@@ -129,7 +129,7 @@ var CATS = [
   {key:"gap",    name:"갭차트",   icon:"📈", color:"#c38bff", desc:"갭 돌파 후보"},
   {key:"sector", name:"관심섹터", icon:"🎯", color:"#4dd47a", desc:"모닝 섹터 브리핑 · 오늘 볼 섹터"},
   {key:"accum",  name:"조용한 매집", icon:"🤫", color:"#ff8fc7", desc:"거래량은 늘고 가격은 제자리인 종목"},
-  {key:"onepager", name:"원페이지", icon:"📄", color:"#5ac8fa", desc:"종목 한 장 요약 · 매일 나온 종목 자동 + 직접 요청"}
+  {key:"onepager", name:"원페이지", icon:"📄", color:"#5ac8fa", desc:"약 2만 종목 한 장 요약 · 검색하면 바로"}
 ];
 var M = null, cur = null, curDate = null, store = {};
 try { store = JSON.parse(localStorage.getItem("app") || "{}"); } catch(e) {}
@@ -166,8 +166,8 @@ function go(key, id){
   var items = (M.cats[key] || []);
   curDate = id || (items[0] && items[0].id);
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
-          '<span class="chip">누적 ' + items.length + '일</span>' +
-          (items[0] ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
+          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
+          (items[0] && key !== "onepager" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
   if (key === "onepager") { $("main").innerHTML = h + opView(); opInit(id); window.scrollTo(0, 0); return; }
   if (!items.length) {
     h += '<div class="empty"><div class="big">🗂️</div>아직 모인 자료가 없어요.<br>' +
