@@ -19,17 +19,14 @@ fetch("data.json?" + Date.now())
 
 var userName = localStorage.getItem("userName");
 if (!userName) {
-  userName = (prompt("처음 한 번만 이름을 입력해 주세요") || "").trim();
-  if (userName) localStorage.setItem("userName", userName);
-  else userName = "이름없음";
+  userName = (prompt("처음 한 번만 이름을 입력해 주세요") || "").trim() || "이름없음";
+  localStorage.setItem("userName", userName);
 }
 var ua = navigator.userAgent;
 var device = /iPhone|iPad/.test(ua) ? "아이폰" : /Android/.test(ua) ? "안드로이드" : "PC";
-var form = new FormData();
-form.append("entry.737105465", userName);
-form.append("entry.356259285", device);
-fetch("https://docs.google.com/forms/d/e/1FAIpQLSeWDVLRmsfTcDBrJFX-t1NNaIeVsk3uBRIMLaHohdNmcUjoZQ/formResponse", {
-  method: "POST", mode: "no-cors", body: form
+fetch("https://ntfy.sh/chkchp-daily-5821", {
+  method: "POST",
+  body: userName + " 님이 앱을 열었어요 (" + device + ")"
 });
 </script>
 </body>
