@@ -22,19 +22,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: 자료 레포 받기
-        env:
-          TOKEN: ${{ secrets.SRC_TOKEN }}
         run: |
           mkdir -p _src
-          for r in stock-screener whale40 Cup Gap; do
+          for r in stock-screener whale40 Cup Gap market-strategy-report sector-watch; do
             GIT_LFS_SKIP_SMUDGE=1 git clone -q --depth 1 https://github.com/chkchp0702-spec/$r _src/$r || echo "fail $r"
           done
-          # 비공개 레포 (SRC_TOKEN 이 있을 때만)
-          if [ -n "$TOKEN" ]; then
-            for r in market-strategy-report sector-watch; do
-              git clone -q --depth 1 https://x-access-token:$TOKEN@github.com/chkchp0702-spec/$r _src/$r || echo "fail $r"
-            done
-          fi
       - run: python collect.py
       - name: 저장
         run: |

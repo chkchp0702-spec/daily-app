@@ -158,7 +158,7 @@ function go(key, id){
           (items[0] ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
   if (!items.length) {
     h += '<div class="empty"><div class="big">🗂️</div>아직 모인 자료가 없어요.<br>' +
-         (key === "market" || key === "sector" ? "비공개 레포 연결이 필요해요." : "다음 자동 수집 때 채워져요.") + '</div>';
+         "다음 자동 수집 때 채워져요." + '</div>';
     $("main").innerHTML = h; window.scrollTo(0, 0); return;
   }
   h += '<div class="dates" id="dates">' + items.map(function(it){
