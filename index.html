@@ -94,6 +94,13 @@ iframe.rep{width:100%;border:0;border-radius:12px;background:#fff;min-height:70v
 .seg{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
 .seg button{flex:none;border:1px solid var(--line);background:transparent;color:var(--sub);border-radius:10px;padding:6px 12px;font:inherit;font-size:13px}
 .seg button.on{color:var(--text);border-color:var(--c)}
+.reqrow{display:flex;gap:8px}
+.reqrow input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:12px;color:var(--text);font:inherit;font-size:16px;padding:10px 12px}
+.reqrow button{flex:none;border:0;border-radius:12px;background:var(--c);color:#0b0f17;font:inherit;font-weight:700;padding:0 18px}
+.opl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.opb{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:8px 12px;font:inherit;font-size:14px;font-weight:600;text-align:left;line-height:1.25}
+.opb small{display:block;color:var(--dim);font-size:11px;font-weight:400}
+.opb.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent)}
 footer{color:var(--dim);font-size:11px;text-align:center;padding:24px 16px 40px}
 </style>
 </head>
@@ -118,7 +125,8 @@ var CATS = [
   {key:"cup",    name:"컵차트",   icon:"☕", color:"#ffb84d", desc:"컵앤핸들 돌파 후보"},
   {key:"gap",    name:"갭차트",   icon:"📈", color:"#c38bff", desc:"갭 돌파 후보"},
   {key:"sector", name:"관심섹터", icon:"🎯", color:"#4dd47a", desc:"모닝 섹터 브리핑 · 오늘 볼 섹터"},
-  {key:"accum",  name:"조용한 매집", icon:"🤫", color:"#ff8fc7", desc:"거래량은 늘고 가격은 제자리인 종목"}
+  {key:"accum",  name:"조용한 매집", icon:"🤫", color:"#ff8fc7", desc:"거래량은 늘고 가격은 제자리인 종목"},
+  {key:"onepager", name:"원페이지", icon:"📄", color:"#5ac8fa", desc:"종목 한 장 요약 · 매일 나온 종목 자동 + 직접 요청"}
 ];
 var M = null, cur = null, curDate = null, store = {};
 try { store = JSON.parse(localStorage.getItem("app") || "{}"); } catch(e) {}
@@ -157,6 +165,7 @@ function go(key, id){
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
           '<span class="chip">누적 ' + items.length + '일</span>' +
           (items[0] ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
+  if (key === "onepager") h += reqBox();
   if (!items.length) {
     h += '<div class="empty"><div class="big">🗂️</div>아직 모인 자료가 없어요.<br>' +
          "다음 자동 수집 때 채워져요." + '</div>';
@@ -268,6 +277,21 @@ var RENDER = {
     if ($("smd")) getText(file("sector", it.id, "sector.md")).then(function(t){ $("smd").innerHTML = window.marked ? marked.parse(t) : "<pre class=\"txt\">" + esc(t) + "</pre>"; });
   },
 
+  onepager: function(it, el){
+    var files = it.files.filter(function(f){ return f.endsWith(".html"); });
+    function label(f){ var b = f.replace(/\.html$/, ""), i = b.lastIndexOf("_"); return {nm: i > 0 ? b.slice(0, i).replace(/_/g, " ") : b, cd: i > 0 ? b.slice(i + 1) : ""}; }
+    var h = '<div class="opl">' + files.map(function(f, i){ var l = label(f);
+      return '<button class="opb' + (i === 0 ? " on" : "") + '" data-f="' + esc(f) + '">' + esc(l.nm) + (l.cd && l.cd !== l.nm ? '<small>' + esc(l.cd) + '</small>' : '') + '</button>'; }).join("") +
+      '</div><div class="card" style="padding:8px"><iframe class="rep" id="opf"></iframe></div>';
+    el.innerHTML = h;
+    var fr = $("opf");
+    fr.onload = function(){ try { fr.style.height = fr.contentWindow.document.documentElement.scrollHeight + 20 + "px"; } catch(e) {} };
+    function show(f){ fr.style.height = "70vh"; fr.src = file("onepager", it.id, f);
+      [].forEach.call(el.querySelectorAll(".opb"), function(b){ b.classList.toggle("on", b.dataset.f === f); }); }
+    [].forEach.call(el.querySelectorAll(".opb"), function(b){ b.onclick = function(){ show(b.dataset.f); fr.scrollIntoView({behavior:"smooth"}); }; });
+    if (files[0]) show(files[0]);
+  },
+
   accum: function(it, el){
     getJSON(file("accum", it.id, "list.json")).then(function(rows){
       var mk = {}; rows.forEach(function(r){ mk[r.mkt] = (mk[r.mkt] || 0) + 1; });
@@ -298,6 +322,23 @@ var RENDER = {
     }).catch(function(){ el.innerHTML = '<div class="empty">자료를 못 불러왔어요.</div>'; });
   }
 };
+
+/* ---------- 원페이지 요청 ---------- */
+function reqBox(){
+  setTimeout(function(){
+    var f = $("reqf"); if (!f) return;
+    f.onsubmit = function(e){
+      e.preventDefault();
+      var q = $("reqq").value.trim(); if (!q) return;
+      var u = "https://github.com/chkchp0702-spec/daily-app/issues/new?title=" + encodeURIComponent("원페이지: " + q) +
+              "&body=" + encodeURIComponent("아래 초록 버튼(Create / Submit new issue)을 누르면 1~3분 뒤 앱에 리포트가 생겨요.");
+      window.open(u, "_blank");
+    };
+  }, 0);
+  return '<form class="card req" id="reqf"><h3>종목 직접 요청</h3>' +
+         '<div class="reqrow"><input id="reqq" placeholder="예: 삼성전자, 005930, 엔비디아, AAPL" autocomplete="off">' +
+         '<button>요청</button></div><div class="tm" style="margin-top:8px">요청을 누르면 GitHub 창이 열려요 → 초록 버튼 한 번 → 1~3분 뒤 이 탭 맨 앞 날짜에 생겨요.</div></form>';
+}
 
 /* ---------- 시작 ---------- */
 getJSON("manifest.json?" + Date.now()).then(function(m){

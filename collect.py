@@ -159,7 +159,7 @@ def accum():
 
 def manifest():
     cats = {}
-    for cat in ["market", "danta", "whale", "cup", "gap", "sector", "accum"]:
+    for cat in ["market", "danta", "whale", "cup", "gap", "sector", "accum", "onepager"]:
         base = os.path.join(ARC, cat)
         items = []
         if os.path.isdir(base):
