@@ -1,13 +1,12 @@
 name: onepager
 # 원페이지 종목 리포트
-#  - 자동: 매일 단타 알람·조용한 매집 종목
-#  - 요청: 이슈 제목을 "원페이지: 종목명" 으로 올리면 그 종목 생성 (저장소 주인만)
+#  - 자동: 매일 단타 알람·조용한 매집 종목 (KST 07:53, 17:03)
+#  - 요청: 앱에서 보낸 요청을 5분마다 확인해서 생성 (누구나)
 on:
   schedule:
-    - cron: "53 22 * * *"   # KST 07:53
-    - cron: "3 8 * * 1-5"   # KST 17:03 (단타 마감 후)
-  issues:
-    types: [opened]
+    - cron: "53 22 * * *"   # KST 07:53 자동
+    - cron: "3 8 * * 1-5"   # KST 17:03 자동
+    - cron: "*/5 * * * *"   # 요청 확인
   workflow_dispatch:
     inputs:
       query:
@@ -16,7 +15,6 @@ on:
 
 permissions:
   contents: write
-  issues: write
 
 concurrency:
   group: onepager
@@ -24,49 +22,46 @@ concurrency:
 
 jobs:
   make:
-    if: github.event_name != 'issues' || (startsWith(github.event.issue.title, '원페이지') && github.event.issue.user.login == github.repository_owner)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: 할 일 정하기
+        id: mode
+        env:
+          CRON: ${{ github.event.schedule }}
+          INPUT: ${{ github.event.inputs.query }}
+        run: |
+          if [ -n "$INPUT" ]; then echo "mode=query" >> $GITHUB_OUTPUT; exit 0; fi
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || [ "$CRON" = "53 22 * * *" ] || [ "$CRON" = "3 8 * * 1-5" ]; then
+            echo "mode=auto" >> $GITHUB_OUTPUT; exit 0
+          fi
+          SINCE=$(cat onepager_since.txt 2>/dev/null || echo 12h)
+          N=$(curl -s "https://ntfy.sh/chkchp-onepager-req-7k3q/json?poll=1&since=$SINCE" | grep -c '"event":"message"' || true)
+          if [ "$N" -gt 0 ]; then echo "mode=poll" >> $GITHUB_OUTPUT; else echo "mode=none" >> $GITHUB_OUTPUT; fi
       - uses: actions/setup-python@v5
+        if: steps.mode.outputs.mode != 'none'
         with:
           python-version: "3.12"
       - name: 원페이지 프로그램 받기
+        if: steps.mode.outputs.mode != 'none'
         run: |
           git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
           pip install -q yfinance pandas
-      - name: 종목 정하기
-        id: q
-        env:
-          TITLE: ${{ github.event.issue.title }}
-          INPUT: ${{ github.event.inputs.query }}
-        run: |
-          Q="$INPUT"
-          if [ -n "$TITLE" ]; then Q=$(printf '%s' "$TITLE" | sed -E 's/^원페이지[[:space:]]*[:：]?[[:space:]]*//'); fi
-          echo "query=$Q" >> $GITHUB_OUTPUT
       - name: 만들기
+        if: steps.mode.outputs.mode != 'none'
         env:
-          Q: ${{ steps.q.outputs.query }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MODE: ${{ steps.mode.outputs.mode }}
+          Q: ${{ github.event.inputs.query }}
         run: |
-          if [ -n "$Q" ]; then python onepager_batch.py --query "$Q"; else python onepager_batch.py --auto; fi
+          case "$MODE" in
+            query) python onepager_batch.py --query "$Q" ;;
+            poll)  python onepager_batch.py --poll ;;
+            auto)  python onepager_batch.py --poll --auto ;;
+          esac
       - name: 저장
+        if: steps.mode.outputs.mode != 'none'
         run: |
           git config user.name "bot"
           git config user.email "bot@users.noreply.github.com"
-          git add archive manifest.json
+          git add archive manifest.json onepager_since.txt 2>/dev/null || git add archive manifest.json
           git diff --cached --quiet || (git commit -m "onepager $(TZ=Asia/Seoul date '+%F %H:%M')" && git pull --rebase -q && git push)
-      - name: 요청한 이슈에 답하고 닫기
-        if: github.event_name == 'issues'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          NUM: ${{ github.event.issue.number }}
-        run: |
-          R=$(cat onepager_result.txt 2>/dev/null || true)
-          if [ -n "$R" ]; then
-            MSG="✅ 완료! 1~2분 뒤 앱의 **원페이지** 탭에서 볼 수 있어요. https://${{ github.repository_owner }}.github.io/daily-app/"
-          else
-            MSG="⚠️ 종목을 찾지 못했어요. 코드(예: 005930, AAPL)로 다시 요청해 주세요."
-          fi
-          gh issue comment "$NUM" --repo "${{ github.repository }}" --body "$MSG"
-          gh issue close "$NUM" --repo "${{ github.repository }}"

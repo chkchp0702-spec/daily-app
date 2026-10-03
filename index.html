@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>투자 데일리</title>
+<title>C. Investing</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="투자 데일리">
+<meta name="apple-mobile-web-app-title" content="C. Investing">
 <meta name="theme-color" content="#0b0f17">
 <link rel="apple-touch-icon" href="icon.png?v=2">
 <link rel="icon" href="icon.png?v=2">
@@ -107,7 +107,7 @@ footer{color:var(--dim);font-size:11px;text-align:center;padding:24px 16px 40px}
 <body>
 <header>
   <div class="top">
-    <div class="brand">투자 <span id="brandDot">데일리</span></div>
+    <div class="brand"><span id="brandDot">C.</span> Investing</div>
     <div class="stamp" id="stamp">불러오는 중…</div>
   </div>
   <nav class="tabs" id="tabs"></nav>
@@ -324,20 +324,26 @@ var RENDER = {
 };
 
 /* ---------- 원페이지 요청 ---------- */
+var REQ_TOPIC = "chkchp-onepager-req-7k3q";
 function reqBox(){
   setTimeout(function(){
     var f = $("reqf"); if (!f) return;
     f.onsubmit = function(e){
       e.preventDefault();
-      var q = $("reqq").value.trim(); if (!q) return;
-      var u = "https://github.com/chkchp0702-spec/daily-app/issues/new?title=" + encodeURIComponent("원페이지: " + q) +
-              "&body=" + encodeURIComponent("아래 초록 버튼(Create / Submit new issue)을 누르면 1~3분 뒤 앱에 리포트가 생겨요.");
-      window.open(u, "_blank");
+      var q = $("reqq").value.trim().slice(0, 30); if (!q) return;
+      var who = ""; try { who = localStorage.getItem("userName") || ""; } catch(err) {}
+      $("reqmsg").textContent = "보내는 중…";
+      fetch("https://ntfy.sh/" + REQ_TOPIC, {method:"POST", body: q}).then(function(r){
+        if (!r.ok) throw 0;
+        $("reqq").value = "";
+        $("reqmsg").innerHTML = "✅ <b>" + esc(q) + "</b> 요청 완료! 보통 10~20분 뒤 이 탭 맨 앞 날짜에 생겨요.";
+        fetch("https://ntfy.sh/chkchp-daily-5821", {method:"POST", body: (who || "누군가") + " 님이 원페이지 요청: " + q}).catch(function(){});
+      }).catch(function(){ $("reqmsg").textContent = "⚠️ 요청을 못 보냈어요. 잠시 뒤 다시 눌러주세요."; });
     };
   }, 0);
   return '<form class="card req" id="reqf"><h3>종목 직접 요청</h3>' +
-         '<div class="reqrow"><input id="reqq" placeholder="예: 삼성전자, 005930, 엔비디아, AAPL" autocomplete="off">' +
-         '<button>요청</button></div><div class="tm" style="margin-top:8px">요청을 누르면 GitHub 창이 열려요 → 초록 버튼 한 번 → 1~3분 뒤 이 탭 맨 앞 날짜에 생겨요.</div></form>';
+         '<div class="reqrow"><input id="reqq" maxlength="30" placeholder="예: 삼성전자, 005930, 엔비디아, AAPL" autocomplete="off">' +
+         '<button>요청</button></div><div class="tm" id="reqmsg" style="margin-top:8px">종목 이름이나 코드를 넣고 요청을 누르세요. 10~20분 뒤 이 탭에 생겨요.</div></form>';
 }
 
 /* ---------- 시작 ---------- */

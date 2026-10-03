@@ -72,14 +72,46 @@ def auto():
             break
 
 
+REQ_TOPIC = "chkchp-onepager-req-7k3q"
+SINCE = "onepager_since.txt"
+
+
+def poll(limit=5):
+    """앱에서 보낸 요청(ntfy)을 읽어 만든다. 마지막으로 읽은 위치는 onepager_since.txt 에 저장"""
+    import urllib.request
+    since = open(SINCE).read().strip() if os.path.exists(SINCE) else "12h"
+    url = f"https://ntfy.sh/{REQ_TOPIC}/json?poll=1&since={since}"
+    try:
+        raw = urllib.request.urlopen(url, timeout=30).read().decode("utf-8")
+    except Exception as e:
+        print("요청 읽기 실패", e)
+        return
+    msgs = [json.loads(l) for l in raw.splitlines() if l.strip()]
+    msgs = [m for m in msgs if m.get("event") == "message"]
+    if not msgs:
+        print("새 요청 없음")
+        return
+    seen = set()
+    for m in msgs:
+        q = re.sub(r"[\x00-\x1f]", "", m.get("message", "")).strip()[:30]
+        if q and q.lower() not in seen and len(seen) < limit:
+            seen.add(q.lower())
+            make(q)
+    with open(SINCE, "w") as f:
+        f.write(msgs[-1]["id"])
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--auto", action="store_true")
     ap.add_argument("--query")
+    ap.add_argument("--poll", action="store_true")
     a = ap.parse_args()
     result = None
     if a.query:
         result = make(a.query.strip())
+    if a.poll:
+        poll()
     if a.auto:
         auto()
     import collect
