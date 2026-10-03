@@ -23,7 +23,7 @@ def src(*p):
     return os.path.join(SRC, *p)
 
 
-def put(cat, day, name, from_path=None, text=None, overwrite=False):
+def put(cat, day, name, from_path=None, text=None, overwrite=True):
     d = os.path.join(ARC, cat, day)
     os.makedirs(d, exist_ok=True)
     dst = os.path.join(d, name)
