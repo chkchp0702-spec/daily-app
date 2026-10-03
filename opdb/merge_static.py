@@ -16,12 +16,15 @@ def main():
     ap.add_argument("--parts", default="")
     a = ap.parse_args()
     os.makedirs(os.path.join(a.dest, "s"), exist_ok=True)
+    os.makedirs(os.path.join(a.dest, "d"), exist_ok=True)
     mpath = os.path.join(a.dest, "meta.json")
     meta = json.load(open(mpath)) if os.path.exists(mpath) else {}
 
     if a.parts:
         for f in glob.glob(os.path.join(a.parts, "**", "s", "*.html"), recursive=True):
             shutil.copyfile(f, os.path.join(a.dest, "s", os.path.basename(f)))
+        for f in glob.glob(os.path.join(a.parts, "**", "d", "*.json"), recursive=True):
+            shutil.copyfile(f, os.path.join(a.dest, "d", os.path.basename(f)))
         for f in glob.glob(os.path.join(a.parts, "**", "meta_*.json"), recursive=True):
             for k, v in json.load(open(f)).items():
                 # 실패 기록이 예전 성공본을 덮지 않게

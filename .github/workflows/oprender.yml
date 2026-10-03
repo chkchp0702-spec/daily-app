@@ -1,0 +1,35 @@
+name: oprender
+# 리포트 디자인만 바꿨을 때: 저장된 데이터로 전체 리포트를 다시 그린다 (야후 호출 없음, 몇 분)
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: opdata
+  cancel-in-progress: false
+
+jobs:
+  rerender:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 준비
+        run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+          git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata
+      - run: python opdb/rerender.py --dest opdata && python opdb/merge_static.py --dest opdata
+      - name: 저장
+        run: |
+          cd opdata
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git checkout -q --orphan fresh
+          git add -A
+          git commit -qm "rerender $(TZ=Asia/Seoul date '+%F %H:%M')"
+          git push -q -f origin fresh:opdata

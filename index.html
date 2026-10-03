@@ -631,6 +631,9 @@ function opShow(sym){
           d.querySelector(".kpi.k1 .ks").innerHTML = '<span class="' + (chg >= 0 ? "up" : "down") + '">' + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%</span> · " + p[0].slice(5).replace("-", "/") + " 종가";
           [].forEach.call(d.querySelectorAll("h2"), function(h){ if (/주가/.test(h.textContent)){ h.parentNode.innerHTML = "<h2>주가 (1년)</h2>" + opChart(p, u); } });
           if (hdr) hdr.innerHTML = "가격 " + p[0] + " 종가<br>설명 " + hdr.innerHTML.split("<br>")[0] + " 기준<br>통화 " + u;
+          var w = d.querySelector(".w52"), lo = w && +w.getAttribute("data-lo"), hi = w && +w.getAttribute("data-hi");
+          if (w && hi > lo){ var n = w.querySelector(".w52-n"), pos = Math.max(0, Math.min(100, (p[1] - lo) / (hi - lo) * 100));
+            n.style.left = pos.toFixed(1) + "%"; var em = n.querySelector("em"); if (em){ em.textContent = "현재 " + fmtPrice(p[1], u); em.className = pos > 85 ? "r" : pos < 15 ? "l" : ""; } }
         }
         [].forEach.call(d.querySelectorAll("h2"), function(h){ if (/뉴스/.test(h.textContent)){
           var a = d.createElement("a"); a.href = "https://news.google.com/search?q=" + encodeURIComponent(r.name + " 주가") + "&hl=ko&gl=KR&ceid=KR:ko";

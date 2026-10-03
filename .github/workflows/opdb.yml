@@ -9,6 +9,9 @@ on:
       days:
         description: "만든 지 며칠 지난 리포트를 다시 만들지"
         default: "30"
+      force:
+        description: "전부 다시 만들기 (true/false)"
+        default: "false"
   schedule:
     - cron: "17 17 * * *"   # KST 02:17 — 매일 오래된 것부터 조금씩 새로 만들기
 
@@ -39,7 +42,10 @@ jobs:
         env:
           MAX: ${{ github.event.inputs.max || '45' }}
           DAYS: ${{ github.event.inputs.days || '30' }}
-        run: python opdb/build_static.py --shard ${{ matrix.shard }} --of 20 --out out --meta meta.json --max "$MAX" --days "$DAYS"
+          FORCE: ${{ github.event.inputs.force || 'false' }}
+        run: |
+          F=""; [ "$FORCE" = "true" ] && F="--force"
+          python opdb/build_static.py --shard ${{ matrix.shard }} --of 20 --out out --meta meta.json --max "$MAX" --days "$DAYS" $F
       - uses: actions/upload-artifact@v4
         with:
           name: part-${{ matrix.shard }}
