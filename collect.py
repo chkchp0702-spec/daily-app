@@ -54,6 +54,18 @@ def market():
                 put("market", day, f, os.path.join(folder, f))
 
 
+    # 주간·월간 회고 (reviews/weekly_YYYY-MM-DD.md, reviews/YYYY-MM.md)
+    for f in glob.glob(src("market-strategy-report", "reviews", "*.md")):
+        b = os.path.basename(f)
+        m = re.match(r"weekly_(20\d\d-\d\d-\d\d)\.md$", b)
+        if m:
+            put("market", m.group(1) + "_WEEK", "review.md", f)
+            continue
+        m = re.match(r"(20\d\d-\d\d)\.md$", b)
+        if m:
+            put("market", m.group(1) + "-01_MONTH", "review.md", f)
+
+
 # ---------- 단타 ----------
 def danta():
     path = src("stock-screener", "data", "tracking.csv")
