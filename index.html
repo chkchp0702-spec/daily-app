@@ -325,25 +325,28 @@ var RENDER = {
 
 /* ---------- 원페이지 요청 ---------- */
 var REQ_TOPIC = "chkchp-onepager-req-7k3q";
+var LIVE_URL = "https://c-onepager.streamlit.app/";
 function reqBox(){
   setTimeout(function(){
     var f = $("reqf"); if (!f) return;
     f.onsubmit = function(e){
       e.preventDefault();
       var q = $("reqq").value.trim().slice(0, 30); if (!q) return;
+      // 바로 보기: 원페이지 웹 화면을 새 창으로 (몇 초~수십 초)
+      window.open(LIVE_URL + "?embed=true&q=" + encodeURIComponent(q), "_blank");
       var who = ""; try { who = localStorage.getItem("userName") || ""; } catch(err) {}
       $("reqmsg").textContent = "보내는 중…";
       fetch("https://ntfy.sh/" + REQ_TOPIC, {method:"POST", body: q}).then(function(r){
         if (!r.ok) throw 0;
         $("reqq").value = "";
-        $("reqmsg").innerHTML = "✅ <b>" + esc(q) + "</b> 요청 완료! 보통 10~20분 뒤 이 탭 맨 앞 날짜에 생겨요.";
+        $("reqmsg").innerHTML = "✅ <b>" + esc(q) + "</b> 새 창에서 바로 열렸어요. 이 탭에도 10~20분 뒤 저장돼요.";
         fetch("https://ntfy.sh/chkchp-daily-5821", {method:"POST", body: (who || "누군가") + " 님이 원페이지 요청: " + q}).catch(function(){});
       }).catch(function(){ $("reqmsg").textContent = "⚠️ 요청을 못 보냈어요. 잠시 뒤 다시 눌러주세요."; });
     };
   }, 0);
   return '<form class="card req" id="reqf"><h3>종목 직접 요청</h3>' +
          '<div class="reqrow"><input id="reqq" maxlength="30" placeholder="예: 삼성전자, 005930, 엔비디아, AAPL" autocomplete="off">' +
-         '<button>요청</button></div><div class="tm" id="reqmsg" style="margin-top:8px">종목 이름이나 코드를 넣고 요청을 누르세요. 10~20분 뒤 이 탭에 생겨요.</div></form>';
+         '<button>바로 보기</button></div><div class="tm" id="reqmsg" style="margin-top:8px">종목 이름이나 코드를 넣고 요청을 누르면 새 창에서 바로 열려요.</div></form>';
 }
 
 /* ---------- 시작 ---------- */
