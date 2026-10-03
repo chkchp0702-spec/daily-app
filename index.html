@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>매일 자료</title>
+</head>
+<body style="font-family:sans-serif;padding:20px">
+<h1>오늘의 자료</h1>
+<p id="msg">불러오는 중…</p>
+<p id="time" style="color:gray"></p>
+<script>
+fetch("data.json?" + Date.now())
+  .then(r => r.json())
+  .then(d => {
+    document.getElementById("msg").textContent = d.message;
+    document.getElementById("time").textContent = "업데이트: " + d.updated;
+  });
+</script>
+</body>
+</html>
