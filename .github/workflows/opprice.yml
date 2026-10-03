@@ -1,0 +1,39 @@
+name: opprice
+# 전 종목 가격·1년 차트 (opdata 브랜치 p/ 폴더)
+on:
+  schedule:
+    - cron: "5 22 * * *"    # KST 07:05 (미국 마감 후)
+    - cron: "20 7 * * 1-5"  # KST 16:20 (아시아 마감 후)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: opdata
+  cancel-in-progress: false
+
+jobs:
+  prices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 준비
+        run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+          pip install -q yfinance pandas
+          git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata \
+            || (mkdir opdata && cd opdata && git init -q -b opdata && git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}")
+      - run: python opdb/build_prices.py --dest opdata
+      - name: 저장
+        run: |
+          cd opdata
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git checkout -q --orphan fresh
+          git add -A
+          git commit -qm "prices $(TZ=Asia/Seoul date '+%F %H:%M')"
+          git push -q -f origin fresh:opdata

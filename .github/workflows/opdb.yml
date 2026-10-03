@@ -1,0 +1,80 @@
+name: opdb
+# 원페이지 리포트를 미리 만들어 opdata 브랜치에 저장 (20대 동시 실행)
+on:
+  workflow_dispatch:
+    inputs:
+      max:
+        description: "묶음당 최대 종목 수 (0 = 전부)"
+        default: "0"
+      days:
+        description: "만든 지 며칠 지난 리포트를 다시 만들지"
+        default: "30"
+  schedule:
+    - cron: "17 17 * * *"   # KST 02:17 — 매일 오래된 것부터 조금씩 새로 만들기
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 준비
+        run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          pip install -q yfinance pandas
+          curl -sf -o meta.json "https://raw.githubusercontent.com/${{ github.repository }}/opdata/meta.json" || echo '{}' > meta.json
+      - name: 만들기
+        env:
+          MAX: ${{ github.event.inputs.max || '45' }}
+          DAYS: ${{ github.event.inputs.days || '30' }}
+        run: python opdb/build_static.py --shard ${{ matrix.shard }} --of 20 --out out --meta meta.json --max "$MAX" --days "$DAYS"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: part-${{ matrix.shard }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  merge:
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    concurrency:
+      group: opdata
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 준비
+        run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata \
+            || (mkdir opdata && cd opdata && git init -q -b opdata && git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}")
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: part-*
+          path: parts
+      - run: python opdb/merge_static.py --dest opdata --parts parts
+      - name: 저장 (기록 없이 한 장으로 덮어쓰기)
+        run: |
+          cd opdata
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git checkout -q --orphan fresh
+          git add -A
+          git commit -qm "opdata $(TZ=Asia/Seoul date '+%F %H:%M')"
+          git push -q -f origin fresh:opdata
