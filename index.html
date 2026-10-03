@@ -97,6 +97,9 @@ iframe.rep{width:100%;border:0;border-radius:12px;background:#fff;min-height:70v
 .reqrow{display:flex;gap:8px}
 .reqrow input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:12px;color:var(--text);font:inherit;font-size:16px;padding:10px 12px}
 .reqrow button{flex:none;border:0;border-radius:12px;background:var(--c);color:#0b0f17;font:inherit;font-weight:700;padding:0 18px}
+.sug{display:grid;gap:4px;margin-top:6px}
+.sug button{display:flex;align-items:baseline;gap:6px;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);font:inherit;padding:10px 4px}
+.sug small{color:var(--dim);font-size:12px;margin-left:auto}
 .opl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .opb{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:8px 12px;font:inherit;font-size:14px;font-weight:600;text-align:left;line-height:1.25}
 .opb small{display:block;color:var(--dim);font-size:11px;font-weight:400}
@@ -165,7 +168,7 @@ function go(key, id){
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
           '<span class="chip">누적 ' + items.length + '일</span>' +
           (items[0] ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
-  if (key === "onepager") h += reqBox();
+  if (key === "onepager") { $("main").innerHTML = h + opView(); opInit(id); window.scrollTo(0, 0); return; }
   if (!items.length) {
     h += '<div class="empty"><div class="big">🗂️</div>아직 모인 자료가 없어요.<br>' +
          "다음 자동 수집 때 채워져요." + '</div>';
@@ -237,7 +240,7 @@ var RENDER = {
       rows.forEach(function(r){
         var ex = r.exit ? '<span class="pill ' + (/손절|이탈/.test(r.exit) ? "cool" : "hot") + '">' + esc(r.exit) + '</span>' : "";
         h += '<div class="st"><div class="row"><div class="nm"><a href="https://m.stock.naver.com/domestic/stock/' + r.code + '/total" target="_blank">' + esc(r.name) + '</a><span class="cd">' + r.code + '</span></div>' +
-             '<span class="tm">' + r.time + '</span></div>' +
+             '<span class="tm">' + r.time + ' <a class="btn" style="padding:2px 7px" href="javascript:openOP(\'' + esc(r.code) + '\')">원페이지</a></span></div>' +
              '<div class="row" style="margin-top:6px;justify-content:flex-start;gap:6px"><span class="pill c">' + esc(r.type) + '</span>' + ex +
              '<span class="tm">알람가 ' + won(r.price) + '원 · 당일 ' + pct(r.chg) + '</span></div>' +
              '<div class="grid4"><div class="kv"><small>30분</small><b>' + pct(r.m30) + '</b></div><div class="kv"><small>최고</small><b>' + pct(r.high) + '</b></div>' +
@@ -277,21 +280,6 @@ var RENDER = {
     if ($("smd")) getText(file("sector", it.id, "sector.md")).then(function(t){ $("smd").innerHTML = window.marked ? marked.parse(t) : "<pre class=\"txt\">" + esc(t) + "</pre>"; });
   },
 
-  onepager: function(it, el){
-    var files = it.files.filter(function(f){ return f.endsWith(".html"); });
-    function label(f){ var b = f.replace(/\.html$/, ""), i = b.lastIndexOf("_"); return {nm: i > 0 ? b.slice(0, i).replace(/_/g, " ") : b, cd: i > 0 ? b.slice(i + 1) : ""}; }
-    var h = '<div class="opl">' + files.map(function(f, i){ var l = label(f);
-      return '<button class="opb' + (i === 0 ? " on" : "") + '" data-f="' + esc(f) + '">' + esc(l.nm) + (l.cd && l.cd !== l.nm ? '<small>' + esc(l.cd) + '</small>' : '') + '</button>'; }).join("") +
-      '</div><div class="card" style="padding:8px"><iframe class="rep" id="opf"></iframe></div>';
-    el.innerHTML = h;
-    var fr = $("opf");
-    fr.onload = function(){ try { fr.style.height = fr.contentWindow.document.documentElement.scrollHeight + 20 + "px"; } catch(e) {} };
-    function show(f){ fr.style.height = "70vh"; fr.src = file("onepager", it.id, f);
-      [].forEach.call(el.querySelectorAll(".opb"), function(b){ b.classList.toggle("on", b.dataset.f === f); }); }
-    [].forEach.call(el.querySelectorAll(".opb"), function(b){ b.onclick = function(){ show(b.dataset.f); fr.scrollIntoView({behavior:"smooth"}); }; });
-    if (files[0]) show(files[0]);
-  },
-
   accum: function(it, el){
     getJSON(file("accum", it.id, "list.json")).then(function(rows){
       var mk = {}; rows.forEach(function(r){ mk[r.mkt] = (mk[r.mkt] || 0) + 1; });
@@ -307,7 +295,7 @@ var RENDER = {
           var link = r.mkt === "KR" ? "https://m.stock.naver.com/domestic/stock/" + r.code + "/total" : "https://finance.yahoo.com/quote/" + r.code;
           h += '<div class="st"><div class="row"><div class="nm"><a href="' + link + '" target="_blank">' + esc(r.name) + '</a><span class="cd">' + esc(r.code) + '</span></div>' +
                '<span class="pill ' + cls + '">' + (r.dist ? "분배 의심" : esc(r.tag)) + '</span></div>' +
-               '<div class="tm" style="margin-top:4px">' + (names[r.mkt] || r.mkt) + (r.sector && r.sector !== "미분류" ? " · " + esc(r.sector) : "") + (r.days > 1 ? " · 매집 " + r.days + "일째" : "") + '</div>' +
+               '<div class="tm" style="margin-top:4px"><a class="btn" style="padding:2px 7px;float:right" href="javascript:openOP(\'' + esc(r.code) + '\')">원페이지</a>' + (names[r.mkt] || r.mkt) + (r.sector && r.sector !== "미분류" ? " · " + esc(r.sector) : "") + (r.days > 1 ? " · 매집 " + r.days + "일째" : "") + '</div>' +
                '<div class="grid4"><div class="kv"><small>매집점수</small><b>' + (r.score == null ? "–" : r.score.toFixed(0)) + '</b></div>' +
                '<div class="kv"><small>거래량</small><b>' + (r.vol == null ? "–" : r.vol.toFixed(1) + "배") + '</b></div>' +
                '<div class="kv"><small>한달 가격</small><b>' + pct(r.m1) + '</b></div>' +
@@ -323,31 +311,132 @@ var RENDER = {
   }
 };
 
-/* ---------- 원페이지 요청 ---------- */
-var REQ_TOPIC = "chkchp-onepager-req-7k3q";
-var LIVE_URL = "https://c-onepager.streamlit.app/";
-function reqBox(){
-  setTimeout(function(){
-    var f = $("reqf"); if (!f) return;
-    f.onsubmit = function(e){
-      e.preventDefault();
-      var q = $("reqq").value.trim().slice(0, 30); if (!q) return;
-      // 바로 보기: 원페이지 웹 화면을 새 창으로 (몇 초~수십 초)
-      window.open(LIVE_URL + "?embed=true&q=" + encodeURIComponent(q), "_blank");
-      var who = ""; try { who = localStorage.getItem("userName") || ""; } catch(err) {}
-      $("reqmsg").textContent = "보내는 중…";
-      fetch("https://ntfy.sh/" + REQ_TOPIC, {method:"POST", body: q}).then(function(r){
-        if (!r.ok) throw 0;
-        $("reqq").value = "";
-        $("reqmsg").innerHTML = "✅ <b>" + esc(q) + "</b> 새 창에서 바로 열렸어요. 이 탭에도 10~20분 뒤 저장돼요.";
-        fetch("https://ntfy.sh/chkchp-daily-5821", {method:"POST", body: (who || "누군가") + " 님이 원페이지 요청: " + q}).catch(function(){});
-      }).catch(function(){ $("reqmsg").textContent = "⚠️ 요청을 못 보냈어요. 잠시 뒤 다시 눌러주세요."; });
-    };
-  }, 0);
-  return '<form class="card req" id="reqf"><h3>종목 직접 요청</h3>' +
-         '<div class="reqrow"><input id="reqq" maxlength="30" placeholder="예: 삼성전자, 005930, 엔비디아, AAPL" autocomplete="off">' +
-         '<button>바로 보기</button></div><div class="tm" id="reqmsg" style="margin-top:8px">종목 이름이나 코드를 넣고 요청을 누르면 새 창에서 바로 열려요.</div></form>';
+/* ---------- 원페이지 (미리 만든 리포트 + 최신 종가) ---------- */
+var OPD = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/";
+var OPIDX = null, OPCSS = null, OPP = {};
+var FLAG = {US:"🇺🇸", KR:"🇰🇷", JP:"🇯🇵", CN:"🇨🇳", HK:"🇭🇰"};
+function norm(t){ return String(t || "").normalize("NFKC").toLowerCase().replace(/[\s\-_.,·()]+/g, ""); }
+function fnv(str){ var h = 0x811c9dc5, b = new TextEncoder().encode(str);
+  for (var i = 0; i < b.length; i++){ h ^= b[i]; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
+function opShard(sym){ var x = (fnv(sym) % 256).toString(16); return x.length < 2 ? "0" + x : x; }
+function opFile(sym){ return sym.replace(/[^A-Za-z0-9.-]/g, "_"); }
+
+function opView(){
+  return '<div class="card"><h3>종목 찾기</h3><div class="reqrow"><input id="opq" placeholder="예: 삼성전자, 엔비디아, 005930, AAPL, 텐센트" autocomplete="off" enterkeyhint="search"></div>' +
+         '<div id="opsug" class="sug"></div><div class="tm" id="opmsg" style="margin-top:8px">미국·한국·일본·중국·홍콩 약 2만 종목 · 최근 종가 기준</div></div>' +
+         '<div id="oppick"></div><div id="opbox"></div>';
 }
+function opLoadIdx(){
+  if (OPIDX) return Promise.resolve(OPIDX);
+  return getJSON(OPD + "idx.json").then(function(x){
+    OPIDX = x.map(function(r){ return {sym:r[0], name:r[1], mkt:r[2], built:r[4], key:norm(r[0] + " " + r[1] + " " + r[3]), n1:norm(r[1]), s1:norm(r[0]), alts:r[3].split(" ").map(norm)}; });
+    return OPIDX;
+  });
+}
+function opSearch(q){
+  q = norm(q); if (!q) return [];
+  var out = [];
+  OPIDX.forEach(function(r){
+    var sc = 0;
+    if (r.s1 === q || r.n1 === q || r.alts.indexOf(q) >= 0) sc = 100;
+    else if (r.n1.indexOf(q) === 0 || r.s1.indexOf(q) === 0) sc = 60;
+    else if (r.key.indexOf(q) >= 0) sc = 30;
+    if (sc) out.push([sc + (r.built ? 5 : 0) - r.name.length / 100, r]);
+  });
+  out.sort(function(a, b){ return b[0] - a[0]; });
+  return out.slice(0, 8).map(function(x){ return x[1]; });
+}
+function opInit(first){
+  $("opmsg").textContent = "종목 목록 불러오는 중…";
+  opLoadIdx().then(function(){
+    var ready = OPIDX.filter(function(r){ return r.built; }).length;
+    $("opmsg").textContent = "미국·한국·일본·중국·홍콩 " + OPIDX.length.toLocaleString() + "종목 중 " + ready.toLocaleString() + "개 준비됨 · 최근 종가 기준";
+    var q = $("opq");
+    q.oninput = function(){
+      var res = opSearch(q.value);
+      $("opsug").innerHTML = res.map(function(r){
+        return '<button data-s="' + esc(r.sym) + '">' + (FLAG[r.mkt] || "") + " <b>" + esc(r.name) + '</b><small>' + esc(r.sym) + (r.built ? "" : " · 준비 중") + '</small></button>';
+      }).join("");
+      [].forEach.call($("opsug").children, function(b){ b.onclick = function(){ q.value = ""; $("opsug").innerHTML = ""; q.blur(); opShow(b.dataset.s); }; });
+    };
+    q.onkeydown = function(e){ if (e.key === "Enter"){ var r = opSearch(q.value)[0]; if (r){ q.value = ""; $("opsug").innerHTML = ""; q.blur(); opShow(r.sym); } } };
+    opPicks();
+    if (first){ var f = opFind(first); if (f) opShow(f.sym); }
+  }).catch(function(){ $("opmsg").textContent = "아직 준비 중이에요. 잠시 뒤 다시 열어주세요."; });
+}
+function opFind(code){
+  var c = norm(code);
+  for (var i = 0; i < OPIDX.length; i++){ var r = OPIDX[i]; if (r.s1 === c || r.alts.indexOf(c) >= 0) return r; }
+  return null;
+}
+function opPicks(){
+  var L = M.cats.danta || [], A = M.cats.accum || [];
+  var jobs = [];
+  if (L[0]) jobs.push(getJSON(file("danta", L[0].id, "alerts.json")).then(function(r){ return r.map(function(x){ return x.code; }); }).catch(function(){ return []; }));
+  if (A[0]) jobs.push(getJSON(file("accum", A[0].id, "list.json")).then(function(r){ return r.slice(0, 8).map(function(x){ return x.code; }); }).catch(function(){ return []; }));
+  Promise.all(jobs).then(function(lists){
+    var seen = {}, rows = [];
+    [].concat.apply([], lists).forEach(function(c){ var r = opFind(c); if (r && r.built && !seen[r.sym]){ seen[r.sym] = 1; rows.push(r); } });
+    if (!rows.length) return;
+    $("oppick").innerHTML = '<div class="tm" style="margin:0 2px 6px">오늘 단타·매집에 나온 종목</div><div class="opl">' + rows.map(function(r){
+      return '<button class="opb" data-s="' + esc(r.sym) + '">' + (FLAG[r.mkt] || "") + " " + esc(r.name) + '<small>' + esc(r.sym) + '</small></button>'; }).join("") + '</div>';
+    [].forEach.call($("oppick").querySelectorAll(".opb"), function(b){ b.onclick = function(){ opShow(b.dataset.s); }; });
+  });
+}
+function fmtPrice(v, u){ if (v == null) return "–"; var dec = (u === "원" || u === "엔" || Math.abs(v) >= 1000) ? 0 : 2;
+  var s = Math.abs(v).toLocaleString("en-US", {minimumFractionDigits:dec, maximumFractionDigits:dec}); s = (v < 0 ? "-" : "") + s;
+  return (u === "원" || u === "엔") ? s + u : s + " " + u; }
+function opChart(p, u){
+  var vals = p[6]; if (!vals || vals.length < 2) return '<div class="muted">차트 데이터 없음</div>';
+  var W = 320, H = 130, pl = 4, pb = 18, pt = 10, lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), rng = (hi - lo) || 1, st = (W - pl * 2) / (vals.length - 1);
+  var pts = vals.map(function(v, i){ return [pl + i * st, pt + (hi - v) / rng * (H - pt - pb)]; });
+  var line = pts.map(function(x){ return x[0].toFixed(1) + "," + x[1].toFixed(1); }).join(" ");
+  var up = vals[vals.length - 1] >= vals[0], c = up ? "#c0392b" : "#1f4e9c", chg = (vals[vals.length - 1] / vals[0] - 1) * 100, last = pts[pts.length - 1];
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" class="spark"><polygon points="' + pts[0][0].toFixed(1) + ',' + (H - pb) + ' ' + line + ' ' + last[0].toFixed(1) + ',' + (H - pb) + '" fill="' + c + '" opacity="0.10"/>' +
+    '<polyline points="' + line + '" fill="none" stroke="' + c + '" stroke-width="1.8"/><circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="3" fill="' + c + '"/>' +
+    '<text x="' + pl + '" y="' + (H - 4) + '" class="ax">' + p[5] + '</text><text x="' + (W - pl) + '" y="' + (H - 4) + '" class="ax" text-anchor="end">' + p[0] + '</text>' +
+    '<text x="' + (W - pl) + '" y="12" class="ax" text-anchor="end" fill="' + c + '">1년 ' + (chg >= 0 ? "+" : "") + chg.toFixed(1) + '%</text></svg>' +
+    '<div class="muted small">1년 최고 ' + fmtPrice(p[3], u) + ' · 최저 ' + fmtPrice(p[4], u) + ' (주간 종가 그래프)</div>';
+}
+function opShow(sym){
+  var r = OPIDX.filter(function(x){ return x.sym === sym; })[0];
+  var box = $("opbox");
+  if (!r) return;
+  if (!r.built){ box.innerHTML = '<div class="empty"><div class="big">⏳</div><b>' + esc(r.name) + '</b> 리포트는 아직 만드는 중이에요.<br>매일 밤 조금씩 채워지고 있어요.</div>'; return; }
+  box.innerHTML = '<div class="loading">' + esc(r.name) + ' 여는 중…</div>';
+  var sh = opShard(sym);
+  Promise.all([
+    getText(OPD + "s/" + opFile(sym) + ".html"),
+    OPCSS ? Promise.resolve(OPCSS) : getText(OPD + "op.css").then(function(c){ OPCSS = c; return c; }),
+    OPP[sh] ? Promise.resolve(OPP[sh]) : getJSON(OPD + "p/" + sh + ".json").then(function(j){ OPP[sh] = j; return j; }).catch(function(){ return {}; })
+  ]).then(function(res){
+    var html = res[0].replace("<style></style>", "<style>" + res[1] + "</style>");
+    box.innerHTML = '<div class="card" style="padding:6px"><iframe class="rep" id="opf"></iframe></div>';
+    var fr = $("opf");
+    fr.onload = function(){
+      var d = fr.contentDocument, p = res[2][sym];
+      try {
+        var hdr = d.querySelector(".hdr"), u = ((hdr && hdr.textContent.match(/통화\s*(.+)$/)) || [, "달러"])[1].trim();
+        if (p){
+          var chg = (p[1] / p[2] - 1) * 100;
+          d.querySelector(".kpi.k1 .kv").textContent = fmtPrice(p[1], u);
+          d.querySelector(".kpi.k1 .ks").innerHTML = '<span class="' + (chg >= 0 ? "up" : "down") + '">' + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%</span> · " + p[0].slice(5).replace("-", "/") + " 종가";
+          [].forEach.call(d.querySelectorAll("h2"), function(h){ if (/주가/.test(h.textContent)){ h.parentNode.innerHTML = "<h2>주가 (1년)</h2>" + opChart(p, u); } });
+          if (hdr) hdr.innerHTML = "가격 " + p[0] + " 종가<br>설명 " + hdr.innerHTML.split("<br>")[0] + " 기준<br>통화 " + u;
+        }
+        [].forEach.call(d.querySelectorAll("h2"), function(h){ if (/뉴스/.test(h.textContent)){
+          var a = d.createElement("a"); a.href = "https://news.google.com/search?q=" + encodeURIComponent(r.name + " 주가") + "&hl=ko&gl=KR&ceid=KR:ko";
+          a.target = "_blank"; a.textContent = "최신 뉴스 더 보기 ↗"; a.style.cssText = "display:inline-block;margin-top:8px;font-size:12px;color:#1f4e9c";
+          h.parentNode.appendChild(a); } });
+        d.querySelectorAll("a").forEach(function(a){ a.target = "_blank"; });
+      } catch(e) {}
+      fr.style.height = d.documentElement.scrollHeight + 10 + "px";
+    };
+    fr.srcdoc = html;
+    box.scrollIntoView({behavior:"smooth", block:"start"});
+  }).catch(function(){ box.innerHTML = '<div class="empty">리포트를 못 불러왔어요. 잠시 뒤 다시 눌러주세요.</div>'; });
+}
+function openOP(code){ go("onepager", code); }
 
 /* ---------- 시작 ---------- */
 getJSON("manifest.json?" + Date.now()).then(function(m){

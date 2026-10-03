@@ -38,9 +38,12 @@ def build_one(sym, name, mkt):
     info = t.info or {}
     if not D._has_price(info):
         raise LookupError("no price")
-    disp = KO_NAME.get(sym) or name
-    if not disp or disp == sym or disp.startswith("TSE") or len(disp) > 34 and mkt == "US":
-        disp = info.get("shortName") or info.get("longName") or name or sym
+    disp = KO_NAME.get(sym)
+    if not disp:
+        if mkt in ("US", "JP", "HK") or not name or name == sym or name.startswith("TSE"):
+            disp = info.get("shortName") or info.get("longName") or name or sym
+        else:
+            disp = name          # 한국·중국은 목록의 한글·한자 이름 그대로
     tk = Ticker(symbol=sym, name=disp, market=mkt)
     d = D.parse_info(tk, info)
     d.financials = D._safe(lambda: D.parse_income_stmt(t.income_stmt), [])
