@@ -16,6 +16,21 @@ fetch("data.json?" + Date.now())
     document.getElementById("msg").textContent = d.message;
     document.getElementById("time").textContent = "업데이트: " + d.updated;
   });
+
+var userName = localStorage.getItem("userName");
+if (!userName) {
+  userName = (prompt("처음 한 번만 이름을 입력해 주세요") || "").trim();
+  if (userName) localStorage.setItem("userName", userName);
+  else userName = "이름없음";
+}
+var ua = navigator.userAgent;
+var device = /iPhone|iPad/.test(ua) ? "아이폰" : /Android/.test(ua) ? "안드로이드" : "PC";
+var form = new FormData();
+form.append("entry.737105465", userName);
+form.append("entry.356259285", device);
+fetch("https://docs.google.com/forms/d/e/1FAIpQLSeWDVLRmsfTcDBrJFX-t1NNaIeVsk3uBRIMLaHohdNmcUjoZQ/formResponse", {
+  method: "POST", mode: "no-cors", body: form
+});
 </script>
 </body>
 </html>
