@@ -52,6 +52,14 @@ def market():
         for f in os.listdir(folder):
             if f.endswith((".pdf", ".txt")):
                 put("market", day, f, os.path.join(folder, f))
+        dj = src("market-strategy-report", "data", day[:10] + ".json")
+        if os.path.exists(dj):
+            put("market", day, "data.json", dj)
+    # 장부는 최신본 하나 (앱 차트용)
+    led = src("market-strategy-report", "ledger", "ledger.json")
+    if os.path.exists(led):
+        os.makedirs(os.path.join(ARC, "market"), exist_ok=True)
+        shutil.copyfile(led, os.path.join(ARC, "market", "ledger.json"))
 
 
     # 주간·월간 회고 (reviews/weekly_YYYY-MM-DD.md, reviews/YYYY-MM.md)
@@ -96,6 +104,23 @@ def danta():
             })
     for day, rows in days.items():
         put("danta", day, "alerts.json", text=json.dumps(rows, ensure_ascii=False), overwrite=True)
+    summ = []
+    for day in sorted(days):
+        rows = days[day]
+        nowv = [r["now"] for r in rows if r["now"] is not None]
+        hiv = [r["high"] for r in rows if r["high"] is not None]
+        lov = [r["low"] for r in rows if r["low"] is not None]
+        types = {}
+        for r in rows:
+            types[r["type"]] = types.get(r["type"], 0) + 1
+        summ.append({"d": day, "n": len(rows),
+                     "now": round(sum(nowv) / len(nowv), 2) if nowv else None,
+                     "hi": round(sum(hiv) / len(hiv), 2) if hiv else None,
+                     "lo": round(sum(lov) / len(lov), 2) if lov else None,
+                     "win": sum(1 for v in nowv if v > 0), "types": types})
+    os.makedirs(os.path.join(ARC, "danta"), exist_ok=True)
+    with open(os.path.join(ARC, "danta", "summary.json"), "w", encoding="utf-8") as f:
+        json.dump(summ, f, ensure_ascii=False)
 
 
 # ---------- 고래 ----------
@@ -121,6 +146,22 @@ def whale():
             put("whale", day, "report.html", text=html)
         else:
             put("whale", day, "report.pdf", os.path.join(rep, f))
+    sec = {}
+    sp = src("whale40", "data", "sectors.json")
+    if os.path.exists(sp):
+        sec = json.load(open(sp, encoding="utf-8"))
+    for f in glob.glob(src("whale40", "data", "days", "20*.json")):
+        day = DATE_RE.search(os.path.basename(f)).group(1)
+        d = json.load(open(f, encoding="utf-8"))
+        hold = sorted(d.get("hold", {}).items(), key=lambda x: -x[1])[:25]
+        out = {"signals": d.get("signals", {}), "inst": d.get("inst", {}), "ppl": d.get("ppl", {}),
+               "hold": [[k, v, sec.get(k, "기타")] for k, v in hold]}
+        put("whale", day, "data.json", text=json.dumps(out, ensure_ascii=False))
+    os.makedirs(os.path.join(ARC, "whale"), exist_ok=True)
+    for name in ("index.json", "ranking.json"):
+        p = src("whale40", "data", name)
+        if os.path.exists(p):
+            shutil.copyfile(p, os.path.join(ARC, "whale", name))
 
 
 # ---------- 컵 / 갭 ----------
@@ -131,12 +172,90 @@ def pdf_series(repo, prefix, cat):
             put(cat, m.group(1), "report.pdf", f)
 
 
+def _rows(path):
+    if not os.path.exists(path):
+        return []
+    with open(path, encoding="utf-8-sig") as f:
+        return list(csv.DictReader(f))
+
+
+def _latest(repo, prefix):
+    ds = sorted(DATE_RE.search(os.path.basename(p)).group(1)
+                for p in glob.glob(src(repo, "results", f"{prefix}_*.pdf")))
+    return ds[-1] if ds else None
+
+
+def _tf(v):
+    return str(v).strip().lower() == "true"
+
+
+def cup_cards():
+    day = _latest("Cup", "report_cup")
+    if not day:
+        return
+    R = lambda n: _rows(src("Cup", "results", n))
+    def card(r, tag=""):
+        return {"name": r.get("종목명", ""), "code": r.get("코드", ""), "mkt": r.get("시장", ""),
+                "sector": r.get("섹터", ""), "shape": r.get("모양", "") or r.get("패턴", ""),
+                "price": num(r.get("현재가")), "pivot": num(r.get("매수기준가")), "dist": num(r.get("기준가까지%")),
+                "depth": num(r.get("컵깊이%")), "weeks": num(r.get("컵기간주")), "handle": num(r.get("손잡이%")),
+                "rs": num(r.get("상대강도")), "score": num(r.get("컵점수")), "acc": num(r.get("매집강도")),
+                "brk": _tf(r.get("돌파")), "brkday": r.get("돌파일", ""), "ath": num(r.get("현재가_최고가대비%")),
+                "point": r.get("투자포인트", ""), "streak": num(r.get("연속일")), "new": _tf(r.get("NEW")), "tag": tag}
+    ath = [card(r, "사상최고가 돌파") for r in R("list0_ath_breakout.csv")]
+    allc = R("list1_cup.csv")
+    by_mkt, by_sec = {}, {}
+    for r in allc:
+        by_mkt[r.get("시장", "")] = by_mkt.get(r.get("시장", ""), 0) + 1
+        s_ = r.get("섹터", "") or "미분류"
+        by_sec[s_] = by_sec.get(s_, 0) + 1
+    allc.sort(key=lambda r: -(num(r.get("컵점수")) or 0))
+    seen = {c["code"] for c in ath}
+    top = [card(r) for r in allc if r.get("코드") not in seen][:60]
+    out = {"ath": ath, "top": top, "total": len(allc), "by_mkt": by_mkt,
+           "by_sec": sorted(by_sec.items(), key=lambda x: -x[1])[:10]}
+    put("cup", day, "cards.json", text=json.dumps(out, ensure_ascii=False))
+
+
+def gap_cards():
+    day = _latest("Gap", "report_gap")
+    if not day:
+        return
+    allg = _rows(src("Gap", "results", "list1_gap.csv"))
+    def card(r):
+        return {"name": r.get("종목명", ""), "code": r.get("코드", ""), "mkt": r.get("시장", ""),
+                "sector": r.get("섹터", ""), "price": num(r.get("현재가")), "gday": r.get("갭일", ""),
+                "after": num(r.get("갭후일수")), "gap": num(r.get("갭크기%")), "vol": num(r.get("거래량배수")),
+                "gopen": num(r.get("갭시가")), "glow": num(r.get("갭저가")),
+                "boxhi": num(r.get("박스고점")), "boxlo": num(r.get("박스저점")), "boxw": num(r.get("횡보주")),
+                "hold": _tf(r.get("갭유지")), "full": _tf(r.get("완전돌파")), "fresh": _tf(r.get("막돌파")),
+                "ath": num(r.get("최고가대비%")), "rs": num(r.get("상대강도")), "score": num(r.get("갭점수")),
+                "point": r.get("투자포인트", ""), "streak": num(r.get("연속일")), "new": _tf(r.get("NEW"))}
+    by_mkt, by_sec = {}, {}
+    for r in allg:
+        by_mkt[r.get("시장", "")] = by_mkt.get(r.get("시장", ""), 0) + 1
+        s_ = r.get("섹터", "") or "미분류"
+        by_sec[s_] = by_sec.get(s_, 0) + 1
+    allg.sort(key=lambda r: -(num(r.get("갭점수")) or 0))
+    out = {"top": [card(r) for r in allg[:60]], "total": len(allg), "by_mkt": by_mkt,
+           "by_sec": sorted(by_sec.items(), key=lambda x: -x[1])[:10]}
+    put("gap", day, "cards.json", text=json.dumps(out, ensure_ascii=False))
+
+
 # ---------- 관심섹터 ----------
 def sector():
     for f in glob.glob(src("stock-screener", "briefing_data", "daily", "*.txt")):
         m = DATE_RE.search(os.path.basename(f))
         if m:
             put("sector", m.group(1), "briefing.txt", f)
+    lj = src("stock-screener", "briefing_data", "daily", "latest.json")
+    if os.path.exists(lj):
+        d = json.load(open(lj, encoding="utf-8"))
+        if DATE_RE.match(d.get("date", "")):
+            put("sector", d["date"], "top.json", lj)
+    for f in glob.glob(src("sector-watch", "reports", "returns_20*.csv")):
+        day = DATE_RE.search(os.path.basename(f)).group(1)
+        put("sector", day, "returns.csv", f)
     for f in glob.glob(src("sector-watch", "reports", "20*.md")):
         day = DATE_RE.search(os.path.basename(f)).group(1)
         put("sector", day, "sector.md", f)
@@ -186,7 +305,7 @@ def manifest():
 
 
 if __name__ == "__main__":
-    for fn in (market, danta, whale, sector, accum):
+    for fn in (market, danta, whale, sector, accum, cup_cards, gap_cards):
         try:
             fn()
         except Exception as e:
