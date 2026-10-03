@@ -1,0 +1,44 @@
+name: collect
+# 각 프로그램 레포의 새 자료를 모아 앱에 누적한다.
+on:
+  schedule:
+    - cron: "23 22 * * *"   # KST 07:23 (컵·갭·고래 새벽 결과)
+    - cron: "43 0 * * *"    # KST 09:43 (시황·브리핑)
+    - cron: "13 6 * * *"    # KST 15:13 (단타 장중)
+    - cron: "33 7 * * *"    # KST 16:33 (단타 마감)
+    - cron: "53 12 * * *"   # KST 21:53 (예비)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 자료 레포 받기
+        env:
+          TOKEN: ${{ secrets.SRC_TOKEN }}
+        run: |
+          mkdir -p _src
+          for r in stock-screener whale40 Cup Gap; do
+            GIT_LFS_SKIP_SMUDGE=1 git clone -q --depth 1 https://github.com/chkchp0702-spec/$r _src/$r || echo "fail $r"
+          done
+          # 비공개 레포 (SRC_TOKEN 이 있을 때만)
+          if [ -n "$TOKEN" ]; then
+            for r in market-strategy-report sector-watch; do
+              git clone -q --depth 1 https://x-access-token:$TOKEN@github.com/chkchp0702-spec/$r _src/$r || echo "fail $r"
+            done
+          fi
+      - run: python collect.py
+      - name: 저장
+        run: |
+          git config user.name "bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add archive manifest.json
+          git diff --cached --quiet || (git commit -m "collect $(TZ=Asia/Seoul date '+%F %H:%M')" && git pull --rebase -q && git push)
