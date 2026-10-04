@@ -1,54 +1,29 @@
-import json, urllib.request, re
-H = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148", "Accept": "application/json, text/plain, */*", "Referer": "https://m.stock.naver.com/"}
-D = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36", "Accept": "text/html,application/json,*/*"}
-URLS = [
- ("m", "https://m.stock.naver.com/api/stock/133690/etfAnalysis"),
- ("d", "https://navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd=133690"),
- ("d", "https://navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd=360750"),
- ("d", "https://stockanalysis.com/etf/soxl/holdings/"),
- ("d", "https://stockanalysis.com/etf/tlt/holdings/"),
- ("d", "https://stockanalysis.com/etf/qqq/holdings/"),
- ("d", "https://www.zacks.com/funds/etf/SOXL/holding"),
- ("d", "https://api.nasdaq.com/api/quote/SOXL/info?assetclass=etf"),
- ("m", "https://m.stock.naver.com/api/stock/133690/integration"),
-]
+import json, urllib.request, urllib.parse
+H = {"User-Agent": "CHInvestingApp/1.0 (https://chkchp0702-spec.github.io/daily-app/; chk app)"}
 out = {}
-for kind, u in URLS:
+def get(u, raw=False):
+    req = urllib.request.Request(u, headers=H)
+    with urllib.request.urlopen(req, timeout=20) as r:
+        b = r.read(); return (r.status, r.headers.get("Content-Type"), len(b), (b[:600].decode("utf-8", "replace") if not raw else ""))
+tests = [
+ "https://ko.wikipedia.org/api/rest_v1/page/summary/" + urllib.parse.quote("스마트폰"),
+ "https://ko.wikipedia.org/api/rest_v1/page/summary/" + urllib.parse.quote("냉장고"),
+ "https://ko.wikipedia.org/api/rest_v1/page/summary/" + urllib.parse.quote("DRAM"),
+ "https://en.wikipedia.org/api/rest_v1/page/summary/" + urllib.parse.quote("iPhone"),
+ "https://en.wikipedia.org/api/rest_v1/page/summary/" + urllib.parse.quote("Apple Inc."),
+ "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&piprop=thumbnail&pithumbsize=400&generator=search&gsrsearch=" + urllib.parse.quote("Curiox Biosystems") + "&gsrlimit=1",
+ "https://ko.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&piprop=thumbnail&pithumbsize=400&titles=" + urllib.parse.quote("삼성전자"),
+ "https://ssl.pstatic.net/imgstock/fn/real/logo/png/stock/Stock005930.png",
+ "https://ssl.pstatic.net/imgstock/fn/real/logo/png/stock/StockAAPL.O.png",
+ "https://ssl.pstatic.net/imgstock/fn/real/logo/png/stock/StockAAPL.png",
+ "https://www.google.com/s2/favicons?domain=apple.com&sz=128",
+ "https://www.google.com/s2/favicons?domain=curiox.com&sz=128",
+ "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/200px-Apple_logo_black.svg.png",
+]
+for u in tests:
     try:
-        req = urllib.request.Request(u, headers=H if kind == "m" else D)
-        with urllib.request.urlopen(req, timeout=25) as r:
-            b = r.read()
-        t = b.decode("utf-8", "replace")
-        o = {"len": len(t)}
-        if "etfAnalysis" in u:
-            j = json.loads(t); o["top10"] = j.get("etfTop10MajorConstituentAssets")
-        elif "wisereport" in u:
-            m = re.search(r"var\s+CU_data\s*=\s*(\{.*?\});", t, re.S)
-            o["cu"] = m.group(1)[:3000] if m else None
-            o["has"] = "CU_data" in t
-        elif "stockanalysis" in u:
-            i = t.find("holdings"); o["head"] = t[:300]
-            m = re.search(r"<table.*?</table>", t, re.S)
-            o["table"] = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " | ", m.group(0)))[:2500] if m else None
-            m2 = re.search(r"holdings:\s*\[(.*?)\]", t, re.S)
-            o["svelte"] = m2.group(0)[:1500] if m2 else None
-        else:
-            o["head"] = t[:2500]
-        out[u] = o
+        out[u] = get(u, raw=("png" in u or "favicon" in u or "upload." in u))
     except Exception as e:
-        out[u] = {"error": repr(e)[:300]}
-try:
-    import yfinance as yf
-    for s in ("SOXL", "TLT", "GLD", "IBIT"):
-        fd = yf.Ticker(s).funds_data
-        r = {}
-        for k in ("top_holdings", "asset_classes", "bond_holdings", "sector_weightings"):
-            try:
-                v = getattr(fd, k); r[k] = v.to_dict() if hasattr(v, "to_dict") else v
-            except Exception as e:
-                r[k] = "ERR " + repr(e)[:150]
-        out["yf_" + s] = json.loads(json.dumps(r, default=str))
-except Exception as e:
-    out["yf"] = repr(e)
+        out[u] = repr(e)[:200]
 json.dump(out, open("probe_out.json", "w"), ensure_ascii=False, indent=1)
-print({k: (v.get("len"), v.get("error")) if isinstance(v, dict) else v for k, v in out.items()})
+print(out)
