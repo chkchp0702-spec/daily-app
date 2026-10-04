@@ -252,7 +252,8 @@ def build(daily, hl, mkt_of, dest):
             "top_cap": [stock(x) for x in top_cap],
         }
         # 52주 신고가 종목 (시가총액 큰 순) + 신고가가 많이 나온 업종
-        hi_rows = sorted([x for x in rows if hl.get(x["s"]) == 1], key=lambda x: -x["cap"])
+        spac = lambda x: ("스팩" in (x["ind"] or "")) or ("Shell" in (x["ind"] or "")) or ("Acquisition" in (x["n"] or ""))
+        hi_rows = sorted([x for x in rows if hl.get(x["s"]) == 1 and not spac(x)], key=lambda x: -x["cap"])
         mk["high_list"] = [stock(x) for x in hi_rows[:15]]
         hic = defaultdict(int)
         for x in hi_rows:
