@@ -1,0 +1,87 @@
+name: opmedia
+# 종목리포트 회사·제품 사진 (위키백과) → 리포트 다시 그리기
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "27 19 1 * *"   # 매달 2일 KST 04:27
+
+permissions:
+  contents: write
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          git clone -q --depth 1 -b opdata https://github.com/${{ github.repository }} opdata
+          python opdb/build_media.py --prep --dest opdata --out media_todo.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prep
+          path: media_todo.json
+          retention-days: 2
+
+  media:
+    needs: prep
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: prep
+      - run: timeout 100m python opdb/build_media.py --shard ${{ matrix.shard }} --of 20 --todo media_todo.json --out out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: media-${{ matrix.shard }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  merge:
+    needs: media
+    if: always()
+    runs-on: ubuntu-latest
+    concurrency:
+      group: opdata
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+          git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: media-*
+          path: parts
+      - run: |
+          mkdir -p opdata/m
+          find parts -path "*/m/*.json" -exec cp {} opdata/m/ \;
+          echo "사진 $(ls opdata/m | wc -l)"
+          python opdb/rerender.py --dest opdata && python opdb/merge_static.py --dest opdata
+      - name: 저장
+        run: |
+          cd opdata
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git checkout -q --orphan fresh
+          git add -A
+          git commit -qm "media $(TZ=Asia/Seoul date '+%F %H:%M')"
+          git push -q -f origin fresh:opdata

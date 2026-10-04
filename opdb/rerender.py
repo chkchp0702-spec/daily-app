@@ -30,6 +30,8 @@ def main():
     fxp = os.path.join(a.dest, "p", "fx.json")
     fx = json.load(open(fxp)) if os.path.exists(fxp) else None
     print("환율", fx)
+    rcp = os.path.join(a.dest, "names_rc.json")
+    rcmap = json.load(open(rcp, encoding="utf-8")) if os.path.exists(rcp) else {}
     # 같은 업종 비교용: (시장, 업종) → 회사 목록
     nk = {}
     try:
@@ -86,7 +88,9 @@ def main():
             if os.path.exists(kf):
                 raw["desc_ko"] = json.load(open(kf, encoding="utf-8")).get("desc_ko") or raw.get("desc_ko", "")
             d = load(raw)
-            html = render(d, rule_based(d), fx=fx, peers=peers_of(raw)).replace(CSS, "")
+            mf = os.path.join(a.dest, "m", os.path.basename(f))
+            media = json.load(open(mf, encoding="utf-8")) if os.path.exists(mf) else None
+            html = render(d, rule_based(d), fx=fx, peers=peers_of(raw), media=media, rc=rcmap.get(raw["ticker"]["symbol"], "")).replace(CSS, "")
             out = os.path.join(a.dest, "s", os.path.basename(f)[:-5] + ".html")
             with open(out, "w", encoding="utf-8") as fh:
                 fh.write(html)
