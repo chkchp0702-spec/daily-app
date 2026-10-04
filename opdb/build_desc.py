@@ -82,6 +82,7 @@ def main():
     ap.add_argument("--sleep", type=float, default=0.25)
     ap.add_argument("--have", default="", help="이미 받은 k/ 폴더 — 있는 건 건너뜀")
     ap.add_argument("--markets", default="", help="예: KR")
+    ap.add_argument("--src", default="wise", help="한국 종목: wise(와이즈리포트 먼저) / naver(네이버 금융 먼저)")
     a = ap.parse_args()
     rc = json.load(open(a.rc)) if os.path.exists(a.rc) else {}
     todo = [(s, n, m) for s, n, m in universe(os.path.join("_src", "Cup")) if fnv(s) % a.of == a.shard]
@@ -95,7 +96,18 @@ def main():
     t0 = time.time()
     for i, (s, n, m) in enumerate(todo):
         try:
-            if m == "KR":
+            if m == "KR" and a.src == "naver":
+                txt = ""
+                try:
+                    txt = kr_desc_naver(s.split(".")[0])
+                except Exception:
+                    pass
+                if not txt:
+                    try:
+                        txt = kr_desc(s.split(".")[0])
+                    except Exception:
+                        pass
+            elif m == "KR":
                 txt = ""
                 for k in range(3):                      # 막히면 쉬었다가 다시
                     try:

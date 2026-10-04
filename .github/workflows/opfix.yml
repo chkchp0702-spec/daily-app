@@ -2,6 +2,11 @@ name: opfix
 # 막혀서 못 받은 한국 종목 설명·한국 ETF 전체 구성종목을 천천히 다시 받기
 on:
   workflow_dispatch:
+    inputs:
+      etf:
+        description: "한국 ETF 전체 구성종목도 다시 (느림)"
+        type: boolean
+        default: false
   schedule:
     - cron: "47 20 * * 6"   # 매주 일요일 KST 05:47 (opextra 뒤)
 
@@ -44,7 +49,7 @@ jobs:
         with:
           name: prep
       - run: git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
-      - run: python opdb/build_desc.py --shard ${{ matrix.shard }} --of 6 --markets KR --have havek --sleep 1.5 --out out
+      - run: python opdb/build_desc.py --shard ${{ matrix.shard }} --of 6 --markets KR --have havek --sleep 0.8 --src naver --out out
       - uses: actions/upload-artifact@v4
         with:
           name: desc-${{ matrix.shard }}
@@ -54,6 +59,7 @@ jobs:
 
   etf:
     needs: prep
+    if: ${{ inputs.etf }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
