@@ -632,13 +632,13 @@ function opShow(sym){
     fr.onload = function(){
       var d = fr.contentDocument, p = res[2][sym];
       try {
-        var hdr = d.querySelector(".hdr"), u = ((hdr && hdr.textContent.match(/통화\s*(.+)$/)) || [, "달러"])[1].trim();
+        var hdr = d.querySelector(".hdr"), u = ((hdr && hdr.textContent.match(/통화\s*([가-힣]+)/)) || [, "달러"])[1];
         if (p){
           var chg = (p[1] / p[2] - 1) * 100;
           d.querySelector(".kpi.k1 .kv").textContent = fmtPrice(p[1], u);
           d.querySelector(".kpi.k1 .ks").innerHTML = '<span class="' + (chg >= 0 ? "up" : "down") + '">' + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%</span> · " + p[0].slice(5).replace("-", "/") + " 종가";
           [].forEach.call(d.querySelectorAll("h2"), function(h){ if (/주가/.test(h.textContent)){ h.parentNode.innerHTML = "<h2>주가 (1년)</h2>" + opChart(p, u); } });
-          if (hdr) hdr.innerHTML = "가격 " + p[0] + " 종가<br>설명 " + hdr.innerHTML.split("<br>")[0] + " 기준<br>통화 " + u;
+          if (hdr) hdr.innerHTML = "가격 " + p[0] + " 종가<br>설명 " + hdr.innerHTML.split("<br>")[0] + " 기준<br>통화 " + u + (u !== "원" ? '<br><span class="fxl"></span>' : "");
           var w = d.querySelector(".w52"), lo = w && +w.getAttribute("data-lo"), hi = w && +w.getAttribute("data-hi");
           if (w && hi > lo){ var n = w.querySelector(".w52-n"), pos = Math.max(0, Math.min(100, (p[1] - lo) / (hi - lo) * 100));
             n.style.left = pos.toFixed(1) + "%"; var em = n.querySelector("em"); if (em){ em.textContent = "현재 " + fmtPrice(p[1], u); em.className = pos > 85 ? "r" : pos < 15 ? "l" : ""; } }
@@ -648,11 +648,16 @@ function opShow(sym){
           a.target = "_blank"; a.textContent = "최신 뉴스 더 보기 ↗"; a.style.cssText = "display:inline-block;margin-top:8px;font-size:12px;color:#1f4e9c";
           h.parentNode.appendChild(a); } });
         d.querySelectorAll("a").forEach(function(a){ a.target = "_blank"; });
+        var h1 = d.querySelector(".hd h1");
+        if (h1 && r.name && h1.textContent.trim() !== r.name){
+          var en = h1.textContent.trim(); h1.textContent = r.name;
+          var sm = d.createElement("div"); sm.textContent = en; sm.style.cssText = "font-size:13px;color:#b9c4d8;margin-top:2px"; h1.after(sm);
+        }
         if (FX){
           var CU = {USD:"달러", CNY:"위안", JPY:"엔", HKD:"홍콩달러"};
           d.querySelectorAll(".krw").forEach(function(k){ var r = FX[k.getAttribute("data-c")], v = +k.getAttribute("data-v");
             if (r && !isNaN(v)) k.textContent = "≈ " + fmtKRW(v * r, k.getAttribute("data-k")); });
-          var fl = d.querySelector(".fxl"), cu = ((hdr && hdr.textContent.match(/통화\s*(\S+)/)) || [])[1], code = Object.keys(CU).filter(function(c){ return CU[c] === cu; })[0];
+          var fl = d.querySelector(".fxl"), cu = u, code = Object.keys(CU).filter(function(c){ return CU[c] === cu; })[0];
           if (fl && code && FX[code]) fl.textContent = "1" + cu + " ≈ " + FX[code].toLocaleString("ko-KR", {maximumFractionDigits:2}) + "원 (" + (FX.date || "").slice(5).replace("-", "/") + ")";
         }
       } catch(e) {}

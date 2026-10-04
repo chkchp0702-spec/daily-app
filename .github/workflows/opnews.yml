@@ -1,0 +1,102 @@
+name: opnews
+# 종목 뉴스만 받기 (20대 동시, 천천히) → 리포트 다시 그리기
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "37 19 * * 0"   # 매주 월요일 KST 04:37
+
+permissions:
+  contents: write
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 마지막 실적 연도 목록
+        run: |
+          git clone -q --depth 1 -b opdata https://github.com/${{ github.repository }} opdata
+          python3 - <<'PY'
+          import json, glob, os
+          out = {}
+          for f in glob.glob("opdata/d/*.json"):
+              r = json.load(open(f, encoding="utf-8"))
+              fin = r.get("financials") or []
+              if fin:
+                  out[r["ticker"]["symbol"]] = fin[-1]["period"]
+          json.dump(out, open("lastfy.json", "w"))
+          print(len(out))
+          PY
+          cp opdata/meta.json meta.json
+          cp opdata/names_ko.json names_ko.json || echo '{}' > names_ko.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prep
+          path: |
+            lastfy.json
+            meta.json
+            names_ko.json
+          retention-days: 2
+
+  news:
+    needs: prep
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: prep
+      - run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          pip install -q yfinance pandas
+      - run: python opdb/build_news.py --shard ${{ matrix.shard }} --of 20 --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: news-${{ matrix.shard }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  merge:
+    needs: news
+    if: always()
+    runs-on: ubuntu-latest
+    concurrency:
+      group: opdata
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 준비
+        run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+          git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: news-*
+          path: parts
+      - run: |
+          mkdir -p opdata/n
+          find parts -path "*/n/*.json" -exec cp {} opdata/n/ \;
+          ls opdata/n | wc -l
+          python opdb/rerender.py --dest opdata && python opdb/merge_static.py --dest opdata
+      - name: 저장
+        run: |
+          cd opdata
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git checkout -q --orphan fresh
+          git add -A
+          git commit -qm "news $(TZ=Asia/Seoul date '+%F %H:%M')"
+          git push -q -f origin fresh:opdata

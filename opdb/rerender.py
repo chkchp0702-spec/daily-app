@@ -38,6 +38,9 @@ def main():
             if os.path.exists(ef):
                 ex = json.load(open(ef, encoding="utf-8"))
                 raw["estimates"], raw["ltg"] = ex.get("estimates", []), ex.get("ltg")
+            nf = os.path.join(a.dest, "n", os.path.basename(f))
+            if os.path.exists(nf):
+                raw["news"] = json.load(open(nf, encoding="utf-8"))
             d = load(raw)
             html = render(d, rule_based(d), fx=fx).replace(CSS, "")
             out = os.path.join(a.dest, "s", os.path.basename(f)[:-5] + ".html")
