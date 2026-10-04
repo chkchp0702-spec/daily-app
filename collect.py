@@ -264,6 +264,18 @@ def sector():
             put("sector", day, "heatmap.png", png)
 
 
+def compass():
+    """나침반: opdata 의 compass.json → archive/sector/<시장 마지막 거래일>/compass.json"""
+    import urllib.request
+    url = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/compass.json"
+    with urllib.request.urlopen(url, timeout=30) as r:
+        txt = r.read().decode("utf-8")
+    d = json.loads(txt)
+    days = [m.get("date", "") for m in d.get("markets", {}).values() if DATE_RE.match(m.get("date", ""))]
+    if days:
+        put("sector", max(days), "compass.json", text=txt)
+
+
 # ---------- 조용한 매집 ----------
 def accum():
     path = src("Cup", "results", "list3_accum.csv")
@@ -305,7 +317,7 @@ def manifest():
 
 
 if __name__ == "__main__":
-    for fn in (market, danta, whale, sector, accum, cup_cards, gap_cards):
+    for fn in (market, danta, whale, sector, compass, accum, cup_cards, gap_cards):
         try:
             fn()
         except Exception as e:

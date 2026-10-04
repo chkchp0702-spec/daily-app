@@ -131,8 +131,9 @@ var V = (function(){
     series.forEach(function(sr){
       var p = []; sr.vals.forEach(function(v, i){ if (v != null) p.push([x(i), y(v), v]); });
       if (!p.length) return;
-      s += '<polyline points="' + p.map(function(q){ return q[0].toFixed(1) + "," + q[1].toFixed(1); }).join(" ") + '" fill="none" stroke="' + sr.color + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
-      p.forEach(function(q){ s += '<circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="2.5" fill="' + sr.color + '" stroke="#121826" stroke-width="1.5"/>'; });
+      s += '<polyline points="' + p.map(function(q){ return q[0].toFixed(1) + "," + q[1].toFixed(1); }).join(" ") + '" fill="none" stroke="' + sr.color + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"' + (sr.dash ? ' stroke-dasharray="4 4"' : '') + '/>';
+      if (opt.nodots){ var lq = p[p.length - 1]; s += '<circle cx="' + lq[0].toFixed(1) + '" cy="' + lq[1].toFixed(1) + '" r="4" fill="' + sr.color + '" stroke="#121826" stroke-width="2"/>'; }
+      else p.forEach(function(q){ s += '<circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="2.5" fill="' + sr.color + '" stroke="#121826" stroke-width="1.5"/>'; });
       ends.push([p[p.length - 1][1], sr]);
     });
     // 끝 라벨 (겹치지 않게)

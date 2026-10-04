@@ -18,7 +18,10 @@ def main():
     import yfinance as yf
     import pandas as pd
 
-    syms = [s for s, _, _ in universe(os.path.join("_src", "Cup"))]
+    uni = universe(os.path.join("_src", "Cup"))
+    syms = [s for s, _, _ in uni]
+    mkt_of = {s: m for s, _, m in uni}
+    daily, hl = {}, {}          # 나침반용: 최근 일봉, 52주 신고가/신저가
     ep = os.path.join(a.dest, "etf_list.json")
     if os.path.exists(ep):                       # ETF 도 같이
         have = set(syms)
@@ -53,6 +56,11 @@ def main():
             if len(c) < 2:
                 continue
             w = c.resample("W-FRI").last().dropna()
+            if s in mkt_of:
+                daily[s] = c.iloc[-70:]
+                if len(c) > 200:
+                    last = float(c.iloc[-1])
+                    hl[s] = 1 if last >= float(c.max()) * 0.999 else -1 if last <= float(c.min()) * 1.001 else 0
             shards[shard(s)][s] = [
                 c.index[-1].strftime("%Y-%m-%d"), round(float(c.iloc[-1]), 4), round(float(c.iloc[-2]), 4),
                 round(float(c.max()), 4), round(float(c.min()), 4), c.index[0].strftime("%Y-%m-%d"),
@@ -77,6 +85,13 @@ def main():
         json.dump(fx, open(os.path.join(pdir, "fx.json"), "w"))
     print("환율", fx)
     print("끝", got, flush=True)
+    try:
+        from compass import build as compass_build
+        compass_build(daily, hl, mkt_of, a.dest)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print("나침반 실패", e, flush=True)
 
 
 if __name__ == "__main__":

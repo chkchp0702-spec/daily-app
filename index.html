@@ -246,6 +246,56 @@ iframe.rep{width:100%;border:0;border-radius:12px;background:#fff;min-height:70v
 .warn-test b{display:block;font-size:14.5px;color:#ffd27a;letter-spacing:-.2px}
 .warn-test p{margin:4px 0 0;font-size:12.5px;color:#e8d9bf;line-height:1.5;word-break:keep-all}
 footer{color:var(--dim);font-size:11px;text-align:center;padding:24px 16px 40px}
+/* PDF 버튼 */
+.pdfbar{margin:18px 0 6px}
+.pdfb{display:block;width:100%;padding:14px 16px;border-radius:16px;border:1px dashed color-mix(in srgb,var(--c) 55%,var(--line));background:color-mix(in srgb,var(--c) 8%,var(--panel));color:var(--text);font:inherit;font-size:15px;font-weight:700;text-align:left}
+.pdfb small{display:block;font-size:11.5px;font-weight:400;color:var(--sub);margin-top:3px}
+.pdfb.ready{border-style:solid;border-color:var(--c);background:color-mix(in srgb,var(--c) 20%,var(--panel))}
+.pdfwrap{width:430px;padding:16px;background:var(--bg);color:var(--text)}
+.pdfhd{display:flex;justify-content:space-between;align-items:baseline;margin:0 2px 12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.pdfhd b{font-size:16px;color:var(--c)}.pdfhd span{font-size:12px;color:var(--sub)}
+/* 나침반 */
+.cp-ov{display:grid;gap:8px}
+.cp-row{display:block;width:100%;text-align:left;font:inherit;color:var(--text);background:var(--panel2);border:1px solid transparent;border-radius:14px;padding:11px 12px}
+.cp-row.on{border-color:var(--c)}
+.cp-h{display:flex;align-items:center;gap:7px;margin-bottom:8px;min-width:0}
+.cp-h b{font-size:15px}.cp-f{font-size:18px}
+.cp-ix{margin-left:auto;font-size:12px;color:var(--sub);white-space:nowrap}
+.cp-ix b{font-size:13px;margin-left:2px}
+.cp-rg{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.cp-rg.up{background:color-mix(in srgb,var(--up) 22%,transparent);color:#ff9a9a}
+.cp-rg.dn{background:color-mix(in srgb,var(--down) 24%,transparent);color:#8fb8ff}
+.cp-rg.fl{background:#2a3142;color:#c2c9d6}
+.cp-rg.big{font-size:20px;padding:6px 14px;margin-top:6px}
+.cp-bb{display:flex;gap:2px;height:10px;border-radius:99px;overflow:hidden}
+.cp-bb.tall{height:16px;margin-top:12px}
+.cp-bb i{display:block;min-width:2px}.cp-bb .u{background:var(--up)}.cp-bb .f{background:#4a5266}.cp-bb .d{background:var(--down)}
+.cp-n{display:flex;justify-content:space-between;font-size:12px;margin-top:6px;font-weight:700}
+.cp-n .up,.cp-mini .up,.cp-3 .up{color:#ff8a8a}.cp-n .dn,.cp-mini .dn,.cp-3 .dn{color:#7fb0ff}
+.cp-seg{margin:14px 0 10px}
+.cp-hero{background:linear-gradient(135deg,color-mix(in srgb,var(--c) 10%,var(--panel)),var(--panel))}
+.cp-hero.h-up{background:linear-gradient(135deg,color-mix(in srgb,var(--up) 16%,var(--panel)),var(--panel))}
+.cp-hero.h-dn{background:linear-gradient(135deg,color-mix(in srgb,var(--down) 18%,var(--panel)),var(--panel))}
+.cp-hero .row{align-items:flex-start}
+.cp-ixb{text-align:right}.cp-ixb small{display:block;color:var(--sub);font-size:12px}
+.cp-ixb b{display:block;font-size:22px;letter-spacing:-.3px}.cp-ixb span{font-weight:800;font-size:14px}
+.cp-sum{margin:10px 0 0;font-size:15px;line-height:1.6;font-weight:600;word-break:keep-all}
+.cp-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;text-align:center}
+.cp-3 div{background:var(--panel2);border-radius:12px;padding:10px 4px}
+.cp-3 small{display:block;color:var(--sub);font-size:12px}.cp-3 b{display:block;font-size:22px;letter-spacing:-.3px}.cp-3 em{font-style:normal;font-size:12px;color:var(--sub)}
+.cp-chg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px;text-align:center}
+.cp-chg div{background:var(--panel2);border-radius:10px;padding:7px 2px}.cp-chg small{display:block;color:var(--sub);font-size:11px}.cp-chg b{font-size:14px}
+.cp-52{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:11px;color:var(--sub);white-space:nowrap}
+.cp-52t{position:relative;flex:1;height:6px;border-radius:99px;background:linear-gradient(90deg,#2f6fd0,#4a5266,#c94a4a)}
+.cp-52t i{position:absolute;top:-4px;width:14px;height:14px;border-radius:50%;background:var(--text);border:3px solid var(--bg);transform:translateX(-7px)}
+.cp-ind .cp-r{font-size:18px}
+.cp-mini{display:flex;gap:10px;font-size:12px;font-weight:700;margin:6px 0 4px}
+.cp-sts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.cp-st{display:inline-flex;align-items:baseline;gap:6px;background:var(--panel2);border-radius:10px;padding:7px 10px;text-decoration:none;color:var(--text);font-size:13px}
+.cp-st b{font-weight:700;max-width:9.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cp-st span{font-size:12px;font-weight:800}
+.cp-st span.up{color:#ff8a8a}.cp-st span.dn{color:#7fb0ff}
+.cp-wk{padding:8px 0;border-bottom:1px solid var(--line)}.cp-wk:last-child{border:0}
+.cp-wk>span{float:right;font-weight:800}
 </style>
 </head>
 <body>
@@ -259,7 +309,7 @@ footer{color:var(--dim);font-size:11px;text-align:center;padding:24px 16px 40px}
 <main id="main"><div class="loading">불러오는 중…</div></main>
 <footer>※ 참고용 자료입니다. 투자 판단과 책임은 본인에게 있습니다.</footer>
 
-<script src="viz.js?v=4"></script>
+<script src="viz.js?v=5"></script>
 <script>
 if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
@@ -268,9 +318,9 @@ var CATS = [
   {key:"whale",  name:"고래",     icon:"🐋", color:"#3dd6c6", desc:"기관·유명 투자자 TOP 40 보유 변화"},
   {key:"cup",    name:"컵차트",   icon:"☕", color:"#ffb84d", desc:"컵앤핸들 돌파 후보"},
   {key:"gap",    name:"갭차트",   icon:"📈", color:"#c38bff", desc:"갭 돌파 후보"},
-  {key:"sector", name:"관심섹터", icon:"🎯", color:"#4dd47a", desc:"모닝 섹터 브리핑 · 오늘 볼 섹터"},
+  {key:"sector", name:"나침반", icon:"🧭", color:"#4dd47a", desc:"5개 시장 등락 종목 수 · 지수 흐름 · 강한 섹터"},
   {key:"accum",  name:"조용한 매집", icon:"🤫", color:"#ff8fc7", desc:"거래량은 늘고 가격은 제자리인 종목"},
-  {key:"onepager", name:"원페이지", icon:"📄", color:"#5ac8fa", desc:"약 2만 종목 한 장 요약 · 검색하면 바로"},
+  {key:"onepager", name:"종목리포트", icon:"📄", color:"#5ac8fa", desc:"약 2만 종목 + ETF 6천 개 · 검색하면 바로"},
   {key:"danta",  name:"단타",     icon:"⚡", color:"#ff6b6b", desc:"장중 단타 알람 · 이후 수익률 추적 · 시험 중"}
 ];
 var M = null, cur = null, curDate = null, store = {};
@@ -324,6 +374,7 @@ function go(key, id){
   var it = items.filter(function(x){ return x.id === curDate; })[0];
   window.scrollTo(0, 0);
   RENDER[key](it, $("body"));
+  if (NOPDF[key]) pdfBar($("main"), function(){ return $("body"); }, c.name + "_" + curDate.slice(0, 10), c.icon + " " + c.name + " · " + curDate.slice(0, 10));
 }
 
 /* ---------- 렌더러 ---------- */
@@ -335,6 +386,98 @@ function pdfCard(title, url){
   setTimeout(function(){ renderPdf(url, $(id)); }, 0);
   return '<div class="card"><h3>' + title + ' <a class="btn" href="' + url + '" target="_blank">크게 보기 ↗</a></h3><div class="pdf" id="' + id + '"><div class="loading">PDF 여는 중…</div></div></div>';
 }
+/* ---------- 화면 → PDF (PDF가 따로 없는 탭) ---------- */
+var NOPDF = {sector: 1, accum: 1, danta: 1};
+var H2P = new URL("lib/html2pdf.bundle.min.js", location.href).href;   // 앱에 같이 넣어둔 html2pdf.js 0.10.1 (MIT)
+function loadScript(doc, src){
+  return new Promise(function(ok, no){
+    var w = doc.defaultView; if (w.html2pdf) return ok();
+    var s = doc.createElement("script"); s.src = src; s.onload = function(){ ok(); }; s.onerror = no; doc.head.appendChild(s);
+  });
+}
+function savePdf(blob, name){
+  var fn = name.replace(/[\\/:*?"<>|\s]+/g, "_") + ".pdf";
+  try {
+    var f = new File([blob], fn, {type: "application/pdf"});
+    if (navigator.canShare && navigator.canShare({files: [f]})){ navigator.share({files: [f], title: fn}).catch(function(){}); return; }
+  } catch(e) {}
+  var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = fn; document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+}
+function pdfButton(make, name){
+  var wrap = document.createElement("div"); wrap.className = "pdfbar";
+  var b = document.createElement("button"); b.className = "pdfb"; b.innerHTML = "📄 이 화면 PDF로 받기<small>휴대폰에 저장하거나 공유할 수 있어요</small>";
+  var blob = null;
+  b.onclick = function(){
+    if (blob){ savePdf(blob, name); return; }
+    if (b.disabled) return;
+    b.disabled = true; b.innerHTML = "⏳ PDF 만드는 중…<small>그림이 많으면 몇 초 걸려요</small>";
+    make().then(function(bl){ blob = bl; b.disabled = false; b.classList.add("ready");
+      b.innerHTML = "⬇️ PDF 저장하기<small>" + esc(name) + ".pdf · 눌러서 저장/공유</small>"; })
+    .catch(function(err){ try { console.error("pdf", err); } catch(e) {} b.disabled = false; b.innerHTML = "다시 시도<small>PDF를 못 만들었어요</small>"; });
+  };
+  wrap.appendChild(b); return wrap;
+}
+// html2canvas 는 color-mix()(계산값 color(srgb …))를 못 읽어서, 복제본의 색을 rgb 로 바꿔 넣는다
+var CPROPS = ["color", "background-color", "background-image", "border-top-color", "border-right-color", "border-bottom-color", "border-left-color", "box-shadow", "fill", "stroke", "outline-color", "text-decoration-color"];
+function toRGB(v){
+  return v.replace(/color\(srgb\s+([-\d.e]+)\s+([-\d.e]+)\s+([-\d.e]+)(?:\s*\/\s*([-\d.e]+))?\)/g, function(_, r, g, b, a){
+    var f = function(x){ return Math.max(0, Math.min(255, Math.round(+x * 255))); };
+    return "rgba(" + f(r) + "," + f(g) + "," + f(b) + "," + (a == null ? 1 : +a) + ")";
+  });
+}
+function fixColors(doc){
+  var w = doc.defaultView;
+  [].forEach.call(doc.querySelectorAll("*"), function(el){
+    var cs = w.getComputedStyle(el);
+    CPROPS.forEach(function(p){ var v = cs.getPropertyValue(p); if (v && v.indexOf("color(") >= 0) el.style.setProperty(p, toRGB(v), "important"); });
+  });
+  // SVG 차트는 그림(img)으로 바꿔야 html2canvas 가 정확히 그린다
+  var SP = ["fill", "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "opacity", "fill-opacity", "stroke-opacity", "font-size", "font-weight", "font-family", "text-anchor", "dominant-baseline"];
+  [].forEach.call(doc.querySelectorAll("svg"), function(svg){
+    try {
+      var r = svg.getBoundingClientRect(); if (!r.width || !r.height) return;
+      [svg].concat([].slice.call(svg.querySelectorAll("*"))).forEach(function(n){
+        var cs = w.getComputedStyle(n), st = "";
+        SP.forEach(function(p){ var v = cs.getPropertyValue(p); if (v) st += p + ":" + toRGB(v) + ";"; });
+        n.setAttribute("style", st);
+      });
+      svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      svg.setAttribute("width", r.width); svg.setAttribute("height", r.height);
+      var img = doc.createElement("img");
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(svg));
+      img.style.cssText = "display:block;width:" + r.width + "px;height:" + r.height + "px";
+      svg.parentNode.replaceChild(img, svg);
+    } catch(e) {}
+  });
+}
+function pdfOpts(name, bg){
+  return {margin: 0, filename: name + ".pdf", image: {type: "jpeg", quality: 0.92},
+    html2canvas: {scale: 2, backgroundColor: bg, useCORS: true, logging: false, onclone: fixColors, scrollX: 0, scrollY: 0},
+    jsPDF: {unit: "mm", format: [114, 203], orientation: "portrait"}, pagebreak: {mode: ["css", "legacy"], avoid: [".card", "section", ".cp-row"]}};
+}
+function pdfBar(host, getEl, name, title){
+  var old = document.querySelector(".pdfbar"); if (old) old.remove();
+  host.appendChild(pdfButton(function(){
+    return loadScript(document, H2P).then(function(){
+      var src = getEl(), w = document.createElement("div");
+      w.className = "pdfwrap";
+      w.innerHTML = '<div class="pdfhd"><b>CH Investing</b><span>' + esc(title) + '</span></div>' + src.innerHTML;
+      [].forEach.call(w.querySelectorAll(".pdfbar,.fold,button.more"), function(x){ x.remove(); });
+      return html2pdf().set(pdfOpts(name, "#0b0f17")).from(w).outputPdf("blob");
+    });
+  }, name));
+}
+function pdfBarFrame(box, fr, name){
+  var old = box.querySelector(".pdfbar"); if (old) old.remove();
+  box.appendChild(pdfButton(function(){
+    var d = fr.contentDocument;
+    return loadScript(d, H2P).then(function(){
+      return fr.contentWindow.html2pdf().set(pdfOpts(name, "#f4f6fa")).from(d.querySelector(".page") || d.body).outputPdf("blob");
+    });
+  }, name));
+}
+
 function renderPdf(url, box){
   if (!box) return;
   if (!window.pdfjsLib) { box.innerHTML = '<div class="loading">"크게 보기"를 눌러 PDF를 열어주세요.</div>'; return; }
@@ -395,7 +538,7 @@ var RENDER = {
       rows.forEach(function(r){
         var ex = r.exit ? '<span class="pill ' + (/손절|이탈/.test(r.exit) ? "cool" : "hot") + '">' + esc(r.exit) + '</span>' : "";
         h += '<div class="st"><div class="row"><div class="nm"><a href="https://m.stock.naver.com/domestic/stock/' + r.code + '/total" target="_blank">' + esc(r.name) + '</a><span class="cd">' + r.code + '</span></div>' +
-             '<span class="tm">' + r.time + ' <a class="btn" style="padding:2px 7px" href="javascript:openOP(\'' + esc(r.code) + '\')">원페이지</a></span></div>' +
+             '<span class="tm">' + r.time + ' <a class="btn" style="padding:2px 7px" href="javascript:openOP(\'' + esc(r.code) + '\')">종목리포트</a></span></div>' +
              '<div class="row" style="margin-top:6px;justify-content:flex-start;gap:6px"><span class="pill c">' + esc(r.type) + '</span>' + ex +
              '<span class="tm">알람가 ' + won(r.price) + '원 · 당일 ' + pct(r.chg) + '</span></div>' +
              '<div class="grid4"><div class="kv"><small>30분</small><b>' + pct(r.m30) + '</b></div><div class="kv"><small>최고</small><b>' + pct(r.high) + '</b></div>' +
@@ -452,7 +595,7 @@ var RENDER = {
           var link = r.mkt === "KR" ? "https://m.stock.naver.com/domestic/stock/" + r.code + "/total" : "https://finance.yahoo.com/quote/" + r.code;
           h += '<div class="st"><div class="row"><div class="nm"><a href="' + link + '" target="_blank">' + esc(r.name) + '</a><span class="cd">' + esc(r.code) + '</span></div>' +
                '<span class="pill ' + cls + '">' + (r.dist ? "분배 의심" : esc(r.tag)) + '</span></div>' +
-               '<div class="tm" style="margin-top:4px"><a class="btn" style="padding:2px 7px;float:right" href="javascript:openOP(\'' + esc(r.code) + '\')">원페이지</a>' + (names[r.mkt] || r.mkt) + (r.sector && r.sector !== "미분류" ? " · " + esc(r.sector) : "") + (r.days > 1 ? " · 매집 " + r.days + "일째" : "") + '</div>' +
+               '<div class="tm" style="margin-top:4px"><a class="btn" style="padding:2px 7px;float:right" href="javascript:openOP(\'' + esc(r.code) + '\')">종목리포트</a>' + (names[r.mkt] || r.mkt) + (r.sector && r.sector !== "미분류" ? " · " + esc(r.sector) : "") + (r.days > 1 ? " · 매집 " + r.days + "일째" : "") + '</div>' +
                '<div class="grid4"><div class="kv"><small>매집점수</small><b>' + (r.score == null ? "–" : r.score.toFixed(0)) + '</b></div>' +
                '<div class="kv"><small>거래량</small><b>' + (r.vol == null ? "–" : r.vol.toFixed(1) + "배") + '</b></div>' +
                '<div class="kv"><small>한달 가격</small><b>' + pct(r.m1) + '</b></div>' +
@@ -525,7 +668,7 @@ function themeLog(el, day){
   }).catch(function(){});
 }
 
-/* ---------- 원페이지 (미리 만든 리포트 + 최신 종가) ---------- */
+/* ---------- 종목리포트 (미리 만든 리포트 + 최신 종가) ---------- */
 var OPD = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/";
 var OPIDX = null, OPCSS = null, OPP = {}, FX = null;
 function fmtKRW(v, kind){
@@ -674,6 +817,7 @@ function opShow(sym){
         }
       } catch(e) {}
       fr.style.height = d.documentElement.scrollHeight + 10 + "px";
+      pdfBarFrame(box, fr, "종목리포트_" + r.name + "_" + ((p && p[0]) || ""));
     };
     fr.srcdoc = html;
     box.scrollIntoView({behavior:"smooth", block:"start"});
@@ -702,6 +846,7 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
   fetch("https://ntfy.sh/chkchp-daily-5821", {method:"POST", body: userName + " 님이 앱을 열었어요 (" + device + ")"}).catch(function(){});
 })();
 </script>
-<script src="views.js?v=5"></script>
+<script src="views.js?v=6"></script>
+<script src="compass.js?v=1"></script>
 </body>
 </html>

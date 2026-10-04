@@ -1,4 +1,4 @@
-/* C. Investing — 탭별 화면 (그림·차트 우선, PDF는 아래 접어두기) */
+/* CH Investing — 탭별 화면 (그림·차트 우선, PDF는 아래 접어두기) */
 (function(){
   var e = V.e, rich = V.rich, sgn = V.sgn, cls = V.cls, fmt = V.fmt;
 
@@ -9,7 +9,7 @@
     setTimeout(function(){ var b = document.getElementById(id); if (b) b.onclick = function(){ b.outerHTML = pdfCard(title, url); }; }, 0);
     return '<button class="fold" id="' + id + '">📄 ' + e(title) + ' 펼치기</button>';
   }
-  function opBtn(code, label){ return '<a class="btn op" href="javascript:openOP(\'' + e(code).replace(/'/g, "") + '\')">' + (label || "원페이지") + '</a>'; }
+  function opBtn(code, label){ return '<a class="btn op" href="javascript:openOP(\'' + e(code).replace(/'/g, "") + '\')">' + (label || "종목리포트") + '</a>'; }
   function chip(t, c){ return '<span class="chip2 ' + (c || "") + '">' + t + '</span>'; }
   function after(el){ V.fillSparks(el); }
 
@@ -177,7 +177,7 @@
       if (sg.hero){
         var sc = (sg.top10_score || {})[sg.hero];
         h += '<section class="hero2 whale-hero"><div class="hero2-k">오늘 이것 하나</div><div class="row"><div><div class="big-t">' + e(sg.hero) + '</div>' +
-             (sc != null ? '<div class="mut">고래 점수 ' + sc + '</div>' : '') + '</div>' + opBtn(sg.hero, "원페이지 →") + '</div>' +
+             (sc != null ? '<div class="mut">고래 점수 ' + sc + '</div>' : '') + '</div>' + opBtn(sg.hero, "종목리포트 →") + '</div>' +
              '<div class="sp-box" data-spark="' + e(sg.hero) + '" data-h="80"></div></section>';
       }
       // 고래 지수 vs S&P
@@ -194,7 +194,7 @@
       if (tops.length) h += card("오늘의 고래 TOP 10 <span class='mut'>점수 · 상태</span>", V.hbars(tops.map(function(t, i){
         var st = ST[t[0]];
         return {label: '<span class="rk">' + (i + 1) + '</span>' + e(t[0]) + (st && st !== "관찰" ? ' <span class="chip2 ' + (stCls[st] || "") + '" style="font-size:10px;padding:1px 6px">' + e(st) + '</span>' : ''),
-                v: t[1], text: t[1], attr: ' onclick="openOP(\'' + e(t[0]) + '\')"', tip: "<b>" + e(t[0]) + "</b> 점수 " + t[1] + (st ? " · " + e(st) : "") + "<br>누르면 원페이지"}; }), {color: "#199e70"}) +
+                v: t[1], text: t[1], attr: ' onclick="openOP(\'' + e(t[0]) + '\')"', tip: "<b>" + e(t[0]) + "</b> 점수 " + t[1] + (st ? " · " + e(st) : "") + "<br>누르면 종목리포트"}; }), {color: "#199e70"}) +
         '<p class="note">상태: 관찰 → 접근(고래 평단 근처) → <b>매수 검토</b>(여러 신호가 겹침)</p>');
       // 신호 묶음
       var groups = [["big", "큰 신규 매수", "hot"], ["mov", "많이 움직인 종목", "c"], ["near", "평단 근처", ""], ["rebound", "반등", "c"], ["warn", "주의", "cool"]];
