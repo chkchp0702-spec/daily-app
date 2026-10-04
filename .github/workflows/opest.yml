@@ -2,6 +2,8 @@ name: opest
 # 애널리스트 추정치만 전체 받기 (20대 동시) → 리포트 다시 그리기
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "37 17 * * 5"   # 매주 토요일 KST 02:37 (추정치 + 실적·배당 일정)
 
 permissions:
   contents: write

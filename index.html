@@ -31,11 +31,11 @@ header{position:sticky;top:0;z-index:10;background:rgba(11,15,23,.86);backdrop-f
 .brand{font-size:22px;font-weight:800;letter-spacing:-.5px}
 .brand span{color:var(--acc)}
 .stamp{font-size:11px;color:var(--dim);text-align:right}
-.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:0 12px 12px}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0 12px 12px}
 .tabs::-webkit-scrollbar,.dates::-webkit-scrollbar{display:none}
 .tab{min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--sub);border-radius:14px;
-  padding:7px 2px 6px;font:inherit;font-size:12.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;transition:.2s;letter-spacing:-.3px;white-space:nowrap}
-.tab .ic{font-size:21px;line-height:1.15}
+  padding:8px 6px;font:inherit;font-size:13.5px;font-weight:700;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:.2s;letter-spacing:-.3px;white-space:nowrap}
+.tab .ic{font-size:19px;line-height:1}
 .tab .tn{overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tab.on{background:color-mix(in srgb,var(--c) 22%,var(--panel));border-color:var(--c);color:var(--text);box-shadow:0 0 0 1px var(--c) inset}
 /* 본문 */
@@ -254,6 +254,19 @@ footer{color:var(--dim);font-size:11px;text-align:center;padding:24px 16px 40px}
 .pdfwrap{width:430px;padding:16px;background:var(--bg);color:var(--text)}
 .pdfhd{display:flex;justify-content:space-between;align-items:baseline;margin:0 2px 12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .pdfhd b{font-size:16px;color:var(--c)}.pdfhd span{font-size:12px;color:var(--sub)}
+/* 알림 · 신호 배지 · 비교 */
+.al-st{display:flex;gap:10px;align-items:flex-start;padding:7px 0}
+.al-st .n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--c);color:#0b0f17;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.al-st b{display:block;font-size:14px}.al-st small b{display:inline;font-size:inherit;color:var(--text)}.al-st small{display:block;color:var(--sub);font-size:12px;margin-top:2px;line-height:1.5}.al-st .btn{margin-top:6px}
+.al .al-h{display:flex;gap:12px;align-items:center}.al-i{font-size:28px}.al-h b{font-size:15px}.al-h small{display:block;color:var(--sub);font-size:12px;margin-top:2px}
+.al-b{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}.al-b .btn{font-size:13px;padding:8px 12px;cursor:pointer;font-family:inherit}
+.al-sub{background:color-mix(in srgb,var(--c) 30%,var(--panel2))!important;border-color:var(--c)!important;font-weight:700}
+.sigb>b{font-size:13px;color:var(--sub)}.sigb>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sgb{display:flex;align-items:center;gap:6px;background:var(--panel2);border-radius:10px;padding:7px 10px;text-decoration:none;color:var(--text);font-size:13px}
+.sgb small{color:var(--sub);font-size:11.5px}
+.cmpt{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}.cmpt th{font-size:13px;padding:6px;text-align:right;color:var(--text)}
+.cmpt td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right}.cmpt td:first-child{text-align:left;color:var(--sub)}
+.cmpt td.win{color:#5fd39a;font-weight:800}
 /* 업그레이드 묶음 */
 .xo{color:var(--text);text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .x4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;text-align:center;margin-bottom:6px}
@@ -365,7 +378,8 @@ var CATS = [
   {key:"sector", name:"나침반", icon:"🧭", color:"#4dd47a", desc:"5개 시장 등락 종목 수 · 지수 흐름 · 강한 섹터"},
   {key:"accum",  name:"조용한 매집", icon:"🤫", color:"#ff8fc7", desc:"거래량은 늘고 가격은 제자리인 종목"},
   {key:"onepager", name:"종목리포트", icon:"📄", color:"#5ac8fa", desc:"약 2만 종목 + ETF 6천 개 · 검색하면 바로"},
-  {key:"danta",  name:"단타",     icon:"⚡", color:"#ff6b6b", desc:"장중 단타 알람 · 이후 수익률 추적 · 시험 중"}
+  {key:"danta",  name:"단타",     icon:"⚡", color:"#ff6b6b", desc:"장중 단타 알람 · 이후 수익률 추적 · 시험 중"},
+  {key:"alarm",  name:"알림",     icon:"🔔", color:"#ffd166", desc:"원하는 신호를 휴대폰 푸시로 받기 (무료)"}
 ];
 var M = null, cur = null, curDate = null, store = {};
 try { store = JSON.parse(localStorage.getItem("app") || "{}"); } catch(e) {}
@@ -401,9 +415,10 @@ function go(key, id){
   var items = (M.cats[key] || []);
   curDate = id || (items[0] && items[0].id);
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
-          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
-          (items[0] && key !== "onepager" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
+          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">ntfy 무료 푸시</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
+          (items[0] && key !== "onepager" && key !== "alarm" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
   if (key === "onepager") { $("main").innerHTML = h + opView(); opInit(id); window.scrollTo(0, 0); return; }
+  if (key === "alarm") { $("main").innerHTML = h + alarmView(); alarmInit(); window.scrollTo(0, 0); return; }
   if (!items.length) {
     h += '<div class="empty"><div class="big">🗂️</div>아직 모인 자료가 없어요.<br>' +
          "다음 자동 수집 때 채워져요." + '</div>';
@@ -430,6 +445,110 @@ function pdfCard(title, url){
   setTimeout(function(){ renderPdf(url, $(id)); }, 0);
   return '<div class="card"><h3>' + title + ' <a class="btn" href="' + url + '" target="_blank">크게 보기 ↗</a></h3><div class="pdf" id="' + id + '"><div class="loading">PDF 여는 중…</div></div></div>';
 }
+/* ---------- 🔔 알림 (ntfy 구독) ---------- */
+var NTFY = "chkchp-ch-";
+var sgn = V.sgn;
+var ALARMS = [
+  {t:"danta",   ic:"⚡", nm:"단타 알람 (실시간)",   d:"장중 단타 신호가 뜨는 순간. 시험 중이라 참고만!"},
+  {t:"cup",     ic:"☕", nm:"컵 돌파 임박 · 돌파",  d:"돌파선까지 2% 이내로 온 종목, 돌파한 종목"},
+  {t:"gap",     ic:"📈", nm:"새 갭 돌파 · 미국 장 전 갭", d:"새로 나온 갭 돌파 종목, 미국 장 시작 전 ±4% 갭"},
+  {t:"accum",   ic:"🤫", nm:"매집 종목 박스 돌파",  d:"조용히 모으던 종목이 20일 고점을 넘는 날"},
+  {t:"compass", ic:"🧭", nm:"시장 국면 변화",       d:"5개 시장 중 상승장·하락장·횡보장이 바뀌면"},
+  {t:"whale",   ic:"🐋", nm:"고래 픽 변경",         d:"오늘의 고래 픽(히어로 종목)이 바뀌면"}
+];
+function alarmView(){
+  return '<section class="card"><h3>📲 처음 한 번만 준비</h3><div class="al-st"><span class="n">1</span><div><b>ntfy 앱 설치 (무료·가입 없음)</b><a class="btn" href="https://apps.apple.com/us/app/ntfy/id1625396347" target="_blank">App Store에서 받기 ↗</a></div></div>' +
+    '<div class="al-st"><span class="n">2</span><div><b>아래에서 원하는 알림의 "구독"을 누르기</b><small>ntfy 앱이 열리면 <b>Subscribe</b>를 누르면 끝. 알림 허용을 물으면 <b>허용</b>.</small></div></div>' +
+    '<div class="al-st"><span class="n">3</span><div><b>"테스트"를 눌러 잘 오는지 확인</b><small>몇 초 안에 휴대폰에 알림이 떠요.</small></div></div></section>' +
+    '<div class="sec">받을 알림 고르기</div>' + ALARMS.map(function(a){
+      return '<section class="card al"><div class="al-h"><span class="al-i">' + a.ic + '</span><div><b>' + a.nm + '</b><small>' + a.d + '</small></div></div>' +
+        '<div class="al-b"><a class="btn al-sub" href="ntfy://ntfy.sh/' + NTFY + a.t + '">🔔 구독</a><a class="btn" href="https://ntfy.sh/' + NTFY + a.t + '" target="_blank">웹으로 보기</a><button class="btn al-test" data-t="' + a.t + '">테스트</button></div></section>';
+    }).join("") +
+    '<section class="card"><h3>✈️ 텔레그램으로도 받고 싶다면</h3><p class="note" style="margin-top:0">지금 단타 알람을 보내는 텔레그램 봇이 이미 있어요. 같은 봇으로 위 알림도 받으려면 GitHub에 값 두 개만 넣으면 돼요 (내가 대신 넣을 수는 없어요):</p>' +
+    '<div class="al-st"><span class="n">1</span><div><b>아래 주소 열기</b><a class="btn" href="https://github.com/chkchp0702-spec/daily-app/settings/secrets/actions/new" target="_blank">daily-app 비밀값 추가 ↗</a></div></div>' +
+    '<div class="al-st"><span class="n">2</span><div><b>Name: TG_TOKEN · Secret: 봇 토큰</b><small>@BotFather 에서 /mybots → 봇 선택 → API Token</small></div></div>' +
+    '<div class="al-st"><span class="n">3</span><div><b>한 번 더: Name: TG_CHAT · Secret: 내 채팅 ID</b><small>텔레그램에서 @userinfobot 에게 아무 말이나 보내면 Id 숫자를 알려줘요.</small></div></div>' +
+    '<p class="note">문자(SMS)는 보낼 때마다 돈이 들어서 넣지 않았어요.</p></section>';
+}
+function alarmInit(){
+  [].forEach.call(document.querySelectorAll(".al-test"), function(b){ b.onclick = function(){
+    var a = ALARMS.filter(function(x){ return x.t === b.dataset.t; })[0];
+    b.disabled = true; b.textContent = "보내는 중…";
+    fetch("https://ntfy.sh/" + NTFY + a.t, {method: "POST", body: a.ic + " 테스트 알림 — CH Investing '" + a.nm + "' 구독이 잘 됐어요!", headers: {"Title": "CH Investing"}})
+      .then(function(){ b.textContent = "보냈어요 ✓"; }).catch(function(){ b.textContent = "실패 — 다시"; b.disabled = false; });
+  }; });
+}
+
+/* ---------- 종목리포트: 다른 탭 신호 배지 · 두 종목 비교 ---------- */
+function sigBadges(sym){
+  var code = sym.split(".")[0], same = function(c){ c = String(c || ""); return c === sym || (/^\d{6}$/.test(code) && c.split(".")[0] === code); };
+  var lat = function(cat, f){ var L = (M.cats[cat] || []).filter(function(x){ return x.files.indexOf(f) >= 0; }); return L.length ? getJSON(file(cat, L[0].id, f)).then(function(j){ return {id: L[0].id, j: j}; }).catch(function(){ return null; }) : Promise.resolve(null); };
+  var px = function(n){ return getJSON("archive/x/" + n + "?" + (M.updated || "")).catch(function(){ return null; }); };
+  return Promise.all([lat("cup", "cards.json"), lat("gap", "cards.json"), lat("accum", "list.json"), lat("whale", "data.json"), lat("danta", "alerts.json"),
+                      px("perf_cup.json"), px("perf_gap.json"), px("perf_accum.json")]).then(function(r){
+    var out = [];
+    var find = function(list){ return (list || []).filter(function(x){ return same(x.code); })[0]; };
+    var cu = r[0] && (find(r[0].j.top) || find(r[0].j.ath)); if (cu) out.push(["☕", "컵", (cu.brk ? "돌파" : "돌파선까지 " + sgn(-cu.dist) + "%") + (cu.streak > 1 ? " · " + cu.streak + "일째" : ""), "cup"]);
+    var ga = r[1] && find(r[1].j.top); if (ga) out.push(["📈", "갭", "갭 +" + (ga.gap || 0).toFixed(1) + "% · " + (ga.hold ? "유지" : "메움"), "gap"]);
+    var ac = r[2] && find(r[2].j); if (ac) out.push(["🤫", "매집", (ac.tag || "") + " · 점수 " + (ac.score || 0).toFixed(0), "accum"]);
+    var wh = r[3] && r[3].j.signals; if (wh && ((wh.top10 || []).indexOf(sym) >= 0 || wh.hero === sym)) out.push(["🐋", "고래", wh.hero === sym ? "오늘의 고래 픽" : "고래 TOP10", "whale"]);
+    var da = r[4] && find(r[4].j); if (da) out.push(["⚡", "단타", r[4].id.slice(5).replace("-", "/") + " " + da.time + " " + da.type, "danta"]);
+    [[5, "☕ 컵"], [6, "📈 갭"], [7, "🤫 매집"]].forEach(function(z){ var P = r[z[0]]; if (!P || !P.signals) return;
+      P.signals.filter(function(s){ return same(s.code); }).slice(0, 1).forEach(function(s){ if (!out.some(function(o){ return z[1].indexOf(o[1]) >= 0; })) out.push(["🕘", z[1] + " 과거", s.d0.slice(5).replace("-", "/") + " 신호 → 지금 " + sgn(s.now) + "%", ""]); }); });
+    if (!out.length) return "";
+    return '<div class="card sigb"><b>이 종목에 뜬 신호</b><div>' + out.map(function(o){ return '<a class="sgb" ' + (o[3] ? 'href="javascript:go(\'' + o[3] + '\')"' : '') + '><span>' + o[0] + '</span><b>' + esc(o[1]) + '</b><small>' + esc(o[2]) + '</small></a>'; }).join("") + '</div></div>';
+  });
+}
+function cmpBox(box, sym, name){
+  var w = document.createElement("div"); w.className = "card cmp";
+  w.innerHTML = '<h3>⚖️ 다른 종목과 비교</h3><div class="reqrow"><input id="cmpq" placeholder="비교할 종목 이름이나 코드" autocomplete="off"></div><div id="cmpsug" class="sug"></div><div id="cmpout"></div>';
+  box.appendChild(w);
+  var q = $("cmpq");
+  q.oninput = function(){ var res = opSearch(q.value).filter(function(r){ return r.built && r.sym !== sym; }).slice(0, 6);
+    $("cmpsug").innerHTML = res.map(function(r){ return '<button data-s="' + esc(r.sym) + '">' + (FLAG[r.mkt] || "") + " <b>" + esc(r.name) + '</b><small>' + esc(r.sym) + '</small></button>'; }).join("");
+    [].forEach.call($("cmpsug").children, function(b){ b.onclick = function(){ $("cmpsug").innerHTML = ""; q.value = ""; q.blur(); compare(sym, b.dataset.s); }; }); };
+}
+function compare(a, b){
+  var out = $("cmpout"); out.innerHTML = '<div class="loading">비교하는 중…</div>';
+  var one = function(s){ var sh = opShard(s);
+    return Promise.all([getJSON(OPD + "d/" + opFile(s) + ".json").catch(function(){ return null; }),
+      OPP[sh] ? Promise.resolve(OPP[sh]) : getJSON(OPD + "p/" + sh + ".json").then(function(j){ OPP[sh] = j; return j; }).catch(function(){ return {}; })])
+      .then(function(r){ return {s: s, d: r[0], p: (r[1] || {})[s], i: OPIDX.filter(function(x){ return x.sym === s; })[0]}; }); };
+  Promise.all([one(a), one(b), FX ? Promise.resolve(FX) : getJSON(OPD + "p/fx.json").then(function(j){ FX = j; return j; }).catch(function(){ return null; })]).then(function(r){
+    var A = r[0], B = r[1], fx = r[2] || {};
+    var won = function(x, v){ var c = x.d && x.d.currency; return v == null ? null : c === "KRW" ? v : (fx[c] ? v * fx[c] : null); };
+    var fin = function(x){ var f = ((x.d && x.d.financials) || []).filter(function(y){ return y.revenue; }); return f; };
+    var g = function(x){ var f = fin(x); return f.length >= 2 ? (f[f.length - 1].revenue / f[f.length - 2].revenue - 1) * 100 : null; };
+    var om = function(x){ var f = fin(x); return f.length && f[f.length - 1].operating_income != null ? f[f.length - 1].operating_income / f[f.length - 1].revenue * 100 : null; };
+    var r1y = function(x){ return x.p ? (x.p[1] / x.p[6][0] - 1) * 100 : null; };
+    var pos = function(x){ return x.p && x.p[3] > x.p[4] ? (x.p[1] - x.p[4]) / (x.p[3] - x.p[4]) * 100 : null; };
+    var up = function(x){ var t = x.d && x.d.analyst && x.d.analyst.target_mean; return t && x.p ? (t / x.p[1] - 1) * 100 : null; };
+    var rows = [
+      ["시가총액(원)", function(x){ return won(x, x.d && x.d.market_cap); }, function(v){ return v == null ? "–" : fmtKRW(v, "m"); }, 1],
+      ["PER", function(x){ return x.d && x.d.pe; }, function(v){ return v == null ? "–" : v.toFixed(1) + "배"; }, -1],
+      ["PBR", function(x){ return x.d && x.d.pb; }, function(v){ return v == null ? "–" : v.toFixed(1) + "배"; }, -1],
+      ["매출 성장", g, function(v){ return v == null ? "–" : sgn(v) + "%"; }, 1],
+      ["영업이익률", om, function(v){ return v == null ? "–" : v.toFixed(1) + "%"; }, 1],
+      ["배당", function(x){ return x.d && x.d.dividend_yield != null ? x.d.dividend_yield * 100 : null; }, function(v){ return v == null ? "–" : v.toFixed(1) + "%"; }, 1],
+      ["1년 수익률", r1y, function(v){ return v == null ? "–" : sgn(v) + "%"; }, 1],
+      ["52주 위치", pos, function(v){ return v == null ? "–" : v.toFixed(0) + "%"; }, 0],
+      ["목표가까지", up, function(v){ return v == null ? "–" : sgn(v) + "%"; }, 1]
+    ];
+    var nm = function(x){ return esc((x.i && x.i.name) || x.s); };
+    var h = '<table class="cmpt"><tr><th></th><th>' + nm(A) + '</th><th>' + nm(B) + '</th></tr>' + rows.map(function(rw){
+      var va = rw[1](A), vb = rw[1](B), wa = "", wb = "";
+      if (rw[3] && va != null && vb != null && va !== vb){ var aw = rw[3] > 0 ? va > vb : va < vb; wa = aw ? "win" : ""; wb = aw ? "" : "win"; }
+      return '<tr><td>' + rw[0] + '</td><td class="' + wa + '">' + rw[2](va) + '</td><td class="' + wb + '">' + rw[2](vb) + '</td></tr>'; }).join("") + '</table>';
+    if (A.p && B.p){
+      var na = A.p[6].map(function(v){ return v / A.p[6][0] * 100; }), nb = B.p[6].map(function(v){ return v / B.p[6][0] * 100; }), n = Math.min(na.length, nb.length);
+      h += '<div class="sub2">1년 주가 (시작 = 100)</div>' + V.lines([{name: (A.i && A.i.name) || A.s, color: V.CAT[0], vals: na.slice(-n)}, {name: (B.i && B.i.name) || B.s, color: V.CAT[1], vals: nb.slice(-n)}],
+        na.slice(-n).map(function(_, i){ return i === 0 ? "1년 전" : i === n - 1 ? "지금" : ""; }), {h: 160, nodots: 1});
+    }
+    h += '<p class="note">초록 = 둘 중 나은 쪽 (PER·PBR은 낮을수록, 나머지는 높을수록). 원화 환산은 최근 환율.</p><a class="btn" href="javascript:opShow(\'' + esc(B.s) + '\')">' + nm(B) + ' 리포트 보기 →</a>';
+    out.innerHTML = h;
+  });
+}
+
 /* ---------- 화면 → PDF (PDF가 따로 없는 탭) ---------- */
 var NOPDF = {sector: 1, accum: 1, danta: 1};
 var H2P = new URL("lib/html2pdf.bundle.min.js", location.href).href;   // 앱에 같이 넣어둔 html2pdf.js 0.10.1 (MIT)
@@ -820,7 +939,8 @@ function opShow(sym){
     FX ? Promise.resolve(FX) : getJSON(OPD + "p/fx.json").then(function(j){ FX = j; return j; }).catch(function(){ return null; })
   ]).then(function(res){
     var html = res[0].replace("<style></style>", "<style>" + res[1] + "</style>");
-    box.innerHTML = '<div class="card" style="padding:6px"><iframe class="rep" id="opf"></iframe></div>';
+    box.innerHTML = '<div id="opsig"></div><div class="card" style="padding:6px"><iframe class="rep" id="opf"></iframe></div>';
+    sigBadges(sym).then(function(hh){ var el = $("opsig"); if (el) el.innerHTML = hh; });
     var fr = $("opf");
     fr.onload = function(){
       var d = fr.contentDocument, p = res[2][sym];
@@ -862,6 +982,7 @@ function opShow(sym){
       } catch(e) {}
       fr.style.height = d.documentElement.scrollHeight + 10 + "px";
       pdfBarFrame(box, fr, "종목리포트_" + r.name + "_" + ((p && p[0]) || ""));
+      if (!r.etf) cmpBox(box, sym, r.name);
     };
     fr.srcdoc = html;
     box.scrollIntoView({behavior:"smooth", block:"start"});
@@ -873,7 +994,8 @@ function openOP(code){ go("onepager", code); }
 getJSON("manifest.json?" + Date.now()).then(function(m){
   M = m;
   $("stamp").innerHTML = "자동 업데이트<br>" + m.updated;
-  var first = store.tab && CATS.some(function(c){ return c.key === store.tab; }) ? store.tab : "market";
+  var hk = (location.hash || "").slice(1);
+  var first = CATS.some(function(c){ return c.key === hk; }) ? hk : store.tab && CATS.some(function(c){ return c.key === store.tab; }) ? store.tab : "market";
   go(first);
 }).catch(function(){ $("main").innerHTML = '<div class="empty"><div class="big">⏳</div>자료 준비 중이에요.<br>잠시 뒤 새로고침 해주세요.</div>'; });
 
@@ -892,6 +1014,6 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
 </script>
 <script src="views.js?v=6"></script>
 <script src="compass.js?v=2"></script>
-<script src="extras.js?v=1"></script>
+<script src="extras.js?v=2"></script>
 </body>
 </html>

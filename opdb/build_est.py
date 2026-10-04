@@ -40,8 +40,9 @@ def main():
             signal.alarm(40)
             t = yf.Ticker(s)
             est, ltg = D.fetch_estimates(t, lastfy.get(s))
+            cal = D.fetch_calendar(t)
             signal.alarm(0)
-            json.dump({"estimates": est, "ltg": ltg}, open(os.path.join(a.out, "e", fname(s) + ".json"), "w"), ensure_ascii=False)
+            json.dump({"estimates": est, "ltg": ltg, "cal": cal}, open(os.path.join(a.out, "e", fname(s) + ".json"), "w"), ensure_ascii=False)
             ok += 1
             has += 1 if est else 0
         except Exception as e:

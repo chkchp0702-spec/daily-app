@@ -30,6 +30,45 @@ def main():
     fxp = os.path.join(a.dest, "p", "fx.json")
     fx = json.load(open(fxp)) if os.path.exists(fxp) else None
     print("환율", fx)
+    # 같은 업종 비교용: (시장, 업종) → 회사 목록
+    nk = {}
+    try:
+        nk = json.load(open(os.path.join(a.dest, "names_ko.json"), encoding="utf-8"))
+    except Exception:
+        pass
+    groups = {}
+    for f in files:
+        try:
+            r = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        t = r.get("ticker") or {}
+        ind = r.get("industry")
+        if not ind or not r.get("market_cap"):
+            continue
+        fin = [y for y in (r.get("financials") or []) if y.get("revenue")]
+        g = om = None
+        if len(fin) >= 2 and fin[-2]["revenue"]:
+            g = fin[-1]["revenue"] / fin[-2]["revenue"] - 1
+        if fin and fin[-1].get("operating_income") is not None:
+            om = fin[-1]["operating_income"] / fin[-1]["revenue"]
+        name = nk.get(t.get("symbol")) if t.get("market") != "KR" else None
+        groups.setdefault((t.get("market"), ind), []).append({"sym": t.get("symbol"), "name": name or t.get("name") or t.get("symbol"),
+            "cap": r.get("market_cap"), "pe": r.get("pe"), "g": g, "om": om, "cur": r.get("currency")})
+    for k in groups:
+        groups[k].sort(key=lambda x: -(x["cap"] or 0))
+    print("업종 그룹", len(groups))
+
+    def peers_of(raw):
+        t = raw.get("ticker") or {}
+        gl = groups.get((t.get("market"), raw.get("industry"))) or []
+        top = gl[:5]
+        if not any(x["sym"] == t.get("symbol") for x in top):
+            me = next((x for x in gl if x["sym"] == t.get("symbol")), None)
+            if me:
+                top = top[:4] + [me]
+        return top
+
     ok = bad = 0
     for i, f in enumerate(files):
         try:
@@ -38,6 +77,8 @@ def main():
             if os.path.exists(ef):
                 ex = json.load(open(ef, encoding="utf-8"))
                 raw["estimates"], raw["ltg"] = ex.get("estimates", []), ex.get("ltg")
+                if ex.get("cal"):
+                    raw["calendar"] = ex["cal"]
             nf = os.path.join(a.dest, "n", os.path.basename(f))
             if os.path.exists(nf):
                 raw["news"] = json.load(open(nf, encoding="utf-8"))
@@ -45,7 +86,7 @@ def main():
             if os.path.exists(kf):
                 raw["desc_ko"] = json.load(open(kf, encoding="utf-8")).get("desc_ko") or raw.get("desc_ko", "")
             d = load(raw)
-            html = render(d, rule_based(d), fx=fx).replace(CSS, "")
+            html = render(d, rule_based(d), fx=fx, peers=peers_of(raw)).replace(CSS, "")
             out = os.path.join(a.dest, "s", os.path.basename(f)[:-5] + ".html")
             with open(out, "w", encoding="utf-8") as fh:
                 fh.write(html)
