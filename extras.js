@@ -33,9 +33,9 @@
     if (!P || !P.signals || !P.signals.length) return card("📊 " + label + " 성적표", '<p class="note">신호가 쌓이면 여기에 성적이 나와요. (' + (P ? P.days + "일치 기록" : "준비 중") + ')</p>');
     var A = P.stats.all, tile = function(k, nm){ var s = A[k] || {}; return '<div><small>' + nm + '</small><b class="' + cls(s.avg) + '">' + pct(s.avg) + '</b><em>승률 ' + (s.win == null ? "–" : s.win + "%") + ' · ' + (s.n || 0) + '건</em></div>'; };
     var h = '<div class="x4">' + tile("r5", "5일 뒤") + tile("r20", "20일 뒤") + tile("r60", "60일 뒤") + tile("now", "지금까지") + '</div>';
-    var bs = P.stats.by_score || {}, rows = Object.keys(bs).map(function(k){ var s = bs[k][P.stats.all.r20.n >= 10 ? "r20" : "now"]; return {label: e(k), v: s.avg || 0, text: pct(s.avg) + ' <span class="mut">(' + (s.win == null ? "–" : s.win + "%") + ')</span>', tip: "<b>" + k + "</b> " + s.n + "건 · 평균 " + pct(s.avg) + " · 승률 " + s.win + "%"}; });
-    if (rows.length) h += '<div class="sub2">점수별 평균 수익률 (' + (P.stats.all.r20.n >= 10 ? "20일 뒤" : "지금까지") + ', 괄호 = 승률)</div>' + V.dbars(rows, {unit: ""});
-    var bm = P.stats.by_mkt || {}, mr = Object.keys(bm).map(function(k){ var s = bm[k].now; return {label: (V.FLAGS[k] || "") + " " + e(V.MKT[k] || k), v: s.avg || 0, text: pct(s.avg) + ' <span class="mut">(' + (s.win == null ? "–" : s.win + "%") + ')</span>'}; });
+    var bs = P.stats.by_score || {}, rows = Object.keys(bs).map(function(k){ var s = bs[k][P.stats.all.r20.n >= 10 ? "r20" : "now"]; return {label: e(k) + ' <span class="mut">승률 ' + (s.win == null ? "–" : s.win + "%") + '</span>', v: s.avg || 0, text: pct(s.avg), tip: "<b>" + k + "</b> " + s.n + "건 · 평균 " + pct(s.avg) + " · 승률 " + s.win + "%"}; });
+    if (rows.length) h += '<div class="sub2">점수별 평균 수익률 (' + (P.stats.all.r20.n >= 10 ? "20일 뒤" : "지금까지") + ')</div>' + V.dbars(rows, {unit: ""});
+    var bm = P.stats.by_mkt || {}, mr = Object.keys(bm).map(function(k){ var s = bm[k].now; return {label: (V.FLAGS[k] || "") + " " + e(V.MKT[k] || k) + ' <span class="mut">승률 ' + (s.win == null ? "–" : s.win + "%") + '</span>', v: s.avg || 0, text: pct(s.avg)}; });
     if (mr.length > 1) h += '<div class="sub2">나라별 (지금까지)</div>' + V.dbars(mr, {unit: ""});
     if (P.brk) h += '<p class="note">신호 뒤 실제로 매수 기준가(피벗)를 넘은 비율 <b>' + P.brk.rate + '%</b> (' + P.brk.n + '건)</p>';
     h += '<div class="sub2">최근 신호 ' + Math.min(15, P.signals.length) + '개</div><div class="xt">' + P.signals.slice(0, 15).map(function(s){
@@ -65,12 +65,9 @@
     var x = function(i){ return P + i * (W - P * 2) / (n - 1); }, y = function(v){ return P + (hi - v) / r * (H - P * 2); };
     var wk = Math.min(n - 1, Math.round(c.weeks || 0)), x0 = x(n - 1 - wk), hw = Math.min(5, Math.max(2, Math.round(wk / 6)));
     var s = '<svg class="cupsv" viewBox="0 0 ' + W + ' ' + H + '">';
-    if (wk > 2) s += '<rect x="' + x0.toFixed(1) + '" y="0" width="' + (x(n - 1) - x0).toFixed(1) + '" height="' + H + '" fill="#ffb84d" opacity=".07"/>' +
-      '<text x="' + ((x0 + x(n - 1 - hw)) / 2).toFixed(1) + '" y="' + (H - 6) + '" class="cupl">☕ 컵 ' + wk + '주</text>';
-    if (hnd) s += '<rect x="' + x(n - 1 - hw).toFixed(1) + '" y="' + y(piv).toFixed(1) + '" width="' + (x(n - 1) - x(n - 1 - hw)).toFixed(1) + '" height="' + Math.max(2, y(hnd) - y(piv)).toFixed(1) + '" fill="#9085e9" opacity=".25" rx="3"/>' +
-      '<text x="' + (x(n - 1) - 2).toFixed(1) + '" y="' + (y(hnd) + 11).toFixed(1) + '" class="cupl" text-anchor="end">손잡이</text>';
-    if (bot) s += '<line x1="' + x0.toFixed(1) + '" x2="' + x(n - 1) + '" y1="' + y(bot).toFixed(1) + '" y2="' + y(bot).toFixed(1) + '" stroke="#8a94a8" stroke-dasharray="2 3"/>' +
-      '<text x="' + (x0 + 3).toFixed(1) + '" y="' + (y(bot) - 3).toFixed(1) + '" class="cupl">바닥 −' + c.depth.toFixed(0) + '%</text>';
+    if (wk > 2) s += '<rect x="' + x0.toFixed(1) + '" y="0" width="' + (x(n - 1) - x0).toFixed(1) + '" height="' + H + '" fill="rgba(255,184,77,.10)" rx="6"/>';
+    if (hnd) s += '<rect x="' + x(n - 1 - hw).toFixed(1) + '" y="' + y(piv).toFixed(1) + '" width="' + (x(n - 1) - x(n - 1 - hw)).toFixed(1) + '" height="' + Math.max(2, y(hnd) - y(piv)).toFixed(1) + '" fill="rgba(144,133,233,.35)" rx="3"/>';
+    if (bot) s += '<line x1="' + x0.toFixed(1) + '" x2="' + x(n - 1) + '" y1="' + y(bot).toFixed(1) + '" y2="' + y(bot).toFixed(1) + '" stroke="#ffb84d" stroke-opacity=".7" stroke-dasharray="2 3"/>';
     var line = vals.map(function(v, i){ return x(i).toFixed(1) + "," + y(v).toFixed(1); }).join(" ");
     s += '<polyline points="' + line + '" fill="none" stroke="#e8ecf4" stroke-width="1.8" stroke-linejoin="round"/>';
     if (piv) s += '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + y(piv).toFixed(1) + '" y2="' + y(piv).toFixed(1) + '" stroke="' + V.UP + '" stroke-width="1.5" stroke-dasharray="5 4"/>' +
@@ -87,7 +84,9 @@
         V.price(c.code).then(function(p){
           if (!p || !p[6] || p[6].length < 8) return;
           var vals = p[6].slice(); vals[vals.length - 1] = p[1];
-          b.innerHTML = cupSvg(vals, c) + '<div class="spark-cap"><span>주간 종가 1년</span><b class="' + cls(c.dist) + '">돌파선까지 ' + (c.dist != null ? sgn(-c.dist) + "%" : "–") + '</b><span>' + p[0].slice(5).replace("-", "/") + ' ' + fmt(p[1]) + '</span></div>';
+          var dtxt = c.dist == null ? "–" : c.dist >= 0 ? "돌파선 위 +" + c.dist.toFixed(1) + "%" : "돌파선까지 +" + (-c.dist).toFixed(1) + "%";
+          b.innerHTML = cupSvg(vals, c) + '<div class="cupk"><span><i class="k1"></i>컵 ' + Math.round(c.weeks || 0) + '주</span><span><i class="k2"></i>바닥 −' + (c.depth || 0).toFixed(0) + '%</span><span><i class="k3"></i>손잡이 −' + (c.handle || 0).toFixed(0) + '%</span><span><i class="k4"></i>돌파선</span></div>' +
+            '<div class="spark-cap"><span>주간 종가 1년</span><b class="' + (c.dist != null && c.dist >= 0 ? "up" : "") + '">' + dtxt + '</b><span>' + p[0].slice(5).replace("-", "/") + ' ' + fmt(p[1]) + '</span></div>';
           b.setAttribute("data-done", "1");
         });
       });
