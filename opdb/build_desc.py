@@ -35,6 +35,18 @@ def kr_desc(code):
     return re.sub(r"\s+", " ", txt).strip()
 
 
+def kr_desc_naver(code):
+    """대안: 네이버 금융 종목 메인의 기업개요 (summary_info)"""
+    t = get(f"https://finance.naver.com/item/main.naver?code={code}", H_D)
+    m = re.search(r'id="summary_info"(.*?)</div>', t, re.S)
+    if not m:
+        return ""
+    ps = re.findall(r"<p[^>]*>(.*?)</p>", m.group(1), re.S)
+    txt = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", x)).strip() for x in ps)
+    txt = re.sub(r"\s+", " ", txt).strip()
+    return re.sub(r"\s*출처\s*:.*$", "", txt)
+
+
 def guess_rc(sym, mkt):
     c = sym.split(".")[0]
     if mkt == "JP":
@@ -91,6 +103,11 @@ def main():
                         break
                     except Exception:
                         time.sleep(5 * (k + 1))
+                if not txt:
+                    try:
+                        txt = kr_desc_naver(s.split(".")[0])
+                    except Exception:
+                        pass
             else:
                 rcs = ([rc[s]] if rc.get(s) else []) + [g for g in guess_rc(s, m) if g != rc.get(s)]
                 txt = world_desc(rcs[:3])
