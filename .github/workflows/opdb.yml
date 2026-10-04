@@ -76,6 +76,8 @@ jobs:
           pattern: part-*
           path: parts
       - run: python opdb/merge_static.py --dest opdata --parts parts
+      - name: 새로 만든 리포트에 한국어 설명·추정치·뉴스 다시 입히기
+        run: python opdb/rerender.py --dest opdata || true
       - name: 저장 (기록 없이 한 장으로 덮어쓰기)
         run: |
           cd opdata

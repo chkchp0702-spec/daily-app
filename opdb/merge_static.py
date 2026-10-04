@@ -71,8 +71,24 @@ def main():
             if code.isdigit() and code.lstrip("0") != code:
                 alts.add(code.lstrip("0"))     # 0700 → 700
         idx.append([sym, disp, mkt, " ".join(sorted(alts)), built])
+    # ETF (etf_meta.json: {심볼: [이름, 시장, 날짜, 영문이름]})
+    epath = os.path.join(a.dest, "etf_meta.json")
+    emeta = json.load(open(epath, encoding="utf-8")) if os.path.exists(epath) else {}
+    elist = os.path.join(a.dest, "etf_list.json")
+    have = {r[0] for r in idx}
+    for sym, name, mkt in (json.load(open(elist, encoding="utf-8")) if os.path.exists(elist) else []):
+        if sym in have:
+            continue
+        m = emeta.get(sym)
+        disp = (m[0] if m else name) or sym
+        alts = {name, "ETF", sym.split(".")[0]}
+        if m and m[3]:
+            alts.add(m[3])
+        alts.discard(disp)
+        idx.append([sym, disp, mkt, " ".join(sorted(a for a in alts if a)), 1 if m else 0, "E"])
+        have.add(sym)
     json.dump(idx, open(os.path.join(a.dest, "idx.json"), "w"), ensure_ascii=False, separators=(",", ":"))
-    print("종목", len(idx), "준비됨", sum(r[4] for r in idx))
+    print("종목", len(idx), "준비됨", sum(r[4] for r in idx), "ETF", sum(1 for r in idx if len(r) > 5))
 
 
 if __name__ == "__main__":

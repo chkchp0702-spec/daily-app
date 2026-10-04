@@ -1,0 +1,136 @@
+name: opextra
+# 전 종목 한국어 회사 설명 + ETF 리포트 (매주) → 리포트 전체 다시 그리기 → 가격
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 18 * * 6"   # 매주 일요일 KST 03:17
+
+permissions:
+  contents: write
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 목록 준비 (해외 종목 코드, ETF 목록)
+        run: |
+          git clone -q --depth 1 -b opdata https://github.com/${{ github.repository }} opdata
+          mkdir -p prep
+          python opdb/names_ko.py --dest opdata --no-translate || true
+          python opdb/build_etf.py --list --dest opdata
+          cp opdata/names_rc.json opdata/names_ko.json opdata/etf_list.json prep/ || true
+          cp opdata/p/fx.json prep/fx.json || echo '{}' > prep/fx.json
+          ls -la prep
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prep
+          path: prep/
+          retention-days: 2
+
+  desc:
+    needs: prep
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: prep
+      - run: git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+      - run: python opdb/build_desc.py --shard ${{ matrix.shard }} --of 20 --rc names_rc.json --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desc-${{ matrix.shard }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  etf:
+    needs: prep
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: prep
+      - run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          pip install -q yfinance pandas
+      - run: python opdb/build_etf.py --shard ${{ matrix.shard }} --of 20 --etfs etf_list.json --names names_ko.json --fx fx.json --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: etf-${{ matrix.shard }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  merge:
+    needs: [prep, desc, etf]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    concurrency:
+      group: opdata
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 준비
+        run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+          git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata
+          pip install -q yfinance pandas
+      - uses: actions/download-artifact@v4
+        with:
+          path: parts
+      - name: 합치기
+        run: |
+          mkdir -p opdata/k opdata/x opdata/s
+          cp parts/prep/names_rc.json parts/prep/etf_list.json opdata/ || true
+          find parts -path "*/k/*.json" -exec cp {} opdata/k/ \;
+          find parts -path "*/x/*.json" -exec cp {} opdata/x/ \;
+          echo "설명 $(ls opdata/k | wc -l) · ETF $(ls opdata/x | wc -l)"
+          python3 - <<'PY'
+          import json, glob, os
+          p = "opdata/etf_meta.json"
+          m = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
+          for f in glob.glob("parts/**/etfmeta_*.json", recursive=True):
+              m.update(json.load(open(f, encoding="utf-8")))
+          json.dump(m, open(p, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+          print("ETF meta", len(m))
+          PY
+      - run: python opdb/rerender.py --dest opdata
+      - run: python opdb/merge_static.py --dest opdata
+      - run: python opdb/build_prices.py --dest opdata
+      - name: 저장
+        run: |
+          cd opdata
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git checkout -q --orphan fresh
+          git add -A
+          git commit -qm "desc+etf $(TZ=Asia/Seoul date '+%F %H:%M')"
+          git push -q -f origin fresh:opdata

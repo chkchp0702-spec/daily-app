@@ -41,6 +41,9 @@ def main():
             nf = os.path.join(a.dest, "n", os.path.basename(f))
             if os.path.exists(nf):
                 raw["news"] = json.load(open(nf, encoding="utf-8"))
+            kf = os.path.join(a.dest, "k", os.path.basename(f))
+            if os.path.exists(kf):
+                raw["desc_ko"] = json.load(open(kf, encoding="utf-8")).get("desc_ko") or raw.get("desc_ko", "")
             d = load(raw)
             html = render(d, rule_based(d), fx=fx).replace(CSS, "")
             out = os.path.join(a.dest, "s", os.path.basename(f)[:-5] + ".html")
@@ -53,6 +56,20 @@ def main():
                 print("실패", f, e)
         if i % 2000 == 0:
             print(i, "/", len(files), flush=True)
+    # ETF 리포트도 다시 그리기 (x/*.json)
+    from onepager.etf import render_etf
+    eo = eb = 0
+    for f in glob.glob(os.path.join(a.dest, "x", "*.json")):
+        try:
+            x = json.load(open(f, encoding="utf-8"))
+            with open(os.path.join(a.dest, "s", os.path.basename(f)[:-5] + ".html"), "w", encoding="utf-8") as fh:
+                fh.write(render_etf(x, fx))
+            eo += 1
+        except Exception as e:
+            eb += 1
+            if eb < 5:
+                print("ETF 실패", f, e)
+    print("ETF", eo, "실패", eb)
     with open(os.path.join(a.dest, "op.css"), "w", encoding="utf-8") as fh:
         fh.write(CSS)
     print("끝: 성공", ok, "실패", bad)

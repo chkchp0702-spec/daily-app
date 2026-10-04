@@ -19,6 +19,10 @@ def main():
     import pandas as pd
 
     syms = [s for s, _, _ in universe(os.path.join("_src", "Cup"))]
+    ep = os.path.join(a.dest, "etf_list.json")
+    if os.path.exists(ep):                       # ETF 도 같이
+        have = set(syms)
+        syms += [r[0] for r in json.load(open(ep, encoding="utf-8")) if r[0] not in have]
     print("종목", len(syms), flush=True)
     shards = defaultdict(dict)
     # 기존 값 유지 (이번에 못 받은 종목은 예전 값 그대로)

@@ -239,6 +239,7 @@ iframe.rep{width:100%;border:0;border-radius:12px;background:#fff;min-height:70v
 .vtip i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
 .board .kv b.up,.board .kv small.up{color:var(--up)}.board .kv b.dn,.board .kv small.dn{color:var(--down)}
 
+.etfb{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:800;color:#fff;background:#c98500;border-radius:6px;padding:1px 6px;vertical-align:1px}
 .warn-test{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;padding:14px 15px;border-radius:16px;
   background:linear-gradient(135deg,rgba(255,176,32,.16),rgba(230,103,103,.14));border:1px solid rgba(255,176,32,.55)}
 .warn-test .wt-i{font-size:24px;line-height:1}
@@ -542,14 +543,14 @@ function opShard(sym){ var x = (fnv(sym) % 256).toString(16); return x.length < 
 function opFile(sym){ return sym.replace(/[^A-Za-z0-9.-]/g, "_"); }
 
 function opView(){
-  return '<div class="card"><h3>종목 찾기</h3><div class="reqrow"><input id="opq" placeholder="예: 삼성전자, 엔비디아, 005930, AAPL, 텐센트" autocomplete="off" enterkeyhint="search"></div>' +
-         '<div id="opsug" class="sug"></div><div class="tm" id="opmsg" style="margin-top:8px">미국·한국·일본·중국·홍콩 약 2만 종목 · 최근 종가 기준</div></div>' +
+  return '<div class="card"><h3>종목 찾기</h3><div class="reqrow"><input id="opq" placeholder="예: 삼성전자, 엔비디아, AAPL, KODEX 200, QQQ" autocomplete="off" enterkeyhint="search"></div>' +
+         '<div id="opsug" class="sug"></div><div class="tm" id="opmsg" style="margin-top:8px">미국·한국·일본·중국·홍콩 약 2만 종목 + ETF · 최근 종가 기준</div></div>' +
          '<div id="oppick"></div><div id="opbox"></div>';
 }
 function opLoadIdx(){
   if (OPIDX) return Promise.resolve(OPIDX);
   return getJSON(OPD + "idx.json").then(function(x){
-    OPIDX = x.map(function(r){ return {sym:r[0], name:r[1], mkt:r[2], built:r[4], key:norm(r[0] + " " + r[1] + " " + r[3]), n1:norm(r[1]), s1:norm(r[0]), alts:r[3].split(" ").map(norm)}; });
+    OPIDX = x.map(function(r){ return {sym:r[0], name:r[1], mkt:r[2], built:r[4], etf:r[5] === "E", key:norm(r[0] + " " + r[1] + " " + r[3]), n1:norm(r[1]), s1:norm(r[0]), alts:r[3].split(" ").map(norm)}; });
     return OPIDX;
   });
 }
@@ -569,13 +570,13 @@ function opSearch(q){
 function opInit(first){
   $("opmsg").textContent = "종목 목록 불러오는 중…";
   opLoadIdx().then(function(){
-    var ready = OPIDX.filter(function(r){ return r.built; }).length;
-    $("opmsg").textContent = "미국·한국·일본·중국·홍콩 " + OPIDX.length.toLocaleString() + "종목 중 " + ready.toLocaleString() + "개 준비됨 · 최근 종가 기준";
+    var ready = OPIDX.filter(function(r){ return r.built; }).length, ne = OPIDX.filter(function(r){ return r.etf; }).length;
+    $("opmsg").textContent = "미국·한국·일본·중국·홍콩 " + (OPIDX.length - ne).toLocaleString() + "종목" + (ne ? " + ETF " + ne.toLocaleString() + "개" : "") + " · " + ready.toLocaleString() + "개 준비됨 · 최근 종가 기준";
     var q = $("opq");
     q.oninput = function(){
       var res = opSearch(q.value);
       $("opsug").innerHTML = res.map(function(r){
-        return '<button data-s="' + esc(r.sym) + '">' + (FLAG[r.mkt] || "") + " <b>" + esc(r.name) + '</b><small>' + esc(r.sym) + (r.built ? "" : " · 준비 중") + '</small></button>';
+        return '<button data-s="' + esc(r.sym) + '">' + (FLAG[r.mkt] || "") + " <b>" + esc(r.name) + '</b>' + (r.etf ? '<span class="etfb">ETF</span>' : "") + '<small>' + esc(r.sym) + (r.built ? "" : " · 준비 중") + '</small></button>';
       }).join("");
       [].forEach.call($("opsug").children, function(b){ b.onclick = function(){ q.value = ""; $("opsug").innerHTML = ""; q.blur(); opShow(b.dataset.s); }; });
     };
@@ -653,6 +654,12 @@ function opShow(sym){
           a.target = "_blank"; a.textContent = "최신 뉴스 더 보기 ↗"; a.style.cssText = "display:inline-block;margin-top:8px;font-size:12px;color:#1f4e9c";
           h.parentNode.appendChild(a); } });
         d.querySelectorAll("a").forEach(function(a){ a.target = "_blank"; });
+        // ETF 구성 종목 → 누르면 그 종목 리포트
+        d.querySelectorAll("[data-op]").forEach(function(el){
+          var f = opFind(el.getAttribute("data-op"));
+          if (!f){ el.removeAttribute("data-op"); var g = el.querySelector(".hl-go"); if (g) g.remove(); return; }
+          el.addEventListener("click", function(){ opShow(f.sym); });
+        });
         var h1 = d.querySelector(".hd h1");
         if (h1 && r.name && h1.textContent.trim() !== r.name){
           var en = h1.textContent.trim(); h1.textContent = r.name;

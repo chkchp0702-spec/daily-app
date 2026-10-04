@@ -48,7 +48,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dest", required=True)
     ap.add_argument("--pages", type=int, default=80)
+    ap.add_argument("--no-translate", action="store_true")
     a = ap.parse_args()
+    rcpath = os.path.join(a.dest, "names_rc.json")
+    rcmap = json.load(open(rcpath, encoding="utf-8")) if os.path.exists(rcpath) else {}
     path = os.path.join(a.dest, "names_ko.json")
     names = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
     before = len(names)
@@ -70,6 +73,8 @@ def main():
             for r in rows:
                 ko = (r.get("stockName") or "").strip()
                 sym = yahoo(r.get("symbolCode") or r.get("itemCode"), mkt, r.get("reutersCode") or "")
+                if sym and r.get("reutersCode"):
+                    rcmap[sym] = r["reutersCode"]          # 네이버 해외 종목 설명(overview)용 코드
                 if ko and sym and any("가" <= ch <= "힣" for ch in ko):
                     names[sym] = ko
                     got += 1
@@ -78,7 +83,10 @@ def main():
     if len(names) >= before:
         json.dump(names, open(path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     json.dump(debug, open(os.path.join(a.dest, "names_debug.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    translate_missing(a.dest, names)
+    json.dump(rcmap, open(rcpath, "w", encoding="utf-8"), separators=(",", ":"))
+    print("로이터 코드", len(rcmap))
+    if not a.no_translate:
+        translate_missing(a.dest, names)
     print("전체", len(names), "(이전", before, ")")
     for k in ("V", "AAPL", "MA", "7203.T", "0700.HK", "600519.SS"):
         print(" ", k, names.get(k))
