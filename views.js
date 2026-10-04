@@ -112,7 +112,9 @@
       var hiv = rows.map(function(x){ return x.high; }).filter(function(v){ return v != null; });
       var avgHi = hiv.length ? hiv.reduce(function(a, b){ return a + b; }, 0) / hiv.length : null;
       var win = nowv.filter(function(v){ return v > 0; }).length;
-      var h = '<div class="sum3"><div class="kv"><small>알람</small><b>' + rows.length + '건</b></div>' +
+      var h = '<div class="warn-test"><div class="wt-i">⚠️</div><div><b>시험 중 · 따라 매매하지 마세요</b>' +
+              '<p>아직 성과를 검증하는 단계예요. 알람은 기록·연구용이고, 손실이 날 수 있어요. 투자 판단과 책임은 본인에게 있어요.</p></div></div>' +
+              '<div class="sum3"><div class="kv"><small>알람</small><b>' + rows.length + '건</b></div>' +
               '<div class="kv"><small>현재 평균</small><b class="' + cls(avg) + '">' + sgn(avg) + '%</b></div>' +
               '<div class="kv"><small>최고점 평균</small><b class="' + cls(avgHi) + '">' + sgn(avgHi) + '%</b></div>' +
               '<div class="kv"><small>플러스</small><b>' + win + '<span class="mut"> / ' + nowv.length + '</span></b>' + V.progress(win, nowv.length || 1, V.UP) + '</div></div>';
