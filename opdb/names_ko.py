@@ -87,7 +87,7 @@ def main():
 SUFFIX = re.compile(r"[,.]?\s*\b(Inc|Incorporated|Corp|Corporation|Co|Company|Ltd|Limited|PLC|plc|S\.?A|AG|N\.?V|Holdings? Ltd|Class [A-Z]|Common Stock|Ordinary Shares?|American Depositary Shares?|ADR|ADS|- .*)\b\.?", re.I)
 
 
-def translate_missing(dest, names, limit=6000):
+def translate_missing(dest, names, limit=6000, budget=20 * 60):
     """네이버에 한글 이름이 없는 해외 종목 → 영어 이름을 번역해 검색 별칭으로 (names_tr.json, 한 번 번역한 건 다시 안 함)"""
     sys.path.insert(0, os.path.join("_src", "stock-onepager"))
     sys.path.insert(0, os.path.dirname(__file__))
@@ -109,13 +109,17 @@ def translate_missing(dest, names, limit=6000):
             continue
         todo.append((sym, en))
     print("번역할 이름", len(todo), flush=True)
+    t0 = time.time()
     for i, (sym, en) in enumerate(todo[:limit]):
+        if time.time() - t0 > budget:
+            print("시간 예산 끝 — 다음 실행 때 이어서", i, flush=True)
+            break
         base = SUFFIX.sub("", en).strip(" ,.-") or en
         ko = translate_ko(base)
         if ko and any("\uac00" <= ch <= "\ud7a3" for ch in ko):
             tr[sym] = ko
-        else:
-            tr[sym] = ""
+        elif ko:
+            tr[sym] = ""          # 번역은 됐지만 한글이 아님 → 다시 안 함
         if i % 500 == 0:
             print(" ", i, sym, en, "→", ko, flush=True)
             json.dump(tr, open(tpath, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
