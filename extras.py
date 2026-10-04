@@ -123,7 +123,10 @@ def perf_one(s, extra=None):
     after = px[px.index >= d0]
     if not len(after):
         return None
-    p0 = s.get("price") or float(after["Close"].iloc[0])
+    c0 = float(after["Close"].iloc[0])
+    p0 = s.get("price") or c0
+    if not p0 or abs(p0 / c0 - 1) > 0.3:      # 카드 가격이 이상하면(단위·분할) 그날 종가로
+        p0 = c0
     closes = after["Close"]
     out = {"code": s["code"], "name": s.get("name", ""), "mkt": s.get("mkt", ""), "sector": s.get("sector", ""),
            "d0": s["d0"], "p0": r2(p0, 4), "score": s.get("score"), "days": int(len(after) - 1),
@@ -189,7 +192,7 @@ def perf(cat, fname, lists, extra=None):
         if y.endswith(".KS"):
             syms.append(y[:-3] + ".KQ")
     load_prices(syms)
-    rows = [x for x in (perf_one(s, extra) for s in sig) if x]
+    rows = [x for x in (perf_one(s, extra) for s in sig) if x and x["now"] is not None and abs(x["now"]) < 300 and (x["maxup"] or 0) < 1000]
     rows.sort(key=lambda r: r["d0"], reverse=True)
     res = {"updated": NOW.strftime("%Y-%m-%d %H:%M"), "first": days[0], "days": len(days), "stats": stats(rows), "signals": rows[:300]}
     if cat == "gap":
