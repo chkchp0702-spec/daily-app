@@ -133,7 +133,11 @@ def kr_etf(sym, name):
             w = float(str(h.get("etfWeight", "")).replace("%", "").replace(",", ""))
         except ValueError:
             w = None
-        hs.append({"code": isin_code(h.get("itemCode")), "name": h.get("itemName") or "", "w": w})
+        try:
+            sh = float(str(h.get("stockCount", "")).replace(",", ""))
+        except ValueError:
+            sh = None
+        hs.append({"code": isin_code(h.get("itemCode")), "name": h.get("itemName") or "", "w": w, "sh": sh})
     # 와이즈리포트: 전체 구성 종목 (CU당)
     t = ""
     for k in range(3):
@@ -192,6 +196,33 @@ def tr(t):
     return _TR[t]
 
 
+def sa_holdings(sym, names_ko):
+    """stockanalysis.com 구성종목 표 (채권·레버리지·원자재 ETF 처럼 야후에 없는 것)"""
+    try:
+        t = get(f"https://stockanalysis.com/etf/{sym.lower()}/holdings/", UA_D, raw=True, timeout=30)
+    except Exception:
+        return []
+    m = re.search(r"<table.*?</table>", t, re.S)
+    if not m:
+        return []
+    out = []
+    for row in re.findall(r"<tr.*?</tr>", m.group(0), re.S)[1:]:
+        cells = [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", c)).strip() for c in re.findall(r"<td.*?</td>", row, re.S)]
+        if len(cells) < 4:
+            continue
+        tk, nm, w = cells[1], cells[2], cells[3]
+        try:
+            w = float(w.replace("%", "").replace(",", ""))
+        except ValueError:
+            continue
+        tk = "" if tk in ("n/a", "-", "") else tk.replace(".", "-")
+        out.append({"code": tk, "name": names_ko.get(tk) or nm, "w": round(w, 2)})
+        if len(out) >= 25:
+            break
+    time.sleep(0.6)
+    return out
+
+
 def us_etf(sym, name, names_ko):
     import yfinance as yf
     t = yf.Ticker(sym)
@@ -243,6 +274,10 @@ def us_etf(sym, name, names_ko):
             hs.append({"code": str(s), "name": str(nm), "w": round(float(row.get("Holding Percent") or 0) * 100, 2)})
     except Exception:
         pass
+    if not hs:
+        hs = sa_holdings(sym, names_ko)
+        if hs:
+            x["hold_src"] = "stockanalysis.com"
     x["holdings"] = hs
     try:
         x["sectors"] = [{"k": k, "w": round(v * 100, 2)} for k, v in (fd.sector_weightings or {}).items() if v]
@@ -271,6 +306,7 @@ def main():
     ap.add_argument("--out", default="out")
     ap.add_argument("--max", type=int, default=0)
     ap.add_argument("--kr-redo", default="", help="x/ 폴더: 전체 구성종목(n_hold) 없는 한국 ETF만 다시")
+    ap.add_argument("--us-redo", default="", help="x/ 폴더: 비중 있는 구성종목이 없는 미국 ETF만 다시")
     ap.add_argument("--sleep", type=float, default=0.4)
     a = ap.parse_args()
     if a.list:
@@ -283,6 +319,13 @@ def main():
             f = os.path.join(a.kr_redo, fname(sym) + ".json")
             return not os.path.exists(f) or not json.load(open(f, encoding="utf-8")).get("n_hold")
         etfs = [r for r in etfs if r[2] == "KR" and need(r[0])]
+    if a.us_redo:
+        def need_us(sym):
+            f = os.path.join(a.us_redo, fname(sym) + ".json")
+            if not os.path.exists(f):
+                return True
+            return not any(h.get("w") for h in (json.load(open(f, encoding="utf-8")).get("holdings") or []))
+        etfs = [r for r in etfs if r[2] == "US" and need_us(r[0])]
     if a.max:
         etfs = etfs[: a.max]
     names = json.load(open(a.names, encoding="utf-8")) if os.path.exists(a.names) else {}

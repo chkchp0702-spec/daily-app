@@ -7,6 +7,10 @@ on:
         description: "한국 ETF 전체 구성종목도 다시 (느림)"
         type: boolean
         default: false
+      etf_us:
+        description: "구성종목 없는 미국 ETF 다시 (stockanalysis)"
+        type: boolean
+        default: false
   schedule:
     - cron: "47 20 * * 6"   # 매주 일요일 KST 05:47 (opextra 뒤)
 
@@ -23,6 +27,7 @@ jobs:
           mkdir -p prep/havek prep/xkr
           for f in opdata/k/*.json; do touch "prep/havek/$(basename "$f")"; done
           cp opdata/x/*.KS.json prep/xkr/ 2>/dev/null || true
+          mkdir -p prep/xus && find opdata/x -name "*.json" ! -name "*.KS.json" -exec cp {} prep/xus/ \;
           cp opdata/etf_list.json opdata/names_ko.json prep/
           cp opdata/p/fx.json prep/fx.json || echo '{}' > prep/fx.json
           ls prep/havek | wc -l; ls prep/xkr | wc -l
@@ -86,8 +91,37 @@ jobs:
           if-no-files-found: ignore
           retention-days: 2
 
+  etfus:
+    needs: prep
+    if: ${{ inputs.etf_us }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: prep
+      - run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          pip install -q yfinance pandas
+      - run: timeout 100m python opdb/build_etf.py --shard ${{ matrix.shard }} --of 10 --etfs etf_list.json --names names_ko.json --fx fx.json --us-redo xus --out out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: etfus-${{ matrix.shard }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 2
+
   merge:
-    needs: [prep, desc, etf]
+    needs: [prep, desc, etf, etfus]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 200

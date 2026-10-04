@@ -99,10 +99,38 @@ def main():
             print(i, "/", len(files), flush=True)
     # ETF 리포트도 다시 그리기 (x/*.json)
     from onepager.etf import render_etf
+    import re as _re
+    # 한국 ETF 중 해외 주식을 담아 비중이 '-' 인 것 → 같은 지수를 따르는 미국 ETF 비중으로
+    PROXY = [(r"필라델피아|PHLX|미국\s*반도체", "SOXX"), (r"배당\s*다우존스|Dividend\s*100", "SCHD"),
+             (r"다우존스\s*30|다우존스\s*산업|Dow Jones Industrial", "DIA"), (r"FANG|팡플러스", "FNGS"),
+             (r"러셀\s*2000|Russell\s*2000", "IWM"), (r"나스닥\s*100|NASDAQ[\s-]*100", "QQQ"),
+             (r"S&P\s*500|S&P500|에스앤피500", "IVV"), (r"MSCI\s*World|선진국", "URTH"), (r"차이나|CSI\s*300|중국", "ASHR"),
+             (r"인도|Nifty|India", "INDA"), (r"일본|닛케이|TOPIX|Nikkei", "EWJ"), (r"베트남|Vietnam", "VNM")]
+    xdir = os.path.join(a.dest, "x")
+    def proxy_for(x):
+        if x.get("mkt") != "KR" or any(h.get("w") for h in (x.get("holdings") or [])):
+            return None
+        txt = (x.get("name") or "") + " " + (x.get("index") or "")
+        for pat, t in PROXY:
+            if _re.search(pat, txt, _re.I):
+                pf = os.path.join(xdir, t + ".json")
+                if os.path.exists(pf):
+                    px_ = json.load(open(pf, encoding="utf-8"))
+                    if any(h.get("w") for h in px_.get("holdings") or []):
+                        return t, px_
+        return None
     eo = eb = 0
     for f in glob.glob(os.path.join(a.dest, "x", "*.json")):
         try:
             x = json.load(open(f, encoding="utf-8"))
+            pr = proxy_for(x)
+            if pr:
+                t, px_ = pr
+                x["holdings_own"] = x.get("holdings")
+                x["holdings"] = [dict(h, name=(nk.get(h.get("code")) or h["name"])) for h in px_["holdings"]]
+                x["hold_proxy"] = t
+                if not x.get("sectors"):
+                    x["sectors"] = px_.get("sectors") or []
             with open(os.path.join(a.dest, "s", os.path.basename(f)[:-5] + ".html"), "w", encoding="utf-8") as fh:
                 fh.write(render_etf(x, fx))
             eo += 1
