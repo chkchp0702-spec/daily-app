@@ -68,16 +68,29 @@ def main():
     ap.add_argument("--rc", default="names_rc.json")
     ap.add_argument("--out", default="out")
     ap.add_argument("--sleep", type=float, default=0.25)
+    ap.add_argument("--have", default="", help="이미 받은 k/ 폴더 — 있는 건 건너뜀")
+    ap.add_argument("--markets", default="", help="예: KR")
     a = ap.parse_args()
     rc = json.load(open(a.rc)) if os.path.exists(a.rc) else {}
     todo = [(s, n, m) for s, n, m in universe(os.path.join("_src", "Cup")) if fnv(s) % a.of == a.shard]
+    if a.markets:
+        todo = [t for t in todo if t[2] in a.markets.split(",")]
+    if a.have:
+        todo = [t for t in todo if not os.path.exists(os.path.join(a.have, fname(t[0]) + ".json"))]
+    print("할 일", len(todo), flush=True)
     os.makedirs(os.path.join(a.out, "k"), exist_ok=True)
     ok = miss = 0
     t0 = time.time()
     for i, (s, n, m) in enumerate(todo):
         try:
             if m == "KR":
-                txt = kr_desc(s.split(".")[0])
+                txt = ""
+                for k in range(3):                      # 막히면 쉬었다가 다시
+                    try:
+                        txt = kr_desc(s.split(".")[0])
+                        break
+                    except Exception:
+                        time.sleep(5 * (k + 1))
             else:
                 rcs = ([rc[s]] if rc.get(s) else []) + [g for g in guess_rc(s, m) if g != rc.get(s)]
                 txt = world_desc(rcs[:3])

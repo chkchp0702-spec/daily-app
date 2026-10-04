@@ -135,8 +135,16 @@ def kr_etf(sym, name):
             w = None
         hs.append({"code": isin_code(h.get("itemCode")), "name": h.get("itemName") or "", "w": w})
     # 와이즈리포트: 전체 구성 종목 (CU당)
+    t = ""
+    for k in range(3):
+        try:
+            t = get(f"https://navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd={code}", UA_D, raw=True)
+            if "CU_data" in t:
+                break
+        except Exception:
+            pass
+        time.sleep(4 * (k + 1))
     try:
-        t = get(f"https://navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd={code}", UA_D, raw=True)
         m = re.search(r"var\s+CU_data\s*=\s*(\{.*?\});", t, re.S)
         if m:
             grid = json.loads(m.group(1)).get("grid_data") or []
@@ -262,12 +270,19 @@ def main():
     ap.add_argument("--fx", default="fx.json")
     ap.add_argument("--out", default="out")
     ap.add_argument("--max", type=int, default=0)
+    ap.add_argument("--kr-redo", default="", help="x/ 폴더: 전체 구성종목(n_hold) 없는 한국 ETF만 다시")
+    ap.add_argument("--sleep", type=float, default=0.4)
     a = ap.parse_args()
     if a.list:
         return build_list(a.dest)
     from onepager.etf import render_etf
     from onepager.render import CSS
     etfs = [r for r in json.load(open(a.etfs, encoding="utf-8")) if fnv(r[0]) % a.of == a.shard]
+    if a.kr_redo:
+        def need(sym):
+            f = os.path.join(a.kr_redo, fname(sym) + ".json")
+            return not os.path.exists(f) or not json.load(open(f, encoding="utf-8")).get("n_hold")
+        etfs = [r for r in etfs if r[2] == "KR" and need(r[0])]
     if a.max:
         etfs = etfs[: a.max]
     names = json.load(open(a.names, encoding="utf-8")) if os.path.exists(a.names) else {}
@@ -304,7 +319,7 @@ def main():
                 json.dump(x, f, ensure_ascii=False, separators=(",", ":"))
             meta[sym] = [x["name"], mkt, today, x.get("name_en") or name]
             ok += 1
-            time.sleep(0.4 if mkt == "KR" else 0.2)
+            time.sleep(a.sleep if mkt == "KR" else 0.2)
         except Exception as e:
             signal.alarm(0)
             bad += 1

@@ -1,0 +1,127 @@
+name: opfix
+# 막혀서 못 받은 한국 종목 설명·한국 ETF 전체 구성종목을 천천히 다시 받기
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "47 20 * * 6"   # 매주 일요일 KST 05:47 (opextra 뒤)
+
+permissions:
+  contents: write
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 이미 받은 것 목록
+        run: |
+          git clone -q --depth 1 -b opdata https://github.com/${{ github.repository }} opdata
+          mkdir -p prep/havek prep/xkr
+          for f in opdata/k/*.json; do touch "prep/havek/$(basename "$f")"; done
+          cp opdata/x/*.KS.json prep/xkr/ 2>/dev/null || true
+          cp opdata/etf_list.json opdata/names_ko.json prep/
+          cp opdata/p/fx.json prep/fx.json || echo '{}' > prep/fx.json
+          ls prep/havek | wc -l; ls prep/xkr | wc -l
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prep
+          path: prep/
+          retention-days: 2
+
+  desc:
+    needs: prep
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0,1,2,3,4,5]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: prep
+      - run: git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+      - run: python opdb/build_desc.py --shard ${{ matrix.shard }} --of 6 --markets KR --have havek --sleep 1.5 --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desc-${{ matrix.shard }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  etf:
+    needs: prep
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: prep
+      - run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          pip install -q yfinance pandas
+      - run: python opdb/build_etf.py --shard ${{ matrix.shard }} --of 4 --etfs etf_list.json --names names_ko.json --fx fx.json --kr-redo xkr --sleep 2 --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: etf-${{ matrix.shard }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  merge:
+    needs: [prep, desc, etf]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    concurrency:
+      group: opdata
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 준비
+        run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+          git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata
+      - uses: actions/download-artifact@v4
+        with:
+          path: parts
+      - name: 합치기
+        run: |
+          mkdir -p opdata/k opdata/x opdata/s
+          find parts -path "*/k/*.json" -exec cp {} opdata/k/ \;
+          find parts -path "*/x/*.json" -exec cp {} opdata/x/ \;
+          echo "설명 $(ls opdata/k | wc -l) · ETF $(ls opdata/x | wc -l)"
+          python3 - <<'PY'
+          import json, glob, os
+          p = "opdata/etf_meta.json"
+          m = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
+          for f in glob.glob("parts/**/etfmeta_*.json", recursive=True):
+              m.update(json.load(open(f, encoding="utf-8")))
+          json.dump(m, open(p, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+          print("ETF meta", len(m))
+          PY
+      - run: python opdb/rerender.py --dest opdata
+      - run: python opdb/merge_static.py --dest opdata
+      - name: 저장
+        run: |
+          cd opdata
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git checkout -q --orphan fresh
+          git add -A
+          git commit -qm "desc+etf fix $(TZ=Asia/Seoul date '+%F %H:%M')"
+          git push -q -f origin fresh:opdata
