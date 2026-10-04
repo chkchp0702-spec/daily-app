@@ -20,10 +20,13 @@ jobs:
           git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
           git clone -q --depth 1 -b opdata https://github.com/${{ github.repository }} opdata
           python opdb/build_media.py --prep --dest opdata --out media_todo.json
+          mkdir -p have && for f in opdata/m/*.json; do touch "have/$(basename "$f")"; done; ls have | wc -l
       - uses: actions/upload-artifact@v4
         with:
           name: prep
-          path: media_todo.json
+          path: |
+            media_todo.json
+            have/
           retention-days: 2
 
   media:
@@ -32,9 +35,9 @@ jobs:
     timeout-minutes: 120
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: 6
       matrix:
-        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+        shard: [0,1,2,3,4,5]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -43,7 +46,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: prep
-      - run: timeout 100m python opdb/build_media.py --shard ${{ matrix.shard }} --of 20 --todo media_todo.json --out out
+      - run: timeout 110m python opdb/build_media.py --shard ${{ matrix.shard }} --of 6 --todo media_todo.json --out out --have have
       - uses: actions/upload-artifact@v4
         if: always()
         with:

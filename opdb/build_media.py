@@ -4,7 +4,7 @@
   받기:  python opdb/build_media.py --shard 3 --of 20 --todo media_todo.json --out out
 결과: out/m/<심볼>.json  {"photo": 회사 사진 URL, "pimg": {제품 이름: 사진 URL}}
 """
-import argparse, glob, json, os, re, sys, time, urllib.parse, urllib.request
+import argparse, glob, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 
 sys.path.insert(0, os.path.join("_src", "stock-onepager"))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -14,6 +14,7 @@ UA = {"User-Agent": "CHInvestingApp/1.0 (https://chkchp0702-spec.github.io/daily
 COMPANY = re.compile(r"기업|회사|그룹|제조|업체|은행|지주|브랜드|법인|company|corporation|manufacturer|bank|group|firm|conglomerate|retailer|holding|brand|airline|insurer|developer|producer|operator|maker|provider", re.I)
 GENERIC = re.compile(r"^(서비스|제품|솔루션|기술|사업|부품|소재|장비|시스템|플랫폼|소프트웨어|콘텐츠|제조|판매|유통|기타|관련 ?제품|각종|기업|고객|인프라|운영|개발|연구)$")
 START = time.time()
+SLEEP = float(os.environ.get("MEDIA_SLEEP", "0.3"))
 
 
 def get_json(url):
@@ -22,10 +23,25 @@ def get_json(url):
         return json.loads(r.read().decode("utf-8"))
 
 
+ERR = {"n": 0, "last": ""}
+
+
 def summary(lang, title):
-    try:
-        j = get_json(f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/" + urllib.parse.quote(title.replace(" ", "_"), safe=""))
-    except Exception:
+    url = f"https://{lang}.wikipedia.org/api/rest_v1/page/summary/" + urllib.parse.quote(title.replace(" ", "_"), safe="")
+    j = None
+    for k in range(4):
+        try:
+            j = get_json(url)
+            break
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                return None
+            ERR["n"] += 1; ERR["last"] = f"{e.code} {url[:60]}"
+            time.sleep(3 * (k + 1) if e.code == 429 else 1)
+        except Exception as e:
+            ERR["n"] += 1; ERR["last"] = repr(e)[:80]
+            time.sleep(1)
+    if j is None:
         return None
     if j.get("type") != "standard":
         return None
@@ -62,7 +78,7 @@ def prep(dest, out):
         desc = desc or r.get("business_summary_ko") or ""
         prods = [nm for _, nm in products(desc)]
         ko = t.get("name") if t.get("market") == "KR" else nk.get(sym, "")
-        todo.append({"s": sym, "ko": ko or "", "en": "", "p": prods})
+        todo.append({"s": sym, "ko": ko or "", "en": "", "p": prods, "cap": r.get("market_cap") or 0})
     meta = {}
     try:
         meta = json.load(open(os.path.join(dest, "meta.json"), encoding="utf-8"))
@@ -76,8 +92,12 @@ def prep(dest, out):
     print("준비", len(todo), "제품 있음", sum(1 for x in todo if x["p"]))
 
 
-def run(shard, of, todo_path, out):
+def run(shard, of, todo_path, out, have=""):
     todo = [x for x in json.load(open(todo_path, encoding="utf-8")) if fnv(x["s"]) % of == shard]
+    if have and os.path.isdir(have):
+        todo = [x for x in todo if not os.path.exists(os.path.join(have, fname(x["s"]) + ".json"))]
+    # 큰 회사부터 (한 번에 다 못 받을 때를 대비)
+    todo.sort(key=lambda x: -(x.get("cap") or 0))
     os.makedirs(os.path.join(out, "m"), exist_ok=True)
     cache = {}
 
@@ -90,7 +110,7 @@ def run(shard, of, todo_path, out):
                 if lang == "en" and re.search(r"[가-힣]", t):
                     continue
                 img = thumb(summary(lang, title))
-                time.sleep(0.05)
+                time.sleep(SLEEP)
                 if img:
                     break
         cache[t] = img
@@ -105,13 +125,13 @@ def run(shard, of, todo_path, out):
             j = summary("ko", re.sub(r"\s*\(.*?\)\s*", "", x["ko"]))
             if j and COMPANY.search((j.get("description") or "") + " " + (j.get("extract") or "")[:300]):
                 photo = thumb(j)
-            time.sleep(0.05)
+            time.sleep(SLEEP)
         if not photo and x["en"]:
             for title in (x["en"], re.sub(r"[,.]?\s*(Inc|Incorporated|Corp|Corporation|Co|Ltd|Limited|PLC|N\.V|S\.A|AG|Holdings?|Group|Class [A-Z]|Common Stock|ADR|American Depositary Shares?)\b\.?", "", x["en"], flags=re.I).strip(" ,.-")):
                 if not title:
                     continue
                 j = summary("en", title)
-                time.sleep(0.05)
+                time.sleep(SLEEP)
                 if j and COMPANY.search((j.get("description") or "") + " " + (j.get("extract") or "")[:300]):
                     photo = thumb(j)
                     break
@@ -125,7 +145,7 @@ def run(shard, of, todo_path, out):
         got_c += bool(photo)
         got_p += bool(pimg)
         if i % 200 == 0:
-            print(f"  {i}/{len(todo)} 회사사진 {got_c} 제품사진 {got_p} ({time.time() - START:.0f}s)", flush=True)
+            print(f"  {i}/{len(todo)} 회사사진 {got_c} 제품사진 {got_p} 오류 {ERR['n']} {ERR['last']} ({time.time() - START:.0f}s)", flush=True)
     print("끝", len(todo), got_c, got_p)
 
 
@@ -137,8 +157,9 @@ if __name__ == "__main__":
     ap.add_argument("--todo", default="media_todo.json")
     ap.add_argument("--shard", type=int, default=0)
     ap.add_argument("--of", type=int, default=1)
+    ap.add_argument("--have", default="")
     a = ap.parse_args()
     if a.prep:
         prep(a.dest, a.out)
     else:
-        run(a.shard, a.of, a.todo, a.out)
+        run(a.shard, a.of, a.todo, a.out, a.have)
