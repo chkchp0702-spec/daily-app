@@ -228,7 +228,9 @@ var V = (function(){
     });
   }
 
-  return {e:e, rich:rich, sgn:sgn, cls:cls, fmt:fmt, UP:UP, DN:DN, CAT:CAT, FLAGS:FLAGS, MKT:MKT,
+  // 표시용 코드: 한국은 6자리, 나머지는 티커 그대로
+  function cd(x){ x = String(x || ""); return /^\d{6}\.K[SQ]$/.test(x) ? x.slice(0, 6) : x; }
+  return {cd:cd, e:e, rich:rich, sgn:sgn, cls:cls, fmt:fmt, UP:UP, DN:DN, CAT:CAT, FLAGS:FLAGS, MKT:MKT,
           spark:spark, hbars:hbars, dbars:dbars, cols:cols, lines:lines, donut:donut, progress:progress, range:range, heat:heat,
           price:price, fillSparks:fillSparks, hideTip:hideTip};
 })();

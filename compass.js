@@ -10,7 +10,7 @@
   function num(n){ return (n || 0).toLocaleString("ko-KR"); }
   function pct(v){ return v == null ? "–" : sgn(v) + "%"; }
   function sChip(x){ // 종목 칩 → 누르면 종목리포트
-    return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s).replace(/'/g, "") + '\')"><b>' + e(x.n) + '</b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span></a>';
+    return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s).replace(/'/g, "") + '\')"><b>' + e(x.n) + '</b><em class="tk">' + e(V.cd(x.s)) + '</em><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span></a>';
   }
   function regChip(lab, big){
     var r = REG[lab] || REG["횡보장"];

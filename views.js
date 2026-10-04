@@ -398,7 +398,7 @@
     getJSON(file("accum", it.id, "list.json")).then(function(rows){
       var strong = rows.filter(function(r){ return r.tag === "강한 매집"; }).length, dist = rows.filter(function(r){ return r.dist; }).length;
       var h = '<div class="sum3"><div class="kv"><small>매집 종목</small><b>' + rows.length + '</b></div><div class="kv"><small>강한 매집</small><b class="up">' + strong + '</b></div><div class="kv"><small>분배 의심</small><b class="dn">' + dist + '</b></div></div>';
-      h += card("매집 점수 순위", V.hbars(rows.slice(0, 10).map(function(r){ return {label: (V.FLAGS[r.mkt] || "") + " " + e(r.name.length > 18 ? r.name.slice(0, 17) + "…" : r.name), v: r.score || 0, text: r.score != null ? r.score.toFixed(0) : "–",
+      h += card("매집 점수 순위", V.hbars(rows.slice(0, 10).map(function(r){ return {label: (V.FLAGS[r.mkt] || "") + " " + e(r.name.length > 14 ? r.name.slice(0, 13) + "…" : r.name) + ' <em class="tk">' + e(V.cd(r.code)) + '</em>', v: r.score || 0, text: r.score != null ? r.score.toFixed(0) : "–",
         color: r.dist ? V.DN : r.tag === "강한 매집" ? V.UP : "#d55181", attr: ' onclick="openOP(\'' + e(r.code) + '\')"', tip: "<b>" + e(r.name) + "</b><br>" + e(r.tag) + " · 거래량 " + fmt(r.vol) + "배 · 한달 " + sgn(r.m1) + "%"}; }), {max: 100}) +
         '<div class="lg"><span><i style="background:' + V.UP + '"></i>강한 매집</span><span><i style="background:#d55181"></i>매집·중립</span><span><i style="background:' + V.DN + '"></i>분배 의심</span></div>');
       h += sec("종목 카드") + filterSeg("aseg", rows, function(k){ P.set(k); }) + '<div id="abox"></div>';

@@ -7,7 +7,7 @@
   function sec(t){ return '<div class="sec">' + t + '</div>'; }
   function chip(t, c){ return '<span class="chip2 ' + (c || "") + '">' + t + '</span>'; }
   function pct(v){ return v == null ? "–" : sgn(v) + "%"; }
-  function opA(code, inner){ return '<a class="xo" href="javascript:openOP(\'' + e(code).replace(/'/g, "") + '\')">' + inner + '</a>'; }
+  function opA(code, inner, noTk){ return '<a class="xo" href="javascript:openOP(\'' + e(code).replace(/'/g, "") + '\')">' + inner + (noTk || inner.indexOf(V.cd(code)) >= 0 ? '' : ' <em class="tk">' + e(V.cd(code)) + '</em>') + '</a>'; }
   function wrap(key, top, bottom){
     var OLD = RENDER[key];
     RENDER[key] = function(it, el){
@@ -116,7 +116,7 @@
         return '<div class="xr' + (hot ? " star" : "") + '">' + opA(c.code, (hot ? "★ " : "") + (V.FLAGS[c.mkt] || "") + ' <b>' + e(c.name.length > 16 ? c.name.slice(0, 15) + "…" : c.name) + '</b>') +
           '<span class="xbar"><i style="width:' + Math.max(4, 100 + c.dist / 3 * 100).toFixed(0) + '%"></i></span><b class="up">' + sgn(-c.dist) + '%</b>' + (gapSet[c.code] ? chip("갭도", "hot") : "") + '</div>'; }).join("") + '</div>' +
         '<p class="note">막대가 꽉 찰수록 돌파선에 가까워요. 🔔 알림 탭에서 "컵 돌파 임박"을 구독하면 휴대폰으로 받아요.</p>');
-      if (dual.length) h += card("✨ 이중 신호 <span class='mut'>컵 + 갭 동시</span>", '<div class="cp-sts">' + dual.map(function(c){ return opA(c.code, '<span class="cp-st"><b>' + (V.FLAGS[c.mkt] || "") + " " + e(c.name) + '</b><span class="up">컵·갭</span></span>'); }).join("") + '</div>');
+      if (dual.length) h += card("✨ 이중 신호 <span class='mut'>컵 + 갭 동시</span>", '<div class="cp-sts">' + dual.map(function(c){ return opA(c.code, '<span class="cp-st"><b>' + (V.FLAGS[c.mkt] || "") + " " + e(c.name) + '</b><em class="tk">' + e(V.cd(c.code)) + '</em><span class="up">컵·갭</span></span>'); }).join("") + '</div>');
       a.innerHTML = h;
     });
   }, function(it, b){
@@ -148,7 +148,7 @@
           '<p class="note">' + (fresh ? "오늘 미국 장 시작 전 가격 기준이에요." : "지난 장 전 기록이에요. 미국 장 전(한국 밤 9~10시)에 새로 계산돼요.") + ' 관심 = 컵·갭·매집·고래·대형주 목록.</p>');
       }
       var dual = d ? (d.top || []).filter(function(c){ return cupSet[c.code]; }) : [];
-      if (dual.length) h += card("✨ 이중 신호 <span class='mut'>갭 + 컵 동시</span>", '<div class="cp-sts">' + dual.map(function(c){ return opA(c.code, '<span class="cp-st"><b>' + (V.FLAGS[c.mkt] || "") + " " + e(c.name) + '</b><span class="up">갭·컵</span></span>'); }).join("") + '</div>');
+      if (dual.length) h += card("✨ 이중 신호 <span class='mut'>갭 + 컵 동시</span>", '<div class="cp-sts">' + dual.map(function(c){ return opA(c.code, '<span class="cp-st"><b>' + (V.FLAGS[c.mkt] || "") + " " + e(c.name) + '</b><em class="tk">' + e(V.cd(c.code)) + '</em><span class="up">갭·컵</span></span>'); }).join("") + '</div>');
       a.innerHTML = h;
     });
   }, function(it, b){
@@ -175,7 +175,7 @@
       var items = (Xa.items || []).filter(function(x){ return by[x.code]; });
       var brk = items.filter(function(x){ return x.brk; }), near = items.filter(function(x){ return !x.brk && x.to_brk != null && x.to_brk <= 5; }).sort(function(p, q){ return p.to_brk - q.to_brk; });
       if (brk.length || near.length) h += card("🚀 박스 돌파 <span class='mut'>최근 20일 고점 위로</span>", (brk.length ? '<div class="cp-sts">' + brk.map(function(x){ var r0 = by[x.code];
-        return opA(x.code, '<span class="cp-st"><b>' + (V.FLAGS[r0.mkt] || "") + " " + e(r0.name.slice(0, 14)) + '</b><span class="up">돌파</span></span>'); }).join("") + '</div>' : '<p class="note">오늘 돌파한 종목은 없어요.</p>') +
+        return opA(x.code, '<span class="cp-st"><b>' + (V.FLAGS[r0.mkt] || "") + " " + e(r0.name.slice(0, 14)) + '</b><em class="tk">' + e(V.cd(x.code)) + '</em><span class="up">돌파</span></span>'); }).join("") + '</div>' : '<p class="note">오늘 돌파한 종목은 없어요.</p>') +
         (near.length ? '<div class="sub2">돌파까지 5% 이내</div><div class="xt">' + near.map(function(x){ var r0 = by[x.code];
           return '<div class="xr">' + opA(x.code, (V.FLAGS[r0.mkt] || "") + ' <b>' + e(r0.name.slice(0, 16)) + '</b>') + '<span class="xbar"><i style="width:' + Math.max(4, 100 - x.to_brk * 20).toFixed(0) + '%"></i></span><b class="up">+' + x.to_brk.toFixed(1) + '%</b></div>'; }).join("") + '</div>' : '') +
         '<p class="note">🔔 알림 탭에서 "매집 돌파"를 구독하면 돌파하는 날 휴대폰으로 받아요.</p>');
@@ -191,7 +191,7 @@
       var days = Xa.days || [], cal = Xa.calendar || {}, codes = Object.keys(cal).sort(function(p, q){ return Object.keys(cal[q].days).length - Object.keys(cal[p].days).length; }).slice(0, 15);
       if (days.length && codes.length) h += card("🗓️ 매집 달력 <span class='mut'>최근 " + days.length + "일 · 진할수록 점수 높음</span>",
         '<div class="xcal"><div class="xcr"><span></span>' + days.map(function(d){ return '<em>' + (days.length <= 12 || d.slice(8) % 3 === 0 ? d.slice(8) : "") + '</em>'; }).join("") + '</div>' +
-        codes.map(function(c){ var x = cal[c]; return '<div class="xcr">' + opA(c, e((x.name || c).slice(0, 8))) + days.map(function(d){ var v = x.days[d];
+        codes.map(function(c){ var x = cal[c]; return '<div class="xcr">' + opA(c, e((x.name || c).slice(0, 8)), 1) + days.map(function(d){ var v = x.days[d];
           return '<i style="background:' + (v == null ? "#1b2232" : "rgba(213,81,145," + (0.25 + Math.min(1, (v - 50) / 50) * 0.75).toFixed(2) + ")") + '" data-tip="' + e("<b>" + (x.name || c) + "</b> " + d + (v != null ? " · 점수 " + v : " · 없음")) + '"></i>'; }).join("") + '</div>'; }).join("") + '</div>');
       if (Xa.sectors && Xa.sectors.length) h += card("🧩 매집 종목 섹터", V.hbars(Xa.sectors.slice(0, 8).map(function(s){ return {label: e(s[0]), v: s[1], text: s[1] + "개"}; }), {color: "#d55181"}));
       a.innerHTML = h;
@@ -277,7 +277,7 @@
       }
       var chips = MX && MX.chips && MX.chips[it.id];
       if (chips && chips.length) h += card("🏷️ 오늘 리포트에 나온 종목 <span class='mut'>누르면 종목리포트</span>", '<div class="cp-sts" id="mchips">' + chips.map(function(c){
-        return '<a class="cp-st" href="javascript:openOP(\'' + e(c[0]) + '\')" data-pc="' + e(c[0]) + '"><b>' + e(c[1].length > 12 ? c[1].slice(0, 11) + "…" : c[1]) + '</b><span class="mut">…</span></a>'; }).join("") + '</div>');
+        return '<a class="cp-st" href="javascript:openOP(\'' + e(c[0]) + '\')" data-pc="' + e(c[0]) + '"><b>' + e(c[1].length > 12 ? c[1].slice(0, 11) + "…" : c[1]) + '</b><em class="tk">' + e(V.cd(c[0])) + '</em><span class="mut">…</span></a>'; }).join("") + '</div>');
       h += '<details class="card xsrch"><summary>🔎 지난 시황 검색</summary><div class="reqrow" style="margin-top:10px"><input id="msq" placeholder="예: 삼성전자, 금리, 외국인" enterkeyhint="search"></div><div id="msr"></div></details>';
       a.innerHTML = h;
       [].forEach.call(document.querySelectorAll("#mchips [data-pc]"), function(x){ V.price(x.getAttribute("data-pc")).then(function(p){

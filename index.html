@@ -239,6 +239,7 @@ iframe.rep{width:100%;border:0;border-radius:12px;background:#fff;min-height:70v
 .vtip i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
 .board .kv b.up,.board .kv small.up{color:var(--up)}.board .kv b.dn,.board .kv small.dn{color:var(--down)}
 
+.fzb{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:700;color:var(--sub);border:1px solid var(--line);border-radius:6px;padding:0 5px;vertical-align:1px}
 .etfb{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:800;color:#fff;background:#c98500;border-radius:6px;padding:1px 6px;vertical-align:1px}
 .warn-test{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;padding:14px 15px;border-radius:16px;
   background:linear-gradient(135deg,rgba(255,176,32,.16),rgba(230,103,103,.14));border:1px solid rgba(255,176,32,.55)}
@@ -267,6 +268,10 @@ footer{color:var(--dim);font-size:11px;text-align:center;padding:24px 16px 40px}
 .cmpt{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}.cmpt th{font-size:13px;padding:6px;text-align:right;color:var(--text)}
 .cmpt td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right}.cmpt td:first-child{text-align:left;color:var(--sub)}
 .cmpt td.win{color:#5fd39a;font-weight:800}
+/* 종목 코드 표시 */
+.cd{color:var(--dim);font-size:12px;margin-left:5px;font-weight:500}
+em.tk{font-style:normal;font-size:11px;color:var(--dim);margin-left:4px;font-weight:600;letter-spacing:0}
+.cp-st em.tk{margin-left:0}
 /* 업그레이드 묶음 */
 .xo{color:var(--text);text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .x4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;text-align:center;margin-bottom:6px}
@@ -368,7 +373,7 @@ footer{color:var(--dim);font-size:11px;text-align:center;padding:24px 16px 40px}
 <main id="main"><div class="loading">불러오는 중…</div></main>
 <footer>※ 참고용 자료입니다. 투자 판단과 책임은 본인에게 있습니다.</footer>
 
-<script src="viz.js?v=5"></script>
+<script src="viz.js?v=6"></script>
 <script>
 if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
@@ -536,7 +541,7 @@ function compare(a, b){
       ["52주 위치", pos, function(v){ return v == null ? "–" : v.toFixed(0) + "%"; }, 0],
       ["목표가까지", up, function(v){ return v == null ? "–" : sgn(v) + "%"; }, 1]
     ];
-    var nm = function(x){ return esc((x.i && x.i.name) || x.s); };
+    var nm = function(x){ return esc((x.i && x.i.name) || x.s) + '<em class="tk" style="display:block">' + esc(V.cd(x.s)) + '</em>'; };
     var h = '<table class="cmpt"><tr><th></th><th>' + nm(A) + '</th><th>' + nm(B) + '</th></tr>' + rows.map(function(rw){
       var va = rw[1](A), vb = rw[1](B), wa = "", wb = "";
       if (rw[3] && va != null && vb != null && va !== vb){ var aw = rw[3] > 0 ? va > vb : va < vb; wa = aw ? "win" : ""; wb = aw ? "" : "win"; }
@@ -546,7 +551,7 @@ function compare(a, b){
       h += '<div class="sub2">1년 주가 (시작 = 100)</div>' + V.lines([{name: (A.i && A.i.name) || A.s, color: V.CAT[0], vals: na.slice(-n)}, {name: (B.i && B.i.name) || B.s, color: V.CAT[1], vals: nb.slice(-n)}],
         na.slice(-n).map(function(_, i){ return i === 0 ? "1년 전" : i === n - 1 ? "지금" : ""; }), {h: 160, nodots: 1});
     }
-    h += '<p class="note">초록 = 둘 중 나은 쪽 (PER·PBR은 낮을수록, 나머지는 높을수록). 원화 환산은 최근 환율.</p><a class="btn" href="javascript:opShow(\'' + esc(B.s) + '\')">' + nm(B) + ' 리포트 보기 →</a>';
+    h += '<p class="note">초록 = 둘 중 나은 쪽 (PER·PBR은 낮을수록, 나머지는 높을수록). 원화 환산은 최근 환율.</p><a class="btn" href="javascript:opShow(\'' + esc(B.s) + '\')">' + esc((B.i && B.i.name) || B.s) + ' 리포트 보기 →</a>';
     out.innerHTML = h;
   });
 }
@@ -851,18 +856,78 @@ function opShard(sym){ var x = (fnv(sym) % 256).toString(16); return x.length < 
 function opFile(sym){ return sym.replace(/[^A-Za-z0-9.-]/g, "_"); }
 
 function opView(){
-  return '<div class="card"><h3>종목 찾기</h3><div class="reqrow"><input id="opq" placeholder="예: 삼성전자, 엔비디아, AAPL, KODEX 200, QQQ" autocomplete="off" enterkeyhint="search"></div>' +
+  return '<div class="card"><h3>종목 찾기</h3><div class="reqrow"><input id="opq" placeholder="예: 삼성전자, 엔비디아, AAPL, KODEX 200 · 발음이 대충 맞아도 OK" autocomplete="off" enterkeyhint="search"></div>' +
          '<div id="opsug" class="sug"></div><div class="tm" id="opmsg" style="margin-top:8px">미국·한국·일본·중국·홍콩 약 2만 종목 + ETF · 최근 종가 기준</div></div>' +
          '<div id="oppick"></div><div id="opbox"></div>';
 }
 function opLoadIdx(){
   if (OPIDX) return Promise.resolve(OPIDX);
   return getJSON(OPD + "idx.json").then(function(x){
-    OPIDX = x.map(function(r){ return {sym:r[0], name:r[1], mkt:r[2], built:r[4], etf:r[5] === "E", key:norm(r[0] + " " + r[1] + " " + r[3]), n1:norm(r[1]), s1:norm(r[0]), alts:r[3].split(" ").map(norm)}; });
+    OPIDX = x.map(function(r){ return {sym:r[0], name:r[1], mkt:r[2], built:r[4], etf:r[5] === "E", tier:r[6] || 0, key:norm(r[0] + " " + r[1] + " " + r[3]), n1:norm(r[1]), s1:norm(r[0]), alts:r[3].split(" ").map(norm),
+      altRaw: r[3].split(" ").filter(function(w){ return /[가-힣]{2,}/.test(w); })}; });
     return OPIDX;
   });
 }
+/* 발음이 대충 비슷해도 찾기: 한글을 자모로 풀고, 헷갈리는 소리를 하나로 묶어 비교 (엔디비아 → 엔비디아, 테술라 → 테슬라) */
+var CHO = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ", JUNG = "ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ", JONG = " ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ";
+var CHO_M = {"ㄲ":"ㄱ","ㅋ":"ㄱ","ㄸ":"ㄷ","ㅌ":"ㄷ","ㅃ":"ㅂ","ㅍ":"ㅂ","ㅉ":"ㅈ","ㅊ":"ㅈ","ㅆ":"ㅅ","ㅇ":""};
+var JUNG_M = {"ㅐ":"ㅔ","ㅒ":"ㅖ","ㅙ":"ㅞ","ㅚ":"ㅞ","ㅢ":"ㅣ","ㅕ":"ㅓ","ㅛ":"ㅗ","ㅠ":"ㅜ","ㅑ":"ㅏ"};
+var JONG_M = {"ㄲ":"ㄱ","ㅋ":"ㄱ","ㄳ":"ㄱ","ㄺ":"ㄱ","ㅅ":"","ㅆ":"","ㄷ":"","ㅈ":"","ㅊ":"","ㅌ":"","ㅎ":"","ㅍ":"ㅂ","ㅄ":"ㅂ","ㄼ":"ㄹ","ㄽ":"ㄹ","ㄾ":"ㄹ","ㅀ":"ㄹ","ㄵ":"ㄴ","ㄶ":"ㄴ","ㄻ":"ㅁ","ㄿ":"ㅂ"};
+function snd(t){
+  var o = "";
+  for (var i = 0; i < t.length; i++){
+    var c = t.charCodeAt(i) - 0xAC00;
+    if (c < 0 || c > 11171){ var ch = t[i]; if (/[a-z0-9]/i.test(ch)) o += ch.toLowerCase(); continue; }
+    var a = CHO[Math.floor(c / 588)], b = JUNG[Math.floor((c % 588) / 28)], z = JONG[c % 28];
+    o += (a in CHO_M ? CHO_M[a] : a) + (JUNG_M[b] || b) + (z === " " ? "" : (z in JONG_M ? JONG_M[z] : z));
+  }
+  return o;
+}
+function bigr(k){ var g = {}, n = 0; for (var i = 0; i < k.length - 1; i++){ var x = k.substr(i, 2); if (!g[x]){ g[x] = 1; n++; } } g._n = n; return g; }
+var PHON = null;
+function phonIndex(){
+  if (PHON) return PHON;
+  PHON = [];
+  OPIDX.forEach(function(r){
+    var names = [r.name].concat(r.altRaw || []), seen = {};
+    names.forEach(function(nm){
+      if (!nm || !/[가-힣]/.test(nm)) return;
+      var k = snd(nm.replace(/\s+/g, "")); if (k.length < 3 || seen[k]) return; seen[k] = 1;
+      PHON.push({r: r, k: k, g: bigr(k)});
+    });
+  });
+  return PHON;
+}
+function lev(a, b){
+  var m = a.length, n = b.length, d = [], i, j;
+  for (j = 0; j <= n; j++) d[j] = j;
+  for (i = 1; i <= m; i++){ var p = d[0]; d[0] = i;
+    for (j = 1; j <= n; j++){ var t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, p + (a[i - 1] === b[j - 1] ? 0 : 1)); p = t; } }
+  return d[n];
+}
+function fuzzy(q){
+  if (!/[가-힣]/.test(q)) return [];
+  var k = snd(q.replace(/\s+/g, "")); if (k.length < 3) return [];
+  var g = bigr(k), cand = [];
+  phonIndex().forEach(function(p){
+    var hit = 0; for (var x in g) if (x !== "_n" && p.g[x]) hit++;
+    if (!hit) return;
+    var dice = 2 * hit / (g._n + p.g._n);
+    if (dice >= 0.35) cand.push([dice, p]);
+  });
+  cand.sort(function(a, b){ return b[0] - a[0]; });
+  var best = {};
+  cand.slice(0, 60).forEach(function(c){
+    var p = c[1];
+    // 이름 앞부분만 비교 (입력 길이만큼) — "엔디비아" vs "엔비디아 코퍼레이션"
+    var head = p.k.slice(0, Math.max(k.length + 1, 3)), ls = 1 - lev(k, head) / Math.max(k.length, head.length);
+    var sc = 0.45 * c[0] + 0.55 * ls + (p.k[0] === k[0] ? 0.05 : 0) + (p.r.tier || 0) * 0.015 + (p.r.built ? 0.01 : 0);
+    if (sc >= 0.5 && (!best[p.r.sym] || best[p.r.sym][0] < sc)) best[p.r.sym] = [sc, p.r];
+  });
+  return Object.keys(best).map(function(x){ return best[x]; }).sort(function(a, b){ return b[0] - a[0]; }).slice(0, 8);
+}
 function opSearch(q){
+  var raw = q;
   q = norm(q); if (!q) return [];
   var out = [];
   OPIDX.forEach(function(r){
@@ -873,18 +938,25 @@ function opSearch(q){
     if (sc) out.push([sc + (r.built ? 5 : 0) - r.name.length / 100, r]);
   });
   out.sort(function(a, b){ return b[0] - a[0]; });
-  return out.slice(0, 8).map(function(x){ return x[1]; });
+  var res = out.slice(0, 8).map(function(x){ return x[1]; });
+  if (res.length < 8){                                            // 발음이 비슷한 이름으로 더 찾기
+    var have = {}; res.forEach(function(r){ have[r.sym] = 1; });
+    res.fz = {};
+    fuzzy(raw).forEach(function(f){ if (res.length < 8 && !have[f[1].sym]){ res.fz[f[1].sym] = 1; res.push(f[1]); have[f[1].sym] = 1; } });
+  }
+  return res;
 }
 function opInit(first){
   $("opmsg").textContent = "종목 목록 불러오는 중…";
   opLoadIdx().then(function(){
+    setTimeout(phonIndex, 300);
     var ready = OPIDX.filter(function(r){ return r.built; }).length, ne = OPIDX.filter(function(r){ return r.etf; }).length;
     $("opmsg").textContent = "미국·한국·일본·중국·홍콩 " + (OPIDX.length - ne).toLocaleString() + "종목" + (ne ? " + ETF " + ne.toLocaleString() + "개" : "") + " · " + ready.toLocaleString() + "개 준비됨 · 최근 종가 기준";
     var q = $("opq");
     q.oninput = function(){
-      var res = opSearch(q.value);
+      var res = opSearch(q.value), fz = res.fz || {};
       $("opsug").innerHTML = res.map(function(r){
-        return '<button data-s="' + esc(r.sym) + '">' + (FLAG[r.mkt] || "") + " <b>" + esc(r.name) + '</b>' + (r.etf ? '<span class="etfb">ETF</span>' : "") + '<small>' + esc(r.sym) + (r.built ? "" : " · 준비 중") + '</small></button>';
+        return '<button data-s="' + esc(r.sym) + '">' + (FLAG[r.mkt] || "") + " <b>" + esc(r.name) + '</b>' + (r.etf ? '<span class="etfb">ETF</span>' : "") + (fz[r.sym] ? '<span class="fzb">비슷한 발음</span>' : "") + '<small>' + esc(V.cd(r.sym)) + (r.built ? "" : " · 준비 중") + '</small></button>';
       }).join("");
       [].forEach.call($("opsug").children, function(b){ b.onclick = function(){ q.value = ""; $("opsug").innerHTML = ""; q.blur(); opShow(b.dataset.s); }; });
     };
@@ -1014,8 +1086,8 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
   fetch("https://ntfy.sh/chkchp-daily-5821", {method:"POST", body: userName + " 님이 앱을 열었어요 (" + device + ")"}).catch(function(){});
 })();
 </script>
-<script src="views.js?v=6"></script>
-<script src="compass.js?v=2"></script>
-<script src="extras.js?v=3"></script>
+<script src="views.js?v=7"></script>
+<script src="compass.js?v=3"></script>
+<script src="extras.js?v=4"></script>
 </body>
 </html>

@@ -532,7 +532,7 @@ def market_chips():
     # 이름 → 심볼 (두 글자 이상 한글 이름, 흔한 단어 제외)
     kr = {}
     for r in idx:
-        if len(r) > 5:
+        if len(r) > 5 and r[5] == "E":
             continue
         nm = r[1]
         if r[2] == "KR" and len(nm) >= 3:
