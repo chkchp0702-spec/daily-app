@@ -158,7 +158,7 @@ def whale():
                "hold": [[k, v, sec.get(k, "기타")] for k, v in hold]}
         put("whale", day, "data.json", text=json.dumps(out, ensure_ascii=False))
     os.makedirs(os.path.join(ARC, "whale"), exist_ok=True)
-    for name in ("index.json", "ranking.json"):
+    for name in ("index.json", "ranking.json", "backtest.json", "hero_log.json"):
         p = src("whale40", "data", name)
         if os.path.exists(p):
             shutil.copyfile(p, os.path.join(ARC, "whale", name))

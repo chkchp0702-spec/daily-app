@@ -166,9 +166,11 @@
     Promise.all([
       getJSON(file("whale", it.id, "data.json")),
       WIDX ? Promise.resolve(WIDX) : getJSON("archive/whale/index.json?" + (M.updated || "")).then(function(j){ WIDX = j; return j; }).catch(function(){ return {}; }),
-      WRANK ? Promise.resolve(WRANK) : getJSON("archive/whale/ranking.json?" + (M.updated || "")).then(function(j){ WRANK = j; return j; }).catch(function(){ return null; })
+      WRANK ? Promise.resolve(WRANK) : getJSON("archive/whale/ranking.json?" + (M.updated || "")).then(function(j){ WRANK = j; return j; }).catch(function(){ return null; }),
+      getJSON("archive/whale/backtest.json?" + (M.updated || "")).catch(function(){ return null; }),
+      getJSON("archive/whale/hero_log.json?" + (M.updated || "")).catch(function(){ return null; })
     ]).then(function(r){
-      var d = r[0], idx = r[1], rk = r[2], sg = d.signals || {}, h = "";
+      var d = r[0], idx = r[1], rk = r[2], BT = r[3], HERO = r[4], sg = d.signals || {}, h = "";
       // 영웅 종목
       if (sg.hero){
         var sc = (sg.top10_score || {})[sg.hero];
@@ -186,8 +188,12 @@
       }
       // 오늘의 10
       var tops = (sg.top10 || []).map(function(t){ return [t, (sg.top10_score || {})[t] || 0]; });
-      if (tops.length) h += card("오늘의 고래 TOP 10 <span class='mut'>점수</span>", V.hbars(tops.map(function(t, i){
-        return {label: '<span class="rk">' + (i + 1) + '</span>' + e(t[0]), v: t[1], text: t[1], attr: ' onclick="openOP(\'' + e(t[0]) + '\')"', tip: "<b>" + e(t[0]) + "</b> 점수 " + t[1] + "<br>누르면 원페이지"}; }), {color: "#199e70"}));
+      var ST = sg.state || {}, stCls = {"매수 검토": "hot", "접근": "c", "보유 점검": "cool"};
+      if (tops.length) h += card("오늘의 고래 TOP 10 <span class='mut'>점수 · 상태</span>", V.hbars(tops.map(function(t, i){
+        var st = ST[t[0]];
+        return {label: '<span class="rk">' + (i + 1) + '</span>' + e(t[0]) + (st && st !== "관찰" ? ' <span class="chip2 ' + (stCls[st] || "") + '" style="font-size:10px;padding:1px 6px">' + e(st) + '</span>' : ''),
+                v: t[1], text: t[1], attr: ' onclick="openOP(\'' + e(t[0]) + '\')"', tip: "<b>" + e(t[0]) + "</b> 점수 " + t[1] + (st ? " · " + e(st) : "") + "<br>누르면 원페이지"}; }), {color: "#199e70"}) +
+        '<p class="note">상태: 관찰 → 접근(고래 평단 근처) → <b>매수 검토</b>(여러 신호가 겹침)</p>');
       // 신호 묶음
       var groups = [["big", "큰 신규 매수", "hot"], ["mov", "많이 움직인 종목", "c"], ["near", "평단 근처", ""], ["rebound", "반등", "c"], ["warn", "주의", "cool"]];
       var gh = groups.filter(function(g){ return sg[g[0]] && sg[g[0]].length; }).map(function(g){
@@ -202,6 +208,23 @@
           '<div class="sub2">섹터 구성 (상위 25종목)</div>' + V.donut(secList.slice(0, 5).map(function(s, i){ return {label: s, v: Math.round(secs[s] / d.hold.length * 100), color: V.CAT[i]}; })
             .concat(secList.length > 5 ? [{label: "기타", v: Math.round(secList.slice(5).reduce(function(a, s){ return a + secs[s]; }, 0) / d.hold.length * 100), color: "#5d667a"}] : []), d.hold.length + "종목", "상위"));
       }
+      // 고래 행동별 성적 (검증)
+      if (BT && BT.zones){
+        var ZN = {bigbuy: ["큰 신규 매수", "포트 2%+ 새로 담음"], chase: ["오른 종목을 삼", "추격 매수"], profit: ["오른 종목을 팖", "차익 실현"],
+                  flee: ["떨어진 종목을 팖", "손절·이탈"], contra: ["떨어진 종목을 삼", "역발상 매수"]};
+        var zk = Object.keys(ZN).filter(function(k){ return BT.zones[k]; });
+        h += card("고래 행동별 이후 성적 <span class='mut'>" + e(BT.quarter || "") + " 공시 후 · S&P " + sgn(BT.bench) + "%</span>",
+          V.dbars(zk.map(function(k){ var z = BT.zones[k];
+            return {label: e(ZN[k][0]) + '<small>' + e(ZN[k][1]) + ' · ' + z.n + '건 · 승률 ' + Math.round(z.win) + '%</small>', v: z.avg, text: sgn(z.avg) + "%",
+                    tip: "<b>" + e(ZN[k][0]) + "</b><br>평균 " + sgn(z.avg) + "% · 승률 " + Math.round(z.win) + "%<br>최고 " + e(z.best) + " " + sgn(z.best_r) + "%"}; })) +
+          '<p class="note">고래가 같은 행동을 했던 종목들이 그 뒤 실제로 얼마나 올랐는지 · 같은 기간 S&P500은 ' + sgn(BT.bench) + '%</p>');
+      }
+      if (HERO){
+        var hd = Object.keys(HERO).sort().reverse().slice(0, 7);
+        h += card("「오늘 이것 하나」 지난 기록", '<div id="herolog">' + hd.map(function(dd){ var x = HERO[dd];
+          return '<div class="hl" data-sym="' + e(x.sym) + '" data-px="' + x.px + '"><span class="tm">' + dd.slice(5).replace("-", "/") + '</span><a href="javascript:openOP(\'' + e(x.sym) + '\')"><b>' + e(x.sym) + '</b></a>' +
+                 '<span class="tm">' + fmt(x.px) + ' →</span><b class="hl-r">…</b></div>'; }).join("") + '</div><p class="note">추천일 가격 → 최근 종가 수익률</p>');
+      }
       // 투자자 순위
       if (rk){
         var best = function(arr){ return (arr || []).slice().sort(function(a, b){ return (b.ret_1y || 0) - (a.ret_1y || 0); }).slice(0, 8); };
@@ -213,6 +236,9 @@
       }
       $("wbody").innerHTML = h;
       after($("wbody"));
+      [].forEach.call(document.querySelectorAll("#herolog .hl"), function(row){
+        V.price(row.getAttribute("data-sym")).then(function(p){ var el = row.querySelector(".hl-r"); if (!p){ el.textContent = "–"; return; }
+          var r_ = (p[1] / +row.getAttribute("data-px") - 1) * 100; el.textContent = sgn(r_) + "%"; el.className = "hl-r " + cls(r_); }); });
     }).catch(function(){ $("wbody").innerHTML = ""; });
   };
 

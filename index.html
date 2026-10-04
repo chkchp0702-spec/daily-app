@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>C. Investing</title>
+<title>CH.Investing</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="C. Investing">
+<meta name="apple-mobile-web-app-title" content="CH.Investing">
 <meta name="theme-color" content="#0b0f17">
 <link rel="apple-touch-icon" href="icon.png?v=2">
 <link rel="icon" href="icon.png?v=2">
@@ -31,13 +31,13 @@ header{position:sticky;top:0;z-index:10;background:rgba(11,15,23,.86);backdrop-f
 .brand{font-size:22px;font-weight:800;letter-spacing:-.5px}
 .brand span{color:var(--acc)}
 .stamp{font-size:11px;color:var(--dim);text-align:right}
-.tabs{display:flex;gap:6px;overflow-x:auto;padding:0 16px 12px;scrollbar-width:none}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:0 12px 12px}
 .tabs::-webkit-scrollbar,.dates::-webkit-scrollbar{display:none}
-.tab{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--sub);border-radius:999px;
-  padding:8px 14px;font:inherit;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;transition:.2s}
-.tab .dot{width:7px;height:7px;border-radius:50%;background:var(--c)}
-.tab.on{background:var(--c);border-color:var(--c);color:#0b0f17}
-.tab.on .dot{background:#0b0f17}
+.tab{min-width:0;border:1px solid var(--line);background:var(--panel);color:var(--sub);border-radius:14px;
+  padding:7px 2px 6px;font:inherit;font-size:12.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;transition:.2s;letter-spacing:-.3px;white-space:nowrap}
+.tab .ic{font-size:21px;line-height:1.15}
+.tab .tn{overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tab.on{background:color-mix(in srgb,var(--c) 22%,var(--panel));border-color:var(--c);color:var(--text);box-shadow:0 0 0 1px var(--c) inset}
 /* 본문 */
 main{padding:16px;max-width:760px;margin:0 auto}
 .hero{border-radius:20px;padding:18px;margin-bottom:14px;background:
@@ -163,7 +163,7 @@ iframe.rep{width:100%;border:0;border-radius:12px;background:#fff;min-height:70v
 .rk.big{width:30px;height:30px;font-size:15px;border-radius:10px;background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c);margin:0}
 .db{display:grid;gap:8px}
 .db-row{display:grid;grid-template-columns:minmax(70px,34%) 1fr 58px;gap:8px;align-items:center;font-size:13px}
-.db-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.db-l small{display:block;color:var(--dim);font-size:11px;overflow:hidden;text-overflow:ellipsis}
+.db-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.db-l small{display:block;color:var(--dim);font-size:11px;white-space:normal;line-height:1.35}
 .db-t{position:relative;height:14px}.db-z{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--dim)}
 .db-f{position:absolute;top:1px;height:12px;border-radius:4px}
 .db-v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
@@ -221,6 +221,7 @@ iframe.rep{width:100%;border:0;border-radius:12px;background:#fff;min-height:70v
 .seg2 button.on{color:var(--text);border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent)}
 .sig{margin:4px 0 10px}.sig small{display:block;color:var(--sub);font-size:12px;margin-bottom:4px}
 .whale-hero .row{align-items:flex-end}
+.hl{display:grid;grid-template-columns:44px 1fr auto 64px;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}.hl:first-child{border-top:0}.hl a{color:var(--text);text-decoration:none}.hl-r{text-align:right}
 /* 관심섹터 */
 .sect .sect-n{font-size:18px}
 .picks{display:grid;gap:6px;margin-top:12px}
@@ -244,7 +245,7 @@ footer{color:var(--dim);font-size:11px;text-align:center;padding:24px 16px 40px}
 <body>
 <header>
   <div class="top">
-    <div class="brand"><span id="brandDot">C.</span> Investing</div>
+    <div class="brand"><span id="brandDot">CH.</span>Investing</div>
     <div class="stamp" id="stamp">불러오는 중…</div>
   </div>
   <nav class="tabs" id="tabs"></nav>
@@ -252,7 +253,7 @@ footer{color:var(--dim);font-size:11px;text-align:center;padding:24px 16px 40px}
 <main id="main"><div class="loading">불러오는 중…</div></main>
 <footer>※ 참고용 자료입니다. 투자 판단과 책임은 본인에게 있습니다.</footer>
 
-<script src="viz.js?v=3"></script>
+<script src="viz.js?v=4"></script>
 <script>
 if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
@@ -286,10 +287,9 @@ function file(cat, id, name){ return "archive/" + cat + "/" + id + "/" + encodeU
 /* ---------- 탭 ---------- */
 function drawTabs(){
   $("tabs").innerHTML = CATS.map(function(c){
-    return '<button class="tab' + (c.key === cur ? " on" : "") + '" style="--c:' + c.color + '" data-k="' + c.key + '"><span class="dot"></span>' + c.name + '</button>';
+    return '<button class="tab' + (c.key === cur ? " on" : "") + '" style="--c:' + c.color + '" data-k="' + c.key + '"><span class="ic">' + c.icon + '</span><span class="tn">' + (c.short || c.name) + '</span></button>';
   }).join("");
   [].forEach.call($("tabs").children, function(b){ b.onclick = function(){ go(b.dataset.k); }; });
-  var on = $("tabs").querySelector(".on"); if (on) on.scrollIntoView({inline:"center", block:"nearest", behavior:"smooth"});
 }
 
 function go(key, id){
@@ -670,6 +670,6 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
   fetch("https://ntfy.sh/chkchp-daily-5821", {method:"POST", body: userName + " 님이 앱을 열었어요 (" + device + ")"}).catch(function(){});
 })();
 </script>
-<script src="views.js?v=3"></script>
+<script src="views.js?v=4"></script>
 </body>
 </html>
