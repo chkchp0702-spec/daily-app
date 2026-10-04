@@ -39,12 +39,21 @@ def main():
     alias = {}
     for k, (sym, disp, _m) in ALIASES.items():
         alias.setdefault(sym, set()).update([k, disp])
+    npath = os.path.join(a.dest, "names_ko.json")
+    names_ko = json.load(open(npath, encoding="utf-8")) if os.path.exists(npath) else {}
+    is_ko = lambda t: any("\uac00" <= ch <= "\ud7a3" for ch in (t or ""))
     idx = []
     for sym, name, mkt in universe(os.path.join("_src", "Cup")):
         m = meta.get(sym)
         built = 1 if (m and len(m) <= 4) else 0
         disp = m[0] if built else name
         alts = set(alias.get(sym, set()))
+        ko = names_ko.get(sym)
+        if ko and mkt != "KR":
+            alts.add(ko)
+            if not is_ko(disp):
+                alts.add(disp)
+                disp = ko
         if m and m[3]:
             alts.add(m[3])
         if name != disp:
