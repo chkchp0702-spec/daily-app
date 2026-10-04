@@ -41,6 +41,8 @@ def main():
         alias.setdefault(sym, set()).update([k, disp])
     npath = os.path.join(a.dest, "names_ko.json")
     names_ko = json.load(open(npath, encoding="utf-8")) if os.path.exists(npath) else {}
+    tpath = os.path.join(a.dest, "names_tr.json")
+    names_tr = json.load(open(tpath, encoding="utf-8")) if os.path.exists(tpath) else {}
     is_ko = lambda t: any("\uac00" <= ch <= "\ud7a3" for ch in (t or ""))
     idx = []
     for sym, name, mkt in universe(os.path.join("_src", "Cup")):
@@ -54,6 +56,8 @@ def main():
             if not is_ko(disp):
                 alts.add(disp)
                 disp = ko
+        elif names_tr.get(sym) and mkt != "KR":
+            alts.add(names_tr[sym])          # 번역 이름은 검색용 별칭으로만
         if m and m[3]:
             alts.add(m[3])
         if name != disp:
@@ -61,6 +65,8 @@ def main():
         code = sym.split(".")[0]
         if code != sym:
             alts.add(code)
+            if code.isdigit() and code.lstrip("0") != code:
+                alts.add(code.lstrip("0"))     # 0700 → 700
         idx.append([sym, disp, mkt, " ".join(sorted(alts)), built])
     json.dump(idx, open(os.path.join(a.dest, "idx.json"), "w"), ensure_ascii=False, separators=(",", ":"))
     print("종목", len(idx), "준비됨", sum(r[4] for r in idx))
