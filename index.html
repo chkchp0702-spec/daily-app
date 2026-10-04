@@ -521,7 +521,14 @@ function themeLog(el, day){
 
 /* ---------- 원페이지 (미리 만든 리포트 + 최신 종가) ---------- */
 var OPD = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/";
-var OPIDX = null, OPCSS = null, OPP = {};
+var OPIDX = null, OPCSS = null, OPP = {}, FX = null;
+function fmtKRW(v, kind){
+  if (kind === "p") return Math.round(v).toLocaleString("ko-KR") + "원";
+  var a = Math.abs(v), sgn = v < 0 ? "-" : "";
+  if (a >= 1e12){ var j = a / 1e12; return sgn + (j >= 100 ? Math.round(j).toLocaleString("ko-KR") : j.toFixed(1)) + "조 원"; }
+  if (a >= 1e8){ var o = a / 1e8; return sgn + (o >= 100 ? Math.round(o).toLocaleString("ko-KR") : o.toFixed(1)) + "억 원"; }
+  return sgn + Math.round(a / 1e4).toLocaleString("ko-KR") + "만 원";
+}
 var FLAG = {US:"🇺🇸", KR:"🇰🇷", JP:"🇯🇵", CN:"🇨🇳", HK:"🇭🇰"};
 function norm(t){ return String(t || "").normalize("NFKC").toLowerCase().replace(/[\s\-_.,·()]+/g, ""); }
 function fnv(str){ var h = 0x811c9dc5, b = new TextEncoder().encode(str);
@@ -616,7 +623,8 @@ function opShow(sym){
   Promise.all([
     getText(OPD + "s/" + opFile(sym) + ".html"),
     OPCSS ? Promise.resolve(OPCSS) : getText(OPD + "op.css").then(function(c){ OPCSS = c; return c; }),
-    OPP[sh] ? Promise.resolve(OPP[sh]) : getJSON(OPD + "p/" + sh + ".json").then(function(j){ OPP[sh] = j; return j; }).catch(function(){ return {}; })
+    OPP[sh] ? Promise.resolve(OPP[sh]) : getJSON(OPD + "p/" + sh + ".json").then(function(j){ OPP[sh] = j; return j; }).catch(function(){ return {}; }),
+    FX ? Promise.resolve(FX) : getJSON(OPD + "p/fx.json").then(function(j){ FX = j; return j; }).catch(function(){ return null; })
   ]).then(function(res){
     var html = res[0].replace("<style></style>", "<style>" + res[1] + "</style>");
     box.innerHTML = '<div class="card" style="padding:6px"><iframe class="rep" id="opf"></iframe></div>';
@@ -640,6 +648,13 @@ function opShow(sym){
           a.target = "_blank"; a.textContent = "최신 뉴스 더 보기 ↗"; a.style.cssText = "display:inline-block;margin-top:8px;font-size:12px;color:#1f4e9c";
           h.parentNode.appendChild(a); } });
         d.querySelectorAll("a").forEach(function(a){ a.target = "_blank"; });
+        if (FX){
+          var CU = {USD:"달러", CNY:"위안", JPY:"엔", HKD:"홍콩달러"};
+          d.querySelectorAll(".krw").forEach(function(k){ var r = FX[k.getAttribute("data-c")], v = +k.getAttribute("data-v");
+            if (r && !isNaN(v)) k.textContent = "≈ " + fmtKRW(v * r, k.getAttribute("data-k")); });
+          var fl = d.querySelector(".fxl"), cu = ((hdr && hdr.textContent.match(/통화\s*(\S+)/)) || [])[1], code = Object.keys(CU).filter(function(c){ return CU[c] === cu; })[0];
+          if (fl && code && FX[code]) fl.textContent = "1" + cu + " ≈ " + FX[code].toLocaleString("ko-KR", {maximumFractionDigits:2}) + "원 (" + (FX.date || "").slice(5).replace("-", "/") + ")";
+        }
       } catch(e) {}
       fr.style.height = d.documentElement.scrollHeight + 10 + "px";
     };

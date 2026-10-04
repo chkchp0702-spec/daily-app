@@ -49,6 +49,7 @@ def build_one(sym, name, mkt):
     d.financials = D._safe(lambda: D.parse_income_stmt(t.income_stmt), [])
     D._safe(lambda: D.parse_recommendations(t.recommendations, d.analyst), None)
     D._safe(lambda: D.parse_upgrades(t.upgrades_downgrades, d.analyst), None)
+    d.estimates, d.ltg = D.fetch_estimates(t, d.financials[-1].period if d.financials else None)
     d.news = D._safe(lambda: D.google_news(D._news_query(tk, info), limit=6), [])
     d.as_of = dt.date.today().isoformat()
     # 회사 설명·업종 한국어 번역 (실패하면 영어 그대로)

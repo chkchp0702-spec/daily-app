@@ -25,6 +25,9 @@ def main():
             shutil.copyfile(f, os.path.join(a.dest, "s", os.path.basename(f)))
         for f in glob.glob(os.path.join(a.parts, "**", "d", "*.json"), recursive=True):
             shutil.copyfile(f, os.path.join(a.dest, "d", os.path.basename(f)))
+        os.makedirs(os.path.join(a.dest, "e"), exist_ok=True)
+        for f in glob.glob(os.path.join(a.parts, "**", "e", "*.json"), recursive=True):
+            shutil.copyfile(f, os.path.join(a.dest, "e", os.path.basename(f)))
         for f in glob.glob(os.path.join(a.parts, "**", "meta_*.json"), recursive=True):
             for k, v in json.load(open(f)).items():
                 # 실패 기록이 예전 성공본을 덮지 않게

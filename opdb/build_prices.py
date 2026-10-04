@@ -58,6 +58,20 @@ def main():
         print(f"  {min(i + a.batch, len(syms))}/{len(syms)} 받음 {got} ({time.time() - t0:.0f}s)", flush=True)
     for k, v in shards.items():
         json.dump(v, open(os.path.join(pdir, k + ".json"), "w"), separators=(",", ":"))
+    # 원화 환율 (1단위 = 몇 원)
+    fx = {"KRW": 1.0}
+    try:
+        f = yf.download(["KRW=X", "CNYKRW=X", "JPYKRW=X", "HKDKRW=X"], period="10d", interval="1d", group_by="ticker", progress=False)
+        for tk, cur in (("KRW=X", "USD"), ("CNYKRW=X", "CNY"), ("JPYKRW=X", "JPY"), ("HKDKRW=X", "HKD")):
+            c = f[tk]["Close"].dropna()
+            if len(c):
+                fx[cur] = round(float(c.iloc[-1]), 4)
+        fx["date"] = str(c.index[-1].date())
+    except Exception as e:
+        print("환율 실패", e)
+    if len(fx) > 2:
+        json.dump(fx, open(os.path.join(pdir, "fx.json"), "w"))
+    print("환율", fx)
     print("끝", got, flush=True)
 
 

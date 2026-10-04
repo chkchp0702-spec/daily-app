@@ -27,11 +27,19 @@ def main():
     ap.add_argument("--dest", required=True)
     a = ap.parse_args()
     files = glob.glob(os.path.join(a.dest, "d", "*.json"))
+    fxp = os.path.join(a.dest, "p", "fx.json")
+    fx = json.load(open(fxp)) if os.path.exists(fxp) else None
+    print("환율", fx)
     ok = bad = 0
     for i, f in enumerate(files):
         try:
-            d = load(json.load(open(f, encoding="utf-8")))
-            html = render(d, rule_based(d)).replace(CSS, "")
+            raw = json.load(open(f, encoding="utf-8"))
+            ef = os.path.join(a.dest, "e", os.path.basename(f))
+            if os.path.exists(ef):
+                ex = json.load(open(ef, encoding="utf-8"))
+                raw["estimates"], raw["ltg"] = ex.get("estimates", []), ex.get("ltg")
+            d = load(raw)
+            html = render(d, rule_based(d), fx=fx).replace(CSS, "")
             out = os.path.join(a.dest, "s", os.path.basename(f)[:-5] + ".html")
             with open(out, "w", encoding="utf-8") as fh:
                 fh.write(html)
