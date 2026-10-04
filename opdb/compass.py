@@ -251,11 +251,55 @@ def build(daily, hl, mkt_of, dest):
             "leaders": [stock(x) for x in leaders], "laggards": [stock(x) for x in laggards],
             "top_cap": [stock(x) for x in top_cap],
         }
+        # 52주 신고가 종목 (시가총액 큰 순) + 신고가가 많이 나온 업종
+        hi_rows = sorted([x for x in rows if hl.get(x["s"]) == 1], key=lambda x: -x["cap"])
+        mk["high_list"] = [stock(x) for x in hi_rows[:15]]
+        hic = defaultdict(int)
+        for x in hi_rows:
+            if x["ind"]:
+                hic[x["ind"]] += 1
+        mk["high_inds"] = sorted(hic.items(), key=lambda kv: -kv[1])[:8]
+        mk["fg"] = fear_greed(mk, mkt)
         mk["summary"] = summary(mk)
         res["markets"][mkt] = mk
         print("나침반", mkt, mk["date"], f"상승 {up} 하락 {dn}", reg, flush=True)
     json.dump(res, open(os.path.join(dest, "compass.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     return res
+
+
+def _vix():
+    try:
+        import yfinance as yf
+        c = yf.download("^VIX", period="1mo", interval="1d", progress=False)["Close"].dropna()
+        return float(c.iloc[-1].iloc[0] if hasattr(c.iloc[-1], "iloc") else c.iloc[-1])
+    except Exception:
+        return None
+
+
+def fear_greed(m, mkt):
+    """0(극단적 공포) ~ 100(극단적 탐욕): 등락 비율·신고가 비율·지수와 20일선 거리·20일 수익률 (+미국은 VIX)"""
+    clamp = lambda v: max(0.0, min(100.0, v))
+    parts = []
+    if m.get("breadth10") is not None:
+        parts.append(("최근 10일 상승 종목 비율", clamp((m["breadth10"] - 35) / 30 * 100), f"{m['breadth10']}%"))
+    h, l = m.get("highs") or 0, m.get("lows") or 0
+    if h + l >= 10:
+        parts.append(("52주 신고가 vs 신저가", clamp(h / (h + l) * 100), f"{h} : {l}"))
+    ix = (m.get("index") or [None])[0]
+    if ix and ix.get("ma20") and ix["ma20"][-1]:
+        gap = (ix["last"] / ix["ma20"][-1] - 1) * 100
+        parts.append(("지수와 20일선 거리", clamp((gap + 5) / 10 * 100), f"{gap:+.1f}%"))
+    if ix and ix.get("chg20") is not None:
+        parts.append(("지수 20일 수익률", clamp((ix["chg20"] + 10) / 20 * 100), f"{ix['chg20']:+.1f}%"))
+    if mkt == "US":
+        v = _vix()
+        if v:
+            parts.append(("VIX(변동성)", clamp((35 - v) / 23 * 100), f"{v:.1f}"))
+    if not parts:
+        return None
+    sc = round(sum(p[1] for p in parts) / len(parts))
+    lab = "극단적 공포" if sc < 20 else "공포" if sc < 40 else "중립" if sc < 60 else "탐욕" if sc < 80 else "극단적 탐욕"
+    return {"score": sc, "label": lab, "parts": [[p[0], round(p[1]), p[2]] for p in parts]}
 
 
 def summary(m):
