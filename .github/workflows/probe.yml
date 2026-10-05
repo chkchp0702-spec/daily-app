@@ -11,23 +11,20 @@ jobs:
       - run: |
           exec > probe_out.txt 2>&1
           UA="Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)"
+          curl -sv -m 30 "https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y3M" -o /dev/null 2>&1 | tail -15
           for u in \
-            "https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y3M" \
-            "https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y3M&cosd=2024-01-01" \
-            "https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2&cosd=2025-01-01" \
-            "https://fred.stlouisfed.org/data/T10Y3M.txt" \
-            "https://m.stock.naver.com/api/index/KOSPI/integration" \
-            "https://m.stock.naver.com/api/index/KOSPI/trend" \
-            "https://m.stock.naver.com/api/index/KOSPI/investor" \
-            "https://m.stock.naver.com/api/stock/005930/integration" \
-            "https://finance.naver.com/sise/investorDealTrendDay.nhn?bizdate=20261005&sosok=01&page=1" \
-            "https://finance.naver.com/sise/sise_trans_style.naver" \
-            "https://finance.naver.com/item/frgn.naver?code=005930" \
-            "https://finance.naver.com/item/main.naver?code=005930" ; do
-            echo "=== $u"; curl -s -m 60 -A "$UA" -e "https://m.stock.naver.com/" -w "\nHTTP %{http_code} %{time_total}s\n" "$u" | iconv -f cp949 -t utf-8 -c 2>/dev/null | head -c 1500 | tr '\n' ' ' ; echo
+            "https://api.db.nomics.world/v22/series/FED/H15/RIFLGFCY10_N.B?observations=1&format=json" \
+            "https://sdmx.oecd.org/public/rest/data/OECD.SDD.STES,DSD_STES@DF_CLI,4.1/KOR.M.LI...AA...H?startPeriod=2025-01&dimensionAtObservation=AllDimensions&format=csvfilewithlabels" \
+            "https://oui.doleta.gov/unemploy/csv/ar539.csv" \
+            "https://www.federalreserve.gov/datadownload/Output.aspx?rel=H15&series=bf17364827e38702b42a58cf8eaa3f78&lastobs=10&from=&to=&filetype=csv&label=include&layout=seriescolumn" \
+            "https://www.chicagofed.org/-/media/publications/nfci/nfci-data-series-csv.csv" \
+            "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=T10Y3M" ; do
+            echo "=== $u"; curl -s -m 60 -A "$UA" -w "\nHTTP %{http_code} %{time_total}s\n" "$u" | head -c 900 | tr '\n' ' ' ; echo
           done
-          curl -s -m 60 -A "$UA" "https://finance.naver.com/item/main.naver?code=005930" | iconv -f cp949 -t utf-8 -c | grep -n -A4 "외국인소진율" | head -20
-          curl -s -m 60 -A "$UA" "https://finance.naver.com/item/frgn.naver?code=005930" | iconv -f cp949 -t utf-8 -c | grep -n -B2 -A12 "외국인" | head -80
+          echo "=== integration codes"
+          curl -s -m 30 -A "$UA" "https://m.stock.naver.com/api/stock/005930/integration" | python3 -c "import json,sys;d=json.load(sys.stdin);print([(x.get('code'),x.get('key'),x.get('value')) for x in d.get('totalInfos',[])]);print(list(d.keys()))"
+          echo "=== dealtrend"
+          curl -s -m 30 -A "$UA" "https://finance.naver.com/sise/investorDealTrendDay.nhn?bizdate=20261005&sosok=01&page=1" | iconv -f cp949 -t utf-8 -c | grep -A12 "<tr" | sed -n 1,80p | tr -s ' \t'
       - run: |
           mkdir -p archive/x && mv probe_out.txt archive/x/probe.txt
           git config user.name bot; git config user.email bot@x
