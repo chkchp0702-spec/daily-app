@@ -261,11 +261,12 @@
   function pager(boxId, list, render){
     var shown = 12, sel = "ALL";
     function draw(){
-      var L = list.filter(function(x){ return sel === "ALL" || x.mkt === sel; });
+      var sp = sel.split("|"), L = list.filter(function(x){ return (sp[0] === "ALL" || x.mkt === sp[0]) && (!sp[1] || (x.sector || "미분류") === sp[1]); });
       var box = $(boxId); if (!box) return;
-      box.innerHTML = '<div class="cgrid">' + L.slice(0, shown).map(render).join("") + '</div>' +
+      box.innerHTML = (sp[1] ? '<div class="pg-f">' + (V.FLAGS[sp[0]] || "") + ' <b>' + e(sp[1]) + '</b> ' + L.length + '개 <button class="btn" id="' + boxId + 'x">✕ 섹터 해제</button></div>' : '') + '<div class="cgrid">' + L.slice(0, shown).map(render).join("") + '</div>' +
         (L.length > shown ? '<button class="more" id="' + boxId + 'm">더 보기 (' + (L.length - shown) + '개 남음)</button>' : "");
       if ($(boxId + "m")) $(boxId + "m").onclick = function(){ shown += 12; draw(); };
+      if ($(boxId + "x")) $(boxId + "x").onclick = function(){ sel = sp[0]; shown = 12; draw(); };
       after(box);
     }
     return {draw: draw, set: function(k){ sel = k; shown = 12; draw(); }};
@@ -293,7 +294,7 @@
       if (d.ath.length) h += sec("★ 사상최고가 돌파") + '<div class="cgrid">' + d.ath.map(cupCard).join("") + '</div>';
       h += sec("컵 점수 상위 " + d.top.length) + filterSeg("cseg", d.top, function(k){ P.set(k); }) + '<div id="cbox"></div>' + pdf;
       el.innerHTML = h;
-      var P = pager("cbox", d.top, cupCard); P.draw();
+      var P = pager("cbox", d.top, cupCard); P.draw(); window.CUPP = P;
       after(el);
     }).catch(function(){ el.innerHTML = pdfCard("컵앤핸들 리포트", file("cup", it.id, "report.pdf")); });
   };

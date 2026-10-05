@@ -217,7 +217,7 @@ def cup_cards():
         g[s_] = g.get(s_, 0) + 1
     allc.sort(key=lambda r: -(num(r.get("컵점수")) or 0))
     seen = {c["code"] for c in ath}
-    top = [card(r) for r in allc if r.get("코드") not in seen][:60]
+    top = [card(r) for r in allc if r.get("코드") not in seen][:400]   # 모양 강화 후 전체가 수백 개 이내 → 지도 숫자와 목록이 맞도록 전부
     out = {"ath": ath, "top": top, "total": len(allc), "by_mkt": by_mkt,
            "by_sec": sorted(by_sec.items(), key=lambda x: -x[1])[:10], "grid": grid}
     put("cup", day, "cards.json", text=json.dumps(out, ensure_ascii=False))

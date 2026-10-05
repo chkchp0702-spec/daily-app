@@ -244,42 +244,20 @@
             '<p class="note">컵 깊이·기간·손잡이·점수가 가장 닮은 과거 컵 ' + N.length + '개. 주황 = 평균, 띠 = 가운데 절반. ' + (A.avg.length - 1) + '거래일 뒤 평균 <b class="' + cls(endv) + '">' + pct(endv) + '</b> · 플러스 ' + Math.round(N.filter(function(s){ return (s.path[Math.min(s.path.length - 1, A.avg.length - 1)] || 0) > 0; }).length / N.length * 100) + '%</p></div>'; };
         var pt = cc.querySelector(".hq") || cc.querySelector(".st4"); if (pt) pt.parentNode.insertBefore(b, cc.querySelector(".row:last-child"));
       });
-      // ② 돌파 순간 리플레이
-      var bp = sig.filter(function(s){ return s.bpath && s.bpath.length > 20 && s.bpi != null && s.bpath.every(function(v){ return v == null || Math.abs(v) < 80; }); });
-      if (bp.length >= 3){
-        var align = function(s){ var arr = []; for (var k = -20; k <= 30; k++){ var v = s.bpath[s.bpi + k]; arr.push(v == null ? null : v); } return arr; };
-        var ok = bp.filter(function(s){ return s.bst === "성공"; }), bad = bp.filter(function(s){ return s.bst === "실패"; });
-        var Ao = avgPath(ok.map(align), 51), Ab = avgPath(bad.map(align), 51);
-        h += card("🎬 돌파 순간 리플레이 <span class='mut'>돌파 전 20일 ~ 뒤 30일 · 돌파가 = 0%</span>",
-          '<div id="rply">' + paths(ok.slice(0, 20).map(function(s){ return {vals: align(s), color: V.UP, w: 1, op: .25}; }).concat(bad.slice(0, 10).map(function(s){ return {vals: align(s), color: V.DN, w: 1, op: .25}; }))
-            .concat(Ao.avg.length ? [{vals: Ao.avg, color: "#ff6b6b", w: 3}] : []).concat(Ab.avg.length ? [{vals: Ab.avg, color: "#5aa0ff", w: 3}] : []), {h: 170, mark: 20, xl: ["돌파 20일 전", "30일 뒤"]}) + '</div>' +
-          '<button class="btn" id="rplay">▶ 재생</button>' +
-          '<div class="lg"><span><i style="background:#ff6b6b"></i>성공 평균 (' + ok.length + ')</span><span><i style="background:#5aa0ff"></i>실패 평균 (' + bad.length + ')</span><span class="mut">점선 = 돌파일</span></div>' +
-          '<p class="note">정석 돌파는 돌파 전에 돌파선 바로 밑에서 숨을 고르고(손잡이), 돌파 뒤 며칠 안에 위로 벌어져요. 실패한 돌파는 사흘 안에 돌파선 아래로 다시 들어오는 경우가 많아요.</p>');
-        setTimeout(function(){ var b = $("rplay"); if (!b) return; b.onclick = function(){ var k = 1, box = $("rply");
-          var tick = function(){ if (!document.body.contains(box)) return; var cut = function(arr){ return arr.slice(0, k); };
-            box.innerHTML = paths(ok.slice(0, 20).map(function(s){ return {vals: cut(align(s)), color: V.UP, w: 1, op: .25}; }).concat(bad.slice(0, 10).map(function(s){ return {vals: cut(align(s)), color: V.DN, w: 1, op: .25}; }))
-              .concat([{vals: cut(Ao.avg), color: "#ff6b6b", w: 3}, {vals: cut(Ab.avg), color: "#5aa0ff", w: 3}]), {h: 170, mark: 20, n: 51, xl: ["돌파 20일 전", "30일 뒤"]});
-            if (++k <= 51) setTimeout(tick, 70); }; tick(); }; }, 0);
-      }
-      // ③ 점수 → 수익률 산점도
-      var sc = sig.filter(function(s){ return s.score != null && s.now != null && Math.abs(s.now) < 150; });
-      if (sc.length >= 10){
-        var buck = {}; sc.forEach(function(s){ var k = Math.floor(s.score / 10) * 10; (buck[k] = buck[k] || []).push(s.now); });
-        h += card("📍 컵 점수가 높으면 정말 더 올랐나 <span class='mut'>신호 " + sc.length + "개 · 점 누르면 리포트</span>",
-          scatter(sc.map(function(s){ return {x: s.score, y: s.now, code: s.code, label: "<b>" + e(s.name) + "</b> " + s.score + "점 → " + pct(s.now)}; }), {xn: "컵 점수", yn: "지금까지 수익률", trend: 1, h: 220}) +
-          '<div class="cp-sts">' + Object.keys(buck).sort().map(function(k){ var v = buck[k], a = v.reduce(function(x, y){ return x + y; }, 0) / v.length; return '<span class="cp-st"><b>' + k + '점대</b><span class="' + cls(a) + '">' + pct(a) + '</span><span class="mut">' + v.length + '개</span></span>'; }).join("") + '</div>' +
-          '<p class="note">주황 점선 = 추세. 오른쪽 위로 기울면 "점수가 높을수록 잘 감" — 점수를 믿어도 된다는 뜻.</p>');
-      }
       // ④ 컵 지도
       if (d.grid){
         var mk = Object.keys(d.grid).sort(function(x, y){ return (d.by_mkt[y] || 0) - (d.by_mkt[x] || 0); });
         var secs = {}; mk.forEach(function(m){ Object.keys(d.grid[m]).forEach(function(s){ if (s !== "미분류" && s !== "-") secs[s] = (secs[s] || 0) + d.grid[m][s]; }); });
         var sl = Object.keys(secs).sort(function(x, y){ return secs[y] - secs[x]; }).slice(0, 8), mx = 0;
         mk.forEach(function(m){ sl.forEach(function(s){ mx = Math.max(mx, d.grid[m][s] || 0); }); });
-        h += card("🗺️ 오늘 컵 지도 <span class='mut'>전체 " + d.total.toLocaleString() + "개 · 나라 × 섹터</span>", '<div class="hm"><table><thead><tr><th></th>' + mk.map(function(m){ return '<th>' + (V.FLAGS[m] || m) + '</th>'; }).join("") + '</tr></thead><tbody>' +
-          sl.map(function(s){ return '<tr><th>' + e(s) + '</th>' + mk.map(function(m){ var v = d.grid[m][s] || 0; return '<td style="background:rgba(255,184,77,' + (v ? .12 + v / mx * .75 : 0).toFixed(2) + ')">' + (v || "") + '</td>'; }).join("") + '</tr>'; }).join("") + '</tbody></table></div>' +
-          '<p class="note">진할수록 컵 모양 종목이 많은 곳 — 돈이 조용히 다시 들어오는 동네예요.</p>');
+        h += card("🗺️ 오늘 컵 지도 <span class='mut'>전체 " + d.total.toLocaleString() + "개 · 숫자를 누르면 아래 목록으로</span>", '<div class="hm cgmap"><table><thead><tr><th></th>' + mk.map(function(m){ return '<th data-cg="' + m + '">' + (V.FLAGS[m] || m) + '</th>'; }).join("") + '</tr></thead><tbody>' +
+          sl.map(function(s){ return '<tr><th>' + e(s) + '</th>' + mk.map(function(m){ var v = d.grid[m][s] || 0; return '<td' + (v ? ' data-cg="' + m + '|' + e(s) + '"' : '') + ' style="background:rgba(255,184,77,' + (v ? .12 + v / mx * .75 : 0).toFixed(2) + ')">' + (v || "") + '</td>'; }).join("") + '</tr>'; }).join("") + '</tbody></table></div>' +
+          '<p class="note">진할수록 컵 모양 종목이 많은 곳. 숫자 = 그 나라·섹터 종목 목록으로 바로 이동, 국기 = 그 나라 전체.</p>');
+        setTimeout(function(){ [].forEach.call(document.querySelectorAll(".cgmap [data-cg]"), function(td){ td.onclick = function(){
+          var k = td.getAttribute("data-cg"), m = k.split("|")[0];
+          [].forEach.call(document.querySelectorAll("#cseg button"), function(b){ b.classList.toggle("on", b.dataset.k === m); });
+          if (window.CUPP) CUPP.set(k);
+          var t = $("cseg"); if (t) window.scrollTo({top: t.getBoundingClientRect().top + window.scrollY - 240, behavior: "smooth"}); }; }); }, 0);
       }
       a.insertAdjacentHTML("beforeend", h);
     });
