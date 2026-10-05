@@ -244,37 +244,44 @@ def rules(D, cal):
 
 # =============================================================== 백테스트
 def backtest(R, Y, cal, GROUP):
-    """주 단위로 표본을 뽑아, 상태별 다음 3·6개월 수익률(S&P·코스피 평균)을 본다 → 가중치."""
+    """주 단위 표본. 2000년 이후 확인해 보니 이 지표들은 '평균 수익'보다 '크게 빠질 위험'을 훨씬 잘 가른다
+    (경고 구간엔 바닥 뒤 반등도 섞여 평균은 비슷하지만, −10% 넘게 빠질 확률은 2~4배).
+    그래서 무게 = 경고일 때와 좋음일 때 '−10% 넘게 빠진 비율' 차이 (미국·한국 평균)."""
     fw = {}
     for tk in ("^GSPC", "^KS11"):
         x = Y[tk].reindex(cal).ffill()
         for h in (63, 126):
             fw[(tk, h)] = (x.shift(-h) / x - 1) * 100
-        lo = x[::-1].rolling(126, min_periods=60).min()[::-1]
-        fw[(tk, "dd")] = (lo / x - 1) * 100
+            lo = x[::-1].rolling(h, min_periods=h // 2).min()[::-1]
+            fw[(tk, "dd", h)] = (lo / x - 1) * 100
+        fw[(tk, "dd")] = fw[(tk, "dd", 126)]
     wk = cal[(cal >= pd.Timestamp(BT_START))]
     wk = pd.DatetimeIndex(pd.Series(wk, index=wk).resample("W-FRI").last().dropna().values)
     stats, W = {}, {}
     for k, (st, _) in R.items():
         h = 126 if GROUP[k] == "cycle" else 63
         s = st.reindex(wk)
-        f = (fw[("^GSPC", h)].reindex(wk) + fw[("^KS11", h)].reindex(wk)) / 2
-        ok = s.notna() & f.notna()
-        s, f = s[ok], f[ok]
-        if len(s) < 150:
+        if s.notna().sum() < 150:
             continue
-        g = {v: f[s == v] for v in (1.0, 0.0, -1.0)}
-        m = {v: (float(g[v].mean()) if len(g[v]) >= 15 else None) for v in g}
-        base = float(f.mean())
-        hi = m[1.0] if m[1.0] is not None else base
-        lo = m[-1.0] if m[-1.0] is not None else base
-        spread = hi - lo
-        w = max(0.0, min(2.0, round(spread / 4 * 2) / 2))
+        res = {}
+        for v in (1.0, -1.0):
+            sel = s[s == v].index
+            rr, pp, dd = [], [], []
+            for tk in ("^GSPC", "^KS11"):
+                f = fw[(tk, h)].reindex(sel).dropna()
+                d = fw[(tk, "dd", h)].reindex(sel).dropna()
+                if len(f) >= 15:
+                    rr.append(f.mean()); pp.append((f > 0).mean() * 100); dd.append((d <= -10).mean() * 100)
+            res[v] = (len(sel), np.mean(rr) if rr else None, np.mean(pp) if pp else None, np.mean(dd) if dd else None)
+        if res[1.0][3] is None or res[-1.0][3] is None:
+            continue
+        risk = res[-1.0][3] - res[1.0][3]                 # 경고일 때 더 자주 크게 빠졌나 (%p)
+        w = max(0.0, min(2.0, round(risk / 15 * 2) / 2))
         W[k] = w
-        stats[k] = {"h": "6개월" if h == 126 else "3개월", "since": str(s.index[0].date())[:4], "n": int(len(s)), "base": round(base, 1),
-                    "pos": [int(len(g[1.0])), r_(m[1.0], 1), r_(float((g[1.0] > 0).mean() * 100) if len(g[1.0]) else None, 0)],
-                    "neg": [int(len(g[-1.0])), r_(m[-1.0], 1), r_(float((g[-1.0] > 0).mean() * 100) if len(g[-1.0]) else None, 0)],
-                    "spread": round(spread, 1), "w": w}
+        stats[k] = {"h": "6개월" if h == 126 else "3개월", "since": str(s.dropna().index[0].date())[:4],
+                    "pos": [int(res[1.0][0]), r_(res[1.0][1], 1), r_(res[1.0][2], 0), r_(res[1.0][3], 0)],
+                    "neg": [int(res[-1.0][0]), r_(res[-1.0][1], 1), r_(res[-1.0][2], 0), r_(res[-1.0][3], 0)],
+                    "risk": round(risk, 0), "w": w}
     # 진단: 상태별 3·6개월 수익·하락 위험 (로그로만)
     try:
         for k, (st, _) in R.items():
@@ -329,8 +336,8 @@ def bucket_table(score, fw, wk, h):
         row = {"lab": lab, "n": int(len(sel))}
         for tk, nm in (("^GSPC", "us"), ("^KS11", "kr")):
             f = fw[(tk, h)].reindex(sel).dropna()
-            d = fw[(tk, "dd")].reindex(sel).dropna()
-            row[nm] = [r_(f.mean(), 1), r_((f > 0).mean() * 100, 0), r_(d.median(), 1)]
+            d = fw[(tk, "dd", h)].reindex(sel).dropna()
+            row[nm] = [r_(f.mean(), 1), r_((f > 0).mean() * 100, 0), r_(d.median(), 1), r_((d <= -10).mean() * 100, 0)]
         rows.append(row)
     return rows
 
@@ -443,13 +450,13 @@ def quad(c, t):
     if c is None or t is None:
         return "엇갈림", "자료가 부족해요"
     if c >= 10 and t >= 10:
-        return "상승 국면", "경기도 좋고 시장 흐름도 위 — 주식 비중을 유지·확대할 구간"
+        return "상승 국면", "경기도 시장 흐름도 위 — 크게 빠질 위험이 가장 낮았던 조합. 비중 유지·확대 구간"
     if c >= 10 and t <= -10:
-        return "경기 속 조정", "경기는 괜찮은데 시장이 흔들려요 — 역사적으로 이런 조정은 사는 자리였던 경우가 많아요"
+        return "경기 속 조정", "경기는 괜찮은데 시장이 흔들려요 — 흔들림은 크지만 경기가 받쳐 주면 조정으로 끝난 경우가 많아요"
     if c <= -10 and t >= 10:
-        return "후반부 · 천장 조심", "시장은 아직 강하지만 경기 지표가 먼저 꺾이는 중 — 오르더라도 비중을 서서히 줄일 구간"
+        return "후반부 · 천장 조심", "시장은 아직 강하지만 경기 지표가 먼저 꺾이는 중 — 오르더라도 크게 빠질 위험이 커지는 구간"
     if c <= -10 and t <= -10:
-        return "하락 국면", "경기와 시장이 함께 나빠져요 — 현금·방어 비중을 늘릴 구간"
+        return "하락 국면", "경기와 시장이 함께 나빠져요 — 크게 빠질 위험이 가장 높았던 조합. 현금·방어 비중 늘릴 구간"
     if t >= 10:
         return "시장 우위", "경기는 중립, 시장 흐름은 위 — 추세를 따라가되 경기 지표를 지켜볼 구간"
     if t <= -10:
@@ -502,7 +509,7 @@ def main():
         for q, ds in qs.items():
             ix = pd.DatetimeIndex(ds)
             tables["quad"][q] = {"n": len(ds), **{nm: [r_(fw[(tk, 63)].reindex(ix).dropna().mean(), 1), r_((fw[(tk, 63)].reindex(ix).dropna() > 0).mean() * 100, 0),
-                                                      r_(fw[(tk, "dd")].reindex(ix).dropna().median(), 1)] for tk, nm in (("^GSPC", "us"), ("^KS11", "kr"))}}
+                                                      r_(fw[(tk, "dd", 63)].reindex(ix).dropna().median(), 1), r_((fw[(tk, "dd", 63)].reindex(ix).dropna() <= -10).mean() * 100, 0)] for tk, nm in (("^GSPC", "us"), ("^KS11", "kr"))}}
     # 오늘
     L = live_only(prev)
     sig = []
@@ -545,12 +552,12 @@ def main():
            "sig": sig, "changes": changes, "hist": hist, "daily": daily_hist[-120:],
            "fr_hist": L.get("_fr_hist") or prev.get("fr_hist") or [], "errors": ERR[:20],
            "n_green": sum(1 for s in sig if s["st"] == 1), "n_red": sum(1 for s in sig if s["st"] == -1), "n_total": sum(1 for s in sig if s["st"] is not None),
-           "bt_note": f"{BT_START[:4]}년 이후 매주 표본 · 미국 S&P500과 코스피 평균 · 발표 지연 반영 · 가중치는 같은 기간에서 정함(과거에 맞춘 값이라 미래엔 덜 맞을 수 있음)"}
+           "bt_note": f"{BT_START[:4]}년 이후 매주 표본 · 발표 지연 반영 · 무게는 경고일 때 −10% 넘게 빠진 비율이 좋음일 때보다 얼마나 높았나로 정함 (같은 기간에서 정한 값이라 미래엔 덜 맞을 수 있음)"}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"), default=lambda o: None)
     log(f"국면 v2 · 경기 {sc} · 시장 {stt} · {label} · 오류 {len(ERR)}")
     for k, s in stats.items():
-        log(f"  {k:8s} w={s['w']} {s['h']} 좋음 {s['pos']} 경고 {s['neg']} 차이 {s['spread']}")
+        log(f"  {k:8s} w={s['w']} {s['h']} 좋음 {s['pos']} 경고 {s['neg']} 위험차 {s['risk']}")
     for e in ERR:
         log("  !", e)
 

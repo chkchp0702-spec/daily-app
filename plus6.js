@@ -51,15 +51,16 @@
   }
   function past(q, h){
     if (!q || !q.us) return "";
-    return '<div class="rb-past"><div class="rb-ph">📜 2000년 이후 지금과 같은 국면이었던 ' + q.n + '주 → ' + h + ' 뒤</div><div class="rb-pg">' +
+    return '<div class="rb-past"><div class="rb-ph">📜 2000년 이후 지금과 같은 국면이었던 ' + q.n + '주 → ' + h + ' 동안</div><div class="rb-pg">' +
       [["🇺🇸 S&P500", q.us], ["🇰🇷 코스피", q.kr]].map(function(x){ var a = x[1] || [];
-        return '<div><small>' + x[0] + '</small><b style="color:' + (a[0] >= 0 ? V.UP : V.DN) + '">' + pc(a[0]) + '</b><em>플러스 ' + (a[1] != null ? a[1] + "%" : "–") + ' · 중간 최대낙폭 ' + pc(a[2]) + '</em></div>'; }).join("") + '</div></div>';
+        return '<div><small>' + x[0] + '</small><b style="color:' + (a[3] >= 35 ? V.DN : a[3] <= 20 ? V.UP : "#c9a227") + '">' + (a[3] != null ? a[3] + "%" : "–") + '</b><em>−10% 넘게 빠진 비율<br>평균 수익 ' + pc(a[0]) + ' · 플러스 ' + (a[1] != null ? a[1] + "%" : "–") + '</em></div>'; }).join("") + '</div></div>';
   }
   function btLine(s){
     var b = s.bt;
     if (!b) return '<div class="rb-bt">🧪 과거 자료가 없어 검증은 못 했어요 · 무게 1</div>';
-    if (!(s.w > 0)) return '<div class="rb-bt off">🧪 ' + b.since + '년 이후 검증: 좋음일 때 ' + b.h + ' 뒤 평균 ' + pc(b.pos[1]) + ' · 경고일 때 ' + pc(b.neg[1]) + ' — 과거엔 잘 안 맞아서 <b>점수에서 뺐어요</b> (참고로만)</div>';
-    return '<div class="rb-bt">🧪 ' + b.since + '년 이후 검증 (' + b.h + ' 뒤, 미·한 평균): 좋음일 때 <b class="up">' + pc(b.pos[1]) + '</b> (플러스 ' + (b.pos[2] != null ? b.pos[2] + "%" : "–") + ', ' + b.pos[0] + '주) · 경고일 때 <b class="dn">' + pc(b.neg[1]) + '</b> (플러스 ' + (b.neg[2] != null ? b.neg[2] + "%" : "–") + ', ' + b.neg[0] + '주) → 무게 ' + s.w + '</div>';
+    var txt = b.since + '년 이후 검증 (' + b.h + ' 안에 −10% 넘게 빠진 비율, 미·한 평균): 경고일 때 <b class="dn">' + b.neg[3] + '%</b> · 좋음일 때 <b class="up">' + b.pos[3] + '%</b> <span class="mut">(평균 수익 경고 ' + pc(b.neg[1]) + ' · 좋음 ' + pc(b.pos[1]) + ')</span>';
+    if (!(s.w > 0)) return '<div class="rb-bt off">🧪 ' + txt + ' — 위험을 잘 못 갈라서 <b>점수에서 뺐어요</b> (참고로만)</div>';
+    return '<div class="rb-bt">🧪 ' + txt + ' → 무게 ' + s.w + '</div>';
   }
   function row(s){
     var st = s.st, hist = s.hist || [];
@@ -72,10 +73,10 @@
   }
   function table(rows, h, now){
     if (!rows || !rows.length) return "";
-    return '<table class="rb-tb"><tr><th>점수</th><th>주</th><th>🇺🇸 ' + h + ' 뒤</th><th>🇰🇷 ' + h + ' 뒤</th></tr>' + rows.map(function(r){
+    return '<table class="rb-tb"><tr><th>점수</th><th>주</th><th>🇺🇸 −10% 확률 · 수익</th><th>🇰🇷 −10% 확률 · 수익</th></tr>' + rows.map(function(r){
       var on = now && now.lab === r.lab;
       return '<tr' + (on ? ' class="on"' : '') + '><td>' + e(r.lab) + (on ? ' ◀' : '') + '</td><td>' + r.n + '</td>' + ["us", "kr"].map(function(k){ var a = r[k];
-        return '<td>' + (a ? '<b class="' + (a[0] >= 0 ? "up" : "dn") + '">' + pc(a[0]) + '</b> <small>' + a[1] + '%</small>' : '<span class="mut">표본 적음</span>') + '</td>'; }).join("") + '</tr>'; }).join("") + '</table>';
+        return '<td>' + (a ? '<b class="' + (a[3] >= 35 ? "dn" : a[3] <= 20 ? "up" : "") + '">' + a[3] + '%</b> <small>' + pc(a[0]) + '</small>' : '<span class="mut">표본 적음</span>') + '</td>'; }).join("") + '</tr>'; }).join("") + '</table>';
   }
   function board(R){
     if (!R || !R.sig) return "";
@@ -90,10 +91,10 @@
     [["🏭 경기 사이클 <small>6~18개월 뒤를 말하는 것</small>", cyc, R.cycle], ["📊 시장 타이밍 <small>1~3개월 뒤를 말하는 것</small>", tim, R.timing]].forEach(function(g){
       h += '<div class="rb-grp"><div class="rb-gh"><b>' + g[0] + '</b><span style="color:' + col(g[2]) + '">' + sg(g[2]) + '</span></div>' + g[1].map(row).join("") + '</div>';
     });
-    h += '<details class="rb-more"><summary>📊 점수별 과거 성적 보기</summary><div class="sub2">경기 사이클 점수 → 6개월 뒤</div>' + table((R.tables || {}).cycle, "6개월", R.now_cycle) +
-      '<div class="sub2">시장 타이밍 점수 → 3개월 뒤</div>' + table((R.tables || {}).timing, "3개월", R.now_timing) +
-      '<p class="note">평균 수익률 · 작은 글씨 = 플러스였던 비율 · ◀ = 지금. ' + e(R.bt_note || "") + '</p></details>';
-    h += '<p class="note">▲ 좋음 +1 · ▼ 경고 −1 · – 중립 0 에 지표별 무게(과거에 잘 맞은 만큼, 0~2)를 곱해 평균 ×100. 줄을 누르면 뜻·기준·과거 검증·출처가 보여요.' + (R.errors && R.errors.length ? ' <em class="mut">오늘 못 받은 자료 ' + R.errors.length + '개</em>' : '') + '</p>';
+    h += '<details class="rb-more"><summary>📊 점수별 과거 성적 보기</summary><div class="sub2">경기 사이클 점수 → 6개월 동안</div>' + table((R.tables || {}).cycle, "6개월", R.now_cycle) +
+      '<div class="sub2">시장 타이밍 점수 → 3개월 동안</div>' + table((R.tables || {}).timing, "3개월", R.now_timing) +
+      '<p class="note">큰 글씨 = 그 기간 안에 고점 대비 −10% 넘게 빠진 적이 있는 비율 · 작은 글씨 = 평균 수익 · ◀ = 지금. ' + e(R.bt_note || "") + '</p></details>';
+    h += '<p class="note">▲ 좋음 +1 · ▼ 경고 −1 · – 중립 0 에 지표별 무게(과거에 「크게 빠질 위험」을 잘 가른 만큼, 0~2)를 곱해 평균 ×100. 이 지표들은 평균 수익보다 하락 위험을 훨씬 잘 맞혀요. 줄을 누르면 뜻·기준·과거 검증·출처가 보여요.' + (R.errors && R.errors.length ? ' <em class="mut">오늘 못 받은 자료 ' + R.errors.length + '개</em>' : '') + '</p>';
     return card("🧭 국면 신호판 <span class='mut'>지금 시장은 어느 국면인가</span>", h, "", "rbboard");
   }
   window.CPREG = function(el){
