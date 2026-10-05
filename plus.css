@@ -151,3 +151,5 @@ tr.hx td{padding:0!important;background:transparent!important}
 .tl-v{margin-left:auto;text-align:right;white-space:nowrap}
 .tl-v small{display:block;font-size:11px;color:var(--dim)}
 .db-row[data-csec],.db-row[data-lsec]{cursor:pointer}
+.kick2{margin-top:10px;padding:9px 11px;border-radius:12px;background:color-mix(in srgb,#ffb84d 14%,transparent);border:1px solid color-mix(in srgb,#ffb84d 45%,transparent);font-size:14px;line-height:1.5}
+.kick2 b{color:#ffc65c}.kick2 span{color:var(--sub)}
