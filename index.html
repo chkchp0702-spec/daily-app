@@ -521,7 +521,15 @@ document.addEventListener("click", function(ev){
   var t = ev.target.closest && ev.target.closest("[data-mgr]");
   if (t){ ev.preventDefault(); openMgr(t.getAttribute("data-mgr")); }
 });
+// 아이폰에서 click이 안 오는 경우 대비: 살짝 탭(움직임 없음)이면 바로 열기
+(function(){ var st = null;
+  document.addEventListener("touchstart", function(ev){ var t = ev.target.closest && ev.target.closest("[data-mgr]"); st = t ? {t: t, x: ev.touches[0].clientX, y: ev.touches[0].clientY, at: Date.now()} : null; }, {passive: true});
+  document.addEventListener("touchend", function(ev){ if (!st) return; var c = ev.changedTouches[0], s0 = st; st = null;
+    if (Math.abs(c.clientX - s0.x) < 10 && Math.abs(c.clientY - s0.y) < 10 && Date.now() - s0.at < 600){ if (ev.cancelable) ev.preventDefault(); openMgr(s0.t.getAttribute("data-mgr")); } }, {passive: false});
+})();
 function openMgr(name){
+  if (openMgr._n === name && Date.now() - openMgr._t < 800) return;   // 같은 탭이 두 번 들어오는 것 막기
+  openMgr._n = name; openMgr._t = Date.now();
   navPush({t: "mgr", name: name});
   closeSheet();
   var sh = document.createElement("div"); sh.id = "sheet";
@@ -1174,7 +1182,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261005h";
+var APPV = "20261005i";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }

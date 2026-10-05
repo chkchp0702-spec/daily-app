@@ -232,7 +232,7 @@
       if (rk){
         var best = function(arr){ return (arr || []).slice().sort(function(a, b){ return (b.ret_1y || 0) - (a.ret_1y || 0); }).slice(0, 20); };
         var bars = function(arr){ return V.dbars(best(arr).map(function(m){ return {label: e(m.name) + ' <span class="mgr-go">보유 종목 ›</span><small>' + e(m.quarter || "") + '</small>', v: m.ret_1y, text: sgn(m.ret_1y) + "%",
-          attr: ' data-mgr="' + e(m.name) + '"'}; })); };
+          attr: ' data-mgr="' + e(m.name) + '" role="button" onclick="openMgr(this.getAttribute(\'data-mgr\'))"'}; })); };
         h += card("수익률 상위 고래 <span class='mut'>1년 · 누르면 보유 종목</span>", '<div class="seg2" id="wseg"><button class="on" data-k="i">기관</button><button data-k="p">유명인</button></div><div id="wrk">' + bars(rk.institutions) + '</div>');
         setTimeout(function(){ [].forEach.call(document.querySelectorAll("#wseg button"), function(b){ b.onclick = function(){
           [].forEach.call(document.querySelectorAll("#wseg button"), function(x){ x.classList.toggle("on", x === b); });
