@@ -30,7 +30,7 @@ def nv_price(code):
     d = (j.get("datas") or [{}])[0]
     num = lambda k: float(str(d.get(k) or "0").replace(",", "") or 0) or None
     return {"now": num("closePrice"), "open": num("openPrice"), "high": num("highPrice"), "low": num("lowPrice"),
-            "chg": float(str(d.get("fluctuationsRatio") or "0").replace(",", "") or 0)}
+            "chg": float(str(d.get("fluctuationsRatio") or "0").replace(",", "") or 0), "status": d.get("marketStatus")}
 
 
 def yf_last(syms):
@@ -117,6 +117,10 @@ def gap_open():
                 q = nv_price(str(r["code"])[:6])
             except Exception:
                 continue
+            if q.get("status") and q["status"] != "OPEN":
+                print("한국 장이 열리지 않음 (휴장)", q["status"])
+                items = []
+                break
             bh = r.get("boxhi")
             items.append({"code": r["code"], "name": r.get("name"), "now": q["now"], "chg": q["chg"], "low": q["low"], "open": q["open"],
                           "boxhi": bh, "hold": bool(bh and q["low"] and q["low"] > bh), "above_open": bool(q["open"] and q["now"] and q["now"] >= q["open"])})

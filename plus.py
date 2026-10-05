@@ -249,18 +249,18 @@ def insider(tickers):
             out[t] = []
             continue
         tb = m.group(1)
-        heads = [re.sub(r"<[^>]+>|&nbsp;", "", x).strip() for x in re.findall(r"<th[^>]*>(.*?)</th>", tb, re.S)]
+        heads = [re.sub(r"[^a-z]", "", re.sub(r"<[^>]+>|&nbsp;", " ", x).lower()) for x in re.findall(r"<th[^>]*>(.*?)</th>", tb, re.S)]
         rows = []
         for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", tb, re.S):
             cells = [re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip() for c in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]
             if len(cells) < 8:
                 continue
             r = dict(zip(heads, cells))
-            if not str(r.get("Trade Type", "")).startswith("P"):
+            if not str(r.get("tradetype", "")).strip().startswith("P"):
                 continue
-            val = re.sub(r"[^\d\-]", "", r.get("Value", "") or "0") or "0"
-            rows.append({"d": (r.get("Trade Date") or "")[:10], "who": (r.get("Insider Name") or "")[:30], "title": (r.get("Title") or "")[:24],
-                         "px": r.get("Price", ""), "val": int(val)})
+            val = re.sub(r"[^\d\-]", "", r.get("value", "") or "0") or "0"
+            rows.append({"d": (r.get("tradedate") or "")[:10], "who": (r.get("insidername") or "")[:30], "title": (r.get("title") or "")[:24],
+                         "px": r.get("price", ""), "val": int(val)})
         out[t] = rows[:8]
         time.sleep(0.6)
     return out
@@ -334,7 +334,7 @@ def whale_plus(U):
     ts = [c["t"] for c in (wx.get("consensus") or [])[:15]] + [c["t"] for c in (wx.get("cheap") or [])[:8]] + [c["t"] for c in cl[:10]]
     ts += [s for s in all_watch(U) if re.fullmatch(r"[A-Z][A-Z.\-]{0,6}", s)]
     ts = [t for t in dict.fromkeys(ts) if re.fullmatch(r"[A-Z][A-Z.\-]{0,6}", t)]
-    ins = cached("ins", ",".join(sorted(ts)), lambda: insider(ts)) or {}
+    ins = cached("ins2", ",".join(sorted(ts)), lambda: insider(ts)) or {}
     res["insider"] = {t: v for t, v in ins.items() if v}
     res["insider_checked"] = len(ins)
     X.js("whale_plus.json", res)
@@ -516,6 +516,7 @@ def pension_flow(code):
 
 
 SEC_MAP = None
+SEC_UA = {"User-Agent": "CH-Investing daily-app chkchp0702-spec@users.noreply.github.com", "Accept-Encoding": "identity"}
 
 
 def sec_13dg(ticker):
@@ -523,12 +524,12 @@ def sec_13dg(ticker):
     global SEC_MAP
     try:
         if SEC_MAP is None:
-            j = hjson("https://www.sec.gov/files/company_tickers.json", timeout=30)
+            j = hjson("https://www.sec.gov/files/company_tickers.json", timeout=30, headers=SEC_UA)
             SEC_MAP = {v["ticker"].upper(): int(v["cik_str"]) for v in j.values()}
         cik = SEC_MAP.get(ticker.upper())
         if not cik:
             return None
-        j = hjson(f"https://data.sec.gov/submissions/CIK{cik:010d}.json", timeout=20)
+        j = hjson(f"https://data.sec.gov/submissions/CIK{cik:010d}.json", timeout=20, headers=SEC_UA)
         r = j.get("filings", {}).get("recent", {})
         cut = (dt.date.today() - dt.timedelta(days=60)).isoformat()
         out = []
@@ -583,12 +584,12 @@ def accum_plus(U):
             if pf:
                 o["pen"] = pf
         elif re.fullmatch(r"[A-Z][A-Z.\-]{0,6}", o["code"]):
-            f = cached("dg", o["code"], lambda: sec_13dg(o["code"]))
+            f = cached("dg2", o["code"], lambda: sec_13dg(o["code"]))
             if f is not None:
                 o["dg"] = f
     for s in all_watch(U):
         if re.fullmatch(r"[A-Z][A-Z.\-]{0,6}", s) and not any(o["code"] == s for o in A["items"]):
-            f = cached("dg", s, lambda: sec_13dg(s))
+            f = cached("dg2", s, lambda: sec_13dg(s))
             if f:
                 A.setdefault("watch_dg", {})[s] = f
     A["dropped"] = [{"code": c, "name": p.get("name"), "score": p.get("score"), "mkt": p.get("mkt")} for c, p in prev.items() if c not in rows][:20]
