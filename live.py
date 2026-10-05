@@ -27,7 +27,9 @@ SECTOR_KO = {
     "Communication Services": ("📡", "통신·미디어"), "Energy": ("🛢️", "에너지"), "Basic Materials": ("⛏️", "소재"),
     "Utilities": ("⚡", "유틸리티"), "Real Estate": ("🏢", "부동산"),
 }
-EPS = 0.05   # ±0.05% 이내 보합
+EPS = 0.05
+import re
+ETF = re.compile(r"^(KODEX|TIGER|KBSTAR|RISE|ACE|SOL|HANARO|KOSEF|ARIRANG|PLUS|TIMEFOLIO|KIWOOM|1Q|WON|BNK|마이티|히어로즈|TRUE|파워|UNICORN|VITA|FOCUS|ITF|DAISHIN|에셋플러스|KoAct|TREX|마이다스|흥국|파인|대신|신한|미래에셋|삼성|KB|하나|N2|QV|메리츠|키움|한투|IBK|유진|NH)\s")   # ±0.05% 이내 보합
 
 
 def get(url, timeout=20, raw=False):
@@ -60,6 +62,8 @@ def fetch(mkt):
             continue
         empty = 0
         for x in items:
+            if (x.get("stockEndType") and x["stockEndType"] != "stock") or ETF.match(x.get("stockName") or "") or "ETN" in (x.get("stockName") or ""):
+                continue
             rows.append({"c": x.get("itemCode"), "n": x.get("stockName"), "p": num(x.get("closePriceRaw") or x.get("closePrice")),
                          "r": num(x.get("fluctuationsRatio")), "v": num(x.get("accumulatedTradingValueRaw")) or 0,
                          "cap": num(x.get("marketValueRaw")) or (num(x.get("marketValue")) or 0) * 1e8, "m": "KQ" if mkt == "KOSDAQ" else "KS"})
