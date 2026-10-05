@@ -80,7 +80,7 @@
   function sync(){
     var al = store.al || {};
     var body = {uid: UID, wl: Object.keys(WL).map(function(k){ var w = WL[k]; return [k, (w.n || k).slice(0, 40), w.buy || null, w.tgt || null, w.stop || null]; }),
-                quiet: al.quiet || [23, 7], brief: al.brief === 0 ? 0 : 1};
+                quiet: al.quiet || [23, 7], brief: al.brief === 0 ? 0 : 1, lim: al.lim || null};
     fetch("https://ntfy.sh/" + SYNC, {method: "POST", body: JSON.stringify(body)}).then(function(){ store.synced = today(); save(); }).catch(function(){});
   }
   if (store.synced !== today() && (Object.keys(WL).length || store.al)) setTimeout(sync, 4000);

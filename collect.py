@@ -56,6 +56,10 @@ def market():
         if os.path.exists(dj):
             put("market", day, "data.json", dj)
     # 장부는 최신본 하나 (앱 차트용)
+    hc = src("market-strategy-report", "market", "history.csv")
+    if os.path.exists(hc):
+        os.makedirs(os.path.join(ARC, "market"), exist_ok=True)
+        shutil.copyfile(hc, os.path.join(ARC, "market", "history.csv"))
     led = src("market-strategy-report", "ledger", "ledger.json")
     if os.path.exists(led):
         os.makedirs(os.path.join(ARC, "market"), exist_ok=True)
@@ -204,16 +208,18 @@ def cup_cards():
                 "point": r.get("투자포인트", ""), "streak": num(r.get("연속일")), "new": _tf(r.get("NEW")), "tag": tag}
     ath = [card(r, "사상최고가 돌파") for r in R("list0_ath_breakout.csv")]
     allc = R("list1_cup.csv")
-    by_mkt, by_sec = {}, {}
+    by_mkt, by_sec, grid = {}, {}, {}
     for r in allc:
         by_mkt[r.get("시장", "")] = by_mkt.get(r.get("시장", ""), 0) + 1
         s_ = r.get("섹터", "") or "미분류"
         by_sec[s_] = by_sec.get(s_, 0) + 1
+        g = grid.setdefault(r.get("시장", ""), {})
+        g[s_] = g.get(s_, 0) + 1
     allc.sort(key=lambda r: -(num(r.get("컵점수")) or 0))
     seen = {c["code"] for c in ath}
     top = [card(r) for r in allc if r.get("코드") not in seen][:60]
     out = {"ath": ath, "top": top, "total": len(allc), "by_mkt": by_mkt,
-           "by_sec": sorted(by_sec.items(), key=lambda x: -x[1])[:10]}
+           "by_sec": sorted(by_sec.items(), key=lambda x: -x[1])[:10], "grid": grid}
     put("cup", day, "cards.json", text=json.dumps(out, ensure_ascii=False))
 
 

@@ -125,7 +125,9 @@ def sync_users():
                        num(it[3] if len(it) > 3 else None), num(it[4] if len(it) > 4 else None)])
         q = m.get("quiet")
         q = [int(q[0]) % 24, int(q[1]) % 24] if isinstance(q, list) and len(q) == 2 else None
-        U[uid] = {"ts": ts, "wl": wl, "quiet": q, "brief": 1 if m.get("brief", 1) else 0, "seen": dt.date.today().isoformat()}
+        lim = m.get("lim")
+        U[uid] = {"ts": ts, "wl": wl, "quiet": q, "brief": 1 if m.get("brief", 1) else 0, "lim": int(lim) if isinstance(lim, (int, float)) and 0 < lim < 100 else None,
+                  "seen": dt.date.today().isoformat()}
         n += 1
     # 60일 넘게 소식 없는 사용자 정리
     cut = (dt.date.today() - dt.timedelta(days=60)).isoformat()
@@ -341,8 +343,51 @@ def whale_plus(U):
     ins = cached("ins2", ",".join(sorted(ts)), lambda: insider(ts)) or {}
     res["insider"] = {t: v for t, v in ins.items() if v}
     res["insider_checked"] = len(ins)
+    try:
+        res["wstats"] = whale_follow_stats(hist, prev, pf)
+    except Exception as e:
+        P("고래별 성적 실패", e)
     X.js("whale_plus.json", res)
     P("고래+", len(sl), len(cl), len(res["insider"]))
+
+
+def whale_follow_stats(hist, prev, pf):
+    """고래별: 새로 산 종목을 공시일(분기말+46일)에 샀다면 지금까지 / 1년 뒤 수익률 분포"""
+    qs = sorted(hist, key=X.qend)
+    names = list(prev.get("inst", [])) + list(prev.get("ppl", []))
+    today = dt.date.today()
+    out = {}
+    for m in names:
+        rets, r1y = [], []
+        for i in range(1, len(qs)):
+            a, b = hist[qs[i]], hist[qs[i - 1]]
+            start = X.qend(qs[i]) + dt.timedelta(days=46)
+            if start >= today:
+                continue
+            for t, v in a.items():
+                if t == "NONE" or m not in v.get("by", []) or m in (b.get(t) or {}).get("by", []):
+                    continue
+                px = X.wpx(t)
+                if not px:
+                    continue
+                d0, p0 = X.at(px, start)
+                if not p0:
+                    continue
+                last = px[max(px)]
+                rets.append((last / p0 - 1) * 100)
+                d1, p1 = X.at(px, start + dt.timedelta(days=365))
+                if p1 and d1 and (dt.date.fromisoformat(d1) - start).days >= 300:
+                    r1y.append((p1 / p0 - 1) * 100)
+        rets = [r for r in rets if -95 < r < 1000]
+        if len(rets) >= 3:
+            srt = sorted(rets)
+            bins = [0] * 7          # <-30, -30~-10, -10~0, 0~10, 10~30, 30~100, 100+
+            for r in rets:
+                bins[0 if r < -30 else 1 if r < -10 else 2 if r < 0 else 3 if r < 10 else 4 if r < 30 else 5 if r < 100 else 6] += 1
+            out[m] = {"n": len(rets), "avg": X.r2(sum(rets) / len(rets)), "med": X.r2(srt[len(srt) // 2]), "win": X.r2(sum(1 for r in rets if r > 0) / len(rets) * 100, 0),
+                      "bins": bins, "n1y": len(r1y), "avg1y": X.r2(sum(r1y) / len(r1y)) if r1y else None,
+                      "win1y": X.r2(sum(1 for r in r1y if r > 0) / len(r1y) * 100, 0) if r1y else None}
+    return out
 
 
 # ── 3. 주봉 컵 ───────────────────────────────────────────────
@@ -574,6 +619,8 @@ def accum_plus(U):
             o["contr"] = X.r2(contr)
             comp["변동성 축소"] = max(0, min(100, (1.3 - contr) / 0.7 * 100))
             if "Volume" in px:
+                o["vspark"] = [int(v) for v in px["Volume"].iloc[-60:].fillna(0).values]
+                o["pspark"] = [X.r2(float(v), 4) for v in px["Close"].iloc[-60:].values]
                 val = px["Close"] * px["Volume"]
                 v5, v20 = float(val.iloc[-5:].mean()), float(val.iloc[-25:-5].mean())
                 if v20 > 0:
@@ -650,12 +697,33 @@ def today_hits():
 def alerts2(U):
     hits = today_hits()
     # ① 관심종목 신호 → 사용자별 주제
+    IMP = lambda txt: 3 if ("돌파" in txt and "임박" not in txt) or "단타" in txt else 2 if ("임박" in txt or "갭" in txt or "고래" in txt) else 1
+    sent = X.jl(X.SENT_P, {}) or {}
     for uid, u in U.items():
+        lim = u.get("lim") or 99
+        used = sum(1 for k, v in sent.items() if k.startswith(f"w:{uid}:") and v == X.TODAY)
+        cand = []
         for it in u.get("wl") or []:
             s, nm = it[0], it[1]
             for txt, tab in hits.get(kn(s), []):
-                X.push("u", f"⭐ {nm[:16]} — {txt}", "관심종목에 신호가 떴어요. 눌러서 확인.", tab, f"w:{uid}:{s}:{txt[:14]}:{X.TODAY}",
-                       tags="star", syms=[[s, None]], quiet=tuple(u.get("quiet") or X.QUIET), full_topic=user_topic(uid), log=False)
+                cand.append((IMP(txt), s, nm, txt, tab))
+        cand.sort(key=lambda x: -x[0])
+        for imp, s, nm, txt, tab in cand:
+            if used >= lim:
+                break
+            key = f"w:{uid}:{s}:{txt[:14]}:{X.TODAY}"
+            if key in sent:
+                continue
+            X.push("u", f"⭐ {nm[:16]} — {txt}", "관심종목에 신호가 떴어요. 눌러서 확인.", tab, key, tags="star", syms=[[s, None]],
+                   quiet=tuple(u.get("quiet") or X.QUIET), full_topic=user_topic(uid), log=False, level="hi" if imp == 3 else "mid" if imp == 2 else "lo")
+            used += 1
+    # ④ 월요일 아침: 지난주 알림 성적 (보낸 때 가격 → 지금)
+    now = dt.datetime.now(X.KST)
+    if now.weekday() == 0 and 8 <= now.hour < 12:
+        try:
+            weekly_report()
+        except Exception as e:
+            P("주간 알림 성적 실패", e)
     # ② 단타: 오늘 연속 손절 3번
     S = X.jl(os.path.join(X.OUT, "danta_stats.json"), {}) or {}
     t = S.get("today") or {}
@@ -674,6 +742,34 @@ def alerts2(U):
                 if mine:
                     X.push("u", "☀️ 내 관심종목 아침 요약", "\n".join(mine[:8]), "market", f"ubrief:{uid}:{X.TODAY}", tags="sunny",
                            quiet=None, full_topic=user_topic(uid), log=False)
+
+
+def weekly_report():
+    lg = X.jl(os.path.join(X.OUT, "push_log.json"), []) or []
+    cut = (dt.date.today() - dt.timedelta(days=8)).isoformat()
+    items = [(x, s) for x in lg if x["t"][:10] >= cut for s in (x.get("syms") or []) if s and s[1]]
+    if not items:
+        return
+    syms = list({X.ysym(s[0]) for _, s in items})
+    syms += [y[:-3] + ".KQ" for y in syms if y.endswith(".KS")]
+    X.load_prices(syms, period="1mo")
+    res = []
+    for x, (sym, p0) in items:
+        y = X.ysym(sym)
+        px = X.PX.get(y) if X.PX.get(y) is not None else X.PX.get(y[:-3] + ".KQ") if y.endswith(".KS") else None
+        if px is None or not p0:
+            continue
+        r = (float(px["Close"].iloc[-1]) / float(p0) - 1) * 100
+        if abs(r) < 80:
+            res.append((r, sym, x["title"]))
+    if not res:
+        return
+    res.sort(key=lambda z: -z[0])
+    avg = sum(r for r, _, _ in res) / len(res)
+    win = sum(1 for r, _, _ in res if r > 0)
+    msg = f"알림 {len(res)}종목 · 평균 {avg:+.1f}% · 오른 종목 {win}/{len(res)}\n잘 간 것: " + ", ".join(f"{s} {r:+.1f}%" for r, s, _ in res[:3]) + "\n못 간 것: " + ", ".join(f"{s} {r:+.1f}%" for r, s, _ in res[-2:])
+    X.push("brief", "📊 지난주 알림 성적", msg, "alarm", f"weekly:{X.TODAY}", tags="bar_chart", level="lo")
+    X.js("push_weekly.json", {"date": X.TODAY, "n": len(res), "avg": X.r2(avg), "win": win, "rows": [[s, X.r2(r), t] for r, s, t in res]})
 
 
 def brief_text(hits):
@@ -705,6 +801,163 @@ def brief_text(hits):
     return "\n".join(L)
 
 
+# ── 7. 시황: 내 배분 vs 시장 · 킥 되감기 ─────────────────────────
+KICK_SEED = [   # 형식에 킥 칸이 생기기 전(9/29·10/1) 리포트의 킥
+    {"date": "2026-09-29", "title": "지수 기록 −1.5%인데 430개 종목 합산 −21.7% · 신저가가 신고가보다 9일 연속 많음", "so": "지수는 멀쩡, 종목은 약세장 — 종목보다 현금·지수 쪽", "view": "down"},
+    {"date": "2026-10-01", "title": "유가·물가·연준 셋 다 내렸는데 미 10년 금리만 올랐음 (5.298%)", "so": "남는 원인은 국채 공급 — 장기채 0 유지", "view": "rate_up"},
+]
+
+
+def market_perf():
+    import re as _re
+    led = X.jl(os.path.join(X.ARC, "market", "ledger.json"), {}) or {}
+    alloc = led.get("allocation") or []
+    if not alloc:
+        return
+    start = "2026-09-18"
+    groups = []
+    syms = ["^KS11", "^GSPC"]
+    for a in alloc:
+        ins = a.get("instruments") or ""
+        tk = [t for t in _re.findall(r"(?<![A-Za-z0-9])([A-Z]{2,5})(?![A-Za-z0-9])", ins) if t not in ("TIGER", "RISE", "KRX", "ETF", "SOL", "ACE", "AI", "HBM", "CD")]
+        kr = [c + ".KS" for c in _re.findall(r"(?<![0-9A-Z])(\d{6})(?![0-9])", ins)]
+        g = (tk + kr)[:4]
+        if "현금" in a["name"]:
+            g = ["SGOV"]
+        groups.append({"name": a["name"], "pct": a["pct"], "syms": g})
+        syms += g
+    X.load_prices(list(dict.fromkeys(syms + [x[:-3] + ".KQ" for x in syms if x.endswith(".KS")])), period="3mo")
+    import pandas as pd
+    def series(sy):
+        px = X.PX.get(sy)
+        if px is None and sy.endswith(".KS"):
+            px = X.PX.get(sy[:-3] + ".KQ")
+        if px is None:
+            return None
+        c = px["Close"]
+        c = c[c.index >= pd.Timestamp(start)]
+        return c / c.iloc[0] if len(c) else None
+    idx = None
+    parts = []
+    for g in groups:
+        ss = [series(sy) for sy in g["syms"]]
+        ss = [x for x in ss if x is not None]
+        if not ss:
+            continue
+        gs = pd.concat(ss, axis=1).ffill().mean(axis=1)
+        parts.append((g, gs))
+    if not parts:
+        return
+    allidx = sorted(set().union(*[set(x.index) for _, x in parts]))
+    tot = sum(g["pct"] for g, _ in parts)
+    port = sum(x.reindex(allidx).ffill().bfill() * g["pct"] / tot for g, x in parts)
+    ks, sp = series("^KS11"), series("^GSPC")
+    def lst(x):
+        x = x.reindex(allidx).ffill().bfill() if x is not None else None
+        return [X.r2(float(v) * 100, 2) for v in x.values] if x is not None else []
+    out = {"updated": X.NOW.strftime("%Y-%m-%d %H:%M"), "start": start, "dates": [d.strftime("%m/%d") for d in allidx],
+           "port": lst(port), "kospi": lst(ks), "sp500": lst(sp),
+           "groups": [{"name": g["name"], "pct": g["pct"], "syms": g["syms"], "ret": X.r2((float(x.iloc[-1]) - 1) * 100)} for g, x in parts]}
+    # 킥 되감기: 킥 날짜 → 지금까지 코스피·S&P·미 10년
+    kicks = list(KICK_SEED)
+    for f in sorted(glob.glob(os.path.join(X.ARC, "market", "20*", "data.json"))):
+        d = X.jl(f, {}) or {}
+        k = d.get("kick")
+        if k and not k.get("none") and k.get("title"):
+            kicks.append({"date": d.get("date") or os.path.basename(os.path.dirname(f))[:10], "title": re.sub(r"<[^>]+>", "", k["title"]), "so": re.sub(r"<[^>]+>", "", k.get("so", ""))})
+    X.load_prices(["^TNX"], period="3mo")
+    def chg(sy, d0):
+        px = X.PX.get(sy)
+        if px is None:
+            return None
+        c = px["Close"]
+        a = c[c.index >= pd.Timestamp(d0)]
+        if not len(a):
+            return None
+        return float(a.iloc[-1]) - float(a.iloc[0]) if sy == "^TNX" else (float(a.iloc[-1]) / float(a.iloc[0]) - 1) * 100
+    for k in kicks:
+        k["kospi"] = X.r2(chg("^KS11", k["date"]))
+        k["sp500"] = X.r2(chg("^GSPC", k["date"]))
+        t = chg("^TNX", k["date"])
+        k["us10y_bp"] = X.r2(t * 100, 1) if t is not None else None
+    out["kicks"] = sorted(kicks, key=lambda k: k["date"], reverse=True)
+    try:
+        tn, kp = X.PX.get("^TNX"), X.PX.get("^KS11")
+        if tn is not None and kp is not None:
+            j = pd.concat([tn["Close"].rename("y"), kp["Close"].rename("k")], axis=1).ffill().dropna().iloc[-40:]
+            out["ratemap"] = [[d.strftime("%Y-%m-%d"), X.r2(float(r.y), 3), X.r2(float(r.k), 2)] for d, r in j.iterrows()]
+    except Exception as e:
+        P("금리 지도 실패", e)
+    X.js("market_perf.json", out)
+    P("내 배분 vs 시장", out["port"][-1] if out["port"] else None, "킥", len(kicks))
+
+
+# ── 8. 미국 갭 → 다음 날 한국 짝꿍 ─────────────────────────────
+PAIRS = [("NVDA", ["005930.KS", "000660.KS", "042700.KS"]), ("MU", ["000660.KS", "005930.KS"]), ("AVGO", ["000660.KS"]), ("AMD", ["000660.KS", "005930.KS"]),
+         ("GEV", ["267260.KS", "010120.KS", "298040.KS"]), ("VRT", ["267260.KS", "010120.KS"]), ("ETN", ["010120.KS"]),
+         ("LMT", ["012450.KS", "064350.KS"]), ("RTX", ["012450.KS"]), ("TSLA", ["373220.KS", "006400.KS", "247540.KQ"]),
+         ("LLY", ["207940.KS", "196170.KQ"]), ("CEG", ["034020.KS", "052690.KS"]), ("OKLO", ["034020.KS"]), ("META", ["035420.KS"]), ("GOOGL", ["035420.KS"])]
+
+
+def gap_pairs():
+    path = os.path.join(X.OUT, "gap_pairs.json")
+    old = X.jl(path, {}) or {}
+    if (old.get("updated") or "")[:10] == X.TODAY:
+        return
+    import yfinance as yf
+    import pandas as pd
+    us = [u for u, _ in PAIRS]
+    kr = sorted({k for _, ks in PAIRS for k in ks})
+    try:
+        du = yf.download(us, period="2y", interval="1d", group_by="ticker", auto_adjust=False, progress=False, threads=True)
+        dk = yf.download(kr, period="2y", interval="1d", group_by="ticker", auto_adjust=False, progress=False, threads=True)
+    except Exception as e:
+        P("짝꿍 실패", e)
+        return
+    out = []
+    for u, ks in PAIRS:
+        try:
+            a = du[u][["Open", "Close"]].dropna()
+        except Exception:
+            continue
+        g = (a["Open"] / a["Close"].shift(1) - 1) * 100
+        days = g[g.abs() >= 3]
+        for k in ks:
+            try:
+                b = dk[k][["Open", "Close"]].dropna()
+            except Exception:
+                continue
+            rk = (b["Close"] / b["Close"].shift(1) - 1) * 100
+            ok = (b["Open"] / b["Close"].shift(1) - 1) * 100
+            up, dn = [], []
+            for d, gv in days.items():
+                nxt = rk.index[rk.index > d]
+                if not len(nxt):
+                    continue
+                nd = nxt[0]
+                if (nd - d).days > 4:
+                    continue
+                (up if gv > 0 else dn).append((float(ok.get(nd, float("nan"))), float(rk[nd])))
+            def st_(L):
+                L = [x for x in L if x[1] == x[1]]
+                if len(L) < 3:
+                    return None
+                return {"n": len(L), "open": X.r2(sum(x[0] for x in L if x[0] == x[0]) / max(1, sum(1 for x in L if x[0] == x[0]))),
+                        "close": X.r2(sum(x[1] for x in L) / len(L)), "same": X.r2(sum(1 for x in L if x[1] > 0) / len(L) * 100, 0)}
+            su, sd = st_(up), st_(dn)
+            if su or sd:
+                out.append({"us": u, "kr": k, "up": su, "dn": sd})
+    last = {}
+    for u, _ in PAIRS:
+        try:
+            a = du[u][["Open", "Close"]].dropna()
+            last[u] = X.r2((float(a["Open"].iloc[-1]) / float(a["Close"].iloc[-2]) - 1) * 100)
+        except Exception:
+            pass
+    X.js("gap_pairs.json", {"updated": X.NOW.strftime("%Y-%m-%d %H:%M"), "pairs": out, "last_gap": last})
+    P("갭 짝꿍", len(out))
+
+
 def main(mod):
     global X
     X = mod
@@ -714,7 +967,7 @@ def main(mod):
             U = fn() or {}
         except Exception as e:
             P("실패 sync", e)
-    for fn, args in ((earn_history, ()), (earn_cal, (U,)), (whale_plus, (U,)), (gap_plus, ()), (accum_plus, (U,)), (weekly_cup, ()), (alerts2, (U,))):
+    for fn, args in ((earn_history, ()), (earn_cal, (U,)), (whale_plus, (U,)), (gap_plus, ()), (gap_pairs, ()), (market_perf, ()), (accum_plus, (U,)), (weekly_cup, ()), (alerts2, (U,))):
         try:
             fn(*args)
         except Exception:

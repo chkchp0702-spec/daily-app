@@ -134,6 +134,10 @@ def perf_one(s, extra=None):
            "maxup": r2((float(after["High"].max()) / p0 - 1) * 100), "maxdd": r2((float(after["Low"].min()) / p0 - 1) * 100)}
     for h in HORIZONS:
         out[f"r{h}"] = r2((float(closes.iloc[h]) / p0 - 1) * 100) if len(closes) > h else None
+    out["path"] = [r2((float(v) / p0 - 1) * 100, 1) for v in closes.values[:61]]      # 신호 뒤 60거래일 경로(%)
+    for k in ("depth", "weeks", "handle", "rs", "gap", "vol", "boxw", "days"):
+        if s.get(k) is not None and k not in out:
+            out["f_" + k] = s.get(k)
     if extra:
         out.update(extra(s, after, p0) or {})
     return out
@@ -174,6 +178,13 @@ def cup_extra(s, after, p0):
         o.update({"bdays": int(len(post) - 1), "bmax": r2((mx / pv - 1) * 100), "bnow": r2((float(post["Close"].iloc[-1]) / pv - 1) * 100),
                   "bst": "실패" if len(fail) else "성공" if mx >= pv * 1.2 else "진행",
                   "bfd": fail.index[0].strftime("%Y-%m-%d") if len(fail) else ""})
+        full = PX.get(ysym(s["code"])) if PX.get(ysym(s["code"])) is not None else PX.get(ysym(s["code"])[:-3] + ".KQ") if ysym(s["code"]).endswith(".KS") else None
+        if full is not None:
+            i = list(full.index).index(hit.index[0]) if hit.index[0] in full.index else None
+            if i is not None:
+                w = full["Close"].iloc[max(0, i - 30): i + 31]
+                o["bpath"] = [r2((float(v) / pv - 1) * 100, 1) for v in w.values]
+                o["bpi"] = int(min(30, i))                                 # 돌파일 위치
     return o
 
 
@@ -347,6 +358,50 @@ def danta():
         eq.append([d[5:].replace("-", "/"), r2(day), r2(cum)])
     order = ["09시", "10시", "11~12시", "13시 이후"]
     pat = fail_patterns(rows)
+    # 그날 코스닥 등락별 성적 (「오늘 같은 장」 승률)
+    by_m, kq = {}, {}
+    try:
+        load_prices(["^KQ11"], period="6mo")
+        k = PX.get("^KQ11")
+        if k is not None:
+            ch = k["Close"].pct_change() * 100
+            kq = {d.strftime("%Y-%m-%d"): r2(v) for d, v in ch.dropna().items()}
+    except Exception as e:
+        print("코스닥 실패", e)
+    def mb(v):
+        return None if v is None else "코스닥 −1% 아래" if v < -1 else "코스닥 −1~0%" if v < 0 else "코스닥 0~+1%" if v < 1 else "코스닥 +1% 위"
+    for r in rows:
+        b = mb(kq.get(r["d"]))
+        if b:
+            r["kq"] = kq.get(r["d"])
+            by_m.setdefault(b, []).append(r)
+    mkt_order = ["코스닥 −1% 아래", "코스닥 −1~0%", "코스닥 0~+1%", "코스닥 +1% 위"]
+    # 알람 되감기: 그날 1분 스냅샷(stock-screener data/days)에서 알람 전 30분 ~ 뒤 90분
+    replay = {}
+    try:
+        import pandas as pd
+        for f in glob.glob(os.path.join(SRC, "stock-screener", "data", "days", "*.csv.gz")):
+            day = os.path.basename(f)[:8]
+            dd = f"{day[:4]}-{day[4:6]}-{day[6:8]}"
+            todays = [r for r in rows if r["d"] == dd]
+            if not todays:
+                continue
+            m = pd.read_csv(f, dtype={"code": str, "t": str}, usecols=["t", "code", "종가"])
+            for r in todays:
+                sub = m[m["code"] == r["code"]].copy()
+                if not len(sub):
+                    continue
+                sub["mi"] = sub["t"].str[:2].astype(int) * 60 + sub["t"].str[2:4].astype(int)
+                at = int((r["time"] or "00:00")[:2]) * 60 + int((r["time"] or "00:00")[3:5])
+                w = sub[(sub["mi"] >= at - 30) & (sub["mi"] <= at + 90)].drop_duplicates("mi")
+                if len(w) >= 5:
+                    replay[f'{r["d"]}|{r["time"]}|{r["code"]}'] = {"t0": at, "p": r["price"], "s": [[int(a - at), float(b)] for a, b in zip(w["mi"], w["종가"])],
+                                                                   "stop": r.get("stp"), "t1": r.get("t1p")}
+    except Exception as e:
+        print("되감기 실패", e)
+    best = {}
+    for t, rs in by_t.items():
+        best[t] = [dict(code=x["code"], name=x["name"], d=x["d"], time=x["time"], pnl=x["pnl"], hi=x["hi"], lo=x["lo"], now=x["now"]) for x in sorted(rs, key=lambda x: -(x["pnl"] or -99))[:3]]
     # 오늘 연속 손절 (가상 매매 기준, 시간 순)
     today = sorted([r for r in rows if r["d"] == max(r["d"] for r in rows)], key=lambda r: r["time"] or "")
     streak = 0
@@ -356,7 +411,8 @@ def danta():
     js("danta_stats.json", {"updated": NOW.strftime("%Y-%m-%d %H:%M"), "all": blk(rows),
                             "by_type": {k: blk(v) for k, v in sorted(by_t.items(), key=lambda x: -len(x[1]))},
                             "by_slot": {k: blk(by_h[k]) for k in order if k in by_h}, "quality": qual,
-                            "patterns": pat, "today": {"d": today[0]["d"] if today else None, "n": len(today), "streak": streak, "pnl": day_pnl,
+                            "patterns": pat, "by_mkt": {k: blk(by_m[k]) for k in mkt_order if k in by_m}, "kq": kq, "replay": replay, "best": best,
+                            "today": {"d": today[0]["d"] if today else None, "n": len(today), "streak": streak, "pnl": day_pnl,
                                                        "stops": sum(1 for r in today if r["hits"])},
                             "equity": eq, "journal": sorted(rows, key=lambda r: (r["d"], r["time"] or ""), reverse=True)[:200]})
     print("단타", len(rows), flush=True)
@@ -802,15 +858,30 @@ def quiet_now(q=QUIET):
 def log_push(topic, title, msg, tab, syms=None):
     lg = jl(LOG_P, []) or []
     lg.insert(0, {"t": dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M"), "topic": topic, "title": title, "msg": msg[:300], "tab": tab,
-                  "syms": syms or []})
+                  "syms": syms or [], "lv": level_of(topic, title)})
     json.dump(lg[:300], open(LOG_P, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 
 
-def push(topic, title, msg, tab, key, tags="chart_with_upwards_trend", syms=None, quiet=QUIET, full_topic=None, log=True):
+LEVEL = {"hi": ("🔴", 4), "mid": ("🟡", 3), "lo": ("⚪", 2)}
+
+
+def level_of(topic, title):
+    """중요도: 🔴 지금 봐야 함 / 🟡 오늘 중 / ⚪ 참고"""
+    t = title
+    if any(k in t for k in ("돌파 ", "돌파 1", "목표가 도달", "손절가 도달", "연속 손절", "국면 변화", "매도 경보")) and "임박" not in t:
+        return "hi"
+    if topic in ("brief", "whale") or "요약" in t or "성적" in t:
+        return "lo"
+    return "mid"
+
+
+def push(topic, title, msg, tab, key, tags="chart_with_upwards_trend", syms=None, quiet=QUIET, full_topic=None, log=True, level=None):
     sent = jl(SENT_P, {}) or {}
     if key in sent:
         return
-    body = {"topic": full_topic or TOPIC + topic, "title": title, "message": msg, "tags": [tags], "click": APP + "#" + tab}
+    lv = level or level_of(topic, title)
+    title = LEVEL[lv][0] + " " + title
+    body = {"topic": full_topic or TOPIC + topic, "title": title, "message": msg, "tags": [tags], "click": APP + "#" + tab, "priority": LEVEL[lv][1]}
     if quiet and quiet_now(quiet):
         body["priority"] = 2
     try:

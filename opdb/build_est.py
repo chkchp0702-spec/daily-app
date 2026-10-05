@@ -54,6 +54,19 @@ def main():
                             if a_ == a_ and a_ is not None and e_ == e_ and e_ is not None:
                                 surp.append([i.strftime("%Y-%m-%d"), round(float(e_), 4), round(float(a_), 4)])
                         surp = sorted(surp)[-8:]
+                        # 실적 발표 다음 거래일 반응 (발표일 종가 → 다음 날 종가, 장 마감 후 발표가 많아서)
+                        if surp:
+                            signal.alarm(20)
+                            h = t.history(period="2y", interval="1d")["Close"].dropna()
+                            signal.alarm(0)
+                            h.index = h.index.tz_localize(None).normalize()
+                            import pandas as pd
+                            for row in surp:
+                                d0 = pd.Timestamp(row[0])
+                                b = h[h.index <= d0]
+                                a = h[h.index > d0]
+                                if len(b) and len(a):
+                                    row.append(round((float(a.iloc[0]) / float(b.iloc[-1]) - 1) * 100, 2))
                 except Exception:
                     signal.alarm(0)
             json.dump({"estimates": est, "ltg": ltg, "cal": cal, "surp": surp}, open(os.path.join(a.out, "e", fname(s) + ".json"), "w"), ensure_ascii=False)

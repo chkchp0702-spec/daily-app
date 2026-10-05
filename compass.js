@@ -140,6 +140,7 @@
       h += card("🧊 약한 업종", m.weak.map(function(x){ return '<div class="cp-wk"><b data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><div class="cp-sts">' + x.lead.slice(-2).map(sChip).join("") + '</div></div>'; }).join(""));
     }
     if (window.CPX) try { h += window.CPX(m, k, C); } catch(err) { console.error(err); }
+    if (window.CPX2) try { var cut = h.indexOf("</section>") + 10; h = h.slice(0, cut) + window.CPX2(m, k, C) + h.slice(cut); } catch(err) { console.error(err); }
     return h;
   }
 
@@ -194,11 +195,12 @@
       var ks = ORDER.filter(function(k){ return C.markets[k]; });
       if (!ks.length){ $("cpbox").innerHTML = ""; return; }
       CPSEL = ks.indexOf(store.cpm) >= 0 ? store.cpm : (ks.indexOf("KR") >= 0 ? "KR" : ks[0]);
-      $("cpbox").innerHTML = '<div id="cplive"></div>' + overview(C) + strength(C) +
+      $("cpbox").innerHTML = '<div id="cplive"></div>' + overview(C) + '<div id="cptop"></div>' + strength(C) +
         '<div class="seg2 cp-seg" id="cpseg">' + ks.map(function(k){ return '<button data-m="' + k + '"' + (k === CPSEL ? ' class="on"' : '') + '>' + C.markets[k].flag + " " + e(C.markets[k].name) + '</button>'; }).join("") + '</div>' +
         '<div id="cpd">' + detail(CPSEL, C) + '</div>';
       wire(C);
       if (window.CPLIVE) try { CPLIVE($("cplive"), C); } catch(err) { console.error(err); }
+      if (window.CPTOP) try { $("cptop").innerHTML = CPTOP(C); } catch(err) { console.error(err); }
     }).catch(function(){ $("cpbox").innerHTML = '<div class="empty">나침반 자료를 못 불러왔어요.</div>'; });
     // 모닝 섹터 브리핑: 그날 것이 없으면(휴장·주말) 가장 최근 브리핑을 이어서 보여주기
     var rest = it.files.filter(function(f){ return f !== "compass.json"; });
