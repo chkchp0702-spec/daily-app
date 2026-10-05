@@ -31,7 +31,7 @@
       '<text x="6" y="14" fill="#c9a227" font-size="10.5" font-weight="700">경기 속 조정</text>' +
       '<text x="' + (W - 6) + '" y="' + (H - 6) + '" text-anchor="end" fill="#c9a227" font-size="10.5" font-weight="700">천장 조심</text>' +
       '<text x="6" y="' + (H - 6) + '" fill="#7fb0ff" font-size="10.5" font-weight="700">하락 국면</text>' +
-      '<text x="' + (cx + 4) + '" y="' + (H - 18) + '" fill="#6b7385" font-size="9">시장 타이밍 →</text><text x="' + (cx + 4) + '" y="26" fill="#6b7385" font-size="9">↑ 경기 사이클</text>';
+      '<text x="' + (W - 6) + '" y="' + (cy + 12) + '" text-anchor="end" fill="#6b7385" font-size="9">시장 타이밍 →</text><text x="' + (cx - 4) + '" y="' + (cy - 6) + '" text-anchor="end" fill="#6b7385" font-size="9">↑ 경기 사이클</text>';
     var h = (R.hist || []).filter(function(x){ return x[1] != null && x[2] != null; }).slice(-26);
     if (h.length > 1) s += '<polyline points="' + h.map(function(x){ return X_(x[2]).toFixed(1) + "," + Y_(x[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="#8a94a8" stroke-opacity=".5" stroke-width="1.4"/>' +
       h.map(function(x, i){ return '<circle cx="' + X_(x[2]).toFixed(1) + '" cy="' + Y_(x[1]).toFixed(1) + '" r="2.2" fill="#8a94a8" fill-opacity="' + (0.2 + i / h.length * 0.6).toFixed(2) + '" data-tip="' + e(x[0].slice(2) + " · 경기 " + sg(x[1]) + " · 시장 " + sg(x[2])) + '"/>'; }).join("");
