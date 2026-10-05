@@ -1,5 +1,5 @@
 """
-💬 의견함 — 앱에서 보낸 건의(ntfy 비밀 주제)를 모아 archive/x/ideas.json 과 archive/fb/<id>/ 첨부로 저장.
+💬 의견함 — 앱에서 보낸 건의(휴대폰에서 암호화된 상태)(ntfy 비밀 주제)를 모아 archive/x/ideas.json 과 archive/fb/<id>/ 첨부로 저장.
   ntfy.sh 는 글을 12시간, 첨부를 3시간 보관하므로 매시간 가져온다 (feedback.yml + keeper).
   새 의견이 오면 텔레그램으로 알린다.
   python feedback.py
@@ -67,13 +67,13 @@ def main():
             continue
         it = by_id.get(iid)
         if it is None:
-            it = {"id": iid, "t": dt.datetime.fromtimestamp(m.get("time", 0), KST).strftime("%Y-%m-%d %H:%M"),
-                  "name": "", "text": "", "files": [], "status": "접수", "note": ""}
+            it = {"id": iid, "t": dt.datetime.fromtimestamp(m.get("time", 0), KST).strftime("%Y-%m-%d %H:%M"), "files": [], "status": "접수", "note": ""}
             by_id[iid] = it
             db["items"].append(it)
+        # 내용은 휴대폰에서 암호화돼 온다 — 서버는 암호문 그대로 저장만 한다
         if body.get("kind") == "idea":
-            it["name"] = str(body.get("name", ""))[:40]
-            it["text"] = str(body.get("text", ""))[:4000]
+            for k in ("k", "iv", "ct"):
+                it[k] = str(body.get(k, ""))[:20000]
             it["nfile"] = int(body.get("n", 0) or 0)
             new.append(it)
         elif body.get("kind") == "idea-file":
@@ -84,19 +84,13 @@ def main():
                     data = get(url, 120, raw=True)
                     d = os.path.join(FB, iid)
                     os.makedirs(d, exist_ok=True)
-                    nm = safe(body.get("fname") or att.get("name"))
-                    p = os.path.join(d, nm)
-                    k = 1
-                    while os.path.exists(p) and k < 20:
-                        base, ext = os.path.splitext(nm)
-                        p = os.path.join(d, f"{base}_{k}{ext}")
-                        k += 1
+                    p = os.path.join(d, f"{int(body.get('i', len(it['files']) + 1))}.bin")
                     open(p, "wb").write(data)
-                    it["files"].append({"name": os.path.basename(p), "path": p.replace(os.sep, "/"), "type": att.get("type", ""), "size": len(data)})
+                    it["files"] = [f for f in it["files"] if f["path"] != p.replace(os.sep, "/")] + [
+                        {"path": p.replace(os.sep, "/"), "iv": body.get("iv"), "miv": body.get("miv"), "meta": body.get("meta"), "size": len(data)}]
                 except Exception as e:
                     print("첨부 받기 실패", iid, e)
-                    it.setdefault("lost", 0)
-                    it["lost"] += 1
+                    it["lost"] = it.get("lost", 0) + 1
         seen.add(m["id"])
     db["items"].sort(key=lambda x: x["t"], reverse=True)
     db["seen"] = sorted(seen)[-500:]
@@ -104,7 +98,7 @@ def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(db, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
     for it in new:
-        tg(f"💬 CH Investing 의견함 — {it['name'] or '이름 없음'}\n{it['text'][:600]}" + (f"\n📎 첨부 {it.get('nfile')}개" if it.get("nfile") else ""))
+        tg("💬 CH Investing 의견함에 새 의견이 들어왔어요" + (f" (첨부 {it.get('nfile')}개)" if it.get("nfile") else "") + "\n🔒 내용은 앱 의견함 → 운영자에서 볼 수 있어요")
     print(f"의견 {len(new)}건 새로 · 전체 {len(db['items'])}건")
 
 
