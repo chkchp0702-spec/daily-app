@@ -1,0 +1,30 @@
+name: live
+# 나침반 장중판 (한국): 평일 09:05 ~ 15:35 30분마다
+on:
+  schedule:
+    - cron: "5,35 0-6 * * 1-5"   # KST 09:05 ~ 15:35
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: live
+  cancel-in-progress: true
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: 장중 나침반
+        env:
+          FORCE: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
+        run: python live.py
+      - name: 저장
+        run: |
+          git config user.name "bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add archive/x/live_kr*.json 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "live $(TZ=Asia/Seoul date '+%F %H:%M')" && (git pull --rebase -q || git pull --rebase -q) && git push)

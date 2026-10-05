@@ -119,3 +119,8 @@ table.sens td small{margin-left:4px;font-size:11px}
 .pl:last-child{border:0}
 .pl b{font-size:13.5px}
 .pl small{display:block;color:var(--sub);font-size:12px;margin-top:2px;word-break:keep-all}
+.card.lv{border-color:#4dd47a;background:linear-gradient(135deg,color-mix(in srgb,#4dd47a 10%,var(--panel)),var(--panel))}
+.lv-ix{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px}
+.lv-r{padding:7px 0;border-bottom:1px solid var(--line)}
+.lv-r:last-of-type{border:0}
+.lv-r .cp-sts{margin-top:4px}

@@ -109,6 +109,35 @@
       e(S.fx_name) + '이 오를 때 같이 오르던 업종: <b>' + best.map(function(x){ return x.name; }).join(", ") + '</b> · 내리던 업종: <b>' + worst.map(function(x){ return x.name; }).join(", ") + '</b>. ' +
       '숫자는 상관계수(−1~+1). 0.3 넘으면 꽤 같이 움직이는 편.</p>');
   }
+  /* ⚡ 장중 나침반 (한국, 30분마다) */
+  function liveLine(sn){
+    if (!sn || sn.length < 2) return "";
+    var br = sn.map(function(x){ return x[1] + x[2] ? Math.round(x[1] / (x[1] + x[2]) * 100) : 50; });
+    return '<div class="sub2">오늘 장중 흐름 <span class="mut">30분마다</span></div>' + V.lines([{name: "상승 종목 비율(%)", color: "#e66767", vals: br}, {name: "코스피 등락(%)", color: "#7c9cff", vals: sn.map(function(x){ return x[3]; })}],
+      sn.map(function(x){ return x[0]; }), {h: 130, nodots: sn.length > 8 ? 1 : 0});
+  }
+  window.CPLIVE = function(el, C){
+    if (!el) return;
+    var test = /[?&]livetest/.test(location.search);
+    getJSON("archive/x/" + (test ? "live_kr_test.json" : "live_kr.json") + "?" + Date.now()).then(function(L){
+      if (!L || (!test && L.date !== P.today())){ el.innerHTML = '<p class="note" style="margin:0 4px 12px">⚡ 장중 나침반(한국)은 평일 장중 30분마다 새로 계산해요. 아래는 마감 기준이에요.</p>'; return; }
+      var t = Math.max(1, L.up + L.down + L.flat), r = L.up / Math.max(1, L.up + L.down) * 100;
+      var y = C && C.markets && C.markets.KR, yr = y ? y.up / Math.max(1, y.up + y.down) * 100 : null;
+      var chip_ = function(x){ return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s) + '\')"><b>' + e(x.n) + '</b><span class="' + cls(x.r) + '">' + pct(x.r) + '</span></a>'; };
+      var h = '<div class="row"><div class="lv-ix">' + L.index.map(function(i){ return '<span>' + e(i.name) + ' <b>' + V.fmt(i.last) + '</b> <b class="' + cls(i.chg) + '">' + pct(i.chg) + '</b></span>'; }).join("") + '</div>' +
+        '<button class="btn" id="lvre">↻</button></div>' +
+        '<div class="cp-bb tall" style="margin-top:10px"><i class="u" style="flex:' + L.up + '"></i><i class="f" style="flex:' + L.flat + '"></i><i class="d" style="flex:' + L.down + '"></i></div>' +
+        '<div class="cp-n"><span class="up">▲ ' + L.up.toLocaleString() + '</span><span class="mut">상승 비율 ' + r.toFixed(0) + '%' + (yr != null ? ' (어제 마감 ' + yr.toFixed(0) + '%)' : '') + '</span><span class="dn">▼ ' + L.down.toLocaleString() + '</span></div>' +
+        '<p class="note">종목 중간값 <b class="' + cls(L.median) + '">' + pct(L.median) + '</b> · 상한가 ' + L.limit_up + ' · 하한가 ' + L.limit_dn + '</p>' + liveLine(L.snaps);
+      if (L.sectors && L.sectors.length) h += '<div class="sub2">섹터 지금</div>' + V.dbars(L.sectors.map(function(x){ return {label: x.icon + " " + e(x.name), v: x.r, tip: "<b>" + e(x.name) + "</b> " + pct(x.r) + " · ▲" + x.up + " ▼" + x.down + "<br>" + x.big.map(function(b){ return e(b.n) + " " + pct(b.r); }).join(", ")}; }));
+      if (L.strong && L.strong.length) h += '<div class="sub2">🔥 지금 강한 업종</div>' + L.strong.slice(0, 5).map(function(x){ return '<div class="lv-r"><div class="row"><b>' + e(x.name) + '</b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
+      if (L.themes && L.themes.length) h += '<div class="sub2">🏷 지금 강한 테마 <span class="mut">+3% 넘은 종목 수</span></div>' + L.themes.slice(0, 6).map(function(x){ return '<div class="lv-r"><div class="row"><b>' + e(x.name) + ' <span class="mut">' + x.up3 + '/' + x.n + '</span></b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
+      if (L.value && L.value.length) h += '<div class="sub2">💰 거래대금 상위</div><div class="cp-sts">' + L.value.slice(0, 10).map(function(x){ return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s) + '\')"><b>' + e(x.n) + '</b><span class="' + cls(x.r) + '">' + pct(x.r) + '</span><span class="mut">' + x.v.toLocaleString() + '억</span></a>'; }).join("") + '</div>';
+      el.innerHTML = '<section class="card lv"><h3>⚡ 장중 나침반 · 한국 <span class="mut">' + e(L.t) + ' 기준' + (test ? " (시험)" : "") + '</span></h3>' + h +
+        '<p class="note">네이버 시세로 코스피·코스닥 ' + L.total.toLocaleString() + '종목을 30분마다 다시 세요 (우선주·스팩 제외). 국면·신고가 등 나머지는 마감 기준이에요.</p></section>';
+      var b = $("lvre"); if (b) b.onclick = function(){ el.innerHTML = '<div class="loading">새로 불러오는 중…</div>'; CPLIVE(el, C); };
+    }).catch(function(){ el.innerHTML = ""; });
+  };
   window.CPX = function(m, k, C){
     CMP = C;
     return regHist(m) + rotSlider(m, k) + hlTrend(m) + sens(m) + ((k === "KR" || k === "US") ? link(C) : "");
