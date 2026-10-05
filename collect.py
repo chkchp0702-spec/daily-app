@@ -169,10 +169,20 @@ def whale():
 
 
 # ---------- 컵 / 갭 ----------
+EYE_FROM = "2026-10-06"   # 이날부터 컵·갭은 눈 검사를 마친 결과만 앱에 올린다
+
+
+def eye_done(mode, day):
+    try:
+        return json.load(open(os.path.join("archive", "x", f"eye_{mode}.json"), encoding="utf-8")).get("scan_date") == day
+    except Exception:
+        return False
+
+
 def pdf_series(repo, prefix, cat):
     for f in glob.glob(src(repo, "results", f"{prefix}_*.pdf")):
         m = DATE_RE.search(os.path.basename(f))
-        if m:
+        if m and m.group(1) < EYE_FROM:      # 눈 검사 이후 날짜는 PDF(스캐너 1차 목록)를 올리지 않는다
             put(cat, m.group(1), "report.pdf", f)
 
 
@@ -222,6 +232,9 @@ def cup_cards():
                 "rs": num(r.get("상대강도")), "score": num(r.get("컵점수")), "acc": num(r.get("매집강도")),
                 "brk": _tf(r.get("돌파")), "brkday": r.get("돌파일", ""), "ath": num(r.get("현재가_최고가대비%")),
                 "point": r.get("투자포인트", ""), "streak": num(r.get("연속일")), "new": _tf(r.get("NEW")), "tag": tag}
+    if day >= EYE_FROM and not eye_done("cup", day):
+        print("컵: 눈 검사 전이라 오늘 결과를 아직 올리지 않음", day)
+        return
     allc, eye = eye_filter("cup", day, R("list1_cup.csv"))
     okc = {str(r.get("코드", "")) for r in allc}
     ath = [card(r, "사상최고가 돌파") for r in R("list0_ath_breakout.csv") if not eye["done"] or str(r.get("코드", "")) in okc]
@@ -243,6 +256,9 @@ def cup_cards():
 def gap_cards():
     day = _latest("Gap", "report_gap")
     if not day:
+        return
+    if day >= EYE_FROM and not eye_done("gap", day):
+        print("갭: 눈 검사 전이라 오늘 결과를 아직 올리지 않음", day)
         return
     allg, eye = eye_filter("gap", day, _rows(src("Gap", "results", "list1_gap.csv")))
     def card(r):

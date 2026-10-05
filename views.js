@@ -274,11 +274,8 @@
   function stat(label, v){ return '<div><small>' + label + '</small><b>' + v + '</b></div>'; }
 
   function eyeLine(d, what){
-    var y = d && d.eye; if (!y) return "";
-    if (!y.done) return '<p class="eye off">👁 눈 검사 전 — 스캐너 1차 결과 그대로예요 (' + e(y.why || "") + ')</p>';
-    var dr = y.drop || [];
-    return '<div class="eye"><b>👁 눈으로 걸러냄</b> 스캐너 1차 ' + y.n_in + '개 → ' + what + '으로 보이는 ' + y.n_keep + '개만 남김 <span class="mut">' + e((y.checked || "").slice(5)) + '</span>' +
-      (dr.length ? '<details><summary>뺀 종목 ' + dr.length + '개 보기</summary><div class="eye-l">' + dr.map(function(x){ return '<span><a href="javascript:openOP(\'' + e(x.code) + '\')">' + e(x.name || x.code) + '</a> <em>' + e(x.why) + '</em></span>'; }).join("") + '</div></details>' : '') + '</div>';
+    var y = d && d.eye; if (!y || !y.done) return "";
+    return '<p class="eye">👁 차트를 눈으로 확인해 ' + what + '으로 보이는 종목만 담았어요</p>';
   }
   /* ======================= 컵차트 ======================= */
   RENDER.cup = function(it, el){
