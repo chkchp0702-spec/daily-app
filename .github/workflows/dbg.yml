@@ -14,15 +14,21 @@ jobs:
       - run: pip -q install yfinance pandas
       - run: |
           python - <<'PY'
-          import yfinance as yf, json, os
+          import yfinance as yf, json, os, pandas as pd
+          tks = "${{ inputs.tickers }}".split()
           out = {}
-          for t in "${{ inputs.tickers }}".split():
-              d = yf.download(t, period="2y", auto_adjust=False, progress=False)
-              if isinstance(d.columns, __import__("pandas").MultiIndex): d.columns = d.columns.get_level_values(0)
-              d = d.dropna()
-              out[t] = [[i.strftime("%Y-%m-%d"), float(r.Open), float(r.High), float(r.Low), float(r.Close), float(r.Volume)] for i, r in d.iterrows()]
+          for i in range(0, len(tks), 80):
+              part = tks[i:i+80]
+              df = yf.download(part, period="2y", auto_adjust=False, progress=False, group_by="ticker", threads=True)
+              for t in part:
+                  try:
+                      d = (df[t] if isinstance(df.columns, pd.MultiIndex) else df).dropna()
+                      out[t] = [[i_.strftime("%Y-%m-%d"), round(float(r.Open),4), round(float(r.High),4), round(float(r.Low),4), round(float(r.Close),4), float(r.Volume)] for i_, r in d.iterrows()]
+                  except Exception as e:
+                      print(t, e)
           os.makedirs("archive/x", exist_ok=True)
           json.dump(out, open("archive/x/dbg_prices.json", "w"), separators=(",", ":"))
+          print(len(out))
           PY
           git config user.name bot; git config user.email bot@x
           git add archive/x/dbg_prices.json; git commit -qm "dbg prices" && git push -q
