@@ -341,6 +341,11 @@ def build(daily, hl, mkt_of, dest, hlh=None):
             if x["ind"]:
                 hic[x["ind"]] += 1
         mk["high_inds"] = sorted(hic.items(), key=lambda kv: -kv[1])[:8]
+        hbi = defaultdict(list)
+        for x in hi_rows:
+            if x["ind"] and len(hbi[x["ind"]]) < 15:
+                hbi[x["ind"]].append(stock(x))
+        mk["high_by_ind"] = {k: hbi[k] for k, _ in mk["high_inds"]}
         # 최근 40일 신고가·신저가 종목 수
         if hlh:
             hh = defaultdict(lambda: [0, 0])

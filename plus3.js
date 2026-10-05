@@ -130,8 +130,8 @@
         '<div class="cp-n"><span class="up">▲ ' + L.up.toLocaleString() + '</span><span class="mut">상승 비율 ' + r.toFixed(0) + '%' + (yr != null ? ' (어제 마감 ' + yr.toFixed(0) + '%)' : '') + '</span><span class="dn">▼ ' + L.down.toLocaleString() + '</span></div>' +
         '<p class="note">종목 중간값 <b class="' + cls(L.median) + '">' + pct(L.median) + '</b> · 상한가 ' + L.limit_up + ' · 하한가 ' + L.limit_dn + '</p>' + liveLine(L.snaps);
       if (L.sectors && L.sectors.length) h += '<div class="sub2">섹터 지금 <span class="mut">누르면 종목</span></div>' + V.dbars(L.sectors.map(function(x){ return {label: x.icon + " " + e(x.name) + ' <span class="hgo">›</span>', v: x.r, attr: ' data-lsec="' + e(x.k) + '" style="cursor:pointer"', tip: "<b>" + e(x.name) + "</b> " + pct(x.r) + " · ▲" + x.up + " ▼" + x.down + "<br>" + x.big.map(function(b){ return e(b.n) + " " + pct(b.r); }).join(", ")}; }));
-      if (L.strong && L.strong.length) h += '<div class="sub2">🔥 지금 강한 업종</div>' + L.strong.slice(0, 5).map(function(x){ return '<div class="lv-r"><div class="row"><b>' + e(x.name) + '</b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
-      if (L.themes && L.themes.length) h += '<div class="sub2">🏷 지금 강한 테마 <span class="mut">+3% 넘은 종목 수</span></div>' + L.themes.slice(0, 6).map(function(x){ return '<div class="lv-r"><div class="row"><b>' + e(x.name) + ' <span class="mut">' + x.up3 + '/' + x.n + '</span></b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
+      if (L.strong && L.strong.length) h += '<div class="sub2">🔥 지금 강한 업종</div>' + L.strong.slice(0, 5).map(function(x){ return '<div class="lv-r"><div class="row"><b data-ind="' + e(x.name) + '" data-cm="KR" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
+      if (L.themes && L.themes.length) h += '<div class="sub2">🏷 지금 강한 테마 <span class="mut">+3% 넘은 종목 수</span></div>' + L.themes.slice(0, 6).map(function(x){ return '<div class="lv-r"><div class="row"><b data-theme="' + e(x.name) + '" data-lead="' + e((x.lead[0] || {}).n || "") + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span> <span class="mut">' + x.up3 + '/' + x.n + '</span></b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
       if (L.value && L.value.length) h += '<div class="sub2">💰 거래대금 상위</div><div class="cp-sts">' + L.value.slice(0, 10).map(function(x){ return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s) + '\')"><b>' + e(x.n) + '</b><span class="' + cls(x.r) + '">' + pct(x.r) + '</span><span class="mut">' + x.v.toLocaleString() + '억</span></a>'; }).join("") + '</div>';
       el.innerHTML = '<section class="card lv"><h3>⚡ 장중 나침반 · 한국 <span class="mut">' + e(L.t) + ' 기준' + (test ? " (시험)" : "") + '</span></h3>' + h +
         '<p class="note">네이버 시세로 코스피·코스닥 ' + L.total.toLocaleString() + '종목을 30분마다 다시 세요 (우선주·스팩 제외). 국면·신고가 등 나머지는 마감 기준이에요.</p></section>';
@@ -210,14 +210,47 @@
         a.forEach(function(x){ box.appendChild(x); }); }, 2500);
     });
   }
+  // ④ 업종 (신고가 업종·강한 업종·약한 업종) — 그 시장의 같은 업종 종목 전체
+  var SECJ = null;
+  function secAll(){ return SECJ || (SECJ = getJSON(OPD + "sec.json").catch(function(){ return {}; })); }
+  function mktOf(sym){ return /\.K[SQ]$/.test(sym) ? "KR" : /\.T$/.test(sym) ? "JP" : /\.HK$/.test(sym) ? "HK" : /\.(SS|SZ)$/.test(sym) ? "CN" : /^[A-Z][A-Z.\-]*$/.test(sym) ? "US" : ""; }
+  function openIndustry(mk, ind, mode){
+    var m = CMP && CMP.markets[mk];
+    var body = sheet((mode === "high" ? "🏔️ " : "🏭 ") + e(ind) + (m ? " · " + m.flag + " " + e(m.name) : ""));
+    var info = m && (m.strong || []).concat(m.weak || []).filter(function(x){ return x.name === ind; })[0];
+    var hiSet = {}; ((m && m.high_list) || []).forEach(function(x){ hiSet[x.s] = 1; });
+    ((m && m.high_by_ind && m.high_by_ind[ind]) || []).forEach(function(x){ hiSet[x.s] = 1; });
+    secAll().then(function(S){
+      var L = Object.keys(S).filter(function(k){ var v = S[k]; return v && v[1] === ind && mktOf(k) === mk; })
+        .map(function(k){ return {s: k, cap: S[k][2] || 0}; }).sort(function(a, b){ return b.cap - a.cap; }).slice(0, 40);
+      if (!L.length){ body.innerHTML = '<div class="empty">이 업종의 종목 목록을 못 찾았어요.</div>'; return; }
+      var names = {}; (window.OPIDX || []).forEach(function(r){ names[r.sym] = r.name; });
+      var ready = window.OPIDX ? Promise.resolve() : (window.opLoadIdx ? opLoadIdx().then(function(){ (OPIDX || []).forEach(function(r){ names[r.sym] = r.name; }); }) : Promise.resolve());
+      ready.then(function(){
+        if (mk === "KR") L = L.filter(function(x){ return !/우[A-C]?$|우\(.*\)$/.test(names[x.s] || ""); });
+        var h = (info ? kv([["오늘", pct(info.r1), cls(info.r1)], ["1주", pct(info.r5), cls(info.r5)], ["종목", info.n + "개"], ["상승 / 하락", '<span class="up">' + info.up + '</span> / <span class="dn">' + info.down + '</span>']]) : '') +
+          '<section class="card"><h3>' + (mode === "high" ? "52주 신고가 종목 먼저 · 🏔️ = 1년 최고가 근처" : "시가총액 큰 순 · 👑 1위") + ' <span class="mut">' + L.length + '종목</span></h3><div class="ss" id="indss">' +
+          L.map(function(x, i){ return row(x.s, names[x.s] || V.cd(x.s), null, i === 0 && mode !== "high", hiSet[x.s] ? "🏔️ 52주 신고가" : ""); }).join("") + '</div></section>' +
+          '<p class="note" style="padding:0 4px 90px">' + (m ? e(m.date) + " 마감 기준. " : "") + '종목을 누르면 종목리포트로 가요.</p>';
+        body.innerHTML = h; fillPx(body);
+        // 가격이 들어오면 1년 최고가 근처 표시 + (신고가 모드면) 위로
+        setTimeout(function(){ var box = $("indss"); if (!box) return;
+          var a = [].slice.call(box.children);
+          a.forEach(function(r){ V.price(r.getAttribute("data-hpx")).then(function(p){ if (p && p[3] && p[1] >= p[3] * 0.99){ r.setAttribute("data-hi", 1); var sm = r.querySelector(".ss-n small"); if (sm){ if (!sm.textContent) sm.textContent = "🏔️ 1년 최고가 근처"; } else r.querySelector(".ss-n").insertAdjacentHTML("beforeend", "<small>🏔️ 1년 최고가 근처</small>"); } }); });
+          if (mode === "high") setTimeout(function(){ a.sort(function(x, y){ return (y.hasAttribute("data-hi") ? 1 : 0) - (x.hasAttribute("data-hi") ? 1 : 0); }); a.forEach(function(x){ box.appendChild(x); }); }, 2000);
+        }, 300);
+      });
+    });
+  }
   function curMk(){ return store.cpm && CMP && CMP.markets[store.cpm] ? store.cpm : CMP && CMP.markets.KR ? "KR" : CMP ? Object.keys(CMP.markets)[0] : null; }
   document.addEventListener("click", function(ev){
-    var t = ev.target.closest && ev.target.closest("[data-hsec],[data-csec],[data-theme],[data-lsec]");
+    var t = ev.target.closest && ev.target.closest("[data-hsec],[data-csec],[data-theme],[data-lsec],[data-ind]");
     if (!t || (ev.target.closest("a[href^='javascript:openOP']") && !t.matches("a"))) return;
     ev.preventDefault();
     if (t.hasAttribute("data-hsec")) openHeat(t.getAttribute("data-hsec"));
     else if (t.hasAttribute("data-csec")) openSector(t.getAttribute("data-cm") || curMk(), t.getAttribute("data-csec"));
     else if (t.hasAttribute("data-lsec")) openSector("KR", t.getAttribute("data-lsec"));
+    else if (t.hasAttribute("data-ind")) openIndustry(t.getAttribute("data-cm") || curMk(), t.getAttribute("data-ind"), t.getAttribute("data-im"));
     else openTheme(t.getAttribute("data-theme"), t.getAttribute("data-lead"));
   });
   // 장중 섹터 발동: 테마 → 시트, 대장 → 종목리포트

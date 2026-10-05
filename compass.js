@@ -80,7 +80,7 @@
   function highs(m){
     if (!m.high_list || !m.high_list.length) return "";
     return card("🏔️ 52주 신고가 <span class='mut'>" + num(m.highs) + "종목 · 큰 회사 순</span>", '<div class="cp-sts">' + m.high_list.map(sChip).join("") + '</div>' +
-      (m.high_inds && m.high_inds.length ? '<div class="sub2">신고가가 많이 나온 업종</div>' + V.hbars(m.high_inds.map(function(x){ return {label: e(x[0]), v: x[1], text: x[1] + "개", color: "#e66767"}; })) : ""));
+      (m.high_inds && m.high_inds.length ? '<div class="sub2">신고가가 많이 나온 업종 <span class="mut">누르면 종목</span></div>' + V.hbars(m.high_inds.map(function(x){ return {label: e(x[0]) + ' <span class="hgo">›</span>', v: x[1], text: x[1] + "개", color: "#e66767", attr: ' data-ind="' + e(x[0]) + '" data-im="high" style="cursor:pointer"'}; })) : ""));
   }
 
   function detail(k, C){
@@ -124,9 +124,9 @@
     h += rotation(m) + highs(m);
     // 6) 강한 업종
     if (m.strong.length){
-      h += sec("🔥 오늘 강한 업종 TOP " + Math.min(5, m.strong.length) + " <span class='mut'>끌어올린 종목</span>") +
+      h += sec("🔥 오늘 강한 업종 TOP " + Math.min(5, m.strong.length) + " <span class='mut'>업종 이름을 누르면 전체 종목</span>") +
         m.strong.slice(0, 5).map(function(x, i){
-          return '<section class="card cp-ind"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n">' + e(x.name) + '</b></div>' +
+          return '<section class="card cp-ind"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n" data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b></div>' +
             '<b class="' + cls(x.r1) + ' cp-r">' + pct(x.r1) + '</b></div>' +
             '<div class="cp-mini"><span class="up">▲' + x.up + '</span><span class="dn">▼' + x.down + '</span><span class="mut">' + x.n + '종목 · 1주 ' + pct(x.r5) + '</span></div>' +
             '<div class="cp-sts">' + x.lead.map(sChip).join("") + '</div></section>';
@@ -137,7 +137,7 @@
       (m.laggards.length ? '<div class="sub2">많이 내린 대형주</div><div class="cp-sts">' + m.laggards.map(sChip).join("") + '</div>' : '') +
       '<div class="sub2">시가총액 TOP 10</div><div class="cp-sts">' + m.top_cap.map(sChip).join("") + '</div>');
     if (m.weak && m.weak.length){
-      h += card("🧊 약한 업종", m.weak.map(function(x){ return '<div class="cp-wk"><b>' + e(x.name) + '</b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><div class="cp-sts">' + x.lead.slice(-2).map(sChip).join("") + '</div></div>'; }).join(""));
+      h += card("🧊 약한 업종", m.weak.map(function(x){ return '<div class="cp-wk"><b data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><div class="cp-sts">' + x.lead.slice(-2).map(sChip).join("") + '</div></div>'; }).join(""));
     }
     if (window.CPX) try { h += window.CPX(m, k, C); } catch(err) { console.error(err); }
     return h;
