@@ -494,8 +494,9 @@ def pension_flow(code):
         if out:
             out["src"] = "다음"
             return out
-    except Exception:
-        pass
+        DIAG["daum"] = "키 없음: " + ",".join(sorted((rows or [{}])[0].keys()))[:200]
+    except Exception as e:
+        DIAG["daum"] = f"{type(e).__name__} {str(e)[:120]}"
     try:
         end = dt.date.today()
         start = end - dt.timedelta(days=9)
@@ -510,12 +511,14 @@ def pension_flow(code):
         if out:
             out["src"] = "KRX"
             return out
-    except Exception:
-        pass
+        DIAG["krx"] = "연기금 줄 없음: " + str(j)[:160]
+    except Exception as e:
+        DIAG["krx"] = f"{type(e).__name__} {str(e)[:120]}"
     return None
 
 
 SEC_MAP = None
+DIAG = {}          # 바깥 자료원 오류 기록 (accum_x.json 의 diag 로 남김)
 SEC_UA = {"User-Agent": "CH-Investing daily-app chkchp0702-spec@users.noreply.github.com", "Accept-Encoding": "identity"}
 
 
@@ -528,7 +531,8 @@ def sec_13dg(ticker):
             SEC_MAP = {v["ticker"].upper(): int(v["cik_str"]) for v in j.values()}
         cik = SEC_MAP.get(ticker.upper())
         if not cik:
-            return None
+            DIAG["sec_nocik"] = DIAG.get("sec_nocik", []) + [ticker]
+            return []
         j = hjson(f"https://data.sec.gov/submissions/CIK{cik:010d}.json", timeout=20, headers=SEC_UA)
         r = j.get("filings", {}).get("recent", {})
         cut = (dt.date.today() - dt.timedelta(days=60)).isoformat()
@@ -543,6 +547,7 @@ def sec_13dg(ticker):
         return out
     except Exception as e:
         P("13D/G 실패", ticker, e)
+        DIAG["sec"] = f"{ticker}: {type(e).__name__} {str(e)[:120]}"
         return None
 
 
@@ -584,16 +589,17 @@ def accum_plus(U):
             if pf:
                 o["pen"] = pf
         elif re.fullmatch(r"[A-Z][A-Z.\-]{0,6}", o["code"]):
-            f = cached("dg2", o["code"], lambda: sec_13dg(o["code"]))
+            f = cached("dg3", o["code"], lambda: sec_13dg(o["code"]))
             if f is not None:
                 o["dg"] = f
     for s in all_watch(U):
         if re.fullmatch(r"[A-Z][A-Z.\-]{0,6}", s) and not any(o["code"] == s for o in A["items"]):
-            f = cached("dg2", s, lambda: sec_13dg(s))
+            f = cached("dg3", s, lambda: sec_13dg(s))
             if f:
                 A.setdefault("watch_dg", {})[s] = f
     A["dropped"] = [{"code": c, "name": p.get("name"), "score": p.get("score"), "mkt": p.get("mkt")} for c, p in prev.items() if c not in rows][:20]
     A["prev_day"] = days[-2] if len(days) >= 2 else None
+    A["diag"] = DIAG
     json.dump(A, open(path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     P("매집+", len(A.get("items") or []), "빠짐", len(A["dropped"]))
 
