@@ -10,21 +10,24 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           exec > probe_out.txt 2>&1
-          UA="Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)"
-          curl -sv -m 30 "https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y3M" -o /dev/null 2>&1 | tail -15
-          for u in \
-            "https://api.db.nomics.world/v22/series/FED/H15/RIFLGFCY10_N.B?observations=1&format=json" \
-            "https://sdmx.oecd.org/public/rest/data/OECD.SDD.STES,DSD_STES@DF_CLI,4.1/KOR.M.LI...AA...H?startPeriod=2025-01&dimensionAtObservation=AllDimensions&format=csvfilewithlabels" \
-            "https://oui.doleta.gov/unemploy/csv/ar539.csv" \
-            "https://www.federalreserve.gov/datadownload/Output.aspx?rel=H15&series=bf17364827e38702b42a58cf8eaa3f78&lastobs=10&from=&to=&filetype=csv&label=include&layout=seriescolumn" \
-            "https://www.chicagofed.org/-/media/publications/nfci/nfci-data-series-csv.csv" \
-            "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=T10Y3M" ; do
-            echo "=== $u"; curl -s -m 60 -A "$UA" -w "\nHTTP %{http_code} %{time_total}s\n" "$u" | head -c 900 | tr '\n' ' ' ; echo
-          done
-          echo "=== integration codes"
-          curl -s -m 30 -A "$UA" "https://m.stock.naver.com/api/stock/005930/integration" | python3 -c "import json,sys;d=json.load(sys.stdin);print([(x.get('code'),x.get('key'),x.get('value')) for x in d.get('totalInfos',[])]);print(list(d.keys()))"
-          echo "=== dealtrend"
-          curl -s -m 30 -A "$UA" "https://finance.naver.com/sise/investorDealTrendDay.nhn?bizdate=20261005&sosok=01&page=1" | iconv -f cp949 -t utf-8 -c | grep -A12 "<tr" | sed -n 1,80p | tr -s ' \t'
+          python3 - <<'PY'
+          import urllib.request, json, subprocess
+          for ua in ["curl/8.5.0", "python-urllib/3.12", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"]:
+              try:
+                  t = urllib.request.urlopen(urllib.request.Request("https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2", headers={"User-Agent": ua}), timeout=40).read()
+                  print("FRED", ua, "OK", len(t), t[-60:])
+              except Exception as e:
+                  print("FRED", ua, "FAIL", e)
+          H = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)", "Referer": "https://m.stock.naver.com/"}
+          d = json.loads(urllib.request.urlopen(urllib.request.Request("https://m.stock.naver.com/api/stock/005930/integration", headers=H), timeout=30).read())
+          print("DEAL", json.dumps(d.get("dealTrendInfos"), ensure_ascii=False)[:1500])
+          for u in ["https://m.stock.naver.com/api/index/KOSPI/trend?pageSize=30&page=1", "https://m.stock.naver.com/api/index/KOSPI/investorTrend?pageSize=30", "https://m.stock.naver.com/api/index/KOSPI/trend/list?pageSize=30", "https://m.stock.naver.com/api/index/KOSPI/dealTrend?pageSize=30"]:
+              try:
+                  t = urllib.request.urlopen(urllib.request.Request(u, headers=H), timeout=30).read().decode()
+                  print("TRY", u, t[:400])
+              except Exception as e:
+                  print("TRY", u, "FAIL", e)
+          PY
       - run: |
           mkdir -p archive/x && mv probe_out.txt archive/x/probe.txt
           git config user.name bot; git config user.email bot@x
