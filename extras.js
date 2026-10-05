@@ -252,13 +252,14 @@
         '<div class="xt">' + F.legs.map(function(l){ return '<div class="xr"><b>' + e(l.q) + '</b><span class="mut">' + l.n + '종목 · 승률 ' + l.win + '%</span><b class="' + cls(l.ret) + '">' + pct(l.ret) + '</b><span class="mut">SPY ' + pct(l.spy) + '</span></div>'; }).join("") + '</div>' +
         '<p class="note">100에서 시작. 13F 공시(분기말 +46일)에 같은 비중으로 사서 다음 공시일까지 들고 있는 단순 규칙이에요. 마지막 줄은 진행 중.</p>');
       var T = W.timeline || {}, names = (W.groups.inst || []).concat(W.groups.ppl || []).filter(function(n){ return T[n]; });
-      if (names.length) h += card("🕰️ 고래별 분기 타임라인", '<select id="wtl" class="xsel">' + names.map(function(n){ return '<option>' + e(n) + '</option>'; }).join("") + '</select><div id="wtlb"></div>');
+      if (names.length) h += card("🕰️ 고래별 분기 타임라인", '<select id="wtl" class="xsel">' + names.map(function(n){ return '<option>' + e(n) + '</option>'; }).join("") + '</select><button class="btn wtl-all" id="wtlall">📋 이 고래의 보유 종목 전체 보기</button><div id="wtlb"></div>');
       b.innerHTML = h;
       var drawT = function(n){ $("wtlb").innerHTML = (T[n] || []).map(function(r){
         return '<div class="xtl"><div class="row"><b>' + e(r.q) + '</b><span class="mut">보유 ' + r.n + ' · <span class="up">+' + r.na + '</span> / <span class="dn">−' + r.nd + '</span></span></div>' +
           (r.add.length ? '<div class="cp-sts">' + r.add.slice(0, 12).map(function(t){ return opA(t, '<span class="cp-st"><b>' + e(t) + '</b><span class="up">신규</span></span>'); }).join("") + '</div>' : '') +
           (r.drop.length ? '<div class="cp-sts">' + r.drop.slice(0, 8).map(function(t){ return '<span class="cp-st"><b>' + e(t) + '</b><span class="dn">정리</span></span>'; }).join("") + '</div>' : '') + '</div>'; }).join(""); };
-      if ($("wtl")){ var sel = $("wtl"); if (store.wtl && T[store.wtl]) sel.value = store.wtl; sel.onchange = function(){ store.wtl = sel.value; save(); drawT(sel.value); }; drawT(sel.value); }
+      if ($("wtl")){ var sel = $("wtl"); if (store.wtl && T[store.wtl]) sel.value = store.wtl; sel.onchange = function(){ store.wtl = sel.value; save(); drawT(sel.value); }; drawT(sel.value);
+        $("wtlall").onclick = function(){ openMgr(sel.value); }; }
     });
   });
 

@@ -316,6 +316,83 @@ def uniq_whales(names, pf):
     return [n for n in names if not (n in pf and pf[n] in funds)]
 
 
+def whale_holdings():
+    """유명 펀드·유명인별 보유 종목 (13F 최신 분기) → whale_holdings.json"""
+    base = os.path.join(SRC, "whale40", "data")
+    rk = jl(os.path.join(base, "ranking.json"), {}) or {}
+    secmap = jl(os.path.join(base, "sectors.json"), {}) or {}
+    names = {}
+    try:
+        with urllib.request.urlopen("https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/names_ko.json", timeout=40) as r:
+            names = json.loads(r.read().decode("utf-8"))
+    except Exception as e:
+        print("names_ko 실패", e)
+    cache = os.path.join(base, "cache", "13f")
+
+    def load(fid):
+        return jl(os.path.join(cache, fid + ".json"), None)
+
+    def prev_fid(fid):
+        m = re.match(r"^\d+-(.*)-q(\d)-(\d{4})$", fid or "")
+        if not m:
+            return None
+        slug, qn, yr = m.group(1), int(m.group(2)), int(m.group(3))
+        pq, py = (qn - 1, yr) if qn > 1 else (4, yr - 1)
+        c = glob.glob(os.path.join(cache, f"*-{slug}-q{pq}-{py}.json"))
+        return os.path.basename(sorted(c)[-1])[:-5] if c else None
+
+    out = {}
+    for grp in ("institutions", "people"):
+        for m in rk.get(grp) or []:
+            cur = load(m.get("fid"))
+            if not cur:
+                continue
+            agg = {}
+            for h in cur:
+                t = (h.get("sym") or "").strip()
+                if not t or t == "NONE":
+                    continue
+                a = agg.setdefault(t, {"v": 0.0, "sh": 0.0, "is": h.get("issuer", "")})
+                a["v"] += h.get("value") or 0
+                a["sh"] += h.get("shares") or 0
+            pf_ = prev_fid(m.get("fid"))
+            prev = {}
+            for h in (load(pf_) or []) if pf_ else []:
+                t = (h.get("sym") or "").strip()
+                if t and t != "NONE":
+                    prev[t] = prev.get(t, 0) + (h.get("shares") or 0)
+            tot = sum(a["v"] for a in agg.values()) or 1
+            items = []
+            for t, a in sorted(agg.items(), key=lambda kv: -kv[1]["v"])[:30]:
+                ps = prev.get(t)
+                if not pf_:
+                    chg, d = "", None
+                elif not ps:
+                    chg, d = "new", None
+                else:
+                    d = (a["sh"] / ps - 1) * 100
+                    chg = "up" if d > 2 else "down" if d < -2 else "same"
+                px = wpx(t)
+                qe = at(px, qend(m["quarter"]), after=False)[1] if (px and m.get("quarter")) else None
+                last = px[max(px)] if px else None
+                items.append({"t": t, "nm": names.get(t) or a["is"].title()[:28], "v": r2(a["v"] * 1000, 0), "w": r2(a["v"] / tot * 100),
+                              "chg": chg, "d": r2(d, 1) if d is not None else None,
+                              "r": r2((last / qe - 1) * 100) if (qe and last) else None, "sec": secmap.get(t, "기타")})
+            sold = [t for t in prev if t not in agg]
+            sold.sort(key=lambda t: -(prev[t] or 0))
+            sec = {}
+            for t, a in agg.items():
+                k = secmap.get(t, "기타")
+                sec[k] = sec.get(k, 0) + a["v"] / tot * 100
+            out[m["name"]] = {"g": "inst" if grp == "institutions" else "ppl", "rank": m.get("rank"), "ret1y": m.get("ret_1y"),
+                              "ret1d": m.get("ret_1d"), "q": m.get("quarter"), "filed": m.get("filed"), "n": len(agg),
+                              "val": r2(tot * 1000, 0), "items": items, "sold": [{"t": t, "nm": names.get(t, t)} for t in sold[:15]],
+                              "n_new": sum(1 for x in items if x["chg"] == "new"),
+                              "sec": [[k, r2(v, 1)] for k, v in sorted(sec.items(), key=lambda kv: -kv[1])[:8]]}
+    js("whale_holdings.json", {"updated": NOW.strftime("%Y-%m-%d %H:%M"), "m": out})
+    print("고래 보유", len(out), flush=True)
+
+
 def whale():
     base = os.path.join(SRC, "whale40", "data")
     pf = person_fund()
@@ -691,6 +768,7 @@ if __name__ == "__main__":
     run(perf, "accum", "list.json", [])
     run(danta)
     run(whale)
+    run(whale_holdings)
     run(accum)
     run(premarket)
     run(market_chips)
