@@ -195,11 +195,12 @@
       var ks = ORDER.filter(function(k){ return C.markets[k]; });
       if (!ks.length){ $("cpbox").innerHTML = ""; return; }
       CPSEL = ks.indexOf(store.cpm) >= 0 ? store.cpm : (ks.indexOf("KR") >= 0 ? "KR" : ks[0]);
-      $("cpbox").innerHTML = '<div id="cplive"></div>' + overview(C) + '<div id="cptop"></div>' + strength(C) +
+      $("cpbox").innerHTML = '<div id="cpreg"></div><div id="cplive"></div>' + overview(C) + '<div id="cptop"></div>' + strength(C) +
         '<div class="seg2 cp-seg" id="cpseg">' + ks.map(function(k){ return '<button data-m="' + k + '"' + (k === CPSEL ? ' class="on"' : '') + '>' + C.markets[k].flag + " " + e(C.markets[k].name) + '</button>'; }).join("") + '</div>' +
         '<div id="cpd">' + detail(CPSEL, C) + '</div>';
       wire(C);
       if (window.CPLIVE) try { CPLIVE($("cplive"), C); } catch(err) { console.error(err); }
+      if (window.CPREG) try { CPREG($("cpreg")); } catch(err) { console.error(err); }
       if (window.CPTOP) try { $("cptop").innerHTML = CPTOP(C); } catch(err) { console.error(err); }
     }).catch(function(){ $("cpbox").innerHTML = '<div class="empty">나침반 자료를 못 불러왔어요.</div>'; });
     // 모닝 섹터 브리핑: 그날 것이 없으면(휴장·주말) 가장 최근 브리핑을 이어서 보여주기

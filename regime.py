@@ -23,6 +23,7 @@ UA = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)"}
 MK = [("US", "🇺🇸", "미국", "^GSPC", ".US"), ("KR", "🇰🇷", "한국", "^KS11", ".K"), ("JP", "🇯🇵", "일본", "^N225", ".T"),
       ("CN", "🇨🇳", "중국", "000001.SS", ".S"), ("HK", "🇭🇰", "홍콩", "^HSI", ".HK")]
 SIG = []        # 신호 목록
+FR = {}         # 외국인 순매수 기록 (다음 날 이어 쌓기)
 ERR = []
 
 
@@ -30,20 +31,45 @@ def log(*a):
     print(*a, flush=True)
 
 
-def http(url, timeout=40, enc="utf-8"):
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=timeout) as r:
+def http(url, timeout=40, enc="utf-8", ua=None):
+    with urllib.request.urlopen(urllib.request.Request(url, headers=ua or UA), timeout=timeout) as r:
         return r.read().decode(enc, errors="ignore")
 
 
 def fred(series, days=800):
     """FRED 시계열 → pandas Series (날짜 index, float). 열쇠 없이 CSV 로 받는다."""
-    t = http(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}")
+    t = None
+    for k in range(3):                     # FRED 는 브라우저 흉내 UA 를 막는다 → 단순 UA
+        try:
+            t = http(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}", 60, ua={"User-Agent": "curl/8.5.0"})
+            break
+        except Exception:
+            if k == 2:
+                raise
     df = pd.read_csv(io.StringIO(t))
     df.columns = ["date", "v"]
     df["v"] = pd.to_numeric(df["v"], errors="coerce")
     s = df.dropna().set_index("date")["v"]
     s.index = pd.to_datetime(s.index)
     return s[s.index >= pd.Timestamp.now() - pd.Timedelta(days=days)]
+
+
+def fresh(s, days):
+    """마지막 값이 너무 오래됐으면(발표 중단 등) 쓰지 않는다."""
+    age = (pd.Timestamp.now() - s.index[-1]).days
+    if age > days:
+        raise RuntimeError(f"마지막 자료가 {age}일 전 ({s.index[-1].date()}) — 발표 중단?")
+    return s
+
+
+def oecd_cli(area):
+    """OECD 경기선행지수(CLI, 100 = 장기 평균). 최근 월들 [(YYYY-MM, 값)]"""
+    u = (f"https://sdmx.oecd.org/public/rest/data/OECD.SDD.STES,DSD_STES@DF_CLI,4.1/{area}.M.LI...AA...H"
+         f"?startPeriod={(NOW - dt.timedelta(days=500)).strftime('%Y-%m')}&dimensionAtObservation=AllDimensions&format=csvfilewithlabels")
+    t = http(u, 60, ua={"User-Agent": "curl/8.5.0"})
+    df = pd.read_csv(io.StringIO(t))
+    df = df[["TIME_PERIOD", "OBS_VALUE"]].dropna().sort_values("TIME_PERIOD")
+    return [(a, float(b)) for a, b in df.values]
 
 
 def yh(tickers, period="2y"):
@@ -157,7 +183,7 @@ def sig_real():
     except Exception as e:
         fail("claims", "real", "신규 실업수당 청구", e, 2)
     try:
-        s = fred("PERMIT", 1200)
+        s = fresh(fred("PERMIT", 1200), 120)
         v, yoy = float(s.iloc[-1]), (float(s.iloc[-1]) / float(s.iloc[-13]) - 1) * 100
         st = 1 if yoy > 5 else (-1 if yoy < -10 else 0)
         mean = {1: f"1년 전보다 {yoy:+.0f}% — 주택이 경기를 끌어올리는 중", 0: f"1년 전 대비 {yoy:+.0f}% — 보통", -1: f"1년 전보다 {yoy:+.0f}% — 주택이 가장 먼저 꺾이는 중 (침체 12~18개월 선행)"}[st]
@@ -165,7 +191,7 @@ def sig_real():
     except Exception as e:
         fail("permit", "real", "건축 허가", e)
     try:
-        s = fred("SAHMREALTIME", 1200)
+        s = fresh(fred("SAHMREALTIME", 1200), 120)
         v = float(s.iloc[-1])
         st = -1 if v >= 0.5 else (0 if v >= 0.3 else 1)
         mean = {-1: f"{v:.2f} — 샴 룰 발동 (실업률이 저점보다 0.5%p 이상 올라옴)", 0: f"{v:.2f} — 발동(0.5) 가까이 접근", 1: f"{v:.2f} — 고용 둔화 신호 없음"}[st]
@@ -173,15 +199,30 @@ def sig_real():
     except Exception as e:
         fail("sahm", "real", "샴 룰", e, 2)
     try:
-        s = fred("USSLIND", 1200)
-        v = float(s.iloc[-1])
-        st = 1 if v > 1.0 else (-1 if v < 0 else 0)
-        mean = {1: f"{v:+.2f} — 6개월 뒤 경기도 좋을 거라는 뜻", 0: f"{v:+.2f} — 미지근", -1: f"{v:+.2f} — 선행지수가 마이너스, 침체 신호"}[st]
-        add("lei", "real", "경기선행지수 (필라델피아 연은)", st, f"{v:+.2f}", mean, w=2, lead="6개월", rule="0 아래 = 🔴 · +1.0 위 = 🟢", src="FRED USSLIND")
+        rows, sts = [], []
+        for area, flag, nm in (("USA", "🇺🇸", "미국"), ("KOR", "🇰🇷", "한국"), ("CHN", "🇨🇳", "중국"), ("JPN", "🇯🇵", "일본")):
+            try:
+                c = oecd_cli(area)
+                if len(c) < 4:
+                    continue
+                v, d3 = c[-1][1], c[-1][1] - c[-4][1]
+                st_ = 1 if (v >= 100 and d3 > 0) or d3 > 0.3 else (-1 if (v < 100 and d3 < 0) or d3 < -0.3 else 0)
+                rows.append({"m": area[:2], "flag": flag, "name": nm, "st": st_, "v": round(v, 1), "u": "", "note": f"{c[-1][0][5:]}월 · 3개월 {d3:+.1f}"})
+                if area in ("USA", "KOR"):
+                    sts.append(st_)
+            except Exception as e:
+                ERR.append(f"OECD {area}: {e}")
+        if not rows:
+            raise RuntimeError("OECD 자료 없음")
+        st = 1 if sts and all(x == 1 for x in sts) else (-1 if sts and all(x == -1 for x in sts) else 0)
+        us = next((x for x in rows if x["name"] == "미국"), None); kr = next((x for x in rows if x["name"] == "한국"), None)
+        add("lei", "real", "경기선행지수 (OECD)", st, " · ".join(f"{x['flag']} {x['v']}" for x in rows),
+            "100 = 장기 평균. 100 위에서 오르면 확장, 100 아래서 내리면 수축 — 경기 방향을 6~9개월 앞서 보여줘요",
+            w=2, lead="6~9개월 (발표 1~2개월 늦음)", rule="미국·한국 둘 다 '100 위 상승' 또는 3개월 +0.3 = 🟢 · 둘 다 하강 = 🔴", src="OECD CLI", extra={"rows": rows})
     except Exception as e:
-        fail("lei", "real", "경기선행지수", e, 2)
+        fail("lei", "real", "경기선행지수 (OECD)", e, 2)
     try:
-        s = fred("XTEXVA01KRM667S", 1200)
+        s = fresh(fred("XTEXVA01KRM667S", 1200), 150)
         v, yoy = float(s.iloc[-1]), (float(s.iloc[-1]) / float(s.iloc[-13]) - 1) * 100
         mon = s.index[-1].strftime("%m월")
         st = 1 if yoy > 5 else (-1 if yoy < 0 else 0)
@@ -309,32 +350,40 @@ def sig_flow(Y, prev):
             extra={"hist": [r(x, 1) for x in s.iloc[-60:].tolist()]})
     except Exception as e:
         fail("vix", "flow", "공포지수 VIX", e)
-    # 외국인 코스피 20일 누적 (네이버)
+    # 외국인 코스피 20일 누적 (네이버, 매일 쌓음)
     try:
-        vals = naver_foreign(30)
-        c20 = sum(v for _, v in vals[:20])
-        c5 = sum(v for _, v in vals[:5])
+        fh = naver_foreign(prev)
+        FR["hist"] = fh
+        last20 = fh[-20:]
+        c20 = sum(v for _, v in last20)
+        c5 = sum(v for _, v in fh[-5:])
         st = 1 if c20 > 0 else -1
-        add("foreign", "flow", "외국인 코스피 순매수 (20일 누적)", st, f"{c20/10000:+.1f}조", f"최근 5일 {c5/10000:+.2f}조. 20일 누적이 돌아서는 시점이 지수 전환과 거의 같아요",
-            w=2, lead="동행 (가장 믿을 만함)", rule="20일 누적 플러스 = 🟢 · 마이너스 = 🔴", src="네이버 금융 투자자별 매매동향",
-            extra={"hist": [r(v / 10000, 2) for _, v in reversed(vals[:30])]})
+        nd = len(last20)
+        add("foreign", "flow", "외국인 코스피 순매수 (20일 누적)", st, f"{c20/10000:+.2f}조" + ("" if nd >= 20 else f" ({nd}일치)"),
+            f"최근 5일 {c5/10000:+.2f}조. 20일 누적이 돌아서는 시점이 지수 전환과 거의 같아요" + ("" if nd >= 20 else f" — 아직 {nd}일치만 모였어요(매일 쌓는 중)"),
+            w=2 if nd >= 10 else 1, lead="동행 (가장 믿을 만함)", rule="20일 누적 플러스 = 🟢 · 마이너스 = 🔴", src="네이버 증권 · 시황리포트 장부",
+            extra={"hist": [r(v / 10000, 2) for _, v in fh[-30:]]})
     except Exception as e:
         fail("foreign", "flow", "외국인 코스피 순매수", e, 2)
     # 삼성전자 외국인 보유율 (추이 저장)
     try:
-        rate = naver_frgn_rate("005930")
-        hist = (prev.get("ss_hist") or [])
-        if not hist or hist[-1][0] != TODAY:
-            hist = [h for h in hist if h[0] != TODAY] + [[TODAY, rate]]
-        hist = hist[-60:]
-        base = next((h[1] for h in hist if (dt.date.fromisoformat(TODAY) - dt.date.fromisoformat(h[0])).days >= 20), None)
+        rate, days = naver_frgn_rate("005930")
+        hm = {h[0]: h[1] for h in (prev.get("ss_hist") or [])}
+        for d_, v_ in days:
+            hm[d_] = v_
+        if days:
+            hm[days[0][0]] = rate
+        hist = [[k, v] for k, v in sorted(hm.items())][-60:]
+        base = next((h[1] for h in reversed(hist) if (dt.date.fromisoformat(hist[-1][0]) - dt.date.fromisoformat(h[0])).days >= 25), None)
         if base is None:
-            st, mean = 0, f"{rate:.2f}% — 추이는 20일 뒤부터 (오늘부터 기록 시작)"
+            ch = rate - hist[0][1]
+            st = 1 if ch > 0.1 else (-1 if ch < -0.1 else 0)
+            mean = f"{len(hist)}일 사이 {ch:+.2f}%p — 20거래일 추이는 기록이 더 쌓이면 판정 (매일 쌓는 중)"
         else:
             ch = rate - base
             st = 1 if ch > 0.1 else (-1 if ch < -0.1 else 0)
             mean = {1: f"20일 전보다 {ch:+.2f}%p — 외국인이 대장주를 사 모으는 중", 0: f"20일 전 대비 {ch:+.2f}%p — 변화 없음", -1: f"20일 전보다 {ch:+.2f}%p — 대장주에서 외국인 이탈"}[st]
-        add("ssfor", "flow", "삼성전자 외국인 보유율", st, f"{rate:.2f}%", mean, lead="동행~선행", rule="20일간 +0.1%p = 🟢 · −0.1%p = 🔴", src="네이버 금융", extra={"ss_hist": hist})
+        add("ssfor", "flow", "삼성전자 외국인 보유율", st, f"{rate:.2f}%", mean, lead="동행~선행", rule="약 20거래일간 +0.1%p = 🟢 · −0.1%p = 🔴", src="네이버 증권", extra={"ss_hist": hist, "hist": [h[1] for h in hist[-30:]]})
     except Exception as e:
         fail("ssfor", "flow", "삼성전자 외국인 보유율", e)
     try:
@@ -352,33 +401,42 @@ def sig_flow(Y, prev):
         fail("fx", "flow", "환율", e)
 
 
-def naver_foreign(n=30):
-    """코스피 투자자별 일별 매매동향에서 외국인 순매수(억원) 최근 n일. [(날짜, 억원)] 최신순."""
-    out = []
-    biz = NOW.strftime("%Y%m%d")
-    for page in range(3):
-        url = f"https://finance.naver.com/sise/investorDealTrendDay.naver?bizdate={biz}&sosok=01&page={page + 1}"
-        t = http(url, enc="cp949")
-        for row in re.findall(r"<tr[^>]*>(.*?)</tr>", t, re.S):
-            cells = [re.sub(r"<[^>]+>", "", c).strip().replace(",", "") for c in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)]
-            if len(cells) >= 3 and re.match(r"\d{2}\.\d{2}\.\d{2}", cells[0]):
-                try:
-                    out.append((cells[0], float(cells[2])))
-                except ValueError:
-                    pass
-        if len(out) >= n:
-            break
-    if len(out) < 10:
-        raise RuntimeError(f"행 {len(out)}개뿐")
-    return out[:n]
+NH = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)", "Referer": "https://m.stock.naver.com/"}
+
+
+def naver_foreign(prev):
+    """코스피 외국인 순매수(억원). 네이버는 '마지막 거래일 하루치'만 주므로 매일 쌓는다.
+    처음엔 시황리포트 장부(ledger) 기록으로 채운다. 반환: [(YYYY-MM-DD, 억원)] 오래된→최신."""
+    hist = {d: v for d, v in (prev.get("fr_hist") or [])}
+    if len(hist) < 3:
+        try:
+            L = json.loads(http("https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/ledger/ledger.json", 40))
+            for x in (L.get("series") or {}).get("foreign_kospi", []):
+                hist.setdefault(x["date"], float(x["value"]))
+        except Exception as e:
+            ERR.append(f"ledger 외국인: {e}")
+    j = json.loads(http("https://m.stock.naver.com/api/index/KOSPI/trend", 30, ua=NH))
+    d = j["bizdate"]
+    hist[f"{d[:4]}-{d[4:6]}-{d[6:]}"] = float(str(j["foreignValue"]).replace(",", "").replace("+", ""))
+    return sorted(hist.items())[-60:]
 
 
 def naver_frgn_rate(code):
-    t = http(f"https://finance.naver.com/item/main.naver?code={code}", enc="cp949")
-    m = re.search(r"외국인소진율.*?<em[^>]*>\s*([\d.]+)%", t, re.S) or re.search(r"외국인소진율.*?([\d]{1,2}\.[\d]{2})%", t, re.S)
-    if not m:
-        raise RuntimeError("소진율 못 찾음")
-    return float(m.group(1))
+    """외국인 보유율: 오늘 값 + 최근 며칠(dealTrendInfos). 반환 (오늘 %, [(YYYY-MM-DD, %)])"""
+    j = json.loads(http(f"https://m.stock.naver.com/api/stock/{code}/integration", 30, ua=NH))
+    days = []
+    for x in j.get("dealTrendInfos") or []:
+        try:
+            d = x["bizdate"]
+            days.append((f"{d[:4]}-{d[4:6]}-{d[6:]}", float(x["foreignerHoldRatio"].replace("%", ""))))
+        except Exception:
+            pass
+    rate = next((float(t["value"].replace("%", "")) for t in j.get("totalInfos", []) if t.get("code") == "foreignRate"), None)
+    if rate is None and days:
+        rate = days[0][1]
+    if rate is None:
+        raise RuntimeError("외인소진율 없음")
+    return rate, days
 
 
 # ============================================================ opdata: 시장 폭
@@ -443,7 +501,7 @@ def main():
     ss_hist = next((s.get("ss_hist") for s in SIG if s["id"] == "ssfor" and s.get("ss_hist")), prev.get("ss_hist"))
     out = {"updated": NOW.strftime("%Y-%m-%d %H:%M"), "score": score, "label": label, "verdict": verdict, "n_green": n_g, "n_red": n_r,
            "n_total": len(avail), "sig": [{k: v for k, v in s.items() if k != "ss_hist"} for s in SIG], "changes": changes, "hist": hist[-90:],
-           "ss_hist": ss_hist, "errors": ERR[:20],
+           "ss_hist": ss_hist, "fr_hist": FR.get("hist") or prev.get("fr_hist") or [], "errors": ERR[:20],
            "groups": [["money", "💰 돈·금리"], ["real", "🏭 실물 경기"], ["market", "📊 시장 속"], ["flow", "🧠 심리·수급"]]}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
