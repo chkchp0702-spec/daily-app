@@ -3,7 +3,7 @@ name: opest
 on:
   workflow_dispatch:
   schedule:
-    - cron: "37 17 * * 5"   # 매주 토요일 KST 02:37 (추정치 + 실적·배당 일정)
+    - cron: "37 3 * * 6"    # 매주 토요일 KST 12:37 (추정치 + 실적·배당 일정, 아침 시간 피함)
 
 permissions:
   contents: write

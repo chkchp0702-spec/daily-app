@@ -3,7 +3,7 @@ name: opextra
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 18 * * 6"   # 매주 일요일 KST 03:17
+    - cron: "17 3 * * 0"    # 매주 일요일 KST 12:17 (아침 시간 피함)
 
 permissions:
   contents: write

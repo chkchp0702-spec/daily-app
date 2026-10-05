@@ -12,7 +12,7 @@ on:
         type: boolean
         default: false
   schedule:
-    - cron: "47 20 * * 6"   # 매주 일요일 KST 05:47 (opextra 뒤)
+    - cron: "57 15 * * *"   # 매일 KST 00:57 — 못 받은 회사 설명 채우기
 
 permissions:
   contents: write

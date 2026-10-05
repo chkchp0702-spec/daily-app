@@ -3,7 +3,7 @@ name: opmedia
 on:
   workflow_dispatch:
   schedule:
-    - cron: "27 19 1 * *"   # 매달 2일 KST 04:27
+    - cron: "27 12 * * *"   # 매일 KST 21:27 — 사진 없는 종목 이어 받기
 
 permissions:
   contents: write
@@ -35,7 +35,7 @@ jobs:
     timeout-minutes: 120
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 5
       matrix:
         shard: [0,1,2,3,4,5]
     steps:

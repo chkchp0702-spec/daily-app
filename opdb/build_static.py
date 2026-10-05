@@ -21,7 +21,7 @@ for _k, (_sym, _disp, _m) in ALIASES.items():
     KO_NAME.setdefault(_sym, _disp)
 
 START = time.time()
-BUDGET = 5 * 3600 + 15 * 60   # GitHub 6시간 제한 전에 멈춤
+BUDGET = int(float(os.environ.get("OPDB_HOURS", "5.25")) * 3600)   # GitHub 6시간 제한 전에 멈춤
 
 
 class Timeout(Exception):

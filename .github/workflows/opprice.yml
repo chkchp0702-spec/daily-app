@@ -2,7 +2,8 @@ name: opprice
 # 전 종목 가격·1년 차트 (opdata 브랜치 p/ 폴더)
 on:
   schedule:
-    - cron: "5 22 * * *"    # KST 07:05 (미국 마감 후)
+    - cron: "47 20 * * *"   # KST 05:47 (미국 마감 후 → 나침반 8시 반 전)
+    - cron: "27 21 * * *"   # KST 06:27 (예비 — 앞에서 이미 했으면 건너뜀)
     - cron: "20 7 * * 1-5"  # KST 16:20 (아시아 마감 후)
   workflow_dispatch:
 
@@ -30,11 +31,20 @@ jobs:
           pip install -q yfinance pandas
           git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata \
             || (mkdir opdata && cd opdata && git init -q -b opdata && git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}")
+      - name: 이미 방금 했으면 건너뛰기 (예비 실행)
+        id: chk
+        run: |
+          T=$(git -C opdata log -1 --format='%ct %s' 2>/dev/null || echo "0 x")
+          if [ "${{ github.event_name }}" = "schedule" ] && echo "$T" | grep -q " prices" && [ $(( $(date +%s) - ${T%% *} )) -lt 5400 ]; then echo "skip=1" >> $GITHUB_OUTPUT; echo "최근 실행됨 → 건너뜀"; fi
       - name: 해외 종목 한글 이름 (검색용)
+        if: steps.chk.outputs.skip != '1' && github.event.schedule != '47 20 * * *' && github.event.schedule != '27 21 * * *'
         run: python opdb/names_ko.py --dest opdata || true
-      - run: python opdb/merge_static.py --dest opdata
-      - run: python opdb/build_prices.py --dest opdata
+      - if: steps.chk.outputs.skip != '1'
+        run: python opdb/merge_static.py --dest opdata
+      - if: steps.chk.outputs.skip != '1'
+        run: python opdb/build_prices.py --dest opdata
       - name: 저장
+        if: steps.chk.outputs.skip != '1'
         run: |
           cd opdata
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
@@ -43,7 +53,7 @@ jobs:
           git commit -qm "prices $(TZ=Asia/Seoul date '+%F %H:%M')"
           git push -q -f origin fresh:opdata
       - name: 앱에 나침반 반영 (collect 실행)
-        if: always()
+        if: always() && steps.chk.outputs.skip != '1'
         run: |
           curl -s -X POST -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/actions/workflows/collect.yml/dispatches -d '{"ref":"main"}' || true

@@ -3,7 +3,7 @@ name: opnews
 on:
   workflow_dispatch:
   schedule:
-    - cron: "37 19 * * 0"   # 매주 월요일 KST 04:37
+    - cron: "57 16 * * *"   # 매일 KST 01:57 — 뉴스 없는 종목·오래된 종목부터 채우기 (06시 전 끝)
 
 permissions:
   contents: write
@@ -27,6 +27,19 @@ jobs:
           json.dump(out, open("lastfy.json", "w"))
           print(len(out))
           PY
+          python3 - <<'PY2'
+          import json, glob, os
+          age = {}
+          for f in glob.glob("opdata/n/*.json"):
+              try:
+                  ds = [x.get("date") or "" for x in json.load(open(f, encoding="utf-8"))]
+              except Exception:
+                  continue
+              sym = os.path.basename(f)[:-5]
+              age[sym] = max(ds) if ds else ""
+          json.dump(age, open("newsage.json", "w"))
+          print("뉴스 있음", len(age))
+          PY2
           cp opdata/meta.json meta.json
           cp opdata/names_ko.json names_ko.json || echo '{}' > names_ko.json
       - uses: actions/upload-artifact@v4
@@ -36,17 +49,18 @@ jobs:
             lastfy.json
             meta.json
             names_ko.json
+            newsage.json
           retention-days: 2
 
   news:
     needs: prep
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 170
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: 16
       matrix:
-        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -58,7 +72,9 @@ jobs:
       - run: |
           git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
           pip install -q yfinance pandas
-      - run: python opdb/build_news.py --shard ${{ matrix.shard }} --of 20 --out out
+      - run: python opdb/build_news.py --shard ${{ matrix.shard }} --of 16 --out out
+        env:
+          NEWS_HOURS: "2.4"
       - uses: actions/upload-artifact@v4
         with:
           name: news-${{ matrix.shard }}

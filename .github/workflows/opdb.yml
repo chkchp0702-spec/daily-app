@@ -13,7 +13,7 @@ on:
         description: "전부 다시 만들기 (true/false)"
         default: "false"
   schedule:
-    - cron: "17 17 * * *"   # KST 02:17 — 매일 오래된 것부터 조금씩 새로 만들기
+    - cron: "17 12 * * *"   # 매일 KST 21:17 — 오래된 것부터 새로 만들기 (새벽 1시쯤 끝)
 
 permissions:
   contents: write
@@ -21,12 +21,12 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 340
+    timeout-minutes: 220
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: 14
       matrix:
-        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -43,9 +43,10 @@ jobs:
           MAX: ${{ github.event.inputs.max || '45' }}
           DAYS: ${{ github.event.inputs.days || '30' }}
           FORCE: ${{ github.event.inputs.force || 'false' }}
+          OPDB_HOURS: "3.4"
         run: |
           F=""; [ "$FORCE" = "true" ] && F="--force"
-          python opdb/build_static.py --shard ${{ matrix.shard }} --of 20 --out out --meta meta.json --max "$MAX" --days "$DAYS" $F
+          python opdb/build_static.py --shard ${{ matrix.shard }} --of 14 --out out --meta meta.json --max "$MAX" --days "$DAYS" $F
       - uses: actions/upload-artifact@v4
         with:
           name: part-${{ matrix.shard }}

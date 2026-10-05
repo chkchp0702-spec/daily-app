@@ -11,7 +11,7 @@ from common import fnv, fname  # noqa: E402
 from onepager import data as D  # noqa: E402
 
 START = time.time()
-BUDGET = 5 * 3600
+BUDGET = int(float(os.environ.get("NEWS_HOURS", "5")) * 3600)
 
 
 def _alarm(*_):
@@ -26,11 +26,14 @@ def main():
     ap.add_argument("--meta", default="meta.json")
     ap.add_argument("--names", default="names_ko.json")
     ap.add_argument("--sleep", type=float, default=1.2)
+    ap.add_argument("--age", default="newsage.json", help="{심볼: 마지막 뉴스 날짜} — 없는 것·오래된 것부터")
     a = ap.parse_args()
     meta = json.load(open(a.meta)) if os.path.exists(a.meta) else {}
     names = json.load(open(a.names, encoding="utf-8")) if os.path.exists(a.names) else {}
     syms = [s for s, v in meta.items() if len(v) <= 4 and fnv(s) % a.of == a.shard]
-    print(f"shard {a.shard}: {len(syms)}개", flush=True)
+    age = json.load(open(a.age)) if os.path.exists(a.age) else {}
+    syms.sort(key=lambda x: age.get(x, ""))      # 뉴스 없는 종목 → 오래된 종목 순
+    print(f"shard {a.shard}: {len(syms)}개 (뉴스 없음 {sum(1 for x in syms if x not in age)})", flush=True)
     os.makedirs(os.path.join(a.out, "n"), exist_ok=True)
     signal.signal(signal.SIGALRM, _alarm)
     got = fails = 0
