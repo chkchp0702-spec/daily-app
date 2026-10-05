@@ -1,19 +1,26 @@
 name: probe
 on:
   workflow_dispatch:
-permissions:
-  contents: write
 jobs:
-  probe:
+  p:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install -q yfinance pandas && python probe/probe.py
       - run: |
-          mkdir pb && cp probe_out.json pb/ && cd pb
-          git init -q -b probe && git config user.name bot && git config user.email bot@users.noreply.github.com
-          git add -A && git commit -qm probe
-          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" probe:probe
+          UA="Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)"
+          for u in \
+            "https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y3M" \
+            "https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y3M&cosd=2024-01-01" \
+            "https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2&cosd=2025-01-01" \
+            "https://fred.stlouisfed.org/data/T10Y3M.txt" \
+            "https://m.stock.naver.com/api/index/KOSPI/integration" \
+            "https://m.stock.naver.com/api/index/KOSPI/trend" \
+            "https://m.stock.naver.com/api/index/KOSPI/investor" \
+            "https://m.stock.naver.com/api/stock/005930/integration" \
+            "https://finance.naver.com/sise/investorDealTrendDay.nhn?bizdate=20261005&sosok=01&page=1" \
+            "https://finance.naver.com/sise/sise_trans_style.naver" \
+            "https://finance.naver.com/item/frgn.naver?code=005930" \
+            "https://finance.naver.com/item/main.naver?code=005930" ; do
+            echo "=== $u"; curl -s -m 60 -A "$UA" -e "https://m.stock.naver.com/" -w "\nHTTP %{http_code} %{time_total}s\n" "$u" | iconv -f cp949 -t utf-8 -c 2>/dev/null | head -c 1500 | tr '\n' ' ' ; echo
+          done
+          curl -s -m 60 -A "$UA" "https://finance.naver.com/item/main.naver?code=005930" | iconv -f cp949 -t utf-8 -c | grep -n -A4 "외국인소진율" | head -20
+          curl -s -m 60 -A "$UA" "https://finance.naver.com/item/frgn.naver?code=005930" | iconv -f cp949 -t utf-8 -c | grep -n -B2 -A12 "외국인" | head -80
