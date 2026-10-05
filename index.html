@@ -1174,7 +1174,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261005c";
+var APPV = "20261005d";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1182,7 +1182,7 @@ fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return
 /* ---------- 시작 ---------- */
 getJSON("manifest.json?" + Date.now()).then(function(m){
   M = m;
-  $("stamp").innerHTML = "자동 업데이트<br>" + m.updated;
+  $("stamp").innerHTML = "자료 " + m.updated + "<br>앱 버전 " + APPV.slice(4);
   var hk = (location.hash || "").slice(1);
   var first = CATS.some(function(c){ return c.key === hk; }) ? hk : store.tab && CATS.some(function(c){ return c.key === store.tab; }) ? store.tab : "market";
   NAV.silent = true; go(first); NAV.silent = false;
