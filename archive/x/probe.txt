@@ -1,67 +1,8 @@
-< content-disposition: attachment; filename="T10Y3M.csv"
-< x-content-type-options: nosniff
-< x-xss-protection: 1; mode=block
-< content-length: 186117
-< cache-control: public, max-age=65
-< expires: Mon, 05 Oct 2026 07:15:58 GMT
-< date: Mon, 05 Oct 2026 07:14:53 GMT
-< alt-svc: h3=":443"; ma=93600
-< strict-transport-security: max-age=86400
-< x-location: cfs
-< set-cookie: _abck=EE9161B6C31F5D51A2BE2BC2C5BE570F~-1~YAAQkM0vFyIDfPGgAQAAo1zqChDIulXF33tBx9U2497K09jZ1ZnTqU+E+a0yikT8b/YVEja6oGMj24p6q8nCGpiWx5Cpuxd0SCAU9/Bf1NLYDMgZ8y+Vo+GX9WXfFHEGWYaQT2O8rfUZcMDeosAPGYBqWe0LHY72cVMKdsr4tZia5ILBqVovsMIqa8mM2hptXl4DgW1ROCUZvqFyzPMgbq21e2aN9kdITekclbfblRbw0OhNAw+ZyXZ8EGoVVcICz+ASsa+EYax6qkunx1M3RXqe/MTFWYf3J4y3h33dt8v8dtCTZY9KLwv6sy3Xae5OtpnyuuOqgpa0JW/A8At+6Aj+FSrmzmWd5N1B6op65WluUD+aiPW7neK27x0aQdTzlmiKrbDK+HnU9b0XIt6C8u/kSqOVFuhpgkYTeHpLTQtERahdLmgYMnS21Qiqkp2XR+FM51t5ExI2~-1~-1~-1~-1~-1; Domain=.stlouisfed.org; Path=/; Expires=Tue, 05 Oct 2027 07:14:53 GMT; Max-Age=31536000; Secure
-< set-cookie: bm_sz=49BDBB4D135242135D83AB45245495A2~YAAQkM0vFyMDfPGgAQAAo1zqCgFkq9Vsymn2mQGxyEghejyV6a4zFSbwglvQW20KT77KMFex5/DVYvau8U4TR1EEM9m21mSXqR+C6HFbjezHyB73KzWF8ia/V/Iz6k7n79dwa1xqlI3ZT1HNTFvfqJqp7srQ3oaskT6NLEttOZuLiblJCc+nyaYLB67yvXsciN4mNeSblSeUfqQTmE7HmhimBC8YLv3lKhLaqVTizi07KibKrxemP5Uiwx7oCGJ1kgDB7npaWoydeyFXVzo3XGsffaechrwNzZ2CuHhrcno6zpFh5rSQv04eFwS7d9hdTrMUx50lzHLDezOvC9S19WuSAXnS/ECo89HXXQAf+rJSsKBE/SnDvkoM~3228728~3753527; Domain=.stlouisfed.org; Path=/; Expires=Mon, 05 Oct 2026 11:14:53 GMT; Max-Age=14400
-< 
-{ [5 bytes data]
-* Connection #0 to host fred.stlouisfed.org left intact
-=== https://api.db.nomics.world/v22/series/FED/H15/RIFLGFCY10_N.B?observations=1&format=json
-{"_meta":{"args":{"align_periods":false,"dataset_code":"H15","dimensions":{},"facets":false,"format":"json","limit":1000,"metadata":true,"observations":true,"offset":0,"provider_code":"FED","q":"","series_code":"RIFLGFCY10_N.B"},"version":"22.1.17"},"dataset":{"code":"H15","dimensions_codes_order":["FREQ","INSTRUMENT","MATURITY"],"dimensions_labels":{"FREQ":"Frequency","INSTRUMENT":"Instrument","MATURITY":"Maturity"},"dimensions_values_labels":{"FREQ":{"0":"Undefined","128":"Twice Monthly","129":"Monthly","144":"Bi-Monthly (Nov)","145":"Bi-Monthly","16":"Weekly (Sunday)","160":"Quarterly (Oct)","161":"Quarterly (Nov)","162":"Quarterly","17":"Weekly (Monday)","18":"Weekly (Tuesday)","19":"Weekly (Wednesday)","192":"Annual (Jan)","193":"Annual (Feb)","194":"Annual (Mar)","195":"Annual (Apr)","196":"Annual (May)","197":"Annual (Jun)","198":"Annual (Jul)","199":"Annual (Aug)","20":"Weekly (T
-=== https://sdmx.oecd.org/public/rest/data/OECD.SDD.STES,DSD_STES@DF_CLI,4.1/KOR.M.LI...AA...H?startPeriod=2025-01&dimensionAtObservation=AllDimensions&format=csvfilewithlabels
-STRUCTURE,STRUCTURE_ID,STRUCTURE_NAME,ACTION,REF_AREA,Reference area,FREQ,Frequency of observation,MEASURE,Measure,UNIT_MEASURE,Unit of measure,ACTIVITY,Economic activity,ADJUSTMENT,Adjustment,TRANSFORMATION,Transformation,TIME_HORIZ,Time horizon,METHODOLOGY,Calculation methodology,TIME_PERIOD,Time period,OBS_VALUE,Observation value,OBS_STATUS,Observation status,UNIT_MULT,Unit multiplier,DECIMALS,Decimals,BASE_PER,Base period DATAFLOW,OECD.SDD.STES:DSD_STES@DF_CLI(4.1),Composite leading indicators,I,KOR,Korea,M,Monthly,LI,Composite leading indicator (CLI),IX,Index,_Z,Not applicable,AA,Amplitude adjusted,IX,Index,_Z,Not applicable,H,OECD harmonised,2025-03,,99.19601,,A,Normal value,0,Units,2,Two,, DATAFLOW,OECD.SDD.STES:DSD_STES@DF_CLI(4.1),Composite leading indicators,I,KOR,Korea,M,Monthly,LI,Composite leading indicator (CLI),IX,Index,_Z,Not applicable,AA,Amplitude adjusted,IX,Index,_Z
-=== https://oui.doleta.gov/unemploy/csv/ar539.csv
-"st","rptdate","c1","c2","c3","c4","c5","c6","c7","c8","c9","c10","c11","c12","c13","c14","c15","c16","c17","c18","c19","c20","c21","c22","c23" "AK","1986-02-15",6,1986-02-08,2048,8,9,0,0,21230,400,133,0,0,3287,3331,0,0,16996,205263,8.28,7.53,109.96,"B",1985-12-29 "AK","1986-02-22",7,1986-02-15,1635,17,8,0,0,19106,359,136,0,0,2758,2688,0,0,17355,205263,8.45,7.76,108.89,"B",1985-12-29 "AK","1986-03-01",8,1986-02-22,1818,15,17,0,0,21424,380,148,0,0,3362,3324,0,0,17922,205263,8.73,7.97,109.53,"B",1985-12-29 "AK","1986-03-08",9,1986-03-01,2257,20,17,0,0,21380,395,149,0,0,3273,3202,0,0,18384,205263,8.95,8.17,109.54,"B",1985-12-29 "AK","1986-03-15",10,1986-03-08,2005,18,17,0,0,21812,387,145,0,0,3380,3319,0,0,18886,205263,9.2,8.32,110.57,"B",1985-12-29 "AK","1986-03-22",11,1986-03-15,1737,11,13,0,0,20379,397,161,0,0,3105,3035,0,0,19200,205263,9.35,8.47,110.38,"B",1985-12-29 "AK","1986-03-29",12
-=== https://www.federalreserve.gov/datadownload/Output.aspx?rel=H15&series=bf17364827e38702b42a58cf8eaa3f78&lastobs=10&from=&to=&filetype=csv&label=include&layout=seriescolumn
-"Series Description","Market yield on U.S. Treasury securities at 1-month   constant maturity, quoted on investment basis","Market yield on U.S. Treasury securities at 3-month   constant maturity, quoted on investment basis","Market yield on U.S. Treasury securities at 6-month   constant maturity, quoted on investment basis","Market yield on U.S. Treasury securities at 1-year   constant maturity, quoted on investment basis","Market yield on U.S. Treasury securities at 2-year   constant maturity, quoted on investment basis","Market yield on U.S. Treasury securities at 3-year   constant maturity, quoted on investment basis","Market yield on U.S. Treasury securities at 5-year   constant maturity, quoted on investment basis","Market yield on U.S. Treasury securities at 7-year   constant maturity, quoted on investment basis","Market yield on U.S. Treasury securities at 10-year   constant matu
-=== https://www.chicagofed.org/-/media/publications/nfci/nfci-data-series-csv.csv
-Friday_of_Week,NFCI,ANFCI,Risk,Credit,Leverage,Nonfinancial_Leverage 01/08/1971,0.594,0.588,0.622,-1.114,-1.024,-1.407 01/15/1971,0.626,0.636,0.651,-1.116,-1.042,-1.424 01/22/1971,0.663,0.702,0.686,-1.119,-1.058,-1.439 01/29/1971,0.704,0.78,0.725,-1.124,-1.073,-1.452 02/05/1971,0.747,0.862,0.767,-1.131,-1.085,-1.462 02/12/1971,0.79,0.938,0.81,-1.141,-1.094,-1.47 02/19/1971,0.832,0.999,0.853,-1.154,-1.099,-1.475 02/26/1971,0.874,1.039,0.897,-1.171,-1.101,-1.478 03/05/1971,0.917,1.059,0.943,-1.193,-1.098,-1.477 03/12/1971,0.963,1.063,0.994,-1.219,-1.09,-1.474 03/19/1971,1.014,1.061,1.051,-1.251,-1.077,-1.468 03/26/1971,1.073,1.07,1.118,-1.288,-1.06,-1.46 04/02/1971,1.139,1.107,1.194,-1.33,-1.037,-1.449 04/09/1971,1.211,1.185,1.277,-1.376,-1.01,-1.437 04/16/1971,1.286,1.31,1.362,-1.427,-0.979,-1.423 04/23/1971,1.356,1.472,1.444,-1.48,-0.943,-1.408 04/30/1971,1.415,1.652,1.5
-=== https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=T10Y3M
- HTTP 000 0.196605s 
-=== integration codes
-[('lastClosePrice', '전일', '276,000'), ('openPrice', '시가', '275,500'), ('highPrice', '고가', '277,000'), ('lowPrice', '저가', '271,500'), ('accumulatedTradingVolume', '거래량', '16,915,343'), ('accumulatedTradingValue', '대금', '4조 6,573억'), ('marketValue', '시총', '1,613조 5,729억'), ('foreignRate', '외인소진율', '46.41%'), ('highPriceOf52Weeks', '52주 최고', '380,000'), ('lowPriceOf52Weeks', '52주 최저', '89,000'), ('per', 'PER', '12.38배'), ('eps', 'EPS', '22,292원'), ('cnsPer', '추정PER', '5.85배'), ('cnsEps', '추정EPS', '47,142원'), ('pbr', 'PBR', '3.21배'), ('bps', 'BPS', '86,052원'), ('dividendYieldRatio', '배당수익률', '0.60%'), ('dividend', '주당배당금', '1,668원')]
-['stockEndType', 'itemCode', 'reutersCode', 'stockName', 'totalInfos', 'iconInfos', 'description', 'etfKeyIndicator', 'dealTrendInfos', 'researches', 'industryCode', 'industryCompareInfo', 'consensusInfo', 'shareholdersMeetingInfo', 'irScheduleInfo']
-=== dealtrend
-	<tr class="udline">
-	<th rowspan="2" class="noln">날짜</th>
-	<th rowspan="2">개인</th>
-	<th rowspan="2">외국인</th>
-	<th rowspan="2">기관계</th>
-	<th colspan="6" class="eb">기관</th>
-	<th rowspan="2">기타법인</th>
-	</tr>
-	<tr class="udline">
-	<th class="sub">금융투자</th>
-	<th class="sub">보험</th>
-	<th class="sub">투신<br>(사모)</th>
-	<th class="sub">은행</th>
-	<th class="sub">기타금융기관</th>
-	<th class="sub">연기금등</th>
-	</tr>
-	<tr>
-	<td colspan="11" class="blank_07"></td>
-	</tr>
-
-	
-	
-	
-	
-	
-	
-	
-
-	
-	<tr><td colspan="11" style="text-align:center; padding:24px 0; color:#666;">이 페이지는 더 이상 제공되지 않습니다. <a href="https://stock.naver.com/" target="_blank">Npay 증권 바로가기</a></td></tr>
-	
-	
-
-</table>
-
-</body>
+FRED curl/8.5.0 OK 12702 b'-09-28,3.02\n2026-09-29,3.08\n2026-09-30,3.12\n2026-10-01,3.24\n'
+FRED python-urllib/3.12 OK 12702 b'-09-28,3.02\n2026-09-29,3.08\n2026-09-30,3.12\n2026-10-01,3.24\n'
+FRED Mozilla/5.0 (Windows NT 10.0; Win64; x64) FAIL The read operation timed out
+DEAL [{"itemCode": "005930", "bizdate": "20261002", "foreignerPureBuyQuant": "-350,942", "foreignerHoldRatio": "46.41%", "organPureBuyQuant": "+614,278", "individualPureBuyQuant": "-2,217,946", "closePrice": "276,000", "compareToPreviousClosePrice": "0", "compareToPreviousPrice": {"code": "3", "text": "보합", "name": "UNCHANGED"}, "accumulatedTradingVolume": "11,408,387"}, {"itemCode": "005930", "bizdate": "20261001", "foreignerPureBuyQuant": "-758,236", "foreignerHoldRatio": "46.41%", "organPureBuyQuant": "+46,127", "individualPureBuyQuant": "-1,292,880", "closePrice": "274,500", "compareToPreviousClosePrice": "6,000", "compareToPreviousPrice": {"code": "2", "text": "상승", "name": "RISING"}, "accumulatedTradingVolume": "13,741,073"}, {"itemCode": "005930", "bizdate": "20260930", "foreignerPureBuyQuant": "-3,191,284", "foreignerHoldRatio": "46.40%", "organPureBuyQuant": "-1,409,182", "individualPureBuyQuant": "+2,546,037", "closePrice": "269,500", "compareToPreviousClosePrice": "-3,000", "compareToPreviousPrice": {"code": "5", "text": "하락", "name": "FALLING"}, "accumulatedTradingVolume": "16,477,580"}, {"itemCode": "005930", "bizdate": "20260929", "foreignerPureBuyQuant": "-2,508,369", "foreignerHoldRatio": "46.47%", "organPureBuyQuant": "+53,759", "individualPureBuyQuant": "+422,277", "closePrice": "275,000", "compareToPreviousClosePrice": "5,000", "compareToPreviousPrice": {"code": "2", "text": "상승", "name": "RISING"}, "accumulatedTradingVolume": "15,963,864"}, {"itemCode": "005930
+TRY https://m.stock.naver.com/api/index/KOSPI/trend?pageSize=30&page=1 {"bizdate":"20261002","personalValue":"-17,897","foreignValue":"-1,080","institutionalValue":"+4,155"}
+TRY https://m.stock.naver.com/api/index/KOSPI/investorTrend?pageSize=30 FAIL HTTP Error 404: 404
+TRY https://m.stock.naver.com/api/index/KOSPI/trend/list?pageSize=30 FAIL HTTP Error 404: 404
+TRY https://m.stock.naver.com/api/index/KOSPI/dealTrend?pageSize=30 FAIL HTTP Error 404: 404
