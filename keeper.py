@@ -20,7 +20,7 @@ API = "https://api.github.com/repos/" + REPO
 
 # (KST 시각, 워크플로, 평일만?, 입력, 최근 몇 분 안에 돌았으면 건너뛰기)
 JOBS = [("05:47", "opprice.yml", False, None, 120), ("06:27", "opprice.yml", False, None, 120),
-        ("07:23", "collect.yml", False, None, 12), ("07:40", "collect.yml", False, None, 12), ("07:50", "regime.yml", False, None, 60),
+        ("07:23", "collect.yml", False, None, 12), ("07:40", "collect.yml", False, None, 12), ("06:50", "regime.yml", False, None, 60), ("07:05", "collect.yml", False, None, 12), ("07:55", "collect.yml", False, None, 8), ("06:05", "collect.yml", False, None, 12),
         ("08:05", "collect.yml", False, None, 12), ("08:35", "collect.yml", False, None, 12), ("09:25", "collect.yml", False, None, 12),
         ("09:43", "collect.yml", False, None, 12), ("15:13", "collect.yml", False, None, 12), ("16:33", "collect.yml", False, None, 12),
         ("16:20", "opprice.yml", True, None, 60), ("17:10", "regime.yml", True, None, 60), ("21:53", "collect.yml", False, None, 12),
@@ -30,7 +30,7 @@ JOBS += [(f"{h:02d}:35", "watch.yml", True, None, 20) for h in range(9, 16)]
 JOBS += [(f"{h:02d}:47", "watch.yml", True, None, 20) for h in (22, 23, 0, 1, 2, 3, 4, 5)]
 JOBS += [(f"{h:02d}:12", "feedback.yml", False, None, 30) for h in list(range(5, 24)) + [0, 1, 2, 3, 4]]   # 의견함 (ntfy 첨부는 3시간만 보관)
 # 교대: [시작, 끝) KST 시
-SHIFTS = [(5, 11), (11, 17), (17, 23), (23, 29)]
+SHIFTS = [(4, 10), (10, 16), (16, 22), (22, 28)]
 
 
 def api(path, method="GET", body=None):
@@ -69,7 +69,7 @@ def other_keeper(shift_start):
         if str(r["id"]) == RUN_ID:
             continue
         t = dt.datetime.fromisoformat(r["created_at"].replace("Z", "+00:00")).astimezone(KST)
-        h = t.hour + (24 if t.hour < 5 else 0)
+        h = t.hour + (24 if t.hour < 4 else 0)
         if shift_start <= h < shift_start + 6:
             return True
     return False
@@ -77,7 +77,7 @@ def other_keeper(shift_start):
 
 def main():
     now = dt.datetime.now(KST)
-    h = now.hour + (24 if now.hour < 5 else 0)
+    h = now.hour + (24 if now.hour < 4 else 0)
     sh = next(((a, b) for a, b in SHIFTS if a <= h < b), None)
     if not sh:
         log("교대 시간 아님")
@@ -85,11 +85,11 @@ def main():
     if other_keeper(sh[0]):
         log("같은 교대 지킴이가 이미 돌고 있음 — 끝")
         return
-    base = (now - dt.timedelta(days=1 if now.hour < 5 else 0)).replace(hour=0, minute=0, second=0, microsecond=0)
+    base = (now - dt.timedelta(days=1 if now.hour < 4 else 0)).replace(hour=0, minute=0, second=0, microsecond=0)
     todo = []
     for hm, wf, wk, inp, skip in JOBS:
         hh, mm = map(int, hm.split(":"))
-        hx = hh + (24 if hh < 5 else 0)
+        hx = hh + (24 if hh < 4 else 0)
         if not (sh[0] <= hx < sh[1]):
             continue
         at = base + dt.timedelta(hours=hx, minutes=mm)
