@@ -139,6 +139,7 @@
     if (m.weak && m.weak.length){
       h += card("🧊 약한 업종", m.weak.map(function(x){ return '<div class="cp-wk"><b>' + e(x.name) + '</b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><div class="cp-sts">' + x.lead.slice(-2).map(sChip).join("") + '</div></div>'; }).join(""));
     }
+    if (window.CPX) try { h += window.CPX(m, k, C); } catch(err) { console.error(err); }
     return h;
   }
 

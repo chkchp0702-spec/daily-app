@@ -50,10 +50,30 @@ def load_meta(dest):
         if not sym:
             continue
         ind = (r.get("industry_ko") or r.get("industry") or "").strip()
-        out[sym] = [r.get("sector") or "", ind, r.get("market_cap") or 0]
+        pe, pb = r.get("pe"), r.get("pb")
+        out[sym] = [r.get("sector") or "", ind, r.get("market_cap") or 0,
+                    round(pe, 2) if isinstance(pe, (int, float)) and 0 < pe < 1000 else None,
+                    round(pb, 2) if isinstance(pb, (int, float)) and 0 < pb < 200 else None]
     if out:
         json.dump(out, open(cache, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        ind_values(out, dest)
     return out
+
+
+def ind_values(meta, dest):
+    """업종별 PER·PBR 중간값 → ind_val.json (종목리포트 '밸류 위치'용)"""
+    g = defaultdict(lambda: [[], []])
+    for v in meta.values():
+        if len(v) < 5 or not v[1]:
+            continue
+        if v[3]:
+            g[v[1]][0].append(v[3])
+        if v[4]:
+            g[v[1]][1].append(v[4])
+    med = lambda a: round(sorted(a)[len(a) // 2], 2) if len(a) >= 5 else None
+    q = lambda a, f: round(sorted(a)[int(len(a) * f)], 2) if len(a) >= 5 else None
+    out = {k: {"pe": med(a), "pe25": q(a, .25), "pe75": q(a, .75), "pb": med(b), "n": len(a)} for k, (a, b) in g.items() if len(a) >= 5}
+    json.dump(out, open(os.path.join(dest, "ind_val.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 
 
 def load_names(dest):
@@ -110,6 +130,8 @@ def index_block(mkt):
             continue
         lab, why, ma20, m60, slope = regime(list(c.values))
         tail = c.iloc[-60:]
+        vals = list(c.values)
+        rh = [[c.index[i].strftime("%m/%d"), regime(vals[:i + 1])[0]] for i in range(max(70, len(vals) - 60), len(vals))]
         m20t = ma20.iloc[-60:]
         out.append({
             "sym": s, "name": nm, "date": c.index[-1].strftime("%Y-%m-%d"), "last": _r(c.iloc[-1]),
@@ -119,12 +141,55 @@ def index_block(mkt):
             "hi52": _r(c.max()), "lo52": _r(c.min()),
             "dates": [d.strftime("%m/%d") for d in tail.index], "close": [_r(v) for v in tail.values],
             "ma20": [_r(v) for v in m20t.values], "ma60": _r(m60), "slope20": _r(slope),
-            "regime": lab, "why": why,
+            "regime": lab, "why": why, "reg_hist": rh,
         })
     return out
 
 
-def build(daily, hl, mkt_of, dest):
+FACTORS = {"KR": ("KRW=X", "원/달러 환율"), "JP": ("JPY=X", "엔/달러 환율"), "CN": ("CNY=X", "위안/달러 환율"),
+           "HK": ("DX-Y.NYB", "달러지수"), "US": ("DX-Y.NYB", "달러지수")}
+FX_CACHE = {}
+
+
+def factor_series():
+    """환율·금리 하루 변화 (나침반 민감도용)"""
+    if FX_CACHE:
+        return FX_CACHE
+    import yfinance as yf
+    import pandas as pd
+    syms = sorted({v[0] for v in FACTORS.values()} | {"^TNX"})
+    try:
+        df = yf.download(syms, period="6mo", interval="1d", group_by="ticker", auto_adjust=False, progress=False, threads=True)
+        for s in syms:
+            c = (df[s]["Close"] if isinstance(df.columns, pd.MultiIndex) else df["Close"]).dropna()
+            c.index = pd.to_datetime(c.index).tz_localize(None).normalize()
+            FX_CACHE[s] = c.diff() if s == "^TNX" else c.pct_change() * 100
+    except Exception as e:
+        print("환율·금리 실패", e, flush=True)
+    return FX_CACHE
+
+
+def sensitivity(mkt, sec_ret):
+    """섹터 하루 수익률과 (환율 변화, 미국 10년 금리 변화)의 상관 — 최근 60거래일"""
+    F = factor_series()
+    fx_s, fx_nm = FACTORS[mkt]
+    fx, rt = F.get(fx_s), F.get("^TNX")
+    if fx is None or rt is None or not sec_ret:
+        return None
+    items = []
+    for k, ser in sec_ret.items():
+        s = ser.dropna().iloc[-60:]
+        a = s.to_frame("s").join(fx.rename("fx"), how="inner").join(rt.rename("rt"), how="inner").dropna()
+        if len(a) < 25:
+            continue
+        items.append({"k": k, "icon": SECTOR_KO[k][0], "name": SECTOR_KO[k][1], "fx": _r(a["s"].corr(a["fx"]), 2), "rate": _r(a["s"].corr(a["rt"]), 2), "n": len(a)})
+    if not items:
+        return None
+    return {"fx_name": fx_nm, "fx_chg1": _r(fx.dropna().iloc[-1], 2) if len(fx.dropna()) else None,
+            "rate_chg1": _r(rt.dropna().iloc[-1] * 100, 1) if len(rt.dropna()) else None, "items": items}
+
+
+def build(daily, hl, mkt_of, dest, hlh=None):
     """daily: {심볼: pandas Series(최근 ~70일 종가)}, hl: {심볼: 1(52주 신고가)/-1(신저가)/0}"""
     import pandas as pd
     meta = load_meta(dest)
@@ -205,6 +270,22 @@ def build(daily, hl, mkt_of, dest):
                             "r1": _r(wavg(items, "r1")), "r5": _r(wavg(items, "r5")), "r20": _r(wavg(items, "r20")),
                             "big": [stock(x) for x in big[:3]], "hot": [stock(x) for x in movers[:3]]})
         sectors.sort(key=lambda x: -(x["r1"] or -999))
+        # 섹터 흐름 (최근 15거래일의 1주·1개월 수익률) + 섹터 하루 수익률 시계열 (민감도용)
+        R5, R20 = df / df.shift(5) - 1, df / df.shift(20) - 1
+        sec_ret = {}
+        for x in sectors:
+            items = sec[x["k"]]
+            ss = [it["s"] for it in items if it["s"] in df.columns]
+            w = pd.Series({it["s"]: max(it["cap"], 0) or 1 for it in items if it["s"] in df.columns})
+            if not ss:
+                continue
+
+            def wm(D):
+                D = D[ss]
+                return (D * w).sum(axis=1) / (D.notna() * w).sum(axis=1).replace(0, float("nan"))
+            a5, a20 = wm(R5).iloc[-15:], wm(R20).iloc[-15:]
+            x["path"] = [[d.strftime("%m/%d"), _r(v5 * 100), _r(v20 * 100)] for d, v5, v20 in zip(a5.index, a5.values, a20.values) if v5 == v5 and v20 == v20]
+            sec_ret[x["k"]] = wm(ret) * 100
 
         ind = defaultdict(list)
         for x in rows:
@@ -260,6 +341,21 @@ def build(daily, hl, mkt_of, dest):
             if x["ind"]:
                 hic[x["ind"]] += 1
         mk["high_inds"] = sorted(hic.items(), key=lambda kv: -kv[1])[:8]
+        # 최근 40일 신고가·신저가 종목 수
+        if hlh:
+            hh = defaultdict(lambda: [0, 0])
+            for s_ in syms:
+                f = hlh.get(s_)
+                if f is None:
+                    continue
+                for d, v in f.items():
+                    hh[d.strftime("%m/%d") if hasattr(d, "strftime") else str(d)][0 if v > 0 else 1] += 1
+            days_ = [d.strftime("%m/%d") for d in df.index[-40:]]
+            mk["hl_hist"] = [[d, hh[d][0], hh[d][1]] for d in days_]
+        try:
+            mk["sens"] = sensitivity(mkt, sec_ret)
+        except Exception as e:
+            print("민감도 실패", mkt, e, flush=True)
         mk["fg"] = fear_greed(mk, mkt)
         mk["summary"] = summary(mk)
         res["markets"][mkt] = mk

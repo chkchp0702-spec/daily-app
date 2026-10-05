@@ -1,0 +1,121 @@
+/* CH Investing — 2차 업그레이드 화면 */
+#wlbtn{margin-left:auto;margin-right:10px;border:1px solid var(--line);background:var(--panel);color:#ffd166;border-radius:12px;padding:6px 10px;font:inherit;font-size:15px;display:flex;align-items:center;gap:4px}
+#wlbtn em{font-style:normal;font-size:12px;font-weight:800;color:var(--text)}
+.star{flex:none;border:0;background:transparent;color:var(--dim);font-size:19px;line-height:1;padding:2px 4px;margin-left:4px;cursor:pointer}
+.star.on{color:#ffd166}
+.star.big{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:6px 10px;font-size:16px;margin-left:auto}
+.star.big span{font-size:12.5px;font-weight:700;color:var(--text)}
+.star.big.on{border-color:#ffd166;background:color-mix(in srgb,#ffd166 14%,var(--panel2))}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;z-index:90;background:#2a3346;color:var(--text);padding:10px 16px;border-radius:12px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:.25s;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.wl .row{gap:8px}
+.wl-n{min-width:0;flex:1}
+.wl-n .xo{color:var(--text);text-decoration:none}
+.wl-p{text-align:right;font-size:13px;white-space:nowrap}
+.wl-p small{display:block;font-size:11.5px}
+.wl-sg{margin-top:6px}
+.wl-m{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.wl-m span{font-size:12px;background:var(--panel2);border-radius:8px;padding:3px 8px;color:var(--sub)}
+.wl-m span.up{color:#ff9a9a}.wl-m span.dn{color:#8fb8ff}
+.wl-memo{margin:8px 0 0;font-size:13px;color:var(--text);background:var(--panel2);border-radius:10px;padding:8px 10px;white-space:pre-wrap;word-break:keep-all}
+.memo-f{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.memo-f label,.mf3 label{display:block;font-size:11.5px;color:var(--sub);margin-bottom:8px}
+.mf3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.memo-f input,.memo-f textarea,.mf3 input,.scp textarea{width:100%;margin-top:3px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:8px;font:inherit;font-size:15px}
+.memo-f textarea,.scp textarea{resize:vertical;font-size:14px}
+.opmemo .wl-m{margin-top:0}
+/* 시황 */
+.dday{flex:none;min-width:38px;font-size:12px;color:#ffd166}
+.scp{padding:8px 0;border-bottom:1px solid var(--line)}
+.scp:last-of-type{border:0}
+.scp textarea{margin-top:6px}
+.xcs .av b{color:#8fb8ff}
+details.pfold,details.pfold2{margin-bottom:12px}
+details.pfold>summary,details.pfold2>summary{list-style:none;cursor:pointer;font-size:14px;color:var(--sub);font-weight:600}
+details.pfold>summary{display:block;padding:13px;border-radius:14px;border:1px solid var(--line);background:var(--panel)}
+details.pfold[open]>summary{margin-bottom:10px}
+details summary::-webkit-details-marker{display:none}
+.x4 em{display:block;font-style:normal;font-size:10.5px;color:var(--dim)}
+.x2 div{background:var(--panel2);border-radius:12px;padding:9px 10px}
+.x2 small{display:block;color:var(--dim);font-size:11px}
+.x2 em{font-style:normal;font-size:11px;color:var(--sub);margin-left:6px}
+.xfl{padding:9px 0;border-bottom:1px solid var(--line)}
+.xfl:last-of-type{border:0}
+.xs{max-width:8em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 컵 */
+.hq{display:flex;align-items:center;gap:8px;margin:8px 0 2px;font-size:12px}
+.hq-b{font-weight:800;font-size:11.5px;padding:3px 8px;border-radius:999px}
+.hq-b.g{background:color-mix(in srgb,var(--up) 20%,transparent);color:#ff9a9a}
+.hq-b.m{background:#2a3142;color:#e8d9bf}
+.hq-b.b{background:color-mix(in srgb,var(--down) 22%,transparent);color:#8fb8ff}
+.bp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:8px 0 4px;text-align:center}
+.bp div{background:var(--panel2);border-radius:9px;padding:6px 2px}
+.bp small{display:block;font-size:10px;color:var(--dim);line-height:1.25}
+.bp small em{font-style:normal;display:block}
+.bp b{font-size:12.5px}
+.bpq{font-size:12px;text-align:right;margin-bottom:4px}
+.wcg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.wc{background:var(--panel2);border-radius:12px;padding:8px;font-size:12px;min-width:0}
+.wc .xo{color:var(--text);text-decoration:none;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wc-sp{margin:4px 0}
+.wc .row b{font-size:12px}
+/* 갭 */
+.gq{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:6px 0 2px;font-size:12px}
+table.ft td,table.ft th{text-align:center}
+table.ft td small{color:var(--sub)}
+table.ft td em{display:block;font-style:normal;font-size:10.5px;color:var(--dim)}
+/* 나침반 */
+.rgs{display:flex;gap:1px;height:26px;border-radius:8px;overflow:hidden}
+.rgs i{flex:1}
+.rgs i.u,.rgl i.u{background:#e66767}.rgs i.d,.rgl i.d{background:#3987e5}.rgs i.f,.rgl i.f{background:#4a5266}
+.rgl{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:4px}
+.rgl i{display:inline-block;width:9px;height:9px;border-radius:2px;margin:0 2px 0 6px}
+.rotc{display:flex;align-items:center;gap:8px;margin-top:6px}
+.rotc input{flex:1;accent-color:var(--c)}
+.rotc b{font-size:12px;min-width:38px;text-align:right}
+.lk{padding:8px 0;border-bottom:1px solid var(--line)}
+.lk:last-child{border:0}
+.lk>b{font-size:13px;display:block;margin-bottom:4px}
+.lk-r{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.lk-r .cp-st{padding:5px 8px;font-size:12px}
+.lk-a{color:var(--dim)}
+table.sens td:first-child{white-space:nowrap}
+table.sens td small{margin-left:4px;font-size:11px}
+.sbar{position:relative;display:inline-block;width:56px;height:8px;border-radius:99px;background:#232c40;vertical-align:middle;overflow:hidden}
+.sbar i{position:absolute;top:0;height:100%}
+/* 종목리포트 */
+.opx .sub2:first-of-type{margin-top:12px}
+.vd{display:flex;align-items:center;gap:10px}
+.vd-i{font-size:26px;line-height:1}
+.vd b{font-size:15px}
+.vd small{display:block;color:var(--sub);font-size:12px;line-height:1.45}
+.vbar{position:relative;height:26px;margin:8px 4px 6px;border-bottom:2px solid #2d3650}
+.vleg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--sub)}
+.vleg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.vrange{position:absolute;bottom:0;height:14px;background:rgba(138,148,168,.25);border-radius:4px 4px 0 0}
+.vm{position:absolute;bottom:-2px;width:2px;height:22px;background:var(--mc)}
+.vm em{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);font-style:normal;font-size:10.5px;white-space:nowrap;color:var(--mc);font-weight:700}
+.nm8{display:flex;align-items:center;gap:4px}
+.nm8 i{width:16px;height:16px;border-radius:5px;background:#4a5266}
+.nm8 i.u{background:#e66767}.nm8 i.d{background:#3987e5}
+.nm8 span{margin-left:6px}
+/* 단타 */
+.rgban{border-radius:14px;padding:11px 13px;margin-bottom:10px;font-size:13.5px;background:var(--panel);border:1px solid var(--line)}
+.rgban.d{border-color:#3987e5;background:color-mix(in srgb,#3987e5 12%,var(--panel))}
+.rgban.u{border-color:#e66767;background:color-mix(in srgb,#e66767 10%,var(--panel))}
+.dlim{border-radius:14px;padding:11px 13px;margin-bottom:10px;background:var(--panel);border:1px solid var(--line)}
+.dlim b{display:block;font-size:14px}
+.dlim span{display:block;font-size:13px;color:var(--sub)}
+.dlim small{display:block;font-size:11.5px;color:var(--dim);margin-top:2px}
+.dlim.over{border-color:var(--up);background:color-mix(in srgb,var(--up) 14%,var(--panel))}
+/* 알림 */
+.card.me{background:linear-gradient(135deg,color-mix(in srgb,#ffd166 12%,var(--panel)),var(--panel))}
+.qrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub)}
+.qrow select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:7px;font:inherit;font-size:15px}
+.tg{display:flex;align-items:center;gap:8px;font-size:13.5px;margin-top:10px}
+.tg input{width:18px;height:18px;accent-color:#ffd166}
+.plog{display:grid}
+.pl{padding:10px 0;border-bottom:1px solid var(--line)}
+.pl:last-child{border:0}
+.pl b{font-size:13.5px}
+.pl small{display:block;color:var(--sub);font-size:12px;margin-top:2px;word-break:keep-all}

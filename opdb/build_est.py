@@ -42,7 +42,21 @@ def main():
             est, ltg = D.fetch_estimates(t, lastfy.get(s))
             cal = D.fetch_calendar(t)
             signal.alarm(0)
-            json.dump({"estimates": est, "ltg": ltg, "cal": cal}, open(os.path.join(a.out, "e", fname(s) + ".json"), "w"), ensure_ascii=False)
+            surp = []
+            if est:                                   # 애널리스트가 있는 종목만: 최근 8분기 예상 EPS vs 실제
+                try:
+                    signal.alarm(20)
+                    ed = t.get_earnings_dates(limit=12)
+                    signal.alarm(0)
+                    if ed is not None and len(ed):
+                        for i, r in ed.iterrows():
+                            e_, a_ = r.get("EPS Estimate"), r.get("Reported EPS")
+                            if a_ == a_ and a_ is not None and e_ == e_ and e_ is not None:
+                                surp.append([i.strftime("%Y-%m-%d"), round(float(e_), 4), round(float(a_), 4)])
+                        surp = sorted(surp)[-8:]
+                except Exception:
+                    signal.alarm(0)
+            json.dump({"estimates": est, "ltg": ltg, "cal": cal, "surp": surp}, open(os.path.join(a.out, "e", fname(s) + ".json"), "w"), ensure_ascii=False)
             ok += 1
             has += 1 if est else 0
         except Exception as e:

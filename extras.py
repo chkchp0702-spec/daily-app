@@ -64,7 +64,7 @@ def load_prices(syms, period="1y"):
         for s in part:
             try:
                 sub = df[s] if isinstance(df.columns, pd.MultiIndex) else df
-                sub = sub[["Close", "High", "Low"]].dropna()
+                sub = sub[[c for c in ("Open", "Close", "High", "Low", "Volume") if c in sub.columns]].dropna(subset=["Close"])
                 if len(sub):
                     sub.index = pd.to_datetime(sub.index).tz_localize(None).normalize()
                     PX[s] = sub
@@ -165,7 +165,16 @@ def cup_extra(s, after, p0):
     if not pv:
         return {}
     hit = after[after["High"] >= pv]
-    return {"pivot": pv, "brk": bool(len(hit)), "brkd": hit.index[0].strftime("%Y-%m-%d") if len(hit) else ""}
+    o = {"pivot": pv, "brk": bool(len(hit)), "brkd": hit.index[0].strftime("%Y-%m-%d") if len(hit) else ""}
+    if len(hit):
+        # 돌파 후 추적: 며칠째 · 돌파선 대비 최고 · 실패(종가가 돌파선 -8% 아래) / 성공(+20%)
+        post = after[after.index >= hit.index[0]]
+        mx = float(post["High"].max())
+        fail = post[post["Close"] < pv * 0.92]
+        o.update({"bdays": int(len(post) - 1), "bmax": r2((mx / pv - 1) * 100), "bnow": r2((float(post["Close"].iloc[-1]) / pv - 1) * 100),
+                  "bst": "실패" if len(fail) else "성공" if mx >= pv * 1.2 else "진행",
+                  "bfd": fail.index[0].strftime("%Y-%m-%d") if len(fail) else ""})
+    return o
 
 
 def gap_extra(s, after, p0):
@@ -176,9 +185,49 @@ def gap_extra(s, after, p0):
     if not lvl or not len(px):
         return {}
     filled = px[px["Low"] <= lvl]
-    return {"gday": gd, "gap": s.get("gap"), "vol": s.get("vol"), "fill_lvl": lvl, "filled": bool(len(filled)),
+    full = PX.get(ysym(s["code"])) if PX.get(ysym(s["code"])) is not None else PX.get(ysym(s["code"])[:-3] + ".KQ") if ysym(s["code"]).endswith(".KS") else None
+    pre = None
+    if full is not None:
+        b = full[full.index < pd.Timestamp(gd)]["Close"]
+        if len(b) > 21:
+            pre = (float(b.iloc[-1]) / float(b.iloc[-21]) - 1) * 100
+    gt = gap_type(s, pre)
+    return {"gday": gd, "gap": s.get("gap"), "vol": s.get("vol"), "fill_lvl": lvl, "filled": bool(len(filled)), "pre20": r2(pre), "gtype": gt,
             "filld": filled.index[0].strftime("%Y-%m-%d") if len(filled) else "",
             "fill_days": int((px.index < filled.index[0]).sum()) if len(filled) else None}
+
+
+EARN = {}      # 미국 종목 실적 발표일 (갭 유형 '실적 갭' 판정용) — plus.py 가 채움
+
+
+def gap_type(s, pre):
+    """갭 유형: 실적 갭 / 돌파 갭(긴 횡보 뒤) / 소진 의심(이미 많이 오른 뒤) / 진행 갭"""
+    gd = s.get("gday") or s.get("d0")
+    for d in EARN.get(s.get("code"), []):
+        try:
+            if 0 <= (dt.date.fromisoformat(gd) - dt.date.fromisoformat(d)).days <= 3:
+                return "실적 갭"
+        except Exception:
+            pass
+    if pre is not None and pre >= 25:
+        return "소진 의심"
+    if (s.get("boxw") or 0) >= 4 and (pre is None or pre < 15):
+        return "돌파 갭"
+    return "진행 갭"
+
+
+def accum_extra(s, after, p0):
+    """매집 신호 뒤 박스(신호 전 20일 고점) 돌파 여부"""
+    import pandas as pd
+    full = PX.get(ysym(s["code"])) if PX.get(ysym(s["code"])) is not None else PX.get(ysym(s["code"])[:-3] + ".KQ") if ysym(s["code"]).endswith(".KS") else None
+    if full is None:
+        return {}
+    before = full[full.index < pd.Timestamp(s["d0"])]
+    if len(before) < 20:
+        return {}
+    box = float(before["High"].iloc[-20:].max())
+    hit = after[after["High"] > box]
+    return {"box": r2(box, 4), "abrk": bool(len(hit)), "abd": int((after.index < hit.index[0]).sum()) if len(hit) else None, "mdays": s.get("days")}
 
 
 def perf(cat, fname, lists, extra=None):
@@ -203,9 +252,40 @@ def perf(cat, fname, lists, extra=None):
         res["fill"] = {"n": len(g), "f5": fr(5), "f20": fr(20), "now": r2(sum(1 for r in g if r["filled"]) / len(g) * 100, 0) if g else None,
                        "held_ret": r2(sum(r["now"] for r in g if not r["filled"]) / max(1, sum(1 for r in g if not r["filled"]))),
                        "fill_ret": r2(sum(r["now"] for r in g if r["filled"]) / max(1, sum(1 for r in g if r["filled"])))}
+    if cat == "gap":
+        # 갭 유형별 성적
+        bt = {}
+        for r in rows:
+            if r.get("gtype"):
+                bt.setdefault(r["gtype"], []).append(r)
+        res["by_type"] = {k: dict(stats(v)["all"], fill=r2(sum(1 for r in v if r.get("filled")) / len(v) * 100, 0)) for k, v in bt.items()}
+        # 갭 메움 확률표: 갭 크기 × 거래량
+        def gb(r):
+            g = r.get("gap") or 0
+            return "갭 5% 미만" if g < 5 else "갭 5~10%" if g < 10 else "갭 10% 이상"
+        def vb(r):
+            return "거래량 3배 미만" if (r.get("vol") or 0) < 3 else "거래량 3배 이상"
+        tbl = {}
+        for r in g:
+            tbl.setdefault(gb(r) + "|" + vb(r), []).append(r)
+        def rate(v, n):
+            v = [r for r in v if r["days"] >= n]
+            return (r2(sum(1 for r in v if r["filled"] and r["fill_days"] is not None and r["fill_days"] <= n) / len(v) * 100, 0), len(v)) if v else (None, 0)
+        res["fill_tbl"] = {k: {"n": len(v), "f5": rate(v, 5)[0], "f20": rate(v, 20)[0], "n5": rate(v, 5)[1]} for k, v in tbl.items()}
+    if cat == "accum":
+        bd = {}
+        for r in rows:
+            m = r.get("mdays") or 1
+            k = "1~2일째" if m <= 2 else "3~5일째" if m <= 5 else "6~10일째" if m <= 10 else "11일째 이상"
+            bd.setdefault(k, []).append(r)
+        res["by_days"] = {k: dict(stats(v)["all"], brk=r2(sum(1 for r in v if r.get("abrk")) / len(v) * 100, 0)) for k, v in bd.items()}
+        a = [r for r in rows if "abrk" in r]
+        res["brk"] = {"n": len(a), "rate": r2(sum(1 for r in a if r["abrk"]) / len(a) * 100, 0) if a else None}
     if cat == "cup":
         c = [r for r in rows if "brk" in r]
         res["brk"] = {"n": len(c), "rate": r2(sum(1 for r in c if r["brk"]) / len(c) * 100, 0) if c else None}
+        b = [r for r in c if r.get("bst")]
+        res["post"] = {k: sum(1 for r in b if r["bst"] == k) for k in ("진행", "성공", "실패")}
     js(f"perf_{cat}.json", res)
     print("성적표", cat, len(rows), flush=True)
     return res
@@ -230,7 +310,8 @@ def danta():
             hh = int((r.get("time") or "00:00")[:2])
             rows.append({"d": d, "time": r.get("time"), "code": r.get("code"), "name": r.get("name"), "type": r.get("type") or "알람",
                          "price": p, "hi": hi, "lo": lo, "now": now, "t1p": r2(t1), "stp": r2(st), "hit1": hit1, "hits": hits,
-                         "pnl": r2(pnl), "slot": "09시" if hh <= 9 else "10시" if hh == 10 else "11~12시" if hh <= 12 else "13시 이후"})
+                         "pnl": r2(pnl), "slot": "09시" if hh <= 9 else "10시" if hh == 10 else "11~12시" if hh <= 12 else "13시 이후",
+                         "chg": r.get("chg"), "wd": "월화수목금토일"[dt.date.fromisoformat(d).weekday()]})
     if not rows:
         return
 
@@ -265,11 +346,52 @@ def danta():
         cum += day
         eq.append([d[5:].replace("-", "/"), r2(day), r2(cum)])
     order = ["09시", "10시", "11~12시", "13시 이후"]
+    pat = fail_patterns(rows)
+    # 오늘 연속 손절 (가상 매매 기준, 시간 순)
+    today = sorted([r for r in rows if r["d"] == max(r["d"] for r in rows)], key=lambda r: r["time"] or "")
+    streak = 0
+    for r in today:
+        streak = streak + 1 if r["hits"] else 0
+    day_pnl = r2(sum(r["pnl"] or 0 for r in today))
     js("danta_stats.json", {"updated": NOW.strftime("%Y-%m-%d %H:%M"), "all": blk(rows),
                             "by_type": {k: blk(v) for k, v in sorted(by_t.items(), key=lambda x: -len(x[1]))},
                             "by_slot": {k: blk(by_h[k]) for k in order if k in by_h}, "quality": qual,
+                            "patterns": pat, "today": {"d": today[0]["d"] if today else None, "n": len(today), "streak": streak, "pnl": day_pnl,
+                                                       "stops": sum(1 for r in today if r["hits"])},
                             "equity": eq, "journal": sorted(rows, key=lambda r: (r["d"], r["time"] or ""), reverse=True)[:200]})
     print("단타", len(rows), flush=True)
+
+
+def fail_patterns(rows):
+    """손절 난 알람 vs 나머지 — 어떤 조건에서 손절이 많았나 (문장으로)"""
+    loss = [r for r in rows if r["hits"]]
+    rest = [r for r in rows if not r["hits"]]
+    if len(loss) < 5 or len(rest) < 5:
+        return {"n": len(loss), "lines": []}
+    out = []
+    avg = lambda v: sum(v) / len(v) if v else None
+    lc, rc = avg([r["chg"] for r in loss if r.get("chg") is not None]), avg([r["chg"] for r in rest if r.get("chg") is not None])
+    if lc is not None and rc is not None and abs(lc - rc) >= 1:
+        out.append({"k": "당일 등락", "t": f"손절 난 알람은 알람 때 이미 평균 {lc:+.1f}% 올라 있었어요 (나머지 {rc:+.1f}%)." + (" 많이 오른 뒤 알람은 조심." if lc > rc else " 덜 오른 상태 알람이 오히려 약했어요.")})
+    def share(key):
+        res = []
+        keys = sorted({r[key] for r in rows})
+        for k in keys:
+            n_all = sum(1 for r in rows if r[key] == k)
+            n_l = sum(1 for r in loss if r[key] == k)
+            if n_all >= 4:
+                res.append((k, n_l / n_all * 100, n_all))
+        return sorted(res, key=lambda x: -x[1])
+    base = len(loss) / len(rows) * 100
+    for key, nm in (("slot", "시간대"), ("type", "유형"), ("wd", "요일")):
+        sh = share(key)
+        if sh and sh[0][1] >= base + 10:
+            k, v, n = sh[0]
+            out.append({"k": nm, "t": f"{nm} '{k}' 알람의 손절 비율이 {v:.0f}%로 가장 높아요 (전체 {base:.0f}%, {n}건)."})
+        if sh and len(sh) > 1 and sh[-1][1] <= base - 10:
+            k, v, n = sh[-1]
+            out.append({"k": nm, "t": f"반대로 '{k}'는 손절 비율 {v:.0f}%로 가장 낮아요 ({n}건)."})
+    return {"n": len(loss), "base": r2(base, 0), "lines": out[:6]}
 
 
 # ── 3. 고래 ──────────────────────────────────────────────────
@@ -667,11 +789,30 @@ def market_chips():
 SENT_P = os.path.join(OUT, "sent.json")
 
 
-def push(topic, title, msg, tab, key, tags="chart_with_upwards_trend"):
+QUIET = (23, 7)    # 공용 알림은 밤 11시 ~ 아침 7시에 소리 없이 (priority 2)
+LOG_P = os.path.join(OUT, "push_log.json")
+
+
+def quiet_now(q=QUIET):
+    h = dt.datetime.now(KST).hour
+    a, b = q
+    return (a <= h or h < b) if a > b else (a <= h < b)
+
+
+def log_push(topic, title, msg, tab, syms=None):
+    lg = jl(LOG_P, []) or []
+    lg.insert(0, {"t": dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M"), "topic": topic, "title": title, "msg": msg[:300], "tab": tab,
+                  "syms": syms or []})
+    json.dump(lg[:300], open(LOG_P, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+
+
+def push(topic, title, msg, tab, key, tags="chart_with_upwards_trend", syms=None, quiet=QUIET, full_topic=None, log=True):
     sent = jl(SENT_P, {}) or {}
     if key in sent:
         return
-    body = {"topic": TOPIC + topic, "title": title, "message": msg, "tags": [tags], "click": APP + "#" + tab}
+    body = {"topic": full_topic or TOPIC + topic, "title": title, "message": msg, "tags": [tags], "click": APP + "#" + tab}
+    if quiet and quiet_now(quiet):
+        body["priority"] = 2
     try:
         req = urllib.request.Request("https://ntfy.sh/", data=json.dumps(body).encode("utf-8"), headers={"Content-Type": "application/json"})
         urllib.request.urlopen(req, timeout=15).read()
@@ -685,6 +826,8 @@ def push(topic, title, msg, tab, key, tags="chart_with_upwards_trend"):
             urllib.request.urlopen(f"https://api.telegram.org/bot{tok}/sendMessage", data=data, timeout=15).read()
         except Exception as e:
             print("텔레그램 실패", e)
+    if log:
+        log_push(topic, title, msg, tab, syms)
     sent[key] = TODAY
     # 30일 지난 기록은 지우기
     cut = (NOW - dt.timedelta(days=30)).strftime("%Y-%m-%d")
@@ -705,16 +848,16 @@ def alerts():
         near = [r for r in j.get("top") or [] if r.get("dist") is not None and -2 <= r["dist"] < 0 and not r.get("brk")]
         brk = [r for r in j.get("top") or [] if r.get("brk") and r.get("brkday") == day]
         if near:
-            push("cup", f"☕ 컵 돌파 임박 {len(near)}종목", ", ".join(f"{r['name'][:14]} ({r['dist']:+.1f}%)" for r in near[:6]), "cup", f"cupnear:{day}")
+            push("cup", f"☕ 컵 돌파 임박 {len(near)}종목", ", ".join(f"{r['name'][:14]} ({r['dist']:+.1f}%)" for r in near[:6]), "cup", f"cupnear:{day}", syms=[[r["code"], r.get("price")] for r in near[:6]])
         if brk:
-            push("cup", f"☕ 컵 돌파 {len(brk)}종목", ", ".join(r["name"][:14] for r in brk[:8]), "cup", f"cupbrk:{day}")
+            push("cup", f"☕ 컵 돌파 {len(brk)}종목", ", ".join(r["name"][:14] for r in brk[:8]), "cup", f"cupbrk:{day}", syms=[[r["code"], r.get("price")] for r in brk[:8]])
     # 갭: 새로 나온 갭 돌파
     ds = sorted(glob.glob(os.path.join(ARC, "gap", "20*", "cards.json")))
     if ds:
         day = os.path.basename(os.path.dirname(ds[-1]))
         new = [r for r in (jl(ds[-1], {}).get("top") or []) if r.get("new")]
         if new:
-            push("gap", f"📈 새 갭 돌파 {len(new)}종목", ", ".join(f"{r['name'][:14]} 갭 {r.get('gap', 0):.0f}%" for r in new[:6]), "gap", f"gapnew:{day}")
+            push("gap", f"📈 새 갭 돌파 {len(new)}종목", ", ".join(f"{r['name'][:14]} 갭 {r.get('gap', 0):.0f}%" for r in new[:6]), "gap", f"gapnew:{day}", syms=[[r["code"], r.get("price")] for r in new[:6]])
     # 매집: 박스 상단 돌파
     ax = jl(os.path.join(OUT, "accum_x.json"), {}) or {}
     names = {}
@@ -723,7 +866,7 @@ def alerts():
         names = {r["code"]: r.get("name", r["code"]) for r in jl(ds[-1], []) or []}
     b = [x for x in ax.get("items") or [] if x.get("brk")]
     if b:
-        push("accum", f"🤫 매집 종목 돌파 {len(b)}", ", ".join(names.get(x["code"], x["code"])[:14] for x in b[:6]), "accum", f"accbrk:{ax.get('date')}:" + ",".join(sorted(x["code"] for x in b)))
+        push("accum", f"🤫 매집 종목 돌파 {len(b)}", ", ".join(names.get(x["code"], x["code"])[:14] for x in b[:6]), "accum", f"accbrk:{ax.get('date')}:" + ",".join(sorted(x["code"] for x in b)), syms=[[x["code"], x.get("last")] for x in b[:6]])
     # 나침반: 국면이 바뀐 시장
     ds = sorted(glob.glob(os.path.join(ARC, "sector", "20*", "compass.json")))
     if len(ds) >= 2:
@@ -738,19 +881,19 @@ def alerts():
         h0 = ((jl(ds[-2], {}) or {}).get("signals") or {}).get("hero")
         h1 = ((jl(ds[-1], {}) or {}).get("signals") or {}).get("hero")
         if h1 and h1 != h0:
-            push("whale", "🐋 오늘의 고래 픽 변경", f"{h0 or '-'} → {h1}", "whale", f"hero:{os.path.basename(os.path.dirname(ds[-1]))}")
+            push("whale", "🐋 오늘의 고래 픽 변경", f"{h0 or '-'} → {h1}", "whale", f"hero:{os.path.basename(os.path.dirname(ds[-1]))}", syms=[[h1, None]])
     # 미국 장 전 갭
     pm = jl(os.path.join(OUT, "premarket.json"), {}) or {}
     big = [x for x in pm.get("items") or [] if abs(x["gap"]) >= 4]
     if big and pm.get("updated", "")[:10] == TODAY:
-        push("gap", f"🌅 미국 장 전 갭 {len(big)}종목", ", ".join(f"{x['s']} {x['gap']:+.1f}%" for x in big[:8]), "gap", f"pre:{TODAY}")
+        push("gap", f"🌅 미국 장 전 갭 {len(big)}종목", ", ".join(f"{x['s']} {x['gap']:+.1f}%" for x in big[:8]), "gap", f"pre:{TODAY}", syms=[[x["s"], x["pre"]] for x in big[:8]])
     # 단타: 장중 알람 묶음 (실시간 알람은 텔레그램 봇이 따로 보냄)
     ds = sorted(glob.glob(os.path.join(ARC, "danta", "20*", "alerts.json")))
     if ds:
         day = os.path.basename(os.path.dirname(ds[-1]))
         rows = jl(ds[-1], []) or []
         if day == TODAY and rows:
-            push("danta", f"⚡ 오늘 단타 알람 {len(rows)}건 (시험 중)", ", ".join(f"{r['time']} {r['name']}" for r in rows[-8:]), "danta", f"danta:{day}:{len(rows)}")
+            push("danta", f"⚡ 오늘 단타 알람 {len(rows)}건 (시험 중)", ", ".join(f"{r['time']} {r['name']}" for r in rows[-8:]), "danta", f"danta:{day}:{len(rows)}", syms=[[r["code"], r.get("price")] for r in rows[-8:]], quiet=None)
 
 
 def run(fn, *a):
@@ -763,9 +906,10 @@ def run(fn, *a):
 
 if __name__ == "__main__":
     import urllib.parse  # noqa: F401
+    EARN.update((jl(os.path.join(OUT, "earn_cache.json"), {}) or {}).get("d", {}))
     run(perf, "cup", "cards.json", ["top", "ath"], cup_extra)
     run(perf, "gap", "cards.json", ["top"], gap_extra)
-    run(perf, "accum", "list.json", [])
+    run(perf, "accum", "list.json", [], accum_extra)
     run(danta)
     run(whale)
     run(whale_holdings)
@@ -773,4 +917,9 @@ if __name__ == "__main__":
     run(premarket)
     run(market_chips)
     run(alerts)
+    try:
+        import plus
+        plus.main(sys.modules[__name__])
+    except Exception:
+        traceback.print_exc()
     print("extras ok")
