@@ -19,10 +19,10 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q yfinance pandas
-      - run: python regime.py
+      - run: python regime.py 2>&1 | tee archive/x/regime_log.txt
       - name: 저장
         run: |
           git config user.name "bot"
           git config user.email "bot@users.noreply.github.com"
-          git add archive/x/regime.json
+          git add archive/x/regime.json archive/x/regime_log.txt
           git diff --cached --quiet || (git commit -m "regime $(TZ=Asia/Seoul date '+%F %H:%M')" && git pull --rebase -q && git push)
