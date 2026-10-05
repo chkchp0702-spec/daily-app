@@ -199,11 +199,25 @@
         '<div id="cpd">' + detail(CPSEL, C) + '</div>';
       wire(C);
     }).catch(function(){ $("cpbox").innerHTML = '<div class="empty">나침반 자료를 못 불러왔어요.</div>'; });
-    // 예전 모닝 섹터 브리핑이 있는 날은 아래에 이어서
+    // 모닝 섹터 브리핑: 그날 것이 없으면(휴장·주말) 가장 최근 브리핑을 이어서 보여주기
     var rest = it.files.filter(function(f){ return f !== "compass.json"; });
+    var hasBrief = rest.indexOf("briefing.txt") >= 0 || rest.indexOf("top.json") >= 0;
+    var h = "";
+    if (rest.length) h += sec(hasBrief ? "☀️ 모닝 섹터 브리핑" : "🗺️ 섹터 히트맵") + '<div id="cpoldb"></div>';
+    var prev = null;
+    if (!hasBrief) prev = (M.cats.sector || []).filter(function(x){ return x.id <= it.id && (x.files.indexOf("briefing.txt") >= 0 || x.files.indexOf("top.json") >= 0); })[0];
+    if (prev) h += sec("☀️ 모닝 섹터 브리핑 <span class='mut'>" + prev.id.slice(5).replace("-", "/") + " · 가장 최근 (이날은 브리핑이 없었어요)</span>") + '<div id="cpoldp"></div>';
+    $("cpold").innerHTML = h;
+    var showPrev = function(){ if (prev && $("cpoldp")) OLD({id: prev.id, files: prev.files.filter(function(f){ return f !== "compass.json"; })}, $("cpoldp")); };
     if (rest.length){
-      $("cpold").innerHTML = sec("☀️ 모닝 섹터 브리핑") + '<div id="cpoldb"></div>';
       OLD({id: it.id, files: rest}, $("cpoldb"));
-    }
+      if (prev){   // 화면 안 id 가 겹치지 않게: 첫 묶음이 다 그려지면 id 를 바꾸고 다음 묶음 그리기
+        var n = 0, t = setInterval(function(){
+          var b = $("cpoldb"); if (!b){ clearInterval(t); return; }
+          if (!b.querySelector(".loading") || ++n > 40){ clearInterval(t);
+            [].forEach.call(b.querySelectorAll("[id]"), function(x){ x.id = x.id + "_0"; }); showPrev(); }
+        }, 150);
+      }
+    } else showPrev();
   };
 })();
