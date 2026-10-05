@@ -138,6 +138,59 @@
       var b = $("lvre"); if (b) b.onclick = function(){ el.innerHTML = '<div class="loading">새로 불러오는 중…</div>'; CPLIVE(el, C); };
     }).catch(function(){ el.innerHTML = ""; });
   };
+
+  /* 섹터를 누르면 구성 종목 → 누르면 종목리포트 */
+  var HETF = {"반도체": "091160", "자동차": "091180", "은행": "091170", "증권": "102970", "건설": "117700", "철강": "117680",
+              "에너지화학": "117460", "헬스케어": "266420", "2차전지": "305720", "방산": "449450"};
+  function stockChip(code, name, extra, crown){
+    return '<a class="cp-st" href="javascript:openOP(\'' + e(code) + '\')" data-hpx="' + e(code) + '">' + (crown ? '<span title="대장주">👑</span>' : '') + '<b>' + e(name) + '</b>' + (extra || '') + '<span class="mut">…</span></a>';
+  }
+  function fillPx(root){
+    [].forEach.call(root.querySelectorAll("[data-hpx]:not([data-done])"), function(a){ a.setAttribute("data-done", 1);
+      V.price(a.getAttribute("data-hpx")).then(function(p){ var sp = a.querySelector("span.mut:last-child"); if (!sp) return; if (!p){ sp.textContent = ""; return; }
+        var c = (p[1] / p[2] - 1) * 100; sp.className = cls(c); sp.textContent = pct(c); }); });
+  }
+  document.addEventListener("click", function(ev){
+    var tr = ev.target.closest && ev.target.closest("tr[data-hsec]");
+    if (tr){
+      var tbl = tr.closest(".hm") || tr.closest("table"), host = tbl.nextElementSibling && tbl.nextElementSibling.classList.contains("hxw") ? tbl.nextElementSibling : null;
+      var nm = tr.getAttribute("data-hsec"), code = HETF[nm];
+      [].forEach.call(tbl.querySelectorAll("tr.on"), function(x){ if (x !== tr) x.classList.remove("on"); });
+      if (host && host.getAttribute("data-s") === nm){ host.remove(); tr.classList.remove("on"); return; }
+      if (host) host.remove();
+      tr.classList.add("on");
+      var row = document.createElement("div"); row.className = "hxw"; row.setAttribute("data-s", nm);
+      row.innerHTML = '<div class="hxb"><div class="loading">' + e(nm) + ' 종목 불러오는 중…</div></div>';
+      tbl.after(row);
+      var box = row.querySelector(".hxb");
+      if (!code){ box.innerHTML = '<p class="note" style="margin:0">이 섹터는 구성 종목 자료가 없어요.</p>'; return; }
+      getJSON(OPD + "x/" + code + ".KS.json").then(function(j){
+        var H = (j.holdings || []).filter(function(h){ return /^\d{6}$/.test(h.code || ""); }).slice(0, 12);
+        if (!H.length) throw 0;
+        box.innerHTML = '<div class="hxh"><b>' + e(nm) + '</b> <span class="mut">' + e(j.name) + ' 구성 종목 · 비중 순 · 👑 = 비중 1위 대장주</span></div><div class="cp-sts">' +
+          H.map(function(h, i){ return stockChip(h.code, h.name, '<em class="tk">' + h.w.toFixed(1) + '%</em>', i === 0); }).join("") + '</div>' +
+          '<a class="btn" style="margin-top:8px" href="javascript:openOP(\'' + code + '\')">ETF 리포트 보기 →</a>';
+        fillPx(box);
+      }).catch(function(){ box.innerHTML = '<p class="note" style="margin:0">구성 종목을 못 불러왔어요.</p>'; });
+      return;
+    }
+    var bar = ev.target.closest && ev.target.closest("[data-csec]");
+    if (bar && CMP){
+      var k = bar.getAttribute("data-csec"), box2 = $("cpsx"); if (!box2) return;
+      var mk = store.cpm && CMP.markets[store.cpm] ? store.cpm : CMP.markets.KR ? "KR" : Object.keys(CMP.markets)[0];
+      var m = CMP.markets[mk], sx = m && (m.sectors || []).filter(function(x){ return x.k === k; })[0];
+      if (!sx){ box2.innerHTML = ""; return; }
+      if (box2.getAttribute("data-k") === k && box2.innerHTML){ box2.innerHTML = ""; box2.removeAttribute("data-k"); return; }
+      box2.setAttribute("data-k", k);
+      var lead = sx.big && sx.big[0];
+      var ind = (m.strong || []).concat(m.weak || []);
+      box2.innerHTML = '<div class="hxb" style="margin-top:8px"><div class="hxh"><b>' + sx.icon + " " + e(sx.name) + '</b> <span class="mut">' + sx.n + '종목 · ▲' + sx.up + ' ▼' + sx.down + ' · 오늘 ' + pct(sx.r1) + ' · 1주 ' + pct(sx.r5) + '</span></div>' +
+        '<div class="sub2" style="margin-top:6px">👑 대장주 (시가총액 큰 순)</div><div class="cp-sts">' + (sx.big || []).map(function(x, i){ return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s) + '\')">' + (i === 0 ? "👑" : "") + '<b>' + e(x.n) + '</b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span></a>'; }).join("") + '</div>' +
+        '<div class="sub2">🔥 오늘 많이 오른 종목</div><div class="cp-sts">' + (sx.hot || []).map(function(x){ return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s) + '\')"><b>' + e(x.n) + '</b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><span class="mut">1주 ' + pct(x.r5) + '</span></a>'; }).join("") + '</div>' +
+        '<p class="note">종목을 누르면 종목리포트로 가요. 다시 누르면 접혀요.</p></div>';
+      box2.scrollIntoView({behavior: "smooth", block: "nearest"});
+    }
+  });
   window.CPX = function(m, k, C){
     CMP = C;
     return regHist(m) + rotSlider(m, k) + hlTrend(m) + sens(m) + ((k === "KR" || k === "US") ? link(C) : "");

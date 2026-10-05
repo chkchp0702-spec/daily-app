@@ -119,7 +119,7 @@
     // 5) 섹터
     if (m.sectors.length){
       h += card("섹터 등락 <span class='mut'>시가총액 가중 · 막대를 누르면 대표 종목</span>",
-        '<div class="seg2" id="cpsk"><button class="on" data-k="r1">오늘</button><button data-k="r5">1주</button><button data-k="r20">1개월</button></div><div id="cpsb">' + secBars(m, "r1") + '</div>');
+        '<div class="seg2" id="cpsk"><button class="on" data-k="r1">오늘</button><button data-k="r5">1주</button><button data-k="r20">1개월</button></div><div id="cpsb">' + secBars(m, "r1") + '</div><div id="cpsx"></div>');
     }
     h += rotation(m) + highs(m);
     // 6) 강한 업종
@@ -155,7 +155,7 @@
   function secBars(m, k){
     var rows = m.sectors.slice().sort(function(a, b){ return (b[k] || 0) - (a[k] || 0); });
     return V.dbars(rows.map(function(x){
-      return {label: x.icon + " " + e(x.name), v: x[k] || 0,
+      return {label: x.icon + " " + e(x.name) + ' <span class="hgo">›</span>', v: x[k] || 0, attr: ' data-csec="' + e(x.k) + '" style="cursor:pointer"',
         tip: "<b>" + x.name + "</b> 오늘 " + pct(x.r1) + " · 1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + "<br>▲" + x.up + " ▼" + x.down + "<br>대표: " + x.big.map(function(s){ return s.n + " " + pct(s.r1); }).join(", ")};
     }));
   }

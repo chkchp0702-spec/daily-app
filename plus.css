@@ -124,3 +124,11 @@ table.sens td small{margin-left:4px;font-size:11px}
 .lv-r{padding:7px 0;border-bottom:1px solid var(--line)}
 .lv-r:last-of-type{border:0}
 .lv-r .cp-sts{margin-top:4px}
+.hgo{color:var(--dim);font-weight:400;margin-left:2px}
+tr.hrow{cursor:pointer}
+tr.hrow.on th{color:var(--c)}
+tr.hx td{padding:0!important;background:transparent!important}
+.hxb{background:var(--panel2);border-radius:12px;padding:10px;margin:4px 0 8px;text-align:left}
+.hxh{font-size:13px}
+.hxb .cp-st{background:var(--panel)}
+.hxb .cp-st em.tk{font-style:normal;font-size:11px;color:var(--sub)}

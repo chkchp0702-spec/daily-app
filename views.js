@@ -381,8 +381,8 @@
         var rows = parseCSV(ret), cols_ = Object.keys(rows[0] || {}).filter(function(k){ return k && k !== ""; }).slice(1);
         var key0 = Object.keys(rows[0] || {})[0];
         var mx2 = {}; cols_.forEach(function(c){ mx2[c] = Math.max.apply(null, rows.map(function(x){ return Math.abs(+x[c]) || 0; })) || 1; });
-        h += card("섹터 히트맵 <span class='mut'>기간별 수익률</span>", '<div class="hm"><table><thead><tr><th></th>' + cols_.map(function(c){ return '<th>' + e(c) + '</th>'; }).join("") + '</tr></thead><tbody>' +
-          rows.map(function(x){ return '<tr><th>' + e(x[key0]) + '</th>' + cols_.map(function(c){ var v = x[c] === "" ? null : +x[c];
+        h += card("섹터 히트맵 <span class='mut'>기간별 수익률 · 섹터를 누르면 종목</span>", '<div class="hm"><table><thead><tr><th></th>' + cols_.map(function(c){ return '<th>' + e(c) + '</th>'; }).join("") + '</tr></thead><tbody>' +
+          rows.map(function(x){ return '<tr class="hrow" data-hsec="' + e(x[key0]) + '"><th>' + e(x[key0]) + ' <span class="hgo">›</span></th>' + cols_.map(function(c){ var v = x[c] === "" ? null : +x[c];
             return '<td style="background:' + V.heat(v, mx2[c]) + '" data-tip="' + e("<b>" + x[key0] + "</b> " + c + " " + sgn(v) + "%") + '">' + (v == null ? "" : sgn(v, Math.abs(v) >= 100 ? 0 : 1)) + '</td>'; }).join("") + '</tr>'; }).join("") +
           '</tbody></table></div>');
       }
