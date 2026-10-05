@@ -1,0 +1,28 @@
+name: dbg-prices
+on:
+  workflow_dispatch:
+    inputs:
+      tickers:
+        description: "야후 티커 (공백 구분)"
+        required: true
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip -q install yfinance pandas
+      - run: |
+          python - <<'PY'
+          import yfinance as yf, json, os
+          out = {}
+          for t in "${{ inputs.tickers }}".split():
+              d = yf.download(t, period="2y", auto_adjust=False, progress=False)
+              if isinstance(d.columns, __import__("pandas").MultiIndex): d.columns = d.columns.get_level_values(0)
+              d = d.dropna()
+              out[t] = [[i.strftime("%Y-%m-%d"), float(r.Open), float(r.High), float(r.Low), float(r.Close), float(r.Volume)] for i, r in d.iterrows()]
+          os.makedirs("archive/x", exist_ok=True)
+          json.dump(out, open("archive/x/dbg_prices.json", "w"), separators=(",", ":"))
+          PY
+          git config user.name bot; git config user.email bot@x
+          git add archive/x/dbg_prices.json; git commit -qm "dbg prices" && git push -q
