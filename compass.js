@@ -70,7 +70,7 @@
       '<text x="' + (W - P - 2) + '" y="' + (H - P - 6) + '" text-anchor="end" class="rotq">🍂 힘 빠지는 중</text><text x="' + (P + 2) + '" y="' + (H - P - 6) + '" class="rotq d">🧊 계속 약함</text>' +
       '<text x="' + (W - P) + '" y="' + (H - 6) + '" text-anchor="end" class="rota">1개월 수익률 →</text><text x="6" y="' + (P - 8) + '" class="rota">↑ 1주 수익률</text>';
     ss.forEach(function(x, i){ var cx = X(x.r20), cy = Y(x.r5);
-      s += '<g data-tip="' + e("<b>" + x.icon + " " + x.name + "</b><br>1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + " · 오늘 " + pct(x.r1)) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="13" fill="transparent"/>' +
+      s += '<g data-csec="' + e(x.k) + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b><br>1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + " · 오늘 " + pct(x.r1)) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="13" fill="transparent"/>' +
         '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + V.CAT[i % 6] + '" stroke="#121826" stroke-width="2"/>' +
         '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl">' + e(x.name) + '</text></g>'; });
     s += '</svg>';
@@ -118,8 +118,8 @@
     }
     // 5) 섹터
     if (m.sectors.length){
-      h += card("섹터 등락 <span class='mut'>시가총액 가중 · 막대를 누르면 대표 종목</span>",
-        '<div class="seg2" id="cpsk"><button class="on" data-k="r1">오늘</button><button data-k="r5">1주</button><button data-k="r20">1개월</button></div><div id="cpsb">' + secBars(m, "r1") + '</div><div id="cpsx"></div>');
+      h += card("섹터 등락 <span class='mut'>시가총액 가중 · 섹터를 누르면 종목</span>",
+        '<div class="seg2" id="cpsk"><button class="on" data-k="r1">오늘</button><button data-k="r5">1주</button><button data-k="r20">1개월</button></div><div id="cpsb">' + secBars(m, "r1") + '</div>');
     }
     h += rotation(m) + highs(m);
     // 6) 강한 업종

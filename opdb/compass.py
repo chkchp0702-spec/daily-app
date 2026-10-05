@@ -268,7 +268,7 @@ def build(daily, hl, mkt_of, dest, hlh=None):
             sectors.append({"k": k, "icon": SECTOR_KO[k][0], "name": SECTOR_KO[k][1], "n": len(items),
                             "up": sum(1 for x in items if x["r1"] > EPS), "down": sum(1 for x in items if x["r1"] < -EPS),
                             "r1": _r(wavg(items, "r1")), "r5": _r(wavg(items, "r5")), "r20": _r(wavg(items, "r20")),
-                            "big": [stock(x) for x in big[:3]], "hot": [stock(x) for x in movers[:3]]})
+                            "big": [stock(x) for x in big[:3]], "hot": [stock(x) for x in movers[:3]], "top": [stock(x) for x in big[:10]]})
         sectors.sort(key=lambda x: -(x["r1"] or -999))
         # 섹터 흐름 (최근 15거래일의 1주·1개월 수익률) + 섹터 하루 수익률 시계열 (민감도용)
         R5, R20 = df / df.shift(5) - 1, df / df.shift(20) - 1
