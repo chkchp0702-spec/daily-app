@@ -125,7 +125,7 @@ def rules(D, cal):
     if "t10y3m" in D:
         s = daily(D["t10y3m"], cal, 1)
         inv = s < 0
-        last_inv = pd.Series(np.where(inv, s.index.values, np.datetime64("NaT")), index=s.index).ffill()
+        last_inv = pd.Series(np.where(inv, s.index.values, np.datetime64("NaT", "ns")), index=s.index).ffill()
         days = (s.index.to_series() - last_inv).dt.days
         st = pd.Series(1.0, index=s.index)
         st[(days <= 365)] = 0.0
@@ -275,6 +275,26 @@ def backtest(R, Y, cal, GROUP):
                     "pos": [int(len(g[1.0])), r_(m[1.0], 1), r_(float((g[1.0] > 0).mean() * 100) if len(g[1.0]) else None, 0)],
                     "neg": [int(len(g[-1.0])), r_(m[-1.0], 1), r_(float((g[-1.0] > 0).mean() * 100) if len(g[-1.0]) else None, 0)],
                     "spread": round(spread, 1), "w": w}
+    # 진단: 상태별 3·6개월 수익·하락 위험 (로그로만)
+    try:
+        for k, (st, _) in R.items():
+            s_ = st.reindex(wk)
+            line = []
+            for h in (63, 126):
+                for tk in ("^GSPC", "^KS11"):
+                    f = fw[(tk, h)].reindex(wk)
+                    dd = fw[(tk, "dd")].reindex(wk)
+                    parts = []
+                    for v in (1.0, 0.0, -1.0):
+                        sel = (s_ == v) & f.notna()
+                        if sel.sum() < 15:
+                            parts.append("  -   ")
+                            continue
+                        parts.append(f"{f[sel].mean():+5.1f}/{(dd[sel] <= -10).mean()*100:3.0f}%")
+                    line.append(f"{tk[1:3]}{h}:" + " ".join(parts))
+            log(f"  DIAG {k:7s} " + " | ".join(line))
+    except Exception as e_:
+        log("diag fail", e_)
     return stats, W, fw, wk
 
 
