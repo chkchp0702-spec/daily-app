@@ -1,0 +1,25 @@
+name: feedback
+# 💬 의견함: ntfy 에 들어온 건의·첨부를 모아 archive/x/ideas.json · archive/fb/ 에 저장 (keeper 가 매시간 실행)
+on:
+  schedule:
+    - cron: "12 */2 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: feedback
+  cancel-in-progress: false
+jobs:
+  fb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 feedback.py
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
+      - name: 저장
+        run: |
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git add archive/x/ideas.json archive/fb 2>/dev/null || git add archive/x/ideas.json
+          git diff --cached --quiet || (git commit -m "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" && git pull --rebase -q && git push)

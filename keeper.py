@@ -28,6 +28,7 @@ JOBS = [("05:47", "opprice.yml", False, None, 120), ("06:27", "opprice.yml", Fal
 JOBS += [(f"{h:02d}:{m:02d}", "live.yml", True, None, 10) for h in range(9, 18) for m in (5, 35)]
 JOBS += [(f"{h:02d}:35", "watch.yml", True, None, 20) for h in range(9, 16)]
 JOBS += [(f"{h:02d}:47", "watch.yml", True, None, 20) for h in (22, 23, 0, 1, 2, 3, 4, 5)]
+JOBS += [(f"{h:02d}:12", "feedback.yml", False, None, 30) for h in list(range(5, 24)) + [0, 1, 2, 3, 4]]   # 의견함 (ntfy 첨부는 3시간만 보관)
 # 교대: [시작, 끝) KST 시
 SHIFTS = [(5, 11), (11, 17), (17, 23), (23, 29)]
 
