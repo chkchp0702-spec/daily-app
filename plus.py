@@ -56,7 +56,11 @@ def http(url, headers=None, timeout=25, data=None):
     h.update(headers or {})
     req = urllib.request.Request(url, headers=h, data=data)
     with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read().decode("utf-8", errors="ignore")
+        b = r.read()
+        if r.headers.get("Content-Encoding") == "gzip":
+            import gzip
+            b = gzip.decompress(b)
+        return b.decode("utf-8", errors="ignore")
 
 
 def hjson(url, **kw):
@@ -519,7 +523,7 @@ def pension_flow(code):
 
 SEC_MAP = None
 DIAG = {}          # 바깥 자료원 오류 기록 (accum_x.json 의 diag 로 남김)
-SEC_UA = {"User-Agent": "CH-Investing daily-app chkchp0702-spec@users.noreply.github.com", "Accept-Encoding": "identity"}
+SEC_UA = {"User-Agent": "CH Investing chkchp0702-spec@users.noreply.github.com", "Accept-Encoding": "gzip, deflate", "Accept": "application/json"}
 
 
 def sec_13dg(ticker):
@@ -589,12 +593,12 @@ def accum_plus(U):
             if pf:
                 o["pen"] = pf
         elif re.fullmatch(r"[A-Z][A-Z.\-]{0,6}", o["code"]):
-            f = cached("dg3", o["code"], lambda: sec_13dg(o["code"]))
+            f = cached("dg4", o["code"], lambda: sec_13dg(o["code"]))
             if f is not None:
                 o["dg"] = f
     for s in all_watch(U):
         if re.fullmatch(r"[A-Z][A-Z.\-]{0,6}", s) and not any(o["code"] == s for o in A["items"]):
-            f = cached("dg3", s, lambda: sec_13dg(s))
+            f = cached("dg4", s, lambda: sec_13dg(s))
             if f:
                 A.setdefault("watch_dg", {})[s] = f
     A["dropped"] = [{"code": c, "name": p.get("name"), "score": p.get("score"), "mkt": p.get("mkt")} for c, p in prev.items() if c not in rows][:20]
