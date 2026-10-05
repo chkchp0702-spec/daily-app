@@ -1,7 +1,7 @@
 """
 🧭 국면 신호판 — 시장이 상승 국면으로 가는지 하락 국면으로 가는지 알려주는 선행지표 묶음
   FRED(미국 금리·신용·고용·경기) + 야후(지수·변동성·원자재) + opdata(시장 폭) + 네이버(외국인) 를
-  매일 모아 신호마다 🟢/⚪/🔴 를 매기고 종합 점수(-100~100)와 60일 흐름을 archive/x/regime.json 에 쓴다.
+  매일 모아 신호마다 좋음/중립/경고 를 매기고 종합 점수(-100~100)와 60일 흐름을 archive/x/regime.json 에 쓴다.
   python regime.py            (GitHub Actions regime.yml 에서 하루 두 번)
 """
 import datetime as dt
@@ -118,7 +118,7 @@ def sig_rates():
         else:
             st, mean = 1, f"정상 ({v:+.2f}%p). 1년 넘게 역전 없음"
         add("yc", "money", "장단기 금리차 (10년−3개월)", st, f"{v:+.2f}%p", mean, w=2, lead="6~18개월",
-            rule="역전 → 경고 · 역전 해제 뒤 6개월 = 🔴 · 1년 넘게 정상 = 🟢", src="FRED T10Y3M",
+            rule="역전 → 경고 · 역전 해제 뒤 6개월 = 경고 · 1년 넘게 정상 = 좋음", src="FRED T10Y3M",
             extra={"hist": [r(x) for x in s.iloc[-120:].tolist()]})
     except Exception as e:
         fail("yc", "money", "장단기 금리차", e, 2)
@@ -133,7 +133,7 @@ def sig_rates():
         else:
             st, mean = 0, f"{v:.2f}%p (한 달 {m1:+.2f}%p) — 보통"
         add("hy", "money", "하이일드 스프레드", st, f"{v:.2f}%p", mean, w=2, lead="1~3개월",
-            rule="5%p 이상 또는 한 달 +0.75%p = 🔴 · 4%p 미만·안정 = 🟢", src="FRED BAMLH0A0HYM2",
+            rule="5%p 이상 또는 한 달 +0.75%p = 경고 · 4%p 미만·안정 = 좋음", src="FRED BAMLH0A0HYM2",
             extra={"hist": [r(x) for x in s.iloc[-120:].tolist()]})
     except Exception as e:
         fail("hy", "money", "하이일드 스프레드", e, 2)
@@ -143,7 +143,7 @@ def sig_rates():
         v = float(s.iloc[-1])
         st = 1 if v < -0.3 else (-1 if v > 0 else 0)
         mean = {1: "돈 구하기 쉬운 상태 (0보다 많이 낮음)", 0: "보통", -1: "돈줄이 조여지는 중 (0 위) — 몇 달 뒤 경기 둔화"}[st]
-        add("nfci", "money", "금융여건지수 (시카고 연은)", st, f"{v:+.2f}", mean, lead="2~4개월", rule="0 위 = 🔴 · −0.3 아래 = 🟢", src="FRED NFCI")
+        add("nfci", "money", "금융여건지수 (시카고 연은)", st, f"{v:+.2f}", mean, lead="2~4개월", rule="0 위 = 경고 · −0.3 아래 = 좋음", src="FRED NFCI")
     except Exception as e:
         fail("nfci", "money", "금융여건지수", e)
     # 4. 2년물 vs 기준금리
@@ -156,7 +156,7 @@ def sig_rates():
             st, mean = 0, f"2년물이 기준금리보다 {abs(d):.2f}%p 아래 — 인하 기대와 경기 걱정이 섞임"
         else:
             st, mean = 1, f"기준금리와 비슷 ({d:+.2f}%p) — 금리 쪽 압박 없음"
-        add("ff2", "money", "2년물 − 기준금리", st, f"{d:+.2f}%p", mean, lead="3~6개월", rule="+0.25 위 = 🔴 · −0.75~+0.25 = 🟢", src="FRED DGS2·DFF")
+        add("ff2", "money", "2년물 − 기준금리", st, f"{d:+.2f}%p", mean, lead="3~6개월", rule="+0.25 위 = 경고 · −0.75~+0.25 = 좋음", src="FRED DGS2·DFF")
     except Exception as e:
         fail("ff2", "money", "2년물 − 기준금리", e)
     # 5. 실질금리 60일 변화
@@ -165,7 +165,7 @@ def sig_rates():
         v, ch = float(s.iloc[-1]), float(s.iloc[-1] - s.iloc[-42])
         st = -1 if ch > 0.5 else (1 if ch < -0.3 else 0)
         mean = {-1: f"두 달 새 {ch:+.2f}%p 급등 — 성장주·기술주에 역풍", 0: f"두 달 {ch:+.2f}%p — 큰 변화 없음", 1: f"두 달 {ch:+.2f}%p 하락 — 주식 밸류에 숨통"}[st]
-        add("real", "money", "실질금리 (10년 물가연동)", st, f"{v:.2f}% ({ch:+.2f})", mean, lead="동행~1개월", rule="두 달 +0.5%p = 🔴 · −0.3%p = 🟢", src="FRED DFII10")
+        add("real", "money", "실질금리 (10년 물가연동)", st, f"{v:.2f}% ({ch:+.2f})", mean, lead="동행~1개월", rule="두 달 +0.5%p = 경고 · −0.3%p = 좋음", src="FRED DFII10")
     except Exception as e:
         fail("real", "money", "실질금리", e)
 
@@ -178,7 +178,7 @@ def sig_real():
         up = (v / lo - 1) * 100
         st = -1 if up >= 20 else (1 if up < 8 else 0)
         mean = {-1: f"1년 저점보다 {up:.0f}% 늘어남 — 실업률보다 2~3개월 먼저 꺾이는 지표", 0: f"저점 대비 +{up:.0f}% — 지켜볼 구간", 1: f"저점 근처(+{up:.0f}%) — 고용 탄탄"}[st]
-        add("claims", "real", "신규 실업수당 청구 (4주 평균)", st, f"{v/1000:.0f}천 명", mean, w=2, lead="2~3개월", rule="1년 저점 대비 +20% = 🔴 · +8% 미만 = 🟢", src="FRED IC4WSA",
+        add("claims", "real", "신규 실업수당 청구 (4주 평균)", st, f"{v/1000:.0f}천 명", mean, w=2, lead="2~3개월", rule="1년 저점 대비 +20% = 경고 · +8% 미만 = 좋음", src="FRED IC4WSA",
             extra={"hist": [r(x / 1000, 0) for x in s.iloc[-60:].tolist()]})
     except Exception as e:
         fail("claims", "real", "신규 실업수당 청구", e, 2)
@@ -187,7 +187,7 @@ def sig_real():
         v, yoy = float(s.iloc[-1]), (float(s.iloc[-1]) / float(s.iloc[-13]) - 1) * 100
         st = 1 if yoy > 5 else (-1 if yoy < -10 else 0)
         mean = {1: f"1년 전보다 {yoy:+.0f}% — 주택이 경기를 끌어올리는 중", 0: f"1년 전 대비 {yoy:+.0f}% — 보통", -1: f"1년 전보다 {yoy:+.0f}% — 주택이 가장 먼저 꺾이는 중 (침체 12~18개월 선행)"}[st]
-        add("permit", "real", "건축 허가 (미국)", st, f"{v/1000:.2f}M ({yoy:+.0f}%)", mean, lead="12~18개월", rule="전년 대비 −10% = 🔴 · +5% = 🟢", src="FRED PERMIT")
+        add("permit", "real", "건축 허가 (미국)", st, f"{v/1000:.2f}M ({yoy:+.0f}%)", mean, lead="12~18개월", rule="전년 대비 −10% = 경고 · +5% = 좋음", src="FRED PERMIT")
     except Exception as e:
         fail("permit", "real", "건축 허가", e)
     try:
@@ -195,7 +195,7 @@ def sig_real():
         v = float(s.iloc[-1])
         st = -1 if v >= 0.5 else (0 if v >= 0.3 else 1)
         mean = {-1: f"{v:.2f} — 샴 룰 발동 (실업률이 저점보다 0.5%p 이상 올라옴)", 0: f"{v:.2f} — 발동(0.5) 가까이 접근", 1: f"{v:.2f} — 고용 둔화 신호 없음"}[st]
-        add("sahm", "real", "샴 룰 (실업률 상승폭)", st, f"{v:.2f}", mean, w=2, lead="동행 (침체 확인)", rule="0.5 이상 = 🔴 · 0.3 미만 = 🟢", src="FRED SAHMREALTIME")
+        add("sahm", "real", "샴 룰 (실업률 상승폭)", st, f"{v:.2f}", mean, w=2, lead="동행 (침체 확인)", rule="0.5 이상 = 경고 · 0.3 미만 = 좋음", src="FRED SAHMREALTIME")
     except Exception as e:
         fail("sahm", "real", "샴 룰", e, 2)
     try:
@@ -218,7 +218,7 @@ def sig_real():
         us = next((x for x in rows if x["name"] == "미국"), None); kr = next((x for x in rows if x["name"] == "한국"), None)
         add("lei", "real", "경기선행지수 (OECD)", st, " · ".join(f"{x['flag']} {x['v']}" for x in rows),
             "100 = 장기 평균. 100 위에서 오르면 확장, 100 아래서 내리면 수축 — 경기 방향을 6~9개월 앞서 보여줘요",
-            w=2, lead="6~9개월 (발표 1~2개월 늦음)", rule="미국·한국 둘 다 '100 위 상승' 또는 3개월 +0.3 = 🟢 · 둘 다 하강 = 🔴", src="OECD CLI", extra={"rows": rows})
+            w=2, lead="6~9개월 (발표 1~2개월 늦음)", rule="미국·한국 둘 다 '100 위 상승' 또는 3개월 +0.3 = 좋음 · 둘 다 하강 = 경고", src="OECD CLI", extra={"rows": rows})
     except Exception as e:
         fail("lei", "real", "경기선행지수 (OECD)", e, 2)
     try:
@@ -227,7 +227,7 @@ def sig_real():
         mon = s.index[-1].strftime("%m월")
         st = 1 if yoy > 5 else (-1 if yoy < 0 else 0)
         mean = {1: f"{mon} 수출 1년 전보다 {yoy:+.0f}% — 코스피 이익과 같은 그림", 0: f"{mon} 수출 {yoy:+.0f}% — 보통", -1: f"{mon} 수출 {yoy:+.0f}% 감소 — 코스피엔 가장 중요한 경고"}[st]
-        add("krx", "real", "한국 수출 증가율", st, f"{yoy:+.1f}% ({mon})", mean, w=2, lead="3~6개월 (발표 1~2개월 늦음)", rule="전년 대비 마이너스 = 🔴 · +5% = 🟢", src="FRED XTEXVA01KRM667S")
+        add("krx", "real", "한국 수출 증가율", st, f"{yoy:+.1f}% ({mon})", mean, w=2, lead="3~6개월 (발표 1~2개월 늦음)", rule="전년 대비 마이너스 = 경고 · +5% = 좋음", src="FRED XTEXVA01KRM667S")
     except Exception as e:
         fail("krx", "real", "한국 수출 증가율", e, 2)
 
@@ -250,7 +250,7 @@ def sig_market(Y, OPX):
         above = sum(1 for x in rows if x["st"] == 1)
         st = 1 if us == 1 and kr == 1 else (-1 if us == -1 and kr == -1 else 0)
         add("trend", "market", "지수 200일선", st, f"{above}/5 나라 위", f"미국 {'위' if us == 1 else '아래'} · 한국 {'위' if kr == 1 else '아래'}. 큰 하락장은 예외 없이 200일선 아래서 일어났어요",
-            lead="추세 확인", rule="미국·한국 둘 다 위 = 🟢 · 둘 다 아래 = 🔴", src="야후", extra={"rows": rows})
+            lead="추세 확인", rule="미국·한국 둘 다 위 = 좋음 · 둘 다 아래 = 경고", src="야후", extra={"rows": rows})
     except Exception as e:
         fail("trend", "market", "지수 200일선", e)
     # 시장 폭: 200일선 위 종목 비율 (opdata 가격)
@@ -269,7 +269,7 @@ def sig_market(Y, OPX):
         sts = [x["st"] for x in rows if x["m"] in ("US", "KR") and x["st"] is not None]
         st = 1 if sts and all(x == 1 for x in sts) else (-1 if sts and all(x == -1 for x in sts) else 0)
         add("b200", "market", "200일선 위 종목 비율", st, f"미국 {us if us is not None else '–'}% · 한국 {kr if kr is not None else '–'}%",
-            "지수만 오르고 이 비율이 떨어지면 속으로는 약세. 20% 아래는 바닥권, 85% 위는 과열", lead="1~3개월", rule="55% 위 = 🟢 · 40% 아래 = 🔴", src="opdata 전 종목 가격", extra={"rows": rows})
+            "지수만 오르고 이 비율이 떨어지면 속으로는 약세. 20% 아래는 바닥권, 85% 위는 과열", lead="1~3개월", rule="55% 위 = 좋음 · 40% 아래 = 경고", src="opdata 전 종목 가격", extra={"rows": rows})
     except Exception as e:
         fail("b200", "market", "200일선 위 종목 비율", e)
     # 브레드 스러스트 (Zweig) — 10일 EMA(상승/(상승+하락))
@@ -295,7 +295,7 @@ def sig_market(Y, OPX):
         us = next((x for x in rows if x["m"] == "US"), {})
         add("thrust", "market", "브레드 스러스트 (즈바이크)", 1 if fired_any else 0, f"미국 10일 상승비율 {us.get('v', '–')}%",
             "발동(최근 30일)" if fired_any else "발동 없음. 10일 상승 종목 비율이 40%→61.5%로 열흘 안에 뛰면 발동 — 1945년 이후 발동 뒤 1년 수익이 전부 플러스",
-            w=2, lead="상승 국면 진입 확인", rule="발동 = 🟢(강) · 평소 = ⚪", src="opdata 등락 종목 수", extra={"rows": rows})
+            w=2, lead="상승 국면 진입 확인", rule="발동 = 좋음(강) · 평소 = 중립", src="opdata 등락 종목 수", extra={"rows": rows})
     except Exception as e:
         fail("thrust", "market", "브레드 스러스트", e, 2)
     # 시장 내부: 반도체·운송·소형주 vs S&P 60일 상대
@@ -312,21 +312,21 @@ def sig_market(Y, OPX):
         pos = sum(1 for _, x in parts if x > 0)
         st = 1 if pos == len(parts) and parts else (-1 if pos == 0 and parts else 0)
         txt = " · ".join(f"{n} {x:+.1f}%" for n, x in parts)
-        add("inner", "market", "시장 속살 (반도체·운송·소형주 vs S&P)", st, f"{pos}/{len(parts)} 앞섬", txt + " — 셋 다 뒤처지면 '속으로는 이미 약세'", lead="1~3개월", rule="셋 다 S&P보다 앞섬 = 🟢 · 셋 다 뒤처짐 = 🔴 (60일)", src="야후")
+        add("inner", "market", "시장 속살 (반도체·운송·소형주 vs S&P)", st, f"{pos}/{len(parts)} 앞섬", txt + " — 셋 다 뒤처지면 '속으로는 이미 약세'", lead="1~3개월", rule="셋 다 S&P보다 앞섬 = 좋음 · 셋 다 뒤처짐 = 경고 (60일)", src="야후")
     except Exception as e:
         fail("inner", "market", "시장 속살", e)
     try:
         cg = (Y["HG=F"] / Y["GC=F"]).dropna()
         ch = (float(cg.iloc[-1]) / float(cg.iloc[-42]) - 1) * 100
         st = 1 if ch > 5 else (-1 if ch < -5 else 0)
-        add("cugold", "market", "구리/금 비율", st, f"{ch:+.1f}% (60일)", {1: "경기 기대가 살아나는 중", 0: "뚜렷한 방향 없음", -1: "안전자산 쏠림 — 경기 걱정"}[st], lead="참고", rule="60일 +5% = 🟢 · −5% = 🔴", src="야후")
+        add("cugold", "market", "구리/금 비율", st, f"{ch:+.1f}% (60일)", {1: "경기 기대가 살아나는 중", 0: "뚜렷한 방향 없음", -1: "안전자산 쏠림 — 경기 걱정"}[st], lead="참고", rule="60일 +5% = 좋음 · −5% = 경고", src="야후")
     except Exception as e:
         fail("cugold", "market", "구리/금 비율", e)
     try:
         kq = (Y["^KQ11"] / Y["^KS11"]).dropna()
         ch = (float(kq.iloc[-1]) / float(kq.iloc[-42]) - 1) * 100
         st = 1 if ch > 3 else (-1 if ch < -5 else 0)
-        add("kq", "market", "코스닥/코스피 비율", st, f"{ch:+.1f}% (60일)", {1: "개인 위험선호 살아 있음", 0: "보통", -1: "코스닥이 뒤처짐 — 유동성 장세 식는 중"}[st], lead="참고", rule="60일 +3% = 🟢 · −5% = 🔴", src="야후")
+        add("kq", "market", "코스닥/코스피 비율", st, f"{ch:+.1f}% (60일)", {1: "개인 위험선호 살아 있음", 0: "보통", -1: "코스닥이 뒤처짐 — 유동성 장세 식는 중"}[st], lead="참고", rule="60일 +3% = 좋음 · −5% = 경고", src="야후")
     except Exception as e:
         fail("kq", "market", "코스닥/코스피 비율", e)
 
@@ -337,7 +337,7 @@ def sig_flow(Y, prev):
         s = Y["^VIX"]
         v = float(s.iloc[-1])
         if v >= 40:
-            st, mean = 0, f"{v:.0f} — 공포 극단. 1990년 이후 40 넘은 뒤 1년 수익은 거의 전부 플러스(역발상 🟢)"
+            st, mean = 0, f"{v:.0f} — 공포 극단. 1990년 이후 40 넘은 뒤 1년 수익은 거의 전부 플러스(역발상 좋음)"
         elif v > 28:
             st, mean = -1, f"{v:.0f} — 불안 구간"
         elif v < 18:
@@ -346,7 +346,7 @@ def sig_flow(Y, prev):
             st, mean = 0, f"{v:.0f} — 보통"
         mv = Y.get("^MOVE")
         mtxt = f" · 채권 변동성(MOVE) {float(mv.iloc[-1]):.0f}" if mv is not None else ""
-        add("vix", "flow", "공포지수 VIX", st, f"{v:.1f}", mean + mtxt, lead="바닥 확인", rule="18 미만 = 🟢 · 28 위 = 🔴 · 40 위 = 역발상 바닥", src="야후 ^VIX·^MOVE",
+        add("vix", "flow", "공포지수 VIX", st, f"{v:.1f}", mean + mtxt, lead="바닥 확인", rule="18 미만 = 좋음 · 28 위 = 경고 · 40 위 = 역발상 바닥", src="야후 ^VIX·^MOVE",
             extra={"hist": [r(x, 1) for x in s.iloc[-60:].tolist()]})
     except Exception as e:
         fail("vix", "flow", "공포지수 VIX", e)
@@ -361,7 +361,7 @@ def sig_flow(Y, prev):
         nd = len(last20)
         add("foreign", "flow", "외국인 코스피 순매수 (20일 누적)", st, f"{c20/10000:+.2f}조" + ("" if nd >= 20 else f" ({nd}일치)"),
             f"최근 5일 {c5/10000:+.2f}조. 20일 누적이 돌아서는 시점이 지수 전환과 거의 같아요" + ("" if nd >= 20 else f" — 아직 {nd}일치만 모였어요(매일 쌓는 중)"),
-            w=2 if nd >= 10 else 1, lead="동행 (가장 믿을 만함)", rule="20일 누적 플러스 = 🟢 · 마이너스 = 🔴", src="네이버 증권 · 시황리포트 장부",
+            w=2 if nd >= 10 else 1, lead="동행 (가장 믿을 만함)", rule="20일 누적 플러스 = 좋음 · 마이너스 = 경고", src="네이버 증권 · 시황리포트 장부",
             extra={"hist": [r(v / 10000, 2) for _, v in fh[-30:]]})
     except Exception as e:
         fail("foreign", "flow", "외국인 코스피 순매수", e, 2)
@@ -383,7 +383,7 @@ def sig_flow(Y, prev):
             ch = rate - base
             st = 1 if ch > 0.1 else (-1 if ch < -0.1 else 0)
             mean = {1: f"20일 전보다 {ch:+.2f}%p — 외국인이 대장주를 사 모으는 중", 0: f"20일 전 대비 {ch:+.2f}%p — 변화 없음", -1: f"20일 전보다 {ch:+.2f}%p — 대장주에서 외국인 이탈"}[st]
-        add("ssfor", "flow", "삼성전자 외국인 보유율", st, f"{rate:.2f}%", mean, lead="동행~선행", rule="약 20거래일간 +0.1%p = 🟢 · −0.1%p = 🔴", src="네이버 증권", extra={"ss_hist": hist, "hist": [h[1] for h in hist[-30:]]})
+        add("ssfor", "flow", "삼성전자 외국인 보유율", st, f"{rate:.2f}%", mean, lead="동행~선행", rule="약 20거래일간 +0.1%p = 좋음 · −0.1%p = 경고", src="네이버 증권", extra={"ss_hist": hist, "hist": [h[1] for h in hist[-30:]]})
     except Exception as e:
         fail("ssfor", "flow", "삼성전자 외국인 보유율", e)
     try:
@@ -396,7 +396,7 @@ def sig_flow(Y, prev):
         if jpy is not None:
             parts.append(f"엔/달러 {float(jpy.iloc[-1]):.0f} ({(float(jpy.iloc[-1]) / float(jpy.iloc[-15]) - 1) * 100:+.1f}%)")
         add("fx", "flow", "환율 (3주 변화)", st, f"{ch:+.1f}%", " · ".join(parts) + {1: " — 원화 강세 = 외국인 유입 신호", 0: "", -1: " — 원화 약세 = 외국인 이탈·달러 강세 역풍"}[st],
-            lead="동행", rule="원/달러 3주 −1% = 🟢 · +1% = 🔴", src="야후")
+            lead="동행", rule="원/달러 3주 −1% = 좋음 · +1% = 경고", src="야후")
     except Exception as e:
         fail("fx", "flow", "환율", e)
 
@@ -505,7 +505,7 @@ def main():
            "groups": [["money", "💰 돈·금리"], ["real", "🏭 실물 경기"], ["market", "📊 시장 속"], ["flow", "🧠 심리·수급"]]}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    log(f"국면 신호판 {score:+d} {label} · 🟢{n_g} 🔴{n_r} / {len(avail)} · 오류 {len(ERR)}")
+    log(f"국면 신호판 {score:+d} {label} · 좋음{n_g} 경고{n_r} / {len(avail)} · 오류 {len(ERR)}")
     for e in ERR:
         log("  !", e)
 
