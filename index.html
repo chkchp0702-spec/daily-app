@@ -389,7 +389,7 @@ em.tk{font-style:normal;font-size:11px;color:var(--dim);margin-left:4px;font-wei
 .cp-wk{padding:8px 0;border-bottom:1px solid var(--line)}.cp-wk:last-child{border:0}
 .cp-wk>span{float:right;font-weight:800}
 </style>
-<link rel="stylesheet" href="plus.css?v=7">
+<link rel="stylesheet" href="plus.css?v=8">
 </head>
 <body>
 <header>
@@ -1182,7 +1182,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261005j";
+var APPV = "20261005k";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1211,7 +1211,7 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
   fetch("https://ntfy.sh/chkchp-daily-5821", {method:"POST", body: userName + " 님이 앱을 열었어요 (" + device + ")"}).catch(function(){});
 })();
 </script>
-<script src="views.js?v=11"></script>
+<script src="views.js?v=12"></script>
 <script src="compass.js?v=10"></script>
 <script src="extras.js?v=5"></script>
 <script src="plus.js?v=2"></script>

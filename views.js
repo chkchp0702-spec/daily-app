@@ -273,6 +273,13 @@
   }
   function stat(label, v){ return '<div><small>' + label + '</small><b>' + v + '</b></div>'; }
 
+  function eyeLine(d, what){
+    var y = d && d.eye; if (!y) return "";
+    if (!y.done) return '<p class="eye off">👁 눈 검사 전 — 스캐너 1차 결과 그대로예요 (' + e(y.why || "") + ')</p>';
+    var dr = y.drop || [];
+    return '<div class="eye"><b>👁 눈으로 걸러냄</b> 스캐너 1차 ' + y.n_in + '개 → ' + what + '으로 보이는 ' + y.n_keep + '개만 남김 <span class="mut">' + e((y.checked || "").slice(5)) + '</span>' +
+      (dr.length ? '<details><summary>뺀 종목 ' + dr.length + '개 보기</summary><div class="eye-l">' + dr.map(function(x){ return '<span><a href="javascript:openOP(\'' + e(x.code) + '\')">' + e(x.name || x.code) + '</a> <em>' + e(x.why) + '</em></span>'; }).join("") + '</div></details>' : '') + '</div>';
+  }
   /* ======================= 컵차트 ======================= */
   RENDER.cup = function(it, el){
     var pdf = it.files.indexOf("report.pdf") >= 0 ? fold("컵앤핸들 PDF 리포트", file("cup", it.id, "report.pdf")) : "";
@@ -290,6 +297,7 @@
       };
       var h = '<div class="sum3"><div class="kv"><small>컵 패턴 종목</small><b>' + d.total.toLocaleString() + '</b></div><div class="kv"><small>사상최고가 돌파</small><b class="up">' + d.ath.length + '</b></div>' +
               '<div class="kv"><small>돌파 완료</small><b>' + d.top.filter(function(c){ return c.brk; }).length + '<span class="mut"> / 상위 ' + d.top.length + '</span></b></div></div>';
+      h += eyeLine(d, '컵');
       h += '<div class="g2">' + card("나라별", marketBars(d.by_mkt)) + card("많이 나온 섹터", V.hbars(d.by_sec.filter(function(x){ return x[0] !== "미분류" && x[0] !== "-"; }).slice(0, 6).map(function(s){ return {label: e(s[0]), v: s[1], text: s[1]}; }), {color: "#c98500"})) + '</div>';
       if (d.ath.length) h += sec("★ 사상최고가 돌파") + '<div class="cgrid">' + d.ath.map(cupCard).join("") + '</div>';
       h += sec("컵 점수 상위 " + d.top.length) + filterSeg("cseg", d.top, function(k){ P.set(k); }) + '<div id="cbox"></div>' + pdf;
@@ -318,6 +326,7 @@
       var h = '<div class="sum3"><div class="kv"><small>갭 돌파 종목</small><b>' + d.total.toLocaleString() + '</b></div>' +
               '<div class="kv"><small>상위 평균 갭</small><b class="up">+' + (d.top.reduce(function(a, c){ return a + (c.gap || 0); }, 0) / (d.top.length || 1)).toFixed(1) + '%</b></div>' +
               '<div class="kv"><small>갭 유지</small><b>' + held + '<span class="mut"> / ' + d.top.length + '</span></b>' + V.progress(held, d.top.length || 1, V.UP) + '</div></div>';
+      h += eyeLine(d, '갭 상승');
       h += '<div class="g2">' + card("나라별", marketBars(d.by_mkt)) + card("많이 나온 섹터", V.hbars(d.by_sec.filter(function(x){ return x[0] !== "미분류" && x[0] !== "-"; }).slice(0, 6).map(function(s){ return {label: e(s[0]), v: s[1], text: s[1]}; }), {color: "#9085e9"})) + '</div>';
       h += '<p class="note" style="margin:0 2px 10px">차트의 옅은 띠 = 갭 전 박스(횡보 구간), 점선 = 갭 시가</p>';
       h += sec("갭 점수 상위 " + d.top.length) + filterSeg("gseg", d.top, function(k){ P.set(k); }) + '<div id="gbox"></div>' + pdf;

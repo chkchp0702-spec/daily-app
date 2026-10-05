@@ -193,6 +193,22 @@ def _tf(v):
     return str(v).strip().lower() == "true"
 
 
+def eye_filter(mode, day, rows_):
+    """아침 눈 검사 결과(archive/x/eye_<mode>.json)가 오늘 스캔 것이면 통과 종목만 남긴다."""
+    p = os.path.join("archive", "x", f"eye_{mode}.json")
+    try:
+        j = json.load(open(p, encoding="utf-8"))
+    except Exception:
+        return rows_, {"done": False, "why": "아직 눈 검사 전"}
+    if j.get("scan_date") != day:
+        return rows_, {"done": False, "why": f"눈 검사가 {j.get('scan_date')} 자료 기준(오늘 {day} 아님)"}
+    keep = set(j.get("keep", []))
+    drop = j.get("drop", {})
+    kept = [r for r in rows_ if str(r.get("코드", "")) in keep]
+    return kept, {"done": True, "checked": j.get("checked"), "n_in": j.get("n_in"), "n_keep": len(kept),
+                  "drop": [{"code": c, "name": (j.get("names") or {}).get(c, ""), "why": w} for c, w in list(drop.items())[:80]]}
+
+
 def cup_cards():
     day = _latest("Cup", "report_cup")
     if not day:
@@ -206,8 +222,9 @@ def cup_cards():
                 "rs": num(r.get("상대강도")), "score": num(r.get("컵점수")), "acc": num(r.get("매집강도")),
                 "brk": _tf(r.get("돌파")), "brkday": r.get("돌파일", ""), "ath": num(r.get("현재가_최고가대비%")),
                 "point": r.get("투자포인트", ""), "streak": num(r.get("연속일")), "new": _tf(r.get("NEW")), "tag": tag}
-    ath = [card(r, "사상최고가 돌파") for r in R("list0_ath_breakout.csv")]
-    allc = R("list1_cup.csv")
+    allc, eye = eye_filter("cup", day, R("list1_cup.csv"))
+    okc = {str(r.get("코드", "")) for r in allc}
+    ath = [card(r, "사상최고가 돌파") for r in R("list0_ath_breakout.csv") if not eye["done"] or str(r.get("코드", "")) in okc]
     by_mkt, by_sec, grid = {}, {}, {}
     for r in allc:
         by_mkt[r.get("시장", "")] = by_mkt.get(r.get("시장", ""), 0) + 1
@@ -219,7 +236,7 @@ def cup_cards():
     seen = {c["code"] for c in ath}
     top = [card(r) for r in allc if r.get("코드") not in seen][:400]   # 모양 강화 후 전체가 수백 개 이내 → 지도 숫자와 목록이 맞도록 전부
     out = {"ath": ath, "top": top, "total": len(allc), "by_mkt": by_mkt,
-           "by_sec": sorted(by_sec.items(), key=lambda x: -x[1])[:10], "grid": grid}
+           "by_sec": sorted(by_sec.items(), key=lambda x: -x[1])[:10], "grid": grid, "eye": eye}
     put("cup", day, "cards.json", text=json.dumps(out, ensure_ascii=False))
 
 
@@ -227,7 +244,7 @@ def gap_cards():
     day = _latest("Gap", "report_gap")
     if not day:
         return
-    allg = _rows(src("Gap", "results", "list1_gap.csv"))
+    allg, eye = eye_filter("gap", day, _rows(src("Gap", "results", "list1_gap.csv")))
     def card(r):
         return {"name": r.get("종목명", ""), "code": r.get("코드", ""), "mkt": r.get("시장", ""),
                 "sector": r.get("섹터", ""), "price": num(r.get("현재가")), "gday": r.get("갭일", ""),
@@ -243,8 +260,8 @@ def gap_cards():
         s_ = r.get("섹터", "") or "미분류"
         by_sec[s_] = by_sec.get(s_, 0) + 1
     allg.sort(key=lambda r: -(num(r.get("갭점수")) or 0))
-    out = {"top": [card(r) for r in allg[:60]], "total": len(allg), "by_mkt": by_mkt,
-           "by_sec": sorted(by_sec.items(), key=lambda x: -x[1])[:10]}
+    out = {"top": [card(r) for r in allg[:400]], "total": len(allg), "by_mkt": by_mkt,
+           "by_sec": sorted(by_sec.items(), key=lambda x: -x[1])[:10], "eye": eye}
     put("gap", day, "cards.json", text=json.dumps(out, ensure_ascii=False))
 
 
