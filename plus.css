@@ -275,7 +275,6 @@ table.corr td{text-align:center;font-size:12px}
 .rb-tb{width:100%;border-collapse:collapse;font-size:12px;margin:4px 0}.rb-tb th{color:var(--dim);font-weight:600;text-align:left;padding:4px 3px;border-bottom:1px solid var(--line)}.rb-tb td{padding:5px 3px;border-bottom:1px solid var(--line)}.rb-tb tr.on td{background:rgba(255,184,77,.1)}.rb-tb small{color:var(--dim)}.rb-tb .up{color:#ff8a8a}.rb-tb .dn{color:#7fb0ff}
 
 /* 💬 의견함 */
-.tab[data-k="idea"]{grid-column:1/-1;flex-direction:row;justify-content:center;gap:8px;padding:9px 6px}
 .id-form label{display:block;font-size:13px;color:var(--sub);margin:8px 0 4px}
 .id-form input[type=text],.id-form input:not([type]),.id-form textarea{width:100%;box-sizing:border-box;margin-top:5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px;font:inherit;font-size:15px}
 .id-form textarea{resize:vertical;min-height:120px;line-height:1.5}
@@ -290,3 +289,17 @@ table.corr td{text-align:center;font-size:12px}
 .id-att{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}.id-att img{width:84px;height:84px;object-fit:cover;border-radius:9px;border:1px solid var(--line)}
 .id-fl{font-size:12.5px;background:var(--panel2);border-radius:8px;padding:5px 8px;color:var(--text);text-decoration:none}
 .id-note{font-size:12.5px;background:rgba(122,227,160,.1);border-radius:8px;padding:6px 8px;margin:4px 0}
+
+/* 상단 카테고리: 한 줄 가로 스크롤 알약 (10/5 개편 — 화면 덜 가리게) */
+header{padding-top:calc(env(safe-area-inset-top) + 6px)}
+header .top{align-items:center;padding:0 14px 6px}
+header .brand{font-size:17px;letter-spacing:-.4px}
+header .stamp{font-size:10.5px;line-height:1.2}
+#wlbtn{padding:3px 9px;font-size:13px;border-radius:10px;margin-right:8px}
+header .tabs{display:flex;grid-template-columns:none;gap:6px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 12px 9px;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 10px,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,transparent 0,#000 10px,#000 calc(100% - 22px),transparent)}
+header .tab{flex:none;scroll-snap-align:center;border-radius:999px;padding:6px 12px 6px 9px;font-size:13px;gap:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:var(--sub)}
+header .tab .ic{font-size:15px}
+header .tab.on{background:var(--c);border-color:var(--c);color:#0b0f17;box-shadow:0 4px 14px -4px var(--c)}
+header .tab.on .tn{font-weight:800}
+header .tab:active{transform:scale(.96)}

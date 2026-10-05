@@ -2,7 +2,7 @@
 💬 의견함 읽기 (운영자·Claude 용) — 암호화된 의견을 풀어서 보여준다.
   FB_PASS='비밀번호' python3 feedback_read.py            → 목록 출력
   FB_PASS='...' python3 feedback_read.py --out /tmp/ideas → 첨부까지 풀어서 폴더에 저장
-  상태 바꾸기: python3 feedback_read.py --status <id> 반영함 "무엇을 고쳤나"   (비밀번호 필요 없음)
+  상태 바꾸기: FB_PASS=... python3 feedback_read.py --status <id> 반영함 "무엇을 고쳤나"   (메모는 암호화)
 """
 import base64
 import json
@@ -34,7 +34,14 @@ def main():
         note = a[3] if len(a) > 3 else ""
         for x in db["items"]:
             if x["id"] == iid:
-                x["status"], x["note"] = st, note
+                x["status"] = st
+                x.pop("note", None)
+                if note:      # 메모도 그 의견의 열쇠로 암호화 (운영자만 보임)
+                    pk = private_key(os.environ["FB_PASS"])
+                    raw = pk.decrypt(ub(x["k"]), padding.OAEP(mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
+                    niv = os.urandom(12)
+                    x["niv"] = base64.b64encode(niv).decode()
+                    x["nct"] = base64.b64encode(AESGCM(raw).encrypt(niv, note.encode(), None)).decode()
         json.dump(db, open(IDEAS, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
         print("상태 바꿈", iid, st)
         return

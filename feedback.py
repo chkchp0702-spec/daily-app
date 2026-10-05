@@ -67,7 +67,7 @@ def main():
             continue
         it = by_id.get(iid)
         if it is None:
-            it = {"id": iid, "t": dt.datetime.fromtimestamp(m.get("time", 0), KST).strftime("%Y-%m-%d %H:%M"), "files": [], "status": "접수", "note": ""}
+            it = {"id": iid, "t": dt.datetime.fromtimestamp(m.get("time", 0), KST).strftime("%Y-%m-%d %H:%M"), "files": [], "status": "접수"}
             by_id[iid] = it
             db["items"].append(it)
         # 내용은 휴대폰에서 암호화돼 온다 — 서버는 암호문 그대로 저장만 한다

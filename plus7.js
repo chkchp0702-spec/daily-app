@@ -94,12 +94,13 @@
     return C.decrypt({name: "RSA-OAEP"}, PRIV, ub64(x.k)).then(function(raw){ return C.importKey("raw", raw, {name: "AES-GCM"}, false, ["decrypt"]); }).then(function(K){
       return C.decrypt({name: "AES-GCM", iv: ub64(x.iv)}, K, ub64(x.ct)).then(function(b){
         var body = JSON.parse(TD.decode(b));
+        var noteP = x.nct ? C.decrypt({name: "AES-GCM", iv: ub64(x.niv)}, K, ub64(x.nct)).then(function(n){ body.note = TD.decode(n); }).catch(function(){}) : Promise.resolve();
         return Promise.all((x.files || []).map(function(f){
           return C.decrypt({name: "AES-GCM", iv: ub64(f.miv)}, K, ub64(f.meta)).then(function(m){ var meta = JSON.parse(TD.decode(m));
             return fetch(f.path).then(function(r){ return r.arrayBuffer(); }).then(function(buf){ return C.decrypt({name: "AES-GCM", iv: ub64(f.iv)}, K, buf); })
               .then(function(pl){ return {name: meta.name, type: meta.type, url: URL.createObjectURL(new Blob([pl], {type: meta.type || "application/octet-stream"}))}; });
           }).catch(function(){ return {name: "첨부 열기 실패", type: "", url: ""}; });
-        })).then(function(fs){ body.files = fs; return body; });
+        })).then(function(fs){ body.files = fs; return noteP; }).then(function(){ return body; });
       });
     });
   }
@@ -116,7 +117,7 @@
           var files = (b.files || []).map(function(f){
             return /^image\//.test(f.type) ? '<a href="' + f.url + '" target="_blank"><img src="' + f.url + '"></a>' : '<a class="id-fl" href="' + f.url + '" download="' + e(f.name) + '">📄 ' + e(f.name) + '</a>'; }).join("");
           return '<div class="id-it"><div class="id-h"><b>' + e(b.name || "이름 없음") + '</b><span class="chip2 ' + cls + '">' + e(st) + '</span></div><p>' + e(b.text).replace(/\n/g, "<br>") + '</p>' +
-            (files ? '<div class="id-att">' + files + '</div>' : '') + (x.lost ? '<small class="dn">첨부 ' + x.lost + '개는 서버가 늦게 받아 사라졌어요</small>' : '') + (x.note ? '<div class="id-note">🛠 ' + e(x.note) + '</div>' : '') + '<small class="mut">' + e(b.t || x.t) + '</small></div>';
+            (files ? '<div class="id-att">' + files + '</div>' : '') + (x.lost ? '<small class="dn">첨부 ' + x.lost + '개는 서버가 늦게 받아 사라졌어요</small>' : '') + (b.note ? '<div class="id-note">🛠 ' + e(b.note) + '</div>' : '') + '<small class="mut">' + e(b.t || x.t) + '</small></div>';
         }).join("");
         var l = $("idlock"); if (l) l.onclick = function(){ delete store.fbpass; save(); PRIV = null; go("idea"); };
       });
@@ -128,7 +129,8 @@
       unlock(store.fbpass).then(function(k){ PRIV = k; adminList(); }).catch(function(){ delete store.fbpass; save(); adminBox(); });
       return;
     }
-    box.innerHTML = '<details class="id-adm"><summary>🔐 운영자</summary><div class="id-adm-b"><input id="idpw" type="password" placeholder="운영자 비밀번호" autocomplete="current-password"><button class="btn" id="idpwb">열기</button></div><small id="idpwst" class="mut"></small></details>';
+    if (!adminBox.shown){ box.innerHTML = ""; return; }
+    box.innerHTML = '<details class="id-adm" open><summary>🔐 운영자</summary><div class="id-adm-b"><input id="idpw" type="password" placeholder="운영자 비밀번호" autocomplete="current-password"><button class="btn" id="idpwb">열기</button></div><small id="idpwst" class="mut"></small></details>';
     $("idpwb").onclick = function(){
       var pw = ($("idpw").value || "").trim(); if (!pw) return;
       $("idpwst").textContent = "확인 중…";
@@ -142,7 +144,7 @@
       '<div class="id-pick"><label class="btn" for="idfile">📎 사진·파일 첨부</label><input id="idfile" type="file" multiple accept="image/*,application/pdf,.pdf,.xlsx,.xls,.csv,.txt,.docx,.pptx,.zip"><small class="mut">최대 ' + MAXF + '개 · 사진은 자동으로 줄여서 보내요</small></div>' +
       '<div id="idfiles" class="id-files"></div>' +
       '<button class="btn id-send" id="idsend">보내기</button><div id="idst" class="id-st"></div>' +
-      '<p class="note">🔒 보낸 내용과 첨부는 이 휴대폰에서 바로 암호화돼서 전송·저장돼요. 운영자만 열어볼 수 있고, 다른 사람에게는 보이지 않아요.</p></section>' +
+      '<p class="note">🔒 보낸 내용과 첨부는 이 휴대폰에서 바로 암호화돼서 전송·저장돼요. 다른 사용자는 누가 무슨 의견을 보냈는지 전혀 볼 수 없고, 운영자만 열어볼 수 있어요.</p></section>' +
       '<div id="idmine"></div><div id="idadmin"></div>';
   };
   window.ideaInit = function(){
@@ -152,6 +154,12 @@
       ev.target.value = ""; drawPicked();
     };
     $("idsend").onclick = send;
-    mineList(); adminBox();
+    mineList(); adminBox.shown = false; adminBox();
+    // 운영자 입구는 숨김: 위쪽 「💬 의견함」 제목을 3초 안에 5번 누르면 나타남
+    var h1 = document.querySelector("#main .hero h1"), taps = [];
+    if (h1) h1.addEventListener("click", function(){
+      var t = Date.now(); taps = taps.filter(function(x){ return t - x < 3000; }); taps.push(t);
+      if (taps.length >= 5 && !adminBox.shown){ adminBox.shown = true; adminBox(); var b = $("idadmin"); if (b) b.scrollIntoView({behavior: "smooth"}); }
+    });
   };
 })();
