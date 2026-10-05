@@ -1,0 +1,16 @@
+/home/runner/work/daily-app/daily-app/regime.py:128: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+  last_inv = pd.Series(np.where(inv, s.index.values, np.datetime64("NaT")), index=s.index).ffill()
+국면 v2 · 경기 100 · 시장 -62 · 경기 속 조정 · 오류 0
+  yc       w=0.0 6개월 좋음 [856, 3.6, 68.0] 경고 [436, 7.7, 69.0] 차이 -4.1
+  credit   w=0.5 6개월 좋음 [628, 5.4, 75.0] 경고 [318, 3.0, 53.0] 차이 2.5
+  nfci     w=1.0 6개월 좋음 [918, 6.2, 72.0] 경고 [154, 1.3, 55.0] 차이 4.9
+  claims   w=0.0 6개월 좋음 [895, 4.2, 67.0] 경고 [197, 9.3, 75.0] 차이 -5.1
+  sahm     w=0.0 6개월 좋음 [992, 4.3, 68.0] 경고 [252, 5.4, 67.0] 차이 -1.0
+  permit   w=0.0 6개월 좋음 [584, 3.8, 68.0] 경고 [242, 2.9, 67.0] 차이 0.9
+  cli      w=1.5 6개월 좋음 [294, 5.4, 72.0] 경고 [308, -0.6, 52.0] 차이 6.0
+  krx      w=0.0 6개월 좋음 [771, 2.7, 61.0] 경고 [415, 7.1, 76.0] 차이 -4.4
+  trend    w=0.0 3개월 좋음 [730, 2.7, 68.0] 경고 [296, 2.3, 61.0] 차이 0.4
+  cycdef   w=0.0 3개월 좋음 [647, 2.3, 67.0] 경고 [388, 1.9, 62.0] 차이 0.4
+  inner    w=0.5 3개월 좋음 [322, 4.2, 76.0] 경고 [196, 2.8, 62.0] 차이 1.4
+  semi     w=0.5 3개월 좋음 [776, 2.9, 69.0] 경고 [369, 1.6, 60.0] 차이 1.3
+  vix      w=0.0 3개월 좋음 [767, 2.1, 65.0] 경고 [122, 6.2, 75.0] 차이 -4.1
