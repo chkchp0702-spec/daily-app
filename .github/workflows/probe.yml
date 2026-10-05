@@ -1,11 +1,15 @@
 name: probe
 on:
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   p:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - run: |
+          exec > probe_out.txt 2>&1
           UA="Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)"
           for u in \
             "https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y3M" \
@@ -24,3 +28,7 @@ jobs:
           done
           curl -s -m 60 -A "$UA" "https://finance.naver.com/item/main.naver?code=005930" | iconv -f cp949 -t utf-8 -c | grep -n -A4 "외국인소진율" | head -20
           curl -s -m 60 -A "$UA" "https://finance.naver.com/item/frgn.naver?code=005930" | iconv -f cp949 -t utf-8 -c | grep -n -B2 -A12 "외국인" | head -80
+      - run: |
+          mkdir -p archive/x && mv probe_out.txt archive/x/probe.txt
+          git config user.name bot; git config user.email bot@x
+          git add archive/x/probe.txt; git commit -qm probe; git pull --rebase -q; git push -q
