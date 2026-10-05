@@ -286,6 +286,16 @@ def build(daily, hl, mkt_of, dest, hlh=None):
             a5, a20 = wm(R5).iloc[-15:], wm(R20).iloc[-15:]
             x["path"] = [[d.strftime("%m/%d"), _r(v5 * 100), _r(v20 * 100)] for d, v5, v20 in zip(a5.index, a5.values, a20.values) if v5 == v5 and v20 == v20]
             sec_ret[x["k"]] = wm(ret) * 100
+            # 섹터 히트맵: 1주·1개월·3개월·6개월·12개월 (시가총액 가중)
+            hm = {}
+            for lab, n in (("1W", 5), ("1M", 21), ("3M", 63), ("6M", 126), ("12M", 250)):
+                if len(df) > n:
+                    r = (df[ss].iloc[-1] / df[ss].iloc[-1 - n] - 1).dropna()
+                    r = r[(r > -0.95) & (r < 20)]
+                    if len(r) >= 3:
+                        ww = w[r.index]
+                        hm[lab] = _r(float((r * ww).sum() / ww.sum()) * 100, 1) if ww.sum() > 0 else _r(float(r.median()) * 100, 1)
+            x["heat"] = hm
 
         ind = defaultdict(list)
         for x in rows:

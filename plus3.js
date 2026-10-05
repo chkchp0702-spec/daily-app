@@ -73,20 +73,21 @@
     ["인터넷·AI 소프트웨어", ["GOOGL", "META", "MSFT"], ["035420.KS", "035720.KS"]],
     ["원전", ["CEG", "CCJ", "OKLO"], ["034020.KS", "052690.KS"]]
   ];
-  function link(C){
-    var us = C.markets.US, kr = C.markets.KR; if (!us || !kr) return "";
+  function link(C, tk){
+    tk = tk || "KR";
+    var us = C.markets.US, kr = C.markets[tk]; if (!us || !kr) return "";
     var kmap = {}; (kr.sectors || []).forEach(function(s){ kmap[s.k] = s; });
     var top = (us.sectors || []).filter(function(s){ return s.r5 != null; }).sort(function(a, b){ return b.r5 - a.r5; }).slice(0, 4);
     var h = '<div class="xt">' + top.map(function(s){ var k = kmap[s.k];
-      return '<div class="xr" data-csec="' + e(s.k) + '" data-cm="US" style="cursor:pointer"><b>' + s.icon + " " + e(s.name) + ' <span class="hgo">›</span></b><span class="mut">🇺🇸 1주</span><b class="' + cls(s.r5) + '">' + pct(s.r5) + '</b><span class="mut">→ 🇰🇷</span>' + (k ? '<b class="' + cls(k.r5) + '">' + pct(k.r5) + '</b>' + (k.r5 < s.r5 - 2 ? chip("덜 오름", "c") : "") : '<span class="mut">–</span>') + '</div>'; }).join("") + '</div>';
-    h += '<div class="sub2">테마별 짝꿍 종목 <span class="mut">미국 대장 → 한국 수혜주 · 하루 등락</span></div><div id="lkth">' + THEMES.map(function(t, i){
+      return '<div class="xr" data-csec="' + e(s.k) + '" data-cm="US" style="cursor:pointer"><b>' + s.icon + " " + e(s.name) + ' <span class="hgo">›</span></b><span class="mut">🇺🇸 1주</span><b class="' + cls(s.r5) + '">' + pct(s.r5) + '</b><span class="mut">→ ' + kr.flag + '</span>' + (k ? '<b class="' + cls(k.r5) + '">' + pct(k.r5) + '</b>' + (k.r5 < s.r5 - 2 ? chip("덜 오름", "c") : "") : '<span class="mut">–</span>') + '</div>'; }).join("") + '</div>';
+    if (tk === "KR") h += '<div class="sub2">테마별 짝꿍 종목 <span class="mut">미국 대장 → 한국 수혜주 · 하루 등락</span></div><div id="lkth">' + THEMES.map(function(t, i){
       return '<div class="lk"><b>' + e(t[0]) + '</b><div class="lk-r">' + t[1].map(function(s){ return '<a class="cp-st" href="javascript:openOP(\'' + s + '\')" data-lk="' + s + '"><b>' + s + '</b><span class="mut">…</span></a>'; }).join("") + '<span class="lk-a">→</span>' +
         t[2].map(function(s){ return '<a class="cp-st" href="javascript:openOP(\'' + s + '\')" data-lk="' + s + '"><b>' + e(KRN[s] || V.cd(s)) + '</b><span class="mut">…</span></a>'; }).join("") + '</div></div>'; }).join("") + '</div>';
     setTimeout(function(){ [].forEach.call(document.querySelectorAll("[data-lk]:not([data-done])"), function(x){ x.setAttribute("data-done", 1);
       V.price(x.getAttribute("data-lk")).then(function(p){ var sp = x.querySelector("span"); if (!p){ sp.textContent = "–"; return; } var c = (p[1] / p[2] - 1) * 100; sp.className = cls(c); sp.textContent = sgn(c) + "%"; });
       }); }, 50);
-    return card("🔗 미국 → 한국 연결고리 <span class='mut'>미국에서 강한 업종, 한국은 따라왔나</span>", h +
-      '<p class="note">미국에서 1주 동안 강했는데 한국 같은 업종이 "덜 오름"이면 따라잡을 여지를 볼 만해요. 짝꿍 종목은 흔히 같이 묶이는 이름이에요 (참고용).</p>');
+    return card("🔗 미국 → " + e(kr.name) + " 연결고리 <span class='mut'>미국에서 강한 업종, " + e(kr.name) + "은 따라왔나</span>", h +
+      '<p class="note">미국에서 1주 동안 강했는데 ' + e(kr.name) + ' 같은 업종이 "덜 오름"이면 따라잡을 여지를 볼 만해요. 업종을 누르면 미국 종목과 ' + e(kr.name) + ' 같은 섹터 종목을 함께 보여줘요.' + (tk === "KR" ? ' 짝꿍 종목은 흔히 같이 묶이는 이름이에요 (참고용).' : '') + '</p>');
   }
   function hlTrend(m){
     var H = m.hl_hist; if (!H || H.length < 5) return "";
@@ -116,26 +117,41 @@
     return '<div class="sub2">오늘 장중 흐름 <span class="mut">30분마다</span></div>' + V.lines([{name: "상승 종목 비율(%)", color: "#e66767", vals: br}, {name: "코스피 등락(%)", color: "#7c9cff", vals: sn.map(function(x){ return x[3]; })}],
       sn.map(function(x){ return x[0]; }), {h: 130, nodots: sn.length > 8 ? 1 : 0});
   }
+  var LVM = [["KR", "🇰🇷", "한국"], ["JP", "🇯🇵", "일본"], ["CN", "🇨🇳", "중국"], ["HK", "🇭🇰", "홍콩"]], LVSEL = null;
+  function liveBody(L, mk, C, test){
+    var r = L.up / Math.max(1, L.up + L.down) * 100;
+    var y = C && C.markets && C.markets[mk], yr = y ? y.up / Math.max(1, y.up + y.down) * 100 : null;
+    var cur = mk === "KR" ? "" : (L.vcur || "");
+    var chip_ = function(x){ return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s) + '\')"><b>' + e(x.n) + '</b><span class="' + cls(x.r) + '">' + pct(x.r) + '</span></a>'; };
+    var h = '<div class="row"><div class="lv-ix">' + (L.index || []).map(function(i){ return '<span>' + e(i.name) + ' <b>' + V.fmt(i.last) + '</b> <b class="' + cls(i.chg) + '">' + pct(i.chg) + '</b></span>'; }).join("") + '</div>' +
+      '<button class="btn" id="lvre">↻</button></div>' +
+      '<div class="cp-bb tall" style="margin-top:10px"><i class="u" style="flex:' + L.up + '"></i><i class="f" style="flex:' + L.flat + '"></i><i class="d" style="flex:' + L.down + '"></i></div>' +
+      '<div class="cp-n"><span class="up">▲ ' + L.up.toLocaleString() + '</span><span class="mut">상승 비율 ' + r.toFixed(0) + '%' + (yr != null ? ' (지난 마감 ' + yr.toFixed(0) + '%)' : '') + '</span><span class="dn">▼ ' + L.down.toLocaleString() + '</span></div>' +
+      '<p class="note">종목 중간값 <b class="' + cls(L.median) + '">' + pct(L.median) + '</b>' + (L.limit_up != null ? ' · 상한가 ' + L.limit_up + ' · 하한가 ' + L.limit_dn : '') + '</p>' + liveLine(L.snaps);
+    if (L.sectors && L.sectors.length) h += '<div class="sub2">섹터 지금 <span class="mut">누르면 종목</span></div>' + V.dbars(L.sectors.map(function(x){ return {label: x.icon + " " + e(x.name) + ' <span class="hgo">›</span>', v: x.r, attr: ' data-csec="' + e(x.k) + '" data-cm="' + mk + '" style="cursor:pointer"', tip: "<b>" + e(x.name) + "</b> " + pct(x.r) + " · ▲" + x.up + " ▼" + x.down + "<br>" + x.big.map(function(b){ return e(b.n) + " " + pct(b.r); }).join(", ")}; }));
+    if (L.strong && L.strong.length) h += '<div class="sub2">🔥 지금 강한 업종 <span class="mut">이름을 누르면 전체 종목</span></div>' + L.strong.slice(0, 5).map(function(x){ return '<div class="lv-r"><div class="row"><b data-ind="' + e(x.name) + '" data-cm="' + mk + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
+    if (L.themes && L.themes.length) h += '<div class="sub2">🏷 지금 강한 테마 <span class="mut">+3% 넘은 종목 수</span></div>' + L.themes.slice(0, 6).map(function(x){ return '<div class="lv-r"><div class="row"><b data-theme="' + e(x.name) + '" data-lead="' + e((x.lead[0] || {}).n || "") + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span> <span class="mut">' + x.up3 + '/' + x.n + '</span></b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
+    if (L.movers && L.movers.length && mk !== "KR") h += '<div class="sub2">🚀 지금 많이 오른 종목</div><div class="cp-sts">' + L.movers.map(chip_).join("") + '</div>';
+    if (L.value && L.value.length) h += '<div class="sub2">💰 거래대금 상위</div><div class="cp-sts">' + L.value.slice(0, 10).map(function(x){ return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s) + '\')"><b>' + e(x.n) + '</b><span class="' + cls(x.r) + '">' + pct(x.r) + '</span><span class="mut">' + x.v.toLocaleString() + '억' + cur + '</span></a>'; }).join("") + '</div>';
+    return h + '<p class="note">' + (mk === "KR" ? '네이버 시세로 코스피·코스닥 ' + L.total.toLocaleString() + '종목 (우선주·스팩·ETF 제외)' : e(L.note || "")) + ' · 30분마다 새로 계산. 국면·신고가 등 나머지는 마감 기준이에요.</p>';
+  }
   window.CPLIVE = function(el, C){
     if (!el) return;
     var test = /[?&]livetest/.test(location.search);
-    getJSON("archive/x/" + (test ? "live_kr_test.json" : "live_kr.json") + "?" + Date.now()).then(function(L){
-      if (!L || (!test && L.date !== P.today())){ el.innerHTML = '<p class="note" style="margin:0 4px 12px">⚡ 장중 나침반(한국)은 평일 장중 30분마다 새로 계산해요. 아래는 마감 기준이에요.</p>'; return; }
-      var t = Math.max(1, L.up + L.down + L.flat), r = L.up / Math.max(1, L.up + L.down) * 100;
-      var y = C && C.markets && C.markets.KR, yr = y ? y.up / Math.max(1, y.up + y.down) * 100 : null;
-      var chip_ = function(x){ return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s) + '\')"><b>' + e(x.n) + '</b><span class="' + cls(x.r) + '">' + pct(x.r) + '</span></a>'; };
-      var h = '<div class="row"><div class="lv-ix">' + L.index.map(function(i){ return '<span>' + e(i.name) + ' <b>' + V.fmt(i.last) + '</b> <b class="' + cls(i.chg) + '">' + pct(i.chg) + '</b></span>'; }).join("") + '</div>' +
-        '<button class="btn" id="lvre">↻</button></div>' +
-        '<div class="cp-bb tall" style="margin-top:10px"><i class="u" style="flex:' + L.up + '"></i><i class="f" style="flex:' + L.flat + '"></i><i class="d" style="flex:' + L.down + '"></i></div>' +
-        '<div class="cp-n"><span class="up">▲ ' + L.up.toLocaleString() + '</span><span class="mut">상승 비율 ' + r.toFixed(0) + '%' + (yr != null ? ' (어제 마감 ' + yr.toFixed(0) + '%)' : '') + '</span><span class="dn">▼ ' + L.down.toLocaleString() + '</span></div>' +
-        '<p class="note">종목 중간값 <b class="' + cls(L.median) + '">' + pct(L.median) + '</b> · 상한가 ' + L.limit_up + ' · 하한가 ' + L.limit_dn + '</p>' + liveLine(L.snaps);
-      if (L.sectors && L.sectors.length) h += '<div class="sub2">섹터 지금 <span class="mut">누르면 종목</span></div>' + V.dbars(L.sectors.map(function(x){ return {label: x.icon + " " + e(x.name) + ' <span class="hgo">›</span>', v: x.r, attr: ' data-lsec="' + e(x.k) + '" style="cursor:pointer"', tip: "<b>" + e(x.name) + "</b> " + pct(x.r) + " · ▲" + x.up + " ▼" + x.down + "<br>" + x.big.map(function(b){ return e(b.n) + " " + pct(b.r); }).join(", ")}; }));
-      if (L.strong && L.strong.length) h += '<div class="sub2">🔥 지금 강한 업종</div>' + L.strong.slice(0, 5).map(function(x){ return '<div class="lv-r"><div class="row"><b data-ind="' + e(x.name) + '" data-cm="KR" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
-      if (L.themes && L.themes.length) h += '<div class="sub2">🏷 지금 강한 테마 <span class="mut">+3% 넘은 종목 수</span></div>' + L.themes.slice(0, 6).map(function(x){ return '<div class="lv-r"><div class="row"><b data-theme="' + e(x.name) + '" data-lead="' + e((x.lead[0] || {}).n || "") + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span> <span class="mut">' + x.up3 + '/' + x.n + '</span></b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
-      if (L.value && L.value.length) h += '<div class="sub2">💰 거래대금 상위</div><div class="cp-sts">' + L.value.slice(0, 10).map(function(x){ return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s) + '\')"><b>' + e(x.n) + '</b><span class="' + cls(x.r) + '">' + pct(x.r) + '</span><span class="mut">' + x.v.toLocaleString() + '억</span></a>'; }).join("") + '</div>';
-      el.innerHTML = '<section class="card lv"><h3>⚡ 장중 나침반 · 한국 <span class="mut">' + e(L.t) + ' 기준' + (test ? " (시험)" : "") + '</span></h3>' + h +
-        '<p class="note">네이버 시세로 코스피·코스닥 ' + L.total.toLocaleString() + '종목을 30분마다 다시 세요 (우선주·스팩 제외). 국면·신고가 등 나머지는 마감 기준이에요.</p></section>';
-      var b = $("lvre"); if (b) b.onclick = function(){ el.innerHTML = '<div class="loading">새로 불러오는 중…</div>'; CPLIVE(el, C); };
+    Promise.all(LVM.map(function(x){ return getJSON("archive/x/live_" + x[0].toLowerCase() + (test ? "_test" : "") + ".json?" + Date.now()).catch(function(){ return null; }); })).then(function(R){
+      var have = {}; LVM.forEach(function(x, i){ var L = R[i]; if (L && (test || L.date === P.today())) have[x[0]] = L; });
+      var ks = LVM.filter(function(x){ return have[x[0]]; });
+      if (!ks.length){ el.innerHTML = '<p class="note" style="margin:0 4px 12px">⚡ 장중 나침반은 평일 장 시간(한국·일본·중국·홍콩)에 30분마다 새로 계산해요. 지금은 열린 장이 없어 아래는 마감 기준이에요.</p>'; return; }
+      if (!LVSEL || !have[LVSEL]) LVSEL = have[store.cpm] ? store.cpm : ks[0][0];
+      var draw = function(){
+        var L = have[LVSEL], m = LVM.filter(function(x){ return x[0] === LVSEL; })[0];
+        el.innerHTML = '<section class="card lv"><h3>⚡ 장중 나침반 <span class="mut">' + e(L.t) + ' 기준' + (test ? " (시험)" : "") + '</span></h3>' +
+          (ks.length > 1 ? '<div class="seg2" id="lvseg">' + ks.map(function(x){ return '<button data-m="' + x[0] + '"' + (x[0] === LVSEL ? ' class="on"' : '') + '>' + x[1] + ' ' + x[2] + ' <span class="mut">' + e(have[x[0]].t) + '</span></button>'; }).join("") + '</div>' : '<div class="mut" style="margin:-4px 0 8px">' + m[1] + ' ' + m[2] + '</div>') +
+          liveBody(L, LVSEL, C, test) + '</section>';
+        [].forEach.call(el.querySelectorAll("#lvseg button"), function(b){ b.onclick = function(){ LVSEL = b.dataset.m; draw(); }; });
+        var b = $("lvre"); if (b) b.onclick = function(){ el.innerHTML = '<div class="loading">새로 불러오는 중…</div>'; CPLIVE(el, C); };
+      };
+      draw();
     }).catch(function(){ el.innerHTML = ""; });
   };
 
@@ -267,9 +283,22 @@
     }).catch(function(){});
   };
   var MKX = "KR";
+  // 시장별 섹터 히트맵 (1주~12개월) — 누르면 그 섹터 종목
+  function heat(m, k){
+    var ss = (m.sectors || []).filter(function(x){ return x.heat && Object.keys(x.heat).length; });
+    if (ss.length < 3) return "";
+    var cols = ["1W", "1M", "3M", "6M", "12M"].filter(function(c){ return ss.some(function(x){ return x.heat[c] != null; }); });
+    var lab = {"1W": "1주", "1M": "1개월", "3M": "3개월", "6M": "6개월", "12M": "12개월"};
+    var mx = {}; cols.forEach(function(c){ mx[c] = Math.max.apply(null, ss.map(function(x){ return Math.abs(x.heat[c] || 0); }).concat([1])); });
+    ss = ss.slice().sort(function(a, b){ return (b.heat["1M"] || 0) - (a.heat["1M"] || 0); });
+    return card("🗺️ " + e(m.name) + " 섹터 히트맵 <span class='mut'>기간별 수익률 · 섹터를 누르면 종목</span>", '<div class="hm"><table><thead><tr><th></th>' + cols.map(function(c){ return '<th>' + lab[c] + '</th>'; }).join("") + '</tr></thead><tbody>' +
+      ss.map(function(x){ return '<tr class="hrow" data-csec="' + e(x.k) + '" data-cm="' + k + '"><th>' + x.icon + " " + e(x.name) + ' <span class="hgo">›</span></th>' + cols.map(function(c){ var v = x.heat[c];
+        return '<td style="background:' + V.heat(v, mx[c]) + '">' + (v == null ? "" : sgn(v, Math.abs(v) >= 100 ? 0 : 1)) + '</td>'; }).join("") + '</tr>'; }).join("") + '</tbody></table></div>' +
+      '<p class="note">시가총액 가중 · 1개월 순. 빨강 = 오름, 파랑 = 내림.</p>');
+  }
   window.CPX = function(m, k, C){
     CMP = C; MKX = k;
-    return regHist(m) + rotSlider(m, k) + hlTrend(m) + sens(m) + ((k === "KR" || k === "US") ? link(C) : "");
+    return heat(m, k) + regHist(m) + rotSlider(m, k) + hlTrend(m) + sens(m) + (k === "US" ? link(C, "KR") : link(C, k));
   };
 
   /* ======================= 🤫 조용한 매집 ======================= */

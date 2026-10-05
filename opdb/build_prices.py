@@ -57,7 +57,7 @@ def main():
                 continue
             w = c.resample("W-FRI").last().dropna()
             if s in mkt_of:
-                daily[s] = c.iloc[-70:]
+                daily[s] = c.iloc[-260:]          # 나침반 섹터 히트맵(1주~12개월)까지 쓰려고 1년치
                 if len(c) > 200:
                     last = float(c.iloc[-1])
                     hl[s] = 1 if last >= float(c.max()) * 0.999 else -1 if last <= float(c.min()) * 1.001 else 0
