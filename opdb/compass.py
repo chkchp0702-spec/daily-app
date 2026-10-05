@@ -329,6 +329,19 @@ def build(daily, hl, mkt_of, dest, hlh=None):
 
         idx = index_block(mkt)
         reg = idx[0]["regime"] if idx else "횡보장"
+        # 200일선 위 종목 비율 (국면 신호판용) — 최근 40일 기록을 이어 붙인다
+        b200, b200_hist = None, []
+        try:
+            if len(df) >= 200:
+                ma200 = df.rolling(200, min_periods=200).mean()
+                ab = (df > ma200).sum(axis=1)
+                ok = ma200.notna().sum(axis=1)
+                ser = (ab / ok.where(ok > 0) * 100).dropna().iloc[-40:]
+                if ok.iloc[-1] >= 100:
+                    b200 = _r(float(ser.iloc[-1]), 1)
+                    b200_hist = [[d.strftime("%m/%d"), _r(float(v), 1)] for d, v in ser.items()]
+        except Exception as _e:
+            print("b200 실패", mkt, _e, flush=True)
         # 등락 비율로 보정 설명
         up10 = [h[1] / max(1, h[1] + h[2]) for h in hist[-10:]]
         breadth10 = round(sum(up10) / len(up10) * 100) if up10 else None
@@ -337,6 +350,7 @@ def build(daily, hl, mkt_of, dest, hlh=None):
             "total": len(today), "up": up, "down": dn, "flat": flat, "limit_up": lim_up,
             "highs": highs, "lows": lows, "breadth_hist": hist, "breadth10": breadth10,
             "index": idx, "regime": reg,
+            "b200": b200, "b200_hist": b200_hist,
             "median1": _r(float(today.median()) * 100),
             "sectors": sectors, "strong": strong[:8], "weak": list(reversed(strong[-5:])) if len(strong) > 8 else [],
             "leaders": [stock(x) for x in leaders], "laggards": [stock(x) for x in laggards],
