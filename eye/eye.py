@@ -117,6 +117,37 @@ def draw_gap(im, x0, y0, ch):
         d.line([(X(g - 1), Y(c[g - 1])), (X(g), Y(c[g]))], fill=(230, 60, 60), width=3)
 
 
+def _f(v):
+    try:
+        x = float(v)
+        return None if x != x else x
+    except (TypeError, ValueError):
+        return None
+
+
+def auto_drop(mode, r, ch):
+    """눈으로 보기 전에 숫자로 확실히 컵이 아닌 것을 먼저 뺀다 (10/6 사용자 기준).
+       AGYS·HIW = 약세·돌파 실패, VSXY = 기준가에서 한참 아래(덜 회복) → 컵 아님.
+       엔비디아·주성엔지니어링 = 크게 오른 주도주가 고점 근처에서 만드는 그릇 → 컵 (자동 거름을 통과해야 함)."""
+    if mode != "cup":
+        return None
+    rs, dist, dbo = _f(r.get("상대강도")), _f(r.get("기준가까지%")), _f(r.get("돌파후일수"))
+    if rs is not None and rs < 60:
+        return f"약세(상대강도 {rs:.0f})"
+    if r.get("돌파") == "True" and dbo is not None and dbo >= 10 and dist is not None and dist < -5:
+        return "돌파실패"
+    if dist is not None and dist < -12:
+        return f"덜회복(기준가 {dist:.0f}%)"
+    if dist is not None and dist > 15:
+        return f"늦음(기준가 +{dist:.0f}%)"
+    c, li = ch.get("c") or [], ch.get("li")
+    if li is not None and li >= 20 and min(c[:li]) > 0:
+        pr = c[li] / min(c[:li]) - 1
+        if pr < 0.20:
+            return f"앞상승없음({pr * 100:.0f}%)"
+    return None
+
+
 def render(mode):
     d = fetch(mode)
     prefix = SRC[mode][1]
@@ -129,11 +160,18 @@ def render(mode):
     os.makedirs(OUT, exist_ok=True)
     for f in glob.glob(os.path.join(OUT, f"{mode}_*.png")):
         os.remove(f)
-    items = []
+    items, auto, names = [], {}, {}
     for r in lst:
         code = str(r.get("코드", ""))
         if code in charts:
-            items.append((code, r))
+            names[code] = r.get("종목명", "")
+            why = auto_drop(mode, r, charts[code])
+            if why:
+                auto[code] = "자동:" + why
+            else:
+                items.append((code, r))
+    # 주도주(상대강도 높은 순)부터 보여 준다 — 엔비디아·주성 같은 컵이 앞에 오게
+    items.sort(key=lambda x: -(_f(x[1].get("상대강도")) or 0))
     index, page = [], 0
     for s in range(0, len(items), COLS * ROWS):
         chunk = items[s:s + COLS * ROWS]
@@ -147,16 +185,16 @@ def render(mode):
             num = s + k + 1
             name = (r.get("종목명") or code)[:14]
             sc = r.get("모양점수", "")
-            extra = (r.get("패턴", "") if mode == "cup" else f"갭 {r.get('갭크기%', '')}% · 박스 {r.get('횡보주', '')}주")
+            extra = (f"{r.get('패턴', '')} · RS {r.get('상대강도', '')} · 기준가 {r.get('기준가까지%', '')}%" if mode == "cup" else f"갭 {r.get('갭크기%', '')}% · 박스 {r.get('횡보주', '')}주")
             dr.text((x0 + 8, y0 + 6), f"#{num}", fill=(200, 40, 40), font=font(15, True))
             dr.text((x0 + 48, y0 + 7), f"{name}  {code}", fill=(30, 30, 40), font=font(13, True))
             dr.text((x0 + 8, y0 + 24), f"모양 {sc} · {extra}", fill=(110, 110, 120), font=font(11))
             (draw_cup if mode == "cup" else draw_gap)(im, x0, y0, charts[code])
             index.append({"n": num, "code": code, "name": r.get("종목명", ""), "mkt": r.get("시장", ""), "page": page, "shape": sc})
         im.save(os.path.join(OUT, f"{mode}_{page:02d}.png"), optimize=True)
-    json.dump({"mode": mode, "scan_date": day, "n": len(items), "pages": page, "items": index},
+    json.dump({"mode": mode, "scan_date": day, "n": len(items), "pages": page, "items": index, "auto": auto, "auto_names": names},
               open(os.path.join(OUT, f"{mode}_index.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=0)
-    print(f"{mode}: 스캔일 {day} · 1차 {len(lst)}종목 · 그림 {page}장 ({len(items)}종목) → {OUT}/{mode}_NN.png")
+    print(f"{mode}: 스캔일 {day} · 1차 {len(lst)}종목 · 자동 거름 {len(auto)} · 그림 {page}장 ({len(items)}종목) → {OUT}/{mode}_NN.png")
 
 
 def apply(mode, drop_path):
@@ -168,14 +206,18 @@ def apply(mode, drop_path):
     drop = {str(k): str(v) for k, v in drop.items()}
     codes = [x["code"] for x in idx["items"]]
     keep = [c for c in codes if c not in drop]
+    auto = idx.get("auto", {})
+    names = dict(idx.get("auto_names", {}))
+    names.update({x["code"]: x["name"] for x in idx["items"]})
+    dd = {c: drop[c] for c in codes if c in drop}
+    dd.update(auto)
     out = {"mode": mode, "scan_date": idx["scan_date"], "checked": dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M"),
-           "n_in": len(codes), "n_keep": len(keep), "keep": keep,
-           "drop": {c: drop[c] for c in codes if c in drop},
-           "names": {x["code"]: x["name"] for x in idx["items"]}}
+           "n_in": len(codes) + len(auto), "n_auto": len(auto), "n_eye": len(codes), "n_keep": len(keep), "keep": keep,
+           "drop": dd, "names": names}
     p = os.path.join(ROOT, "archive", "x", f"eye_{mode}.json")
     os.makedirs(os.path.dirname(p), exist_ok=True)
     json.dump(out, open(p, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    print(f"{mode}: 1차 {len(codes)} → 눈 검사 뒤 {len(keep)}종목 ({len(out['drop'])}개 뺌) → {p}")
+    print(f"{mode}: 1차 {out['n_in']} → 자동 거름 {len(auto)} → 눈 검사 {len(codes)} → 남김 {len(keep)}종목 → {p}")
 
 
 def status():
