@@ -1,8 +1,10 @@
 name: live
-# 나침반 장중판: 평일 09:05 ~ 17:35 30분마다 (한국 = 네이버, 일본·중국·홍콩 = 야후)
+# 나침반 장중판: 각 시장 장 시간에 10분마다 (한국 = 네이버, 일본·중국·홍콩·미국 = 야후)
+#   아시아: KST 09:03 ~ 17:53  ·  미국: 뉴욕 09:30~16:00 = UTC 13:30~21:00 (서머타임과 무관하게 같은 UTC 범위 안)
 on:
   schedule:
-    - cron: "5,35 0-8 * * 1-5"   # KST 09:05 ~ 17:35 (한국·일본·중국·홍콩)
+    - cron: "3-59/10 0-8 * * 1-5"    # KST 09:03 ~ 17:53 (한국·일본·중국·홍콩)
+    - cron: "3-59/10 13-21 * * 1-5"  # KST 22:03 ~ 06:53 (미국, 장 시간 밖이면 바로 끝남)
   workflow_dispatch:
     inputs:
       force:
@@ -14,7 +16,7 @@ permissions:
 
 concurrency:
   group: live
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   live:
@@ -26,9 +28,10 @@ jobs:
         env:
           FORCE: ${{ github.event.inputs.force == 'true' && '1' || '' }}
         run: |
-          python live.py || echo "한국 실패"
+          H=$(date -u +%H)
+          if [ "$H" -lt 12 ] || [ -n "$FORCE" ]; then python live.py || echo "한국 실패"; fi
           pip install -q yfinance pandas
-          python live_world.py || echo "일본·중국·홍콩 실패"
+          python live_world.py || echo "일본·중국·홍콩·미국 실패"
       - name: 저장
         run: |
           git config user.name "bot"

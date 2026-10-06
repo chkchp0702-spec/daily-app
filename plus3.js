@@ -110,14 +110,14 @@
       e(S.fx_name) + '이 오를 때 같이 오르던 업종: <b>' + best.map(function(x){ return x.name; }).join(", ") + '</b> · 내리던 업종: <b>' + worst.map(function(x){ return x.name; }).join(", ") + '</b>. ' +
       '숫자는 상관계수(−1~+1). 0.3 넘으면 꽤 같이 움직이는 편.</p>');
   }
-  /* ⚡ 장중 나침반 (한국, 30분마다) */
-  function liveLine(sn){
+  /* ⚡ 장중 나침반 (한국·일본·중국·홍콩·미국, 10분마다) */
+  function liveLine(sn, ixn){
     if (!sn || sn.length < 2) return "";
     var br = sn.map(function(x){ return x[1] + x[2] ? Math.round(x[1] / (x[1] + x[2]) * 100) : 50; });
-    return '<div class="sub2">오늘 장중 흐름 <span class="mut">30분마다</span></div>' + V.lines([{name: "상승 종목 비율(%)", color: "#e66767", vals: br}, {name: "코스피 등락(%)", color: "#7c9cff", vals: sn.map(function(x){ return x[3]; })}],
+    return '<div class="sub2">오늘 장중 흐름 <span class="mut">10분마다</span></div>' + V.lines([{name: "상승 종목 비율(%)", color: "#e66767", vals: br}, {name: (ixn || "코스피") + " 등락(%)", color: "#7c9cff", vals: sn.map(function(x){ return x[3]; })}],
       sn.map(function(x){ return x[0]; }), {h: 130, nodots: sn.length > 8 ? 1 : 0});
   }
-  var LVM = [["KR", "🇰🇷", "한국"], ["JP", "🇯🇵", "일본"], ["CN", "🇨🇳", "중국"], ["HK", "🇭🇰", "홍콩"]], LVSEL = null;
+  var LVM = [["KR", "🇰🇷", "한국"], ["JP", "🇯🇵", "일본"], ["CN", "🇨🇳", "중국"], ["HK", "🇭🇰", "홍콩"], ["US", "🇺🇸", "미국"]], LVSEL = null;
   function liveBody(L, mk, C, test){
     var r = L.up / Math.max(1, L.up + L.down) * 100;
     var y = C && C.markets && C.markets[mk], yr = y ? y.up / Math.max(1, y.up + y.down) * 100 : null;
@@ -127,21 +127,21 @@
       '<button class="btn" id="lvre">↻</button></div>' +
       '<div class="cp-bb tall" style="margin-top:10px"><i class="u" style="flex:' + L.up + '"></i><i class="f" style="flex:' + L.flat + '"></i><i class="d" style="flex:' + L.down + '"></i></div>' +
       '<div class="cp-n"><span class="up">▲ ' + L.up.toLocaleString() + '</span><span class="mut">상승 비율 ' + r.toFixed(0) + '%' + (yr != null ? ' (지난 마감 ' + yr.toFixed(0) + '%)' : '') + '</span><span class="dn">▼ ' + L.down.toLocaleString() + '</span></div>' +
-      '<p class="note">종목 중간값 <b class="' + cls(L.median) + '">' + pct(L.median) + '</b>' + (L.limit_up != null ? ' · 상한가 ' + L.limit_up + ' · 하한가 ' + L.limit_dn : '') + '</p>' + liveLine(L.snaps);
+      '<p class="note">종목 중간값 <b class="' + cls(L.median) + '">' + pct(L.median) + '</b>' + (L.limit_up != null ? ' · 상한가 ' + L.limit_up + ' · 하한가 ' + L.limit_dn : '') + '</p>' + liveLine(L.snaps, L.index && L.index[0] && L.index[0].name);
     if (L.sectors && L.sectors.length) h += '<div class="sub2">섹터 지금 <span class="mut">누르면 종목</span></div>' + V.dbars(L.sectors.map(function(x){ return {label: x.icon + " " + e(x.name) + ' <span class="hgo">›</span>', v: x.r, attr: ' data-csec="' + e(x.k) + '" data-cm="' + mk + '" style="cursor:pointer"', tip: "<b>" + e(x.name) + "</b> " + pct(x.r) + " · ▲" + x.up + " ▼" + x.down + "<br>" + x.big.map(function(b){ return e(b.n) + " " + pct(b.r); }).join(", ")}; }));
     if (L.strong && L.strong.length) h += '<div class="sub2">🔥 지금 강한 업종 <span class="mut">이름을 누르면 전체 종목</span></div>' + L.strong.slice(0, 5).map(function(x){ return '<div class="lv-r"><div class="row"><b data-ind="' + e(x.name) + '" data-cm="' + mk + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
     if (L.themes && L.themes.length) h += '<div class="sub2">🏷 지금 강한 테마 <span class="mut">+3% 넘은 종목 수</span></div>' + L.themes.slice(0, 6).map(function(x){ return '<div class="lv-r"><div class="row"><b data-theme="' + e(x.name) + '" data-lead="' + e((x.lead[0] || {}).n || "") + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span> <span class="mut">' + x.up3 + '/' + x.n + '</span></b><b class="' + cls(x.r) + '">' + pct(x.r) + '</b></div><div class="cp-sts">' + x.lead.map(chip_).join("") + '</div></div>'; }).join("");
     if (L.movers && L.movers.length && mk !== "KR") h += '<div class="sub2">🚀 지금 많이 오른 종목</div><div class="cp-sts">' + L.movers.map(chip_).join("") + '</div>';
     if (L.value && L.value.length) h += '<div class="sub2">💰 거래대금 상위</div><div class="cp-sts">' + L.value.slice(0, 10).map(function(x){ return '<a class="cp-st" href="javascript:openOP(\'' + e(x.s) + '\')"><b>' + e(x.n) + '</b><span class="' + cls(x.r) + '">' + pct(x.r) + '</span><span class="mut">' + x.v.toLocaleString() + '억' + cur + '</span></a>'; }).join("") + '</div>';
-    return h + '<p class="note">' + (mk === "KR" ? '네이버 시세로 코스피·코스닥 ' + L.total.toLocaleString() + '종목 (우선주·스팩·ETF 제외)' : e(L.note || "")) + ' · 30분마다 새로 계산. 국면·신고가 등 나머지는 마감 기준이에요.</p>';
+    return h + '<p class="note">' + (mk === "KR" ? '네이버 시세로 코스피·코스닥 ' + L.total.toLocaleString() + '종목 (우선주·스팩·ETF 제외)' : e(L.note || "")) + ' · 장 시간에 10분마다 새로 계산. 국면·신고가 등 나머지는 마감 기준이에요.</p>';
   }
   window.CPLIVE = function(el, C){
     if (!el) return;
     var test = /[?&]livetest/.test(location.search);
     Promise.all(LVM.map(function(x){ return getJSON("archive/x/live_" + x[0].toLowerCase() + (test ? "_test" : "") + ".json?" + Date.now()).catch(function(){ return null; }); })).then(function(R){
-      var have = {}; LVM.forEach(function(x, i){ var L = R[i]; if (L && (test || L.date === P.today())) have[x[0]] = L; });
+      var have = {}; LVM.forEach(function(x, i){ var L = R[i]; if (L && (test || L.date === P.today() || (L.at && Date.now() - L.at < 3 * 3600e3))) have[x[0]] = L; });
       var ks = LVM.filter(function(x){ return have[x[0]]; });
-      if (!ks.length){ el.innerHTML = '<p class="note" style="margin:0 4px 12px">⚡ 장중 나침반은 평일 장 시간(한국·일본·중국·홍콩)에 30분마다 새로 계산해요. 지금은 열린 장이 없어 아래는 마감 기준이에요.</p>'; return; }
+      if (!ks.length){ el.innerHTML = '<p class="note" style="margin:0 4px 12px">⚡ 장중 나침반은 평일 장 시간(한국·일본·중국·홍콩·미국)에 10분마다 새로 계산해요. 지금은 열린 장이 없어 아래는 마감 기준이에요.</p>'; return; }
       if (!LVSEL || !have[LVSEL]) LVSEL = have[store.cpm] ? store.cpm : ks[0][0];
       var draw = function(){
         var L = have[LVSEL], m = LVM.filter(function(x){ return x[0] === LVSEL; })[0];
