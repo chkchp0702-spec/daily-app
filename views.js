@@ -104,8 +104,23 @@
   };
 
   /* ======================= 단타 ======================= */
+  // 오늘 알람은 수집(하루 몇 번)을 기다리지 않고 단타 프로그램 원본(tracking.csv)에서 바로 읽기
+  function dantaRows(it){
+    var td = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+    var arc = function(){ return getJSON(file("danta", it.id, "alerts.json")); };
+    if (it.id !== td) return arc();
+    return getText(RAW + "stock-screener/main/data/tracking.csv?" + Date.now()).then(function(t){
+      var k = td.replace(/-/g, "") + "_", n = function(v){ v = parseFloat(v); return isNaN(v) ? null : v; };
+      return parseCSV(t).filter(function(r){ return String(r["시각"] || "").indexOf(k) === 0; }).map(function(r){
+        var s = r["시각"], ty = (r["유형"] || "").trim();
+        return {time: s.slice(9, 11) + ":" + s.slice(11, 13), code: r.code, name: r.name, type: (!ty || /^nan$/i.test(ty)) ? "알람" : ty,
+                price: n(r["알람가"]), chg: n(r["당일등락"]), m30: n(r["30분"]), high: n(r["최고"]), low: n(r["최저"]), now: n(r["현재"]),
+                exit: (r["청산알림"] || "").replace(/nan/ig, "").trim(), stop: n(r["손절"]), t1: n(r["목표1"]), t2: n(r["목표2"])};
+      });
+    }).catch(function(){ return arc().catch(function(){ return []; }); });
+  }
   RENDER.danta = function(it, el){
-    Promise.all([getJSON(file("danta", it.id, "alerts.json")), getJSON("archive/danta/summary.json?" + (M.updated || "")).catch(function(){ return []; })]).then(function(r){
+    Promise.all([dantaRows(it), getJSON("archive/danta/summary.json?" + (M.updated || "")).catch(function(){ return []; })]).then(function(r){
       var rows = r[0], S = r[1];
       rows.sort(function(a, b){ return a.time < b.time ? 1 : -1; });
       var nowv = rows.map(function(x){ return x.now; }).filter(function(v){ return v != null; });
@@ -126,6 +141,7 @@
           '<div class="lg"><span><i style="background:' + V.UP + '"></i>플러스</span><span><i style="background:' + V.DN + '"></i>마이너스</span><span class="mut">막대를 누르면 자세히</span></div>');
       }
       h += '<div id="bt"></div>' + sec("알람 " + rows.length + "건");
+      if (!rows.length) h += '<div class="empty"><div class="big">⚡</div>오늘은 아직 알람이 없어요.<br><small class="mut">텔레그램으로 알람이 오면 1~5분 안에 여기에도 떠요. 새로고침 해보세요.</small></div>';
       h += '<div class="list">' + rows.map(function(x){
         var ex = x.exit ? chip(e(x.exit), /손절|이탈/.test(x.exit) ? "cool" : "hot") : "";
         return '<div class="st"><div class="row"><div class="nm"><a href="https://m.stock.naver.com/domestic/stock/' + e(x.code) + '/total" target="_blank">' + e(x.name) + '</a><span class="cd">' + e(x.code) + '</span></div>' +
