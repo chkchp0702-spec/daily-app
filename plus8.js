@@ -25,7 +25,7 @@
           (s.title ? '<div class="mk-t2">' + rich(strip(s.title)) + '</div>' : '') +
           (s.lead ? '<p class="mk-lead">' + rich(strip(s.lead)) + '</p>' : '') +
           (us.length ? '<div class="mk-q">' + us.map(function(q){
-            return '<div><small>' + e(String(q.who || "").replace(/^🇺🇸\s*/, "")) + '</small><b>' + rich(strip(q.said)) + '</b>' + (q.so ? '<span>' + rich(strip(q.so)) + '</span>' : '') + '</div>'; }).join("") + '</div>' : '') + '</section>';
+            return '<div><small>' + e(String(q.who || "").replace(/^🇺🇸\s*/, "")) + '</small><b>' + rich(strip(q.said)) + '</b>' + (q.so ? '<span>→ ' + rich(strip(q.so).replace(/^\s*→?\s*(<b>)?\s*그래서\?\s*(<\/b>)?\s*/, "")) + '</span>' : '') + '</div>'; }).join("") + '</div>' : '') + '</section>';
       }
       a.innerHTML = h;
     }).catch(function(){});
