@@ -109,13 +109,13 @@
     var td = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
     var arc = function(){ return getJSON(file("danta", it.id, "alerts.json")); };
     if (it.id !== td) return arc();
-    return getText(RAW + "stock-screener/main/data/tracking.csv?" + Date.now()).then(function(t){
+    return dantaLive().then(function(R){
       var k = td.replace(/-/g, "") + "_", n = function(v){ v = parseFloat(v); return isNaN(v) ? null : v; };
-      return parseCSV(t).filter(function(r){ return String(r["시각"] || "").indexOf(k) === 0; }).map(function(r){
+      return R.filter(function(r){ return String(r["시각"] || "").indexOf(k) === 0; }).map(function(r){
         var s = r["시각"], ty = (r["유형"] || "").trim();
         return {time: s.slice(9, 11) + ":" + s.slice(11, 13), code: r.code, name: r.name, type: (!ty || /^nan$/i.test(ty)) ? "알람" : ty,
                 price: n(r["알람가"]), chg: n(r["당일등락"]), m30: n(r["30분"]), high: n(r["최고"]), low: n(r["최저"]), now: n(r["현재"]),
-                exit: (r["청산알림"] || "").replace(/nan/ig, "").trim(), stop: n(r["손절"]), t1: n(r["목표1"]), t2: n(r["목표2"])};
+                exit: r["방금"] ? "방금 뜸" : (r["청산알림"] || "").replace(/nan/ig, "").trim(), stop: n(r["손절"]), t1: n(r["목표1"]), t2: n(r["목표2"])};
       });
     }).catch(function(){ return arc().catch(function(){ return []; }); });
   }

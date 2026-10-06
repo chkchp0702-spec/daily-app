@@ -229,21 +229,21 @@
   var SBT = null;
   function scoreboard(el){
     clearTimeout(SBT);
-    getText(RAW + "stock-screener/main/data/tracking.csv?" + Date.now()).then(function(t){
+    dantaLive().then(function(R){
       if (!document.body.contains(el)) return;
-      var R = parseCSV(t), today = P.today().replace(/-/g, ""), rows = R.filter(function(r){ return String(r["시각"] || "").indexOf(today) === 0; }), live = true;
+      var today = P.today().replace(/-/g, ""), rows = R.filter(function(r){ return String(r["시각"] || "").indexOf(today) === 0; }), live = true;
       if (!rows.length){ var last = R.length ? String(R[R.length - 1]["시각"]).slice(0, 8) : ""; rows = R.filter(function(r){ return String(r["시각"] || "").indexOf(last) === 0; }); live = false; }
       if (!rows.length){ el.innerHTML = ""; return; }
       var d0 = String(rows[0]["시각"]).slice(0, 8);
       var sum = rows.reduce(function(a, r){ return a + (+r["현재"] || 0); }, 0) / rows.length;
-      el.innerHTML = '<section class="card sb"><h3>📺 ' + (live ? "오늘 알람 실시간 전광판" : d0.slice(4, 6) + "/" + d0.slice(6) + " 알람 전광판") + ' <span class="mut">' + (live ? "1분마다 새로 · 단타 프로그램 10분 저장" : "오늘 알람 없음") + '</span></h3>' +
+      el.innerHTML = '<section class="card sb"><h3>📺 ' + (live ? "오늘 알람 실시간 전광판" : d0.slice(4, 6) + "/" + d0.slice(6) + " 알람 전광판") + ' <span class="mut">' + (live ? "30초마다 새로 · 텔레그램과 같은 순간" : "오늘 알람 없음") + '</span></h3>' +
         '<div class="sb-sum"><span>알람 ' + rows.length + '</span><b class="' + cls(sum) + '">평균 ' + pct(sum) + '</b><span>플러스 ' + rows.filter(function(r){ return +r["현재"] > 0; }).length + '</span></div><div class="sb-g">' +
         rows.slice().reverse().map(function(r){ var v = +r["현재"] || 0, hi = +r["최고"] || 0, lo = +r["최저"] || 0, ex = (r["청산알림"] || "").replace(/nan/i, "");
           return '<a class="sb-t ' + (v > 0 ? "u" : v < 0 ? "d" : "") + (live ? " blink" : "") + '" href="javascript:openOP(\'' + e(r.code) + '\')"><small>' + String(r["시각"]).slice(9, 11) + ':' + String(r["시각"]).slice(11, 13) + ' · ' + e(r["유형"] && r["유형"] !== "nan" ? r["유형"] : "알람") + '</small><b>' + e(r.name) + '</b>' +
             '<em class="' + cls(v) + '">' + pct(v) + '</em><span class="sb-r"><i style="left:' + clamp(50 + lo * 8).toFixed(0) + '%;right:' + clamp(50 - hi * 8).toFixed(0) + '%"></i><u style="left:' + clamp(50 + v * 8).toFixed(0) + '%"></u></span>' +
             (ex ? '<small class="' + (/손절|이탈|시간|트레일/.test(ex) ? "dn" : "up") + '">' + e(ex) + '</small>' : '<small class="mut">최고 ' + pct(hi) + ' · 최저 ' + pct(lo) + '</small>') + '</a>'; }).join("") + '</div>' +
-        '<p class="note">막대 = 장중 최저~최고 범위, 흰 점 = 지금. ' + (live ? "장 중엔 1분마다 새로 불러와요." : "") + ' 시험 중인 알람이라 참고만.</p></section>';
-      if (live && cur === "danta") SBT = setTimeout(function(){ scoreboard(el); }, 60000);
+        '<p class="note">막대 = 장중 최저~최고 범위, 흰 점 = 지금. ' + (live ? "장 중엔 30초마다 새로 불러와요." : "") + ' 시험 중인 알람이라 참고만.</p></section>';
+      if (live && cur === "danta") SBT = setTimeout(function(){ scoreboard(el); }, 30000);
     }).catch(function(){ el.innerHTML = ""; });
   }
   function replayBtn(st, rp){
