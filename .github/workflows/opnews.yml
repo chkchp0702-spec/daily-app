@@ -11,9 +11,18 @@ permissions:
 jobs:
   prep:
     runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.when.outputs.go }}
     steps:
+      - name: 시간 확인 (예약이 늦게 떠서 장중과 겹치면 건너뜀 — 장중 나침반·단타 자리 확보)
+        id: when
+        run: |
+          H=$(TZ=Asia/Seoul date +%H)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$H" -ge 21 ] || [ "$H" -lt 7 ]; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "KST ${H}시 — 장중이라 오늘은 건너뜀"; echo "go=false" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/checkout@v4
+        if: steps.when.outputs.go == 'true'
       - name: 마지막 실적 연도 목록
+        if: steps.when.outputs.go == 'true'
         run: |
           git clone -q --depth 1 -b opdata https://github.com/${{ github.repository }} opdata
           python3 - <<'PY'
@@ -43,6 +52,7 @@ jobs:
           cp opdata/meta.json meta.json
           cp opdata/names_ko.json names_ko.json || echo '{}' > names_ko.json
       - uses: actions/upload-artifact@v4
+        if: steps.when.outputs.go == 'true'
         with:
           name: prep
           path: |
@@ -54,11 +64,12 @@ jobs:
 
   news:
     needs: prep
+    if: needs.prep.outputs.go == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 170
     strategy:
       fail-fast: false
-      max-parallel: 16
+      max-parallel: 16         # 밤에만 돈다(시간 확인). 장중엔 건너뛰어 장중 나침반·단타 자리 확보
       matrix:
         shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
     steps:
@@ -83,8 +94,8 @@ jobs:
           retention-days: 2
 
   merge:
-    needs: news
-    if: always()
+    needs: [prep, news]
+    if: always() && needs.prep.outputs.go == 'true'
     runs-on: ubuntu-latest
     concurrency:
       group: opdata
