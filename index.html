@@ -389,7 +389,7 @@ em.tk{font-style:normal;font-size:11px;color:var(--dim);margin-left:4px;font-wei
 .cp-wk{padding:8px 0;border-bottom:1px solid var(--line)}.cp-wk:last-child{border:0}
 .cp-wk>span{float:right;font-weight:800}
 </style>
-<link rel="stylesheet" href="plus.css?v=23">
+<link rel="stylesheet" href="plus.css?v=24">
 </head>
 <body>
 <header>
@@ -1257,14 +1257,18 @@ function opShow(sym, noPush){
   }).catch(function(){ box.innerHTML = '<div class="empty">리포트를 못 불러왔어요. 잠시 뒤 다시 눌러주세요.</div>'; });
 }
 function openOP(code){
-  if ($("sheet")) closeSheet();
+  if ($("sheet")){
+    closeSheet();
+    // 보조 창에서 왔으면: 그 창 자리(history)를 "아래 화면"으로 바꿔 둔다 → 뒤로 하면 그 화면·그 위치로
+    if (history.state && history.state.t === "xs" && cur !== "onepager") try { history.replaceState(Object.assign({t: "go", key: cur, id: curDate || null, d: navD()}, navSnap()), "", location.pathname + "#" + cur); } catch(e) {}
+  }
   navPush({t: "op", code: code});
   NAV.silent = true; try { go("onepager", code); } finally { NAV.silent = false; }
   updBack();
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261006l";
+var APPV = "20261006m";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1306,7 +1310,7 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
 <script src="plus5.js?v=2"></script>
 <script src="plus6.js?v=7"></script>
 <script src="plus7.js?v=4"></script>
-<script src="plus8.js?v=3"></script>
+<script src="plus8.js?v=4"></script>
 <script src="simple.js?v=3"></script>
 <script src="pdfx.js?v=4"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
