@@ -324,3 +324,25 @@ header .tab:active{transform:scale(.96)}
 .mk-q small{display:block;color:var(--sub);font-size:12px;margin-bottom:3px}
 .mk-q b{display:block;font-size:14px;line-height:1.5;font-weight:600}
 .mk-q span{display:block;margin-top:4px;font-size:13px;color:var(--sub);line-height:1.5}
+
+/* 보기 단순하게 (simple.js) */
+.xs-hid{display:none!important}
+.xs-more h3{margin-bottom:6px}
+.xs-list{display:flex;flex-direction:column}
+.xs-row{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);color:var(--text);padding:13px 2px;font-size:15px;cursor:pointer}
+.xs-row:first-child{border-top:0}
+.xs-row .xs-t{flex:0 1 auto;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62%}
+.xs-row .xs-s{flex:1 1 auto;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xs-row .hgo{flex:0 0 auto;font-size:18px}
+.xs-row:active{background:color-mix(in srgb,var(--c) 10%,transparent)}
+.cc .nm2{cursor:pointer}
+.cc .nm2 b{text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--c) 45%,transparent);text-underline-offset:3px}
+#sheet .card{margin-top:4px}
+
+.cc:not(.xs-open) > :not(:first-child):not(:last-child):not(.sp-box):not(.st4):not(.xs-tg){display:none!important}
+.xs-tg{display:block;width:100%;margin:8px 0 2px;padding:7px;border:1px dashed var(--line);border-radius:10px;background:none;color:var(--sub);font-size:13px;cursor:pointer}
+
+.xs-clamp{max-height:620px;position:relative;padding-bottom:56px}
+.xs-clamp::after{content:"";position:absolute;left:0;right:0;bottom:44px;height:90px;background:linear-gradient(transparent,var(--panel));pointer-events:none}
+.xs-cl{position:absolute;left:16px;right:16px;bottom:10px;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--panel2,var(--panel));color:var(--text);font-size:13px;cursor:pointer;z-index:1}
+section.card:not(.xs-clamp) > .xs-cl{position:static;display:block;width:100%;margin-top:10px}

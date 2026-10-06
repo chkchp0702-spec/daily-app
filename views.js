@@ -263,9 +263,43 @@
   };
 
   /* ======================= 컵·갭 공통 ======================= */
-  function marketBars(by){
+  function marketBars(by, seg){
     var ks = Object.keys(by || {}).sort(function(a, b){ return by[b] - by[a]; });
-    return V.hbars(ks.map(function(k){ return {label: (V.FLAGS[k] || "") + " " + (V.MKT[k] || k), v: by[k], text: by[k] + "개"}; }));
+    return V.hbars(ks.map(function(k){ return {label: (V.FLAGS[k] || "") + " " + (V.MKT[k] || k) + (seg ? ' <span class="hgo">›</span>' : ''), v: by[k], text: by[k] + "개",
+      attr: seg ? ' data-jump="' + seg + '|' + k + '" style="cursor:pointer"' : ''}; }));
+  }
+  function secBars(bySec, seg, color){
+    return V.hbars(bySec.filter(function(x){ return x[0] !== "미분류" && x[0] !== "-"; }).slice(0, 6).map(function(s){
+      return {label: e(s[0]) + (seg ? ' <span class="hgo">›</span>' : ''), v: s[1], text: s[1], attr: seg ? ' data-jump="' + seg + '|ALL|' + e(s[0]) + '" style="cursor:pointer"' : ''}; }), {color: color});
+  }
+  /* 지도·막대를 누르면 아래 목록을 그 나라·섹터로 거르고 그 자리로 바로 이동 */
+  window.PAGERS = window.PAGERS || {};
+  function jumpTo(seg, key){
+    var P = window.PAGERS[seg]; if (!P) return;
+    var m = key.split("|")[0];
+    [].forEach.call(document.querySelectorAll("#" + seg + " button"), function(b){ b.classList.toggle("on", b.dataset.k === m); });
+    P.set(key);
+    var t = $(seg); if (t) window.scrollTo({top: t.getBoundingClientRect().top + window.scrollY - 150, behavior: "smooth"});
+  }
+  window.jumpTo = jumpTo;
+  window.mapCard = function(){ return mapCard.apply(null, arguments); };
+  document.addEventListener("click", function(ev){
+    var t = ev.target.closest && ev.target.closest("[data-jump]"); if (!t) return;
+    var v = t.getAttribute("data-jump"), i = v.indexOf("|"); jumpTo(v.slice(0, i), v.slice(i + 1));
+  });
+  /* 오늘 지도: 나라 × 섹터 표. 숫자 = 그 나라·섹터 목록으로, 국기 = 그 나라 전체로 */
+  function mapCard(icon, what, list, seg, rgb){
+    var g = {}, bm = {}, secs = {};
+    list.forEach(function(x){ var m = x.mkt, sc = x.sector || "미분류"; g[m] = g[m] || {}; g[m][sc] = (g[m][sc] || 0) + 1; bm[m] = (bm[m] || 0) + 1; if (sc !== "미분류" && sc !== "-") secs[sc] = (secs[sc] || 0) + 1; });
+    var mk = Object.keys(bm).sort(function(x, y){ return bm[y] - bm[x]; });
+    var sl = Object.keys(secs).sort(function(x, y){ return secs[y] - secs[x]; }).slice(0, 8), mx = 1;
+    if (!mk.length || !sl.length) return "";
+    mk.forEach(function(m){ sl.forEach(function(s){ mx = Math.max(mx, g[m][s] || 0); }); });
+    return card(icon + " 오늘 " + what + " 지도 <span class='mut'>" + list.length + "개 · 숫자를 누르면 그 종목들로</span>",
+      '<div class="hm cgmap"><table><thead><tr><th></th>' + mk.map(function(m){ return '<th data-jump="' + seg + '|' + m + '" style="cursor:pointer">' + (V.FLAGS[m] || m) + '</th>'; }).join("") + '</tr></thead><tbody>' +
+      sl.map(function(s){ return '<tr><th data-jump="' + seg + '|ALL|' + e(s) + '" style="cursor:pointer">' + e(s) + '</th>' + mk.map(function(m){ var v = g[m][s] || 0;
+        return '<td' + (v ? ' data-jump="' + seg + '|' + m + '|' + e(s) + '" style="cursor:pointer;background:rgba(' + rgb + ',' + (.14 + v / mx * .7).toFixed(2) + ')"' : '') + '>' + (v || "") + '</td>'; }).join("") + '</tr>'; }).join("") + '</tbody></table></div>' +
+      '<p class="note">진할수록 많은 곳. 숫자 = 그 나라·섹터, 국기 = 그 나라 전체, 섹터 이름 = 모든 나라의 그 섹터.</p>');
   }
   function filterSeg(id, list, cb){
     var mk = {}; list.forEach(function(x){ mk[x.mkt] = (mk[x.mkt] || 0) + 1; });
@@ -279,7 +313,7 @@
     function draw(){
       var sp = sel.split("|"), L = list.filter(function(x){ return (sp[0] === "ALL" || x.mkt === sp[0]) && (!sp[1] || (x.sector || "미분류") === sp[1]); });
       var box = $(boxId); if (!box) return;
-      box.innerHTML = (sp[1] ? '<div class="pg-f">' + (V.FLAGS[sp[0]] || "") + ' <b>' + e(sp[1]) + '</b> ' + L.length + '개 <button class="btn" id="' + boxId + 'x">✕ 섹터 해제</button></div>' : '') + '<div class="cgrid">' + L.slice(0, shown).map(render).join("") + '</div>' +
+      box.innerHTML = (sp[1] ? '<div class="pg-f">' + (sp[0] === "ALL" ? "🌐" : (V.FLAGS[sp[0]] || "")) + ' <b>' + e(sp[1]) + '</b> ' + L.length + '개 <button class="btn" id="' + boxId + 'x">✕ 섹터 해제</button></div>' : '') + '<div class="cgrid">' + L.slice(0, shown).map(render).join("") + '</div>' +
         (L.length > shown ? '<button class="more" id="' + boxId + 'm">더 보기 (' + (L.length - shown) + '개 남음)</button>' : "");
       if ($(boxId + "m")) $(boxId + "m").onclick = function(){ shown += 12; draw(); };
       if ($(boxId + "x")) $(boxId + "x").onclick = function(){ sel = sp[0]; shown = 12; draw(); };
@@ -311,11 +345,12 @@
       var h = '<div class="sum3"><div class="kv"><small>컵 패턴 종목</small><b>' + d.total.toLocaleString() + '</b></div><div class="kv"><small>사상최고가 돌파</small><b class="up">' + d.ath.length + '</b></div>' +
               '<div class="kv"><small>돌파 완료</small><b>' + d.top.filter(function(c){ return c.brk; }).length + '<span class="mut"> / 상위 ' + d.top.length + '</span></b></div></div>';
       h += eyeLine(d, '컵');
-      h += '<div class="g2">' + card("나라별", marketBars(d.by_mkt)) + card("많이 나온 섹터", V.hbars(d.by_sec.filter(function(x){ return x[0] !== "미분류" && x[0] !== "-"; }).slice(0, 6).map(function(s){ return {label: e(s[0]), v: s[1], text: s[1]}; }), {color: "#c98500"})) + '</div>';
+      h += mapCard("🗺️", "컵", (d.ath || []).concat(d.top.filter(function(c){ return !(d.ath || []).some(function(x){ return x.code === c.code; }); })), "cseg", "255,184,77");
+      h += '<div class="g2">' + card("나라별 <span class='mut'>누르면 그 나라</span>", marketBars(d.by_mkt, "cseg")) + card("많이 나온 섹터 <span class='mut'>누르면 그 섹터</span>", secBars(d.by_sec, "cseg", "#c98500")) + '</div>';
       if (d.ath.length) h += sec("★ 사상최고가 돌파") + '<div class="cgrid">' + d.ath.map(cupCard).join("") + '</div>';
       h += sec("컵 점수 상위 " + d.top.length) + filterSeg("cseg", d.top, function(k){ P.set(k); }) + '<div id="cbox"></div>' + pdf;
       el.innerHTML = h;
-      var P = pager("cbox", d.top, cupCard); P.draw(); window.CUPP = P;
+      var P = pager("cbox", d.top, cupCard); P.draw(); window.CUPP = P; window.PAGERS.cseg = P;
       after(el);
     }).catch(function(){ el.innerHTML = pdfCard("컵앤핸들 리포트", file("cup", it.id, "report.pdf")); });
   };
@@ -340,11 +375,12 @@
               '<div class="kv"><small>상위 평균 갭</small><b class="up">+' + (d.top.reduce(function(a, c){ return a + (c.gap || 0); }, 0) / (d.top.length || 1)).toFixed(1) + '%</b></div>' +
               '<div class="kv"><small>갭 유지</small><b>' + held + '<span class="mut"> / ' + d.top.length + '</span></b>' + V.progress(held, d.top.length || 1, V.UP) + '</div></div>';
       h += eyeLine(d, '갭 상승');
-      h += '<div class="g2">' + card("나라별", marketBars(d.by_mkt)) + card("많이 나온 섹터", V.hbars(d.by_sec.filter(function(x){ return x[0] !== "미분류" && x[0] !== "-"; }).slice(0, 6).map(function(s){ return {label: e(s[0]), v: s[1], text: s[1]}; }), {color: "#9085e9"})) + '</div>';
+      h += mapCard("🗺️", "갭", d.top, "gseg", "144,133,233");
+      h += '<div class="g2">' + card("나라별 <span class='mut'>누르면 그 나라</span>", marketBars(d.by_mkt, "gseg")) + card("많이 나온 섹터 <span class='mut'>누르면 그 섹터</span>", secBars(d.by_sec, "gseg", "#9085e9")) + '</div>';
       h += '<p class="note" style="margin:0 2px 10px">차트의 옅은 띠 = 갭 전 박스(횡보 구간), 점선 = 갭 시가</p>';
       h += sec("갭 점수 상위 " + d.top.length) + filterSeg("gseg", d.top, function(k){ P.set(k); }) + '<div id="gbox"></div>' + pdf;
       el.innerHTML = h;
-      var P = pager("gbox", d.top, gapCard); P.draw();
+      var P = pager("gbox", d.top, gapCard); P.draw(); window.GAPP = P; window.PAGERS.gseg = P;
     }).catch(function(){ el.innerHTML = pdfCard("갭 돌파 리포트", file("gap", it.id, "report.pdf")); });
   };
 

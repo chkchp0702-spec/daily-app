@@ -244,21 +244,7 @@
             '<p class="note">컵 깊이·기간·손잡이·점수가 가장 닮은 과거 컵 ' + N.length + '개. 주황 = 평균, 띠 = 가운데 절반. ' + (A.avg.length - 1) + '거래일 뒤 평균 <b class="' + cls(endv) + '">' + pct(endv) + '</b> · 플러스 ' + Math.round(N.filter(function(s){ return (s.path[Math.min(s.path.length - 1, A.avg.length - 1)] || 0) > 0; }).length / N.length * 100) + '%</p></div>'; };
         var pt = cc.querySelector(".hq") || cc.querySelector(".st4"); if (pt) pt.parentNode.insertBefore(b, cc.querySelector(".row:last-child"));
       });
-      // ④ 컵 지도
-      if (d.grid){
-        var mk = Object.keys(d.grid).sort(function(x, y){ return (d.by_mkt[y] || 0) - (d.by_mkt[x] || 0); });
-        var secs = {}; mk.forEach(function(m){ Object.keys(d.grid[m]).forEach(function(s){ if (s !== "미분류" && s !== "-") secs[s] = (secs[s] || 0) + d.grid[m][s]; }); });
-        var sl = Object.keys(secs).sort(function(x, y){ return secs[y] - secs[x]; }).slice(0, 8), mx = 0;
-        mk.forEach(function(m){ sl.forEach(function(s){ mx = Math.max(mx, d.grid[m][s] || 0); }); });
-        h += card("🗺️ 오늘 컵 지도 <span class='mut'>전체 " + d.total.toLocaleString() + "개 · 숫자를 누르면 아래 목록으로</span>", '<div class="hm cgmap"><table><thead><tr><th></th>' + mk.map(function(m){ return '<th data-cg="' + m + '">' + (V.FLAGS[m] || m) + '</th>'; }).join("") + '</tr></thead><tbody>' +
-          sl.map(function(s){ return '<tr><th>' + e(s) + '</th>' + mk.map(function(m){ var v = d.grid[m][s] || 0; return '<td' + (v ? ' data-cg="' + m + '|' + e(s) + '"' : '') + ' style="background:rgba(255,184,77,' + (v ? .12 + v / mx * .75 : 0).toFixed(2) + ')">' + (v || "") + '</td>'; }).join("") + '</tr>'; }).join("") + '</tbody></table></div>' +
-          '<p class="note">진할수록 컵 모양 종목이 많은 곳. 숫자 = 그 나라·섹터 종목 목록으로 바로 이동, 국기 = 그 나라 전체.</p>');
-        setTimeout(function(){ [].forEach.call(document.querySelectorAll(".cgmap [data-cg]"), function(td){ td.onclick = function(){
-          var k = td.getAttribute("data-cg"), m = k.split("|")[0];
-          [].forEach.call(document.querySelectorAll("#cseg button"), function(b){ b.classList.toggle("on", b.dataset.k === m); });
-          if (window.CUPP) CUPP.set(k);
-          var t = $("cseg"); if (t) window.scrollTo({top: t.getBoundingClientRect().top + window.scrollY - 240, behavior: "smooth"}); }; }); }, 0);
-      }
+      // ④ 컵 지도는 views.js RENDER.cup 에서 (갭과 같은 자리: 요약 아래)
       a.insertAdjacentHTML("beforeend", h);
     });
   });
@@ -311,7 +297,7 @@
         setTimeout(function(){ var b = $("raceb"); if (b) b.onclick = function(){ var k = 0; var t = function(){ if (!$("race")) return; $("race").innerHTML = drawR(k); $("racek").textContent = k + "일째"; if (++k <= maxK) setTimeout(t, 260); }; t(); }; }, 0);
       }
       // ④ 갭 지도
-      if (d && d.top && d.top.length >= 5) h += card("🎯 오늘 갭 지도 <span class='mut'>오른쪽 위 = 크게 + 거래 많이 = 최강</span>",
+      if (d && d.top && d.top.length >= 5) h += card("🎯 갭 크기 × 거래량 <span class='mut'>오른쪽 위 = 크게 + 거래 많이 = 최강</span>",
         scatter(d.top.filter(function(c){ return c.gap != null && c.vol != null; }).map(function(c){ return {x: Math.min(c.vol, 30), y: Math.min(c.gap, 60), code: c.code, label: "<b>" + e(c.name) + "</b><br>갭 +" + c.gap.toFixed(1) + "% · 거래량 " + c.vol.toFixed(1) + "배 · " + (c.hold ? "유지" : "메움"), color: c.hold ? V.UP : "#5d667a", r: 3 + (c.score || 50) / 25}; }), {xn: "거래량 (배)", yn: "갭 크기 %", x0: 0, qx: 3, qy: 10, h: 230}) +
         '<p class="note">빨강 = 갭 유지, 회색 = 메움 · 점 크기 = 갭 점수. 선(거래량 3배·갭 10%) 오른쪽 위 칸이 가장 믿을 만한 갭. 점을 누르면 리포트.</p>');
       // ⑤ 미국 갭 → 한국 짝꿍
