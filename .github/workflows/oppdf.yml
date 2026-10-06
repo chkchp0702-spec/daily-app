@@ -69,9 +69,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          python oppdf/upload.py --dir _pdf --repo ${{ github.repository }}
+          python oppdf/upload.py --dir _pdf --repo ${{ github.repository }} --part /tmp/part.json
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
-          git add archive/x/pdf_index.json
-          git diff --cached --quiet && exit 0
-          git commit -qm "pdf $(TZ=Asia/Seoul date '+%F %H:%M')"
-          for i in 1 2 3; do git pull --rebase -q && git push -q && exit 0; sleep $((i*5)); done
+          for i in 1 2 3 4 5; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            python oppdf/upload.py merge /tmp/part.json
+            git add archive/x/pdf_index.json
+            git diff --cached --quiet && exit 0
+            git commit -qm "pdf $(TZ=Asia/Seoul date '+%F %H:%M')" && git push -q && exit 0
+            sleep $((i*7))
+          done
+          exit 1

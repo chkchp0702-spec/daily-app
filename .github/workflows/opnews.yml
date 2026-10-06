@@ -1,9 +1,10 @@
 name: opnews
-# 종목 뉴스만 받기 (20대 동시, 천천히) → 리포트 다시 그리기
+# 종목 뉴스만 받기 (밤 12시~5시, 서버 14대, 천천히) → 리포트 다시 그리기
+#   밤 서버 나눠 쓰기(동시 20대 한도): 뉴스 14 · 전 종목 PDF 3(oppdf-all) · 미국 장중 나침반 1 · 지킴이 1
 on:
   workflow_dispatch:
   schedule:
-    - cron: "57 16 * * *"   # 매일 KST 01:57 — 뉴스 없는 종목·오래된 종목부터 채우기 (06시 전 끝)
+    - cron: "20 15 * * *"   # 매일 KST 00:20 — 뉴스 없는 종목·오래된 종목부터 채우기 (05시 전 끝, 서버 14대)
 
 permissions:
   contents: write
@@ -18,7 +19,7 @@ jobs:
         id: when
         run: |
           H=$(TZ=Asia/Seoul date +%H)
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$H" -ge 21 ] || [ "$H" -lt 7 ]; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "KST ${H}시 — 장중이라 오늘은 건너뜀"; echo "go=false" >> "$GITHUB_OUTPUT"; fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$H" -ge 23 ] || [ "$H" -lt 4 ]; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "KST ${H}시 — 장중이라 오늘은 건너뜀"; echo "go=false" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/checkout@v4
         if: steps.when.outputs.go == 'true'
       - name: 마지막 실적 연도 목록
@@ -66,12 +67,12 @@ jobs:
     needs: prep
     if: needs.prep.outputs.go == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 170
+    timeout-minutes: 290
     strategy:
       fail-fast: false
-      max-parallel: 16         # 밤에만 돈다(시간 확인). 장중엔 건너뛰어 장중 나침반·단타 자리 확보
+      max-parallel: 14         # 밤에만 돈다(시간 확인). 장중엔 건너뛰어 장중 나침반·단타 자리 확보
       matrix:
-        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -83,9 +84,14 @@ jobs:
       - run: |
           git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
           pip install -q yfinance pandas
-      - run: python opdb/build_news.py --shard ${{ matrix.shard }} --of 16 --out out
-        env:
-          NEWS_HOURS: "2.4"
+      - name: 뉴스 받기 (05:00 KST 까지, 최대 4.2시간)
+        run: |
+          NOW=$(date +%s); H=$(TZ=Asia/Seoul date +%H)
+          if [ "$H" -ge 12 ]; then END=$(TZ=Asia/Seoul date -d "tomorrow 04:50" +%s); else END=$(TZ=Asia/Seoul date -d "today 04:50" +%s); fi
+          HRS=$(python3 -c "print(max(0.3, min(4.2, ($END - $NOW) / 3600)))")
+          if [ "$H" -ge 5 ] && [ "$H" -lt 23 ]; then HRS=1.0; fi     # 낮에 손으로 돌리면 1시간만
+          echo "뉴스 받는 시간 ${HRS}시간"
+          NEWS_HOURS=$HRS python opdb/build_news.py --shard ${{ matrix.shard }} --of 14 --out out
       - uses: actions/upload-artifact@v4
         with:
           name: news-${{ matrix.shard }}

@@ -88,6 +88,8 @@ async def main(a):
                     await out.pdf(path=fn, width="390px", height=f"{h + 2}px", print_background=True,
                                   margin={"top": "0", "bottom": "0", "left": "0", "right": "0"}, page_ranges="1", prefer_css_page_size=True)
                     done[sym] = round(os.path.getsize(fn) / 1024)
+                    if len(done) % 50 == 0:              # 시간 제한으로 끊겨도 만든 것까지는 올라가게 중간 저장
+                        json.dump({"done": done, "fail": fail}, open(os.path.join(a.out, "_result.json"), "w", encoding="utf-8"), ensure_ascii=False)
                     print(f"[{wid}] {sym} {done[sym]}KB {time.time()-t0:.1f}s", flush=True)
                 except Exception as e:
                     fail.append([sym, str(e)[:120]])

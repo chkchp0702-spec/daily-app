@@ -30,6 +30,8 @@ JOBS += [(f"{h:02d}:{m:02d}", "live.yml", True, None, 7) for h in range(9, 18) f
 JOBS += [(f"{h:02d}:{m:02d}", "live.yml", False, None, 7) for h in (22, 23, 0, 1, 2, 3, 4, 5, 6) for m in range(3, 60, 10)]
 JOBS += [(f"{h:02d}:35", "watch.yml", True, None, 20) for h in range(9, 16)]
 JOBS += [(f"{h:02d}:47", "watch.yml", True, None, 20) for h in (22, 23, 0, 1, 2, 3, 4, 5)]
+# 밤 작업 (GitHub 예약이 몇 시간씩 늦게 뜨는 걸 막음): 신호 종목 PDF · 전 종목 PDF · 뉴스
+JOBS += [("23:21", "oppdf.yml", False, None, 20), ("00:11", "oppdf-all.yml", False, None, 180), ("00:21", "opnews.yml", False, None, 180), ("02:41", "opest.yml", False, None, 120)]
 JOBS += [(f"{h:02d}:12", "feedback.yml", False, None, 30) for h in list(range(5, 24)) + [0, 1, 2, 3, 4]]   # 의견함 (ntfy 첨부는 3시간만 보관)
 # 교대: [시작, 끝) KST 시
 SHIFTS = [(4, 10), (10, 16), (16, 22), (22, 28)]

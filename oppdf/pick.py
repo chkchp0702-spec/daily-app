@@ -3,6 +3,8 @@
   1) 신호 종목 (매일): 컵·갭(최근 리포트 카드), 조용한 매집, 단타(최근 5일 알람), 고래 주요 보유, 시황 리포트에 나온 종목
   2) 열어본 종목 (신청): 앱에서 미리 만든 PDF가 없는 종목을 열면 ntfy chkchp-ch-pdfreq 로 신청이 온다
   3) 큰 회사 (돌아가며): 나라별 시가총액 상위 TOP_N — 3일에 한 번씩 돌아가며 새로 만듦
+  --mode all : 전 종목 순환 (밤 12시~). 아직 없는 것 먼저, 그다음 오래된 순. 하룻밤 최소 전체의 1/5 (5일에 한 바퀴).
+               --shard i --of n 이면 n대 서버가 나눠 맡는다.
   리포트가 아직 없는 종목(opdata/s/<파일>.html 없음)은 뺀다.
 
   python oppdf/pick.py --opdata <opdata 체크아웃> --out syms.txt [--mode daily|request]
@@ -107,6 +109,18 @@ def main(a):
             for i, (_, s) in enumerate(L[:TOP_N]):
                 if i % 3 == turn or i < 30:          # 가장 큰 30개는 매일
                     add(s, "큰 회사")
+    if a.mode == "all":
+        pidx = jl(os.path.join(ARC, "x", "pdf_index.json"), {}) or {}
+        today = dt.datetime.now(KST).strftime("%Y-%m-%d")
+        allb = [r[0] for r in idx if r[4] and built(r[0])]
+        miss = [s for s in allb if s not in pidx]
+        old = sorted([s for s in allb if s in pidx and pidx[s][0] < today], key=lambda s: pidx[s][0])
+        n = max(len(miss), len(allb) // 5)
+        order = (miss + old)[:n]
+        want = [(s, "전 종목") for s in order]
+        if a.of > 1:
+            want = want[a.shard::a.of]
+        print(f"전 종목 {len(allb)} · 아직 없음 {len(miss)} · 오늘 맡을 {len(want)} (서버 {a.shard + 1}/{a.of})")
     with open(a.out, "w", encoding="utf-8") as f:
         f.write("\n".join(s for s, _ in want))
     from collections import Counter
@@ -117,5 +131,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--opdata", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--mode", default="daily", choices=["daily", "request"])
+    ap.add_argument("--mode", default="daily", choices=["daily", "request", "all"])
+    ap.add_argument("--shard", type=int, default=0)
+    ap.add_argument("--of", type=int, default=1)
     main(ap.parse_args())

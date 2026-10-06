@@ -1,0 +1,98 @@
+name: oppdf-all
+# 📄 전 종목(약 27,000) 종목리포트 PDF — 밤 12시부터 서버 3대가 나눠서 (아직 없는 것 먼저 → 오래된 순, 5일에 한 바퀴)
+#   밤 서버 나눠 쓰기(동시 20대 한도): 뉴스 14 · 전 종목 PDF 3 · 미국 장중 나침반 1 · 지킴이 1 · 여유 1
+on:
+  schedule:
+    - cron: "10 15 * * *"     # KST 00:10
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "시험: 서버마다 이 개수만 (0 = 전부)"
+        default: "0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: oppdf-all
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 290          # 늦어도 05시 전후엔 끝
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2]
+    steps:
+      - name: 시간 확인 (늦게 떠서 아침 장과 겹치면 건너뜀)
+        id: t
+        run: |
+          H=$(TZ=Asia/Seoul date +%H)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$H" -ge 23 ] || [ "$H" -lt 4 ]; then echo "go=1" >> "$GITHUB_OUTPUT"; else echo "KST ${H}시 — 건너뜀"; echo "go=0" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.t.outputs.go == '1'
+      - name: 종목리포트 자료(opdata) 받기
+        if: steps.t.outputs.go == '1'
+        run: |
+          git clone -q --depth 1 --filter=blob:none --sparse -b opdata https://github.com/${{ github.repository }} _opdata
+          cd _opdata && git sparse-checkout set --no-cone /idx.json /sec.json /op.css /meta.json /names_ko.json '/s/*' '/p/*' && cd ..
+      - name: 크롬·글꼴 준비
+        if: steps.t.outputs.go == '1'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk fonts-noto-color-emoji qpdf >/dev/null
+          pip install -q playwright && python -m playwright install --with-deps chromium >/dev/null
+      - name: 맡을 종목
+        if: steps.t.outputs.go == '1'
+        run: python oppdf/pick.py --opdata _opdata --out syms.txt --mode all --shard ${{ matrix.shard }} --of 3
+      - name: PDF 만들기 (앱 화면 그대로)
+        if: steps.t.outputs.go == '1'
+        run: |
+          # 05:10 (KST) 이 되면 그때까지 만든 것만 올리도록 시간 제한
+          END=$(TZ=Asia/Seoul date -d "tomorrow 05:10" +%s 2>/dev/null); H=$(TZ=Asia/Seoul date +%H); [ "$H" -lt 12 ] && END=$(TZ=Asia/Seoul date -d "today 05:10" +%s)
+          LEFT=$(( END - $(date +%s) )); [ "${{ github.event_name }}" = "workflow_dispatch" ] && LEFT=12000
+          echo "남은 시간 ${LEFT}초"
+          timeout $(( LEFT > 600 ? LEFT - 600 : 60 )) python oppdf/render.py --opdata _opdata --out _pdf --list syms.txt --workers 4 --limit ${{ github.event.inputs.limit || '0' }} --port $((8811 + ${{ matrix.shard }})) || echo "시간 다 됨 — 만든 것까지 올림"
+          ls _pdf/*.pdf 2>/dev/null | wc -l
+          [ -f _pdf/_result.json ] || python - <<'PY'
+          import glob, json, os
+          done = {os.path.basename(f)[:-4]: round(os.path.getsize(f) / 1024) for f in glob.glob("_pdf/*.pdf")}
+          json.dump({"done": done, "fail": []}, open("_pdf/_result.json", "w"))
+          PY
+          for f in _pdf/*.pdf; do qpdf --object-streams=generate --recompress-flate --compression-level=9 "$f" "$f.z" && mv "$f.z" "$f" || true; done
+      - name: 릴리스에 올리기
+        if: steps.t.outputs.go == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python oppdf/upload.py --dir _pdf --repo ${{ github.repository }} --part part_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        if: steps.t.outputs.go == '1'
+        with:
+          name: part-${{ matrix.shard }}
+          path: part_${{ matrix.shard }}.json
+          retention-days: 2
+
+  merge:
+    needs: render
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: _parts
+      - name: 목록 합치기
+        run: |
+          ls -R _parts || true
+          cp _parts/*/part_*.json /tmp/ 2>/dev/null || true
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          for i in 1 2 3 4 5; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            python oppdf/upload.py merge $(ls /tmp/part_*.json 2>/dev/null)
+            git add archive/x/pdf_index.json
+            git diff --cached --quiet && exit 0
+            git commit -qm "pdf 전 종목 $(TZ=Asia/Seoul date '+%F %H:%M')" && git push -q && exit 0
+            sleep $((i*7))
+          done
+          exit 1

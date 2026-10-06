@@ -1,9 +1,11 @@
 name: opest
-# 애널리스트 추정치만 전체 받기 (20대 동시) → 리포트 다시 그리기
+# 애널리스트 추정치·실적 일정 전체 받기 → 리포트 다시 그리기
+#   매일 밤 02:40 (서버 4대씩 — 밤엔 뉴스 14대가 같이 돌아서 동시 20대 한도 안으로) · 토요일 낮 한 번 더
 on:
   workflow_dispatch:
   schedule:
     - cron: "37 3 * * 6"    # 매주 토요일 KST 12:37 (추정치 + 실적·배당 일정, 아침 시간 피함)
+    - cron: "40 17 * * *"   # 매일 KST 02:40 — 전 종목 PDF가 끝난 뒤 남는 서버로 (05시 전 끝)
 
 permissions:
   contents: write
@@ -42,7 +44,7 @@ jobs:
     timeout-minutes: 330
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: 4
       matrix:
         shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
     steps:
