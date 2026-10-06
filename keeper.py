@@ -25,7 +25,9 @@ JOBS = [("05:47", "opprice.yml", False, None, 120), ("06:27", "opprice.yml", Fal
         ("09:43", "collect.yml", False, None, 12), ("15:13", "collect.yml", False, None, 12), ("16:33", "collect.yml", False, None, 12),
         ("16:20", "opprice.yml", True, None, 60), ("17:10", "regime.yml", True, None, 60), ("21:53", "collect.yml", False, None, 12),
         ("20:17", "watch.yml", False, None, 20)]
-JOBS += [(f"{h:02d}:{m:02d}", "live.yml", True, None, 10) for h in range(9, 18) for m in (5, 35)]
+# 장중 나침반: 10분마다 — 아시아(한·일·중·홍) 09:03~17:53, 미국 22:03~06:53 (미국 장 시간 판정은 live_world.py 가 뉴욕 시각으로 함)
+JOBS += [(f"{h:02d}:{m:02d}", "live.yml", True, None, 7) for h in range(9, 18) for m in range(3, 60, 10)]
+JOBS += [(f"{h:02d}:{m:02d}", "live.yml", False, None, 7) for h in (22, 23, 0, 1, 2, 3, 4, 5, 6) for m in range(3, 60, 10)]
 JOBS += [(f"{h:02d}:35", "watch.yml", True, None, 20) for h in range(9, 16)]
 JOBS += [(f"{h:02d}:47", "watch.yml", True, None, 20) for h in (22, 23, 0, 1, 2, 3, 4, 5)]
 JOBS += [(f"{h:02d}:12", "feedback.yml", False, None, 30) for h in list(range(5, 24)) + [0, 1, 2, 3, 4]]   # 의견함 (ntfy 첨부는 3시간만 보관)
