@@ -125,6 +125,9 @@ def _f(v):
         return None
 
 
+REF = {"NVDA", "036930.KQ", "446540.KQ"}   # 사용자 기준선: 엔비디아·주성엔지니어링·메가터치 = 컵
+
+
 def auto_drop(mode, r, ch):
     """눈으로 보기 전에 숫자로 확실히 컵이 아닌 것을 먼저 뺀다 (10/6 사용자 기준).
        AGYS·HIW = 약세·돌파 실패, VSXY = 기준가에서 한참 아래(덜 회복) → 컵 아님.
@@ -132,7 +135,11 @@ def auto_drop(mode, r, ch):
     if mode != "cup":
         return None
     rs, dist, dbo = _f(r.get("상대강도")), _f(r.get("기준가까지%")), _f(r.get("돌파후일수"))
-    if rs is not None and rs < 60:
+    if str(r.get("코드", "")) in REF:
+        return None                                    # 사용자 기준선 종목은 항상 눈으로 본다
+    hi52 = _f(r.get("52주고점대비%"))
+    near_high = hi52 is not None and hi52 <= 10       # 고점 10% 안 = 거대 주도주는 상대강도가 낮게 나와도 본다 (엔비디아)
+    if rs is not None and rs < 60 and not (near_high and rs >= 50):
         return f"약세(상대강도 {rs:.0f})"
     if r.get("돌파") == "True" and dbo is not None and dbo >= 10 and dist is not None and dist < -5:
         return "돌파실패"
