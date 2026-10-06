@@ -346,3 +346,7 @@ header .tab:active{transform:scale(.96)}
 .xs-clamp::after{content:"";position:absolute;left:0;right:0;bottom:44px;height:90px;background:linear-gradient(transparent,var(--panel));pointer-events:none}
 .xs-cl{position:absolute;left:16px;right:16px;bottom:10px;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--panel2,var(--panel));color:var(--text);font-size:13px;cursor:pointer;z-index:1}
 section.card:not(.xs-clamp) > .xs-cl{position:static;display:block;width:100%;margin-top:10px}
+
+a.pdfb{display:block;box-sizing:border-box;text-decoration:none;color:var(--text)}
+.pdfb.pdfb2{margin-top:8px;opacity:.85;font-size:14px}
+.pdfn{margin:8px 2px 0}

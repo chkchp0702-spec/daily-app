@@ -34,7 +34,8 @@
     var src = img.getAttribute("src") || "";
     if (!src || /^data:/.test(src)) return Promise.resolve();
     var abs; try { abs = new URL(src, w.location.href).href; } catch(e) { return Promise.resolve(); }
-    var toData = function(u){ return fetch(u, {mode: "cors"}).then(function(r){ if (!r.ok) throw 0; return r.blob(); }).then(function(bl){
+    var toData = function(u){ var ac = window.AbortController ? new AbortController() : null; if (ac) setTimeout(function(){ ac.abort(); }, 5000);   // 5초 안에 안 오면 포기 (멈춤 방지)
+      return fetch(u, {mode: "cors", signal: ac ? ac.signal : undefined}).then(function(r){ if (!r.ok) throw 0; return r.blob(); }).then(function(bl){
       return new Promise(function(ok){ var fr = new FileReader(); fr.onload = function(){ ok(fr.result); }; fr.readAsDataURL(bl); }); }); };
     return toData(abs).catch(function(){ return toData("https://wsrv.nl/?url=" + encodeURIComponent(abs) + "&output=png"); })
       .then(function(d){ img.src = d; return loadImg(img); })
@@ -42,7 +43,7 @@
   }
 
   /* w: 화면이 있는 window(iframe 이면 그 contentWindow), root: 찍을 영역, bg: 배경색 */
-  window.screenPdf = function(w, root, name, bg){
+  window.screenPdf = function(w, root, name, bg, prog){
     var d = w.document, H2P = w.html2pdf;
     if (!H2P) return Promise.reject("html2pdf 없음");
     var width = root.getBoundingClientRect().width || 390;
@@ -67,7 +68,7 @@
         parts.push(ch); }); })(clone);
       if (!parts.length) parts = [clone];
       // 찍는 폭 = 화면 폭 그대로 (html2pdf 는 쪽 너비로 다시 배치하므로 쪽을 px 로 화면 폭과 같게)
-      var opt = {margin: 0, jsPDF: {unit: "px", format: [width, 2000], orientation: "portrait", hotfixes: ["px_scaling"]}, html2canvas: {scale: 2, backgroundColor: bg, useCORS: true, logging: false, scrollX: 0, scrollY: 0,
+      var opt = {margin: 0, jsPDF: {unit: "px", format: [width, 2000], orientation: "portrait", hotfixes: ["px_scaling"]}, html2canvas: {scale: (w.devicePixelRatio > 2 ? 1.6 : 2), backgroundColor: bg, useCORS: true, logging: false, scrollX: 0, scrollY: 0,
                                 onclone: function(cd){ if (window.fixColors) try { fixColors(cd); } catch(e) {} }}};
       // 4) PDF 만들기 — 쪽 너비에 맞춰 카드를 차례로 붙이고, 남은 자리가 모자라면 새 쪽
       return H2P().set({jsPDF: {unit: "mm", format: [PW, PH], orientation: "portrait"}}).from(d.createElement("div")).toPdf().get("pdf").then(function(tmp){
@@ -79,7 +80,8 @@
         var next = function(){
           if (i >= parts.length) return Promise.resolve();
           var el = parts[i++];
-          return H2P().set(opt).from(el).toCanvas().get("canvas").then(function(cv){
+          if (prog) try { prog(i, parts.length); } catch(e) {}
+          return wait(30).then(function(){ return H2P().set(opt).from(el).toCanvas().get("canvas"); }).then(function(cv){   // 카드 사이 숨 고르기 — 화면이 멈추지 않게
             var wmm = PW - M * 2, hmm = cv.height / cv.width * wmm, gap = 2.2;   // 찍힌 그림 비율 그대로
             if (hmm <= PH - M * 2){
               if (y + hmm > PH - M){ PDF.addPage([PW, PH], "portrait"); paint(); y = M; }

@@ -1,0 +1,77 @@
+name: oppdf
+# 📄 종목리포트 PDF 미리 만들기 — 앱 화면 그대로 (서버 크롬)
+#   매일 밤: 신호 종목 + 열어본 종목(신청) + 큰 회사(3일 순환)  ·  매시간: 신청 들어온 종목만
+#   PDF는 릴리스 pdf-00 ~ pdf-15 에 보관, 목록은 archive/x/pdf_index.json
+on:
+  schedule:
+    - cron: "20 14 * * *"     # KST 23:20 (opnews 새벽 작업 전)
+    - cron: "47 * * * *"      # 매시간 47분: 신청만
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "daily(전체) / request(신청만) / syms(아래 종목만)"
+        default: "daily"
+      syms:
+        description: "mode=syms 일 때 종목 (공백 구분, 예: NVDA 005930.KS)"
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: oppdf
+  cancel-in-progress: false
+
+jobs:
+  pdf:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: 할 일 정하기
+        id: m
+        run: |
+          M="${{ github.event.inputs.mode }}"
+          if [ -z "$M" ]; then if [ "${{ github.event.schedule }}" = "20 14 * * *" ]; then M=daily; else M=request; fi; fi
+          echo "mode=$M" >> "$GITHUB_OUTPUT"; echo "모드 $M"
+      - name: 신청이 있나 (매시간)
+        id: q
+        if: steps.m.outputs.mode == 'request'
+        run: |
+          N=$(curl -s "https://ntfy.sh/chkchp-ch-pdfreq/json?poll=1&since=2h" | grep -c '"event":"message"' || true)
+          echo "n=$N" >> "$GITHUB_OUTPUT"; echo "신청 $N건"
+      - uses: actions/checkout@v4
+        if: steps.m.outputs.mode != 'request' || steps.q.outputs.n != '0'
+      - name: 종목리포트 자료(opdata) 받기
+        if: steps.m.outputs.mode != 'request' || steps.q.outputs.n != '0'
+        run: |
+          git clone -q --depth 1 --filter=blob:none --sparse -b opdata https://github.com/${{ github.repository }} _opdata
+          cd _opdata && git sparse-checkout set --no-cone /idx.json /sec.json /op.css /meta.json /names_ko.json '/s/*' '/p/*' && cd ..
+          ls _opdata | head; ls _opdata/s | wc -l
+      - name: 크롬·글꼴 준비
+        if: steps.m.outputs.mode != 'request' || steps.q.outputs.n != '0'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk fonts-noto-color-emoji qpdf >/dev/null
+          pip install -q playwright && python -m playwright install --with-deps chromium >/dev/null
+      - name: 종목 고르기
+        if: steps.m.outputs.mode != 'request' || steps.q.outputs.n != '0'
+        run: |
+          M="${{ steps.m.outputs.mode }}"
+          if [ "$M" = "syms" ]; then echo "${{ github.event.inputs.syms }}" | tr ' ' '\n' | sed '/^$/d' > syms.txt; else python oppdf/pick.py --opdata _opdata --out syms.txt --mode $M; fi
+          wc -l syms.txt
+      - name: PDF 만들기 (앱 화면 그대로)
+        if: steps.m.outputs.mode != 'request' || steps.q.outputs.n != '0'
+        run: |
+          python oppdf/render.py --opdata _opdata --out _pdf --list syms.txt --workers 4
+          for f in _pdf/*.pdf; do qpdf --object-streams=generate --recompress-flate --compression-level=9 "$f" "$f.z" && mv "$f.z" "$f" || true; done
+          du -sh _pdf
+      - name: 릴리스에 올리기 + 목록 갱신
+        if: steps.m.outputs.mode != 'request' || steps.q.outputs.n != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python oppdf/upload.py --dir _pdf --repo ${{ github.repository }}
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git add archive/x/pdf_index.json
+          git diff --cached --quiet && exit 0
+          git commit -qm "pdf $(TZ=Asia/Seoul date '+%F %H:%M')"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && exit 0; sleep $((i*5)); done

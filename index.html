@@ -389,7 +389,7 @@ em.tk{font-style:normal;font-size:11px;color:var(--dim);margin-left:4px;font-wei
 .cp-wk{padding:8px 0;border-bottom:1px solid var(--line)}.cp-wk:last-child{border:0}
 .cp-wk>span{float:right;font-weight:800}
 </style>
-<link rel="stylesheet" href="plus.css?v=21">
+<link rel="stylesheet" href="plus.css?v=22">
 </head>
 <body>
 <header>
@@ -785,16 +785,44 @@ function pdfBar(host, getEl, name, title){
     }
   }, name));
 }
-function pdfBarFrame(box, fr, name){
+/* 종목리포트 PDF: 서버가 밤마다 앱 화면 그대로 미리 만들어 둔 것(릴리스)을 바로 받기.
+   없으면 서버에 만들어 달라고 신청(1시간 안에 만들어 둠) + 휴대폰에서 지금 화면으로 만들기 */
+var PDFIDX = null;
+function pdfIdx(){ return PDFIDX || (PDFIDX = getJSON("archive/x/pdf_index.json?" + ((M && M.updated) || Date.now())).catch(function(){ PDFIDX = null; return {}; })); }
+function pdfTag(fn){ var n = 0; for (var i = 0; i < fn.length; i++) n += fn.charCodeAt(i); return "pdf-" + ("0" + (n % 16)).slice(-2); }
+function pdfUrl(sym){ var fn = opFile(sym); return "https://github.com/chkchp0702-spec/daily-app/releases/download/" + pdfTag(fn) + "/" + encodeURIComponent(fn) + ".pdf"; }
+function pdfRequest(sym){
+  var k = "pdfreq_" + sym + "_" + new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  try { if (localStorage.getItem(k)) return; localStorage.setItem(k, 1); } catch(e) {}
+  fetch("https://ntfy.sh/chkchp-ch-pdfreq", {method: "POST", body: sym}).catch(function(){});
+}
+function pdfBarFrame(box, fr, name, sym){
   var old = box.querySelector(".pdfbar"); if (old) old.remove();
-  box.appendChild(pdfButton(function(){
+  var makeLocal = function(btn){
     var d = fr.contentDocument;
     return loadScript(d, H2P).then(function(){
-      // 화면 그대로: 카드 한 장씩 찍어 붙이기 (pdfx.js). 실패하면 예전 방식으로
-      return (window.screenPdf ? screenPdf(fr.contentWindow, d.querySelector(".page") || d.body, name, "#f4f6fa") : Promise.reject())
+      var prog = function(i, n){ if (btn) btn.innerHTML = "⏳ PDF 만드는 중… " + i + " / " + n + "<small>카드 한 장씩 찍는 중이에요</small>"; };
+      return (window.screenPdf ? screenPdf(fr.contentWindow, d.querySelector(".page") || d.body, name, "#f4f6fa", prog) : Promise.reject())
         .catch(function(){ return fr.contentWindow.html2pdf().set(pdfOpts(name, "#f4f6fa")).from(d.querySelector(".page") || d.body).outputPdf("blob"); });
     });
-  }, name));
+  };
+  var bar = pdfButton(function(){ return makeLocal(bar.querySelector(".pdfb")); }, name);
+  box.appendChild(bar);
+  if (!sym) return;
+  pdfIdx().then(function(I){
+    var it = I && I[sym];
+    if (it){
+      var a = document.createElement("a"); a.className = "pdfb ready"; a.href = pdfUrl(sym); a.target = "_blank"; a.rel = "noopener";
+      a.innerHTML = "📄 PDF 바로 받기<small>앱 화면 그대로 · " + String(it[0]).slice(5).replace("-", "/") + " 기준" + (it[1] ? " · " + (it[1] / 1024).toFixed(1) + "MB" : "") + " · 열리면 공유 버튼으로 저장</small>";
+      bar.insertBefore(a, bar.firstChild);
+      var b = bar.querySelector("button.pdfb"); if (b){ b.classList.add("pdfb2"); b.innerHTML = "지금 화면으로 새로 만들기<small>오늘 가격까지 반영 · 10초쯤 걸려요</small>"; }
+    } else {
+      pdfRequest(sym);
+      var n = document.createElement("p"); n.className = "note pdfn";
+      n.textContent = "이 종목은 미리 만든 PDF가 아직 없어서 서버에 만들어 달라고 신청해 뒀어요. 1시간쯤 뒤 다시 열면 바로 받을 수 있어요. 지금 필요하면 위 버튼으로 휴대폰에서 만들어요(10초쯤).";
+      bar.appendChild(n);
+    }
+  });
 }
 
 function renderPdf(url, box){
@@ -1221,7 +1249,7 @@ function opShow(sym, noPush){
         }
       } catch(e) {}
       fr.style.height = d.documentElement.scrollHeight + 10 + "px";
-      pdfBarFrame(box, fr, "종목리포트_" + r.name + "_" + ((p && p[0]) || ""));
+      pdfBarFrame(box, fr, "종목리포트_" + r.name + "_" + ((p && p[0]) || ""), sym);
       if (!r.etf) cmpBox(box, sym, r.name);
     };
     fr.srcdoc = html;
@@ -1236,7 +1264,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261006i";
+var APPV = "20261006j";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1280,7 +1308,7 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
 <script src="plus7.js?v=4"></script>
 <script src="plus8.js?v=2"></script>
 <script src="simple.js?v=3"></script>
-<script src="pdfx.js?v=3"></script>
+<script src="pdfx.js?v=4"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
 </html>
