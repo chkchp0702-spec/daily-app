@@ -772,12 +772,17 @@ function pdfBar(host, getEl, name, title){
   var old = document.querySelector(".pdfbar"); if (old) old.remove();
   host.appendChild(pdfButton(function(){
     return loadScript(document, H2P).then(function(){
+      // 화면 그대로 (pdfx.js) — 실패하면 예전 방식
+      if (window.screenPdf) return screenPdf(window, getEl(), name, "#0b0f17").catch(function(){ return oldWay(); });
+      return oldWay();
+    });
+    function oldWay(){
       var src = getEl(), w = document.createElement("div");
       w.className = "pdfwrap";
       w.innerHTML = '<div class="pdfhd"><b>CH Investing</b><span>' + esc(title) + '</span></div>' + src.innerHTML;
       [].forEach.call(w.querySelectorAll(".pdfbar,.fold,button.more"), function(x){ x.remove(); });
       return html2pdf().set(pdfOpts(name, "#0b0f17")).from(w).outputPdf("blob");
-    });
+    }
   }, name));
 }
 function pdfBarFrame(box, fr, name){
@@ -785,7 +790,9 @@ function pdfBarFrame(box, fr, name){
   box.appendChild(pdfButton(function(){
     var d = fr.contentDocument;
     return loadScript(d, H2P).then(function(){
-      return fr.contentWindow.html2pdf().set(pdfOpts(name, "#f4f6fa")).from(d.querySelector(".page") || d.body).outputPdf("blob");
+      // 화면 그대로: 카드 한 장씩 찍어 붙이기 (pdfx.js). 실패하면 예전 방식으로
+      return (window.screenPdf ? screenPdf(fr.contentWindow, d.querySelector(".page") || d.body, name, "#f4f6fa") : Promise.reject())
+        .catch(function(){ return fr.contentWindow.html2pdf().set(pdfOpts(name, "#f4f6fa")).from(d.querySelector(".page") || d.body).outputPdf("blob"); });
     });
   }, name));
 }
@@ -1229,7 +1236,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261006h";
+var APPV = "20261006i";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1273,6 +1280,7 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
 <script src="plus7.js?v=4"></script>
 <script src="plus8.js?v=2"></script>
 <script src="simple.js?v=3"></script>
+<script src="pdfx.js?v=3"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
 </html>
