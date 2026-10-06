@@ -15,11 +15,11 @@ from collections import defaultdict
 MKT_NAME = {"US": "미국", "KR": "한국", "JP": "일본", "CN": "중국", "HK": "홍콩"}
 MKT_FLAG = {"US": "🇺🇸", "KR": "🇰🇷", "JP": "🇯🇵", "CN": "🇨🇳", "HK": "🇭🇰"}
 INDEX = {
-    "US": [("^GSPC", "S&P 500"), ("^IXIC", "나스닥")],
+    "US": [("^GSPC", "S&P 500"), ("^DJI", "다우"), ("^IXIC", "나스닥")],
     "KR": [("^KS11", "코스피"), ("^KQ11", "코스닥")],
     "JP": [("^N225", "닛케이 225")],
-    "CN": [("000001.SS", "상해종합"), ("399001.SZ", "선전성분")],
-    "HK": [("^HSI", "항셍")],
+    "CN": [("000001.SS", "상해종합"), ("399001.SZ", "선전(심천)성분"), ("000688.SS", "과창판 50")],
+    "HK": [("^HSI", "항셍"), ("^HSCE", "HSCEI(H지수)")],
 }
 SECTOR_KO = {
     "Technology": ("💻", "IT·기술"), "Financial Services": ("🏦", "금융"), "Healthcare": ("💊", "헬스케어"),
@@ -111,6 +111,23 @@ def regime(closes):
     return lab, why, ma20, m60, slope
 
 
+def ohlc_1y(df, s, c):
+    """고퀄 지수 차트용: 1년 일봉 [날짜, 시, 고, 저, 종, 거래량] (앱에서 기간·캔들·이평선 계산)"""
+    import pandas as pd
+    out = []
+    try:
+        sub = df[s] if isinstance(df.columns, pd.MultiIndex) else df
+        for d in c.index[-260:]:
+            r = sub.loc[d]
+            cl = float(r["Close"])
+            o, h, l = (float(r[k]) if pd.notna(r[k]) else cl for k in ("Open", "High", "Low"))
+            v = float(r["Volume"]) if "Volume" in r and pd.notna(r["Volume"]) else 0
+            out.append([d.strftime("%Y-%m-%d"), _r(o), _r(max(h, o, cl)), _r(min(l, o, cl)), _r(cl), int(v)])
+    except Exception as e:
+        print("ohlc 실패", s, e, flush=True)
+    return out
+
+
 def index_block(mkt):
     import yfinance as yf
     out = []
@@ -142,6 +159,7 @@ def index_block(mkt):
             "dates": [d.strftime("%m/%d") for d in tail.index], "close": [_r(v) for v in tail.values],
             "ma20": [_r(v) for v in m20t.values], "ma60": _r(m60), "slope20": _r(slope),
             "regime": lab, "why": why, "reg_hist": rh,
+            "ohlc": ohlc_1y(df, s, c),
         })
     return out
 
