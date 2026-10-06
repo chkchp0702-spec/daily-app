@@ -104,7 +104,8 @@
       bbar(m, true) + '<div style="margin-top:10px">' + hiTxt + '</div>' +
       '<p class="note">종목 하나하나의 중간값 등락 <b class="' + cls(m.median1) + '">' + pct(m.median1) + '</b> — 지수가 대형주 위주라면 이 숫자가 "보통 종목"의 실제 체감이에요.</p>');
     // 3) 지수 흐름
-    if (m.index.length){
+    if (m.index.length && window.IXC){ h += IXC(m, k, regChip); }
+    else if (m.index.length){
       var ixTabs = m.index.length > 1 ? '<div class="seg2" id="cpix">' + m.index.map(function(x, i){ return '<button' + (i ? '' : ' class="on"') + ' data-i="' + i + '">' + e(x.name) + '</button>'; }).join("") + '</div>' : '';
       h += card("지수 흐름 <span class='mut'>최근 60거래일 · 점선 = 20일 평균</span>", ixTabs + '<div id="cpixb">' + ixBody(m.index[0]) + '</div>');
     }

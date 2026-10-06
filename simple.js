@@ -9,7 +9,7 @@
     whale:  /TOP 10|오늘의 신호|함께 든 종목/,
     cup:    /오늘 컵 지도|나라별|많이 나온 섹터|돌파 임박/,
     gap:    /오늘 갭 지도|나라별|많이 나온 섹터/,
-    sector: /국면 신호판|장중 나침반|5개 시장 한눈에|섹터 등락/,
+    sector: /국면 신호판|장중 나침반|5개 시장 한눈에|대표 지수|섹터 등락/,
     accum:  /매집 강도 순위|박스 돌파|매집 점수 순위/,
     danta:  /전광판|날짜별 성적/,
     alarm:  /내 알림|처음 한 번만|알림 기록/
@@ -107,7 +107,7 @@
   function clampLong(){
     var main = document.getElementById("main"); if (!main) return;
     [].forEach.call(main.querySelectorAll("section.card"), function(c){
-      if (c.dataset.xc || c.classList.contains("xs-hid") || c.closest("#sheet") || c.id === "xs-more" || c.parentElement.closest(".card")) return;
+      if (c.dataset.xc || c.classList.contains("ixc-card") || c.classList.contains("xs-hid") || c.closest("#sheet") || c.id === "xs-more" || c.parentElement.closest(".card")) return;
       if (c.offsetHeight < 900) return;
       c.dataset.xc = "1"; c.classList.add("xs-clamp");
       var b = document.createElement("button"); b.className = "xs-cl"; b.textContent = "전체 보기 ▾";
