@@ -813,7 +813,7 @@ function pdfBarFrame(box, fr, name, sym){
     var it = I && I[sym];
     if (it){
       var a = document.createElement("a"); a.className = "pdfb ready"; a.href = pdfUrl(sym); a.target = "_blank"; a.rel = "noopener";
-      a.innerHTML = "📄 PDF 바로 받기<small>앱 화면 그대로 · " + String(it[0]).slice(5).replace("-", "/") + " 기준" + (it[1] ? " · " + (it[1] / 1024).toFixed(1) + "MB" : "") + " · 열리면 공유 버튼으로 저장</small>";
+      a.innerHTML = "📄 PDF 바로 받기<small>앱 화면 그대로 · " + String(it[0]).slice(5).replace("-", "/") + " 기준" + (it[1] ? " · " + (it[1] / 1024).toFixed(1) + "MB" : "") + " · 누르면 바로 내려받아요</small>";
       bar.insertBefore(a, bar.firstChild);
       var b = bar.querySelector("button.pdfb"); if (b){ b.classList.add("pdfb2"); b.innerHTML = "지금 화면으로 새로 만들기<small>오늘 가격까지 반영 · 10초쯤 걸려요</small>"; }
     } else {
