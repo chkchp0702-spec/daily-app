@@ -541,6 +541,7 @@ function getText(u){ return fetch(u).then(function(r){ if (!r.ok) throw 0; retur
 function getJSON(u){ return fetch(u).then(function(r){ if (!r.ok) throw 0; return r.json(); }); }
 
 function pdfCard(title, url){
+  if (/^archive\//.test(url) && url.indexOf("?") < 0) url += "?v=" + Math.floor(Date.now() / 300000);   // 다시 만든 PDF가 옛것(캐시)으로 보이지 않게
   var id = "p" + Math.random().toString(36).slice(2);
   setTimeout(function(){ renderPdf(url, $(id)); }, 0);
   return '<div class="card"><h3>' + title + ' <a class="btn" href="' + url + '" target="_blank">크게 보기 ↗</a></h3><div class="pdf" id="' + id + '"><div class="loading">PDF 여는 중…</div></div></div>';
@@ -1268,7 +1269,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261006m";
+var APPV = "20261007a";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
