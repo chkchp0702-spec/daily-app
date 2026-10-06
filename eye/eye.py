@@ -75,8 +75,19 @@ def draw_cup(im, x0, y0, ch):
     X = lambda i: x0 + pad + i / max(n - 1, 1) * W
     Y = lambda v: y0 + 40 + (1 - (v - lo) / (hi - lo)) * H
     d = ImageDraw.Draw(im)
+    li_, ri_, he_ = ch.get("li"), ch.get("ri"), ch.get("he")
+    # 컵 구간(L→R) 파란 음영 · 손잡이 구간(R→끝) 노란 음영 — 눈이 "이 구간이 U/V자인가, 손잡이가 생기나"만 보게
+    if li_ is not None and ri_ is not None and 0 <= li_ < ri_ < n:
+        d.rectangle([X(li_), y0 + 40, X(ri_), y0 + 40 + H], fill=(226, 236, 252))
+        hend = min(he_ if (he_ is not None and he_ > ri_) else n - 1, n - 1)
+        if hend > ri_:
+            d.rectangle([X(ri_), y0 + 40, X(hend), y0 + 40 + H], fill=(253, 244, 214))
     pts = [(X(i), Y(v)) for i, v in enumerate(c)]
-    d.line(pts, fill=(30, 60, 140), width=2)
+    d.line(pts, fill=(150, 160, 185), width=1)
+    if li_ is not None and ri_ is not None and 0 <= li_ < ri_ < n:
+        d.line(pts[li_:], fill=(30, 60, 140), width=3)     # 컵부터 지금까지 진하게
+    else:
+        d.line(pts, fill=(30, 60, 140), width=2)
     if ch.get("piv"):
         y = Y(ch["piv"])
         for xx in range(int(x0 + pad), int(x0 + pad + W), 8):
