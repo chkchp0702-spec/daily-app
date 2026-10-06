@@ -272,7 +272,7 @@ footer{color:var(--dim);font-size:11px;text-align:center;padding:24px 16px 40px}
 #backbtn{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom) + 18px);z-index:80;display:none;align-items:center;gap:6px;
   border:1px solid color-mix(in srgb,var(--c) 60%,var(--line));background:rgba(18,24,38,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   color:var(--text);font:inherit;font-size:20px;font-weight:800;padding:10px 16px 10px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.45)}
-#backbtn span{font-size:14px}#backbtn.on{display:flex}#backbtn:active{transform:scale(.96)}
+#backbtn span{font-size:14px}#backbtn.on{display:flex}#backbtn.root{opacity:.55}#main{padding-bottom:84px}#backbtn:active{transform:scale(.96)}
 /* 고래 보유 종목 화면 */
 #sheet{position:fixed;inset:0;z-index:70;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;animation:shUp .22s ease-out}
 @keyframes shUp{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
@@ -446,17 +446,40 @@ function drawTabs(){
 /* ---------- 뒤로가기: 화면마다 기록을 남기고, 오른쪽 아래 버튼·밀어서 뒤로가기로 돌아가기 ---------- */
 var NAV = {restoring: false, silent: false};
 function navD(){ return (history.state && history.state.d) || 0; }
+function navSnap(){   // 지금 화면의 스크롤 위치 + 목록 거름(나라·섹터) 상태
+  var pg = {}; try { Object.keys(window.PAGERS || {}).forEach(function(k){ var P = PAGERS[k]; if (P && P.get && document.getElementById(k)){ var v = P.get(); if (v && v !== "ALL") pg[k] = v; } }); } catch(e) {}
+  return {y: window.scrollY, pg: pg};
+}
+/* 전 위치로 확실히 돌아가기: 내용이 늦게 그려져도 3초 동안 계속 맞춰 줌 (손가락으로 스크롤하면 바로 멈춤) */
+function restoreView(st){
+  var y = (st && st.y) || 0, pg = (st && st.pg) || {}, t0 = Date.now(), ok = 0, stop = false, done = {};
+  var cancel = function(){ stop = true; };
+  window.addEventListener("touchstart", cancel, {once: true, passive: true});
+  window.addEventListener("wheel", cancel, {once: true, passive: true});
+  (function tick(){
+    if (stop) return;
+    Object.keys(pg).forEach(function(k){ if (!done[k] && window.PAGERS && PAGERS[k] && document.getElementById(k)){ done[k] = 1;
+      var m = pg[k].split("|")[0]; [].forEach.call(document.querySelectorAll("#" + k + " button"), function(b){ b.classList.toggle("on", b.dataset.k === m); }); PAGERS[k].set(pg[k]); } });
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    if (max >= y - 4){ if (Math.abs(window.scrollY - y) > 3) window.scrollTo(0, y); if (!ok) ok = Date.now(); }
+    if (Date.now() - t0 < 6000 && (!ok || Date.now() - ok < 3000)) setTimeout(tick, 120);
+  })();
+}
 function navPush(st){
   if (NAV.restoring || NAV.silent) return;
   try {
-    history.replaceState(Object.assign({}, history.state || {}, {y: window.scrollY}), "");
+    history.replaceState(Object.assign({}, history.state || {}, navSnap()), "");
     st.d = navD() + 1;
     history.pushState(st, "", location.pathname + (st.t === "go" ? "#" + st.key : st.t === "op" ? "#onepager" : "#whale"));
   } catch(e) {}
   updBack();
 }
-function updBack(){ var b = $("backbtn"); if (b) b.classList.toggle("on", navD() > 0 || !!$("sheet")); }
-function goBack(){ if (navD() > 0) history.back(); else if ($("sheet")) closeSheet(); }
+function updBack(){ var b = $("backbtn"); if (!b) return; b.classList.add("on"); b.classList.toggle("root", !(navD() > 0 || !!$("sheet"))); }
+function goBack(){
+  if ($("sheet") && navD() <= 0){ closeSheet(); updBack(); return; }
+  if (navD() > 0){ history.back(); return; }
+  window.scrollTo({top: 0, behavior: "smooth"});   // 더 돌아갈 곳이 없으면 맨 위로
+}
 window.addEventListener("popstate", function(ev){
   var st = ev.state;
   if ($("sheet")){
@@ -464,14 +487,20 @@ window.addEventListener("popstate", function(ev){
     // 아래 화면이 그대로면 시트만 닫고 끝 (스크롤 유지)
     if (!st || (st.t === "go" && st.key === cur) || (st.t === "op" && cur === "onepager")){ updBack(); return; }
   }
-  if (!st){ updBack(); return; }
+  if (!st || st.t === "xs"){ updBack(); return; }
+  // 같은 화면 안에서의 이동(지도·막대로 거른 것)은 다시 그리지 않고 거름·위치만 되돌린다
+  if (st.t === "go" && st.key === cur && (st.id || ((M.cats[cur] || [])[0] || {}).id || null) === curDate && $("body")){
+    Object.keys(window.PAGERS || {}).forEach(function(k){ if (!(st.pg || {})[k] && PAGERS[k] && document.getElementById(k)){
+      [].forEach.call(document.querySelectorAll("#" + k + " button"), function(b){ b.classList.toggle("on", b.dataset.k === "ALL"); }); PAGERS[k].set("ALL"); } });
+    restoreView(st); updBack(); return;
+  }
   NAV.restoring = true;
   try {
     if (st.t === "go") go(st.key, st.id);
     else if (st.t === "op") go("onepager", st.code);
     else if (st.t === "mgr"){ if (cur !== "whale") go("whale"); openMgr(st.name); }
   } finally { NAV.restoring = false; }
-  if (st.y) setTimeout(function(){ window.scrollTo(0, st.y); }, 900);
+  restoreView(st);
   updBack();
 });
 
@@ -1200,7 +1229,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261006g";
+var APPV = "20261006h";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1232,7 +1261,7 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
   fetch("https://ntfy.sh/chkchp-daily-5821", {method:"POST", body: userName + " 님이 앱을 열었어요 (" + device + ")"}).catch(function(){});
 })();
 </script>
-<script src="views.js?v=18"></script>
+<script src="views.js?v=19"></script>
 <script src="compass.js?v=11"></script>
 <script src="extras.js?v=5"></script>
 <script src="plus.js?v=2"></script>

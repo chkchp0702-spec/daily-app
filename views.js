@@ -277,6 +277,9 @@
   function jumpTo(seg, key){
     var P = window.PAGERS[seg]; if (!P) return;
     var m = key.split("|")[0];
+    // 뒤로가기로 「누르기 전 자리」에 돌아오도록 기록을 하나 남김 (같은 화면이라 다시 그리지 않음)
+    try { history.replaceState(Object.assign({}, history.state || {}, navSnap()), ""); var pg = {}; pg[seg] = key;
+      history.pushState({t: "go", key: cur, id: curDate, d: navD() + 1, pg: pg}, "", location.pathname + "#" + cur); updBack(); } catch(e) {}
     [].forEach.call(document.querySelectorAll("#" + seg + " button"), function(b){ b.classList.toggle("on", b.dataset.k === m); });
     P.set(key);
     var t = $(seg); if (t) window.scrollTo({top: t.getBoundingClientRect().top + window.scrollY - 150, behavior: "smooth"});
@@ -319,7 +322,7 @@
       if ($(boxId + "x")) $(boxId + "x").onclick = function(){ sel = sp[0]; shown = 12; draw(); };
       after(box);
     }
-    return {draw: draw, set: function(k){ sel = k; shown = 12; draw(); }};
+    return {draw: draw, set: function(k){ sel = k; shown = 12; draw(); }, get: function(){ return sel; }};
   }
   function stat(label, v){ return '<div><small>' + label + '</small><b>' + v + '</b></div>'; }
 
