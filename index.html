@@ -67,6 +67,7 @@ main{padding:16px;max-width:760px;margin:0 auto}
 .md th{color:var(--sub);font-weight:600}
 .md img{max-width:100%;border-radius:10px}
 /* PDF */
+.pbig{overflow-x:auto;padding:8px;-webkit-overflow-scrolling:touch}.pcl{margin-left:6px}.pz.on{background:var(--accent,#3b7ddd);color:#fff}.sh-top .btn{padding:5px 8px;font-size:12px;white-space:nowrap;flex-shrink:0}.sh-top b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .pdf canvas{width:100%;display:block;border-radius:10px;margin-bottom:8px;background:#fff}
 .loading{color:var(--dim);font-size:13px;padding:20px 0;text-align:center}
 iframe.rep{width:100%;border:0;border-radius:12px;background:#fff;min-height:70vh}
@@ -544,7 +545,7 @@ function pdfCard(title, url){
   if (/^archive\//.test(url) && url.indexOf("?") < 0) url += "?v=" + Math.floor(Date.now() / 300000);   // 다시 만든 PDF가 옛것(캐시)으로 보이지 않게
   var id = "p" + Math.random().toString(36).slice(2);
   setTimeout(function(){ renderPdf(url, $(id)); }, 0);
-  return '<div class="card"><h3>' + title + ' <a class="btn" href="' + url + '" target="_blank">크게 보기 ↗</a></h3><div class="pdf" id="' + id + '"><div class="loading">PDF 여는 중…</div></div></div>';
+  return '<div class="card"><h3>' + title + ' <button class="btn" onclick="pdfBig(\'' + url + '\',\'' + title + '\')">크게 보기 ⤢</button></h3><div class="pdf" id="' + id + '"><div class="loading">PDF 여는 중…</div></div></div>';
 }
 /* ---------- 🐋 유명 펀드·유명인 보유 종목 (아래에서 올라오는 화면) ---------- */
 var WH = null;
@@ -826,6 +827,24 @@ function pdfBarFrame(box, fr, name, sym){
   });
 }
 
+/* PDF 크게 보기: 앱 안 전체 화면 + ✕ 닫기 (새 창으로 나가면 닫을 방법이 없어서) */
+function pdfBig(url, title){
+  if ($("sheet")) closeSheet();
+  var sh = document.createElement("div"); sh.id = "sheet";
+  sh.innerHTML = '<div class="sh-top"><button class="sh-x" onclick="goBack()">✕</button><b></b><span style="flex:1"></span>' +
+    '<button class="btn pz" data-z="1">1×</button><button class="btn pz" data-z="1.6">1.6×</button><button class="btn pz" data-z="2.3">2.3×</button>' +
+    '<a class="btn" href="' + url + '" download>저장</a></div><div class="pbig"><div class="pdf"></div></div>';
+  sh.querySelector("b").textContent = title.replace(/\s*PDF$/, "");
+  document.body.appendChild(sh); document.body.classList.add("sheet-open");
+  try { history.pushState({t: "xs", d: navD() + 1}, "", location.pathname + "#" + cur); } catch(e) {}
+  updBack();
+  var box = sh.querySelector(".pdf"), z = 1;
+  var draw = function(){
+    [].forEach.call(sh.querySelectorAll(".pz"), function(b){ b.classList.toggle("on", +b.dataset.z === z); });
+    box.style.width = Math.round((sh.clientWidth - 16) * z) + "px"; box.innerHTML = '<div class="loading">PDF 여는 중…</div>'; renderPdf(url, box); };
+  [].forEach.call(sh.querySelectorAll(".pz"), function(b){ b.onclick = function(){ z = +b.dataset.z; draw(); }; });
+  draw();
+}
 function renderPdf(url, box){
   if (!box) return;
   if (!window.pdfjsLib) { box.innerHTML = '<div class="loading">"크게 보기"를 눌러 PDF를 열어주세요.</div>'; return; }
@@ -1269,7 +1288,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261007a";
+var APPV = "20261007b";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1301,7 +1320,7 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
   fetch("https://ntfy.sh/chkchp-daily-5821", {method:"POST", body: userName + " 님이 앱을 열었어요 (" + device + ")"}).catch(function(){});
 })();
 </script>
-<script src="views.js?v=19"></script>
+<script src="views.js?v=20"></script>
 <script src="compass.js?v=11"></script>
 <script src="extras.js?v=5"></script>
 <script src="plus.js?v=2"></script>

@@ -6,7 +6,12 @@
   function sec(t){ return '<div class="sec">' + t + '</div>'; }
   function fold(title, url){
     var id = "f" + Math.random().toString(36).slice(2, 8);
-    setTimeout(function(){ var b = document.getElementById(id); if (b) b.onclick = function(){ b.outerHTML = pdfCard(title, url); }; }, 0);
+    setTimeout(function(){ var b = document.getElementById(id); if (b) b.onclick = function(){
+      var w = document.createElement("div"); w.innerHTML = pdfCard(title, url); var card = w.firstElementChild;
+      var x = document.createElement("button"); x.className = "btn pcl"; x.textContent = "닫기 ✕";
+      x.onclick = function(){ var t = document.createElement("div"); t.innerHTML = fold(title, url); var nb = t.firstElementChild; card.parentNode.replaceChild(nb, card);
+        var r = nb.getBoundingClientRect(); if (r.top < 0) window.scrollBy(0, r.top - 80); };
+      card.querySelector("h3").appendChild(x); b.parentNode.replaceChild(card, b); }; }, 0);
     return '<button class="fold" id="' + id + '">📄 ' + e(title) + ' 펼치기</button>';
   }
   function opBtn(code, label){ return '<a class="btn op" href="javascript:openOP(\'' + e(code).replace(/'/g, "") + '\')">' + (label || "종목리포트") + '</a>'; }

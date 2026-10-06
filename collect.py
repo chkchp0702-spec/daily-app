@@ -313,6 +313,10 @@ def compass():
     days = [m.get("date", "") for m in d.get("markets", {}).values() if DATE_RE.match(m.get("date", ""))]
     if days:
         put("sector", max(days), "compass.json", text=txt)
+        # 평일 아침(6시~)부터는 오늘 날짜로도 둔다 → 나침반 맨 위 날짜가 오늘로 (장중 나침반·국면이 오늘 것이라)
+        now = datetime.datetime.now(KST); today = now.strftime("%Y-%m-%d")
+        if now.weekday() < 5 and now.hour >= 6 and today > max(days):
+            put("sector", today, "compass.json", text=txt)
 
 
 # ---------- 조용한 매집 ----------
