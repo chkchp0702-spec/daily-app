@@ -111,38 +111,80 @@ def regime(closes):
     return lab, why, ma20, m60, slope
 
 
-def ohlc_1y(df, s, c):
+def ohlc_1y(sub, c):
     """고퀄 지수 차트용: 1년 일봉 [날짜, 시, 고, 저, 종, 거래량] (앱에서 기간·캔들·이평선 계산)"""
     import pandas as pd
     out = []
     try:
-        sub = df[s] if isinstance(df.columns, pd.MultiIndex) else df
         for d in c.index[-260:]:
             r = sub.loc[d]
             cl = float(r["Close"])
-            o, h, l = (float(r[k]) if pd.notna(r[k]) else cl for k in ("Open", "High", "Low"))
+            o, h, l = (float(r[k]) if k in r and pd.notna(r[k]) else cl for k in ("Open", "High", "Low"))
             v = float(r["Volume"]) if "Volume" in r and pd.notna(r["Volume"]) else 0
             out.append([d.strftime("%Y-%m-%d"), _r(o), _r(max(h, o, cl)), _r(min(l, o, cl)), _r(cl), int(v)])
     except Exception as e:
-        print("ohlc 실패", s, e, flush=True)
+        print("ohlc 실패", e, flush=True)
     return out
+
+
+# 야후가 늦거나 없는 지수는 다른 곳에서 (한국: 네이버, 과창판: 동방재부)
+ALT = {"^KS11": ("naver", "KOSPI"), "^KQ11": ("naver", "KOSDAQ"), "000688.SS": ("em", "1.000688")}
+
+
+def alt_frame(s):
+    import pandas as pd, urllib.request, re
+    kind, code = ALT[s]
+    rows = []
+    try:
+        if kind == "naver":
+            u = f"https://fchart.stock.naver.com/sise.nhn?symbol={code}&timeframe=day&count=300&requestType=0"
+            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
+            x = urllib.request.urlopen(req, timeout=20).read().decode("euc-kr", "ignore")
+            for m in re.finditer(r'data="(\d{8})\|([\d.]+)\|([\d.]+)\|([\d.]+)\|([\d.]+)\|(\d+)"', x):
+                d, o, h, l, c, v = m.groups()
+                rows.append((pd.Timestamp(f"{d[:4]}-{d[4:6]}-{d[6:]}"), float(o), float(h), float(l), float(c), float(v)))
+        else:
+            u = (f"https://push2his.eastmoney.com/api/qt/stock/kline/get?secid={code}&fields1=f1,f2,f3&fields2=f51,f52,f53,f54,f55,f56"
+                 f"&klt=101&fqt=0&lmt=300&end=20500101")
+            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://quote.eastmoney.com/"})
+            j = json.loads(urllib.request.urlopen(req, timeout=20).read().decode("utf-8"))
+            for k in ((j.get("data") or {}).get("klines") or []):
+                d, o, c, h, l, v = k.split(",")[:6]
+                rows.append((pd.Timestamp(d), float(o), float(h), float(l), float(c), float(v)))
+    except Exception as e:
+        print("지수 대체 실패", s, e, flush=True)
+    if len(rows) < 25:
+        return None
+    f = pd.DataFrame(rows, columns=["Date", "Open", "High", "Low", "Close", "Volume"]).set_index("Date").sort_index()
+    return f[f.index >= f.index[-1] - pd.Timedelta(days=372)]
 
 
 def index_block(mkt):
     import yfinance as yf
+    import pandas as pd
     out = []
     syms = [s for s, _ in INDEX[mkt]]
     try:
         df = yf.download(syms, period="1y", interval="1d", group_by="ticker", auto_adjust=False, progress=False, threads=True)
     except Exception as e:
         print("지수 실패", mkt, e, flush=True)
-        return out
-    import pandas as pd
+        df = None
     for s, nm in INDEX[mkt]:
+        sub = None
         try:
-            c = (df[s]["Close"] if isinstance(df.columns, pd.MultiIndex) else df["Close"]).dropna()
+            sub = df[s] if isinstance(df.columns, pd.MultiIndex) else df
+            if sub["Close"].dropna().empty:
+                sub = None
         except Exception:
+            sub = None
+        if s in ALT:
+            a = alt_frame(s)
+            if a is not None and (sub is None or a.index[-1] >= sub["Close"].dropna().index[-1]):
+                sub = a
+        if sub is None:
+            print("지수 없음", s, flush=True)
             continue
+        c = sub["Close"].dropna()
         if len(c) < 25:
             continue
         lab, why, ma20, m60, slope = regime(list(c.values))
@@ -159,7 +201,7 @@ def index_block(mkt):
             "dates": [d.strftime("%m/%d") for d in tail.index], "close": [_r(v) for v in tail.values],
             "ma20": [_r(v) for v in m20t.values], "ma60": _r(m60), "slope20": _r(slope),
             "regime": lab, "why": why, "reg_hist": rh,
-            "ohlc": ohlc_1y(df, s, c),
+            "ohlc": ohlc_1y(sub, c),
         })
     return out
 
