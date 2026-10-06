@@ -303,3 +303,24 @@ header .tab.on{background:var(--c);border-color:var(--c);color:#0b0f17;box-shado
 header .tab.on .tn{font-weight:800}
 header .tab:active{transform:scale(.96)}
 @media (max-width:350px){header .tab .ic{display:none}}
+
+/* 시황 맨 위: 킥 · 전일 미국장 (plus8.js) */
+.mk-kick{border:1px solid color-mix(in srgb,#ffb84d 55%,transparent);background:linear-gradient(160deg,color-mix(in srgb,#ffb84d 16%,transparent),transparent 70%)}
+.mk-lab{font-size:12px;font-weight:700;color:#ffc65c;letter-spacing:.2px;margin-bottom:6px}
+.mk-us .mk-lab{color:var(--c)}
+.mk-t{font-size:18px;font-weight:700;line-height:1.5;letter-spacing:-.3px;word-break:keep-all}
+.mk-t2{font-size:16px;font-weight:700;line-height:1.5;word-break:keep-all;margin-bottom:6px}
+.mk-so{margin-top:8px;font-size:14.5px;line-height:1.55;color:var(--sub)}
+.mk-so b{color:var(--tx,inherit)}
+.mk-rows{margin-top:10px;display:grid;gap:4px}
+.mk-rows div{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 8px;border-radius:8px;background:color-mix(in srgb,var(--line) 40%,transparent)}
+.mk-rows div.hi{outline:1px solid color-mix(in srgb,#ffb84d 60%,transparent)}
+.mk-rows span{color:var(--sub)}
+.mk-why{margin-top:8px;font-size:13.5px;line-height:1.6}
+.mk-why summary{cursor:pointer;color:var(--sub)}
+.mk-lead{margin:0;font-size:14.5px;line-height:1.65;word-break:keep-all}
+.mk-q{margin-top:10px;display:grid;gap:8px}
+.mk-q div{padding:9px 11px;border-radius:12px;border-left:3px solid var(--c);background:color-mix(in srgb,var(--c) 7%,transparent)}
+.mk-q small{display:block;color:var(--sub);font-size:12px;margin-bottom:3px}
+.mk-q b{display:block;font-size:14px;line-height:1.5;font-weight:600}
+.mk-q span{display:block;margin-top:4px;font-size:13px;color:var(--sub);line-height:1.5}

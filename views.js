@@ -45,7 +45,7 @@
       // 1) 오늘의 한 줄
       $("mhead").innerHTML = '<section class="hero2"><div class="hero2-k">' + e(d.edition_label || "") + ' · ' + e(d.basis || "") + '</div>' +
         '<div class="hero2-t">' + rich(d.one_liner || "") + '</div>' +
-        (d.kick ? '<div class="kick2">' + (d.kick.none ? '<b>⚡ 킥</b> 오늘은 킥 없음 — ' + rich(d.kick.why || "") : '<b>⚡ 킥</b> ' + rich(d.kick.title || "") + (d.kick.so ? ' <span>→ ' + rich(d.kick.so) + '</span>' : '')) + '</div>' : '') +
+        /* 킥은 plus8.js가 화면 맨 위에 따로 보여줌 */
         ((d.decision && d.decision.badges) ? '<div class="hero2-b">' + d.decision.badges.map(function(b){ return chip(e(b), "c"); }).join("") + '</div>' : "") + '</section>';
       var h = "";
       // 2) 핵심 숫자
