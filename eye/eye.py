@@ -27,7 +27,7 @@ ROOT = os.path.dirname(HERE)
 OUT = os.environ.get("EYE_OUT", "/tmp/eye")
 SRC = {"cup": ("https://github.com/chkchp0702-spec/Cup", "report_cup"), "gap": ("https://github.com/chkchp0702-spec/Gap", "report_gap")}
 KST = dt.timezone(dt.timedelta(hours=9))
-COLS, ROWS, CW, CH = 4, 5, 330, 215
+COLS, ROWS, CW, CH = 3, 4, 440, 290   # 10/7 눈 강화: 칸을 키워 모양이 더 잘 보이게 (한 장 12종목)
 
 
 def font(sz, bold=False):
@@ -139,6 +139,35 @@ def _f(v):
 REF = {"NVDA", "036930.KQ", "446540.KQ"}   # 사용자 기준선: 엔비디아·주성엔지니어링·메가터치 = 컵
 
 
+def user_verdicts():
+    """사용자가 직접 본 판정. rejects: eye/user_rejects_<날짜>.json (14일 동안 자동 제외 — 모양은 변하니까),
+       keeps: eye/user_keeps.json {코드: [날짜, 이유]} (30일 동안 항상 남김). 같은 종목이면 더 최근 판정이 이긴다."""
+    today = dt.datetime.now(KST).date()
+    rej, keep = {}, {}
+    for f in sorted(glob.glob(os.path.join(HERE, "user_rejects_*.json"))):
+        m = re.search(r"(\d{4}-\d{2}-\d{2})", f)
+        d = dt.date.fromisoformat(m.group(1)) if m else today
+        if (today - d).days <= 14:
+            for k, v in json.load(open(f, encoding="utf-8")).items():
+                rej[k] = (str(d), v)
+    kp = os.path.join(HERE, "user_keeps.json")
+    if os.path.exists(kp):
+        for k, v in json.load(open(kp, encoding="utf-8")).items():
+            d = dt.date.fromisoformat(v[0])
+            if (today - d).days <= 30:
+                keep[k] = (v[0], v[1])
+    for k in list(rej):
+        if k in keep:
+            if keep[k][0] >= rej[k][0]:
+                del rej[k]
+            else:
+                del keep[k]
+    return rej, keep
+
+
+UREJ, UKEEP = user_verdicts()
+
+
 def auto_drop(mode, r, ch):
     """눈으로 보기 전에 숫자로 확실히 컵이 아닌 것을 먼저 뺀다 (10/6 사용자 기준).
        AGYS·HIW = 약세·돌파 실패, VSXY = 기준가에서 한참 아래(덜 회복) → 컵 아님.
@@ -146,24 +175,39 @@ def auto_drop(mode, r, ch):
     if mode != "cup":
         return None
     rs, dist, dbo = _f(r.get("상대강도")), _f(r.get("기준가까지%")), _f(r.get("돌파후일수"))
-    if str(r.get("코드", "")) in REF:
-        return None                                    # 사용자 기준선 종목은 항상 눈으로 본다
+    code = str(r.get("코드", ""))
+    if code in REF or code in UKEEP:
+        return None                                    # 사용자 기준선·사용자가 컵이라 한 종목은 항상 눈으로 본다 (그리고 남긴다)
+    if code in UREJ:
+        return UREJ[code][1].replace("사용자:", "사용자(" + UREJ[code][0][5:] + "):")
     hi52 = _f(r.get("52주고점대비%"))
     near_high = hi52 is not None and hi52 <= 10       # 고점 10% 안 = 거대 주도주는 상대강도가 낮게 나와도 본다 (엔비디아)
-    if rs is not None and rs < 60 and not (near_high and rs >= 50):
+    if rs is not None and rs < 55 and not (near_high and rs >= 45):     # 10/7 범위 확대: 60→55 (고점 근처면 45)
         return f"약세(상대강도 {rs:.0f})"
     if r.get("돌파") == "True" and dbo is not None and dbo >= 10 and dist is not None and dist < -5:
         return "돌파실패"
-    if dist is not None and dist < -12:
+    if dist is not None and dist < -15:
         return f"덜회복(기준가 {dist:.0f}%)"
-    if dist is not None and dist > 15:
+    if dist is not None and dist > 20:
         return f"늦음(기준가 +{dist:.0f}%)"
     c, li = ch.get("c") or [], ch.get("li")
     if li is not None and li >= 20 and min(c[:li]) > 0:
         pr = c[li] / min(c[:li]) - 1
-        if pr < 0.20:
+        if pr < 0.15:
             return f"앞상승없음({pr * 100:.0f}%)"
     return None
+
+
+def geo(ch):
+    """컵 생김새 숫자: 길이(주)·깊이·손잡이 깊이 — 눈으로 볼 때 참고"""
+    c, li, bi, ri = ch.get("c") or [], ch.get("li"), ch.get("bi"), ch.get("ri")
+    try:
+        wk = (ri - li) / 5
+        dep = (1 - c[bi] / c[li]) * 100
+        hd = (1 - min(c[ri:]) / c[ri]) * 100 if ri < len(c) - 1 else 0
+        return f"컵 {wk:.0f}주 · 깊이 {dep:.0f}% · 손잡이 -{hd:.0f}% ({len(c) - 1 - ri}일)"
+    except Exception:
+        return ""
 
 
 def render(mode):
@@ -206,7 +250,9 @@ def render(mode):
             extra = (f"{r.get('패턴', '')} · RS {r.get('상대강도', '')} · 기준가 {r.get('기준가까지%', '')}%" if mode == "cup" else f"갭 {r.get('갭크기%', '')}% · 박스 {r.get('횡보주', '')}주")
             dr.text((x0 + 8, y0 + 6), f"#{num}", fill=(200, 40, 40), font=font(15, True))
             dr.text((x0 + 48, y0 + 7), f"{name}  {code}", fill=(30, 30, 40), font=font(13, True))
-            dr.text((x0 + 8, y0 + 24), f"모양 {sc} · {extra}", fill=(110, 110, 120), font=font(11))
+            dr.text((x0 + 8, y0 + 24), f"모양 {sc} · {extra}" + (" · " + geo(charts[code]) if mode == "cup" else ""), fill=(110, 110, 120), font=font(11))
+            if code in UKEEP or code in REF:
+                dr.text((x0 + CW - 92, y0 + 6), "★사용자:컵", fill=(30, 140, 60), font=font(13, True))
             (draw_cup if mode == "cup" else draw_gap)(im, x0, y0, charts[code])
             index.append({"n": num, "code": code, "name": r.get("종목명", ""), "mkt": r.get("시장", ""), "page": page, "shape": sc})
         im.save(os.path.join(OUT, f"{mode}_{page:02d}.png"), optimize=True)
@@ -223,6 +269,9 @@ def apply(mode, drop_path):
     drop = json.load(open(drop_path, encoding="utf-8")) if os.path.exists(drop_path) else {}
     drop = {str(k): str(v) for k, v in drop.items()}
     codes = [x["code"] for x in idx["items"]]
+    for c in codes:
+        if c in UKEEP:
+            drop.pop(c, None)                          # 사용자가 컵이라 한 종목은 남긴다
     keep = [c for c in codes if c not in drop]
     auto = idx.get("auto", {})
     names = dict(idx.get("auto_names", {}))
