@@ -9,11 +9,11 @@ jobs:
       - run: |
           set +e
           O="https://chkchp0702-spec.github.io"
-          for u in "https://qt.gtimg.cn/q=sh000001,sz399001,sh000688,hkHSCEI,us.DJI,us.INX,us.IXIC,usDJI,usINX,usIXIC,jpN225,krKOSPI" "https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&secids=100.KS11,100.N225,100.HSCEI,100.DJIA,100.SPX,100.NDX,1.000001,0.399001,1.000688,100.KOSDAQ&fields=f2,f3,f4,f12,f14,f124" "https://push2.eastmoney.com/api/qt/stock/trends2/get?secid=100.KS11&fields1=f1,f2,f3&fields2=f51,f53,f56&iscr=0&ndays=1" "https://push2.eastmoney.com/api/qt/stock/trends2/get?secid=100.N225&fields1=f1,f2,f3&fields2=f51,f53,f56&iscr=0&ndays=1" "https://push2.eastmoney.com/api/qt/stock/trends2/get?secid=100.KOSDAQ&fields1=f1,f2,f3&fields2=f51,f53,f56&iscr=0&ndays=1" "https://fchart.stock.naver.com/sise.nhn?symbol=KOSPI&timeframe=minute&count=5&requestType=0" "https://stooq.com/q/l/?s=^kospi&f=sd2t2ohlcv&h&e=csv"; do
+          for u in "https://qt.gtimg.cn/q=us.DJI" "https://qt.gtimg.cn/q=us.INX" "https://qt.gtimg.cn/q=us.IXIC" "https://qt.gtimg.cn/q=jpN225" "https://qt.gtimg.cn/q=krKOSPI" "https://qt.gtimg.cn/q=hkHSI" "https://web.ifzq.gtimg.cn/appstock/app/minute/query?code=us.INX" "https://smartbox.gtimg.cn/s3/?v=2&q=KOSPI&t=all" "https://smartbox.gtimg.cn/s3/?v=2&q=N225&t=all" "https://smartbox.gtimg.cn/s3/?v=2&q=日经&t=all" "https://push2.eastmoney.com/api/qt/stock/get?secid=100.KS11&fields=f43,f57,f58,f170&cb=x" "https://push2his.eastmoney.com/api/qt/stock/trends2/get?secid=100.KS11&fields1=f1&fields2=f51,f53&ndays=1&cb=x"; do
             echo "=== $u" >> out.txt
             rm -f h.txt b.txt; touch h.txt b.txt; curl -s -m 15 -D h.txt -o b.txt -H "Origin: $O" -H "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)" "$u"
-            head -1 h.txt >> out.txt; grep -i "access-control-allow-origin\|content-type" h.txt >> out.txt
-            head -c 1500 b.txt | iconv -f gbk -t utf-8 -c >> out.txt 2>/dev/null || head -c 1500 b.txt >> out.txt
+            head -1 h.txt >> out.txt; grep -i "access-control-allow-origin\|content-type\|^location" h.txt >> out.txt
+            head -c 600 b.txt | iconv -f gbk -t utf-8 -c >> out.txt 2>/dev/null || head -c 600 b.txt >> out.txt
             echo >> out.txt
           done
           git config --global user.name bot; git config --global user.email bot@users.noreply.github.com
