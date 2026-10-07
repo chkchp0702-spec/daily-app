@@ -396,3 +396,6 @@ a.pdfb{display:block;box-sizing:border-box;text-decoration:none;color:var(--text
 .xp-card p:last-child{padding-bottom:15px}
 /* 아이폰: 문서에서 한꺼번에 받는 탭(위임)은 cursor:pointer 가 있어야 눌린다 — 막대·점·칩 전부 */
 [data-tip],[data-mgr],[data-star],[data-hsec],[data-csec],[data-theme],[data-lsec],[data-ind],[data-jump],[data-rotplay],[data-op],[data-s],.cc .nm2,.cp-row,.rad{cursor:pointer;-webkit-tap-highlight-color:rgba(124,156,255,.18)}
+
+.cp-watch .cw-row{padding:12px 0;border-top:1px solid var(--line)}.cp-watch .cw-row:first-of-type{border-top:0;padding-top:4px}
+.cp-watch .sect-n{cursor:pointer}

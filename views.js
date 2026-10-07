@@ -429,7 +429,7 @@
         var pickMap = {};
         if (b) b.picks.forEach(function(p){ var m = p.match(/^(\S.*?)\s+전일/); if (m) pickMap[m[1].trim()] = p.replace(m[1], "").replace(/^\s*/, ""); });
         var mx = Math.max.apply(null, top.top.map(function(x){ return x.score; }));
-        h += sec("🎯 오늘 이 섹터를 보자") + top.top.map(function(x, i){
+        h += sec("🇰🇷 한국 아침 브리핑 픽 <span class='mut'>" + e(String(top.date || it.id).slice(5, 10).replace("-", "/")) + " · 한국 섹터만 · 나라별은 위 「🎯 오늘 이 업종·종목을 보자」</span>") + top.top.map(function(x, i){
           return '<section class="card sect"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n">' + e(x.sector) + '</b></div><span class="mut">점수 ' + x.score.toFixed(2) + '</span></div>' +
             V.progress(Math.max(0, x.score), mx, V.CAT[i % 6]) +
             '<div class="picks">' + (x.picks || []).map(function(p){ return '<a class="pick" href="javascript:openOP(\'' + e(p).replace(/'/g, "") + '\')"><b>' + e(p) + '</b>' + (pickMap[p] ? '<small>' + e(pickMap[p]) + '</small>' : '') + '</a>'; }).join("") + '</div></section>';

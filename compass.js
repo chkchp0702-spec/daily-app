@@ -94,6 +94,7 @@
       (ix ? '<div class="cp-ixb"><small>' + e(ix.name) + '</small><b>' + V.fmt(ix.last) + '</b><span class="' + cls(ix.chg1) + '">' + pct(ix.chg1) + '</span></div>' : '') + '</div>' +
       (ix ? '<p class="note">📐 ' + e(ix.why) + '</p>' : '') +
       '<p class="cp-sum">' + e(m.summary) + '</p></section>';
+    h += watchCard(m, k);
     if (m.fg) h += card("😨😀 공포·탐욕 지수 <span class='mut'>" + e(m.name) + "</span>", fgGauge(m.fg));
     // 2) 등락 종목 수
     var t = Math.max(1, m.up + m.flat + m.down);
@@ -143,6 +144,21 @@
     if (window.CPX) try { h += window.CPX(m, k, C); } catch(err) { console.error(err); }
     if (window.CPX2) try { var cut = h.indexOf("</section>") + 10; h = h.slice(0, cut) + window.CPX2(m, k, C) + h.slice(cut); } catch(err) { console.error(err); }
     return h;
+  }
+
+  // 🎯 오늘 이 업종·종목을 보자 — 고른 나라의 오늘(1일)·1주 힘·오른 종목 비율로 업종 3개 + 대장주
+  function watchCard(m, k){
+    var L = (m.strong || []).filter(function(x){ return (x.n || 0) >= 4 && x.r1 != null; });
+    if (!L.length) return "";
+    L = L.map(function(x){ var br = x.n ? x.up / x.n : .5; return {x: x, sc: x.r1 + (x.r5 || 0) * .5 + (br - .5) * 4}; })
+         .sort(function(a, b){ return b.sc - a.sc; }).slice(0, 3);
+    return '<section class="card cp-watch"><h3>🎯 오늘 이 업종·종목을 보자 <span class="mut">' + m.flag + ' ' + e(m.name) + ' · ' + e(String(m.date || "").slice(5).replace("-", "/")) + '</span></h3>' +
+      L.map(function(o, i){ var x = o.x;
+        return '<div class="cw-row"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n" data-ind="' + e(x.name) + '">' + e(x.name) + ' <span class="hgo">›</span></b></div>' +
+          '<span><b class="' + cls(x.r1) + '">' + pct(x.r1) + '</b> <small class="mut">1주 ' + pct(x.r5) + '</small></span></div>' +
+          '<div class="cp-mini"><span class="up">▲' + x.up + '</span><span class="dn">▼' + x.down + '</span><span class="mut">' + x.n + '종목 중 ' + Math.round(x.up / Math.max(1, x.n) * 100) + '% 상승</span></div>' +
+          '<div class="cp-sts">' + (x.lead || []).slice(0, 4).map(sChip).join("") + '</div></div>'; }).join("") +
+      '<p class="note">오늘 등락 + 1주 흐름 + 업종 안에서 오른 종목 비율로 고른 3곳이에요. 종목을 누르면 종목리포트, 업종을 누르면 전체 종목.</p></section>';
   }
 
   function ixBody(ix){
