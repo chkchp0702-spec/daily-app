@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
+          set +e
           O="https://chkchp0702-spec.github.io"
           for u in \
             "https://qt.gtimg.cn/q=sh000001,sz399001,sh000688,hkHSCEI,usDJI,us.DJI,usINX,us.INX,usIXIC,us.IXIC,jpN225" \
@@ -23,7 +24,7 @@ jobs:
             "https://query1.finance.yahoo.com/v8/finance/chart/%5EKS11?interval=5m&range=1d" \
             "https://query2.finance.yahoo.com/v8/finance/chart/%5EN225?interval=5m&range=1d" ; do
             echo "=== $u" >> out.txt
-            curl -s -m 15 -D h.txt -o b.txt -H "Origin: $O" -H "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)" "$u"
+            rm -f h.txt b.txt; touch h.txt b.txt; curl -s -m 15 -D h.txt -o b.txt -H "Origin: $O" -H "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)" "$u"
             head -1 h.txt >> out.txt; grep -i "access-control-allow-origin\|content-type" h.txt >> out.txt
             head -c 400 b.txt | iconv -f gbk -t utf-8 -c >> out.txt 2>/dev/null || head -c 400 b.txt >> out.txt
             echo >> out.txt
