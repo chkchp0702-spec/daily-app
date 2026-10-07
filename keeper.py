@@ -119,6 +119,16 @@ def main():
             log("실행 ·", at.strftime("%H:%M"), wf)
         except Exception as e:
             log("실행 실패", wf, e)
+    # 이어달리기: GitHub 예약(schedule)이 통째로 빠지는 일이 잦아(10/7 10시 교대 4번 다 안 뜸)
+    #   교대가 끝나면 다음 교대 지킴이를 직접 켠다. (예약도 남겨 두고, 같은 교대 중복은 other_keeper 가 막음)
+    wait = (end - dt.datetime.now(KST)).total_seconds() + 20
+    if 0 < wait < 3600:
+        time.sleep(wait)
+    try:
+        api("/actions/workflows/keeper.yml/dispatches", "POST", {"ref": "main"})
+        log("다음 교대 지킴이 켬")
+    except Exception as e:
+        log("다음 교대 켜기 실패", e)
     log("교대 끝")
 
 
