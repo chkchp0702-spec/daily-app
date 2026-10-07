@@ -390,7 +390,7 @@ em.tk{font-style:normal;font-size:11px;color:var(--dim);margin-left:4px;font-wei
 .cp-wk{padding:8px 0;border-bottom:1px solid var(--line)}.cp-wk:last-child{border:0}
 .cp-wk>span{float:right;font-weight:800}
 </style>
-<link rel="stylesheet" href="plus.css?v=30">
+<link rel="stylesheet" href="plus.css?v=31">
 </head>
 <body>
 <header>
@@ -600,6 +600,7 @@ function openMgr(name){
 var NTFY = "chkchp-ch-";
 var sgn = V.sgn;
 var ALARMS = [
+  {t:"focus",   ic:"🎯", nm:"오늘의 집중 — 돌파·이탈",  d:"아침에 고른 집중 종목이 기준가를 뚫거나 20일선 아래로 내려가는 순간 (장중 10분마다)"},
   {t:"danta",   ic:"⚡", nm:"단타 알람 (실시간)",   d:"장중 단타 신호가 뜨는 순간. 시험 중이라 참고만!"},
   {t:"cup",     ic:"☕", nm:"컵 돌파 임박 · 돌파",  d:"돌파선까지 2% 이내로 온 종목, 돌파한 종목"},
   {t:"gap",     ic:"📈", nm:"새 갭 돌파 · 미국 장 전 갭", d:"새로 나온 갭 돌파 종목, 미국 장 시작 전 ±4% 갭"},
@@ -1288,7 +1289,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261007h";
+var APPV = "20261007i";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1331,8 +1332,8 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
 <script src="plus5.js?v=2"></script>
 <script src="plus6.js?v=7"></script>
 <script src="plus7.js?v=4"></script>
-<script src="plus8.js?v=7"></script>
-<script src="simple.js?v=8"></script>
+<script src="plus8.js?v=8"></script>
+<script src="simple.js?v=9"></script>
 <script src="pdfx.js?v=4"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>

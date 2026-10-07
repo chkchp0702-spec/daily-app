@@ -28,16 +28,19 @@ jobs:
       - name: 장중 나침반
         env:
           FORCE: ${{ github.event.inputs.force == 'true' && '1' || '' }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
         run: |
           H=$(date -u +%H)
           if [ "$H" -lt 12 ] || [ -n "$FORCE" ]; then python live.py || echo "한국 실패"; fi
           pip install -q yfinance pandas
           python live_world.py || echo "일본·중국·홍콩·미국 실패"
+          python focus_live.py || echo "🎯 집중 장중 실패"
       - name: 저장
         run: |
           git config user.name "bot"
           git config user.email "bot@users.noreply.github.com"
-          git add archive/x/live_*.json 2>/dev/null || true
+          git add archive/x/live_*.json archive/x/focus_live.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "live $(TZ=Asia/Seoul date '+%F %H:%M')"
           for i in 1 2 3; do git pull --rebase -q && git push && exit 0; sleep $((i * 5)); done
