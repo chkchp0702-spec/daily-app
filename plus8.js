@@ -27,7 +27,8 @@
   function focusHtml(F, L){
     var px = (L && L.px) || {}, liveOn = L && L.date && L.at;
     var tagc = function(a){ return a === "추격 금지" ? "r" : a === "눌림 대기" ? "o" : /★/.test(a) ? "g" : "x"; };
-    var chip = function(x, flag){ var nm = x.name || x.t, q = px[x.t];
+    var usOpen = (function(){ var a = (L && L.at) || "", h = +a.slice(0, 2); return a && (h >= 22 || h < 6); })();
+    var chip = function(x, flag){ var nm = x.name || x.t, q = px[x.t]; if (q && flag === "🇺🇸" && !usOpen) q = {lv: q.lv, d: q.d};
       var pos = x.pos ? '<small class="fo-pos">' + e(x.pos.k) + ' ' + (q && q.lv ? (q.d >= 0 ? "+" : "") + q.d.toFixed(1) : (x.pos.d != null ? (x.pos.d >= 0 ? "+" : "") + x.pos.d.toFixed(1) : "")) + '%</small>' : '';
       var now = q && q.r != null ? '<small class="fo-now ' + (q.r >= 0 ? "up" : "dn") + '">지금 ' + (q.r >= 0 ? "+" : "") + q.r.toFixed(1) + '%</small>' : '';
       return '<a class="fo-st" href="javascript:openOP(\'' + e(x.t).replace(/'/g, "") + '\')"><span class="fo-nm">' + flag + ' <b>' + e(nm.length > 13 ? nm.slice(0, 12) + "…" : nm) + '</b>' + (x.star ? ' <em>★' + e(x.star) + '</em>' : '') + pos + '</span>' +
