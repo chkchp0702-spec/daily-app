@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: collect
@@ -54,3 +55,11 @@ jobs:
           git config user.email "bot@users.noreply.github.com"
           git add archive manifest.json
           git diff --cached --quiet || (git commit -m "collect $(TZ=Asia/Seoul date '+%F %H:%M')" && git pull --rebase -q && git push)
+      - name: 지킴이 살아 있나 (없으면 켬)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          N=$(gh api "repos/${{ github.repository }}/actions/workflows/keeper.yml/runs?status=in_progress&per_page=5" --jq '.total_count' || echo 1)
+          Q=$(gh api "repos/${{ github.repository }}/actions/workflows/keeper.yml/runs?status=queued&per_page=5" --jq '.total_count' || echo 1)
+          if [ "$N" = "0" ] && [ "$Q" = "0" ]; then gh api -X POST "repos/${{ github.repository }}/actions/workflows/keeper.yml/dispatches" -f ref=main && echo "지킴이 켬"; else echo "지킴이 있음"; fi

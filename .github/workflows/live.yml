@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: live
@@ -41,3 +42,11 @@ jobs:
           git commit -m "live $(TZ=Asia/Seoul date '+%F %H:%M')"
           for i in 1 2 3; do git pull --rebase -q && git push && exit 0; sleep $((i * 5)); done
           exit 1
+      - name: 지킴이 살아 있나 (없으면 켬)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          N=$(gh api "repos/${{ github.repository }}/actions/workflows/keeper.yml/runs?status=in_progress&per_page=5" --jq '.total_count' || echo 1)
+          Q=$(gh api "repos/${{ github.repository }}/actions/workflows/keeper.yml/runs?status=queued&per_page=5" --jq '.total_count' || echo 1)
+          if [ "$N" = "0" ] && [ "$Q" = "0" ]; then gh api -X POST "repos/${{ github.repository }}/actions/workflows/keeper.yml/dispatches" -f ref=main && echo "지킴이 켬"; else echo "지킴이 있음"; fi
