@@ -60,6 +60,8 @@
       } else if (k && k.none){
         h += '<section class="card mk-kick"><div class="mk-lab">⚡ 오늘의 킥</div><div class="mk-so">오늘은 킥 없음 — ' + rich(strip(k.why || "")) + '</div></section>';
       }
+      // ①-1 🎯 오늘의 집중 (market-strategy-report/market/focus.json — 돈의 길 → 담는 법 → 행동)
+      h += '<section class="card mk-focus" id="mkfo"><div class="mk-lab">🎯 오늘의 집중 <span class="mut">돈의 길 → 담는 법 → 행동</span></div><div class="fo-b"><div class="loading">불러오는 중…</div></div></section>';
       // ①-2 🔥 지금 주도 테마 (리포트 data.leaders + 아침 자동 레이더 market/sectors.json)
       h += '<section class="card mk-lead2" id="mkld"><div class="mk-lab">🔥 지금 돈이 몰리는 곳</div>' +
         (d.leaders && d.leaders.title ? '<div class="mk-t2">' + rich(strip(d.leaders.title)) + '</div>' + (d.leaders.so ? '<div class="mk-so">→ ' + rich(strip(d.leaders.so)) + '</div>' : '') +
@@ -76,6 +78,28 @@
             return '<div><small>' + e(String(q.who || "").replace(/^🇺🇸\s*/, "")) + '</small><b>' + rich(strip(q.said)) + '</b>' + (q.so ? '<span>→ ' + rich(strip(q.so).replace(/^\s*→?\s*(<b>)?\s*그래서\?\s*(<\/b>)?\s*/, "")) + '</span>' : '') + '</div>'; }).join("") + '</div>' : '') + '</section>';
       }
       a.innerHTML = h;
+      // 🎯 집중 채우기
+      getJSON(RAW + "market-strategy-report/main/market/focus.json?" + Date.now()).then(function(F){
+        var box = document.querySelector("#mkfo .fo-b"); if (!box) return;
+        if (!F || !F.themes || !F.themes.length){ box.innerHTML = '<div class="mut">오늘 집중 자료가 아직 없어요.</div>'; return; }
+        var tagc = function(a){ return a === "추격 금지" ? "r" : a === "눌림 대기" ? "o" : /★/.test(a) ? "g" : "x"; };
+        var chip = function(x, flag){ var nm = x.name || x.t; return '<a class="fo-st" href="javascript:openOP(\'' + e(x.t).replace(/'/g, "") + '\')"><span>' + flag + ' <b>' + e(nm.length > 14 ? nm.slice(0, 13) + "…" : nm) + '</b>' + (x.star ? ' <em>★' + e(x.star) + '</em>' : '') + '</span>' +
+          '<span>' + (x.r5 != null ? pc(x.r5) : '') + ' <i class="fo-t ' + tagc(x.act || "") + '">' + e(x.act || "") + '</i></span></a>'; };
+        var hc = (F.countries || []).map(function(c, i){ return '<div class="fo-c' + (i === 0 && c.label ? " fo-top" : "") + '"><div class="fo-n">' + c.flag + " " + e(c.name) + '</div><div class="fo-v">' + pc(c.chg5) + '</div><small>' + (c.label ? e(c.label) : "1주 " + e(c.ix || "")) + '</small>' +
+          ((c.hot || [])[0] ? '<small class="fo-h">▲ ' + e(c.hot[0].name) + '</small>' : '') + '</div>'; }).join("");
+        var ht = F.themes.slice(0, 2).map(function(t, i){
+          return '<div class="fo-th"><div class="fo-tt"><b>' + (i ? "③" : "②") + " " + e(t.name) + '</b> <small>' + e(t.sym) + '</small>' + (t.streak >= 3 ? ' <em>🔥' + t.streak + '일</em>' : '') +
+            '<span>5일 ' + pc(t.r5) + ' · 20일 ' + pc(t.r20) + '</span></div>' +
+            (t.why_auto ? '<div class="fo-why">' + e(t.why_auto) + '</div>' : '') +
+            '<div class="fo-sub">ETF</div>' + chip({t: t.sym, name: t.sym + " (미국)", r5: t.r5, act: t.etf_us.act}, "🇺🇸") + (t.etf_kr || []).slice(0, 2).map(function(x){ return chip(x, "🇰🇷"); }).join("") +
+            '<div class="fo-sub">종목 <span class="mut">★ = 우리 컵·갭·매집에도 걸림 · 5일</span></div>' + (t.us || []).slice(0, 4).map(function(x){ return chip(x, "🇺🇸"); }).join("") + (t.kr || []).slice(0, 4).map(function(x){ return chip(x, "🇰🇷"); }).join("") +
+            (t.stop ? '<div class="fo-stop">⛔ <b>이게 깨지면</b> ' + e(t.stop) + '</div>' : '') + '</div>'; }).join("");
+        var sc = F.score || {};
+        box.innerHTML = '<div class="fo-sub" style="margin-top:2px">① 돈의 길 — 5개 시장 1주</div><div class="fo-cs">' + hc + '</div>' + ht +
+          (F.avoid && F.avoid.length ? '<div class="fo-av">🧊 빠지는 곳: ' + F.avoid.slice(0, 3).map(function(a){ return e(a.name) + " " + pc(a.r5); }).join(" · ") + '</div>' : '') +
+          '<div class="fo-sc">📒 집중 성적 ' + (sc.n ? '<b>' + sc.hit + '/' + sc.n + '</b> (5거래일 뒤 S&amp;P 대비 평균 ' + pc(sc.avg_ex) + ')' : '— 10/7부터 기록, 5거래일 뒤부터 채점') + '</div>' +
+          '<div class="mut" style="font-size:11px;margin-top:4px">★관심 = 테마+차트 자리 · 눌림 대기 = 5일 +15%↑ · 추격 금지 = 하루 +8%↑. 매수 권유가 아니라 볼 곳을 좁히는 표예요.</div>';
+      }).catch(function(){ var box = document.querySelector("#mkfo .fo-b"); if (box) box.innerHTML = '<div class="mut">집중 자료를 못 불러왔어요.</div>'; });
       // 아침 자동 레이더 (리포트에 없더라도 숫자는 매일)
       getJSON(RAW + "market-strategy-report/main/market/sectors.json?" + Date.now()).then(function(S){
         var box = document.querySelector("#mkld .mk-rad"); if (!box || !S || !S.rows) return;

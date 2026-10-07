@@ -399,3 +399,21 @@ a.pdfb{display:block;box-sizing:border-box;text-decoration:none;color:var(--text
 
 .cp-watch .cw-row{padding:12px 0;border-top:1px solid var(--line)}.cp-watch .cw-row:first-of-type{border-top:0;padding-top:4px}
 .cp-watch .sect-n{cursor:pointer}
+
+/* 🎯 오늘의 집중 */
+.mk-focus{border:1px solid color-mix(in srgb,#ffb84d 45%,var(--line))!important;background:linear-gradient(160deg,color-mix(in srgb,#ffb84d 9%,var(--panel)),var(--panel))!important}
+.fo-sub{font-size:12px;font-weight:800;color:var(--sub);margin:10px 0 5px}
+.fo-cs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.fo-cs::-webkit-scrollbar{display:none}
+.fo-c{flex:0 0 auto;min-width:86px;border:1px solid var(--line);border-radius:12px;padding:7px 9px;background:var(--panel2);font-size:13px}
+.fo-c .fo-n{font-size:12.5px;font-weight:800;white-space:nowrap}.fo-c .fo-v{font-size:15px;margin-top:1px}.fo-c small{display:block;color:var(--sub);font-size:10.5px;margin-top:1px}.fo-c .fo-h{color:var(--text)}
+.fo-c.fo-top{border-color:#ffb84d;box-shadow:inset 0 0 0 1px #ffb84d55}.fo-c.fo-top small:not(.fo-h){color:#ffb84d;font-weight:800}
+.fo-th{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.fo-tt{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}.fo-tt b{font-size:17px;font-weight:800}.fo-tt small{color:var(--sub)}.fo-tt em{font-style:normal;color:#ffb84d;font-size:12px}.fo-tt span{margin-left:auto;font-size:12.5px}
+.fo-why{font-size:12.5px;color:var(--sub);margin-top:3px;line-height:1.5}
+.fo-st{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent);color:var(--text);text-decoration:none;font-size:13.5px}
+.fo-st em{font-style:normal;color:#ffb84d;font-size:11.5px;font-weight:800}
+.fo-st span:last-child{white-space:nowrap;font-size:12.5px}
+.fo-t{font-style:normal;font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 6px;margin-left:4px;color:#fff;background:#5d667a}
+.fo-t.g{background:#2f9e62}.fo-t.o{background:#d98a1c}.fo-t.r{background:#d64545}
+.fo-stop{margin-top:7px;font-size:12px;color:var(--sub);line-height:1.5}.fo-stop b{color:var(--text)}
+.fo-av{margin-top:12px;font-size:12.5px;color:var(--sub)}.fo-sc{margin-top:6px;font-size:12.5px}
