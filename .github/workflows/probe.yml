@@ -9,11 +9,11 @@ jobs:
       - run: |
           set +e
           O="https://chkchp0702-spec.github.io"
-          for u in "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f56&ndays=1&iscr=0&cb=x&secid=100.N225" "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f56&ndays=1&iscr=0&cb=x&secid=100.KOSDAQ" "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f56&ndays=1&iscr=0&cb=x&secid=100.KQ11" "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f56&ndays=1&iscr=0&cb=x&secid=100.KOSPI" "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f56&ndays=1&iscr=0&cb=x&secid=100.DJIA" "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f56&ndays=1&iscr=0&cb=x&secid=100.SPX" "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f56&ndays=1&iscr=0&cb=x&secid=100.NDX" "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f56&ndays=1&iscr=0&cb=x&secid=100.HSCEI" "https://push2his.eastmoney.com/api/qt/stock/trends2/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f56&ndays=1&iscr=0&cb=x&secid=1.000688"; do
+          for u in "https://searchapi.eastmoney.com/api/suggest/get?input=KOSDAQ&type=14&token=D43BF722C8E33BDC906FB84D85E326E8&count=5" "https://searchapi.eastmoney.com/api/suggest/get?input=%E9%9F%A9%E5%9B%BD&type=14&token=D43BF722C8E33BDC906FB84D85E326E8&count=10" "https://searchapi.eastmoney.com/api/suggest/get?input=KS11&type=14&token=D43BF722C8E33BDC906FB84D85E326E8&count=5"; do
             echo "=== $u" >> out.txt
             rm -f h.txt b.txt; touch h.txt b.txt; curl -s -m 15 -D h.txt -o b.txt -H "Origin: $O" -H "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)" "$u"
             head -1 h.txt >> out.txt; grep -i "access-control-allow-origin\|content-type\|^location" h.txt >> out.txt
-            head -c 420 b.txt | iconv -f gbk -t utf-8 -c >> out.txt 2>/dev/null || head -c 420 b.txt >> out.txt
+            head -c 1500 b.txt | iconv -f gbk -t utf-8 -c >> out.txt 2>/dev/null || head -c 1500 b.txt >> out.txt
             echo >> out.txt
           done
           git config --global user.name bot; git config --global user.email bot@users.noreply.github.com
