@@ -96,8 +96,8 @@ def bing(q, limit=6, mkt=None):
 
 
 def yahoo(sym):
-    import yfinance as yf
     try:
+        import yfinance as yf
         signal.alarm(20)
         items = yf.Search(sym, news_count=6, max_results=1).news
         signal.alarm(0)
