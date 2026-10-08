@@ -409,6 +409,7 @@ if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.clo
 
 var CATS = [
   {key:"market", name:"시황", short:"시황",     icon:"🌐", color:"#7c9cff", desc:"오늘의 시장 전략 리포트"},
+  {key:"feed",   name:"내 피드", short:"피드",  icon:"📰", color:"#f4a261", desc:"매일 보는 블로그·텔레그램 한곳에 · 시황리포트 재료"},
   {key:"whale",  name:"고래", short:"고래",     icon:"🐋", color:"#3dd6c6", desc:"기관·유명 투자자 TOP 40 보유 변화"},
   {key:"cup",    name:"컵차트", short:"컵",   icon:"☕", color:"#ffb84d", desc:"컵앤핸들 돌파 후보"},
   {key:"gap",    name:"갭차트", short:"갭",   icon:"📈", color:"#c38bff", desc:"갭 돌파 후보"},
@@ -515,11 +516,12 @@ function go(key, id){
   var items = (M.cats[key] || []);
   curDate = id || (items[0] && items[0].id);
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
-          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">ntfy 무료 푸시</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
-          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
+          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">ntfy 무료 푸시</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "feed" ? '<span class="chip">블로그 3 · 텔레그램 3</span><span class="chip">매시간 :40</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
+          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
   if (key === "onepager") { $("main").innerHTML = h + opView(); opInit(id); window.scrollTo(0, 0); return; }
   if (key === "alarm") { $("main").innerHTML = h + alarmView(); alarmInit(); window.scrollTo(0, 0); return; }
   if (key === "idea") { $("main").innerHTML = h + ideaView(); ideaInit(); window.scrollTo(0, 0); return; }
+  if (key === "feed") { $("main").innerHTML = h + feedView(); feedInit(); window.scrollTo(0, 0); return; }
   if (!items.length) {
     h += '<div class="empty"><div class="big">🗂️</div>아직 모인 자료가 없어요.<br>' +
          "다음 자동 수집 때 채워져요." + '</div>';
@@ -1289,7 +1291,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261007j";
+var APPV = "20261009a";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1333,6 +1335,7 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
 <script src="plus6.js?v=7"></script>
 <script src="plus7.js?v=4"></script>
 <script src="plus8.js?v=9"></script>
+<script src="feed.js?v=1"></script>
 <script src="simple.js?v=9"></script>
 <script src="pdfx.js?v=4"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
