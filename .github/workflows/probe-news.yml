@@ -7,7 +7,7 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,32 +37,28 @@ jobs:
               except Exception as e:
                   return -1, repr(e).encode()[:300]
           import yfinance as yf
+          from collections import Counter
           for s in pick:
               disp, mkt, _, ln = meta[s][:4]
-              ko = names.get(s) if mkt != "KR" else disp
-              q = (ko or ln or disp) + " 주가"
-              gu = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": q + " when:30d", "hl": "ko", "gl": "KR", "ceid": "KR:ko"})
-              st, b = get(gu, {"User-Agent": "Mozilla/5.0"})
-              gn = b.count(b"<item>")
-              gu2 = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": q, "hl": "ko", "gl": "KR", "ceid": "KR:ko"})
-              st2, b2 = get(gu2, {"User-Agent": "Mozilla/5.0"}); gn2 = b2.count(b"<item>")
-              bu = "https://www.bing.com/news/search?" + urllib.parse.urlencode({"q": q, "format": "rss", "setlang": "ko", "cc": "KR"})
-              st3, b3 = get(bu); bn = b3.count(b"<item>")
-              try:
-                  yn = len(yf.Search(s, news_count=6, max_results=1).news or [])
-              except Exception as e:
-                  yn = "ERR " + repr(e)[:80]
-              try:
-                  yt = len(yf.Ticker(s).news or [])
-              except Exception as e:
-                  yt = "ERR " + repr(e)[:80]
-              nv = ""
-              if mkt == "KR":
-                  st4, b4 = get("https://m.stock.naver.com/api/news/stock/%s?pageSize=6&page=1" % s.split(".")[0])
-                  nv = f" naver={st4}:{len(b4)}B"
-              print(f"{s} [{mkt}] q={q!r} google30d={st}:{gn} google={st2}:{gn2} bing={st3}:{bn} yfsearch={yn} yfticker={yt}{nv}", flush=True)
-              if gn == 0: print("   g-head:", b[:160])
+              base = (ln or disp)
+              ge = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": '"%s" when:30d' % base, "hl": "en-US", "gl": "US", "ceid": "US:en"})
+              st, b = get(ge, {"User-Agent": "Mozilla/5.0"}); n1 = b.count(b"<item>")
+              ge2 = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": base + " stock when:30d", "hl": "en-US", "gl": "US", "ceid": "US:en"})
+              st2, b2 = get(ge2, {"User-Agent": "Mozilla/5.0"}); n2 = b2.count(b"<item>")
+              bu = "https://www.bing.com/news/search?" + urllib.parse.urlencode({"q": base, "format": "rss"})
+              st3, b3 = get(bu); n3 = b3.count(b"<item>")
+              print(f"{s} [{mkt}] {base!r} g_en_quoted={st}:{n1} g_en_stock={st2}:{n2} bing_en={st3}:{n3}", flush=True)
               time.sleep(1)
+          c = Counter(); t0 = time.time()
+          for i, s in enumerate(miss[:260]):
+              disp, mkt, _, ln = meta[s][:4]
+              q = (names.get(s) if mkt != "KR" else disp) or ln or disp
+              gu = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": q + " 주가 when:30d", "hl": "ko", "gl": "KR", "ceid": "KR:ko"})
+              st, b = get(gu, {"User-Agent": "Mozilla/5.0"})
+              c[st] += 1
+              if st != 200 and c[st] <= 2: print("  fail", i, st, b[:200])
+              time.sleep(1.2)
+          print("hammer", dict(c), round(time.time() - t0))
           PY
           cat out.txt
           git config user.name bot; git config user.email bot@users.noreply.github.com
