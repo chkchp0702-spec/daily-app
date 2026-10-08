@@ -65,7 +65,7 @@ jobs:
         if: steps.t.outputs.go == '1'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python oppdf/upload.py --dir _pdf --repo ${{ github.repository }} --part part_${{ matrix.shard }}.json
+        run: python oppdf/upload.py --dir _pdf --repo ${{ github.repository }} --part part_${{ matrix.shard }}.json --max-min 170
       - uses: actions/upload-artifact@v4
         if: steps.t.outputs.go == '1'
         with:
