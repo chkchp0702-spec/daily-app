@@ -25,21 +25,41 @@
 
   function draw(){
     var b = document.getElementById("pobody"); if (!b || !P) return;
-    var st = P.stat, ex = st.ret - st.spy;
-    var h = '<section class="po-hero"><div class="po-k">시황리포트 배분표대로 ' + md(P.start) + '부터 투자했다면</div>' +
-      '<div class="po-big ' + cls(st.ret) + '">' + sg(st.ret) + '</div>' +
-      '<div class="po-sub">' + st.days + '거래일 · S&P500 대비 <b class="' + cls(ex) + '">' + sg(ex) + 'p</b> · 가장 크게 빠졌을 때 <b>' + sg(st.mdd) + '</b></div>' +
-      '<div class="po-cmp">' + [["S&P500", st.spy], ["코스피", st.kospi], ["주식60·채권40", st.mix]].map(function(x){
-        return '<div><small>' + x[0] + '</small><b class="' + cls(x[1]) + '">' + sg(x[1]) + '</b><em class="' + (st.ret >= x[1] ? "w" : "l") + '">' + (st.ret >= x[1] ? "포트가 앞섬" : "포트가 뒤짐") + '</em></div>'; }).join("") + '</div>' +
+    var B = P.bench, mk = [["S&P500", "S&P500"], ["코스피", "코스피"], ["주식60·채권40", "60·40"]];
+    // 두 포트 (같은 날짜 줄)
+    var PF = [{k: "base", ic: "💼", t: "기본 포트", s: "킥 없음 · 배분표 그대로", s2: "킥 없음", line: P.nav, color: "#e9c46a"}];
+    if (K) PF.push({k: "kick", ic: "⚡", t: "킥 포트", s: "현금 15%p → 확인된 돌파에 3%씩", s2: "킥 15% 포함", line: K.kick, color: "#ff6b6b"});
+    PF.forEach(function(f){
+      var v = f.line, n = v.length, peak = -1e9, mdd = 0, win = 0, best = null, worst = null;
+      for (var i = 0; i < n; i++){ var x = 1 + v[i] / 100; peak = Math.max(peak, x); mdd = Math.min(mdd, (x / peak - 1) * 100);
+        if (i){ var r = ((1 + v[i] / 100) / (1 + v[i - 1] / 100) - 1) * 100, sp = ((1 + B["S&P500"][i] / 100) / (1 + B["S&P500"][i - 1] / 100) - 1) * 100;
+          if (r >= sp) win++; if (!best || r > best.r) best = {d: P.dates[i], r: r}; if (!worst || r < worst.r) worst = {d: P.dates[i], r: r}; } }
+      f.ret = v[n - 1]; f.mdd = mdd; f.win = win; f.days = n - 1; f.best = best; f.worst = worst;
+    });
+    if (S.pf !== "kick" || !K) S.pf = K ? S.pf : "base";
+    var h = '<div class="sec">⚔️ 두 포트 × 시장 <small class="mut">' + md(P.start) + '부터 · 같은 날 같은 기준</small></div><section class="card po-mx"><table><tr><th></th><th>수익률</th>' +
+      mk.map(function(m){ return '<th>' + m[1] + ' 대비</th>'; }).join("") + '</tr>' +
+      PF.map(function(f){ return '<tr class="' + (S.pf === f.k ? "on" : "") + '" data-pf="' + f.k + '"><td>' + f.ic + ' ' + f.t.replace(" 포트", "") + '<small>' + f.s2 + '</small></td><td class="' + cls(f.ret) + '"><b>' + sg(f.ret) + '</b></td>' +
+        mk.map(function(m){ var x = f.ret - B[m[0]][B[m[0]].length - 1]; return '<td class="' + cls(x) + '">' + sg(x) + 'p<em class="' + (x >= 0 ? "w" : "l") + '">' + (x >= 0 ? "이김" : "짐") + '</em></td>'; }).join("") +
+        '</tr>'; }).join("") +
+      '<tr class="mkt"><td>시장<small>그대로</small></td><td></td>' + mk.map(function(m){ var x = B[m[0]][B[m[0]].length - 1]; return '<td class="' + cls(x) + '">' + sg(x) + '</td>'; }).join("") + '</tr></table>' +
+      '<p class="note" style="margin:6px 0 0">줄을 누르면 아래에서 그 포트를 자세히 봐요.</p></section>';
+    var F = PF.filter(function(f){ return f.k === S.pf; })[0] || PF[0], ex = F.ret - B["S&P500"][B["S&P500"].length - 1];
+    h += (PF.length > 1 ? '<div class="po-mode po-pf2">' + PF.map(function(f){ return '<button data-pf="' + f.k + '" class="' + (S.pf === f.k ? "on" : "") + '">' + f.ic + ' ' + f.t + '</button>'; }).join("") + '</div>' : '') +
+      '<section class="po-hero' + (F.k === "kick" ? " kick" : "") + '"><div class="po-k">' + F.ic + ' <b>' + F.t + '</b> · ' + F.s + ' · ' + md(P.start) + '부터</div>' +
+      '<div class="po-big ' + cls(F.ret) + '">' + sg(F.ret) + '</div>' +
+      '<div class="po-sub">' + F.days + '거래일 · S&P500 대비 <b class="' + cls(ex) + '">' + sg(ex) + 'p</b> · 가장 크게 빠졌을 때 <b>' + sg(F.mdd) + '</b></div>' +
+      '<div class="po-cmp">' + mk.map(function(m){ var x = B[m[0]][B[m[0]].length - 1];
+        return '<div><small>' + m[0] + '</small><b class="' + cls(x) + '">' + sg(x) + '</b><em class="' + (F.ret >= x ? "w" : "l") + '">' + (F.ret >= x ? "포트가 앞섬" : "포트가 뒤짐") + '</em></div>'; }).join("") + '</div>' +
       '<div class="po-ch">' + V.lines([
-        {name: "💼 포트", color: "#e9c46a", vals: P.nav},
-        {name: "S&P500", color: "#7c9cff", vals: P.bench["S&P500"], dash: 1},
-        {name: "코스피", color: "#e66767", vals: P.bench["코스피"], dash: 1},
-        {name: "60·40", color: "#8a94a8", vals: P.bench["주식60·채권40"], dash: 1}
+        {name: F.ic + " " + F.t, color: F.color, vals: F.line},
+        {name: "S&P500", color: "#7c9cff", vals: B["S&P500"], dash: 1},
+        {name: "코스피", color: "#8fd3ff", vals: B["코스피"], dash: 1},
+        {name: "60·40", color: "#8a94a8", vals: B["주식60·채권40"], dash: 1}
       ], P.dates.map(md), {h: 190, unit: "%", zero: 1, nodots: P.dates.length > 12}) + '</div>' +
-      '<div class="po-w">S&P를 이긴 날 <b>' + st.win + ' / ' + st.days + '</b>' + (st.best ? ' · 가장 좋았던 날 ' + md(st.best.d) + ' <b class="up">' + sg(st.best.r) + '</b>' : '') + (st.worst ? ' · 가장 나빴던 날 ' + md(st.worst.d) + ' <b class="dn">' + sg(st.worst.r) + '</b>' : '') + '</div></section>';
+      '<div class="po-w">S&P를 이긴 날 <b>' + F.win + ' / ' + F.days + '</b>' + (F.best ? ' · 가장 좋았던 날 ' + md(F.best.d) + ' <b class="up">' + sg(F.best.r) + '</b>' : '') + (F.worst ? ' · 가장 나빴던 날 ' + md(F.worst.d) + ' <b class="dn">' + sg(F.worst.r) + '</b>' : '') + '</div></section>';
 
-    if (K) h += kickHtml();
+    if (K && S.pf === "kick") h += kickHtml();
 
     // ② 따라하기
     var segs = P.hold.map(function(x, i){ return {label: x.name, v: x.pct, color: COL[i % COL.length]}; });
@@ -47,7 +67,7 @@
       '<section class="card po-follow">' + V.donut(segs, P.hold.length + "칸", "비중") +
       '<div class="po-in"><label>내 투자금</label><div class="po-amt"><input id="poamt" inputmode="numeric" value="' + S.amt.toLocaleString("ko-KR") + '"><span>원</span></div>' +
       '<div class="po-q">' + [3e6, 1e7, 3e7, 1e8].map(function(v){ return '<button data-v="' + v + '">' + won(v) + '</button>'; }).join("") + '</div>' +
-      (K ? '<div class="po-mode po-pf"><button data-p="base" class="' + (S.pf === "base" ? "on" : "") + '">💼 기본 포트</button><button data-p="kick" class="' + (S.pf === "kick" ? "on" : "") + '">⚡ 킥 포함</button></div>' : '') +
+      (K ? '<div class="po-mode po-pf"><button data-pf="base" class="' + (S.pf === "base" ? "on" : "") + '">💼 기본 포트</button><button data-pf="kick" class="' + (S.pf === "kick" ? "on" : "") + '">⚡ 킥 포함</button></div>' : '') +
       '<div class="po-mode"><button data-m="us" class="' + (S.mode === "us" ? "on" : "") + '">🇺🇸 미국 ETF로</button><button data-m="kr" class="' + (S.mode === "kr" ? "on" : "") + '">🇰🇷 한국 상장 ETF로</button></div></div>' +
       '<div id="porows"></div><div class="po-cp"><button class="btn" id="pocopy">📋 주문 목록 복사</button><span id="pocpst"></span></div>' +
       '<p class="note">환율 ' + (P.fx ? P.fx.toLocaleString("ko-KR") + "원" : "–") + ' · 주 수는 ' + md(P.asof) + ' 종가 기준 내림. 한국 ETF가 없는 칸은 미국 상품으로 적었어요. ' +
@@ -69,9 +89,11 @@
           '<div class="bar"><span class="' + (x.contrib >= 0 ? "p" : "m") + '" style="width:' + w.toFixed(1) + '%"></span></div><b class="' + cls(x.contrib) + '">' + sg(x.contrib) + 'p</b></div>'; }).join("") + '</section>';
 
     // ⑤ 날짜별
-    h += '<div class="sec">📅 날짜별 성적</div><section class="card"><table class="po-dt"><tr><th>날짜(미국)</th><th>💼 포트</th><th>S&P500</th><th></th></tr>' +
-      P.daily.slice().reverse().slice(0, 15).map(function(d){ var w = d.r >= d.spy;
-        return '<tr><td>' + md(d.d) + '</td><td class="' + cls(d.r) + '">' + sg(d.r) + '</td><td class="' + cls(d.spy) + '">' + sg(d.spy) + '</td><td>' + (w ? '<em class="w">이김</em>' : '<em class="l">짐</em>') + '</td></tr>'; }).join("") + '</table></section>' +
+    h += '<div class="sec">📅 날짜별 성적</div><section class="card"><table class="po-dt"><tr><th>날짜(미국)</th><th>💼 기본</th>' + (K ? '<th>⚡ 킥</th>' : '') + '<th>S&P500</th></tr>' +
+      P.daily.slice().reverse().slice(0, 15).map(function(d){
+        var j = K ? K.dates.indexOf(d.d) : -1, kr = j > 0 ? ((1 + K.kick[j] / 100) / (1 + K.kick[j - 1] / 100) - 1) * 100 : null;
+        var tag = function(x){ return x == null ? '' : (x >= d.spy ? ' <em class="w">이김</em>' : ' <em class="l">짐</em>'); };
+        return '<tr><td>' + md(d.d) + '</td><td class="' + cls(d.r) + '">' + sg(d.r) + tag(d.r) + '</td>' + (K ? '<td class="' + cls(kr) + '">' + sg(kr) + tag(kr) + '</td>' : '') + '<td class="' + cls(d.spy) + '">' + sg(d.spy) + '</td></tr>'; }).join("") + '</table></section>' +
       '<p class="note">' + e(P.note) + ' 계산 ' + e(P.at) + (P.miss && P.miss.length ? ' · 시세 없음: ' + e(P.miss.join(", ")) : '') + '</p>';
     b.innerHTML = h;
     rows();
@@ -81,8 +103,10 @@
     [].forEach.call(b.querySelectorAll(".po-q button"), function(x){ x.onclick = function(){ S.amt = +x.dataset.v; inp.value = S.amt.toLocaleString("ko-KR"); keep(); rows(); }; });
     [].forEach.call(b.querySelectorAll(".po-mode button[data-m]"), function(x){ x.onclick = function(){ S.mode = x.dataset.m; keep();
       [].forEach.call(b.querySelectorAll(".po-mode button[data-m]"), function(y){ y.classList.toggle("on", y === x); }); rows(); }; });
+    [].forEach.call(b.querySelectorAll("[data-pf]"), function(x){ x.onclick = function(){ S.pf = x.dataset.pf; keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     [].forEach.call(b.querySelectorAll(".po-mode button[data-p]"), function(x){ x.onclick = function(){ S.pf = x.dataset.p; keep();
-      [].forEach.call(b.querySelectorAll(".po-mode button[data-p]"), function(y){ y.classList.toggle("on", y === x); }); rows(); }; });
+      [].forEach.call(b.querySelectorAll("[data-pf]"), function(x){ x.onclick = function(){ S.pf = x.dataset.pf; keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    [].forEach.call(b.querySelectorAll(".po-mode button[data-p]"), function(y){ y.classList.toggle("on", y === x); }); rows(); }; });
     document.getElementById("pocopy").onclick = copy;
   }
 
@@ -128,10 +152,7 @@
   function pr(v){ return v == null ? "–" : (+v).toLocaleString("ko-KR", {maximumFractionDigits: v >= 1000 ? 0 : 2}); }
   function kickHtml(){
     var ks = K.stat, d = ks.kick - ks.base, rows2;
-    var h = '<div class="sec">⚔️ 기본 포트 vs ⚡ 킥 포트 <small class="mut">현금 15%p 를 「확인된 돌파」에만 3%씩</small></div><section class="card po-vs">' +
-      '<div class="po-vs2"><div><small>💼 기본</small><b class="' + cls(ks.base) + '">' + sg(ks.base) + '</b></div><div class="k"><small>⚡ 킥 포함</small><b class="' + cls(ks.kick) + '">' + sg(ks.kick) + '</b><em class="' + (d >= 0 ? "w" : "l") + '">기본보다 ' + sg(d) + 'p</em></div><div><small>S&P500</small><b class="' + cls(ks.spy) + '">' + sg(ks.spy) + '</b></div></div>' +
-      V.lines([{name: "⚡ 킥", color: "#ff6b6b", vals: K.kick}, {name: "💼 기본", color: "#e9c46a", vals: K.base}, {name: "S&P500", color: "#7c9cff", vals: P.bench["S&P500"], dash: 1}],
-        K.dates.map(md), {h: 170, unit: "%", zero: 1, nodots: K.dates.length > 12}) +
+    var h = '<div class="sec">⚡ 킥 칸 속 <small class="mut">킥 포트에만 있는 15% · 기본 포트보다 ' + sg(d) + 'p</small></div><section class="card po-vs">' +
       '<div class="po-ks"><span>슬리브 자체 <b class="' + cls(K.sleeve) + '">' + sg(K.sleeve) + '</b></span><span>자리 <b>' + ks.slots + '</b></span><span>끝난 거래 <b>' + ks.trades + '</b>' +
       (ks.win != null ? ' · 이긴 비율 <b>' + ks.win + '%</b>' : '') + '</span>' + (ks.avg_win != null ? '<span>이길 때 <b class="up">' + sg(ks.avg_win, 1) + '</b> · 질 때 <b class="dn">' + sg(ks.avg_loss, 1) + '</b></span>' : '') +
       (ks.paused ? '<span class="warn">⛔ 브레이크 중 (새 진입 멈춤)</span>' : '') + '</div>';
@@ -181,6 +202,10 @@
     ".po-ks{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--sub);margin:6px 0}.po-ks b{color:var(--text)}.po-ks .warn{color:#ffb84d}" +
     ".po-kh{font-size:12.5px;font-weight:800;color:var(--sub);margin:12px 0 2px}.po-kp{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}.po-kp small{color:var(--dim)}.po-kp em{display:block;font-style:normal;font-size:11.5px;color:var(--sub)}" +
     ".po-itn{font-size:11.5px;color:var(--dim);padding:2px 0 0 17px}.po-rk{background:rgba(255,107,107,.06);border-radius:10px;padding:10px 6px}" +
-    ".po-dt{width:100%;border-collapse:collapse;font-size:13.5px}.po-dt th{font-size:12px;color:var(--sub);text-align:right;font-weight:600;padding:4px}.po-dt th:first-child,.po-dt td:first-child{text-align:left}.po-dt td{text-align:right;padding:6px 4px;border-top:1px solid var(--line)}";
+    ".po-mx table{width:100%;border-collapse:collapse;font-size:12.5px}.po-mx td,.po-mx th{white-space:nowrap}.po-mx th{font-size:11px;color:var(--sub);font-weight:600;text-align:right;padding:3px}.po-mx th:first-child{text-align:left}" +
+    ".po-mx td{text-align:right;padding:8px 3px;border-top:1px solid var(--line);vertical-align:top}.po-mx td:first-child{text-align:left;font-weight:800;white-space:nowrap}.po-mx td small{display:block;font-weight:400;font-size:10.5px;color:var(--sub)}" +
+    ".po-mx td em{display:block;font-style:normal;font-size:10.5px}.po-mx tr[data-pf]{cursor:pointer}.po-mx tr.on td{background:rgba(233,196,106,.08)}.po-mx tr.mkt td{color:var(--sub);font-size:12px}" +
+    ".po-pf2{margin:12px 0 8px}.po-hero.kick{background:linear-gradient(160deg,rgba(255,107,107,.16),rgba(18,24,38,.4) 60%)}" +
+    ".po-dt{width:100%;border-collapse:collapse;font-size:13.5px}.po-dt th{font-size:12px;color:var(--sub);text-align:right;font-weight:600;padding:4px}.po-dt th:first-child,.po-dt td:first-child{text-align:left}.po-dt td{text-align:right;padding:6px 4px;border-top:1px solid var(--line)}.po-dt td em{display:block;font-size:10.5px}";
   document.head.appendChild(css);
 })();
