@@ -53,11 +53,12 @@
 
     // ④ 칸별 기여
     var mx = Math.max.apply(null, P.hold.map(function(x){ return Math.abs(x.contrib) || 0.01; }));
-    h += '<div class="sec">🧩 어느 칸이 벌고 잃었나 <small class="mut">' + md(P.start) + '부터 포트 수익 기여 %p</small></div><section class="card po-ct">' +
+    h += '<div class="sec">🧩 어느 칸이 벌고 잃었나 <small class="mut">' + md(P.start) + '부터 기여 %p · 칸별 신호(S&P 대비·20일선)</small></div><section class="card po-ct">' +
       P.hold.slice().sort(function(a, b){ return b.contrib - a.contrib; }).map(function(x){
         var i = P.hold.indexOf(x), w = Math.abs(x.contrib) / mx * 50;
         var us = x.us.map(function(u){ return u.t + " " + sg(u.since, 1); }).join(" · ");
-        return '<div class="po-cr"><div class="n"><i style="background:' + COL[i % COL.length] + '"></i>' + e(x.name) + ' <small>' + x.pct + '%</small><em>' + e(us) + '</em></div>' +
+        var sgc = /^강함/.test(x.sig || "") ? "g" : /^약함/.test(x.sig || "") ? "b" : /^꺾이/.test(x.sig || "") ? "w" : "";
+        return '<div class="po-cr"><div class="n"><i style="background:' + COL[i % COL.length] + '"></i>' + e(x.name) + ' <small>' + x.pct + '%</small>' + (sgc ? ' <span class="po-sg ' + sgc + '">' + e(x.sig.split(" — ")[0]) + '</span>' : '') + '<em>' + e(us) + '</em>' + (sgc ? '<em class="sgt">' + e((x.sig.split(" — ")[1] || "")) + '</em>' : '') + '</div>' +
           '<div class="bar"><span class="' + (x.contrib >= 0 ? "p" : "m") + '" style="width:' + w.toFixed(1) + '%"></span></div><b class="' + cls(x.contrib) + '">' + sg(x.contrib) + 'p</b></div>'; }).join("") + '</section>';
 
     // ⑤ 날짜별
@@ -133,6 +134,7 @@
     ".po-cr .n{font-size:13.5px}.po-cr .n i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}.po-cr .n small{color:var(--sub)}.po-cr .n em{display:block;font-style:normal;font-size:11px;color:var(--dim)}" +
     ".po-cr .bar{position:relative;height:10px;background:var(--panel2);border-radius:5px}.po-cr .bar span{position:absolute;top:0;bottom:0;border-radius:5px}" +
     ".po-cr .bar .p{left:50%;background:#e66767}.po-cr .bar .m{right:50%;background:#3987e5}.po-cr>b{text-align:right;font-size:13px}" +
+    ".po-sg{font-size:10.5px;font-weight:800;border-radius:5px;padding:0 5px;margin-left:3px}.po-sg.g{background:rgba(77,212,122,.18);color:#4dd47a}.po-sg.b{background:rgba(57,135,229,.2);color:#7cb0ff}.po-sg.w{background:rgba(255,184,77,.18);color:#ffb84d}.po-cr .n em.sgt{color:var(--sub)}" +
     ".po-dt{width:100%;border-collapse:collapse;font-size:13.5px}.po-dt th{font-size:12px;color:var(--sub);text-align:right;font-weight:600;padding:4px}.po-dt th:first-child,.po-dt td:first-child{text-align:left}.po-dt td{text-align:right;padding:6px 4px;border-top:1px solid var(--line)}";
   document.head.appendChild(css);
 })();
