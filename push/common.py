@@ -15,7 +15,8 @@ ALERT_TOPICS = ["chkchp-ch-" + t for t in ("focus", "danta", "cup", "gap", "accu
 def box_key():
     s = (os.environ.get("TG_TOKEN") or "").strip()
     if not s:
-        raise SystemExit("TG_TOKEN 비밀값이 없어 열쇠를 풀 수 없음")
+        print("::error::TG_TOKEN 비밀값이 없음 (daily-app Settings → Secrets → Actions)", flush=True)
+        raise SystemExit(3)
     return hashlib.sha256(("ch-push:" + s).encode()).digest()
 
 
