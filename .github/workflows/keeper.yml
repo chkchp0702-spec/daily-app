@@ -29,6 +29,9 @@ jobs:
             push/
             archive/x/push_keys.json
             archive/x/push_subs.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
       - name: 🔔 앱 푸시 준비
         continue-on-error: true
         run: pip install -q pywebpush cryptography

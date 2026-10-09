@@ -23,6 +23,9 @@ jobs:
             push/
             archive/x/push_keys.json
             archive/x/push_subs.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
       - run: pip install -q pywebpush cryptography
       - run: python3 push/relay.py ${{ github.event.inputs.secs }}
         env:
