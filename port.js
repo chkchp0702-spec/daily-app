@@ -14,7 +14,7 @@
   function won(v){ if (v >= 1e8) return (v / 1e8).toFixed(v >= 1e9 ? 1 : 2).replace(/\.?0+$/, "") + "억"; if (v >= 1e4) return Math.round(v / 1e4).toLocaleString("ko-KR") + "만"; return Math.round(v).toLocaleString("ko-KR"); }
   function md(d){ return d ? d.slice(5).replace("-", "/") : ""; }
 
-  window.portView = function(){ return '<div id="pobody"><div class="loading">포트 불러오는 중…</div></div>'; };
+  window.portView = function(){ setTimeout(function(){ if (window.brainCard) brainCard(document.getElementById("pobrain"), false); }, 0); return '<div id="pobrain"></div><div id="pobody"><div class="loading">포트 불러오는 중…</div></div>'; };
   window.portInit = function(){
     var t = Date.now();
     Promise.all([fetch(URL_P + "?" + t).then(function(r){ if (!r.ok) throw 0; return r.json(); }),

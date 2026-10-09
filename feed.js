@@ -19,7 +19,8 @@
   }
 
   window.feedView = function(){
-    return '<div class="fd-top"><div class="fd-src" id="fdsrc"></div>' +
+    setTimeout(function(){ if (window.brainCard) brainCard(document.getElementById("fdbrain"), true); }, 0);
+    return '<div id="fdbrain"></div><div class="fd-top"><div class="fd-src" id="fdsrc"></div>' +
       '<input id="fdq" class="fd-q" type="search" placeholder="🔎 검색 (예: 반도체, TSMC, 금리)"></div>' +
       '<div id="fdbody"><div class="loading">블로그·텔레그램 불러오는 중…</div></div>';
   };
