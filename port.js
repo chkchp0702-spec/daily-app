@@ -14,6 +14,10 @@
   function won(v){ if (v >= 1e8) return (v / 1e8).toFixed(v >= 1e9 ? 1 : 2).replace(/\.?0+$/, "") + "억"; if (v >= 1e4) return Math.round(v / 1e4).toLocaleString("ko-KR") + "만"; return Math.round(v).toLocaleString("ko-KR"); }
   function md(d){ return d ? d.slice(5).replace("-", "/") : ""; }
 
+  document.addEventListener("click", function(ev){
+    var t = ev.target.closest && ev.target.closest("#pobody [data-op], #pobrain [data-op]");
+    if (t && window.openOP){ ev.preventDefault(); ev.stopPropagation(); openOP(t.getAttribute("data-op")); }
+  }, true);
   window.portView = function(){ setTimeout(function(){ if (window.brainCard) brainCard(document.getElementById("pobrain"), false); }, 0); return '<div id="pobrain"></div><div id="pobody"><div class="loading">포트 불러오는 중…</div></div>'; };
   window.portInit = function(){
     var t = Date.now();
@@ -83,9 +87,9 @@
     h += '<div class="sec">🧩 어느 칸이 벌고 잃었나 <small class="mut">' + md(P.start) + '부터 기여 %p · 칸별 신호(S&P 대비·20일선)</small></div><section class="card po-ct">' +
       P.hold.slice().sort(function(a, b){ return b.contrib - a.contrib; }).map(function(x){
         var i = P.hold.indexOf(x), w = Math.abs(x.contrib) / mx * 50;
-        var us = x.us.map(function(u){ return u.t + " " + sg(u.since, 1); }).join(" · ");
+        var us = x.us.map(function(u){ return '<span class="po-tk" data-op="' + e(u.t) + '">' + e(u.t) + '</span> ' + sg(u.since, 1); }).join(" · ");
         var sgc = /^강함/.test(x.sig || "") ? "g" : /^약함/.test(x.sig || "") ? "b" : /^꺾이/.test(x.sig || "") ? "w" : "";
-        return '<div class="po-cr"><div class="n"><i style="background:' + COL[i % COL.length] + '"></i>' + e(x.name) + ' <small>' + x.pct + '%</small>' + (sgc ? ' <span class="po-sg ' + sgc + '">' + e(x.sig.split(" — ")[0]) + '</span>' : '') + '<em>' + e(us) + '</em>' + (sgc ? '<em class="sgt">' + e((x.sig.split(" — ")[1] || "")) + '</em>' : '') + '</div>' +
+        return '<div class="po-cr"><div class="n"><i style="background:' + COL[i % COL.length] + '"></i>' + e(x.name) + ' <small>' + x.pct + '%</small>' + (sgc ? ' <span class="po-sg ' + sgc + '">' + e(x.sig.split(" — ")[0]) + '</span>' : '') + '<em>' + us + '</em>' + (sgc ? '<em class="sgt">' + e((x.sig.split(" — ")[1] || "")) + '</em>' : '') + '</div>' +
           '<div class="bar"><span class="' + (x.contrib >= 0 ? "p" : "m") + '" style="width:' + w.toFixed(1) + '%"></span></div><b class="' + cls(x.contrib) + '">' + sg(x.contrib) + 'p</b></div>'; }).join("") + '</section>';
 
     // ⑤ 날짜별
@@ -141,7 +145,7 @@
     box.innerHTML = plan().map(function(p){
       return '<div class="po-r' + (p.kick ? ' po-rk' : '') + '"><div class="po-rh"><i style="background:' + (p.kick ? "#ff6b6b" : COL[p.i % COL.length]) + '"></i><b>' + e(p.x.name) + '</b><span class="pct">' + p.x.pct + '%</span><span class="am">' + won(p.amt) + '원</span></div>' +
         p.items.map(function(it){
-          return '<div class="po-it"><span class="tk">' + e(it.nm) + (it.code !== it.nm ? ' <small>' + e(it.code) + '</small>' : '') + '</span>' +
+          return '<div class="po-it" data-op="' + e(it.code) + '"><span class="tk">' + e(it.nm) + (it.code !== it.nm ? ' <small>' + e(it.code) + '</small>' : '') + ' <i class="po-go">›</i></span>' +
             '<span class="v">' + (it.cur === "$" ? (it.usd != null ? '$' + Math.round(it.usd).toLocaleString("en-US") + ' · ' : '') : won(it.amt) + '원 · ') +
             (it.sh != null ? '<b>' + it.sh.toLocaleString("ko-KR") + '주</b>' : it.cur === "현지" ? '현지 통화로' : '가격 확인') + '</span></div>' +
             (it.note ? '<div class="po-itn">' + e(it.note) + '</div>' : ''); }).join("") +
@@ -157,11 +161,11 @@
       (ks.win != null ? ' · 이긴 비율 <b>' + ks.win + '%</b>' : '') + '</span>' + (ks.avg_win != null ? '<span>이길 때 <b class="up">' + sg(ks.avg_win, 1) + '</b> · 질 때 <b class="dn">' + sg(ks.avg_loss, 1) + '</b></span>' : '') +
       (ks.paused ? '<span class="warn">⛔ 브레이크 중 (새 진입 멈춤)</span>' : '') + '</div>';
     h += '<div class="po-kh">지금 들고 있는 것</div>' + (K.open.length ? K.open.map(function(o){
-      return '<div class="po-kp"><div><b>' + e(nm(o.name)) + '</b> <small>' + e(o.code) + '</small>' + (o.whale ? ' <span class="po-sg g">🐋</span>' : '') + (o.half ? ' <span class="po-sg w">절반 익절</span>' : '') +
+      return '<div class="po-kp" data-op="' + e(o.code) + '"><div><b>' + e(nm(o.name)) + ' <i class="po-go">›</i></b> <small>' + e(o.code) + '</small>' + (o.whale ? ' <span class="po-sg g">🐋</span>' : '') + (o.half ? ' <span class="po-sg w">절반 익절</span>' : '') +
         '<em>' + e(o.src) + ' · ' + md(o.d0) + ' 진입 ' + pr(o.entry) + ' · ' + o.days + '일째 · 손절 ' + pr(o.stop) + '</em></div><b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></div>'; }).join("")
       : '<div class="po-itn">빈 자리 — 다음 확인된 돌파를 기다리는 중</div>');
     if (K.closed.length) h += '<div class="po-kh">끝난 거래</div>' + K.closed.slice(0, 8).map(function(c){
-      return '<div class="po-kp"><div><b>' + e(nm(c.name)) + '</b> <small>' + e(c.code) + '</small><em>' + md(c.d0) + '→' + md(c.d1) + ' · ' + c.days + '일 · ' + e(c.why) + '</em></div><b class="' + cls(c.r) + '">' + sg(c.r, 1) + '</b></div>'; }).join("");
+      return '<div class="po-kp" data-op="' + e(c.code) + '"><div><b>' + e(nm(c.name)) + ' <i class="po-go">›</i></b> <small>' + e(c.code) + '</small><em>' + md(c.d0) + '→' + md(c.d1) + ' · ' + c.days + '일 · ' + e(c.why) + '</em></div><b class="' + cls(c.r) + '">' + sg(c.r, 1) + '</b></div>'; }).join("");
     h += '<p class="note">' + e(K.note) + '</p></section>';
     return h;
   }
@@ -206,6 +210,8 @@
     ".po-mx td{text-align:right;padding:8px 3px;border-top:1px solid var(--line);vertical-align:top}.po-mx td:first-child{text-align:left;font-weight:800;white-space:nowrap}.po-mx td small{display:block;font-weight:400;font-size:10.5px;color:var(--sub)}" +
     ".po-mx td em{display:block;font-style:normal;font-size:10.5px}.po-mx tr[data-pf]{cursor:pointer}.po-mx tr.on td{background:rgba(233,196,106,.08)}.po-mx tr.mkt td{color:var(--sub);font-size:12px}" +
     ".po-pf2{margin:12px 0 8px}.po-hero.kick{background:linear-gradient(160deg,rgba(255,107,107,.16),rgba(18,24,38,.4) 60%)}" +
+    ".po-go{font-style:normal;color:var(--c,#e9c46a);font-weight:800;margin-left:2px}.po-it[data-op],.po-kp[data-op],.po-tk{cursor:pointer}.po-tk{text-decoration:underline dotted;text-underline-offset:2px;color:var(--text)}" +
+    ".po-it[data-op]:active,.po-kp[data-op]:active{background:rgba(255,255,255,.05)}" +
     ".po-dt{width:100%;border-collapse:collapse;font-size:13.5px}.po-dt th{font-size:12px;color:var(--sub);text-align:right;font-weight:600;padding:4px}.po-dt th:first-child,.po-dt td:first-child{text-align:left}.po-dt td{text-align:right;padding:6px 4px;border-top:1px solid var(--line)}.po-dt td em{display:block;font-size:10.5px}";
   document.head.appendChild(css);
 })();
