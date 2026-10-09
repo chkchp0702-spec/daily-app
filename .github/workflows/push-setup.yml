@@ -1,0 +1,22 @@
+name: push-setup
+# 🔔 처음 한 번: 앱 푸시 열쇠 만들기 (archive/x/push_keys.json — 비밀 열쇠는 TG_TOKEN 으로 잠금)
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "열쇠 새로 만들기 (모두 다시 켜야 함)"
+        default: "no"
+permissions:
+  contents: write
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q cryptography && python3 push/setup.py $([ "${{ github.event.inputs.force }}" = "yes" ] && echo --force)
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+      - run: |
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git add archive/x/push_keys.json
+          git diff --cached --quiet || (git commit -m "🔔 앱 푸시 열쇠" && git pull --rebase -q && git push)

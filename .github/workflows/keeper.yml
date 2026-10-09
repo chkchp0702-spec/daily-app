@@ -23,7 +23,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: keeper.py
-      - run: python3 keeper.py
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            keeper.py
+            push/
+            archive/x/push_keys.json
+            archive/x/push_subs.json
+      - name: 🔔 앱 푸시 준비
+        continue-on-error: true
+        run: pip install -q pywebpush cryptography
+      - name: 지킴이 + 🔔 앱 푸시 중계(같이 깨어 있음)
+        run: |
+          if [ -f archive/x/push_keys.json ]; then (python3 push/relay.py 23000 > relay.log 2>&1 &) ; fi
+          python3 keeper.py
+          echo "---- 푸시 중계 기록"; tail -n 60 relay.log 2>/dev/null || true
         env:
           GH_TOKEN: ${{ github.token }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}

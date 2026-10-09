@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CH Investing">
 <meta name="theme-color" content="#0b0f17">
+<link rel="manifest" href="app.webmanifest">
 <link rel="apple-touch-icon" href="icon.png?v=2">
 <link rel="icon" href="icon.png?v=2">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -409,7 +410,7 @@ if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.clo
 
 var CATS = [
   {key:"market", name:"시황", short:"시황",     icon:"🌐", color:"#7c9cff", desc:"오늘의 시장 전략 리포트"},
-  {key:"feed",   name:"내 피드", short:"피드",  icon:"📰", color:"#f4a261", desc:"매일 보는 블로그·텔레그램 한곳에 · 시황리포트 재료"},
+  {key:"port",   name:"포트", short:"포트",     icon:"💼", color:"#e9c46a", desc:"시황리포트대로 투자했다면 — 지금 담을 비중과 지난 성적"},
   {key:"whale",  name:"고래", short:"고래",     icon:"🐋", color:"#3dd6c6", desc:"기관·유명 투자자 TOP 40 보유 변화"},
   {key:"cup",    name:"컵차트", short:"컵",   icon:"☕", color:"#ffb84d", desc:"컵앤핸들 돌파 후보"},
   {key:"gap",    name:"갭차트", short:"갭",   icon:"📈", color:"#c38bff", desc:"갭 돌파 후보"},
@@ -417,8 +418,9 @@ var CATS = [
   {key:"accum",  name:"조용한 매집", short:"매집", icon:"🤫", color:"#ff8fc7", desc:"거래량은 늘고 가격은 제자리인 종목"},
   {key:"onepager", name:"종목리포트", short:"종목", icon:"📄", color:"#5ac8fa", desc:"약 2만 종목 + ETF 6천 개 · 검색하면 바로"},
   {key:"danta",  name:"단타", short:"단타",     icon:"⚡", color:"#ff6b6b", desc:"장중 단타 알람 · 이후 수익률 추적 · 시험 중"},
-  {key:"alarm",  name:"알림", short:"알림",     icon:"🔔", color:"#ffd166", desc:"원하는 신호를 휴대폰 푸시로 받기 (무료)"},
-  {key:"idea",   name:"의견함", short:"의견",   icon:"💬", color:"#9ad0ff", desc:"앱에 바라는 점을 남겨 주세요 · 사진·파일 첨부 가능"}
+  {key:"alarm",  name:"알림", short:"알림",     icon:"🔔", color:"#ffd166", desc:"이 휴대폰으로 알림 받을지 켜고 끄기"},
+  {key:"idea",   name:"의견함", short:"의견",   icon:"💬", color:"#9ad0ff", desc:"앱에 바라는 점을 남겨 주세요 · 사진·파일 첨부 가능"},
+  {key:"feed",   name:"내 피드", short:"피드",  icon:"📰", color:"#f4a261", desc:"매일 보는 블로그·텔레그램 한곳에 · 시황리포트 재료"}
 ];
 var M = null, cur = null, curDate = null, store = {};
 try { store = JSON.parse(localStorage.getItem("app") || "{}"); } catch(e) {}
@@ -516,11 +518,12 @@ function go(key, id){
   var items = (M.cats[key] || []);
   curDate = id || (items[0] && items[0].id);
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
-          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">ntfy 무료 푸시</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "feed" ? '<span class="chip">블로그 3 · 텔레그램 3</span><span class="chip">매시간 :40</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
-          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
+          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">켜기 · 끄기만</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "port" ? '<span class="chip">10/2부터 · 매일 갱신</span>' : key === "feed" ? '<span class="chip">블로그 3 · 텔레그램 6</span><span class="chip">매시간 :40</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
+          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" && key !== "port" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
   if (key === "onepager") { $("main").innerHTML = h + opView(); opInit(id); window.scrollTo(0, 0); return; }
   if (key === "alarm") { $("main").innerHTML = h + alarmView(); alarmInit(); window.scrollTo(0, 0); return; }
   if (key === "idea") { $("main").innerHTML = h + ideaView(); ideaInit(); window.scrollTo(0, 0); return; }
+  if (key === "port") { $("main").innerHTML = h + portView(); portInit(); window.scrollTo(0, 0); return; }
   if (key === "feed") { $("main").innerHTML = h + feedView(); feedInit(); window.scrollTo(0, 0); return; }
   if (!items.length) {
     h += '<div class="empty"><div class="big">🗂️</div>아직 모인 자료가 없어요.<br>' +
@@ -1291,7 +1294,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261009a";
+var APPV = "20261009b";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1335,8 +1338,10 @@ getJSON("manifest.json?" + Date.now()).then(function(m){
 <script src="plus6.js?v=7"></script>
 <script src="plus7.js?v=4"></script>
 <script src="plus8.js?v=9"></script>
-<script src="feed.js?v=1"></script>
-<script src="simple.js?v=9"></script>
+<script src="feed.js?v=2"></script>
+<script src="push.js?v=1"></script>
+<script src="port.js?v=1"></script>
+<script src="simple.js?v=10"></script>
 <script src="pdfx.js?v=4"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
