@@ -81,20 +81,17 @@
         setTimeout(function(){
           fetch("https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/kick.json?" + Math.floor(Date.now() / 300000)).then(function(r){ return r.ok ? r.json() : null; }).then(function(K){
             var box = document.getElementById("mkkick"); if (!box || !K) return;
-            var dw = (K.open || []).reduce(function(s, o){ return s + (o.w || 0); }, 0), st = K.stat || {};
-            var WR = (K.whale && K.whale.rows || []).filter(function(r){ return r.on; }), bw = WR.reduce(function(s, r){ return s + (r.w || 0); }, 0), kw = dw + bw;
+            var st = K.stat || {}, HL = K.hold || [], kw = HL.reduce(function(s, o){ return s + (o.w || 0); }, 0);
             var nm = function(x){ return String(x || "").replace(/,? (Inc\.?|Corp\.?|Corporation|Company|Ltd\.?|plc|CORP)\b.*$/i, "").replace(/ (Common Stock|Ordinary Shares).*$/i, ""); };
             var sg = function(v){ return v == null ? "–" : (v > 0 ? "+" : "") + (+v).toFixed(1) + "%"; };
             var rowsK = al.map(function(a){ var k = /현금/.test(a.name) ? Math.round((a.pct - kw) * 10) / 10 : a.pct;
               return '<tr><td>' + e(a.name) + '</td><td>' + a.pct + '%</td><td' + (k !== a.pct ? ' class="mk-ch"' : '') + '>' + k + '%</td></tr>'; }).join("") +
-              (bw ? '<tr class="mk-k mk-w"><td>🐋 고래 바스켓 <small>' + e(K.whale.q) + ' 13F 큰 신규 ' + WR.length + '종목 · 같은 비중 · 분기 보유</small></td><td>–</td><td><b>' + (Math.round(bw * 10) / 10) + '%</b> <small class="' + (K.whale.ret >= 0 ? "up" : "dn") + '" style="display:inline">' + sg(K.whale.ret) + '</small></td></tr>' +
-                '<tr class="mk-ko"><td colspan="3" style="text-align:left">' + WR.map(function(r){ return e(r.t) + ' <span class="' + (r.r >= 0 ? "up" : "dn") + '">' + sg(r.r) + '</span>'; }).join(" · ") + '</td></tr>' : '') +
-              '<tr class="mk-k"><td>⚡ 돌파 슬리브 <small>확인된 돌파 · 자리 ' + e(st.slots || "") + '</small></td><td>–</td><td><b>' + (Math.round(dw * 10) / 10) + '%</b></td></tr>' +
-              (K.open || []).map(function(o){ return '<tr class="mk-ko"><td>' + e(nm(o.name)) + ' <small>' + e(o.code) + ' · ' + e(String(o.src || "").replace(/\(.*\)/, "")) + (o.half ? ' · 절반 익절' : '') + '</small></td><td></td><td>' + (Math.round(o.w * 10) / 10) + '% <small class="' + (o.r >= 0 ? "up" : "dn") + '">' + sg(o.r) + '</small></td></tr>'; }).join("");
+              '<tr class="mk-k"><td>⚡ 킥 <small>성과 확인된 신호만 · ' + HL.length + '종목</small></td><td>–</td><td><b>' + (Math.round(kw * 10) / 10) + '%</b></td></tr>' +
+              HL.map(function(o){ return '<tr class="mk-ko"><td><span class="mk-tg">' + e(o.tags || "") + '</span> ' + e(nm(o.name)) + ' <small>' + e(o.code) + '</small></td><td></td><td>' + (Math.round(o.w * 10) / 10) + '% <small class="' + (o.r >= 0 ? "up" : "dn") + '">' + sg(o.r) + '</small></td></tr>'; }).join("");
             box.outerHTML = card("⚡ 킥 포함 자산 배분 <span class='mut'>기본 vs 킥 — 같은 날 같은 기준</span>",
-              '<div class="mk-st"><span>💼 기본 <b class="' + (st.base >= 0 ? "up" : "dn") + '">' + sg(st.base) + '</b></span><span>⚡ 킥 <b class="' + (st.kick >= 0 ? "up" : "dn") + '">' + sg(st.kick) + '</b></span>' + (st.whale != null ? '<span>🐋 고래 <b class="' + (st.whale >= 0 ? "up" : "dn") + '">' + sg(st.whale) + '</b></span>' : '') + '<span>S&P <b>' + sg(st.spy) + '</b></span></div>' +
+              '<div class="mk-st"><span>💼 기본 <b class="' + (st.base >= 0 ? "up" : "dn") + '">' + sg(st.base) + '</b></span><span>⚡ 킥 <b class="' + (st.kick >= 0 ? "up" : "dn") + '">' + sg(st.kick) + '</b></span><span>S&P <b>' + sg(st.spy) + '</b></span></div>' +
               '<table class="mk-t"><tr><th></th><th>💼 기본</th><th>⚡ 킥 포함</th></tr>' + rowsK + '</table>' +
-              '<p class="note">킥 포함 = 기본 배분에서 현금 15%p 를 떼어 ⚡ 돌파 9%(스캐너가 돌파를 확인한 순간 1.8%씩 · −5% 손절 · +15% 절반 익절) + 🐋 고래 바스켓 6%(13F 큰 신규 포지션을 같은 비중으로 분기 동안 보유 — 바스켓은 매 분기 S&P 를 이겼음). 자세한 건 💼 포트 탭.</p>');
+              '<p class="note">⚡ 킥 = 기본 배분에서 현금 15%p 를 떼어 <b>성과가 확인된 신호</b>에만 담은 것 — 🐋 고래 13F 큰 신규 · ☕ 컵 돌파 · 📈 돌파 갭 · 🤫 조용한 매집(표본 20건 차면 자동). 종목 앞 이모티콘이 들어온 이유예요. 자세한 건 💼 포트 탭.</p>');
           }).catch(function(){});
         }, 0);
       }

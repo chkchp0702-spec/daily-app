@@ -38,7 +38,7 @@
     var B = P.bench, mk = [["S&P500", "S&P500"], ["코스피", "코스피"], ["주식60·채권40", "60·40"]];
     // 두 포트 (같은 날짜 줄)
     var PF = [{k: "base", ic: "💼", t: "기본 포트", s: "킥 없음 · 배분표 그대로", s2: "킥 없음", line: P.nav, color: "#e9c46a"}];
-    if (K) PF.push({k: "kick", ic: "⚡", t: "킥 포트", s: (K.whale ? "현금 15%p → ⚡ 돌파 9% + 🐋 고래 6%" : "현금 15%p → 확인된 돌파에 3%씩"), s2: (K.whale ? "돌파 9 + 고래 6" : "킥 15% 포함"), line: K.kick, color: "#ff6b6b"});
+    if (K) PF.push({k: "kick", ic: "⚡", t: "킥 포트", s: "현금 15%p → 성과 확인된 신호만 🐋☕📈🤫", s2: "킥 15% 포함", line: K.kick, color: "#ff6b6b"});
     PF.forEach(function(f){
       var v = f.line, n = v.length, peak = -1e9, mdd = 0, win = 0, best = null, worst = null;
       for (var i = 0; i < n; i++){ var x = 1 + v[i] / 100; peak = Math.max(peak, x); mdd = Math.min(mdd, (x / peak - 1) * 100);
@@ -143,7 +143,8 @@
 
   // 칸마다 무엇을 얼마나
   function wRows(){ return (K && K.whale && K.whale.rows || []).filter(function(r){ return r.on; }); }
-  function kickW(){ return (K && S.pf === "kick") ? K.open.reduce(function(a, o){ return a + (o.w || 0); }, 0) + wRows().reduce(function(a, r){ return a + (r.w || 0); }, 0) : 0; }
+  function kHold(){ return K && K.hold ? K.hold : (K ? K.open.map(function(o){ return {code: o.code, name: o.name, tags: "", w: o.w, r: o.r, now: o.now, rule: "손절 " + pr(o.stop)}; }) : []); }
+  function kickW(){ return (K && S.pf === "kick") ? kHold().reduce(function(a, o){ return a + (o.w || 0); }, 0) : 0; }
   function plan(){
     var kw = kickW(), out;
     out = P.hold.map(function(x, i){
@@ -164,15 +165,11 @@
       }
       return {x: x, i: i, amt: amt, items: items};
     });
-    var bw = wRows().reduce(function(a, r){ return a + (r.w || 0); }, 0), dw = kw - bw;
-    if (bw) out.push({x: {name: "🐋 고래 바스켓", pct: Math.round(bw * 10) / 10}, i: -1, amt: S.amt * bw / 100, kick: 1, items: wRows().map(function(r){
-      var a = S.amt * r.w / 100, usd = P.fx ? a / P.fx : null;
-      return {nm: r.t, code: r.t, amt: a, usd: usd, cur: "$", sh: usd && r.now ? Math.floor(usd / r.now) : null, note: (r.by || []).slice(0, 2).join(" · ") + " 신규 · 다음 분기 목록까지 보유"}; })});
-    if (dw > 0.05) out.push({x: {name: "⚡ 돌파 슬리브", pct: Math.round(dw * 10) / 10}, i: -1, amt: S.amt * dw / 100, kick: 1, items: K.open.map(function(o){
-      var a = S.amt * o.w / 100, kr = /^\d{6}\.K[SQ]$/.test(o.code), us = /^[A-Z.\-]+$/.test(o.code);
+    if (kw) out.push({x: {name: "⚡ 킥", pct: Math.round(kw * 10) / 10}, i: -1, amt: S.amt * kw / 100, kick: 1, items: kHold().map(function(o){
+      var a = S.amt * o.w / 100, kr = /^\d{6}\.K[SQ]$/.test(o.code), us = /^[A-Z\-]+$/.test(o.code);
       var usd = us && P.fx ? a / P.fx : null;
-      return {nm: nm(o.name), code: o.code, amt: a, usd: usd, cur: us ? "$" : kr ? "원" : "현지", sh: us ? (usd ? Math.floor(usd / o.now) : null) : kr ? Math.floor(a / o.now) : null,
-              note: "손절 " + pr(o.stop) + " · 절반 익절 " + pr(o.take)}; })});
+      return {nm: (o.tags ? o.tags + " " : "") + nm(o.name), code: o.code, amt: a, usd: usd, cur: us ? "$" : kr ? "원" : "현지", sh: us ? (usd && o.now ? Math.floor(usd / o.now) : null) : kr ? Math.floor(a / o.now) : null,
+              note: o.rule || ""}; })});
     return out;
   }
   function rows(){
@@ -214,19 +211,18 @@
   }
   function kickHtml(){
     var ks = K.stat, d = ks.kick - ks.base, rows2;
-    var h = '<div class="sec">⚡ 킥 칸 속 <small class="mut">킥 포트에만 있는 15%' + (K.whale ? ' (⚡ 돌파 9 + 🐋 고래 6)' : '') + ' · 기본 포트보다 ' + sg(d) + 'p</small></div><section class="card po-vs">' +
-      '<div class="po-ks"><span>⚡ 돌파 슬리브 <b class="' + cls(K.sleeve) + '">' + sg(K.sleeve) + '</b></span>' + (K.whale ? '<span>🐋 고래 바스켓 <b class="' + cls(K.whale.ret) + '">' + sg(K.whale.ret) + '</b></span>' : '') + '<span>자리 <b>' + ks.slots + '</b></span><span>끝난 거래 <b>' + ks.trades + '</b>' +
+    var h = '<div class="sec">⚡ 킥 칸 속 <small class="mut">킥 포트에만 있는 15% · 기본 포트보다 ' + sg(d) + 'p</small></div><section class="card po-vs">' +
+      '<div class="po-ks">' + (K.whale ? '<span>🐋 들어온 고래 종목 <b class="' + cls(K.whale.ret) + '">' + sg(K.whale.ret) + '</b></span><span>☕📈 돌파 종목 <b class="' + cls(K.sleeve) + '">' + sg(K.sleeve) + '</b></span>' : '<span>슬리브 <b class="' + cls(K.sleeve) + '">' + sg(K.sleeve) + '</b></span>') + '<span>자리 <b>' + ks.slots + '</b></span><span>끝난 거래 <b>' + ks.trades + '</b>' +
       (ks.win != null ? ' · 이긴 비율 <b>' + ks.win + '%</b>' : '') + '</span>' + (ks.avg_win != null ? '<span>이길 때 <b class="up">' + sg(ks.avg_win, 1) + '</b> · 질 때 <b class="dn">' + sg(ks.avg_loss, 1) + '</b></span>' : '') +
       (ks.paused ? '<span class="warn">⛔ 브레이크 중 (새 진입 멈춤)</span>' : '') + '</div>';
-    h += '<div class="po-kh">지금 들고 있는 것</div>' + (K.open.length ? K.open.map(function(o){
-      return '<div class="po-kp" data-op="' + e(o.code) + '"><div><b>' + e(nm(o.name)) + ' <i class="po-go">›</i></b> <small>' + e(o.code) + '</small>' + (o.whale ? ' <span class="po-sg g">🐋</span>' : '') + (o.half ? ' <span class="po-sg w">절반 익절</span>' : '') +
-        '<em>' + e(o.src) + ' · ' + md(o.d0) + ' 진입 ' + pr(o.entry) + ' · ' + o.days + '일째 · 손절 ' + pr(o.stop) + '</em></div><b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></div>'; }).join("")
-      : '<div class="po-itn">빈 자리 — 다음 확인된 돌파를 기다리는 중</div>');
-    if (K.whale && K.whale.rows && K.whale.rows.length){ var W = K.whale;
-      h += '<div class="po-kh">🐋 고래 바스켓 <small>' + e(W.q) + ' 13F 큰 신규 · 같은 비중 · 다음 분기 목록까지 · 포트의 ' + Math.round(W.sleeve * 100) + '%</small> <b class="' + cls(W.ret) + '" style="float:right">' + sg(W.ret, 1) + '</b></div>' +
-        W.rows.map(function(r){ return '<div class="po-kp" data-op="' + e(r.t) + '"><div><b>' + e(r.t) + ' <i class="po-go">›</i></b>' + (r.n > 1 ? ' <span class="po-sg g">고래 ' + r.n + '곳</span>' : '') + (!r.on ? ' <span class="po-sg b">−30% 정리</span>' : '') +
-          '<em>' + e((r.by || []).join(" · ")) + ' · 13F 비중 ' + r.w13f + '% · ' + md(r.d0) + ' 진입</em></div><b class="' + cls(r.r) + '">' + sg(r.r, 1) + '</b></div>'; }).join("") +
-        '<p class="po-itn" style="padding-left:0">' + e(W.why || "") + '</p>'; }
+    if (K.proof) h += '<div class="po-pf3">' + [["whale", "🐋 고래"], ["cup", "☕ 컵"], ["gap", "📈 갭"], ["accum", "🤫 매집"]].map(function(x){ var p = K.proof[x[0]] || {};
+      return '<span class="' + (p.on ? "on" : "wait") + '" data-tip="' + e(p.why || "") + '">' + x[1] + ' ' + (p.on ? '✓' : '⏳ ' + (p.n || 0) + '/20') + '</span>'; }).join("") + '</div>';
+    var HL = kHold();
+    h += '<div class="po-kh">지금 들고 있는 것 <small>' + HL.length + '종목</small></div>' + (HL.length ? HL.map(function(o){
+      return '<div class="po-kp" data-op="' + e(o.code) + '"><div><span class="po-tg">' + e(o.tags || "") + '</span> <b>' + e(nm(o.name)) + ' <i class="po-go">›</i></b> <small>' + e(o.code) + ' · ' + (Math.round(o.w * 10) / 10) + '%</small>' + (o.half ? ' <span class="po-sg w">절반 익절</span>' : '') +
+        '<em>' + md(o.d0) + ' 진입 ' + pr(o.entry) + ' · ' + e(o.rule || "") + (o.by && o.by.length ? ' · ' + e(o.by.join(", ")) : '') + '</em></div><b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></div>'; }).join("")
+      : '<div class="po-itn">빈 자리 — 확인된 신호를 기다리는 중</div>');
+    if (K.tags) h += '<p class="po-itn" style="padding-left:0">' + Object.keys(K.tags).map(function(k){ return k + ' ' + e(K.tags[k]); }).join(" · ") + '</p>';
     if (K.closed.length) h += '<div class="po-kh">끝난 거래</div>' + K.closed.slice(0, 8).map(function(c){
       return '<div class="po-kp" data-op="' + e(c.code) + '"><div><b>' + e(nm(c.name)) + ' <i class="po-go">›</i></b> <small>' + e(c.code) + '</small><em>' + md(c.d0) + '→' + md(c.d1) + ' · ' + c.days + '일 · ' + e(c.why) + '</em></div><b class="' + cls(c.r) + '">' + sg(c.r, 1) + '</b></div>'; }).join("");
     h += '<p class="note">' + e(K.note) + '</p></section>';
@@ -292,6 +288,8 @@
     ".po-cr .n em.pvs{color:var(--sub)}.po-cr .n em.pvs b.w{color:#4dd47a}.po-cr .n em.pvs b.l{color:#ff8a8a}" +
     ".po-pe details .po-per.more{display:none}.po-pe details.all .po-per.more{display:grid}.po-more{display:block;width:100%;margin-top:6px;border:1px dashed var(--line);background:none;color:var(--sub);border-radius:8px;padding:6px;font:inherit;font-size:12.5px;cursor:pointer}" +
     ".po-per.nb .n{opacity:.8}.po-sg.n{background:rgba(138,148,168,.18);color:#aab3c5}" +
+    ".po-pf3{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 2px}.po-pf3 span{font-size:11.5px;border-radius:999px;padding:3px 9px;border:1px solid var(--line)}.po-pf3 .on{background:rgba(77,212,122,.12);color:#4dd47a;border-color:transparent}.po-pf3 .wait{color:var(--sub)}" +
+    ".po-tg{font-size:13px;letter-spacing:-1px}" +
     ".po-dt{width:100%;border-collapse:collapse;font-size:13.5px}.po-dt th{font-size:12px;color:var(--sub);text-align:right;font-weight:600;padding:4px}.po-dt th:first-child,.po-dt td:first-child{text-align:left}.po-dt td{text-align:right;padding:6px 4px;border-top:1px solid var(--line)}.po-dt td em{display:block;font-size:10.5px}";
   document.head.appendChild(css);
 })();
