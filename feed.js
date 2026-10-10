@@ -82,9 +82,12 @@
     chips.push({k: "PIN", t: "📌 " + nP});
     var cnt = function(k){ return d.items.filter(function(i){ return K_OF(i) === k; }).length; };
     [["K:mine", "📝 블로그·텔레그램"], ["K:news", "🌐 뉴스"], ["K:ai", "🧠 AI가 찾은 글"]].forEach(function(x){ var n = cnt(x[0].slice(2)); if (n) chips.push({k: x[0], t: x[1] + " " + n}); });
-    d.sources.forEach(function(s){ chips.push({k: s.id, t: IC[s.kind] + " " + s.name.replace(/\s*\(.*\)/, "") + " " + s.n, bad: !s.ok}); });
+    // 출처 칩: 고른 묶음(📝/🌐/🧠)의 출처만 (10/10 뉴스 50곳 — 한 줄에 다 늘어놓지 않게)
+    var cur = S.f.indexOf("K:") === 0 ? S.f.slice(2) : (function(){ var x = d.sources.filter(function(s){ return s.id === S.f; })[0]; return x ? K_OF(x) : "mine"; })();
+    var SRC = d.sources.filter(function(s){ return K_OF(s) === cur; }).sort(function(x, y){ return (y.n || 0) - (x.n || 0); });
+    SRC.forEach(function(s){ chips.push({k: s.id, t: IC[s.kind] + " " + s.name.replace(/\s*\(.*\)/, "") + " " + s.n, bad: !s.ok}); });
     var chip = function(c){ return '<button class="fd-chip' + (S.f === c.k ? " on" : "") + (c.bad ? " bad" : "") + '" data-fk="' + e(c.k) + '">' + e(c.t) + '</button>'; };
-    var nTop = chips.length - d.sources.length;
+    var nTop = chips.length - SRC.length;
     srcEl.innerHTML = '<div class="fd-row">' + chips.slice(0, nTop).map(chip).join("") + '</div><div class="fd-row">' + chips.slice(nTop).map(chip).join("") + '</div>' +
       '<div class="fd-meta">' + e(d.at.slice(5).replace("-", "/")) + ' 모음 · 매시간 :40 · 7일치</div>' +
       (S.usedInfo && S.usedInfo.date ? '<div class="fd-sel">📝 ' + e(S.usedInfo.date.slice(5).replace("-", "/")) + ' 시황리포트: 글 <b>' + (S.usedInfo.read || "–") + '개</b> 읽고 <b>' + nU + '개</b> 골라 반영' +
