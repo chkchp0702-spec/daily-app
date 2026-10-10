@@ -436,3 +436,9 @@ a.pdfb{display:block;box-sizing:border-box;text-decoration:none;color:var(--text
 /* 🧪 단타 배운 것 (10/10) */
 .lrn{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}.lrn th{font-size:11px;color:var(--sub);font-weight:600;padding:3px 2px;text-align:center}.lrn th:first-child{width:24%}
 .lrn td{padding:7px 2px;border-top:1px solid var(--line);text-align:center;vertical-align:top}.lrn td:first-child{text-align:left;font-weight:800}.lrn td small{display:block;font-size:10px;color:var(--dim);font-weight:400;margin-top:1px}
+
+/* ⚡ 킥 포함 자산 배분 (10/10) */
+.mk-st{display:flex;gap:14px;font-size:13px;color:var(--sub);margin-bottom:6px}.mk-st b{font-size:15px}
+.mk-t{width:100%;border-collapse:collapse;font-size:13px}.mk-t th{font-size:11px;color:var(--sub);font-weight:600;text-align:right;padding:3px 4px}.mk-t th:first-child{text-align:left}
+.mk-t td{padding:6px 4px;border-top:1px solid var(--line);text-align:right}.mk-t td:first-child{text-align:left}.mk-t td small{display:block;font-size:10.5px;color:var(--dim)}
+.mk-t td.mk-ch{color:#ffb84d;font-weight:700}.mk-t tr.mk-k td{background:rgba(255,107,107,.08);font-weight:800}.mk-t tr.mk-ko td{font-size:12.5px;padding-left:14px;border-top:1px dashed var(--line)}.mk-t tr.mk-ko td small.up{color:#e66767;display:inline}.mk-t tr.mk-ko td small.dn{color:#3987e5;display:inline}

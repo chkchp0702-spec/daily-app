@@ -76,6 +76,24 @@
         var al = L.allocation.slice().sort(function(a, b){ return b.pct - a.pct; });
         h += card("지금 자산 배분", V.hbars(al.map(function(a){ return {label: e(a.name), v: a.pct, text: a.pct + "%", tip: "<b>" + e(a.name) + "</b> " + a.pct + "%<br>" + e(a.instruments || "")}; }), {max: Math.max.apply(null, al.map(function(a){ return a.pct; })), color: "#3987e5"}) +
                   (d.allocation_note ? '<p class="note">' + rich(d.allocation_note) + '</p>' : ""));
+        // ⚡ 킥 포함 자산 배분 (10/10 사용자: "시황에 킥 자산배분 넣고") — 기본 배분에서 현금 일부를 확인된 돌파 종목에 3%씩
+        h += '<div id="mkkick"></div>';
+        setTimeout(function(){
+          fetch("https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/kick.json?" + Math.floor(Date.now() / 300000)).then(function(r){ return r.ok ? r.json() : null; }).then(function(K){
+            var box = document.getElementById("mkkick"); if (!box || !K) return;
+            var kw = (K.open || []).reduce(function(s, o){ return s + (o.w || 0); }, 0), st = K.stat || {};
+            var nm = function(x){ return String(x || "").replace(/,? (Inc\.?|Corp\.?|Corporation|Company|Ltd\.?|plc|CORP)\b.*$/i, "").replace(/ (Common Stock|Ordinary Shares).*$/i, ""); };
+            var sg = function(v){ return v == null ? "–" : (v > 0 ? "+" : "") + (+v).toFixed(1) + "%"; };
+            var rowsK = al.map(function(a){ var k = /현금/.test(a.name) ? Math.round((a.pct - kw) * 10) / 10 : a.pct;
+              return '<tr><td>' + e(a.name) + '</td><td>' + a.pct + '%</td><td' + (k !== a.pct ? ' class="mk-ch"' : '') + '>' + k + '%</td></tr>'; }).join("") +
+              '<tr class="mk-k"><td>⚡ 킥 슬리브 <small>확인된 돌파 · 한 자리 3% · 자리 ' + e(st.slots || "") + '</small></td><td>–</td><td><b>' + (Math.round(kw * 10) / 10) + '%</b></td></tr>' +
+              (K.open || []).map(function(o){ return '<tr class="mk-ko"><td>' + e(nm(o.name)) + ' <small>' + e(o.code) + ' · ' + e(String(o.src || "").replace(/\(.*\)/, "")) + (o.half ? ' · 절반 익절' : '') + '</small></td><td></td><td>' + (Math.round(o.w * 10) / 10) + '% <small class="' + (o.r >= 0 ? "up" : "dn") + '">' + sg(o.r) + '</small></td></tr>'; }).join("");
+            box.outerHTML = card("⚡ 킥 포함 자산 배분 <span class='mut'>기본 vs 킥 — 같은 날 같은 기준</span>",
+              '<div class="mk-st"><span>💼 기본 <b class="' + (st.base >= 0 ? "up" : "dn") + '">' + sg(st.base) + '</b></span><span>⚡ 킥 <b class="' + (st.kick >= 0 ? "up" : "dn") + '">' + sg(st.kick) + '</b></span><span>S&P <b>' + sg(st.spy) + '</b></span></div>' +
+              '<table class="mk-t"><tr><th></th><th>💼 기본</th><th>⚡ 킥 포함</th></tr>' + rowsK + '</table>' +
+              '<p class="note">킥 포함 = 기본 배분에서 현금을 떼어 스캐너가 「돌파를 확인한 순간」에 3%씩(−5% 손절 · +15% 절반 익절 · 15일 시간 손절). 빈 자리는 현금. 자세한 건 💼 포트 탭.</p>');
+          }).catch(function(){});
+        }, 0);
       }
       // 5) 20일 흐름
       if (L && L.series){
