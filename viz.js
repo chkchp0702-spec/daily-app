@@ -31,8 +31,23 @@ var V = (function(){
     var p = ev.touches ? ev.touches[0] : ev;
     showTip(t.getAttribute("data-tip"), p.clientX, p.clientY);
   }
-  document.addEventListener("pointerover", function(ev){ if (ev.pointerType === "mouse") onTip(ev); });
-  document.addEventListener("pointerdown", onTip);
+  document.addEventListener("pointerover", function(ev){ if (ev.pointerType === "mouse") onTip(ev); cross(ev.target); });
+  document.addEventListener("pointerdown", function(ev){ onTip(ev); scrub = !!(ev.target.closest && ev.target.closest("svg.lc")); cross(ev.target); });
+  // ④ 선 그래프는 손가락으로 좌우로 끌면 그 날짜 값이 따라온다
+  var scrub = false;
+  document.addEventListener("pointermove", function(ev){
+    if (!scrub || ev.pointerType === "mouse") return;
+    var el = document.elementFromPoint(ev.clientX, ev.clientY), t = el && el.closest && el.closest("svg.lc [data-tip]");
+    if (t){ showTip(t.getAttribute("data-tip"), ev.clientX, ev.clientY); cross(t); }
+  }, {passive: true});
+  ["pointerup", "pointercancel"].forEach(function(k){ document.addEventListener(k, function(){ scrub = false; }); });
+  function cross(t){
+    var r = t && t.closest && t.closest("svg.lc rect[data-tip]"); if (!r) return;
+    var sv = r.ownerSVGElement, ln = sv.querySelector("line.lc-x");
+    if (!ln){ ln = document.createElementNS("http://www.w3.org/2000/svg", "line"); ln.setAttribute("class", "lc-x"); sv.insertBefore(ln, sv.querySelector("rect[data-tip]")); }
+    var X = +(r.getAttribute("data-x") || (+r.getAttribute("x") + +r.getAttribute("width") / 2));
+    ln.setAttribute("x1", X); ln.setAttribute("x2", X); ln.setAttribute("y1", 0); ln.setAttribute("y2", r.getAttribute("height"));
+  }
   window.addEventListener("scroll", hideTip, {passive:true});
 
   /* ---------- 작은 가격 그래프 ---------- */
@@ -136,14 +151,21 @@ var V = (function(){
       else p.forEach(function(q){ s += '<circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="2.5" fill="' + sr.color + '" stroke="#121826" stroke-width="1.5"/>'; });
       ends.push([p[p.length - 1][1], sr]);
     });
+    // ② 표시점 (opt.marks = [{i, color, t}]) — 비중 바뀐 날·킥 매매 등
+    var mk = {};
+    (opt.marks || []).forEach(function(m){ if (m.i == null || m.i < 0 || m.i >= n) return; var X = x(m.i).toFixed(1);
+      s += '<line x1="' + X + '" x2="' + X + '" y1="' + T + '" y2="' + (H - B) + '" stroke="' + m.color + '" stroke-width="1" stroke-dasharray="2 3" opacity=".7"/>' +
+           '<circle cx="' + X + '" cy="' + (H - B + 4) + '" r="3.2" fill="' + m.color + '"/>';
+      (mk[m.i] = mk[m.i] || []).push(m.t); });
     // 끝 라벨 (겹치지 않게)
     ends.sort(function(a, b){ return a[0] - b[0]; });
     for (var k = 1; k < ends.length; k++) if (ends[k][0] - ends[k - 1][0] < 12) ends[k][0] = ends[k - 1][0] + 12;
     // 탭 영역 (날짜별)
     for (var i = 0; i < n; i++){
-      var tip = "<b>" + e(labels[i]) + "</b>" + series.map(function(sr){ return sr.vals[i] == null ? "" : '<br><i style="background:' + sr.color + '"></i>' + e(sr.name) + " " + fmt(sr.vals[i]) + (opt.unit || ""); }).join("");
+      var tip = "<b>" + e(labels[i]) + "</b>" + series.map(function(sr){ return sr.vals[i] == null ? "" : '<br><i style="background:' + sr.color + '"></i>' + e(sr.name) + " " + fmt(sr.vals[i]) + (opt.unit || ""); }).join("") +
+        (mk[i] ? mk[i].map(function(t){ return "<br>" + e(t); }).join("") : "");
       var x0 = i === 0 ? 0 : (x(i - 1) + x(i)) / 2, x1 = i === n - 1 ? W - R : (x(i) + x(i + 1)) / 2;
-      s += '<rect x="' + x0.toFixed(1) + '" y="0" width="' + (x1 - x0).toFixed(1) + '" height="' + (H - B) + '" fill="transparent" data-tip="' + e(tip) + '"/>';
+      s += '<rect x="' + x0.toFixed(1) + '" y="0" width="' + (x1 - x0).toFixed(1) + '" height="' + (H - B) + '" fill="transparent" data-x="' + x(i).toFixed(1) + '" data-tip="' + e(tip) + '"/>';
     }
     s += '</svg>';
     var leg = series.length > 1 ? '<div class="lg">' + series.map(function(sr){ var lv = sr.vals.filter(function(v){ return v != null; }).pop();

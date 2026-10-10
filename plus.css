@@ -444,3 +444,6 @@ a.pdfb{display:block;box-sizing:border-box;text-decoration:none;color:var(--text
 .mk-t td.mk-ch{color:#ffb84d;font-weight:700}.mk-t tr.mk-k td{background:rgba(255,107,107,.08);font-weight:800}.mk-t tr.mk-ko td{font-size:12.5px;padding-left:14px;border-top:1px dashed var(--line)}.mk-t tr.mk-ko td small.up{color:#e66767;display:inline}.mk-t tr.mk-ko td small.dn{color:#3987e5;display:inline}
 .mk-t tr.mk-w td{background:rgba(77,160,255,.09)}.mk-t tr.mk-ko td span.up{color:#e66767}.mk-t tr.mk-ko td span.dn{color:#3987e5}
 .mk-tg{letter-spacing:-1px}
+
+/* ④ 그래프 끌어 보기 (10/10) */
+svg.lc{touch-action:pan-y}.lc-x{stroke:var(--sub);stroke-width:1;stroke-dasharray:3 3;pointer-events:none}
