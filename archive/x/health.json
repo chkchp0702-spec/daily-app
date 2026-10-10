@@ -1,0 +1,212 @@
+{
+ "at": "2026-10-10 20:09",
+ "ok": false,
+ "problems": [
+  "#feed 화면에 「오류」"
+ ],
+ "data": [
+  {
+   "name": "💼 포트",
+   "ok": true,
+   "age_h": 0.1,
+   "lim": 3
+  },
+  {
+   "name": "⚡ 킥",
+   "ok": true,
+   "age_h": 0.1,
+   "lim": 3
+  },
+  {
+   "name": "🏠 홈",
+   "ok": true,
+   "age_h": 0.1,
+   "lim": 3
+  },
+  {
+   "name": "📊 성적표",
+   "ok": true,
+   "age_h": 0.1,
+   "lim": 3
+  },
+  {
+   "name": "🌏 동종주",
+   "ok": true,
+   "age_h": 0.1,
+   "lim": 3
+  },
+  {
+   "name": "🎯 집중",
+   "ok": true,
+   "age_h": 0.1,
+   "lim": 80
+  },
+  {
+   "name": "📰 피드",
+   "ok": true,
+   "age_h": 0.2,
+   "lim": 1.5
+  },
+  {
+   "name": "🧠 두뇌",
+   "ok": true,
+   "age_h": 0.4,
+   "lim": 3
+  },
+  {
+   "name": "🧪 단타 학습",
+   "ok": true,
+   "age_h": 4.5,
+   "lim": 80
+  },
+  {
+   "name": "📱 앱 목록",
+   "ok": true,
+   "age_h": 3.6,
+   "lim": 30
+  }
+ ],
+ "app": [
+  {
+   "tab": "home",
+   "s": 0.5,
+   "cards": 6,
+   "len": 1238,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "market",
+   "s": 0.5,
+   "cards": 28,
+   "len": 7228,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "port",
+   "s": 0.2,
+   "cards": 7,
+   "len": 2804,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "score",
+   "s": 0.3,
+   "cards": 9,
+   "len": 1447,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "whale",
+   "s": 0.4,
+   "cards": 22,
+   "len": 1423,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "cup",
+   "s": 0.4,
+   "cards": 13,
+   "len": 3370,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "gap",
+   "s": 0.4,
+   "cards": 18,
+   "len": 3011,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "sector",
+   "s": 0.6,
+   "cards": 36,
+   "len": 5197,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "accum",
+   "s": 0.4,
+   "cards": 15,
+   "len": 1606,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "onepager",
+   "s": 0.3,
+   "cards": 1,
+   "len": 394,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "danta",
+   "s": 0.4,
+   "cards": 13,
+   "len": 2088,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "alarm",
+   "s": 0.2,
+   "cards": 2,
+   "len": 669,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "idea",
+   "s": 0.2,
+   "cards": 1,
+   "len": 201,
+   "bad": [],
+   "loading": 0,
+   "errs": []
+  },
+  {
+   "tab": "feed",
+   "s": 0.3,
+   "cards": 1,
+   "len": 394561,
+   "bad": [
+    "오류",
+    "오류"
+   ],
+   "loading": 0,
+   "errs": []
+  }
+ ],
+ "week_fixed": [
+  "10/10 단타 스스로 배우기(learn.py) · 09~12시 1분 자료 유실 고침",
+  "10/10 포트 비교 12곳 달러 기준 · 해외 상품 규칙(RULES 1-I) · 고른 상품 vs 원래 상품 채점",
+  "10/10 대만 제외 · 중국/홍콩 반도체 계열 70여 종목 비교 · 광통신 칸 킨웡 H주",
+  "10/10 피드에 블룸버그 5곳",
+  "10/10 ⚡ 킥 15% = 돌파 9% + 🐋 고래 바스켓 6% (13F 큰 신규·바이오 펀드 제외·10종목 같은 비중",
+  "10/10 ⚡ 킥 포트 하나로: 성과 확인 신호만(🐋 고래 · ☕ 컵 · 📈 갭 · 🤫 매집 — 표본 20↑·손익비 1",
+  "10/10 👻 킥 그림자 채점 — 못 들어온 신호(🤫·🎯·🔗)도 같은 규칙으로 「들어갔다면」 성적을 쌓아 20건·손익비",
+  "10/10 🧠 bets 자동 채점(Actions src/bets_score.py → market/bets_score.j",
+  "10/10 🧪 킥 시험 편입 — 돌파 표본이 부족해도 신호 전체·그림자 성적 10건↑·손익비 1.5↑면 절반 크기로 먼"
+ ],
+ "note": "매일 16:30 자동 검사. 「자가 업그레이드」(16:47)가 problems 를 먼저 고친다."
+}
