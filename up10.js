@@ -58,6 +58,8 @@
         setTimeout(function(){ var hd = document.querySelector("header"), jb = document.querySelector(".fold-jump");
           var y = el.getBoundingClientRect().top + window.scrollY - ((hd ? hd.offsetHeight : 0) + (jb ? jb.offsetHeight : 0) + 8);
           window.scrollTo({top: Math.max(0, y), behavior: "smooth"}); el.classList.add("flash"); setTimeout(function(){ el.classList.remove("flash"); }, 1800); }, 80); return; }
+      // ⚡ 킥 카드는 포트 탭이 「킥 포트」일 때만 있으니, 없으면 킥 포트로 바꿔서 다시 찾기
+      if (anchor === "pokick" && Date.now() - t0 > 400 && !find.sw){ var kb = document.querySelector('#pobody [data-pf="kick"]'); if (kb){ find.sw = 1; kb.click(); } }
       if (Date.now() - t0 < 8000) setTimeout(find, 150);
     })();
   };
