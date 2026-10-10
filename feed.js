@@ -10,6 +10,8 @@
   try { PIN = JSON.parse(localStorage.getItem("feedpin") || "{}"); } catch(e) {}
   function savePin(){ try { localStorage.setItem("feedpin", JSON.stringify(PIN)); } catch(e) {} }
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  var IC = {tg: "✈️", blog: "🅽", news: "🌐", ai: "🧠"};
+  function K_OF(i){ return i.kind === "news" ? "news" : i.kind === "ai" ? "ai" : "mine"; }
   var WDS = ["일","월","화","수","목","금","토"];
   function dayLab(d){
     var t = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
@@ -78,7 +80,9 @@
     if (nU) chips.push({k: "USED", t: "📝 리포트 인용 " + nU});
     chips.push({k: "FOCUS", t: "🎯 집중 연결 " + nF});
     chips.push({k: "PIN", t: "📌 " + nP});
-    d.sources.forEach(function(s){ chips.push({k: s.id, t: (s.kind === "tg" ? "✈️ " : "🅽 ") + s.name.replace(/\s*\(.*\)/, "") + " " + s.n, bad: !s.ok}); });
+    var cnt = function(k){ return d.items.filter(function(i){ return K_OF(i) === k; }).length; };
+    [["K:mine", "📝 블로그·텔레그램"], ["K:news", "🌐 뉴스"], ["K:ai", "🧠 AI가 찾은 글"]].forEach(function(x){ var n = cnt(x[0].slice(2)); if (n) chips.push({k: x[0], t: x[1] + " " + n}); });
+    d.sources.forEach(function(s){ chips.push({k: s.id, t: IC[s.kind] + " " + s.name.replace(/\s*\(.*\)/, "") + " " + s.n, bad: !s.ok}); });
     var chip = function(c){ return '<button class="fd-chip' + (S.f === c.k ? " on" : "") + (c.bad ? " bad" : "") + '" data-fk="' + e(c.k) + '">' + e(c.t) + '</button>'; };
     var nTop = chips.length - d.sources.length;
     srcEl.innerHTML = '<div class="fd-row">' + chips.slice(0, nTop).map(chip).join("") + '</div><div class="fd-row">' + chips.slice(nTop).map(chip).join("") + '</div>' +
@@ -93,7 +97,8 @@
     if (S.f === "FOCUS" && !it._h.length) return false;
     if (S.f === "PIN" && !PIN[it.id]) return false;
     if (S.f === "USED" && !S.used[it.id]) return false;
-    if (["ALL", "FOCUS", "PIN", "USED"].indexOf(S.f) < 0 && it.src !== S.f) return false;
+    if (/^K:/.test(S.f)){ if (K_OF(it) !== S.f.slice(2)) return false; }
+    else if (["ALL", "FOCUS", "PIN", "USED"].indexOf(S.f) < 0 && it.src !== S.f) return false;
     if (S.q && (it.title + " " + it.text + " " + it.name).toLowerCase().indexOf(S.q) < 0) return false;
     return true;
   }
@@ -110,11 +115,11 @@
       var long = it.text.length > 260, op = S.open[it.id];
       var body = e(it.text).replace(/\n/g, "<br>");
       S.kw.length && it._h.forEach(function(w){ body = body.split(e(w)).join('<mark>' + e(w) + '</mark>'); });
-      h += '<div class="fd-it' + (it.kind === "tg" ? " fd-tg" : " fd-bl") + '" data-fid="' + e(it.id) + '">' +
-        '<div class="fd-hd"><span class="fd-sn">' + (it.kind === "tg" ? "✈️" : "🅽") + " " + e(it.name.replace(/\s*\(.*\)/, "")) + '</span>' +
+      h += '<div class="fd-it fd-' + (it.kind || "bl") + '" data-fid="' + e(it.id) + '">' +
+        '<div class="fd-hd"><span class="fd-sn">' + (IC[it.kind] || "🅽") + " " + e(it.name.replace(/\s*\(.*\)/, "")) + (it.press ? ' <small class="fd-press">· ' + e(it.press) + '</small>' : '') + '</span>' +
         '<span class="fd-tm">' + e((it.at || "").slice(11)) + '</span>' + (news[it.id] ? '<span class="fd-new">새 글</span>' : "") +
         '<button class="fd-pin' + (PIN[it.id] ? " on" : "") + '" data-pin="' + e(it.id) + '">📌</button></div>' +
-        (it.kind === "blog" ? '<div class="fd-ti">' + e(it.title) + '</div>' : "") +
+        (it.kind !== "tg" ? '<div class="fd-ti">' + e(it.title) + '</div>' : "") +
         (S.used[it.id] ? '<div class="fd-used">📝 오늘 시황리포트: ' + e(S.used[it.id]) + '</div>' : "") +
         (it._h.length ? '<div class="fd-hit">🎯 ' + it._h.map(e).join(" · ") + '</div>' : "") +
         '<div class="fd-tx' + (long && !op ? " cl" : "") + '">' + body + '</div>' +
@@ -148,7 +153,8 @@
     ".fd-q{width:100%;margin-top:8px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit;font-size:15px}" +
     ".fd-day{margin:14px 2px 6px;font-size:13px;font-weight:700;color:var(--sub)}" +
     ".fd-it{background:var(--panel);border:1px solid var(--line);border-left:3px solid #4aa3ff;border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer}" +
-    ".fd-it.fd-bl{border-left-color:#03c75a}" +
+    ".fd-it.fd-news{border-left-color:#8a94a8}.fd-it.fd-ai{border-left-color:#7c9cff;background:linear-gradient(160deg,rgba(124,156,255,.08),var(--panel) 60%)}.fd-press{font-weight:400;color:var(--sub)}" +
+    ".fd-it.fd-bl,.fd-it.fd-blog{border-left-color:#03c75a}" +
     ".fd-hd{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--sub)}" +
     ".fd-sn{font-weight:700;color:var(--text)}.fd-tm{color:var(--dim)}" +
     ".fd-new{background:#ff6b6b;color:#fff;border-radius:6px;padding:1px 6px;font-size:10.5px;font-weight:700}" +
