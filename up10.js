@@ -21,7 +21,7 @@
   var mq = window.matchMedia ? matchMedia("(prefers-color-scheme: light)") : null;
   function applyUI(){
     var t = UI.theme === "auto" ? (mq && mq.matches ? "light" : "dark") : UI.theme;
-    document.documentElement.setAttribute("data-theme", t);
+    document.documentElement.setAttribute("data-ui", t);
     var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", t === "light" ? "#f5f6fa" : "#0b0f17");
     document.documentElement.style.setProperty("--fs", UI.fs);
     document.body && (document.body.style.zoom = UI.fs === 1 ? "" : UI.fs);
@@ -53,8 +53,11 @@
     var t0 = Date.now();
     (function find(){
       var el = document.getElementById(anchor);
-      if (el){ if (el.classList.contains("fold") && !el.classList.contains("open")) el.classList.add("open");
-        setTimeout(function(){ el.scrollIntoView({behavior: "smooth", block: "start"}); el.classList.add("flash"); setTimeout(function(){ el.classList.remove("flash"); }, 1800); }, 60); return; }
+      if (el){ var f = el.closest(".fold"); if (f && !f.classList.contains("open")) f.classList.add("open");
+        if (el.classList.contains("xs-hid") && window.closeSheet){ /* 「더 보기」로 숨은 카드면 그대로 펼쳐 보이기 */ el.classList.remove("xs-hid"); }
+        setTimeout(function(){ var hd = document.querySelector("header"), jb = document.querySelector(".fold-jump");
+          var y = el.getBoundingClientRect().top + window.scrollY - ((hd ? hd.offsetHeight : 0) + (jb ? jb.offsetHeight : 0) + 8);
+          window.scrollTo({top: Math.max(0, y), behavior: "smooth"}); el.classList.add("flash"); setTimeout(function(){ el.classList.remove("flash"); }, 1800); }, 80); return; }
       if (Date.now() - t0 < 8000) setTimeout(find, 150);
     })();
   };
@@ -64,8 +67,12 @@
   }
   window.addEventListener("hashchange", deep);
   window.addEventListener("load", function(){ setTimeout(deep, 400); });
+  // 화면 연동 (10/10 사용자: "뭐든지 누르면 화면 연동 잘 되게") — 어디서든 ① 종목 이름(data-op) → 그 종목 화면 ② 줄·칩·카드(data-goto) → 그 탭의 그 카드
   document.addEventListener("click", function(ev){
-    var t = ev.target.closest && ev.target.closest("[data-goto]"); if (!t) return;
+    if (ev.defaultPrevented || !ev.target.closest) return;            // 다른 화면이 이미 처리한 클릭
+    var op = ev.target.closest("[data-op]");
+    if (op && window.openOP){ ev.preventDefault(); ev.stopPropagation(); openOP(op.getAttribute("data-op")); return; }
+    var t = ev.target.closest("[data-goto]"); if (!t) return;
     ev.preventDefault(); var p = t.getAttribute("data-goto").split("~"); goTo(p[0], p[1]);
   });
 
@@ -87,30 +94,30 @@
     var ex = (P.kick || 0) - (P.spy || 0);
     var spark = (window.V && P.nav && P.nav.length > 1) ? V.lines([{name: "⚡ 킥", color: "#ff6b6b", vals: P.kick_line}, {name: "💼 기본", color: "#e9c46a", vals: P.nav}, {name: "S&P", color: "#7c9cff", vals: P.spy_line, dash: 1}],
       (P.nav || []).map(function(_, i){ return i ? "" : md(P.start); }), {h: 96, unit: "%", zero: 1, nodots: 1}) : "";
-    h += card("port", "💼", "포트", md(P.start) + "부터 · " + md(P.asof) + " 미국 종가",
+    h += card("port~pohero", "💼", "포트", md(P.start) + "부터 · " + md(P.asof) + " 미국 종가",
       '<div class="hm-big"><div><small>⚡ 킥</small><b class="' + cls(P.kick) + '">' + sg(P.kick) + '</b></div><div><small>💼 기본</small><b class="' + cls(P.base) + '">' + sg(P.base) + '</b></div><div><small>S&P500</small><b>' + sg(P.spy) + '</b></div></div>' +
       '<div class="hm-l">어제(' + md(P.d1_date) + ') 💼 <b class="' + cls(P.d1) + '">' + sg(P.d1) + '</b> · ⚡ <b class="' + cls(P.d1_kick) + '">' + sg(P.d1_kick) + '</b> · S&P ' + sg(P.d1_spy) +
-      ' · 시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬' + (ex < 0 ? ' · S&P까지 ' + sg(ex) + 'p' : '') + '</div>' +
+      ' · <a data-goto="port~pocmp">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a>' + (ex < 0 ? ' · S&P까지 ' + sg(ex) + 'p' : '') + '</div>' +
       '<div class="hm-sp">' + spark + '</div>' +
       (P.change ? '<div class="hm-alert" data-goto="port~pofollow">🔁 ' + md(P.change.date) + ' 비중·상품 바뀜 — <b>따라하기에서 맞추기 ›</b><small>' + e(String(P.change.why || "").replace(/\s*\([^()]*\)/g, "").slice(0, 120)) + '…</small></div>' : '') +
-      ((P.weak || []).length ? '<div class="hm-chips">' + P.weak.map(function(x){ return '<span class="hm-chip b">약함 ' + e(x) + '</span>'; }).join("") + (P.strong || []).slice(0, 3).map(function(x){ return '<span class="hm-chip g">강함 ' + e(x) + '</span>'; }).join("") + '</div>' : ''));
+      ((P.weak || []).length ? '<div class="hm-chips">' + P.weak.map(function(x){ return '<span class="hm-chip b" data-goto="port~poct">약함 ' + e(x) + '</span>'; }).join("") + (P.strong || []).slice(0, 3).map(function(x){ return '<span class="hm-chip g" data-goto="port~poct">강함 ' + e(x) + '</span>'; }).join("") + '</div>' : ''));
     // ⚡ 킥
     var ev = K.events || [];
     h += card("port~pokick", "⚡", "킥 — 오늘 할 일", K.n + "종목 · 포트의 " + K.w + "%",
-      (ev.length ? ev.map(function(x){ return '<div class="hm-ev ' + (x.k === "사기" ? "buy" : "sell") + '">' + (x.k === "사기" ? "🟢 사기" : x.k === "팔기" ? "🔴 팔기" : "🟡 절반") + ' <b>' + e(x.name) + '</b>' + (x.r != null ? ' ' + sg(x.r, 1) : '') + (x.why ? ' <small>' + e(x.why) + '</small>' : '') + '</div>'; }).join("")
+      (ev.length ? ev.map(function(x){ return '<div class="hm-ev ' + (x.k === "사기" ? "buy" : "sell") + '">' + (x.k === "사기" ? "🟢 사기" : x.k === "팔기" ? "🔴 팔기" : "🟡 절반") + ' <b data-op="' + e(x.code) + '">' + e(x.name) + ' ›</b>' + (x.r != null ? ' ' + sg(x.r, 1) : '') + (x.why ? ' <small>' + e(x.why) + '</small>' : '') + '</div>'; }).join("")
         : '<div class="hm-l">' + md(K.asof) + ' 사고판 것 없음 — 들고 있는 그대로</div>') +
-      '<div class="hm-chips">' + (K.best || []).map(function(o){ return '<span class="hm-chip">' + e(o.tags || "") + ' ' + e(o.name) + ' <b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></span>'; }).join("") +
-      (K.worst || []).map(function(o){ return '<span class="hm-chip">' + e(o.tags || "") + ' ' + e(o.name) + ' <b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></span>'; }).join("") + '</div>', "킥 보기");
+      '<div class="hm-chips">' + (K.best || []).map(function(o){ return '<span class="hm-chip" data-op="' + e(o.code) + '">' + e(o.tags || "") + ' ' + e(o.name) + ' <b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></span>'; }).join("") +
+      (K.worst || []).map(function(o){ return '<span class="hm-chip" data-op="' + e(o.code) + '">' + e(o.tags || "") + ' ' + e(o.name) + ' <b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></span>'; }).join("") + '</div>', "킥 보기");
     // 🎯 집중
-    if ((H.focus || []).length) h += card("market", "🎯", "오늘 집중", "돈이 몰리는 테마",
+    if ((H.focus || []).length) h += card("market~mkfo", "🎯", "오늘 집중", "돈이 몰리는 테마",
       H.focus.map(function(t){ return '<div class="hm-f"><b>' + e(t.name) + '</b> <span class="hm-chip ' + (t.stage === "과열" ? "b" : "g") + '">' + e(t.stage || "") + '</span> <small>5일 ' + sg(t.r5, 1) + ' · S&P 대비 20일 ' + sg(t.rs20, 1) + 'p</small>' +
-        '<div class="hm-l">' + e(t.do || "") + ((t.stars || []).length ? ' · ★ ' + t.stars.map(function(s){ return '<a data-op="' + e(s.t) + '">' + e(s.name) + '</a>'; }).join(", ") : '') + ((t.etf_kr || []).length ? ' · 🇰🇷 ' + e(t.etf_kr[0].name) : '') + '</div></div>'; }).join(""), "시황");
+        '<div class="hm-l">' + e(t.do || "") + ((t.stars || []).length ? ' · ★ ' + t.stars.map(function(s){ return '<a data-op="' + e(s.t) + '">' + e(s.name) + '</a>'; }).join(", ") : '') + ((t.etf_kr || []).length ? ' · 🇰🇷 <a data-op="' + e(t.etf_kr[0].t) + '">' + e(t.etf_kr[0].name) + '</a>' : '') + '</div></div>'; }).join(""), "시황");
     // ⚡ 단타
     h += card("danta", "🔔", "단타 알람", "오늘 " + (D.today || 0) + "건",
       '<div class="hm-l">' + ((D.strong || []).length ? '⭐ 이기는 자리: <b>' + e(D.strong.join(", ")) + '</b>' : '아직 「강함」 자리 없음') + ((D.observe || []).length ? ' · 👀 관찰만: ' + e(D.observe.join(", ")) : '') + '</div>', "단타");
     // 🧠 두뇌
-    if (Bn.summary) h += card("feed", "🧠", "지금 생각", (Bn.regime || "") + " · " + md(Bn.at) + " " + String(Bn.at || "").slice(11, 16),
-      '<div class="hm-l">' + e(Bn.summary) + '</div>' + ((Bn.ideas || []).length ? '<div class="hm-chips">' + Bn.ideas.map(function(x){ var t = typeof x === "string" ? x : ((x["칸"] || x.box || "") + " " + (x["제안"] || x.idea || "")); return t.trim() ? '<span class="hm-chip">💡 ' + e(t) + '</span>' : ''; }).join("") + '</div>' : ''), "피드");
+    if (Bn.summary) h += card("feed~fdbrain", "🧠", "지금 생각", (Bn.regime || "") + " · " + md(Bn.at) + " " + String(Bn.at || "").slice(11, 16),
+      '<div class="hm-l">' + e(Bn.summary) + '</div>' + ((Bn.ideas || []).length ? '<div class="hm-chips">' + Bn.ideas.map(function(x){ var t = typeof x === "string" ? x : ((x["칸"] || x.box || "") + " " + (x["제안"] || x.idea || "")); return t.trim() ? '<span class="hm-chip" data-goto="port~poct">💡 ' + e(t) + '</span>' : ''; }).join("") + '</div>' : ''), "피드");
     // 📊 성적
     h += card("score", "📊", "성적 한 줄", "무엇이 이기고 지나",
       '<div class="hm-l">' + ((S.good || []).length ? '✅ ' + e(S.good.join(" · ")) : '') + ((S.bad || []).length ? '<br>❌ ' + e(S.bad.join(" · ")) : '') + (!(S.good || []).length && !(S.bad || []).length ? '표본이 쌓이는 중' : '') + '</div>', "성적표");
@@ -125,7 +132,7 @@
   function bar(w, l){ var n = (w || 0) + (l || 0); if (!n) return ''; return '<div class="sc-bar"><span class="w" style="flex:' + w + '">' + (w ? w : "") + '</span><span class="l" style="flex:' + l + '">' + (l ? l : "") + '</span></div>'; }
   function drawScore(S){
     var b = document.getElementById("scbody"); if (!b) return;
-    var h = '<section class="card sc-top"><div class="sc-gb"><div><b>✅ 이기는 것</b>' + ((S.good || []).length ? S.good.map(function(x){ return '<span>' + e(x) + '</span>'; }).join("") : '<span class="mut">표본 쌓는 중</span>') + '</div>' +
+    var h = '<section class="card sc-top sc-c" data-goto="port~pokick"><div class="sc-gb"><div><b>✅ 이기는 것</b>' + ((S.good || []).length ? S.good.map(function(x){ return '<span>' + e(x) + '</span>'; }).join("") : '<span class="mut">표본 쌓는 중</span>') + '</div>' +
       '<div><b>❌ 지는 것</b>' + ((S.bad || []).length ? S.bad.map(function(x){ return '<span>' + e(x) + '</span>'; }).join("") : '<span class="mut">없음</span>') + '</div></div>' +
       '<p class="note">매시간 자동 채점 · ' + e(String(S.at || "").slice(5)) + ' · 매일 저녁 자가 업그레이드가 이 숫자로 규칙을 고쳐요(지는 건 줄이고 이기는 건 늘림).</p></section>';
     (S.rows || []).forEach(function(r){
@@ -140,7 +147,8 @@
         return '<tr><td>' + e(x.k) + '<small>' + (x.n || 0) + '건 ' + sg(x.avg) + '</small></td>' + ["09시", "10시", "11~12시", "13시 이후"].map(function(s){ var c = (x.slots || {})[s] || {};
           return '<td><b class="st-' + e(c.st) + '">' + e({"강함": "⭐", "켬": "켬", "관찰": "👀", "닫힘": "닫힘"}[c.st] || "–") + '</b><small>' + (c.n ? c.n + "건 " + sg(c.avg, 1) : "") + '</small></td>'; }).join("") + '</tr>'; }).join("") + '</table>';
       if (r.k === "picks" && r.rows) body += r.rows.map(function(x){ return '<div class="sc-li">' + e(x.name) + ' · ' + e((x.picks || []).join("·")) + (x.edge != null ? ' <b class="' + cls(x.edge) + '">' + (x.edge >= 0 ? "앞섬 " : "뒤짐 ") + sg(x.edge, 1).replace("%", "p") + '</b>' : ' <span class="mut">채점 대기</span>') + '</div>'; }).join("");
-      h += '<section class="card sc-c">' + top + body + '</section>';
+      var GO = {report: "market", bets: "feed~fdbrain", kick: "port~pokick", picks: "port~poct", focus: "market~mkfo", port: "port~pocmp", whale: "port~pokick"}[r.k];
+      h += '<section class="card sc-c"' + (GO ? ' data-goto="' + GO + '"' : '') + '>' + top.replace('</div></div>', '</div><span class="hm-go">보기 ›</span></div>') + body + '</section>';
     });
     b.innerHTML = h;
   }
@@ -226,6 +234,9 @@
     ".hm-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.hm-chip{font-size:12px;background:var(--panel2);border-radius:999px;padding:3px 9px}.hm-chip.g{background:rgba(77,212,122,.14);color:#4dd47a}.hm-chip.b{background:rgba(57,135,229,.16);color:#7cb0ff}",
     ".hm-ev{font-size:14px;padding:5px 0;border-bottom:1px dashed var(--line)}.hm-ev small{color:var(--sub)}",
     ".hm-f{padding:6px 0;border-bottom:1px dashed var(--line)}.hm-f:last-child{border-bottom:0}.hm-f small{color:var(--sub);font-size:11.5px}",
+    /* 누르는 곳 */
+    ".hm-chip[data-op],.hm-chip[data-goto],[data-op],a[data-goto]{cursor:pointer}.hm-l a,.hm-ev b[data-op]{color:var(--acc);text-decoration:none}",
+    ".hm-chip[data-op]:active,.hm-chip[data-goto]:active,.sc-c:active{opacity:.7}.sc-c{cursor:pointer}",
     /* 성적표 */
     ".sc-gb{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sc-gb>div{background:var(--panel2);border-radius:12px;padding:9px}.sc-gb b{display:block;font-size:13px;margin-bottom:4px}.sc-gb span{display:block;font-size:12px;line-height:1.5}",
     ".sc-h{display:flex;align-items:center;gap:10px}.sc-h>div:nth-child(2){flex:1;min-width:0}.sc-h b{font-size:15px}.sc-h small{display:block;font-size:11.5px;color:var(--sub)}",
@@ -247,25 +258,25 @@
     ".sgx-c{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 12px}.sgx-t{font-size:20px;letter-spacing:-1px}",
     ".sgx{font-size:12.5px;border-radius:999px;padding:4px 10px;background:var(--panel2);color:var(--text);text-decoration:none;cursor:pointer}.sgx.k{background:rgba(255,107,107,.14)}.sgx.p{background:rgba(233,196,106,.16)}.sgx.f{background:rgba(124,156,255,.14)}.sgx.b{background:rgba(77,212,122,.12)}",
     /* ⑥ 밝은 테마 */
-    ":root[data-theme=light]{--bg:#f4f6fa;--panel:#ffffff;--panel2:#eef1f6;--line:#dde2ea;--text:#141a26;--sub:#5a6476;--dim:#8b94a4;--acc:#3d63dd;--up:#d64545;--down:#2f6fd0}",
-    ":root[data-theme=light] header{background:rgba(244,246,250,.9)}",
-    ":root[data-theme=light] header .tab{background:#fff;border-color:#dde2ea;color:#5a6476}",
-    ":root[data-theme=light] header .tab.on{color:#fff}",
-    ":root[data-theme=light] .chip{background:rgba(20,26,38,.06)}",
-    ":root[data-theme=light] .card,:root[data-theme=light] .hero{box-shadow:0 1px 2px rgba(20,26,38,.05)}",
-    ":root[data-theme=light] .po-hero{background:linear-gradient(160deg,rgba(233,196,106,.22),#fff 60%)}",
-    ":root[data-theme=light] .po-hero.kick{background:linear-gradient(160deg,rgba(255,107,107,.18),#fff 60%)}",
-    ":root[data-theme=light] .vtip{background:#141a26;color:#fff}",
-    ":root[data-theme=light] .lc-g{stroke:#e3e7ee}:root[data-theme=light] .lc-a{fill:#6b7486}",
-    ":root[data-theme=light] svg circle[stroke='#121826']{stroke:#fff}",
-    ":root[data-theme=light] .up{color:#d64545}:root[data-theme=light] .dn{color:#2f6fd0}",
-    ":root[data-theme=light] #backbtn{background:#fff;color:#141a26;border-color:#dde2ea}",
-    ":root[data-theme=light] .hm-chip.g,:root[data-theme=light] .po-sg.g{color:#1f8b4c}:root[data-theme=light] .hm-chip.b{color:#2f6fd0}",
-    ":root[data-theme=light] .sc-v.w{color:#1f8b4c}:root[data-theme=light] .sc-v.l{color:#c23b3b}",
-    ":root[data-theme=light] em.w,:root[data-theme=light] .po-rr .d.w,:root[data-theme=light] .mk-t td small.up{color:#1f8b4c}",
-    ":root[data-theme=light] .po-pf3 .on{color:#1f8b4c}:root[data-theme=light] .po-pf3 .trial{color:#b26b00}",
-    ":root[data-theme=light] .hero{background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--c) 28%,transparent),transparent 60%),#fff}",
-    ":root[data-theme=light] iframe.rep{background:#fff}"
+    ":root[data-ui=light]{--bg:#f4f6fa;--panel:#ffffff;--panel2:#eef1f6;--line:#dde2ea;--text:#141a26;--sub:#5a6476;--dim:#8b94a4;--acc:#3d63dd;--up:#d64545;--down:#2f6fd0}",
+    ":root[data-ui=light] header{background:rgba(244,246,250,.9)}",
+    ":root[data-ui=light] header .tab{background:#fff;border-color:#dde2ea;color:#5a6476}",
+    ":root[data-ui=light] header .tab.on{color:#fff}",
+    ":root[data-ui=light] .chip{background:rgba(20,26,38,.06)}",
+    ":root[data-ui=light] .card,:root[data-ui=light] .hero{box-shadow:0 1px 2px rgba(20,26,38,.05)}",
+    ":root[data-ui=light] .po-hero{background:linear-gradient(160deg,rgba(233,196,106,.22),#fff 60%)}",
+    ":root[data-ui=light] .po-hero.kick{background:linear-gradient(160deg,rgba(255,107,107,.18),#fff 60%)}",
+    ":root[data-ui=light] .vtip{background:#141a26;color:#fff}",
+    ":root[data-ui=light] .lc-g{stroke:#e3e7ee}:root[data-ui=light] .lc-a{fill:#6b7486}",
+    ":root[data-ui=light] svg circle[stroke='#121826']{stroke:#fff}",
+    ":root[data-ui=light] .up{color:#d64545}:root[data-ui=light] .dn{color:#2f6fd0}",
+    ":root[data-ui=light] #backbtn{background:#fff;color:#141a26;border-color:#dde2ea}",
+    ":root[data-ui=light] .hm-chip.g,:root[data-ui=light] .po-sg.g{color:#1f8b4c}:root[data-ui=light] .hm-chip.b{color:#2f6fd0}",
+    ":root[data-ui=light] .sc-v.w{color:#1f8b4c}:root[data-ui=light] .sc-v.l{color:#c23b3b}",
+    ":root[data-ui=light] em.w,:root[data-ui=light] .po-rr .d.w,:root[data-ui=light] .mk-t td small.up{color:#1f8b4c}",
+    ":root[data-ui=light] .po-pf3 .on{color:#1f8b4c}:root[data-ui=light] .po-pf3 .trial{color:#b26b00}",
+    ":root[data-ui=light] .hero{background:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--c) 28%,transparent),transparent 60%),#fff}",
+    ":root[data-ui=light] iframe.rep{background:#fff}"
   ].join("\n");
   document.head.appendChild(css);
   // 접기 칩이 헤더 바로 아래 붙도록 헤더 높이 기억
