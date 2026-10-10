@@ -137,22 +137,26 @@ def job_checks():
     out, probs = [], []
     tok = os.environ.get("GH_TOKEN", "")
     H = {"User-Agent": "ch-health", "Accept": "application/vnd.github+json", **({"Authorization": "Bearer " + tok} if tok else {})}
+    def api(path):
+        with urllib.request.urlopen(urllib.request.Request("https://api.github.com/repos/chkchp0702-spec/" + path, headers=H), timeout=30) as r:
+            return json.loads(r.read().decode())
     for repo in ("daily-app", "market-strategy-report", "stock-screener", "Cup", "Gap", "whale40"):
         try:
-            with urllib.request.urlopen(urllib.request.Request(f"https://api.github.com/repos/chkchp0702-spec/{repo}/actions/runs?per_page=60", headers=H), timeout=30) as r:
-                runs = json.loads(r.read().decode())["workflow_runs"]
-        except Exception as e:
-            probs.append(f"{repo} 작업 기록을 못 읽음"); continue
-        last = {}
-        for x in runs:
-            if x.get("status") != "completed" or x["name"] in last:
+            wfs = [w for w in api(f"{repo}/actions/workflows?per_page=100")["workflows"] if w.get("state") == "active"]
+        except Exception:
+            probs.append(f"{repo} 작업 목록을 못 읽음"); continue
+        for w in wfs:                                            # 작업마다 마지막으로 끝난 실행 1개 (자주 도는 작업에 묻히지 않게)
+            try:
+                rs = api(f"{repo}/actions/workflows/{w['id']}/runs?status=completed&per_page=1")["workflow_runs"]
+            except Exception:
                 continue
-            last[x["name"]] = x
-        for name, x in last.items():
-            bad = x.get("conclusion") not in ("success", "skipped", "cancelled")
-            out.append({"repo": repo, "job": name, "ok": not bad, "when": x["created_at"][:16]})
+            if not rs:
+                continue
+            x = rs[0]
+            bad = x.get("conclusion") not in ("success", "skipped", "cancelled", "neutral")
+            out.append({"repo": repo, "job": w["name"], "ok": not bad, "when": x["created_at"][:16]})
             if bad:
-                probs.append(f"작업 실패: {repo}/{name} ({x['created_at'][5:16]} {x.get('conclusion')})")
+                probs.append(f"작업 실패: {repo}/{w['name']} ({x['created_at'][5:16]} {x.get('conclusion')})")
     return out, probs
 
 
