@@ -118,7 +118,7 @@ def run(shard, of, todo_path, out, have=""):
 
     got_p = got_c = 0
     for i, x in enumerate(todo):
-        if time.time() - START > 5 * 3600:
+        if time.time() - START > 105 * 60:          # 10/10: 바깥 timeout 110분보다 먼저 스스로 끝내기 (매일 「실패」로 찍히던 것)
             break
         photo = ""
         if x["ko"] and re.search(r"[가-힣]", x["ko"]):
