@@ -112,6 +112,22 @@ def app_checks():
             if info["loading"] > 0:
                 probs.append(f"#{tab} 4초 뒤에도 「불러오는 중」 {info['loading']}곳")
             pg.close()
+        # 🔗 누르면 제 화면으로 가나 (10/10: 클릭이 엉뚱한 곳으로 가로채이던 사고 뒤 추가)
+        for start, sel, want in [("home", '.hm-c[data-goto="port~pokick"] .hm-h b', ("port", "pokick")), ("home", '.hm-c[data-goto="score"] .hm-h b', ("score", None)),
+                                 ("home", '.hm-chip[data-op]', ("onepager", None)), ("score", '.sc-c[data-goto="market~mkfo"] .sc-h b', ("market", "mkfo"))]:
+            pg = ctx.new_page(); pg.on("dialog", lambda d: d.dismiss())
+            try:
+                pg.goto(APP + "?h=" + str(int(time.time())) + "#" + start, wait_until="domcontentloaded", timeout=45000)
+                pg.wait_for_selector(sel, timeout=20000); pg.wait_for_timeout(800)
+                pg.click(sel); pg.wait_for_timeout(3500)
+                got = pg.evaluate("[window.cur, %s]" % ("!!document.getElementById('%s')" % want[1] if want[1] else "true"))
+                ok = got[0] == want[0] and got[1]
+            except Exception as e:
+                got, ok = [str(e)[:60]], False
+            res.append({"tab": "클릭 " + start + " → " + want[0], "ok": ok, "got": got})
+            if not ok:
+                probs.append(f"클릭 연동 실패: #{start} 「{sel}」 → {want[0]} 기대, 실제 {got}")
+            pg.close()
         b.close()
     return res, probs
 
