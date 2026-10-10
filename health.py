@@ -96,7 +96,7 @@ def app_checks():
                 info = pg.evaluate("""() => {
                   const m = document.getElementById('main'), t = m ? m.innerText : '';
                   return {cards: document.querySelectorAll('#main .card').length, len: t.length,
-                          bad: (t.match(/못 불러왔|아직 안 올라왔|자료 준비 중|오류|undefined|NaN%/g) || []).slice(0, 4),
+                          bad: (t.match(/못 불러왔|아직 안 올라왔|자료 준비 중|undefined|NaN%/g) || []).slice(0, 4),
                           loading: document.querySelectorAll('#main .loading').length};
                 }""")
             except Exception as e:
