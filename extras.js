@@ -200,8 +200,9 @@
 
   /* ======================= ⚡ 단타 ======================= */
   wrap("danta", null, function(it, b, o){
-    Promise.all([X("danta_stats.json"), getJSON(file("danta", it.id, "alerts.json")).catch(function(){ return []; })]).then(function(r){
-      var S = r[0], rows = r[1]; if (!S) return;
+    Promise.all([X("danta_stats.json"), getJSON(file("danta", it.id, "alerts.json")).catch(function(){ return []; }),
+                 fetch("https://raw.githubusercontent.com/chkchp0702-spec/stock-screener/main/data/learned.json?" + Math.floor(Date.now() / 300000)).then(function(x){ return x.ok ? x.json() : null; }).catch(function(){ return null; })]).then(function(r){
+      var S = r[0], rows = r[1], LR = r[2]; if (!S) return;
       var slot = function(t){ var hh = +(t || "0").slice(0, 2); return hh <= 9 ? "09시" : hh === 10 ? "10시" : hh <= 12 ? "11~12시" : "13시 이후"; };
       // 오늘 알람에 품질 등급 붙이기
       var q = S.quality || {};
@@ -214,6 +215,19 @@
       }); };
       go(); new MutationObserver(go).observe(o, {childList: true, subtree: true});
       var A = S.all, h = "";
+      // 🧪 스스로 배운 것 (stock-screener learn.py → data/learned.json · 세션 시작·장중 매시간)
+      if (LR && LR.types){
+        var SL = ["09시", "10시", "11~12시", "13시 이후"], ST = {"강함": ["⭐ 강함", "#4dd47a"], "켬": ["켬", "#8a94a8"], "관찰": ["👀 관찰", "#ffb84d"], "닫힘": ["닫힘", "#4a5266"]};
+        var pp = LR.params || {};
+        h += card("🧪 단타가 스스로 배운 것 <span class='mut'>쌓인 1분 자료 " + LR.n_days + "일 + 실제 알람 · " + e(String(LR.at || "").slice(5)) + "</span>",
+          '<table class="lrn"><tr><th></th>' + SL.map(function(x){ return '<th>' + x + '</th>'; }).join("") + '</tr>' +
+          Object.keys(LR.types).map(function(k){ var T = LR.types[k];
+            return '<tr><td>' + e(k) + '<small>' + (T.n_all || 0) + '건 ' + pct(T.avg_all) + '</small></td>' + SL.map(function(x){ var c = T.slots[x] || {}, st = ST[c.st] || [c.st || "–", "#8a94a8"];
+              return '<td data-tip="' + e("<b>" + k + " · " + x + "</b><br>" + (c.st || "") + " · " + (c.n || 0) + "건 · 평균 " + pct(c.avg) + " (비용 0.3% 뺌)<br>다시 돌린 것 " + ((c.replay || {}).n || 0) + " · 실제 알람 " + ((c.live || {}).n || 0)) + '"><b style="color:' + st[1] + '">' + st[0] + '</b><small>' + (c.n ? c.n + '건 ' + pct(c.avg) : '자료 없음') + '</small></td>'; }).join("") + '</tr>'; }).join("") + '</table>' +
+          '<p class="note"><b>⭐ 강함</b> = 품질 A로 먼저 알림 · <b>👀 관찰</b> = 지는 쪽이라 앱 푸시 없이 기록만(추적은 계속, 좋아지면 저절로 다시 켜짐) · <b>닫힘</b> = 오후는 성적이 증명돼야 열림. ' +
+          '지금 손잡이: 후발주 대장 ' + pp.fol_hold + '분 유지·' + (pp.fol_band || []).join("~") + '% · 거래폭발 ×' + pp.burst_x + ' · 청산 ' + e(pp.exit || "") + ' · 신규 알람 ' + String(pp.cutoff || 1130).replace(/(\d\d)$/, ":$1") + '까지' +
+          (LR.changed && LR.changed.length ? ' · <b>바뀐 것: ' + e(LR.changed.join(", ")) + '</b>' : ' · 표본이 25건 넘게 쌓이고 확실히 나을 때만 손잡이를 바꿔요') + '.</p>');
+      }
       h += card("📊 단타 성적 대시보드 <span class='mut'>전체 " + A.n + "건</span>",
         '<div class="x4"><div><small>승률(마감)</small><b>' + A.win + '%</b></div><div><small>평균</small><b class="' + cls(A.avg) + '">' + pct(A.avg) + '</b></div><div><small>목표1 도달</small><b class="up">' + A.hit1 + '%</b></div><div><small>손절 도달</small><b class="dn">' + A.hits + '%</b></div></div>' +
         '<div class="sub2">유형별 승률</div>' + V.hbars(Object.keys(S.by_type).map(function(k){ var s = S.by_type[k]; return {label: e(k) + ' <span class="mut">' + s.n + '</span>', v: s.win || 0, text: s.win + "%", color: (s.win || 0) >= 50 ? V.UP : V.DN,

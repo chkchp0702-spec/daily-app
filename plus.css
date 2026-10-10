@@ -432,3 +432,7 @@ a.pdfb{display:block;box-sizing:border-box;text-decoration:none;color:var(--text
 .fo-wk{margin-top:8px}.fo-wk summary{cursor:pointer;font-size:12.5px;list-style:none}.fo-wk summary::-webkit-details-marker{display:none}
 .fo-wr{display:grid;grid-template-columns:1fr 70px 52px;gap:6px;align-items:center;font-size:12px;padding:5px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 50%,transparent)}
 .fo-wr small{grid-column:1/-1;color:var(--sub);font-size:11px}.fo-wb{height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}.fo-wb i{display:block;height:100%}
+
+/* 🧪 단타 배운 것 (10/10) */
+.lrn{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}.lrn th{font-size:11px;color:var(--sub);font-weight:600;padding:3px 2px;text-align:center}.lrn th:first-child{width:24%}
+.lrn td{padding:7px 2px;border-top:1px solid var(--line);text-align:center;vertical-align:top}.lrn td:first-child{text-align:left;font-weight:800}.lrn td small{display:block;font-size:10px;color:var(--dim);font-weight:400;margin-top:1px}
