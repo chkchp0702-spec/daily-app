@@ -132,6 +132,30 @@ def app_checks():
     return res, probs
 
 
+def job_checks():
+    """⚙️ 자동 작업이 조용히 실패하고 있지 않나 (10/10: 종목 사진 작업이 4일째 「실패」였는데 아무도 몰랐음)"""
+    out, probs = [], []
+    tok = os.environ.get("GH_TOKEN", "")
+    H = {"User-Agent": "ch-health", "Accept": "application/vnd.github+json", **({"Authorization": "Bearer " + tok} if tok else {})}
+    for repo in ("daily-app", "market-strategy-report", "stock-screener", "Cup", "Gap", "whale40"):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(f"https://api.github.com/repos/chkchp0702-spec/{repo}/actions/runs?per_page=60", headers=H), timeout=30) as r:
+                runs = json.loads(r.read().decode())["workflow_runs"]
+        except Exception as e:
+            probs.append(f"{repo} 작업 기록을 못 읽음"); continue
+        last = {}
+        for x in runs:
+            if x.get("status") != "completed" or x["name"] in last:
+                continue
+            last[x["name"]] = x
+        for name, x in last.items():
+            bad = x.get("conclusion") not in ("success", "skipped", "cancelled")
+            out.append({"repo": repo, "job": name, "ok": not bad, "when": x["created_at"][:16]})
+            if bad:
+                probs.append(f"작업 실패: {repo}/{name} ({x['created_at'][5:16]} {x.get('conclusion')})")
+    return out, probs
+
+
 def week_fixed():
     txt = web(MSR + "brain/upgrades.md") or ""
     cut = NOW - dt.timedelta(days=7)
@@ -155,15 +179,16 @@ def main():
         app, p2 = app_checks()
     except Exception as e:
         app, p2 = [], [f"브라우저 검사 실패: {str(e)[:100]}"]
-    probs = p1 + p2
+    jobs, p3 = job_checks()
+    probs = p1 + p2 + p3
     fixed = week_fixed()
-    out = {"at": NOW.strftime("%Y-%m-%d %H:%M"), "ok": not probs, "problems": probs, "data": data, "app": app, "week_fixed": fixed,
+    out = {"at": NOW.strftime("%Y-%m-%d %H:%M"), "ok": not probs, "problems": probs, "data": data, "app": app, "jobs": jobs, "week_fixed": fixed,
            "note": "매일 16:30 자동 검사. 「자가 업그레이드」(16:47)가 problems 를 먼저 고친다."}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps({"ok": out["ok"], "problems": probs}, ensure_ascii=False, indent=1))
     sunday = NOW.weekday() == 6
-    urgent = [x for x in probs if re.search(r"오류|실패|깨짐|못 받음", x)]
+    urgent = [x for x in probs if re.search(r"오류|실패|깨짐|못 받음", x)]   # 작업 실패도 바로 알림
     if urgent or sunday:                     # 평소엔 급한 것만, 일요일엔 늘 (이번 주 고친 것 포함)
         title = "🩺 앱 건강검진 — " + ("문제 없음" if not probs else f"고칠 것 {len(probs)}개")
         msg = ("\n".join("· " + x for x in probs[:5]) if probs else "모든 탭·자료 정상") + \
