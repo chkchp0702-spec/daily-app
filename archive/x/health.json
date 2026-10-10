@@ -1,8 +1,7 @@
 {
- "at": "2026-10-10 21:48",
+ "at": "2026-10-10 21:53",
  "ok": false,
  "problems": [
-  "#home 화면에 「자료 준비 중」",
   "작업 실패: daily-app/opmedia (10-09T18:25 failure)"
  ],
  "data": [
@@ -21,13 +20,13 @@
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 1.4,
+   "age_h": 1.5,
    "lim": 3
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 1.4,
+   "age_h": 1.5,
    "lim": 3
   },
   {
@@ -45,43 +44,41 @@
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.2,
+   "age_h": 0.0,
    "lim": 1.5
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.1,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 6.1,
+   "age_h": 6.2,
    "lim": 80
   },
   {
    "name": "📱 앱 목록",
    "ok": true,
-   "age_h": 0.4,
+   "age_h": 0.5,
    "lim": 30
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 0.3,
-   "cards": 0,
-   "len": 29,
-   "bad": [
-    "자료 준비 중"
-   ],
+   "s": 0.6,
+   "cards": 6,
+   "len": 1205,
+   "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "market",
-   "s": 0.6,
+   "s": 0.3,
    "cards": 28,
    "len": 7253,
    "bad": [],
@@ -90,7 +87,7 @@
   },
   {
    "tab": "port",
-   "s": 0.3,
+   "s": 0.4,
    "cards": 7,
    "len": 2807,
    "bad": [],
@@ -108,7 +105,7 @@
   },
   {
    "tab": "whale",
-   "s": 0.4,
+   "s": 0.5,
    "cards": 22,
    "len": 1423,
    "bad": [],
@@ -117,7 +114,7 @@
   },
   {
    "tab": "cup",
-   "s": 0.4,
+   "s": 0.5,
    "cards": 13,
    "len": 3370,
    "bad": [],
@@ -135,7 +132,7 @@
   },
   {
    "tab": "sector",
-   "s": 0.6,
+   "s": 0.5,
    "cards": 36,
    "len": 5197,
    "bad": [],
@@ -153,7 +150,7 @@
   },
   {
    "tab": "onepager",
-   "s": 0.2,
+   "s": 0.4,
    "cards": 1,
    "len": 394,
    "bad": [],
@@ -180,7 +177,7 @@
   },
   {
    "tab": "idea",
-   "s": 0.2,
+   "s": 0.3,
    "cards": 1,
    "len": 201,
    "bad": [],
@@ -191,7 +188,7 @@
    "tab": "feed",
    "s": 0.3,
    "cards": 1,
-   "len": 393557,
+   "len": 396114,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -234,7 +231,7 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-10T12:47"
+   "when": "2026-10-10T12:50"
   },
   {
    "repo": "daily-app",
@@ -342,7 +339,7 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-10T12:44"
+   "when": "2026-10-10T12:47"
   },
   {
    "repo": "market-strategy-report",
