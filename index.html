@@ -1298,13 +1298,15 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261010l";
+var APPV = "20261010m";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
 }).catch(function(){});
 /* ---------- 시작 ---------- */
-getJSON("manifest.json?" + Date.now()).then(function(m){
+// 목록을 못 받으면(사이트가 막 바뀌는 순간 등) 1.5초·4초 뒤 두 번 더 받아 보고 나서야 「준비 중」 (10/10)
+function getManifest(n){ return getJSON("manifest.json?" + Date.now()).catch(function(e){ if ((n || 0) >= 2) throw e; return new Promise(function(r){ setTimeout(r, n ? 4000 : 1500); }).then(function(){ return getManifest((n || 0) + 1); }); }); }
+getManifest(0).then(function(m){
   M = m;
   // 평일 장중엔 오늘 단타 칸을 미리 만들어 둠 (내용은 단타 프로그램 원본에서 바로 읽음)
   (function(){ var d = new Date(Date.now() + 9 * 3600e3), td = d.toISOString().slice(0, 10), L = M.cats.danta = M.cats.danta || [];
