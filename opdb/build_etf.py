@@ -218,9 +218,18 @@ def resolve(name, code=""):
                     sym = it["code"] + (".KQ" if it.get("typeCode") == "KOSDAQ" else ".KS")
                     break
         else:
-            bare = re.sub(r"\b(LTD|LIMITED|CORP(ORATION)?|INC|PLC|CO|COMPANY|HOLDINGS?|GROUP|SA|AG|NV|SE|OF INDIA|THE)\b\.?", " ", _clean(name), flags=re.I)
+            bare = re.sub(r"\b(LTD|LIMITED|CORP(ORATION)?|INC|PLC|CO|COMPANY|HOLDINGS?|GROUP|SA|AG|NV|SE|KK|OF INDIA|THE|SVCS|TECH)\b\.?", " ", _clean(name), flags=re.I)
             for q in dict.fromkeys([name, _clean(name), re.sub(r"\s+", " ", bare).strip()]):
-                d = get("https://query2.finance.yahoo.com/v1/finance/search?quotesCount=8&newsCount=0&q=" + urllib.parse.quote(q), UA_D, timeout=10)
+                d = {}
+                for k in range(3):                    # 야후가 잠깐 막으면(429) 쉬었다 다시
+                    try:
+                        d = get("https://query2.finance.yahoo.com/v1/finance/search?quotesCount=8&newsCount=0&q=" + urllib.parse.quote(q), UA_D, timeout=10)
+                        break
+                    except TimeoutError:
+                        raise
+                    except Exception as e:
+                        print("  야후 검색 재시도", q[:30], str(e)[:40], flush=True)
+                        time.sleep(3 * (k + 1))
                 qs = [z for z in d.get("quotes") or [] if z.get("quoteType") == "EQUITY" and z.get("exchange") not in BAD_EX
                       and _suf(z.get("symbol", "")) in CUR_BY_SUF]
                 # 유럽 교차상장(빈 .VI · 밀라노 1XXX.MI · 독일 지방거래소)은 빼고 야후 순서대로.
