@@ -167,7 +167,7 @@ def em_notice(code, limit=6):
     return out[:limit]
 
 
-SPAM = re.compile(r"토토|카지노|바카라|파워볼|슬롯|홀덤|마작|먹튀|사설\s*사이트|릴\s*(게임|영역)|룰렛|casino|betting|gambl", re.I)
+SPAM = re.compile(r"Calgary Rough|도박|토토|카지노|바카라|파워볼|슬롯|홀덤|마작|먹튀|사설\s*사이트|릴\s*(게임|영역)|룰렛|casino|betting|gambl", re.I)
 
 
 def clean(items):
@@ -195,7 +195,7 @@ def _tick(items, sym):
 def _core(name):
     """ETF 이름에서 검색에 쓸 핵심 (예: 'SPDR S&P 500 ETF Trust' → 'SPDR S&P 500')"""
     n = re.sub(r"\b(ETF|Trust|Fund|Shares|Index|Portfolio|Series)\b.*$", "", name or "", flags=re.I).strip(" -,")
-    return n or name
+    return n if len(n) >= 8 and " " in n else name      # 너무 짧으면(예: 'EA') 전체 이름
 
 
 def recent(items, days=30):
@@ -210,11 +210,11 @@ def one(s, meta, etf, names, g, src):
         ko = names.get(s) or (disp if mkt == "KR" else "")
         news = []
         if mkt == "KR":                             # 한국 ETF: 정확한 이름 + ETF
-            news = clean(g.get(f'"{disp}" ETF when:30d')) or about(clean(g.get(f"{disp} when:30d")), disp)
+            news = about(clean(g.get(f'"{disp}" ETF when:30d')), disp) or about(clean(g.get(f"{disp} when:30d")), disp)
             src["google"] += 1 if news else 0
         else:                                       # 미국 ETF: 정확한 이름 → "티커 ETF" → 야후(제목에 티커 있는 것만)
             core = _core(disp)
-            news = clean(g.get(f'"{core}" when:30d', hl="en-US", gl="US"))
+            news = [n for n in clean(g.get(f'"{core}" when:30d', hl="en-US", gl="US")) if about([n], core) or _tick([n], s)]
             if len(news) < 3:
                 news += _tick(clean(g.get(f'"{s}" ETF when:30d', hl="en-US", gl="US")), s)
             src["google_en"] += 1 if news else 0
@@ -230,7 +230,7 @@ def one(s, meta, etf, names, g, src):
             src["bing"] += 1 if b else 0
             news += b
         if not news:
-            o = clean(g.get(f'"{disp}"' if mkt == "KR" else f'"{_core(disp)}"', **({} if mkt == "KR" else {"hl": "en-US", "gl": "US"})))
+            o = about(clean(g.get(f'"{disp}"' if mkt == "KR" else f'"{_core(disp)}"', **({} if mkt == "KR" else {"hl": "en-US", "gl": "US"}))), disp, _core(disp))
             src["old"] += 1 if o else 0
             news += o
         src["etf"] += 1 if news else 0
