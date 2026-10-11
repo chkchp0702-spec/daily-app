@@ -15,10 +15,26 @@
     var pts = vals.map(function(v, i){ return (i / (vals.length - 1) * w).toFixed(1) + "," + (h - (v - lo) / (hi - lo) * (h - 2) - 1).toFixed(1); });
     return '<svg class="rb-mini" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '"><polyline points="' + pts.join(" ") + '" fill="none" stroke="' + (color || "#8a94a8") + '" stroke-width="1.6"/></svg>';
   }
-  function gauge(name, sub, v){
+  // 점수를 처음 보는 사람도: 말로 된 판정 + 신호 개수 + 막대 양 끝 뜻 (10/11)
+  function word(v){ return v == null ? "–" : v >= 35 ? "좋음" : v >= 10 ? "조금 좋음" : v > -10 ? "반반 (엇갈림)" : v > -35 ? "조금 나쁨" : "나쁨"; }
+  function gauge(name, sub, v, sigs){
     var x = v == null ? 50 : (v + 100) / 2;
-    return '<div class="rb-gc"><div class="rb-gt"><b>' + name + '</b><small>' + sub + '</small></div><div class="rb-gv" style="color:' + col(v) + '">' + sg(v) + '</div>' +
-      '<div class="rb-gb"><i style="left:' + x.toFixed(1) + '%;background:' + col(v) + '"></i></div></div>';
+    var a = (sigs || []).filter(function(s){ return s.st != null && s.w > 0 && !(s.id === "thrust" && s.st === 0); });
+    var n = function(k){ return a.filter(function(s){ return s.st === k; }).length; };
+    return '<div class="rb-gc"><div class="rb-gt"><b>' + name + '</b><small>' + sub + '</small></div>' +
+      '<div class="rb-gv" style="color:' + col(v) + '">' + sg(v) + '<span class="rb-gw">' + word(v) + '</span></div>' +
+      '<div class="rb-gb"><i style="left:' + x.toFixed(1) + '%;background:' + col(v) + '"></i></div>' +
+      '<div class="rb-ge"><span>−100 경고</span><span>0</span><span>+100 좋음</span></div>' +
+      (a.length ? '<div class="rb-gn">신호 ' + a.length + '개 <span>🟢' + n(1) + ' ⚪' + n(0) + ' 🔴' + n(-1) + '</span></div>' : '') + '</div>';
+  }
+  function gaugeHelp(R){
+    var t = R.now_timing, c = R.now_cycle;
+    var f = function(q, h){ return q && q.us ? '이 점수대(' + e(q.lab) + ')였던 ' + q.n + '주 → ' + h + ' 뒤 S&P500 평균 ' + pc(q.us[0]) + ' · 코스피 ' + pc(q.kr[0]) : ''; };
+    return '<div class="rb-help"><b>점수 읽는 법</b> — 신호마다 🟢 좋음 +1 · ⚪ 보통 0 · 🔴 경고 −1 을 매겨 (중요한 신호는 무게를 더 줘서) 평균 낸 것을 −100~+100으로 바꾼 숫자예요. ' +
+      '<b>0 근처 = 좋은 신호와 나쁜 신호가 반반</b>, +면 좋은 쪽이 많고 −면 경고가 많아요.' +
+      '<br>📊 <b>시장 타이밍</b> = 주가 흐름 자체(지수 200일선·오른 종목 수·신고가·공포지수·외국인 등)로 본 1~3개월 날씨' + (t ? ' · ' + f(t, "3개월") : '') +
+      '<br>🏭 <b>경기 사이클</b> = 금리·실업·경기선행지수로 본 6~18개월 경기' + (c ? ' · ' + f(c, "6개월") : '') +
+      '<br><span class="mut">아래 신호 목록에서 무엇이 🟢·🔴인지 볼 수 있어요.</span></div>';
   }
   // 사분면 지도: 가로 = 시장 타이밍, 세로 = 경기 사이클, 최근 26주 꼬리
   function quadMap(R){
@@ -84,7 +100,7 @@
     var cyc = R.sig.filter(function(s){ return s.grp === "cycle"; }), tim = R.sig.filter(function(s){ return s.grp === "timing"; });
     var h = '<div class="rb-top"><div class="rb-lab"><small>지금 국면</small><b>' + e(R.label) + '</b></div><em>' + e((R.updated || "").slice(5)) + '</em></div>' +
       '<p class="rb-verdict">' + e(R.verdict) + '</p>' +
-      '<div class="rb-g2">' + gauge("경기 사이클", "6~18개월 뒤", R.cycle) + gauge("시장 타이밍", "1~3개월 뒤", R.timing) + '</div>' +
+      '<div class="rb-g2">' + gauge("경기 사이클", "6~18개월 뒤", R.cycle, cyc) + gauge("시장 타이밍", "1~3개월 뒤", R.timing, tim) + '</div>' + gaugeHelp(R) +
       quadMap(R) + past(R.quad_stats, "3개월");
     if (R.changes && R.changes.length) h += '<div class="rb-chg">🔔 달라진 것: ' + R.changes.map(function(c){ return e(c.name) + ' ' + ic(c.from) + '→' + ic(c.to); }).join(" · ") + '</div>';
     h += '<div class="sub2">두 점수의 흐름</div>' + lines(R);

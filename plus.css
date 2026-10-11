@@ -447,3 +447,8 @@ a.pdfb{display:block;box-sizing:border-box;text-decoration:none;color:var(--text
 
 /* ④ 그래프 끌어 보기 (10/10) */
 svg.lc{touch-action:pan-y}.lc-x{stroke:var(--sub);stroke-width:1;stroke-dasharray:3 3;pointer-events:none}
+/* 국면 신호판 점수 읽는 법 (10/11) */
+.rb-gw{font-size:13px;font-weight:700;margin-left:6px;letter-spacing:0;color:var(--text)}
+.rb-ge{display:flex;white-space:nowrap;justify-content:space-between;font-size:10px;color:var(--sub);margin-top:4px}
+.rb-gn{font-size:11.5px;color:var(--sub);margin-top:6px;white-space:nowrap}.rb-gn span{color:var(--text);font-weight:700;margin-left:4px}
+.rb-help{font-size:12.5px;line-height:1.6;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
