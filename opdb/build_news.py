@@ -167,6 +167,37 @@ def em_notice(code, limit=6):
     return out[:limit]
 
 
+SPAM = re.compile(r"토토|카지노|바카라|파워볼|슬롯|홀덤|마작|먹튀|사설\s*사이트|릴\s*(게임|영역)|룰렛|casino|betting|gambl", re.I)
+
+
+def clean(items):
+    """도박·광고성 글 빼기 (구글 한국어 검색에 섞여 들어옴)"""
+    return [n for n in items if not SPAM.search((n.title or "") + " " + (n.publisher or ""))]
+
+
+def about(items, *keys):
+    """제목에 이름·티커가 들어간 것만 (짧은 티커·흔한 이름 검색에 엉뚱한 기사가 섞이는 것 막기)"""
+    ks = [k for k in keys if k and len(k) >= 2]
+    if not ks:
+        return items
+    def hit(t):
+        t2 = (t or "").replace(" ", "").lower()
+        return any(k.replace(" ", "").lower() in t2 for k in ks)
+    return [n for n in items if hit(n.title)]
+
+
+def _tick(items, sym):
+    """제목에 티커가 대문자 단어로 있는 것만 (예: SPY ETF)"""
+    r = re.compile(r"(?<![A-Za-z])" + re.escape(sym) + r"(?![a-z])")
+    return [n for n in items if r.search(n.title or "")]
+
+
+def _core(name):
+    """ETF 이름에서 검색에 쓸 핵심 (예: 'SPDR S&P 500 ETF Trust' → 'SPDR S&P 500')"""
+    n = re.sub(r"\b(ETF|Trust|Fund|Shares|Index|Portfolio|Series)\b.*$", "", name or "", flags=re.I).strip(" -,")
+    return n or name
+
+
 def recent(items, days=30):
     cut = (dt.date.today() - dt.timedelta(days=days)).isoformat()
     return [n for n in items if (n.date or "") >= cut]
@@ -178,24 +209,28 @@ def one(s, meta, etf, names, g, src):
         disp, mkt = etf[s]
         ko = names.get(s) or (disp if mkt == "KR" else "")
         news = []
-        if mkt == "KR":
-            news = g.get(f"{disp} when:30d")
+        if mkt == "KR":                             # 한국 ETF: 정확한 이름 + ETF
+            news = clean(g.get(f'"{disp}" ETF when:30d')) or about(clean(g.get(f"{disp} when:30d")), disp)
             src["google"] += 1 if news else 0
-        else:
-            news = recent(yahoo(s), 45)
-            src["yahoo"] += 1 if news else 0
+        else:                                       # 미국 ETF: 정확한 이름 → "티커 ETF" → 야후(제목에 티커 있는 것만)
+            core = _core(disp)
+            news = clean(g.get(f'"{core}" when:30d', hl="en-US", gl="US"))
             if len(news) < 3:
-                e = g.get(f'"{disp}" when:30d', hl="en-US", gl="US") or g.get(f'"{s}" ETF when:30d', hl="en-US", gl="US")
-                src["google_en"] += 1 if e else 0
-                news += e
+                news += _tick(clean(g.get(f'"{s}" ETF when:30d', hl="en-US", gl="US")), s)
+            src["google_en"] += 1 if news else 0
+            if len(news) < 3:
+                y = _tick(recent(yahoo(s), 45), s)
+                src["yahoo"] += 1 if y else 0
+                news += y
             if len(news) < 3 and ko:
-                news += g.get(f"{ko} ETF when:30d")
+                news += about(clean(g.get(f"{ko} when:30d")), ko)
         if len(news) < 3:
-            b = recent(bing(disp, mkt="ko" if mkt == "KR" else None))
+            b = clean(recent(bing(f'"{disp}"', mkt="ko" if mkt == "KR" else None)))
+            b = about(b, disp, _core(disp)) if mkt == "KR" else (about(b, _core(disp)) or _tick(b, s))
             src["bing"] += 1 if b else 0
             news += b
         if not news:
-            o = g.get(disp if mkt == "KR" else f'"{disp}"', **({} if mkt == "KR" else {"hl": "en-US", "gl": "US"}))
+            o = clean(g.get(f'"{disp}"' if mkt == "KR" else f'"{_core(disp)}"', **({} if mkt == "KR" else {"hl": "en-US", "gl": "US"})))
             src["old"] += 1 if o else 0
             news += o
         src["etf"] += 1 if news else 0
@@ -222,6 +257,13 @@ def one(s, meta, etf, names, g, src):
             c = g.get(f"{int(code):05d} 股票 when:30d", hl="zh-HK", gl="HK", ceid="HK:zh-Hant")
         src["cn"] += 1 if c else 0
         news += c
+    if mkt == "JP" and len(news) < 3:               # 일본: 구글 일본판 (영문 회사명 · 종목코드)
+        code = s.split(".")[0]
+        c = g.get(f'"{long_name or disp}" when:30d', hl="ja", gl="JP", ceid="JP:ja") if (long_name or disp) else []
+        if not c and code.isalnum():
+            c = about(g.get(f"{code} 株価 when:30d", hl="ja", gl="JP", ceid="JP:ja"), code)
+        src["cn"] += 1 if c else 0
+        news += c
     if len(news) < 3 and mkt != "KR":               # 야후 검색 뉴스 (예전엔 미국만 → 해외 전부)
         y = recent(yahoo(s), 45)
         src["yahoo"] += 1 if y else 0
@@ -234,8 +276,10 @@ def one(s, meta, etf, names, g, src):
         b = recent(bing(q, mkt="ko")) or (recent(bing(long_name)) if mkt != "KR" and long_name else [])
         src["bing"] += 1 if b else 0
         news += b
-    if not news:
+    if not news:                                    # 기간 없이 — 해외는 제목에 이름이 있는 것만 (엉뚱한 옛 기사 막기)
         o = g.get(q)
+        if mkt != "KR":
+            o = about(o, ko, disp, (long_name or "").split(",")[0])
         src["old"] += 1 if o else 0
         news += o
     if not news and mkt == "CN":                    # 그래도 없으면: 기간 없이 동방재부 → 회사 공시
@@ -287,7 +331,7 @@ def main():
         except Exception as ex:                     # 한 종목 오류로 전체가 멈추지 않게
             print("  오류", s, ex, flush=True)
             news = []
-        news = D._dedupe(news)
+        news = D._dedupe(clean(news))
         news.sort(key=lambda n: n.date or "", reverse=True)
         news = news[:6]
         if a.only:
