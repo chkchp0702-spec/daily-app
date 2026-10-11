@@ -117,6 +117,18 @@
       return '<div class="po-tli"><span class="d">' + md(c.date) + '</span><span class="t">' + e(c.why || "") + (i === 0 ? ' <em>지금</em>' : '') + '</span></div>'; }).join("") +
       (P.changes.length < 2 ? '<p class="note" style="margin:6px 0 0">' + md(P.start) + ' 이후 배분표가 그대로예요. 리포트가 비중을 바꾸면 여기에 쌓이고 알림이 가요.</p>' : '') + '</section>';
 
+    // 🧭 섹터 의견 (10/11 C안) — 리포트의 섹터 판단은 배분표 밖에서 그림자로 채점 (port.json views)
+    if (P.views && P.views.rows && P.views.rows.length){
+      var VW = P.views, vmx = Math.max.apply(null, VW.rows.map(function(x){ return Math.abs(x.ret || 0); }).concat([0.5]));
+      h += '<div class="sec">🧭 섹터 의견 <small class="mut">리포트의 섹터 판단 · 돈은 안 넣고 지수 코어와 비교</small></div><section class="card po-vw">' +
+        (VW.pending ? '<p class="cn-n">' + md(VW.since) + ' 첫 거래일부터 채점해요. 코어(S&P½+나스닥½)보다 8주 넘게 나으면 「주식 칸의 절반까지 섹터로」를 제안해요.</p>'
+          : '<div class="cn-v" style="grid-template-columns:repeat(3,1fr)"><div class="me"><small>🧭 섹터 의견</small><b class="' + cls(VW.ret) + '">' + sg(VW.ret) + '</b></div><div><small>코어</small><b class="' + cls(VW.core) + '">' + sg(VW.core) + '</b></div><div><small>차이</small><b class="' + cls(VW.edge) + '">' + sg(VW.edge).replace("%", "%p") + '</b></div></div>') +
+        VW.rows.map(function(x){ var w = x.ret == null ? 0 : Math.abs(x.ret) / vmx * 50;
+          return '<div class="po-cr"><div class="n">' + e(x.name) + ' <small>' + x.pct + '%</small>' + (x.t ? '<em>' + x.t.map(function(t){ return '<span class="po-tk" data-op="' + e(t) + '">' + e(t) + '</span>'; }).join(" · ") + '</em>' : '') + '</div>' +
+            (x.ret != null ? '<div class="bar"><span class="' + (x.ret >= 0 ? "p" : "m") + '" style="width:' + w.toFixed(1) + '%"></span></div><b class="' + cls(x.ret) + '">' + sg(x.ret) + '</b>' : '<div class="bar"></div><b class="mut">대기</b>') + '</div>'; }).join("") +
+        '<p class="note" style="margin:6px 0 0">10/11부터 💼 기본 포트 뼈대는 검증한 규칙(🟢 S&P·나스닥 코어 95%·금 5% / 🔴 코어 63%·금 11%·현금 26%)이 정해요. 2017년 이후 옛 뼈대(섹터 칸 + 현금 26% 상시)는 S&P보다 연 −1.5%p, 새 뼈대는 +1.9%p였어요.</p></section>';
+    }
+
     // 🌏 해외 동종주 (market/peers.json) — 미국 강세 섹터와 같은 일을 하는 일·중·홍·대만·한국 종목을 달러 기준으로 비교
     if (PE && PE.themes && PE.themes.length) h += peersHtml();
 

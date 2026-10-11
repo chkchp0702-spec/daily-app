@@ -173,7 +173,7 @@
   /* ---------- ⑤ 접히는 카드 + 바로가기 칩 (💼 포트) ---------- */
   var FOLD = {};
   try { FOLD = JSON.parse(localStorage.getItem("fold") || "{}"); } catch(x) {}
-  var FMAP = [[/시장 .*비교/, "pocmp", "🏁 비교", 1], [/집중 포트/, "poconc", "🎯 집중", 1], [/킥 칸 속/, "pokick", "⚡ 킥", 1], [/이렇게 담으면/, "pofollow", "📋 따라하기", 1], [/비중 바뀐 날/, "potl", "🔁 바뀐 날", 0],
+  var FMAP = [[/시장 .*비교/, "pocmp", "🏁 비교", 1], [/집중 포트/, "poconc", "🎯 집중", 1], [/섹터 의견/, "poviews", "🧭 섹터", 0], [/킥 칸 속/, "pokick", "⚡ 킥", 1], [/이렇게 담으면/, "pofollow", "📋 따라하기", 1], [/비중 바뀐 날/, "potl", "🔁 바뀐 날", 0],
               [/해외 동종주/, "popeers", "🌏 동종주", 0], [/벌고 잃었나/, "poct", "🧩 칸별", 0], [/날짜별/, "podt", "📅 날짜별", 0]];
   window.foldify = function(root){
     if (!root) return;
