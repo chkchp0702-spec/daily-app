@@ -216,6 +216,7 @@
     var main = document.getElementById("main"); if (!main) return;
     [].forEach.call(main.querySelectorAll("section.card"), function(c){
       if (c.dataset.xc || c.classList.contains("ixc-card") || c.closest("#pobody") || (c.classList.contains("br") && cur !== "feed") || c.classList.contains("pu-main") || c.classList.contains("pu-list") || c.classList.contains("xs-hid") || c.closest("#sheet") || c.id === "xs-more" || c.parentElement.closest(".card")) return;
+      if (c.querySelector(".rb-x")) return;                     // 국면 신호판: 점수 설명을 펼친 카드는 자르지 않음
       if (c.offsetHeight < 900) return;
       c.dataset.xc = "1"; c.classList.add("xs-clamp");
       var b = document.createElement("button"); b.className = "xs-cl"; b.textContent = "전체 보기 ▾";
