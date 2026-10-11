@@ -48,9 +48,10 @@
     var n = Math.max.apply(null, ss.map(function(x){ return x.path.length; }));
     var days = ss[0].path.map(function(p){ return p[0]; });
     return card("🎞️ 섹터 흐름 되감기 <span class='mut'>최근 " + n + "거래일 · 꼬리 = 지난 4일 이동</span>",
-      '<div class="famw" id="rotw-' + k + '" data-ff="' + ((window.store && store.secf) || "") + '">' + rotSvg(m, n - 1, RSEL[k]) + '</div>' + V.famChips("rot") +
+      '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '"><div id="rotw-' + k + '">' + rotSvg(m, n - 1, RSEL[k]) + '</div>' + V.famChips("rot") +
+      // 세부 섹터 칩: 고른 계열의 섹터만 보이고, 누르면 그 섹터만 재생 (10/11 사용자: "밑에 세부 섹터는 되감기 재생 안 됨")
       '<div class="rots">' + ['<button data-rsel="' + k + '|"' + (!RSEL[k] ? ' class="on"' : '') + '>전체</button>'].concat(ss.map(function(x, i){
-        return '<button data-rsel="' + k + '|' + e(x.k) + '" style="--sc:' + V.secCol(x.k, i) + '"' + (RSEL[k] === x.k ? ' class="on"' : '') + '><i></i>' + e(x.name) + '</button>'; })).join("") + '</div>' +
+        return '<button data-rsel="' + k + '|' + e(x.k) + '" data-fam="' + V.famOf(x) + '" style="--sc:' + V.secCol(x.k, i) + '"' + (RSEL[k] === x.k ? ' class="on"' : '') + '><i></i>' + e(x.name) + '</button>'; })).join("") + '</div></div>' +
       '<div class="rotc"><button class="btn" data-rotplay="' + k + '">▶︎ 재생</button><input type="range" min="0" max="' + (n - 1) + '" value="' + (n - 1) + '" data-rot="' + k + '"><b id="rotd-' + k + '">' + e(days[n - 1] || "") + '</b></div>' +
       '<p class="note">막대를 밀면 그날 기준 섹터 위치로 바뀌어요. 왼쪽 아래 → 왼쪽 위 → 오른쪽 위로 도는 섹터가 "새로 돈이 들어오는" 곳.</p>');
   }
@@ -66,6 +67,8 @@
     var a = b.getAttribute("data-rsel").split("|"), k = a[0];
     RSEL[k] = a[1] || null;
     [].forEach.call(b.parentNode.children, function(x){ x.classList.toggle("on", x === b); });
+    var w = b.closest(".famw");
+    if (w && w.dataset.ff && b.dataset.fam && b.dataset.fam !== w.dataset.ff){ var fb = w.querySelector('.famc [data-ffam="' + b.dataset.fam + '"]'); if (fb) fb.click(); }
     var pb = document.querySelector('[data-rotplay="' + k + '"]'); if (pb) pb.click();
   });
   document.addEventListener("click", function(ev){
