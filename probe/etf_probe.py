@@ -14,7 +14,7 @@ for code in sys.argv[1:]:
     try:
         f = post({"bld": "dbms/comm/finder/finder_secuprodisu", "mktsel": "ETF", "searchText": code})
         o["finder"] = (f.get("block1") or f)  if isinstance(f, dict) else f
-        isin = ((f.get("block1") or [{}])[0]).get("codeName") or ((f.get("block1") or [{}])[0]).get("full_code")
+        isin = ((f.get("block1") or [{}])[0]).get("full_code")
         o["isin"] = isin
         for back in range(0, 6):
             d = (dt.date.today() - dt.timedelta(days=back)).strftime("%Y%m%d")
