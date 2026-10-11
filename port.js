@@ -95,9 +95,9 @@
       '<div class="po-in"><label>내 투자금</label><div class="po-amt"><input id="poamt" inputmode="numeric" value="' + S.amt.toLocaleString("ko-KR") + '"><span>원</span></div>' +
       '<div class="po-q">' + [3e6, 1e7, 3e7, 1e8].map(function(v){ return '<button data-v="' + v + '">' + won(v) + '</button>'; }).join("") + '</div>' +
       (K ? '<div class="po-mode po-pf"><button data-pf="base" class="' + (S.pf === "base" ? "on" : "") + '">💼 기본 포트</button><button data-pf="kick" class="' + (S.pf === "kick" ? "on" : "") + '">⚡ 킥 포함</button></div>' : '') +
-      '<div class="po-mode"><button data-m="us" class="' + (S.mode === "us" ? "on" : "") + '">💵 외화로</button><button data-m="kr" class="' + (S.mode === "kr" ? "on" : "") + '">₩ 원화로</button></div></div>' +
+      '<div class="po-mode"><button data-m="us" class="' + (S.mode === "us" ? "on" : "") + '">💵 외화 베이스</button><button data-m="kr" class="' + (S.mode === "kr" ? "on" : "") + '">₩ 원화 베이스</button></div></div>' +
       '<div id="porows"></div><div class="po-cp"><button class="btn" id="pocopy">📋 주문 목록 복사</button><span id="pocpst"></span></div>' +
-      '<p class="note">환율 ' + (P.fx ? P.fx.toLocaleString("ko-KR") + "원" : "–") + ' · 주 수는 ' + md(P.asof) + ' 종가 기준 내림. <b>외화로</b> = 미국 ETF를 달러로 · <b>원화로</b> = 같은 걸 담은 한국 상장 ETF로 바꿔 원화로. 원화 상품이 없는 칸과 해외 개별 종목(🇭🇰 등)은 원화로에서도 외화예요. ' +
+      '<p class="note">환율 ' + (P.fx ? P.fx.toLocaleString("ko-KR") + "원" : "–") + ' · 주 수는 ' + md(P.asof) + ' 종가 기준 내림. <b>외화 베이스</b> = 미국 ETF를 달러로 · <b>원화 베이스</b> = 같은 걸 담은 한국 상장 ETF로 바꿔 원화로. 원화 상품이 없는 칸과 해외 개별 종목(🇭🇰 등)은 원화 베이스에서도 외화예요. ' +
       '<b>비중이 바뀐 날(아래 「비중 바뀐 날」)에만 고치면</b> 돼요.</p></section>';
 
     // ③ 비중 바뀐 날
@@ -179,13 +179,14 @@
     if (kw) out.push({x: {name: "⚡ 킥", pct: Math.round(kw * 10) / 10}, i: -1, amt: S.amt * kw / 100, kick: 1, items: kHold().map(function(o){
       var a = S.amt * o.w / 100, kr = /^\d{6}\.K[SQ]$/.test(o.code), us = /^[A-Z\-]+$/.test(o.code);
       var usd = us && P.fx ? a / P.fx : null;
-      return {nm: (o.tags ? o.tags + " " : "") + nm(o.name), code: o.code, amt: a, usd: usd, cur: us ? "$" : kr ? "원" : "현지", sh: us ? (usd && o.now ? Math.floor(usd / o.now) : null) : kr ? Math.floor(a / o.now) : null,
+      return {tags: o.tags || "", short: nm(o.name), nm: (o.tags ? o.tags + " " : "") + nm(o.name), code: o.code, amt: a, usd: usd, cur: us ? "$" : kr ? "원" : "현지", sh: us ? (usd && o.now ? Math.floor(usd / o.now) : null) : kr ? Math.floor(a / o.now) : null,
               note: o.rule || ""}; })});
     return out;
   }
   function rows(){
     var box = document.getElementById("porows"); if (!box) return;
     box.innerHTML = plan().map(function(p){
+      if (p.kick) return kickRow(p);
       return '<div class="po-r' + (p.kick ? ' po-rk' : '') + '"><div class="po-rh"><i style="background:' + (p.kick ? "#ff6b6b" : COL[p.i % COL.length]) + '"></i><b>' + e(p.x.name) + '</b><span class="pct">' + p.x.pct + '%</span><span class="am">' + won(p.amt) + '원</span></div>' +
         p.items.map(function(it){
           return '<div class="po-it" data-op="' + e(it.code) + '"><span class="tk">' + e(it.nm) + (it.code !== it.nm ? ' <small>' + e(it.code) + '</small>' : '') + ' <i class="po-go">›</i></span>' +
@@ -194,6 +195,19 @@
             (it.note ? '<div class="po-itn">' + e(it.note) + '</div>' : ''); }).join("") +
           (p.kick && !p.items.length ? '<div class="po-itn">지금 빈 자리 — 신호가 뜨면 3%씩 들어가요 (그때까지 현금)</div>' : '') + '</div>';
     }).join("");
+  }
+  // ⚡ 킥 칸은 간단히: 신호별 개수 한 줄 + 종목 칩(이모티콘·이름·주 수) · 규칙·손절은 「킥」 카드에서
+  function kickRow(p){
+    var cnt = {}; p.items.forEach(function(it){ (it.tags.match(/\p{Extended_Pictographic}/gu) || ["·"]).forEach(function(t){ cnt[t] = (cnt[t] || 0) + 1; }); });
+    var lab = {"🐋": "고래", "☕": "컵", "📈": "갭", "🤫": "매집", "🧪": "시험"};
+    var sum = Object.keys(cnt).filter(function(t){ return lab[t]; }).map(function(t){ return t + ' ' + lab[t] + ' ' + cnt[t]; }).join(' · ');
+    return '<div class="po-r po-rk"><div class="po-rh"><i style="background:#ff6b6b"></i><b>' + e(p.x.name) + '</b><span class="pct">' + p.x.pct + '%</span><span class="am">' + won(p.amt) + '원</span></div>' +
+      (p.items.length ? '<div class="po-ksum">' + p.items.length + '종목 · 한 종목 약 ' + won(p.amt / p.items.length) + '원' + (sum ? ' · ' + sum : '') + '</div><div class="po-kg">' +
+        p.items.map(function(it){
+          var q = it.sh ? it.sh.toLocaleString("ko-KR") + '주' : it.cur === "현지" ? won(it.amt) + '원' : '<span class="po-k0">1주 안 됨</span>';
+          return '<span class="po-kc" data-op="' + e(it.code) + '"><i>' + e(it.tags.replace(/🧪/g, "")) + '</i><b>' + e(it.short) + '</b><small>' + q + '</small></span>'; }).join("") + '</div>' +
+        '<div class="po-kl" data-goto="port~pokick">손절·익절 규칙과 수익은 ⚡ 킥 카드에서 ›</div>'
+      : '<div class="po-itn">지금 빈 자리 — 신호가 뜨면 3%씩 들어가요 (그때까지 현금)</div>') + '</div>';
   }
   function nm(x){ return String(x || "").replace(/,? (Inc\.?|Corp\.?|Corporation|Ltd\.?|Company|plc|N\.V\.|S\.A\.|ASA)?\s*(Common Stock|Ordinary Shares|Class [A-Z].*|American Depositary.*)$/i, "").replace(/,? (Inc\.?|Corporation|Corp\.?|Ltd\.?)$/i, "").trim(); }
   function pr(v){ return v == null ? "–" : (+v).toLocaleString("ko-KR", {maximumFractionDigits: v >= 1000 ? 0 : 2}); }
@@ -257,6 +271,12 @@
     ".po-sub{font-size:13.5px;color:var(--sub)}.po-sub b{color:var(--text)}" +
     ".po-cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0 8px}.po-cmp>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px}" +
     ".po-cmp small{display:block;font-size:11.5px;color:var(--sub)}.po-cmp b{font-size:16px}.po-cmp em{display:block;font-style:normal;font-size:11px;margin-top:2px}" +
+    ".po-ksum{font-size:12.5px;color:var(--sub);margin:2px 0 8px}" +
+    ".po-kg{display:grid;grid-template-columns:1fr 1fr;gap:6px}" +
+    ".po-kc{display:flex;align-items:center;gap:4px;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 8px;cursor:pointer}" +
+    ".po-kc i{font-style:normal;font-size:12px;flex:none}.po-kc b{font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}" +
+    ".po-kc small{flex:none;font-size:12px;font-weight:700}.po-k0{color:var(--sub);font-weight:400;font-size:11px}" +
+    ".po-kl{font-size:12.5px;color:var(--accent,#e9c46a);margin-top:8px;cursor:pointer}" +
     "em.w{color:#4dd47a;font-style:normal}em.l{color:#8a94a8;font-style:normal}" +
     ".po-ch{margin-top:6px}.po-w{font-size:12.5px;color:var(--sub);margin-top:4px}" +
     ".po-follow .dn-w{margin-bottom:10px}.po-in label{font-size:13px;color:var(--sub)}" +
