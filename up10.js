@@ -97,9 +97,10 @@
     var h = '<div class="hm-day">' + (now.getUTCMonth() + 1) + '월 ' + now.getUTCDate() + '일 ' + wd + '요일 · <span class="mut">' + e(String(H.at || "").slice(5)) + ' 기준</span></div>';
     // 💼 포트
     var ex = (P.kick || 0) - (P.spy || 0);
-    var spark = (window.V && P.nav && P.nav.length > 1) ? V.lines([{name: "⚡ 킥", color: "#ff6b6b", vals: P.kick_line}, {name: "💼 기본", color: "#e9c46a", vals: P.nav}, {name: "S&P", color: "#7c9cff", vals: P.spy_line, dash: 1}],
+    var spark = (window.V && P.nav && P.nav.length > 1) ? V.lines([{name: "⚡ 킥", color: "#ff6b6b", vals: P.kick_line}].concat((function(){ var c = (P.conc_line || []).slice(), n = (P.nav || []).length; while (c.length && c.length < n) c.unshift(0); return c.length === n ? [{name: "🎯 집중", color: "#4dd47a", vals: c}] : []; })()).concat([{name: "💼 기본", color: "#e9c46a", vals: P.nav}, {name: "S&P", color: "#7c9cff", vals: P.spy_line, dash: 1}]),
       (P.nav || []).map(function(_, i){ return i ? "" : md(P.start); }), {h: 96, unit: "%", zero: 1, nodots: 1}) : "";
     h += card("port~pohero", "💼", "포트", md(P.start) + "부터 · " + md(P.asof) + " 미국 종가",
+      (P.conc != null ? '<div class="hm-cn ' + (P.conc_up ? "g" : "r") + '" data-goto="port~poconc"><span>🎯 집중 <b class="' + cls(P.conc) + '">' + sg(P.conc) + '</b></span><span>' + (P.conc_up ? "🟢 오르는 시장 · 주식 100%" : "🔴 상승장 아님 · 주식 50%") + ' <small>S&P 200일선 ' + sg(P.conc_gap, 1) + '</small> ›</span></div>' : '') +
       '<div class="hm-big"><div><small>⚡ 킥</small><b class="' + cls(P.kick) + '">' + sg(P.kick) + '</b>' + hon(P.kick_honest, {note: "돌파 칸은 다음 거래일 종가에 사고, 사고팔 때마다 비용을 뺌"}) + '</div><div><small>💼 기본</small><b class="' + cls(P.base) + '">' + sg(P.base) + '</b>' + hon(P.base_honest, {note: "주 1회(+배분표 바뀐 날)만 비중을 맞추고 그때마다 비용을 뺌"}) + '</div><div><small>S&P500</small><b>' + sg(P.spy) + '</b></div></div>' +
       '<div class="hm-l">어제(' + md(P.d1_date) + ') 💼 <b class="' + cls(P.d1) + '">' + sg(P.d1) + '</b> · ⚡ <b class="' + cls(P.d1_kick) + '">' + sg(P.d1_kick) + '</b> · S&P ' + sg(P.d1_spy) +
       ' · <a data-goto="port~pocmp">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a>' + (ex < 0 ? ' · S&P까지 ' + sg(ex) + 'p' : '') + '</div>' +
@@ -172,7 +173,7 @@
   /* ---------- ⑤ 접히는 카드 + 바로가기 칩 (💼 포트) ---------- */
   var FOLD = {};
   try { FOLD = JSON.parse(localStorage.getItem("fold") || "{}"); } catch(x) {}
-  var FMAP = [[/시장 .*비교/, "pocmp", "🏁 비교", 1], [/킥 칸 속/, "pokick", "⚡ 킥", 1], [/이렇게 담으면/, "pofollow", "📋 따라하기", 1], [/비중 바뀐 날/, "potl", "🔁 바뀐 날", 0],
+  var FMAP = [[/시장 .*비교/, "pocmp", "🏁 비교", 1], [/집중 포트/, "poconc", "🎯 집중", 1], [/킥 칸 속/, "pokick", "⚡ 킥", 1], [/이렇게 담으면/, "pofollow", "📋 따라하기", 1], [/비중 바뀐 날/, "potl", "🔁 바뀐 날", 0],
               [/해외 동종주/, "popeers", "🌏 동종주", 0], [/벌고 잃었나/, "poct", "🧩 칸별", 0], [/날짜별/, "podt", "📅 날짜별", 0]];
   window.foldify = function(root){
     if (!root) return;
@@ -249,6 +250,7 @@
     ".hm-l{font-size:13.5px;line-height:1.5;color:var(--text)}.hm-l small{color:var(--sub)}.hm-l a{color:var(--acc);cursor:pointer}",
     ".hm-sp{margin:4px -4px 0}.hm-sp .lg{font-size:11px}",
     ".hm-alert{margin-top:8px;background:rgba(255,184,77,.12);border:1px solid rgba(255,184,77,.4);border-radius:12px;padding:8px 10px;font-size:13px}.hm-alert small{display:block;color:var(--sub);font-size:11.5px;margin-top:2px}",
+    ".hm-cn{display:flex;justify-content:space-between;align-items:center;gap:8px;border-radius:10px;padding:7px 10px;margin-bottom:8px;font-size:13px;cursor:pointer}.hm-cn.g{background:rgba(77,212,122,.12)}.hm-cn.r{background:rgba(255,107,107,.12)}.hm-cn small{color:var(--sub)}" +
     ".hm-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.hm-chip{font-size:12px;background:var(--panel2);border-radius:999px;padding:3px 9px}.hm-chip.g{background:rgba(77,212,122,.14);color:#4dd47a}.hm-chip.b{background:rgba(57,135,229,.16);color:#7cb0ff}",
     ".hm-ev{font-size:14px;padding:5px 0;border-bottom:1px dashed var(--line)}.hm-ev small{color:var(--sub)}",
     ".hm-f{padding:6px 0;border-bottom:1px dashed var(--line)}.hm-f:last-child{border-bottom:0}.hm-f small{color:var(--sub);font-size:11.5px}",
