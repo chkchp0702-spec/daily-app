@@ -84,14 +84,16 @@
             var st = K.stat || {}, HL = K.hold || [], kw = HL.reduce(function(s, o){ return s + (o.w || 0); }, 0);
             var nm = function(x){ return String(x || "").replace(/,? (Inc\.?|Corp\.?|Corporation|Company|Ltd\.?|plc|CORP)\b.*$/i, "").replace(/ (Common Stock|Ordinary Shares).*$/i, ""); };
             var sg = function(v){ return v == null ? "–" : (v > 0 ? "+" : "") + (+v).toFixed(1) + "%"; };
-            var rowsK = al.map(function(a){ var k = /현금/.test(a.name) ? Math.round((a.pct - kw) * 10) / 10 : a.pct;
+            var RB = K.rule && K.rule.base_now, share = RB ? 1 - ((K.rules || {}).sleeve || 0) - ((K.rules || {}).whale_sleeve || 0) : 1, spare = RB ? Math.max(0, (1 - share) * 100 - kw) : 0;
+            var rowsK = al.map(function(a){ var k = RB ? Math.round(((RB[a.name] != null ? RB[a.name] : a.pct) * share + (/현금/.test(a.name) ? spare : 0)) * 10) / 10
+                                                       : /현금/.test(a.name) ? Math.round((a.pct - kw) * 10) / 10 : a.pct;
               return '<tr><td>' + e(a.name) + '</td><td>' + a.pct + '%</td><td' + (k !== a.pct ? ' class="mk-ch"' : '') + '>' + k + '%</td></tr>'; }).join("") +
               '<tr class="mk-k" data-goto="port~pokick"><td>⚡ 킥 <small>성과 확인된 신호만 · ' + HL.length + '종목</small></td><td>–</td><td><b>' + (Math.round(kw * 10) / 10) + '%</b></td></tr>' +
               HL.map(function(o){ return '<tr class="mk-ko" data-op="' + e(o.code) + '"><td><span class="mk-tg">' + e(o.tags || "") + '</span> ' + e(nm(o.name)) + ' <small>' + e(o.code) + '</small></td><td></td><td>' + (Math.round(o.w * 10) / 10) + '% <small class="' + (o.r >= 0 ? "up" : "dn") + '">' + sg(o.r) + '</small></td></tr>'; }).join("");
             box.outerHTML = card("⚡ 킥 포함 자산 배분 <span class='mut'>기본 vs 킥 — 같은 날 같은 기준</span>",
               '<div class="mk-st"><span>💼 기본 <b class="' + (st.base >= 0 ? "up" : "dn") + '">' + sg(st.base) + '</b></span><span>⚡ 킥 <b class="' + (st.kick >= 0 ? "up" : "dn") + '">' + sg(st.kick) + '</b></span><span>S&P <b>' + sg(st.spy) + '</b></span></div>' +
               '<table class="mk-t"><tr><th></th><th>💼 기본</th><th>⚡ 킥 포함</th></tr>' + rowsK + '</table>' +
-              '<p class="note"><a data-goto="port~pofollow">📋 포트에서 따라하기(금액·주 수) ›</a> · ⚡ 킥 = 기본 배분에서 현금 15%p 를 떼어 <b>성과가 확인된 신호</b>에만 담은 것 — 🐋 고래 13F 큰 신규 · ☕ 컵 돌파 · 📈 돌파 갭 · 🤫 조용한 매집(표본 20건 차면 자동). 종목 앞 이모티콘이 들어온 이유예요. 자세한 건 💼 포트 탭.</p>');
+              '<p class="note"><a data-goto="port~pofollow">📋 포트에서 따라하기(금액·주 수) ›</a> · ' + (RB ? '🧪 ' + e((K.rule.from || "").slice(5).replace("-", "/")) + '부터 킥 포트는 현금을 국면(「' + e(K.rule.quad || "") + '」 → ' + K.rule.cash + '%)으로 정하고 🐋 고래를 10%로 — 검증 통과한 규칙만. ' : '') + '⚡ 킥 = 기본 배분에서 현금 일부를 떼어 <b>성과가 확인된 신호</b>에만 담은 것 — 🐋 고래 13F 큰 신규 · ☕ 컵 돌파 · 📈 돌파 갭 · 🤫 조용한 매집(표본 20건 차면 자동). 종목 앞 이모티콘이 들어온 이유예요. 자세한 건 💼 포트 탭.</p>');
           }).catch(function(){});
         }, 0);
       }

@@ -145,6 +145,9 @@
       var nn = (r.win || 0) + (r.loss || 0);
       var body = nn && nn < 5 && r.k !== "port" ? '<div class="sc-few">표본 ' + nn + '건 — 5건 넘으면 비율을 보여 줘요</div>' : bar(r.win, r.loss);
       if (r.k === "report" && r.recent) body += r.recent.map(function(x){ return '<div class="sc-li"><span class="sc-v ' + (/맞/.test(x.v) ? "w" : /틀/.test(x.v) ? "l" : "") + '">' + e(x.v) + '</span>' + md(x.d) + ' ' + e(String(x.t || "").slice(0, 70)) + '</div>'; }).join("");
+      if (r.k === "report" && r.cal && r.cal.n) body += '<div class="sc-cal"><b>🎯 확률 채점 ' + r.cal.n + '건 · 브라이어 ' + r.cal.brier + ' <span class="mut">(0 완벽 · 0.25 동전)</span> · ' + e(r.cal.tone || "") + '</b>' +
+        (r.cal.cats || []).map(function(c){ return '<span class="' + (c.ok ? "ok" : "") + '">' + e(c.k) + ' ' + c.rate + '% <small>' + c.n + '건</small>' + (c.ok ? ' ✓' : '') + '</span>'; }).join("") +
+        '<small>' + e(r.cal.gate || "") + ' · ✓ = 비중을 바꿔도 되는 분야</small></div>';
       if (r.k === "kick" && r.sig) body += '<div class="sc-sig">' + r.sig.map(function(x){ return '<div class="' + (x.shadow ? "sh" : x.trial ? "tr" : x.on ? "on" : "off") + '"><b>' + e(x.tag) + ' ' + e({cup: "컵", gap: "갭", accum: "매집", whale: "고래", focus: "집중", lead: "선행"}[x.k] || x.k) + '</b>' +
         '<small>' + (x.shadow ? "👻 그림자 " : x.trial ? "🧪 시험 " : x.on ? "✓ 킥에 들어감 " : "⏳ 대기 ") + (x.n != null ? x.n + "건" : "") + (x.avg != null ? " · 평균 " + sg(x.avg, 1) : "") + (x.pf ? " · 손익비 " + x.pf : "") + '</small></div>'; }).join("") + '</div>';
       if (r.k === "danta" && r.rows) body += '<table class="lrn"><tr><th></th><th>09시</th><th>10시</th><th>11~12시</th><th>13시~</th></tr>' + r.rows.map(function(x){
@@ -154,7 +157,13 @@
       var GO = {report: "market", bets: "feed~fdbrain", kick: "port~pokick", picks: "port~poct", focus: "market~mkfo", port: "port~pocmp", whale: "port~pokick"}[r.k];
       h += '<section class="card sc-c"' + (GO ? ' data-goto="' + GO + '"' : '') + '>' + top.replace('</div></div>', '</div><span class="hm-go">보기 ›</span></div>') + body + '</section>';
     });
-    b.innerHTML = h;
+    b.innerHTML = h + '<div id="scrbt"></div>';
+    J("rules_bt.json").then(function(T){ var x = document.getElementById("scrbt"); if (!x || !T || !T.rows) return;
+      x.outerHTML = '<section class="card sc-bt" id="scrbt"><h3>🧪 포트 규칙 검증 <span class="mut">' + e(T.from.slice(0, 4)) + '~' + e(T.to.slice(0, 4)) + ' · 매주 일요일 다시</span></h3>' +
+        '<table class="sc-bt-t"><tr><th></th><th>연 수익</th><th>최대 낙폭</th><th>샤프</th><th></th></tr>' + T.rows.map(function(r){
+          return '<tr' + (/킥 포트/.test(r.lab) ? ' class="kp"' : '') + '><td>' + e(r.lab) + '</td><td class="' + cls(r.cagr) + '">' + sg(r.cagr, 1) + '</td><td>' + r.mdd + '%</td><td>' + (r.sharpe != null ? r.sharpe : "–") + '</td><td>' + e(r.verdict || "") + '</td></tr>'; }).join("") + '</table>' +
+        '<p class="note">「같은 비중」에 규칙 하나씩 붙여 본 결과예요. ✅ 나아진 것만 킥 포트에 켜요 — 지금은 ① 국면 현금만 켜져 있어요. ' + e(T.note || "") + '</p></section>';
+    }).catch(function(){});
   }
 
   /* ---------- ⑤ 접히는 카드 + 바로가기 칩 (💼 포트) ---------- */
@@ -241,6 +250,8 @@
     ".hm-f{padding:6px 0;border-bottom:1px dashed var(--line)}.hm-f:last-child{border-bottom:0}.hm-f small{color:var(--sub);font-size:11.5px}",
     /* 누르는 곳 */
     ".hm-chip[data-op],.hm-chip[data-goto],[data-op],a[data-goto]{cursor:pointer}.hm-l a,.hm-ev b[data-op]{color:var(--acc);text-decoration:none}",
+    ".sc-cal{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--panel2);font-size:12.5px;display:flex;flex-wrap:wrap;gap:5px}.sc-cal>b{width:100%;font-size:12.5px}.sc-cal span{border:1px solid var(--line);border-radius:999px;padding:2px 8px}.sc-cal span.ok{border-color:#4dd47a;color:#4dd47a}.sc-cal>small{width:100%;color:var(--sub);font-size:11.5px}",
+    ".sc-bt-t{width:100%;border-collapse:collapse;font-size:12.5px}.sc-bt-t td,.sc-bt-t th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:right}.sc-bt-t td:first-child,.sc-bt-t th:first-child{text-align:left}.sc-bt-t tr.kp td{font-weight:800}",
     ".hm-chip[data-op]:active,.hm-chip[data-goto]:active,.sc-c:active{opacity:.7}.sc-c{cursor:pointer}",
     /* 성적표 */
     ".sc-gb{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sc-gb>div{background:var(--panel2);border-radius:12px;padding:9px}.sc-gb b{display:block;font-size:13px;margin-bottom:4px}.sc-gb span{display:block;font-size:12px;line-height:1.5}",
