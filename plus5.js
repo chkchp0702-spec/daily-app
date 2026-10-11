@@ -75,7 +75,7 @@
     var q = [["🔥 계속 강함", 0, "#e66767"], ["🍂 힘 빠지는 중", 90, "#d98a1a"], ["🧊 계속 약함", 180, "#3987e5"], ["🌱 새로 뜨는 중", 270, "#3fb27f"]];
     q.forEach(function(z){ var a0 = (z[1] - 90) * Math.PI / 180, a1 = (z[1] + 0) * Math.PI / 180;
       s += '<path d="M' + cx + ',' + cy + ' L' + (cx + R * Math.cos(a0)).toFixed(1) + ',' + (cy + R * Math.sin(a0)).toFixed(1) + ' A' + R + ',' + R + ' 0 0 1 ' + (cx + R * Math.cos(a1)).toFixed(1) + ',' + (cy + R * Math.sin(a1)).toFixed(1) + ' Z" fill="' + z[2] + '" opacity=".1"/>';
-      var am = (z[1] + 45 - 90) * Math.PI / 180; s += '<text x="' + (cx + (R + 14) * Math.cos(am)).toFixed(1) + '" y="' + (cy + (R + 14) * Math.sin(am) + 3).toFixed(1) + '" text-anchor="middle" class="lc-a">' + z[0] + '</text>'; });
+      var am = (z[1] + 45 - 90) * Math.PI / 180; s += '<text x="' + (cx + (R + 14) * Math.cos(am)).toFixed(1) + '" y="' + (cy + (R + 14) * Math.sin(am) + 3).toFixed(1) + '" text-anchor="middle" class="lc-a rotq">' + z[0] + '</text>'; });
     s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" stroke="#3a4358"/><circle cx="' + cx + '" cy="' + cy + '" r="3" fill="#e8ecf4"/>';
     s += '<path d="M' + (cx + 40) + ',' + (cy - R - 4) + ' A' + (R + 4) + ',' + (R + 4) + ' 0 0 1 ' + (cx + R * .8).toFixed(1) + ',' + (cy - R * .62).toFixed(1) + '" stroke="#8a94a8" fill="none" marker-end="url(#ah)"/><defs><marker id="ah" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L6,3L0,6Z" fill="#8a94a8"/></marker></defs>';
     var mxv = Math.max.apply(null, ss.map(function(x){ return Math.hypot(x.r20 - m20, (x.r5 - m5) * 2); }).concat([1]));
