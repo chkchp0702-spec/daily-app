@@ -15,5 +15,9 @@ for k, m in C.get("markets", {}).items():
         got = {x["sym"] for x in ix}
         m["index"] = ix + [x for x in m.get("index", []) if x["sym"] not in got and "ohlc" in x]   # 이번에 못 받은 지수는 예전 것 유지
         print(k, [(x["sym"], len(x.get("ohlc") or [])) for x in ix], "(전:", list(old), ")")
+gl = index_block("GL")                     # 🏁 포트 비교 지수 (세계·자산배분)
+if gl:
+    C["bench"] = gl
+    print("GL", [(x["sym"], len(x.get("ohlc") or [])) for x in gl])
 json.dump(C, open(p, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 open(os.path.join(a.dest, "ix_log.txt"), "w", encoding="utf-8").write("\n".join(LOGX) + "\n")

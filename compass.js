@@ -105,7 +105,10 @@
       bbar(m, true) + '<div style="margin-top:10px">' + hiTxt + '</div>' +
       '<p class="note">종목 하나하나의 중간값 등락 <b class="' + cls(m.median1) + '">' + pct(m.median1) + '</b> — 지수가 대형주 위주라면 이 숫자가 "보통 종목"의 실제 체감이에요.</p>');
     // 3) 지수 흐름
-    if (m.index.length && window.IXC){ h += IXC(m, k, regChip); }
+    if (m.index.length && window.IXC){ h += IXC(m, k, regChip);
+      // 🏁 포트 비교 지수 (세계·자산배분) — 같은 차트로. 나라 지수(S&P·코스피·닛케이·항셍·CSI300 등)는 각 나라 탭에
+      if (k === "US" && C.bench && C.bench.length) h += IXC({index: C.bench}, "GL", regChip, '🏁 포트 비교 지수 <span class="mut">세계·자산배분 · 나라 지수는 각 나라 탭</span>');
+    }
     else if (m.index.length){
       var ixTabs = m.index.length > 1 ? '<div class="seg2" id="cpix">' + m.index.map(function(x, i){ return '<button' + (i ? '' : ' class="on"') + ' data-i="' + i + '">' + e(x.name) + '</button>'; }).join("") + '</div>' : '';
       h += card("지수 흐름 <span class='mut'>최근 60거래일 · 점선 = 20일 평균</span>", ixTabs + '<div id="cpixb">' + ixBody(m.index[0]) + '</div>');

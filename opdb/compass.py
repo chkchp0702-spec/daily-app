@@ -15,11 +15,13 @@ from collections import defaultdict
 MKT_NAME = {"US": "미국", "KR": "한국", "JP": "일본", "CN": "중국", "HK": "홍콩"}
 MKT_FLAG = {"US": "🇺🇸", "KR": "🇰🇷", "JP": "🇯🇵", "CN": "🇨🇳", "HK": "🇭🇰"}
 INDEX = {
-    "US": [("^GSPC", "S&P 500"), ("^DJI", "다우"), ("^IXIC", "나스닥")],
+    "US": [("^GSPC", "S&P 500"), ("^DJI", "다우"), ("^IXIC", "나스닥"), ("^NDX", "나스닥 100")],
     "KR": [("^KS11", "코스피"), ("^KQ11", "코스닥")],
     "JP": [("^N225", "닛케이 225")],
-    "CN": [("000001.SS", "상해종합"), ("399001.SZ", "선전(심천)성분"), ("000688.SS", "과창판 50")],
+    "CN": [("000001.SS", "상해종합"), ("399001.SZ", "선전(심천)성분"), ("000688.SS", "과창판 50"), ("000300.SS", "CSI 300")],
     "HK": [("^HSI", "항셍"), ("^HSCE", "HSCEI(H지수)")],
+    # 🏁 포트 비교 지수 중 나라 지수가 아닌 것 (미국 상장 ETF로 따라감) — 나침반 미국 탭에 같은 차트로
+    "GL": [("ACWI", "MSCI 전세계"), ("URTH", "MSCI 선진국"), ("EEM", "MSCI 신흥국"), ("AOR", "주식·채권 60/40")],
 }
 SECTOR_KO = {
     "Technology": ("💻", "IT·기술"), "Financial Services": ("🏦", "금융"), "Healthcare": ("💊", "헬스케어"),
@@ -486,6 +488,10 @@ def build(daily, hl, mkt_of, dest, hlh=None):
         mk["summary"] = summary(mk)
         res["markets"][mkt] = mk
         print("나침반", mkt, mk["date"], f"상승 {up} 하락 {dn}", reg, flush=True)
+    try:
+        res["bench"] = index_block("GL")
+    except Exception as e:
+        print("비교 지수 실패", e, flush=True)
     json.dump(res, open(os.path.join(dest, "compass.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     return res
 

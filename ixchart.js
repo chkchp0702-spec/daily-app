@@ -3,17 +3,20 @@
    1개월·3개월 = 캔들, 6개월·1년 = 면적선. 20일선·60일선, 거래량, 기간 최고·최저, 마지막 값 표시.
    차트를 누르고 옆으로 움직이면 그날 값(시·고·저·종, 전일 대비, 기간 시작 대비)이 나온다. */
 (function(){
-  var PREF = {US: ["^DJI", "^GSPC", "^IXIC"], KR: ["^KS11", "^KQ11"], JP: ["^N225"], HK: ["^HSCE"], CN: ["000001.SS", "399001.SZ", "000688.SS"]};
+  var PREF = {US: ["^DJI", "^GSPC", "^IXIC", "^NDX"], KR: ["^KS11", "^KQ11"], JP: ["^N225"], HK: ["^HSI", "^HSCE"], CN: ["000001.SS", "399001.SZ", "000688.SS", "000300.SS"],
+              GL: ["ACWI", "URTH", "EEM", "AOR"]};
   var SHORT = {"^DJI": "다우", "^GSPC": "S&P 500", "^IXIC": "나스닥", "^KS11": "코스피", "^KQ11": "코스닥", "^N225": "닛케이 225",
-               "^HSCE": "HSCEI (H지수)", "^HSI": "항셍", "000001.SS": "상해종합", "399001.SZ": "심천성분", "000688.SS": "과창판 50"};
+               "^HSCE": "HSCEI (H지수)", "^HSI": "항셍", "000001.SS": "상해종합", "399001.SZ": "심천성분", "000688.SS": "과창판 50",
+               "^NDX": "나스닥 100", "000300.SS": "CSI 300", "ACWI": "MSCI 전세계 (ACWI)", "URTH": "MSCI 선진국 (URTH)", "EEM": "MSCI 신흥국 (EEM)", "AOR": "주식·채권 60/40 (AOR)"};
   var PER = [["1D", "오늘", 0], ["1M", "1개월", 22], ["3M", "3개월", 65], ["6M", "6개월", 130], ["1Y", "1년", 9999]];
   var UP = "#e66767", DN = "#3987e5", MA20 = "#f2b84b", MA60 = "#a48cff";
   var D = {}, SEQ = 0, JN = 0;
   // 실시간: 동방재부 1분 시세 (JSONP, 앱에서 바로) — 코스닥만 없어서 우리 장중 자료(10분)로
   var EM = {"^DJI": "100.DJIA", "^GSPC": "100.SPX", "^IXIC": "100.NDX", "^KS11": "100.KS11", "^N225": "100.N225", "^HSCE": "100.HSCEI", "^HSI": "100.HSI",
-            "000001.SS": "1.000001", "399001.SZ": "0.399001", "000688.SS": "1.000688"};
+            "000001.SS": "1.000001", "399001.SZ": "0.399001", "000688.SS": "1.000688",
+            "^NDX": "100.NDX100", "000300.SS": "1.000300", "ACWI": "105.ACWI", "URTH": "107.URTH", "EEM": "107.EEM", "AOR": "107.AOR"};
   var SES = {US: {tz: "America/New_York", o: 570, c: 960, city: "뉴욕 "}, KR: {tz: "Asia/Seoul", o: 540, c: 930}, JP: {tz: "Asia/Tokyo", o: 540, c: 930, ls: 690, le: 750},
-             HK: {tz: "Asia/Hong_Kong", o: 570, c: 960, ls: 720, le: 780}, CN: {tz: "Asia/Shanghai", o: 570, c: 900, ls: 690, le: 780}};
+             GL: {tz: "America/New_York", o: 570, c: 960, city: "뉴욕 "}, HK: {tz: "Asia/Hong_Kong", o: 570, c: 960, ls: 720, le: 780}, CN: {tz: "Asia/Shanghai", o: 570, c: 900, ls: 690, le: 780}};
   function nSlots(S){ return S.c - S.o + 1 - (S.ls ? S.le - S.ls : 0); }
   function slotOf(S, min){ var m = S.ls && min >= S.le ? min - (S.le - S.ls) : (S.ls && min > S.ls ? S.ls : min); return Math.max(0, Math.min(nSlots(S) - 1, m - S.o)); }
   function minOfSlot(S, k){ var m = S.o + k; return S.ls && m > S.ls ? m + (S.le - S.ls) : m; }
@@ -170,12 +173,12 @@
   }
 
   // 나라 하나 → 「📈 대표 지수」 카드
-  window.IXC = function(m, mk, reg){
+  window.IXC = function(m, mk, reg, title){
     var list = (PREF[mk] || []).map(function(s){ return (m.index || []).filter(function(x){ return x.sym === s; })[0]; }).filter(Boolean);
     if (!list.length) list = (m.index || []).slice();
     if (!list.length) return "";
     var P = per();
-    return '<section class="card ixc-card"><h3>📈 대표 지수 <span class="mut">차트를 누르고 옆으로 밀면 그날 값</span></h3>' +
+    return '<section class="card ixc-card"><h3>' + (title || '📈 대표 지수 <span class="mut">차트를 누르고 옆으로 밀면 그날 값</span>') + '</h3>' +
       '<div class="seg2 ixc-seg">' + PER.map(function(p){ return '<button data-p="' + p[0] + '"' + (p[0] === P[0] ? ' class="on"' : '') + '>' + p[1] + '</button>'; }).join("") + '</div>' +
       list.map(function(ix){ return block(ix, {reg: reg, mk: mk}); }).join("") + '</section>';
   };
