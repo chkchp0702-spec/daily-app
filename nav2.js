@@ -32,6 +32,8 @@
   window.drawTabs = function(){
     var nav = document.getElementById("tabs"); if (!nav) return;
     var g = grpOf(cur);
+    if (cur && cur !== "onepager"){ store.lastTab = cur; }
+    try { updBack(); } catch(x) {}
     if (g){ store.gl = store.gl || {}; store.gl[g.k] = cur; try { save(); } catch(x) {} }
     if (g && g.tabs.length > 1){
       nav.className = "tabs sub";
@@ -44,6 +46,15 @@
     setTimeout(function(){ var h = document.querySelector("header"); if (h) document.documentElement.style.setProperty("--hh", h.offsetHeight + "px"); }, 0);   // 접기 칩이 헤더 바로 아래 붙게
   };
 
+  // ⑦ 뒤로: 홈이 아니면 늘 보이게 (알림 링크로 종목 화면을 바로 열었을 때도) — 더 돌아갈 기록이 없으면 보던 탭 → 오늘로
+  window.updBack = function(){ var b = document.getElementById("backbtn"); if (!b) return; b.classList.add("on");
+    b.classList.toggle("root", !(navD() > 0 || !!document.getElementById("sheet") || (window.cur && cur !== "home"))); };
+  var _goBack = window.goBack;
+  window.goBack = function(){
+    if (document.getElementById("sheet") || navD() > 0) return _goBack();
+    var t = (cur === "onepager" && store.lastTab && store.lastTab !== "onepager") ? store.lastTab : "home";
+    if (cur !== t) go(t); else window.scrollTo({top: 0, behavior: "smooth"});
+  };
   // ③ 탭 머리: 누르면 소개 글
   document.addEventListener("click", function(ev){
     var h = ev.target.closest && ev.target.closest("#main > .hero"); if (!h || ev.target.closest("button,a")) return;

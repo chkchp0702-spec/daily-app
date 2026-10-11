@@ -62,6 +62,14 @@
     $("rotw-" + k).innerHTML = rotSvg(m, +t.value, RSEL[k]);
     var ss = m.sectors.filter(function(x){ return x.path && x.path.length; }); $("rotd-" + k).textContent = (ss[0].path[+t.value] || [""])[0];
   });
+  document.addEventListener("click", function(ev){       // 계열(큰 섹터)을 다시 고르면 세부 섹터 선택은 풀고 그 계열 전체로
+    var fb = ev.target.closest && ev.target.closest(".famc [data-ffam]"); if (!fb) return;
+    var w = fb.closest(".famw"), rw = w && w.querySelector('[id^="rotw-"]'); if (!rw) return;
+    var k = rw.id.slice(5), m = CMP && CMP.markets[k], r = w.parentNode.querySelector('[data-rot="' + k + '"]');
+    RSEL[k] = null;
+    [].forEach.call(w.querySelectorAll(".rots button"), function(x){ x.classList.toggle("on", x.dataset.rsel === k + "|"); });
+    if (m && r){ r._tok = Math.random(); rw.innerHTML = rotSvg(m, +r.value, null); }
+  });
   document.addEventListener("click", function(ev){       // 섹터 고르기 → 그 섹터만 처음부터 재생 · 전체 → 전체 재생
     var b = ev.target.closest && ev.target.closest("[data-rsel]"); if (!b) return;
     var a = b.getAttribute("data-rsel").split("|"), k = a[0];
