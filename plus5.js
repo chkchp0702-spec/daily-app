@@ -323,12 +323,11 @@
   }
   window.PSPEAK = speak;
   // 시황 탭 위에도 듣기 버튼
-  P.wrap("market", function(it, a){ if ((M.cats.market || [])[0] && M.cats.market[0].id === it.id){ a.insertAdjacentHTML("afterbegin", '<button class="btn listen" id="lsn1">🔊 아침 요약 듣기</button>'); $("lsn1").onclick = function(){ speak($("lsn1")); }; } });
+  // 🔊 아침 요약 듣기 — 휴대폰에서 소리가 안 나와 뺌 (10/11 사용자)
   var OLD_AV = window.alarmView, OLD_AI = window.alarmInit;
   window.alarmView = function(){
     var al = store.al || {};
-    var top = '<section class="card"><h3>🔊 귀로 듣기 <span class="mut">출근길용</span></h3><p class="note" style="margin-top:0">시황 한 줄 · 킥 · 체크할 것 · 국면 · 오늘 신호 · 내 관심종목 신호를 읽어줘요.</p><button class="btn al-sub" id="lsn2">🔊 아침 요약 듣기</button></section>' +
-      '<section class="card"><h3>🎚️ 하루 알림 개수 <span class="mut">내 알림(관심종목)</span></h3><div class="seg2" id="limseg">' + [[3, "3개"], [5, "5개"], [10, "10개"], [0, "전부"]].map(function(x){ return '<button data-l="' + x[0] + '"' + ((al.lim || 0) === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join("") + '</div>' +
+    var top = '<section class="card"><h3>🎚️ 하루 알림 개수 <span class="mut">내 알림(관심종목)</span></h3><div class="seg2" id="limseg">' + [[3, "3개"], [5, "5개"], [10, "10개"], [0, "전부"]].map(function(x){ return '<button data-l="' + x[0] + '"' + ((al.lim || 0) === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join("") + '</div>' +
       '<p class="note" style="margin-top:0">개수를 정하면 중요한 것부터 보내고 나머지는 하루 묶어서 넘겨요. 🔴 돌파·목표가·손절가 → 🟡 돌파 임박·새 갭·고래 → ⚪ 나머지.</p>' +
       '<div class="lvl"><span>🔴 지금 봐야 함</span><span>🟡 오늘 중에</span><span>⚪ 참고</span></div><p class="note">모든 알림 제목 앞에 붙어요. 🔴는 소리·진동이 더 크게(ntfy 우선순위 높음).</p></section>';
     return OLD_AV().replace('<div id="plog"></div>', '') + top + '<div id="pweek"></div><div id="pcal"></div><div id="plog"></div>';
