@@ -101,7 +101,9 @@
     var h = '<div class="rb-top"><div class="rb-lab"><small>지금 국면</small><b>' + e(R.label) + '</b></div><em>' + e((R.updated || "").slice(5)) + '</em></div>' +
       '<p class="rb-verdict">' + e(R.verdict) + '</p>' +
       '<div class="rb-g2">' + gauge("경기 사이클", "6~18개월 뒤", R.cycle, cyc) + gauge("시장 타이밍", "1~3개월 뒤", R.timing, tim) + '</div>' + gaugeHelp(R) +
-      quadMap(R) + past(R.quad_stats, "3개월");
+      past(R.quad_stats, "3개월") +
+      // 10/11 사용자: "나침반이 복잡해 보여" — 지도·흐름·신호 목록은 「자세히」 안으로
+      '<details class="rb-det"><summary>🔎 자세히 — 국면 지도 · 두 점수 흐름 · 신호 ' + R.sig.length + '개</summary>' + quadMap(R);
     if (R.changes && R.changes.length) h += '<div class="rb-chg">🔔 달라진 것: ' + R.changes.map(function(c){ return e(c.name) + ' ' + ic(c.from) + '→' + ic(c.to); }).join(" · ") + '</div>';
     h += '<div class="sub2">두 점수의 흐름</div>' + lines(R);
     [["🏭 경기 사이클 <small>6~18개월 뒤를 말하는 것</small>", cyc, R.cycle], ["📊 시장 타이밍 <small>1~3개월 뒤를 말하는 것</small>", tim, R.timing]].forEach(function(g){
@@ -111,6 +113,7 @@
       '<div class="sub2">시장 타이밍 점수 → 3개월 동안</div>' + table((R.tables || {}).timing, "3개월", R.now_timing) +
       '<p class="note">큰 글씨 = 그 기간 안에 고점 대비 −10% 넘게 빠진 적이 있는 비율 · 작은 글씨 = 평균 수익 · ◀ = 지금. ' + e(R.bt_note || "") + '</p></details>';
     h += '<p class="note">▲ 좋음 +1 · ▼ 경고 −1 · – 중립 0 에 지표별 무게(과거에 「크게 빠질 위험」을 잘 가른 만큼, 0~2)를 곱해 평균 ×100. 이 지표들은 평균 수익보다 하락 위험을 훨씬 잘 맞혀요. 줄을 누르면 뜻·기준·과거 검증·출처가 보여요.' + (R.errors && R.errors.length ? ' <em class="mut">오늘 못 받은 자료 ' + R.errors.length + '개</em>' : '') + '</p>';
+    h += '</details>';
     return card("🧭 국면 신호판 <span class='mut'>지금 시장은 어느 국면인가</span>", h, "", "rbboard");
   }
   window.CPREG = function(el){

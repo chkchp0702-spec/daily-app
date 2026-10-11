@@ -96,8 +96,21 @@
     }
     svg.dataset.dc = sig;
   }
+  // ⑥ 나침반: 설명 글은 「ⓘ 설명」을 눌러야 보이게 (10/11 사용자: "지우지 말고 밑에 누르면 설명 부분 나오게 · 나침반이 복잡해 보여")
+  var NOTE_TABS = {sector: 1};
+  function notes(){
+    [].forEach.call(document.querySelectorAll("#sheet details.cpx-d:not([data-op1])"), function(d){ d.dataset.op1 = "1"; d.open = true; });   // 칩으로 열면 바로 펼친 채로
+    if (!NOTE_TABS[cur]) return;
+    [].forEach.call(document.querySelectorAll("#main p.note, #main .rb-help, #sheet p.note"), function(n){
+      if (n.dataset.nt || !n.textContent.trim()) return;
+      n.dataset.nt = "1"; n.classList.add("nt-h");
+      var b = document.createElement("button"); b.className = "nt-b"; b.type = "button"; b.textContent = "ⓘ 설명";
+      b.onclick = function(ev){ ev.stopPropagation(); var o = n.classList.toggle("nt-h"); b.textContent = o ? "ⓘ 설명" : "ⓘ 설명 접기"; };
+      n.parentNode.insertBefore(b, n);
+    });
+  }
   var DCT = null;
-  new MutationObserver(function(){ if (DCT) return; DCT = setTimeout(function(){ DCT = null;
+  new MutationObserver(function(){ if (DCT) return; DCT = setTimeout(function(){ DCT = null; notes();
     [].forEach.call(document.querySelectorAll("svg"), function(sv){ if (sv.querySelector("text.rotl")) declutter(sv); }); }, 200); })
     .observe(document.body, {childList: true, subtree: true});
 
@@ -125,6 +138,12 @@
     "#main > .hero .meta .chip{font-size:11px;padding:2px 7px}" +
     "#main > .hero p{display:none}#main > .hero.show p{display:block;margin-top:6px}" +
     "#main > .hero h1:after{content:' ⓘ';font-size:12px;color:var(--dim);font-weight:400}" +
+    // 나침반 접기·설명
+    ".nt-h{display:none!important}.nt-b{display:inline-block;border:0;background:none;color:var(--sub);font:inherit;font-size:12px;padding:4px 2px;margin:2px 0;cursor:pointer}" +
+    "details.cpx-d>summary,.rb-det>summary{cursor:pointer;font-weight:800;font-size:15px;list-style:none;padding:2px 0}details.cpx-d>summary::-webkit-details-marker,.rb-det>summary::-webkit-details-marker{display:none}" +
+    "details.cpx-d>summary:after,.rb-det>summary:after{content:' ▾';color:var(--dim);font-weight:400}details.cpx-d[open]>summary:after,.rb-det[open]>summary:after{content:' ▴'}" +
+    "details.cpx-d>summary .mut{display:block;font-size:12px;font-weight:400;margin-top:2px}details.cpx-d[open]>summary{margin-bottom:10px}" +
+    ".rb-det{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}.rb-det>summary{font-size:14px;color:var(--sub)}" +
     // 겹친 글씨 비켜 쓴 선 · 밝은 화면의 카드 창 머리
     "svg .dc-ln{stroke:var(--sub);stroke-width:.8;opacity:.6}" +
     ":root[data-ui=light] .sh-top{background:rgba(255,255,255,.94)!important}:root[data-ui=light] .sh-top b{color:#141a26}" +

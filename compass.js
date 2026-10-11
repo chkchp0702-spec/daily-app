@@ -129,13 +129,13 @@
     h += rotation(m) + highs(m);
     // 6) 강한 업종
     if (m.strong.length){
-      h += sec("🔥 오늘 강한 업종 TOP " + Math.min(5, m.strong.length) + " <span class='mut'>업종 이름을 누르면 전체 종목</span>") +
+      h += '<details class="card cpx-d"><summary>🔥 오늘 강한 업종 TOP ' + Math.min(5, m.strong.length) + ' <span class="mut">' + e(m.strong[0].name) + ' ' + pct(m.strong[0].r1).replace(/<[^>]+>/g, "") + ' 외 · 누르면 종목까지</span></summary>' +
         m.strong.slice(0, 5).map(function(x, i){
           return '<section class="card cp-ind"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n" data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b></div>' +
             '<b class="' + cls(x.r1) + ' cp-r">' + pct(x.r1) + '</b></div>' +
             '<div class="cp-mini"><span class="up">▲' + x.up + '</span><span class="dn">▼' + x.down + '</span><span class="mut">' + x.n + '종목 · 1주 ' + pct(x.r5) + '</span></div>' +
             '<div class="cp-sts">' + x.lead.map(sChip).join("") + '</div></section>';
-        }).join("");
+        }).join("") + '</details>';
     }
     // 7) 대표 종목
     h += card("⭐ 오늘 많이 오른 대형주", '<div class="cp-sts">' + m.leaders.map(sChip).join("") + '</div>' +
@@ -230,7 +230,7 @@
     if (rest.length) h += sec(hasBrief ? "☀️ 모닝 섹터 브리핑" : "🗺️ 섹터 히트맵") + '<div id="cpoldb"></div>';
     var prev = null;
     if (!hasBrief) prev = (M.cats.sector || []).filter(function(x){ return x.id <= it.id && (x.files.indexOf("briefing.txt") >= 0 || x.files.indexOf("top.json") >= 0); })[0];
-    if (prev) h += sec("☀️ 모닝 섹터 브리핑 <span class='mut'>" + prev.id.slice(5).replace("-", "/") + " · 가장 최근 (이날은 브리핑이 없었어요)</span>") + '<div id="cpoldp"></div>';
+    if (prev) h += '<details class="card cpx-d"><summary>☀️ 모닝 섹터 브리핑 <span class="mut">' + prev.id.slice(5).replace("-", "/") + ' · 가장 최근 (이날은 브리핑이 없었어요)</span></summary><div id="cpoldp"></div></details>';
     $("cpold").innerHTML = h;
     var showPrev = function(){ if (prev && $("cpoldp")) OLD({id: prev.id, files: prev.files.filter(function(f){ return f !== "compass.json"; })}, $("cpoldp")); };
     if (rest.length){
