@@ -22,6 +22,28 @@ def load(raw):
     return d
 
 
+def _etf_news(html, items):
+    """ETF 리포트에 「최근 뉴스」 카드 끼워 넣기 (주식 리포트와 같은 모양: ul.news)"""
+    from html import escape as esc
+    lis = []
+    for n in (items or [])[:6]:
+        title, link = (n.get("title") or "").strip(), (n.get("link") or "").strip()
+        if not title:
+            continue
+        if not link.startswith(("http://", "https://")):
+            link = ""
+        meta_ = " · ".join(x for x in [esc(n.get("publisher") or ""), esc(n.get("date") or "")] if x)
+        a_ = f'<a href="{esc(link)}" target="_blank" rel="noopener">{esc(title)}</a>' if link else esc(title)
+        lis.append(f'<li>{a_}<span class="muted small"> · {meta_}</span></li>' if meta_ else f"<li>{a_}</li>")
+    if not lis:
+        return html
+    card = f'<section class="card">\n  <h2>최근 뉴스</h2>\n  <ul class="news">{"".join(lis)}</ul>\n</section>\n\n'
+    i = html.rfind('<footer class="ft">')
+    if i < 0:
+        i = html.rfind("</main>")
+    return html[:i] + card + html[i:] if i >= 0 else html + card
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dest", required=True)
@@ -170,8 +192,12 @@ def main():
                 x["hold_note"] = note
                 if not x.get("sectors"):
                     x["sectors"] = px_.get("sectors") or []
+            html = render_etf(x, fx)
+            nf = os.path.join(a.dest, "n", os.path.basename(f))
+            if os.path.exists(nf):                  # ETF 뉴스 (opnews 가 받은 n/<심볼>.json) → 맨 아래 출처 위에
+                html = _etf_news(html, json.load(open(nf, encoding="utf-8")))
             with open(os.path.join(a.dest, "s", os.path.basename(f)[:-5] + ".html"), "w", encoding="utf-8") as fh:
-                fh.write(render_etf(x, fx))
+                fh.write(html)
             eo += 1
         except Exception as e:
             eb += 1

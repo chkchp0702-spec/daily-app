@@ -1,13 +1,15 @@
 """
 종목 뉴스만 받기 → out/n/<심볼>.json  (천천히: 종목당 1~4번 호출 + 쉬기)
   python opdb/build_news.py --shard 3 --of 14 --out out --meta meta.json --names names_ko.json
-순서: ① 구글 뉴스(한국어, 최근 30일) → ② 야후 검색 뉴스(미국 종목에 강함) → ③ 구글 영어 "<영문명> stock"(최근 30일, 해외 종목)
-      → ④ 빙 뉴스(한국어·영어) → ⑤ 그래도 없으면 구글 한국어 기간 제한 없이.
+순서: ① 구글 뉴스(한국어, 최근 30일) → (중국) 동방재부 뉴스 검색·구글 중국어 / (홍콩) 구글 홍콩판
+      → ② 야후 검색 뉴스(해외 전부) → ③ 구글 영어 "<영문명> stock"(최근 30일, 해외 종목)
+      → ④ 빙 뉴스(한국어·영어) → ⑤ 그래도 없으면 구글 한국어 기간 제한 없이 → (중국) 동방재부 기간 없이 → 회사 공시.
+ETF(etf_list.json)도 받는다: 한국 ETF = 구글 한국어 이름 / 미국 ETF = 야후 → 구글 영어 "정확한 이름" → 빙.
 구글이 막히면(연속 실패) 10분간 구글을 건너뛰고 야후·빙으로만 받는다.
 끝까지 뉴스가 없는 종목은 out/t/<shard>.json 에 '오늘 시도함'으로 남겨 다음 밤엔 뒤로 미룬다
 (예전엔 뉴스 없는 종목을 매일 맨 앞에서 다시 시도해서 하룻밤에 몇 개밖에 못 늘었다).
 """
-import argparse, dataclasses, datetime as dt, json, os, signal, sys, time
+import argparse, dataclasses, datetime as dt, json, os, re, signal, sys, time
 import urllib.parse, urllib.request
 import xml.etree.ElementTree as ET
 
@@ -37,11 +39,11 @@ class Google:
     def ok(self):
         return time.time() >= self.off_until
 
-    def get(self, q, hl="ko", gl="KR", limit=6):
+    def get(self, q, hl="ko", gl="KR", limit=6, ceid=None):
         if not self.ok():
             return []
         url = "https://news.google.com/rss/search?" + urllib.parse.urlencode(
-            {"q": q, "hl": hl, "gl": gl, "ceid": f"{gl}:{hl.split('-')[0]}"})
+            {"q": q, "hl": hl, "gl": gl, "ceid": ceid or f"{gl}:{hl.split('-')[0]}"})
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=7) as r:
                 out = D.parse_google_rss(r.read(), limit)
@@ -107,9 +109,139 @@ def yahoo(sym):
     return D.parse_yf_news(items)
 
 
+def _cn_code(sym):
+    """600198.SS → 600198 (중국 A주 6자리)"""
+    c = sym.split(".")[0]
+    return c if c.isdigit() and len(c) == 6 else ""
+
+
+def em_news(keyword, limit=6):
+    """동방재부(eastmoney) 뉴스 검색 — 중국어 종목명으로. 중국 A주 뉴스가 구글보다 훨씬 많다."""
+    if not keyword:
+        return []
+    param = {"uid": "", "keyword": keyword, "type": ["cmsArticleWebOld"], "client": "web", "clientType": "web",
+             "clientVersion": "curr", "param": {"cmsArticleWebOld": {"searchScope": "default", "sort": "time",
+                                                                      "pageIndex": 1, "pageSize": 10, "preTag": "", "postTag": ""}}}
+    url = "https://search-api-web.eastmoney.com/search/jsonp?" + urllib.parse.urlencode(
+        {"cb": "cb", "param": json.dumps(param, ensure_ascii=False, separators=(",", ":"))})
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=dict(UA, Referer="https://so.eastmoney.com/")), timeout=8) as r:
+            t = r.read().decode("utf-8", "replace")
+        d = json.loads(t[t.find("(") + 1:t.rfind(")")])
+        rows = (d.get("result") or {}).get("cmsArticleWebOld") or []
+    except Exception:
+        return []
+    out = []
+    for x in rows:
+        title = re.sub(r"<[^>]+>", "", x.get("title") or "").strip()
+        if not title:
+            continue
+        out.append(NewsItem(title=title, publisher=(x.get("mediaName") or "东方财富").strip(),
+                            link=x.get("url") or "", date=(x.get("date") or "")[:10]))
+    out.sort(key=lambda n: n.date, reverse=True)
+    return out[:limit]
+
+
+def em_notice(code, limit=6):
+    """동방재부 회사 공시(公告) — 상장사는 공시가 늘 있으므로 중국 A주 마지막 보루."""
+    if not code:
+        return []
+    url = "https://np-anotice-stock.eastmoney.com/api/security/ann?" + urllib.parse.urlencode(
+        {"sr": -1, "page_size": limit, "page_index": 1, "ann_type": "A", "client_source": "web",
+         "stock_list": code, "f_node": 0, "s_node": 0})
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=dict(UA, Referer="https://data.eastmoney.com/")), timeout=8) as r:
+            d = json.loads(r.read().decode("utf-8", "replace"))
+        rows = (d.get("data") or {}).get("list") or []
+    except Exception:
+        return []
+    out = []
+    for x in rows:
+        title = (x.get("title") or x.get("title_ch") or "").strip()
+        art = x.get("art_code") or ""
+        if not title or not art:
+            continue
+        out.append(NewsItem(title="[공시] " + title, publisher="东方财富 公告",
+                            link=f"https://data.eastmoney.com/notices/detail/{code}/{art}.html",
+                            date=(x.get("notice_date") or x.get("display_time") or "")[:10]))
+    return out[:limit]
+
+
 def recent(items, days=30):
     cut = (dt.date.today() - dt.timedelta(days=days)).isoformat()
     return [n for n in items if (n.date or "") >= cut]
+
+
+def one(s, meta, etf, names, g, src):
+    """한 종목(또는 ETF) 뉴스 모으기 → [NewsItem]"""
+    if s in etf:                                    # ── ETF ──
+        disp, mkt = etf[s]
+        ko = names.get(s) or (disp if mkt == "KR" else "")
+        news = []
+        if mkt == "KR":
+            news = g.get(f"{disp} when:30d")
+            src["google"] += 1 if news else 0
+        else:
+            news = recent(yahoo(s), 45)
+            src["yahoo"] += 1 if news else 0
+            if len(news) < 3:
+                e = g.get(f'"{disp}" when:30d', hl="en-US", gl="US") or g.get(f'"{s}" ETF when:30d', hl="en-US", gl="US")
+                src["google_en"] += 1 if e else 0
+                news += e
+            if len(news) < 3 and ko:
+                news += g.get(f"{ko} ETF when:30d")
+        if len(news) < 3:
+            b = recent(bing(disp, mkt="ko" if mkt == "KR" else None))
+            src["bing"] += 1 if b else 0
+            news += b
+        if not news:
+            o = g.get(disp if mkt == "KR" else f'"{disp}"', **({} if mkt == "KR" else {"hl": "en-US", "gl": "US"}))
+            src["old"] += 1 if o else 0
+            news += o
+        src["etf"] += 1 if news else 0
+        return news
+    disp, mkt, _, long_name = meta[s][:4]           # ── 주식 ──
+    ko = names.get(s) if mkt != "KR" else disp
+    q = (ko or long_name or disp) + " 주가"
+    news = g.get(q + " when:30d")
+    if news:
+        src["google"] += 1
+    if mkt == "CN":                                 # 중국: 중국어 이름으로 동방재부·구글 중국어
+        if len(news) < 3:
+            c = recent(em_news(disp))
+            src["em"] += 1 if c else 0
+            news += c
+        if len(news) < 3:
+            c = g.get(f"{disp} when:30d", hl="zh-CN", gl="CN", ceid="CN:zh-Hans")
+            src["cn"] += 1 if c else 0
+            news += c
+    if mkt == "HK" and len(news) < 3:               # 홍콩: 구글 홍콩판(번체·영문)
+        code = s.split(".")[0]
+        c = g.get(f'"{long_name or disp}" when:30d', hl="zh-HK", gl="HK", ceid="HK:zh-Hant") if (long_name or disp) else []
+        if not c and code.isdigit():
+            c = g.get(f"{int(code):05d} 股票 when:30d", hl="zh-HK", gl="HK", ceid="HK:zh-Hant")
+        src["cn"] += 1 if c else 0
+        news += c
+    if len(news) < 3 and mkt != "KR":               # 야후 검색 뉴스 (예전엔 미국만 → 해외 전부)
+        y = recent(yahoo(s), 45)
+        src["yahoo"] += 1 if y else 0
+        news += y
+    if len(news) < 3 and mkt != "KR" and long_name:
+        e = g.get(f"{long_name} stock when:30d", hl="en-US", gl="US")
+        src["google_en"] += 1 if e else 0
+        news += e
+    if len(news) < 3:
+        b = recent(bing(q, mkt="ko")) or (recent(bing(long_name)) if mkt != "KR" and long_name else [])
+        src["bing"] += 1 if b else 0
+        news += b
+    if not news:
+        o = g.get(q)
+        src["old"] += 1 if o else 0
+        news += o
+    if not news and mkt == "CN":                    # 그래도 없으면: 기간 없이 동방재부 → 회사 공시
+        news = em_news(disp) or em_notice(_cn_code(s))
+        src["notice"] += 1 if news else 0
+    return news
 
 
 def main():
@@ -121,10 +253,21 @@ def main():
     ap.add_argument("--names", default="names_ko.json")
     ap.add_argument("--sleep", type=float, default=1.0)
     ap.add_argument("--age", default="newsage.json", help="{심볼: 마지막 뉴스 날짜 또는 뉴스 없이 시도한 날} — 없는 것·오래된 것부터")
+    ap.add_argument("--etfs", default="etf_list.json", help="ETF 목록 [[심볼, 이름, 시장]] — ETF 뉴스도 받기")
+    ap.add_argument("--limit", type=int, default=0, help="시험용: 앞에서 N개만")
+    ap.add_argument("--only", default="", help="시험용: 쉼표로 심볼 지정")
     a = ap.parse_args()
     meta = json.load(open(a.meta)) if os.path.exists(a.meta) else {}
     names = json.load(open(a.names, encoding="utf-8")) if os.path.exists(a.names) else {}
+    etf = {}
+    if os.path.exists(a.etfs):
+        for r in json.load(open(a.etfs, encoding="utf-8")):
+            if r and r[0] not in meta:
+                etf[r[0]] = (r[1] if len(r) > 1 else r[0], r[2] if len(r) > 2 else "US")
     syms = [s for s, v in meta.items() if len(v) <= 4 and fnv(s) % a.of == a.shard]
+    syms += [s for s in etf if fnv(s) % a.of == a.shard]
+    if a.only:
+        syms = [s for s in a.only.split(",") if s in meta or s in etf]
     age = json.load(open(a.age)) if os.path.exists(a.age) else {}
     syms.sort(key=lambda x: age.get(x, ""))      # 한 번도 안 한 종목 → 오래된 종목 순
     print(f"shard {a.shard}: {len(syms)}개 (처음 {sum(1 for x in syms if x not in age)})", flush=True)
@@ -135,35 +278,20 @@ def main():
     today = dt.date.today().isoformat()
     tried = {}
     got = fresh = 0
-    src = {"google": 0, "yahoo": 0, "google_en": 0, "bing": 0, "old": 0}
+    src = {"google": 0, "yahoo": 0, "google_en": 0, "bing": 0, "old": 0, "cn": 0, "em": 0, "notice": 0, "etf": 0}
     for i, s in enumerate(syms):
-        if time.time() - START > BUDGET:
+        if time.time() - START > BUDGET or (a.limit and i >= a.limit):
             break
-        disp, mkt, _, long_name = meta[s][:4]
-        ko = names.get(s) if mkt != "KR" else disp
-        q = (ko or long_name or disp) + " 주가"
-        news = g.get(q + " when:30d")
-        if news:
-            src["google"] += 1
-        if len(news) < 3 and mkt == "US":
-            y = recent(yahoo(s), 45)
-            src["yahoo"] += 1 if y else 0
-            news += y
-        if len(news) < 3 and mkt != "KR" and long_name:
-            e = g.get(f"{long_name} stock when:30d", hl="en-US", gl="US")
-            src["google_en"] += 1 if e else 0
-            news += e
-        if len(news) < 3:
-            b = recent(bing(q, mkt="ko")) or (recent(bing(long_name)) if mkt != "KR" and long_name else [])
-            src["bing"] += 1 if b else 0
-            news += b
-        if not news:
-            o = g.get(q)
-            src["old"] += 1 if o else 0
-            news += o
+        try:
+            news = one(s, meta, etf, names, g, src)
+        except Exception as ex:                     # 한 종목 오류로 전체가 멈추지 않게
+            print("  오류", s, ex, flush=True)
+            news = []
         news = D._dedupe(news)
         news.sort(key=lambda n: n.date or "", reverse=True)
         news = news[:6]
+        if a.only:
+            print(" ", s, len(news), [f"{n.date} {n.publisher[:12]} {n.title[:40]}" for n in news[:3]], flush=True)
         if news:
             got += 1
             fresh += 1 if recent(news) else 0
