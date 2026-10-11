@@ -4,7 +4,7 @@ ETF 리포트 만들기 (미국: 나스닥 목록 + 야후 / 한국: 네이버�
   python opdb/build_etf.py --shard 3 --of 20 --etfs etf_list.json --names names_ko.json --out out
 결과: out/x/<심볼>.json (원본), out/s/<심볼>.html (리포트, CSS 없이), out/etfmeta_<shard>.json
 """
-import argparse, datetime as dt, json, os, re, signal, sys, time, urllib.request
+import argparse, datetime as dt, json, os, re, signal, sys, time, urllib.parse, urllib.request
 
 sys.path.insert(0, os.path.join("_src", "stock-onepager"))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -162,9 +162,12 @@ def kr_etf(sym, name):
                         cd = isin_code(g[k])
                         if cd:
                             break
+                sh = g.get("AGMT_STK_CNT")
                 if nm and w is not None:
                     full.append({"code": cd, "name": nm, "w": float(w)})
-            full.sort(key=lambda h: -h["w"])
+                elif nm and sh:                       # 해외 종목 ETF: 비중 없이 주식 수만 → 나중에 추정
+                    full.append({"code": cd, "name": nm, "w": None, "sh": float(sh)})
+            full.sort(key=lambda h: -(h["w"] if h["w"] is not None else -1))
             if len(full) >= len(hs):
                 # 코드가 비면 네이버 상위 10에서 이름으로 채우기
                 byname = {h["name"]: h["code"] for h in hs}
@@ -175,7 +178,147 @@ def kr_etf(sym, name):
                 hs = full
     except Exception as e:
         print("  wise 실패", sym, e, flush=True)
-    x["holdings"] = hs[:40]
+    x["holdings"] = hs if any(h.get("w") is None for h in hs) else hs[:40]   # 추정할 것은 다 넘김(추정 뒤 40개로 자름)
+    return x
+
+
+# ── 주식 수만 공개한 ETF: 비중 추정 (주식 수 × 최근 가격 × 환율) ─────────
+_SYM, _PX, _FXR = {}, {}, {}
+CUR_BY_SUF = {"": "USD", "L": "GBp", "T": "JPY", "HK": "HKD", "TW": "TWD", "TWO": "TWD", "KS": "KRW", "KQ": "KRW",
+              "DE": "EUR", "F": "EUR", "PA": "EUR", "AS": "EUR", "MI": "EUR", "MC": "EUR", "HE": "EUR", "BR": "EUR", "VI": "EUR", "LS": "EUR", "IR": "EUR",
+              "SW": "CHF", "TO": "CAD", "V": "CAD", "AX": "AUD", "TA": "ILA", "ST": "SEK", "CO": "DKK", "OL": "NOK",
+              "SS": "CNY", "SZ": "CNY", "SI": "SGD", "NS": "INR", "BO": "INR", "SA": "BRL", "MX": "MXN", "JO": "ZAc", "NZ": "NZD", "KL": "MYR", "BK": "THB", "JK": "IDR"}
+BAD_EX = {"PNK", "OTC", "OQB", "OQX", "OEM", "OBB", "OGM", "NEO", "CXE", "BUE", "MUN", "STU", "DUS", "HAM", "BER", "FRA", "EBS", "IOB"}
+CASH = re.compile(r"현금|예금|증거금|CASH|DEPOSIT|미수|미지급|원화|KRW|USD$", re.I)
+SKIP = re.compile(r"선물|FUT|스왑|SWAP|\b[FC] \d{6}|옵션", re.I)
+
+
+def _suf(sym):
+    return sym.rsplit(".", 1)[1] if "." in sym and not sym.startswith("^") else ""
+
+
+def _clean(n):
+    n = re.sub(r"\s*-\s*(CL|CLASS)\s*[A-Z]\b|\b(CL|CLASS)\s+[A-Z]\b|\bADR\b|\bSPON\w*|\bREG\b|\bSHS\b|\bORD\b|\(.*?\)", " ", n, flags=re.I)
+    return re.sub(r"\s+", " ", n).strip()
+
+
+def resolve(name, code=""):
+    """종목 이름 → 야후 심볼 (한국 6자리는 .KS/.KQ, 한글 이름은 네이버 자동완성, 나머지는 야후 검색)"""
+    key = code or name
+    if key in _SYM:
+        return _SYM[key]
+    sym = None
+    try:
+        if code and re.fullmatch(r"\d{6}|[0-9A-Z]{6}", code) and code[0].isdigit():
+            sym = code + ".KS"
+        elif re.search(r"[가-힣]", name):
+            d = get("https://ac.stock.naver.com/ac?q=" + urllib.parse.quote(name) + "&target=stock", UA_D, timeout=10)
+            for it in d.get("items") or []:
+                if it.get("nationCode") == "KOR" and it.get("code"):
+                    sym = it["code"] + (".KQ" if it.get("typeCode") == "KOSDAQ" else ".KS")
+                    break
+        else:
+            for q in (name, _clean(name)):
+                d = get("https://query2.finance.yahoo.com/v1/finance/search?quotesCount=8&newsCount=0&q=" + urllib.parse.quote(q), UA_D, timeout=10)
+                qs = [z for z in d.get("quotes") or [] if z.get("quoteType") == "EQUITY" and z.get("exchange") not in BAD_EX
+                      and _suf(z.get("symbol", "")) in CUR_BY_SUF]
+                if qs:
+                    sym = qs[0]["symbol"]
+                    break
+                time.sleep(0.3)
+    except TimeoutError:
+        raise
+    except Exception as e:
+        print("  심볼 못 찾음", name, repr(e)[:80], flush=True)
+    _SYM[key] = sym
+    return sym
+
+
+def _last_prices(syms):
+    import yfinance as yf
+    import pandas as pd
+    need = [s for s in dict.fromkeys(syms) if s and s not in _PX]
+    if not need:
+        return
+    try:
+        df = yf.download(need, period="10d", interval="1d", group_by="ticker", auto_adjust=False, threads=True, progress=False)
+    except Exception as e:
+        print("  가격 실패", e, flush=True)
+        df = None
+    for s in need:
+        v = None
+        try:
+            c = (df[s]["Close"] if isinstance(df.columns, pd.MultiIndex) else df["Close"]).dropna()
+            v = float(c.iloc[-1]) if len(c) else None
+        except TimeoutError:
+            raise
+        except Exception:
+            pass
+        _PX[s] = v
+
+
+def fx_krw(cur):
+    """통화 1단위 = 원 (GBp·ILA·ZAc 는 1/100)"""
+    base, div = {"GBp": ("GBP", 100), "ILA": ("ILS", 100), "ZAc": ("ZAR", 100)}.get(cur, (cur, 1))
+    if base == "KRW":
+        return 1.0
+    if base not in _FXR:
+        s = base + "KRW=X"
+        _last_prices([s])
+        _FXR[base] = _PX.get(s)
+    r = _FXR.get(base)
+    return r / div if r else None
+
+
+def est_weights(x):
+    hs = x.get("holdings") or []
+    if not hs or not any(h.get("w") is None and h.get("sh") for h in hs) or any(h.get("w") for h in hs):
+        x["holdings"] = hs[:40]
+        return x
+    rows = []
+    for h in hs:
+        nm = h["name"]
+        if SKIP.search(nm):
+            continue
+        if CASH.search(nm):
+            cur = "USD" if re.search(r"USD|달러", nm, re.I) else "KRW"
+            rows.append((h, None, cur))
+            continue
+        rows.append((h, resolve(nm, h.get("code", "")), None))
+    syms = [s for _, s, _ in rows if s]
+    _last_prices(syms + [s.replace(".KS", ".KQ") for s in syms if s.endswith(".KS")])
+    val, miss = {}, []
+    for h, s, cur in rows:
+        if cur:                                   # 현금: 주식 수 칸 = 금액
+            f = fx_krw(cur)
+            if f:
+                val[id(h)] = h["sh"] * f
+            continue
+        p = _PX.get(s) if s else None
+        if s and p is None and s.endswith(".KS"):
+            s = s[:-3] + ".KQ"; p = _PX.get(s)
+        f = fx_krw(CUR_BY_SUF.get(_suf(s), "USD")) if s else None
+        if p and f:
+            val[id(h)] = h["sh"] * p * f
+            h["ysym"] = s
+        else:
+            miss.append(nm)
+    stocks = [h for h, s, cur in rows if not cur]
+    got = sum(1 for h in stocks if id(h) in val)
+    if not stocks or got < max(3, 0.85 * len(stocks)):
+        print(f"  비중 추정 포기 {x.get('sym')} {got}/{len(stocks)} 못 찾음 {miss[:5]}", flush=True)
+        x["holdings"] = hs[:40]
+        return x
+    tot = sum(val.values())
+    out = []
+    for h in hs:
+        if id(h) in val:
+            h2 = dict(h, w=round(val[id(h)] / tot * 100, 2), est=1)
+            out.append(h2)
+    out.sort(key=lambda h: -h["w"])
+    x["holdings"], x["w_est"] = out[:40], {"miss": miss[:10], "got": got, "of": len(stocks)}
+    x["n_hold"] = x.get("n_hold") or len(hs)
+    print(f"  비중 추정 {x.get('sym')} {got}/{len(stocks)} 1위 {out[0]['name']} {out[0]['w']}%", flush=True)
     return x
 
 
@@ -345,6 +488,15 @@ def main():
             signal.alarm(90)
             x = kr_etf(sym, name) if mkt == "KR" else us_etf(sym, name, names)
             signal.alarm(0)
+            if mkt == "KR":
+                x["sym"] = sym
+                signal.alarm(240)
+                try:
+                    x = est_weights(x)
+                except Exception as e:                # 추정이 실패해도 리포트는 주식 수로 그대로
+                    print("  비중 추정 실패", sym, repr(e)[:120], flush=True)
+                    x["holdings"] = (x.get("holdings") or [])[:40]
+                signal.alarm(0)
             p = px.get(sym) or {}
             x.update({k: p[k] for k in ("price", "w52_lo", "w52_hi", "price_history") if k in p})
             rets = dict(p.get("ret") or {})

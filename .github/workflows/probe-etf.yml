@@ -8,8 +8,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python probe/etf_probe.py 418670 381180
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          pip install -q yfinance pandas
+          echo '[["418670.KS","TIGER 글로벌AI사이버보안","KR"],["381180.KS","TIGER 미국필라델피아반도체나스닥","KR"],["069500.KS","KODEX 200","KR"],["379800.KS","KODEX 미국S&P500","KR"],["453870.KS","TIGER 인도니프티50","KR"]]' > t.json
+          python opdb/build_etf.py --etfs t.json --out tout 2>&1 | tail -40
+          python3 - <<'PY'
+          import json, glob
+          out = {}
+          for f in glob.glob("tout/x/*.json"):
+              x = json.load(open(f))
+              out[x["sym"]] = {"n_hold": x.get("n_hold"), "w_est": x.get("w_est"), "top": [[h["name"], h.get("w"), h.get("sh"), h.get("ysym")] for h in x["holdings"][:12]]}
+          json.dump(out, open("archive/x/probe_etf.json", "w"), ensure_ascii=False, indent=1)
+          PY
+          mkdir -p archive/x/probe_s && cp tout/s/418670*.html archive/x/probe_s/ || true
       - run: |
           git config user.name bot; git config user.email bot@users.noreply.github.com
-          git add archive/x/probe_etf.json; git commit -qm "probe etf" || true
+          git add archive/x/probe_etf.json archive/x/probe_s; git commit -qm "probe etf" || true
           for i in 1 2 3; do git pull -q --rebase && git push -q && break; sleep 3; done
