@@ -133,7 +133,7 @@ LOGX = []
 
 
 # 야후가 늦거나 없는 지수는 다른 곳에서 (한국: 네이버, 과창판: 동방재부)
-ALT = {"^KS11": ("naver", "KOSPI"), "^KQ11": ("naver", "KOSDAQ"), "000688.SS": ("em", "1.000688")}
+ALT = {"^KS11": ("naver", "KOSPI"), "^KQ11": ("naver", "KOSDAQ"), "000688.SS": ("em", "1.000688"), "000300.SS": ("em", "1.000300")}
 
 
 def alt_frame(s):
@@ -148,7 +148,8 @@ def alt_frame(s):
             for m in re.finditer(r'data="(\d{8})\|([\d.]+)\|([\d.]+)\|([\d.]+)\|([\d.]+)\|(\d+)"', x):
                 d, o, h, l, c, v = m.groups()
                 rows.append((pd.Timestamp(f"{d[:4]}-{d[4:6]}-{d[6:]}"), float(o), float(h), float(l), float(c), float(v)))
-        else:   # 과창판 50: 동방재부 → 텐센트 → 시나 순서로
+        else:   # 과창판 50 · CSI 300: 동방재부 → 텐센트 → 시나 순서로
+            sc = ("sh" if code.startswith("1.") else "sz") + code.split(".")[1]
             hdr = {"User-Agent": "Mozilla/5.0"}
             def get(u, ref=None):
                 h = dict(hdr); h.update({"Referer": ref} if ref else {})
@@ -161,12 +162,12 @@ def alt_frame(s):
                             d, o, c, h, l, v = k.split(",")[:6]
                             rows.append((pd.Timestamp(d), float(o), float(h), float(l), float(c), float(v)))
                     elif src == "qq":
-                        j = json.loads(get("https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh000688,day,,,320,", "https://gu.qq.com/"))
-                        dd = ((j.get("data") or {}).get("sh000688") or {})
+                        j = json.loads(get(f"https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={sc},day,,,320,", "https://gu.qq.com/"))
+                        dd = ((j.get("data") or {}).get(sc) or {})
                         for k in (dd.get("day") or dd.get("qfqday") or []):
                             rows.append((pd.Timestamp(k[0]), float(k[1]), float(k[3]), float(k[4]), float(k[2]), float(k[5])))
                     else:
-                        j = json.loads(get("https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh000688&scale=240&ma=no&datalen=300", "https://finance.sina.com.cn/"))
+                        j = json.loads(get(f"https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol={sc}&scale=240&ma=no&datalen=300", "https://finance.sina.com.cn/"))
                         for k in j or []:
                             rows.append((pd.Timestamp(k["day"][:10]), float(k["open"]), float(k["high"]), float(k["low"]), float(k["close"]), float(k.get("volume") or 0)))
                     LOGX.append(f"{s} {src}: {len(rows)}")
