@@ -3,92 +3,92 @@
   "n_hold": 503,
   "w_est": {
    "miss": [
-    "NVR INC",
-    "NVR INC",
-    "NVR INC",
-    "NVR INC",
-    "NVR INC",
-    "NVR INC",
-    "NVR INC",
-    "NVR INC",
-    "NVR INC",
-    "NVR INC"
+    "General Aerospace Co",
+    "CROWDSTRIKE HOLDINGS INC - A",
+    "DOMINION RESOURCES INC/VA",
+    "BLACKSTONE GROUP-A",
+    "KKR & CO INC-A Equity",
+    "MARSH & MCLENNAN COS",
+    "DOORDASH INC - A",
+    "VISTRA ENERGY CORP",
+    "DELL TECH-C",
+    "GOLDMAN SACHS GP Equity"
    ],
-   "got": 454,
+   "got": 477,
    "of": 503
   },
   "top": [
    [
     "NVIDIA Corp",
-    9.22,
+    8.63,
     316.96,
     "NVDA"
    ],
    [
     "APPLE Inc",
-    8.16,
+    7.64,
     191.14,
     "AAPL"
    ],
    [
     "MICROSOFT",
-    6.6,
+    6.18,
     97.25,
     "MSFT"
    ],
    [
     "Amazon.com Inc",
-    4.28,
+    4.0,
     128.56,
     "AMZN"
    ],
    [
     "ALPHABET INC-CL A",
-    3.42,
+    3.2,
     76.86,
     "GOOA.VI"
    ],
    [
+    "BROADCOM LTD",
+    2.67,
+    62.31,
+    "AVGO"
+   ],
+   [
     "ALPHABET INC-CL C",
-    2.75,
+    2.57,
     62.25,
     "GOOC.VI"
    ],
    [
     "Meta Platforms Inc-CL A",
-    2.63,
+    2.46,
     28.88,
     "META"
    ],
    [
     "MICRON TECH",
-    1.93,
+    1.81,
     14.79,
     "MU"
    ],
    [
     "TESLA MOTORS",
-    1.79,
+    1.68,
     36.91,
     "TSLA"
    ],
    [
     "ADVANCED MICRO DEVICES",
-    1.65,
+    1.54,
     21.38,
     "AMD"
    ],
    [
     "BERKSHIRE HATHAWAY CL B ORD.",
-    1.6,
+    1.49,
     24.39,
     "BRK-B"
-   ],
-   [
-    "ELI LILLY & CO",
-    1.56,
-    10.48,
-    "1LLY.MI"
    ]
   ]
  },
@@ -96,8 +96,8 @@
   "n_hold": 30,
   "w_est": {
    "miss": [
-    "AMIYA CORP",
-    "AMIYA CORP"
+    "CROWDSTRIKE HOLDINGS INC - A",
+    "HENNGE KK"
    ],
    "got": 28,
    "of": 30
@@ -339,79 +339,86 @@
  },
  "453870.KS": {
   "n_hold": 50,
-  "w_est": null,
+  "w_est": {
+   "miss": [
+    "OIL & NATURAL GAS CORP LTD",
+    "TATA CONSULTANCY SVCS LTD"
+   ],
+   "got": 48,
+   "of": 50
+  },
   "top": [
    [
     "HDFC BANK LIMITED",
-    null,
+    27.43,
     5442.54,
-    "HDFCBANK.NS"
-   ],
-   [
-    "ITC LTD",
-    null,
-    3423.24,
-    "ITC.NS"
-   ],
-   [
-    "TATA STEEL LTD",
-    null,
-    2946.13,
-    "TATASTEEL.BO"
-   ],
-   [
-    "KOTAK MAHINDRA BANK LTD",
-    null,
-    2614.69,
-    "KOTAKBANK.NS"
-   ],
-   [
-    "ETERNAL LTD",
-    null,
-    2572.95,
-    null
+    "HDB"
    ],
    [
     "ICICI BANK LTD",
-    null,
+    8.06,
     2545.05,
     "ICICIBANK.NS"
    ],
    [
     "RELIANCE INDUSTRIES LIMITED",
-    null,
+    6.5,
     2374.17,
     "RELIANCE.NS"
    ],
    [
-    "NTPC LTD",
-    null,
-    1687.37,
-    "NTPC.NS"
+    "BHARTI AIRTEL LTD",
+    4.56,
+    1079.83,
+    "BHARTIARTL.BO"
    ],
    [
-    "POWER GRID CORP OF INDIA LTD",
-    null,
-    1607.85,
-    null
+    "LARSEN & TOUBRO LTD",
+    3.6,
+    415.61,
+    "LT.NS"
    ],
    [
     "STATE BANK OF INDIA",
-    null,
+    3.29,
     1467.46,
     "SBIN.NS"
    ],
    [
-    "OIL & NATURAL GAS CORP LTD",
-    null,
-    1379.18,
-    null
+    "AXIS BANK LTD",
+    3.01,
+    1020.8,
+    "AXISBANK.BO"
    ],
    [
-    "BHARAT ELECTRONICS LTD",
-    null,
-    1271.68,
-    "BEL.NS"
+    "INFOSYS LTD",
+    3.0,
+    1254.06,
+    "INFY.BO"
+   ],
+   [
+    "KOTAK MAHINDRA BANK LTD",
+    2.7,
+    2614.69,
+    "KOTAKBANK.NS"
+   ],
+   [
+    "BAJAJ FINANCE LTD",
+    2.17,
+    968.87,
+    "BAJFINANCE.NS"
+   ],
+   [
+    "ITC LTD",
+    2.13,
+    3423.24,
+    "ITC.NS"
+   ],
+   [
+    "MAHINDRA & MAHINDRA LTD",
+    2.07,
+    317.24,
+    "M&M.NS"
    ]
   ]
  }
