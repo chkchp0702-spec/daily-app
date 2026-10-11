@@ -1,62 +1,418 @@
 {
- "418670": {
-  "finder": [
-   {
-    "full_code": "KR7418670006",
-    "short_code": "418670",
-    "codeName": "TIGER 글로벌AI사이버보안"
-   }
-  ],
-  "isin": "KR7418670006",
-  "tries": [
-   {
-    "20261011": "{'http': 400, 'body': 'LOGOUT'}"
-   },
-   {
-    "20261010": "{'http': 400, 'body': 'LOGOUT'}"
-   },
-   {
-    "20261009": "{'http': 400, 'body': 'LOGOUT'}"
-   },
-   {
-    "20261008": "{'http': 400, 'body': 'LOGOUT'}"
-   },
-   {
-    "20261007": "{'http': 400, 'body': 'LOGOUT'}"
-   },
-   {
-    "20261006": "{'http': 400, 'body': 'LOGOUT'}"
-   }
+ "379800.KS": {
+  "n_hold": 503,
+  "w_est": {
+   "miss": [
+    "NVR INC",
+    "NVR INC",
+    "NVR INC",
+    "NVR INC",
+    "NVR INC",
+    "NVR INC",
+    "NVR INC",
+    "NVR INC",
+    "NVR INC",
+    "NVR INC"
+   ],
+   "got": 454,
+   "of": 503
+  },
+  "top": [
+   [
+    "NVIDIA Corp",
+    9.22,
+    316.96,
+    "NVDA"
+   ],
+   [
+    "APPLE Inc",
+    8.16,
+    191.14,
+    "AAPL"
+   ],
+   [
+    "MICROSOFT",
+    6.6,
+    97.25,
+    "MSFT"
+   ],
+   [
+    "Amazon.com Inc",
+    4.28,
+    128.56,
+    "AMZN"
+   ],
+   [
+    "ALPHABET INC-CL A",
+    3.42,
+    76.86,
+    "GOOA.VI"
+   ],
+   [
+    "ALPHABET INC-CL C",
+    2.75,
+    62.25,
+    "GOOC.VI"
+   ],
+   [
+    "Meta Platforms Inc-CL A",
+    2.63,
+    28.88,
+    "META"
+   ],
+   [
+    "MICRON TECH",
+    1.93,
+    14.79,
+    "MU"
+   ],
+   [
+    "TESLA MOTORS",
+    1.79,
+    36.91,
+    "TSLA"
+   ],
+   [
+    "ADVANCED MICRO DEVICES",
+    1.65,
+    21.38,
+    "AMD"
+   ],
+   [
+    "BERKSHIRE HATHAWAY CL B ORD.",
+    1.6,
+    24.39,
+    "BRK-B"
+   ],
+   [
+    "ELI LILLY & CO",
+    1.56,
+    10.48,
+    "1LLY.MI"
+   ]
   ]
  },
- "381180": {
-  "finder": [
-   {
-    "full_code": "KR7381180009",
-    "short_code": "381180",
-    "codeName": "TIGER 미국필라델피아반도체나스닥"
-   }
-  ],
-  "isin": "KR7381180009",
-  "tries": [
-   {
-    "20261011": "{'http': 400, 'body': 'LOGOUT'}"
-   },
-   {
-    "20261010": "{'http': 400, 'body': 'LOGOUT'}"
-   },
-   {
-    "20261009": "{'http': 400, 'body': 'LOGOUT'}"
-   },
-   {
-    "20261008": "{'http': 400, 'body': 'LOGOUT'}"
-   },
-   {
-    "20261007": "{'http': 400, 'body': 'LOGOUT'}"
-   },
-   {
-    "20261006": "{'http': 400, 'body': 'LOGOUT'}"
-   }
+ "418670.KS": {
+  "n_hold": 30,
+  "w_est": {
+   "miss": [
+    "AMIYA CORP",
+    "AMIYA CORP"
+   ],
+   "got": 28,
+   "of": 30
+  },
+  "top": [
+   [
+    "OKTA INC",
+    11.15,
+    264.35,
+    "OKTA"
+   ],
+   [
+    "PALO ALTO NETWORKS INC",
+    8.26,
+    108.57,
+    "PANW"
+   ],
+   [
+    "FORTINET INC",
+    8.17,
+    230.92,
+    "FTNT"
+   ],
+   [
+    "ZSCALER INC",
+    6.33,
+    148.99,
+    "ZS"
+   ],
+   [
+    "QUALYS INC",
+    6.18,
+    167.97,
+    "QLYS"
+   ],
+   [
+    "RUBRIK INC-A",
+    5.99,
+    274.57,
+    "1RBRK.MI"
+   ],
+   [
+    "NETSKOPE INC-CL A",
+    5.53,
+    1466.02,
+    "NTSK"
+   ],
+   [
+    "TENABLE HOLDINGS INC",
+    5.28,
+    698.97,
+    "TENB"
+   ],
+   [
+    "VARONIS SYSTEMS INC",
+    5.06,
+    555.18,
+    "VRNS"
+   ],
+   [
+    "SAILPOINT INC",
+    4.83,
+    1278.59,
+    "SAIL"
+   ],
+   [
+    "SENTINELONE INC -CLASS A",
+    4.75,
+    1031.17,
+    "1SUS.MI"
+   ],
+   [
+    "COMMVAULT SYSTEMS INC",
+    4.22,
+    147.67,
+    "CVLT"
+   ]
+  ]
+ },
+ "069500.KS": {
+  "n_hold": 202,
+  "w_est": null,
+  "top": [
+   [
+    "삼성전자",
+    34.57,
+    null,
+    null
+   ],
+   [
+    "SK하이닉스",
+    27.02,
+    null,
+    null
+   ],
+   [
+    "SK스퀘어",
+    2.72,
+    null,
+    null
+   ],
+   [
+    "삼성전기",
+    2.43,
+    null,
+    null
+   ],
+   [
+    "KB금융",
+    1.4,
+    null,
+    null
+   ],
+   [
+    "현대차",
+    1.25,
+    null,
+    null
+   ],
+   [
+    "신한지주",
+    1.15,
+    null,
+    null
+   ],
+   [
+    "삼성SDI",
+    0.98,
+    null,
+    null
+   ],
+   [
+    "두산에너빌리티",
+    0.96,
+    null,
+    null
+   ],
+   [
+    "하나금융지주",
+    0.87,
+    null,
+    null
+   ],
+   [
+    "삼성물산",
+    0.87,
+    null,
+    null
+   ],
+   [
+    "한화에어로스페이스",
+    0.83,
+    null,
+    null
+   ]
+  ]
+ },
+ "381180.KS": {
+  "n_hold": 30,
+  "w_est": {
+   "miss": [],
+   "got": 30,
+   "of": 30
+  },
+  "top": [
+   [
+    "NVIDIA CORP",
+    11.44,
+    816.12,
+    "NVDA"
+   ],
+   [
+    "BROADCOM INC",
+    8.97,
+    405.44,
+    "AVGO"
+   ],
+   [
+    "MICRON TECHNOLOGY INC",
+    7.89,
+    125.29,
+    "MU"
+   ],
+   [
+    "MARVELL TECHNOLOGY INC",
+    4.78,
+    283.76,
+    "MRVL"
+   ],
+   [
+    "ADVANCED MICRO DEVICES",
+    4.75,
+    127.59,
+    "AMD"
+   ],
+   [
+    "INTEL CORP",
+    4.3,
+    671.0,
+    "INTC"
+   ],
+   [
+    "ANALOG DEVICES INC",
+    4.12,
+    165.85,
+    "ADI"
+   ],
+   [
+    "KLA CORP",
+    4.09,
+    342.32,
+    "KLAC"
+   ],
+   [
+    "APPLIED MATERIALS INC",
+    4.06,
+    131.02,
+    "AMAT"
+   ],
+   [
+    "TEXAS INSTRUMENTS INC",
+    3.99,
+    230.19,
+    "TXN"
+   ],
+   [
+    "TAIWAN SEMICONDUCTOR-SP ADR",
+    3.99,
+    144.61,
+    "TSFA.VI"
+   ],
+   [
+    "ASML HOLDING NV-NY REG SHS",
+    3.89,
+    35.41,
+    "ASMN.VI"
+   ]
+  ]
+ },
+ "453870.KS": {
+  "n_hold": 50,
+  "w_est": null,
+  "top": [
+   [
+    "HDFC BANK LIMITED",
+    null,
+    5442.54,
+    "HDFCBANK.NS"
+   ],
+   [
+    "ITC LTD",
+    null,
+    3423.24,
+    "ITC.NS"
+   ],
+   [
+    "TATA STEEL LTD",
+    null,
+    2946.13,
+    "TATASTEEL.BO"
+   ],
+   [
+    "KOTAK MAHINDRA BANK LTD",
+    null,
+    2614.69,
+    "KOTAKBANK.NS"
+   ],
+   [
+    "ETERNAL LTD",
+    null,
+    2572.95,
+    null
+   ],
+   [
+    "ICICI BANK LTD",
+    null,
+    2545.05,
+    "ICICIBANK.NS"
+   ],
+   [
+    "RELIANCE INDUSTRIES LIMITED",
+    null,
+    2374.17,
+    "RELIANCE.NS"
+   ],
+   [
+    "NTPC LTD",
+    null,
+    1687.37,
+    "NTPC.NS"
+   ],
+   [
+    "POWER GRID CORP OF INDIA LTD",
+    null,
+    1607.85,
+    null
+   ],
+   [
+    "STATE BANK OF INDIA",
+    null,
+    1467.46,
+    "SBIN.NS"
+   ],
+   [
+    "OIL & NATURAL GAS CORP LTD",
+    null,
+    1379.18,
+    null
+   ],
+   [
+    "BHARAT ELECTRONICS LTD",
+    null,
+    1271.68,
+    "BEL.NS"
+   ]
   ]
  }
 }
