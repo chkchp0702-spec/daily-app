@@ -7,7 +7,7 @@
     "codeName": "TIGER 글로벌AI사이버보안"
    }
   ],
-  "isin": "TIGER 글로벌AI사이버보안",
+  "isin": "KR7418670006",
   "err": "HTTP Error 400: Bad Request"
  },
  "381180": {
@@ -18,7 +18,7 @@
     "codeName": "TIGER 미국필라델피아반도체나스닥"
    }
   ],
-  "isin": "TIGER 미국필라델피아반도체나스닥",
+  "isin": "KR7381180009",
   "err": "HTTP Error 400: Bad Request"
  }
 }
