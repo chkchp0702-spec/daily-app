@@ -7,7 +7,23 @@ var V = (function(){
   var SECC = {"Technology": "#2563eb", "Energy": "#ea580c", "Financial Services": "#0d9488", "Healthcare": "#db2777", "Industrials": "#b45309",
               "Basic Materials": "#7c3aed", "Consumer Cyclical": "#dc2626", "Consumer Defensive": "#16a34a", "Utilities": "#ca8a04",
               "Real Estate": "#64748b", "Communication Services": "#0891b2"};
-  function secCol(k, i){ return SECC[k] || CAT[(i || 0) % 6]; }
+  // 세부 섹터 30개 (10/11) — 계열(큰 섹터)이 비슷한 색, 서로는 구분되게
+  var SUBC = {semi: "#1d4ed8", soft: "#0ea5e9", hw: "#6366f1", bio: "#db2777", pharma: "#a21caf", medtech: "#f43f5e",
+              defense: "#475569", power_eq: "#f59e0b", machine: "#b45309", build: "#92400e", transport: "#0f766e", biz: "#64748b",
+              bank: "#059669", broker: "#14b8a6", insure: "#047857", auto: "#dc2626", retail: "#ea580c", fashion: "#c026d3", leisure: "#f97316",
+              internet: "#7c3aed", media: "#9333ea", telecom: "#0891b2", util: "#ca8a04", renew: "#65a30d", chem: "#7e22ce", steel: "#57534e",
+              gold: "#d4a106", food: "#16a34a", energy: "#b91c1c", realty: "#78716c"};
+  function secCol(k, i){ return SUBC[k] || SECC[k] || (/^other_/.test(k || "") ? "#94a3b8" : CAT[(i || 0) % 6]); }
+  // 계열 고르기 칩 (시계·지도) — 큰 섹터 → 계열
+  var FAM = {"Technology": "it", "Healthcare": "hc", "Industrials": "ind", "Financial Services": "fin", "Consumer Cyclical": "con", "Consumer Defensive": "con",
+             "Communication Services": "com", "Basic Materials": "mat", "Energy": "mat", "Utilities": "mat", "Real Estate": "re"};
+  var FAMS = [["", "전체"], ["it", "💻 IT"], ["hc", "💊 헬스"], ["ind", "🏭 산업"], ["fin", "🏦 금융"], ["con", "🛍️ 소비"], ["com", "📡 통신·미디어"], ["mat", "⛏️ 소재·에너지"], ["re", "🏘️ 부동산"]];
+  function shortSec(n){ n = String(n || "").replace(/\(.*\)/, ""); return n.length > 6 && n.indexOf("·") > 0 ? n.split("·")[0] : n; }   // 차트 글씨는 짧게 (전체 이름은 눌렀을 때)
+  function topSet(ss, n){ var a = ss.slice().sort(function(x, y){ return (Math.abs(y.r5 || 0) + Math.abs(y.r20 || 0) / 2) - (Math.abs(x.r5 || 0) + Math.abs(x.r20 || 0) / 2); }); var o = {}; a.slice(0, n).forEach(function(x){ o[x.k] = 1; }); return o; }
+  function famOf(x){ return FAM[x.p || x.k] || ""; }
+  function famChips(id){ var f = ""; try { f = (window.store && store.secf) || ""; } catch(x) {}
+    return '<div class="famc" data-famfor="' + id + '">' + FAMS.map(function(a){ return '<button data-ffam="' + a[0] + '"' + (a[0] === f ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div>' +
+      '<div class="famh">세부 섹터 30개 · 「전체」엔 많이 움직인 10곳만 이름 · 계열을 누르면 그 섹터들만</div>'; }
   var FLAGS = {US:"🇺🇸", KR:"🇰🇷", JP:"🇯🇵", CN:"🇨🇳", HK:"🇭🇰"};
   var MKT = {US:"미국", KR:"한국", JP:"일본", CN:"중국", HK:"홍콩"};
 
@@ -257,7 +273,7 @@ var V = (function(){
 
   // 표시용 코드: 한국은 6자리, 나머지는 티커 그대로
   function cd(x){ x = String(x || ""); return /^\d{6}\.K[SQ]$/.test(x) ? x.slice(0, 6) : x; }
-  return {cd:cd, e:e, rich:rich, sgn:sgn, cls:cls, fmt:fmt, UP:UP, DN:DN, CAT:CAT, secCol:secCol, FLAGS:FLAGS, MKT:MKT,
+  return {cd:cd, e:e, rich:rich, sgn:sgn, cls:cls, fmt:fmt, UP:UP, DN:DN, CAT:CAT, secCol:secCol, famOf:famOf, shortSec:shortSec, topSet:topSet, famChips:famChips, FLAGS:FLAGS, MKT:MKT,
           spark:spark, hbars:hbars, dbars:dbars, cols:cols, lines:lines, donut:donut, progress:progress, range:range, heat:heat,
           price:price, fillSparks:fillSparks, hideTip:hideTip};
 })();

@@ -58,7 +58,7 @@
       '<p class="note">점수 = 오른 종목 비율·신고가 비율·지수 위치·20일 수익률(미국은 VIX까지) 평균. 높을수록 사람들이 사고 싶어 하는 시장.</p>');
   }
   function rotation(m){
-    var ss = m.sectors.filter(function(x){ return x.r5 != null && x.r20 != null; });
+    var ss = m.sectors.filter(function(x){ return x.r5 != null && x.r20 != null; }), TOP = V.topSet(ss, 10);
     if (ss.length < 4) return "";
     var W = 330, H = 250, P = 26, mx = Math.max.apply(null, ss.map(function(x){ return Math.abs(x.r20); }).concat([1])) * 1.15, my = Math.max.apply(null, ss.map(function(x){ return Math.abs(x.r5); }).concat([1])) * 1.15;
     var X = function(v){ return P + (v + mx) / (2 * mx) * (W - 2 * P); }, Y = function(v){ return P + (my - v) / (2 * my) * (H - 2 * P); };
@@ -70,10 +70,11 @@
       '<text x="' + (W - P - 2) + '" y="' + (H - P - 6) + '" text-anchor="end" class="rotq">🍂 힘 빠지는 중</text><text x="' + (P + 2) + '" y="' + (H - P - 6) + '" class="rotq d">🧊 계속 약함</text>' +
       '<text x="' + (W - P) + '" y="' + (H - 6) + '" text-anchor="end" class="rota">1개월 수익률 →</text><text x="6" y="' + (P - 8) + '" class="rota">↑ 1주 수익률</text>';
     ss.forEach(function(x, i){ var cx = X(x.r20), cy = Y(x.r5);
-      s += '<g data-csec="' + e(x.k) + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b><br>1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + " · 오늘 " + pct(x.r1)) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="13" fill="transparent"/>' +
+      s += '<g data-csec="' + e(x.k) + '" data-fam="' + V.famOf(x) + '"' + (TOP[x.k] ? ' data-top="1"' : '') + ' style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b><br>1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + " · 오늘 " + pct(x.r1)) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="13" fill="transparent"/>' +
         '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + V.secCol(x.k, i) + '" stroke="#121826" stroke-width="2"/>' +
-        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + V.secCol(x.k, i) + '">' + e(x.name) + '</text></g>'; });
+        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + V.secCol(x.k, i) + '">' + e(V.shortSec(x.name)) + '</text></g>'; });
     s += '</svg>';
+    s = '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '">' + s + V.famChips("map") + '</div>';
     return card("🔄 섹터 로테이션 지도 <span class='mut'>돈이 어디로 움직이나</span>", s +
       '<p class="note">오른쪽 위 = 한 달 내내 강하고 이번 주도 강함 · 왼쪽 위 = 한 달은 약했는데 이번 주 살아남 (새로 뜨는 곳) · 오른쪽 아래 = 한 달 강했지만 이번 주 식음.</p>');
   }

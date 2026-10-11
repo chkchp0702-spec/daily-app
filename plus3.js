@@ -20,7 +20,8 @@
     var ss = (m.sectors || []).filter(function(x){ return x.path && x.path.length; });
     if (ss.length < 4) return "";
     var W = 330, H = 250, Pd = 26, all = [];
-    ss.forEach(function(x){ if (!sel || x.k === sel) x.path.forEach(function(p){ all.push(p); }); });   // 한 섹터만 볼 땐 그 섹터 길이에 맞춰 크게
+    ss.forEach(function(x){ if (!sel || x.k === sel) x.path.forEach(function(p){ all.push(p); }); });
+    var TOP = V.topSet(ss, 10);   // 한 섹터만 볼 땐 그 섹터 길이에 맞춰 크게
     var mx = Math.max.apply(null, all.map(function(p){ return Math.abs(p[2]); }).concat([1])) * 1.12, my = Math.max.apply(null, all.map(function(p){ return Math.abs(p[1]); }).concat([1])) * 1.12;
     var Xs = function(v){ return Pd + (v + mx) / (2 * mx) * (W - 2 * Pd); }, Ys = function(v){ return Pd + (my - v) / (2 * my) * (H - 2 * Pd); };
     var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="rotsv">' +
@@ -32,11 +33,12 @@
       if (sel && x.k !== sel) return;
       var p = x.path, k = Math.min(di, p.length - 1), tr = p.slice(sel ? 0 : Math.max(0, k - 4), k + 1);   // 한 섹터만 볼 땐 처음부터 지나온 길 전부
       var col = V.secCol(x.k, i);
+      s += '<g data-fam="' + V.famOf(x) + '"' + (sel || TOP[x.k] ? ' data-top="1"' : '') + '>';
       if (tr.length > 1) s += '<polyline points="' + tr.map(function(q){ return Xs(q[2]).toFixed(1) + "," + Ys(q[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="' + col + '" stroke-opacity="' + (sel ? .8 : .45) + '" stroke-width="' + (sel ? 2.5 : 2) + '"/>' +
         (sel ? tr.slice(0, -1).map(function(q){ return '<circle cx="' + Xs(q[2]).toFixed(1) + '" cy="' + Ys(q[1]).toFixed(1) + '" r="2" fill="' + col + '" opacity=".6"/>'; }).join("") : '');
       var cx = Xs(p[k][2]), cy = Ys(p[k][1]);
       s += '<g data-csec="' + e(x.k) + '" data-cm="' + MKX + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + p[k][0] + "<br>1주 " + pct(p[k][1]) + " · 1개월 " + pct(p[k][2])) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
-        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(x.name) + '</text></g>';
+        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(V.shortSec(x.name)) + '</text></g></g>';
     });
     return s + '</svg>';
   }
@@ -46,7 +48,7 @@
     var n = Math.max.apply(null, ss.map(function(x){ return x.path.length; }));
     var days = ss[0].path.map(function(p){ return p[0]; });
     return card("🎞️ 섹터 흐름 되감기 <span class='mut'>최근 " + n + "거래일 · 꼬리 = 지난 4일 이동</span>",
-      '<div id="rotw-' + k + '">' + rotSvg(m, n - 1, RSEL[k]) + '</div>' +
+      '<div class="famw" id="rotw-' + k + '" data-ff="' + ((window.store && store.secf) || "") + '">' + rotSvg(m, n - 1, RSEL[k]) + '</div>' + V.famChips("rot") +
       '<div class="rots">' + ['<button data-rsel="' + k + '|"' + (!RSEL[k] ? ' class="on"' : '') + '>전체</button>'].concat(ss.map(function(x, i){
         return '<button data-rsel="' + k + '|' + e(x.k) + '" style="--sc:' + V.secCol(x.k, i) + '"' + (RSEL[k] === x.k ? ' class="on"' : '') + '><i></i>' + e(x.name) + '</button>'; })).join("") + '</div>' +
       '<div class="rotc"><button class="btn" data-rotplay="' + k + '">▶︎ 재생</button><input type="range" min="0" max="' + (n - 1) + '" value="' + (n - 1) + '" data-rot="' + k + '"><b id="rotd-' + k + '">' + e(days[n - 1] || "") + '</b></div>' +

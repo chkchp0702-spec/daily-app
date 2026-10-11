@@ -57,11 +57,14 @@
   // ⑤ 차트 글씨가 겹치면 비켜 쓰기 (섹터 시계·지도·되감기 — 10/11 사용자: "겹치면 비켜써")
   function declutter(svg){
     var ts = [].slice.call(svg.querySelectorAll("text.rotl"));
-    var sig = ts.map(function(t){ return (t.dataset.x0 || t.getAttribute("x")) + "," + (t.dataset.y0 || t.getAttribute("y")); }).join("|");
+    var fw = svg.closest(".famw"), ff = fw ? fw.dataset.ff || "" : "";
+    if (!svg.getBoundingClientRect().width) return;                          // 안 보이는 카드 — 보일 때 다시
+    ts = ts.filter(function(t){ var g = t.closest("[data-fam]"); return !g || (ff ? g.dataset.fam === ff : !!g.closest("[data-top]") || !fw); });
+    var sig = ff + "#" + ts.map(function(t){ return (t.dataset.x0 || t.getAttribute("x")) + "," + (t.dataset.y0 || t.getAttribute("y")); }).join("|");
     if (!ts.length || svg.dataset.dc === sig) return;
     var boxes = [];
     try {        // 점(동그라미)도 피해서
-      [].forEach.call(svg.querySelectorAll("circle"), function(c){ var r = +c.getAttribute("r"); if (r >= 3 && r <= 9){ var cx = +c.getAttribute("cx"), cy = +c.getAttribute("cy"); boxes.push({x: cx - r, y: cy - r, w: 2 * r, h: 2 * r}); } });
+      [].forEach.call(svg.querySelectorAll("circle"), function(c){ var r = +c.getAttribute("r"), g = c.closest("[data-fam]"); if (ff && g && g.dataset.fam !== ff) return; if (r >= 3 && r <= 9){ var cx = +c.getAttribute("cx"), cy = +c.getAttribute("cy"); boxes.push({x: cx - r, y: cy - r, w: 2 * r, h: 2 * r}); } });
     } catch(x) {}
     try {        // 구역 이름(🔥 계속 강함 등)도 피해서
       [].forEach.call(svg.querySelectorAll("text.rotq"), function(q){ var b = q.getBBox(); if (b.width) boxes.push({x: b.x, y: b.y, w: b.width, h: b.height}); });
@@ -109,6 +112,14 @@
       n.parentNode.insertBefore(b, n);
     });
   }
+  // 세부 섹터 계열 고르기 (시계·지도·되감기 같이)
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest && ev.target.closest(".famc [data-ffam]"); if (!b) return;
+    var f = b.dataset.ffam; try { store.secf = f; save(); } catch(x) {}
+    [].forEach.call(document.querySelectorAll(".famw"), function(w){ w.dataset.ff = f; });
+    [].forEach.call(document.querySelectorAll(".famc [data-ffam]"), function(x){ x.classList.toggle("on", x.dataset.ffam === f); });
+    setTimeout(function(){ [].forEach.call(document.querySelectorAll(".famw svg"), function(sv){ if (sv.querySelector("text.rotl")) declutter(sv); }); }, 30);
+  });
   var DCT = null;
   new MutationObserver(function(){ if (DCT) return; DCT = setTimeout(function(){ DCT = null; notes();
     [].forEach.call(document.querySelectorAll("svg"), function(sv){ if (sv.querySelector("text.rotl")) declutter(sv); }); }, 200); })
@@ -144,6 +155,12 @@
     "details.cpx-d>summary:after,.rb-det>summary:after{content:' ▾';color:var(--dim);font-weight:400}details.cpx-d[open]>summary:after,.rb-det[open]>summary:after{content:' ▴'}" +
     "details.cpx-d>summary .mut{display:block;font-size:12px;font-weight:400;margin-top:2px}details.cpx-d[open]>summary{margin-bottom:10px}" +
     ".rb-det{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}.rb-det>summary{font-size:14px;color:var(--sub)}" +
+    // 계열 고르기
+    ".famc{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin:6px 0 2px;padding-bottom:2px}.famc::-webkit-scrollbar{display:none}" +
+    ".famc button{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}.famc button.on{background:var(--text);color:var(--bg);border-color:transparent}" +
+    ".famw[data-ff=it] [data-fam]:not([data-fam=it]),.famw[data-ff=hc] [data-fam]:not([data-fam=hc]),.famw[data-ff=ind] [data-fam]:not([data-fam=ind]),.famw[data-ff=fin] [data-fam]:not([data-fam=fin])," +
+    ".famw[data-ff=con] [data-fam]:not([data-fam=con]),.famw[data-ff=com] [data-fam]:not([data-fam=com]),.famw[data-ff=mat] [data-fam]:not([data-fam=mat]),.famw[data-ff=re] [data-fam]:not([data-fam=re]){display:none}" +
+    ".famw[data-ff=''] [data-fam]:not([data-top]) .rotl,.famw:not([data-ff]) [data-fam]:not([data-top]) .rotl{display:none}" +   // 전체일 땐 움직임 큰 10곳만 이름
     // 겹친 글씨 비켜 쓴 선 · 밝은 화면의 카드 창 머리
     "svg .dc-ln{stroke:var(--sub);stroke-width:.8;opacity:.6}" +
     ":root[data-ui=light] .sh-top{background:rgba(255,255,255,.94)!important}:root[data-ui=light] .sh-top b{color:#141a26}" +

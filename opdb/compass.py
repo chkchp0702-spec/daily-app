@@ -3,11 +3,15 @@
   - 상승/하락/보합 종목 수 (오늘 + 최근 40거래일)
   - 대표 지수 흐름 + 20·60일선 → 상승장/하락장/횡보장
   - 52주 신고가·신저가 종목 수
-  - 섹터(11개)·업종별 등락 + 대표 종목
+  - 세부 섹터(30개 — 큰 섹터 11개를 업종으로 나눔, subsec.py)·업종별 등락 + 대표 종목
 build_prices.py 가 받은 일봉(종가 Series)을 그대로 받아 계산한다 → <dest>/compass.json
 """
 import datetime as dt
 import glob
+import sys as _sys
+import os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+from subsec import sub_of, META as SUB_META   # 🧭 세부 섹터 30개 (10/11)
 import json
 import os
 from collections import defaultdict
@@ -282,7 +286,10 @@ def sensitivity(mkt, sec_ret):
         a = s.to_frame("s").join(fx.rename("fx"), how="inner").join(rt.rename("rt"), how="inner").dropna()
         if len(a) < 25:
             continue
-        items.append({"k": k, "icon": SECTOR_KO[k][0], "name": SECTOR_KO[k][1], "fx": _r(a["s"].corr(a["fx"]), 2), "rate": _r(a["s"].corr(a["rt"]), 2), "n": len(a)})
+        mt = SUB_META.get(k) or {"icon": SECTOR_KO.get(k, ("", k))[0], "name": SECTOR_KO.get(k, ("", k))[1]}
+        if k.startswith("other_"):
+            mt = {"icon": "▫️", "name": k}
+        items.append({"k": k, "icon": mt["icon"], "name": mt["name"], "fx": _r(a["s"].corr(a["fx"]), 2), "rate": _r(a["s"].corr(a["rt"]), 2), "n": len(a)})
     if not items:
         return None
     return {"fx_name": fx_nm, "fx_chg1": _r(fx.dropna().iloc[-1], 2) if len(fx.dropna()) else None,
@@ -355,17 +362,19 @@ def build(daily, hl, mkt_of, dest, hlh=None):
         def stock(x):
             return {"s": x["s"], "n": x["n"], "r1": _r(x["r1"] * 100), "r5": _r((x["r5"] or 0) * 100) if x["r5"] is not None else None}
 
-        sec = defaultdict(list)
+        sec, SUBI = defaultdict(list), {}
         for x in rows:
-            if x["sec"] in SECTOR_KO:
-                sec[x["sec"]].append(x)
+            r_ = sub_of(x["sec"], x["ind"])
+            if r_:
+                sec[r_[0]].append(x)
+                SUBI[r_[0]] = r_
         sectors = []
         for k, items in sec.items():
             if len(items) < 5:
                 continue
             big = sorted(items, key=lambda x: -x["cap"])
             movers = sorted([x for x in big[: max(10, len(big) // 5)]], key=lambda x: -x["r1"])
-            sectors.append({"k": k, "icon": SECTOR_KO[k][0], "name": SECTOR_KO[k][1], "n": len(items),
+            sectors.append({"k": k, "icon": SUBI[k][1], "name": SUBI[k][2], "p": SUBI[k][3], "pn": SECTOR_KO.get(SUBI[k][3], ("", ""))[1], "n": len(items),
                             "up": sum(1 for x in items if x["r1"] > EPS), "down": sum(1 for x in items if x["r1"] < -EPS),
                             "r1": _r(wavg(items, "r1")), "r5": _r(wavg(items, "r5")), "r20": _r(wavg(items, "r20")),
                             "big": [stock(x) for x in big[:3]], "hot": [stock(x) for x in movers[:3]], "top": [stock(x) for x in big[:10]]})

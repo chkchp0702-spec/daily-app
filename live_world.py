@@ -12,6 +12,7 @@ import statistics
 import time
 import urllib.request
 from collections import defaultdict
+from subsec import sub_of   # 🧭 세부 섹터 (10/11)
 
 KST = dt.timezone(dt.timedelta(hours=9))
 NOW = dt.datetime.now(KST)
@@ -111,17 +112,18 @@ def run(mk, sec, names):
         return
     up = sum(1 for x in rows if x["r"] > EPS)
     dn = sum(1 for x in rows if x["r"] < -EPS)
-    by_s, by_i = defaultdict(list), defaultdict(list)
+    by_s, by_i, SUBI = defaultdict(list), defaultdict(list), {}
     for x in rows:
-        if x["sec"] in SECTOR_KO:
-            by_s[x["sec"]].append(x)
+        r_ = sub_of(x["sec"], x["ind"])
+        if r_:
+            by_s[r_[0]].append(x); SUBI[r_[0]] = r_
         if x["ind"]:
             by_i[x["ind"]].append(x)
     sectors = []
     for k, items in by_s.items():
         if len(items) >= 3:
             big = sorted(items, key=lambda x: -x["cap"])
-            sectors.append({"k": k, "icon": SECTOR_KO[k][0], "name": SECTOR_KO[k][1], "n": len(items), "r": round(wavg(items), 2),
+            sectors.append({"k": k, "icon": SUBI[k][1], "name": SUBI[k][2], "p": SUBI[k][3], "n": len(items), "r": round(wavg(items), 2),
                             "up": sum(1 for x in items if x["r"] > EPS), "down": sum(1 for x in items if x["r"] < -EPS), "big": [st(x) for x in big[:3]]})
     sectors.sort(key=lambda x: -x["r"])
     inds = []
