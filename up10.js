@@ -161,7 +161,7 @@
     J("rules_bt.json").then(function(T){ var x = document.getElementById("scrbt"); if (!x || !T || !T.rows) return;
       x.outerHTML = '<section class="card sc-bt" id="scrbt"><h3>🧪 포트 규칙 검증 <span class="mut">' + e(T.from.slice(0, 4)) + '~' + e(T.to.slice(0, 4)) + ' · 매주 일요일 다시</span></h3>' +
         '<table class="sc-bt-t"><tr><th></th><th>연 수익</th><th>최대 낙폭</th><th>샤프</th><th></th></tr>' + T.rows.map(function(r){
-          return '<tr' + (/킥 포트/.test(r.lab) ? ' class="kp"' : '') + '><td>' + e(r.lab) + '</td><td class="' + cls(r.cagr) + '">' + sg(r.cagr, 1) + '</td><td>' + r.mdd + '%</td><td>' + (r.sharpe != null ? r.sharpe : "–") + '</td><td>' + e(r.verdict || "") + '</td></tr>'; }).join("") + '</table>' +
+          return '<tr' + (/켬/.test(r.lab) ? ' class="kp"' : '') + '><td>' + e(r.lab) + '</td><td class="' + cls(r.cagr) + '">' + sg(r.cagr, 1) + '</td><td>' + r.mdd + '%</td><td>' + (r.sharpe != null ? r.sharpe : "–") + '</td><td>' + e(r.verdict || "") + '</td></tr>'; }).join("") + '</table>' +
         '<p class="note">「같은 비중」에 규칙 하나씩 붙여 본 결과예요. ✅ 나아진 것만 킥 포트에 켜요 — 지금은 ① 국면 현금만 켜져 있어요. ' + e(T.note || "") + '</p></section>';
     }).catch(function(){});
   }
