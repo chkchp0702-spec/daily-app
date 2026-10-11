@@ -218,12 +218,14 @@ def resolve(name, code=""):
                     sym = it["code"] + (".KQ" if it.get("typeCode") == "KOSDAQ" else ".KS")
                     break
         else:
-            for q in (name, _clean(name)):
+            bare = re.sub(r"\b(LTD|LIMITED|CORP(ORATION)?|INC|PLC|CO|COMPANY|HOLDINGS?|GROUP|SA|AG|NV|SE|OF INDIA|THE)\b\.?", " ", _clean(name), flags=re.I)
+            for q in dict.fromkeys([name, _clean(name), re.sub(r"\s+", " ", bare).strip()]):
                 d = get("https://query2.finance.yahoo.com/v1/finance/search?quotesCount=8&newsCount=0&q=" + urllib.parse.quote(q), UA_D, timeout=10)
                 qs = [z for z in d.get("quotes") or [] if z.get("quoteType") == "EQUITY" and z.get("exchange") not in BAD_EX
                       and _suf(z.get("symbol", "")) in CUR_BY_SUF]
-                if qs:
-                    sym = qs[0]["symbol"]
+                if qs:                                # 미국 상장 먼저 (유럽 교차상장 .VI/.MI 피함), 없으면 본국
+                    us = [z for z in qs if "." not in z["symbol"]]
+                    sym = (us or qs)[0]["symbol"]
                     break
                 time.sleep(0.3)
     except TimeoutError:
@@ -302,7 +304,7 @@ def est_weights(x):
             val[id(h)] = h["sh"] * p * f
             h["ysym"] = s
         else:
-            miss.append(nm)
+            miss.append(h["name"])
     stocks = [h for h, s, cur in rows if not cur]
     got = sum(1 for h in stocks if id(h) in val)
     if not stocks or got < max(3, 0.85 * len(stocks)):
