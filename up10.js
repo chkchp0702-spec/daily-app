@@ -12,7 +12,8 @@
   function sg(v, d){ if (v == null || isNaN(v)) return "–"; d = d == null ? 2 : d; return (v > 0 ? "+" : "") + (+v).toFixed(d) + "%"; }
   function cls(v){ return v > 0 ? "up" : v < 0 ? "dn" : ""; }
   function md(d){ return d ? String(d).slice(5, 10).replace("-", "/") : ""; }
-  function J(name){ return fetch(RAW + name + "?" + Math.floor(Date.now() / 120000)).then(function(r){ if (!r.ok) throw 0; return r.json(); }); }
+  function hon(v, o){ return window.HON ? HON.chip(v, o) : ""; }   // 🧾 정직 계산 칩 (honest.js · 자료 없으면 빈칸)
+  function J(name){ return getJSON(RAW + name + "?" + Math.floor(Date.now() / 120000), {ttl: 120000}); }   // 같은 2분 안엔 한 번만 받음 (index.html getJSON)
   var UI = {theme: "auto", fs: 1};
   try { var u = JSON.parse(localStorage.getItem("ui") || "{}"); if (u.theme) UI.theme = u.theme; if (u.fs) UI.fs = u.fs; } catch(x) {}
   function keepUI(){ try { localStorage.setItem("ui", JSON.stringify(UI)); } catch(x) {} }
@@ -99,7 +100,7 @@
     var spark = (window.V && P.nav && P.nav.length > 1) ? V.lines([{name: "⚡ 킥", color: "#ff6b6b", vals: P.kick_line}, {name: "💼 기본", color: "#e9c46a", vals: P.nav}, {name: "S&P", color: "#7c9cff", vals: P.spy_line, dash: 1}],
       (P.nav || []).map(function(_, i){ return i ? "" : md(P.start); }), {h: 96, unit: "%", zero: 1, nodots: 1}) : "";
     h += card("port~pohero", "💼", "포트", md(P.start) + "부터 · " + md(P.asof) + " 미국 종가",
-      '<div class="hm-big"><div><small>⚡ 킥</small><b class="' + cls(P.kick) + '">' + sg(P.kick) + '</b></div><div><small>💼 기본</small><b class="' + cls(P.base) + '">' + sg(P.base) + '</b></div><div><small>S&P500</small><b>' + sg(P.spy) + '</b></div></div>' +
+      '<div class="hm-big"><div><small>⚡ 킥</small><b class="' + cls(P.kick) + '">' + sg(P.kick) + '</b>' + hon(P.kick_honest, {note: "돌파 칸은 다음 거래일 종가에 사고, 사고팔 때마다 비용을 뺌"}) + '</div><div><small>💼 기본</small><b class="' + cls(P.base) + '">' + sg(P.base) + '</b>' + hon(P.base_honest, {note: "주 1회(+배분표 바뀐 날)만 비중을 맞추고 그때마다 비용을 뺌"}) + '</div><div><small>S&P500</small><b>' + sg(P.spy) + '</b></div></div>' +
       '<div class="hm-l">어제(' + md(P.d1_date) + ') 💼 <b class="' + cls(P.d1) + '">' + sg(P.d1) + '</b> · ⚡ <b class="' + cls(P.d1_kick) + '">' + sg(P.d1_kick) + '</b> · S&P ' + sg(P.d1_spy) +
       ' · <a data-goto="port~pocmp">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a>' + (ex < 0 ? ' · S&P까지 ' + sg(ex) + 'p' : '') + '</div>' +
       '<div class="hm-sp">' + spark + '</div>' +
@@ -149,7 +150,9 @@
         (r.cal.cats || []).map(function(c){ return '<span class="' + (c.ok ? "ok" : "") + '">' + e(c.k) + ' ' + c.rate + '% <small>' + c.n + '건</small>' + (c.ok ? ' ✓' : '') + '</span>'; }).join("") +
         '<small>' + e(r.cal.gate || "") + ' · ✓ = 비중을 바꿔도 되는 분야</small></div>';
       if (r.k === "kick" && r.sig) body += '<div class="sc-sig">' + r.sig.map(function(x){ return '<div class="' + (x.shadow ? "sh" : x.trial ? "tr" : x.on ? "on" : "off") + '"><b>' + e(x.tag) + ' ' + e({cup: "컵", gap: "갭", accum: "매집", whale: "고래", focus: "집중", lead: "선행"}[x.k] || x.k) + '</b>' +
-        '<small>' + (x.shadow ? "👻 그림자 " : x.trial ? "🧪 시험 " : x.on ? "✓ 킥에 들어감 " : "⏳ 대기 ") + (x.n != null ? x.n + "건" : "") + (x.avg != null ? " · 평균 " + sg(x.avg, 1) : "") + (x.pf ? " · 손익비 " + x.pf : "") + '</small></div>'; }).join("") + '</div>';
+        '<small>' + (x.shadow ? "👻 그림자 " : x.trial ? "🧪 시험 " : x.on ? "✓ 킥에 들어감 " : "⏳ 대기 ") + (x.n != null ? x.n + "건" : "") + (x.avg != null ? " · 평균 " + sg(x.avg, 1) : "") + (x.pf ? " · 손익비 " + x.pf : "") + '</small>' +
+        (window.HON ? '<div class="sc-hon">' + (x.h_n ? HON.chip(x.h_avg, {n: x.h_n, pf: x.h_pf, basis: x.h_basis, oos: x.h_oos}) + HON.tags(x) : '') + (x.k === "whale" ? HON.whale(x) : '') + '</div>' : '') + '</div>'; }).join("") + '</div>' +
+        (r.honest_ret != null && window.HON ? '<div class="sc-hon">⚡ 킥 포트 전체 ' + HON.chip(r.honest_ret, {d: 2, note: r.honest_note}) + '</div>' : '');
       if (r.k === "danta" && r.rows) body += '<table class="lrn"><tr><th></th><th>09시</th><th>10시</th><th>11~12시</th><th>13시~</th></tr>' + r.rows.map(function(x){
         return '<tr><td>' + e(x.k) + '<small>' + (x.n || 0) + '건 ' + sg(x.avg) + '</small></td>' + ["09시", "10시", "11~12시", "13시 이후"].map(function(s){ var c = (x.slots || {})[s] || {};
           return '<td><b class="st-' + e(c.st) + '">' + e({"강함": "⭐", "켬": "켬", "관찰": "👀", "닫힘": "닫힘"}[c.st] || "–") + '</b><small>' + (c.n ? c.n + "건 " + sg(c.avg, 1) : "") + '</small></td>'; }).join("") + '</tr>'; }).join("") + '</table>';
@@ -241,6 +244,7 @@
     ".hm-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}.hm-h>div{flex:1;min-width:0}.hm-h b{font-size:16px}.hm-h small{display:block;font-size:11.5px;color:var(--sub)}",
     ".hm-i{font-size:22px;width:36px;height:36px;border-radius:11px;background:var(--panel2);display:flex;align-items:center;justify-content:center;flex:none}",
     ".hm-go{font-size:12px;color:var(--sub);white-space:nowrap}",
+    ".sc-hon:empty{display:none}.sc-hon{margin-top:3px;font-size:11.5px;color:var(--sub)}.hm-big .hon-chip{display:flex;width:max-content;margin:3px 0 0;font-size:10.5px;padding:1px 6px}.hm-big .hon-chip b{font-size:11px;letter-spacing:0}" +
     ".hm-big{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 6px}.hm-big>div{background:var(--panel2);border-radius:12px;padding:7px 9px}.hm-big small{display:block;font-size:11px;color:var(--sub)}.hm-big b{font-size:20px;letter-spacing:-.5px}",
     ".hm-l{font-size:13.5px;line-height:1.5;color:var(--text)}.hm-l small{color:var(--sub)}.hm-l a{color:var(--acc);cursor:pointer}",
     ".hm-sp{margin:4px -4px 0}.hm-sp .lg{font-size:11px}",

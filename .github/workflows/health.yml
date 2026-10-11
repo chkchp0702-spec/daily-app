@@ -31,6 +31,4 @@ jobs:
         run: |
           git config user.name "health-bot"
           git config user.email "health-bot@users.noreply.github.com"
-          git add archive/x/health.json
-          git diff --cached --quiet || git commit -m "health $(TZ=Asia/Seoul date '+%m/%d %H:%M')"
-          for i in 1 2 3; do git pull -q --rebase origin main && git push -q && break; sleep 5; done
+          bash scripts/push.sh "health $(TZ=Asia/Seoul date '+%m/%d %H:%M')" archive/x/health.json

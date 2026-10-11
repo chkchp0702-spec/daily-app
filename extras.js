@@ -218,15 +218,18 @@
       // 🧪 스스로 배운 것 (stock-screener learn.py → data/learned.json · 세션 시작·장중 매시간)
       if (LR && LR.types){
         var SL = ["09시", "10시", "11~12시", "13시 이후"], ST = {"강함": ["⭐ 강함", "#4dd47a"], "켬": ["켬", "#8a94a8"], "관찰": ["👀 관찰", "#ffb84d"], "닫힘": ["닫힘", "#4a5266"]};
-        var pp = LR.params || {};
+        var pp = LR.params || {}, G = LR.gate || {};
+        // 10/11: 비용 0.45% + 다음 1분 가격(+0.2% 미끄러짐) 진입 · 20거래일·칸당 40건 문턱 (learned.json gate·slip·entry·cost)
+        var costTxt = "비용 " + (LR.cost != null ? LR.cost : 0.45) + "% 뺌 · " + (LR.entry === "next_min" || !LR.entry ? "다음 1분 가격" : e(LR.entry)) + (LR.slip != null ? " +" + LR.slip + "%" : " +0.2%") + " 진입";
+        var gateTxt = (G.min_days || 20) + "거래일·칸당 " + (G.min_n || 40) + "건 차야 규칙이 바뀜 (그 전엔 관찰만" + (G.days_ok === false ? " · 지금 " + (LR.n_days || 0) + "일째" : "") + ")";
         h += card("🧪 단타가 스스로 배운 것 <span class='mut'>쌓인 1분 자료 " + LR.n_days + "일 + 실제 알람 · " + e(String(LR.at || "").slice(5)) + "</span>",
           '<table class="lrn"><tr><th></th>' + SL.map(function(x){ return '<th>' + x + '</th>'; }).join("") + '</tr>' +
           Object.keys(LR.types).map(function(k){ var T = LR.types[k];
             return '<tr><td>' + e(k) + '<small>' + (T.n_all || 0) + '건 ' + pct(T.avg_all) + '</small></td>' + SL.map(function(x){ var c = T.slots[x] || {}, st = ST[c.st] || [c.st || "–", "#8a94a8"];
-              return '<td data-tip="' + e("<b>" + k + " · " + x + "</b><br>" + (c.st || "") + " · " + (c.n || 0) + "건 · 평균 " + pct(c.avg) + " (비용 0.3% 뺌)<br>다시 돌린 것 " + ((c.replay || {}).n || 0) + " · 실제 알람 " + ((c.live || {}).n || 0)) + '"><b style="color:' + st[1] + '">' + st[0] + '</b><small>' + (c.n ? c.n + '건 ' + pct(c.avg) : '자료 없음') + '</small></td>'; }).join("") + '</tr>'; }).join("") + '</table>' +
+              return '<td data-tip="' + e("<b>" + k + " · " + x + "</b><br>" + (c.st || "") + " · " + (c.n || 0) + "건 · 평균 " + pct(c.avg) + " (" + costTxt + ")" + (c.obs ? "<br>👀 아직 문턱 전 — 관찰만(규칙 안 바뀜)" : "") + "<br>다시 돌린 것 " + ((c.replay || {}).n || 0) + " · 실제 알람 " + ((c.live || {}).n || 0)) + '"><b style="color:' + st[1] + '">' + st[0] + '</b><small>' + (c.n ? c.n + '건 ' + pct(c.avg) : '자료 없음') + '</small></td>'; }).join("") + '</tr>'; }).join("") + '</table>' +
           '<p class="note"><b>⭐ 강함</b> = 품질 A로 먼저 알림 · <b>👀 관찰</b> = 지는 쪽이라 앱 푸시 없이 기록만(추적은 계속, 좋아지면 저절로 다시 켜짐) · <b>닫힘</b> = 오후는 성적이 증명돼야 열림. ' +
           '지금 손잡이: 후발주 대장 ' + pp.fol_hold + '분 유지·' + (pp.fol_band || []).join("~") + '% · 거래폭발 ×' + pp.burst_x + ' · 청산 ' + e(pp.exit || "") + ' · 신규 알람 ' + String(pp.cutoff || 1130).replace(/(\d\d)$/, ":$1") + '까지' +
-          (LR.changed && LR.changed.length ? ' · <b>바뀐 것: ' + e(LR.changed.join(", ")) + '</b>' : ' · 표본이 25건 넘게 쌓이고 확실히 나을 때만 손잡이를 바꿔요') + '.</p>');
+          (LR.changed && LR.changed.length ? ' · <b>바뀐 것: ' + e(LR.changed.join(", ")) + '</b>' : '') + ' · ' + gateTxt + ' · 확실히 나을 때만 손잡이를 바꿔요' + '. <span class="mut">성적은 ' + costTxt + '.</span></p>');
       }
       h += card("📊 단타 성적 대시보드 <span class='mut'>전체 " + A.n + "건</span>",
         '<div class="x4"><div><small>승률(마감)</small><b>' + A.win + '%</b></div><div><small>평균</small><b class="' + cls(A.avg) + '">' + pct(A.avg) + '</b></div><div><small>목표1 도달</small><b class="up">' + A.hit1 + '%</b></div><div><small>손절 도달</small><b class="dn">' + A.hits + '%</b></div></div>' +

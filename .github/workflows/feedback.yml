@@ -21,5 +21,4 @@ jobs:
       - name: 저장
         run: |
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
-          git add archive/x/ideas.json archive/fb 2>/dev/null || git add archive/x/ideas.json
-          git diff --cached --quiet || (git commit -m "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" && git pull --rebase -q && git push)
+          bash scripts/push.sh "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/ideas.json archive/fb

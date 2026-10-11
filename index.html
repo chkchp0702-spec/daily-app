@@ -12,8 +12,7 @@
 <link rel="apple-touch-icon" href="icon.png?v=2">
 <link rel="icon" href="icon.png?v=2">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- marked·pdf.js 는 처음 쓸 때만 받음 (10/11: 첫 화면이 300KB 덜 기다림) — loadLib() -->
 <style>
 :root{
   --bg:#0b0f17; --panel:#121826; --panel2:#182033; --line:#232c40;
@@ -71,6 +70,19 @@ main{padding:16px;max-width:760px;margin:0 auto}
 .pbig{overflow-x:auto;padding:8px;-webkit-overflow-scrolling:touch}.pcl{margin-left:6px}.pz.on{background:var(--accent,#3b7ddd);color:#fff}.sh-top .btn{padding:5px 8px;font-size:12px;white-space:nowrap;flex-shrink:0}.sh-top b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .pdf canvas{width:100%;display:block;border-radius:10px;margin-bottom:8px;background:#fff}
 .loading{color:var(--dim);font-size:13px;padding:20px 0;text-align:center}
+#netbar{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 6px);transform:translate(-50%,-140%);z-index:60;max-width:calc(100% - 24px);
+  background:#3a2a10;color:#ffd58a;border:1px solid #6b4e1a;border-radius:12px;padding:7px 12px;font-size:12.5px;font-weight:600;line-height:1.35;
+  box-shadow:0 6px 18px rgba(0,0,0,.35);transition:transform .25s;pointer-events:none;text-align:center}
+#netbar.on{transform:translate(-50%,0);pointer-events:auto}
+#netbar.ok{background:#12301f;color:#8fe0ad;border-color:#1f5a37;cursor:pointer}
+.hon-line{font-size:12.5px;line-height:1.5;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 11px;margin:0 0 10px;color:var(--sub)}
+.hon-line b{color:var(--text)}.hon-line .up{color:var(--up)}.hon-line .dn{color:var(--down)}
+.hon-chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--panel2);color:var(--sub);white-space:nowrap;margin:2px 3px 2px 0;vertical-align:middle;cursor:help}
+.hon-chip i{font-style:normal;opacity:.75}
+.hon-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;background:#3a2a10;color:#ffc46b;margin:2px 3px 2px 0;white-space:nowrap;vertical-align:middle}
+:root[data-ui=light] .hon-tag{background:#fff1d6;color:#8a5a00}
+:root[data-ui=light] #netbar{background:#fff1d6;color:#7a4b00;border-color:#f0c97a}
+:root[data-ui=light] #netbar.ok{background:#e3f6ea;color:#18603a;border-color:#9fd8b5}
 iframe.rep{width:100%;border:0;border-radius:12px;background:#fff;min-height:70vh}
 /* 종목 카드 */
 .list{display:grid;gap:10px}
@@ -406,7 +418,51 @@ em.tk{font-style:normal;font-size:11px;color:var(--dim);margin-left:4px;font-wei
 
 <script src="viz.js?v=8"></script>
 <script>
-if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+/* ---------- ⚠ 저장본 알림 띠 (10/11) — 서비스 워커가 느려서 마지막 저장본을 보여 주면 위쪽에 잠깐 ---------- */
+(function(){
+  if (!("serviceWorker" in navigator)) return;
+  var pend = {}, bar = null, oldest = 0, hideT = null;
+  function hm(t){ if (!t) return "예전"; var d = new Date(t + 9 * 3600e3); return ("0" + d.getUTCHours()).slice(-2) + ":" + ("0" + d.getUTCMinutes()).slice(-2); }
+  function show(html, cls){
+    if (!bar){ bar = document.createElement("div"); bar.id = "netbar"; document.body.appendChild(bar);
+      bar.onclick = function(){ if (bar.classList.contains("ok") && typeof go === "function" && typeof cur !== "undefined"){ hide(); go(cur, typeof curDate !== "undefined" && M && M.cats[cur] ? curDate : undefined); } }; }
+    clearTimeout(hideT); bar.className = "on " + (cls || ""); bar.innerHTML = html;
+  }
+  function hide(){ if (bar) bar.className = ""; }
+  navigator.serviceWorker.addEventListener("message", function(ev){
+    var m = ev.data || {}; if (!m.t || !m.url) return;
+    if (m.t === "stale"){ pend[m.url] = 1; if (m.at && (!oldest || m.at < oldest)) oldest = m.at;
+      show(m.why === "off" ? "⚠ 인터넷이 끊겨 " + hm(oldest) + " 저장본을 보여 주고 있어요" : "⚠ 연결이 느려 " + hm(oldest) + " 저장본을 보여 주고 있어요 · 새로 받는 중", "");
+      if (m.why === "off"){ clearTimeout(hideT); hideT = setTimeout(hide, 8000); } return; }
+    if (!pend[m.url]) return;
+    delete pend[m.url];
+    if (Object.keys(pend).length) return;
+    oldest = 0;
+    if (window.getJSONdrop) getJSONdrop();          // 저장본으로 받아 둔 것은 버리고 다음엔 새로
+    if (m.t === "fresh"){ show("✓ 새 자료가 왔어요 · 눌러서 새로 보기", "ok"); hideT = setTimeout(hide, 6000); }
+    else { show("⚠ 인터넷이 끊겨 저장본을 보여 주고 있어요", "off"); hideT = setTimeout(hide, 8000); }
+  });
+})();
+/* ---------- 무거운 도구는 필요할 때만 (10/11) ---------- */
+var LIBS = {marked: "https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js", pdfjsLib: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"}, LIBP = {};
+function loadLib(name){
+  if (window[name]) return Promise.resolve(window[name]);
+  if (!LIBP[name]) LIBP[name] = new Promise(function(ok, no){
+    var s = document.createElement("script"); s.src = LIBS[name]; s.async = true;
+    s.onload = function(){ if (!window[name]) { LIBP[name] = null; return no(new Error(name)); }
+      if (name === "pdfjsLib") pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      ok(window[name]); };
+    s.onerror = function(){ LIBP[name] = null; s.remove(); no(new Error(name)); };
+    document.head.appendChild(s);
+  });
+  return LIBP[name];
+}
+// 마크다운 → 화면 (marked 를 못 받으면 글자 그대로)
+function mdInto(el, t){
+  if (!el) return;
+  var plain = function(){ el.innerHTML = '<pre class="txt">' + String(t).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }) + '</pre>'; };
+  loadLib("marked").then(function(m){ try { el.innerHTML = m.parse(t); } catch(x) { plain(); } }, plain);
+}
 
 var CATS = [
   {key:"home",   name:"오늘", short:"오늘",     icon:"🏠", color:"#9ad0ff", desc:"아침에 30초 — 포트 · 킥 · 집중 · 알람 · 두뇌 · 성적 한 장"},
@@ -548,7 +604,19 @@ function go(key, id){
 
 /* ---------- 렌더러 ---------- */
 function getText(u){ return fetch(u).then(function(r){ if (!r.ok) throw 0; return r.text(); }); }
-function getJSON(u){ return fetch(u).then(function(r){ if (!r.ok) throw 0; return r.json(); }); }
+/* 같은 주소 JSON 은 한 번만 받기 (10/11) — 동시에 여러 곳이 부르면 한 요청을 나눠 쓰고, 5분 동안은 받아 둔 글을 다시 씀.
+   부르는 곳마다 새 객체를 줌(글에서 다시 읽음) → 한쪽이 고쳐도 다른 쪽에 안 번짐 · 실패는 저장 안 함 */
+var JC = {};
+function getJSON(u, o){
+  var ttl = o && o.ttl != null ? o.ttl : 300000, now = Date.now(), c = JC[u];
+  if (!c || (c.t && now - c.t > ttl)){
+    for (var k in JC) if (JC[k].t && now - JC[k].t > 600000) delete JC[k];
+    c = JC[u] = {t: 0, p: fetch(u).then(function(r){ if (!r.ok) throw 0; return r.text(); })};
+    c.p.then(function(){ c.t = Date.now(); }, function(){ if (JC[u] === c) delete JC[u]; });
+  }
+  return c.p.then(function(t){ return JSON.parse(t); });
+}
+function getJSONdrop(){ JC = {}; }
 
 function pdfCard(title, url){
   if (/^archive\//.test(url) && url.indexOf("?") < 0) url += "?v=" + Math.floor(Date.now() / 300000);   // 다시 만든 PDF가 옛것(캐시)으로 보이지 않게
@@ -857,7 +925,9 @@ function pdfBig(url, title){
 }
 function renderPdf(url, box){
   if (!box) return;
-  if (!window.pdfjsLib) { box.innerHTML = '<div class="loading">"크게 보기"를 눌러 PDF를 열어주세요.</div>'; return; }
+  loadLib("pdfjsLib").then(function(){ renderPdf2(url, box); }, function(){ if (document.body.contains(box)) box.innerHTML = '<div class="loading">PDF 도구를 못 받았어요 — <a href="' + url + '" target="_blank">PDF 바로 열기</a></div>'; });
+}
+function renderPdf2(url, box){
   pdfjsLib.getDocument(url).promise.then(function(pdf){
     box.innerHTML = "";
     var n = 0;
@@ -888,7 +958,7 @@ var RENDER = {
     }
     if (files.indexOf("review.md") >= 0) {
       h = '<div class="card md" id="mrev">…</div>' + h;
-      getText(file("market", it.id, "review.md")).then(function(t){ $("mrev") && ($("mrev").innerHTML = window.marked ? marked.parse(t) : "<pre class=\"txt\">" + esc(t) + "</pre>"); });
+      getText(file("market", it.id, "review.md")).then(function(t){ mdInto($("mrev"), t); });
     }
     el.innerHTML = '<div id="live"></div>' + h +
       '<div class="card"><h3>전략 대시보드 <button class="btn" id="dashbtn">열기</button></h3><div id="dash"></div></div>';
@@ -954,7 +1024,7 @@ var RENDER = {
         .replace(/&lt;(\/?)(b|i)&gt;/g, "<$1$2>");
       $("brf").innerHTML = safe.trim();
     });
-    if ($("smd")) getText(file("sector", it.id, "sector.md")).then(function(t){ $("smd").innerHTML = window.marked ? marked.parse(t) : "<pre class=\"txt\">" + esc(t) + "</pre>"; });
+    if ($("smd")) getText(file("sector", it.id, "sector.md")).then(function(t){ mdInto($("smd"), t); });
   },
 
   accum: function(it, el){
@@ -1298,7 +1368,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261011u";
+var APPV = "20261011v";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1306,7 +1376,10 @@ fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return
 /* ---------- 시작 ---------- */
 // 목록을 못 받으면(사이트가 막 바뀌는 순간 등) 1.5초·4초 뒤 두 번 더 받아 보고 나서야 「준비 중」 (10/10)
 function getManifest(n){ return getJSON("manifest.json?" + Date.now()).catch(function(e){ if ((n || 0) >= 2) throw e; return new Promise(function(r){ setTimeout(r, n ? 4000 : 1500); }).then(function(){ return getManifest((n || 0) + 1); }); }); }
-getManifest(0).then(function(m){
+// 아래 views·plus*.js 가 RENDER 를 다 덧입힌 뒤에 첫 화면을 그림 (목록이 먼저 와도 기다림 · 10/11)
+var DOMREADY = new Promise(function(r){ if (document.readyState !== "loading") r(); else document.addEventListener("DOMContentLoaded", function(){ r(); }); });
+Promise.all([getManifest(0), DOMREADY]).then(function(a){
+  var m = a[0];
   M = m;
   // 평일 장중엔 오늘 단타 칸을 미리 만들어 둠 (내용은 단타 프로그램 원본에서 바로 읽음)
   (function(){ var d = new Date(Date.now() + 9 * 3600e3), td = d.toISOString().slice(0, 10), L = M.cats.danta = M.cats.danta || [];
@@ -1332,27 +1405,29 @@ getManifest(0).then(function(m){
   fetch("https://ntfy.sh/chkchp-daily-5821", {method:"POST", body: userName + " 님이 앱을 열었어요 (" + device + ")"}).catch(function(){});
 })();
 </script>
-<script src="views.js?v=26"></script>
-<script src="ixchart.js?v=7"></script>
-<script src="compass.js?v=18"></script>
-<script src="extras.js?v=6"></script>
-<script src="plus.js?v=2"></script>
-<script src="plus2.js?v=1"></script>
-<script src="plus3.js?v=12"></script>
-<script src="plus4.js?v=4"></script>
-<script src="plus5.js?v=6"></script>
-<script src="plus6.js?v=12"></script>
-<script src="plus7.js?v=4"></script>
-<script src="plus8.js?v=9"></script>
-<script src="gsearch.js?v=1"></script>
-<script src="brain.js?v=4"></script>
-<script src="feed.js?v=6"></script>
-<script src="push.js?v=2"></script>
-<script src="port.js?v=18"></script>
-<script src="simple.js?v=14"></script>
-<script src="pdfx.js?v=4"></script>
-<script src="up10.js?v=6"></script>
-<script src="nav2.js?v=9"></script>
+<!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
+<script defer src="views.js?v=27"></script>
+<script defer src="ixchart.js?v=7"></script>
+<script defer src="compass.js?v=18"></script>
+<script defer src="extras.js?v=7"></script>
+<script defer src="plus.js?v=2"></script>
+<script defer src="plus2.js?v=1"></script>
+<script defer src="plus3.js?v=12"></script>
+<script defer src="plus4.js?v=4"></script>
+<script defer src="plus5.js?v=6"></script>
+<script defer src="plus6.js?v=12"></script>
+<script defer src="plus7.js?v=4"></script>
+<script defer src="plus8.js?v=9"></script>
+<script defer src="gsearch.js?v=1"></script>
+<script defer src="brain.js?v=4"></script>
+<script defer src="feed.js?v=6"></script>
+<script defer src="push.js?v=2"></script>
+<script defer src="port.js?v=19"></script>
+<script defer src="simple.js?v=14"></script>
+<script defer src="pdfx.js?v=4"></script>
+<script defer src="honest.js?v=1"></script>
+<script defer src="up10.js?v=7"></script>
+<script defer src="nav2.js?v=9"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
 </html>

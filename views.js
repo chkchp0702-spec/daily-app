@@ -35,7 +35,7 @@
     el.innerHTML = '<div id="mhead"></div><div id="live"></div><div id="mbody"></div>' + tail;
     marketBoard($("live"));
     if (txt) getText(file("market", it.id, txt)).then(function(t){ $("mtxt") && ($("mtxt").textContent = t); });
-    if (has("review.md")) getText(file("market", it.id, "review.md")).then(function(t){ $("mrev") && ($("mrev").innerHTML = window.marked ? marked.parse(t) : "<pre class=\"txt\">" + e(t) + "</pre>"); });
+    if (has("review.md")) getText(file("market", it.id, "review.md")).then(function(t){ mdInto($("mrev"), t); });
     $("dashbtn").onclick = function(){
       $("dashbtn").remove(); $("dash").innerHTML = '<div class="loading">여는 중…</div>';
       getText(RAW + "market-strategy-report/main/docs/index.html").then(function(t){
