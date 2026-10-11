@@ -161,8 +161,9 @@
     var id = "x" + (++SEQ); D[id] = {ix: ix, rows: rowsOf(ix), base: rowsOf(ix), mk: k.mk};
     var svg = draw(id), o = D[id], P = per();
     var pos = ix.hi52 > ix.lo52 ? (ix.last - ix.lo52) / (ix.hi52 - ix.lo52) * 100 : 50;
-    return '<div class="ixc" id="' + id + '">' +
-      '<div class="ixc-h"><div><div class="ixc-n">' + e(SHORT[ix.sym] || ix.name) + '</div><div class="ixc-d mut">' + e(String(ix.date || "").slice(5).replace("-", "/")) + ' 종가</div></div>' +
+    var opn = ((window.store && store.ixo) || {})[ix.sym];      // 처음엔 제목 줄만 — 누르면 차트 (10/11 사용자)
+    return '<div class="ixc' + (opn ? '' : ' fold') + '" id="' + id + '" data-sym="' + e(ix.sym) + '">' +
+      '<div class="ixc-h"><div><div class="ixc-n"><i class="ixc-ar">▸</i>' + e(SHORT[ix.sym] || ix.name) + '</div><div class="ixc-d mut">' + e(String(ix.date || "").slice(5).replace("-", "/")) + ' 종가</div></div>' +
       '<div class="ixc-v"><b>' + fmt(ix.last) + '</b><span class="' + cls(ix.chg1) + '">' + (ix.chg1 > 0 ? "▲ " : ix.chg1 < 0 ? "▼ " : "") + pct(ix.chg1) + '</span></div></div>' +
       '<div class="ixc-pp">' + ppHtml(o) + '</div>' +
       '<div class="ixc-w">' + svg + '<div class="ixc-tip"></div></div>' +
@@ -242,6 +243,14 @@
   new MutationObserver(function(){ var f = document.querySelector(".ixc:not([data-rt])"); if (f){ [].forEach.call(document.querySelectorAll(".ixc:not([data-rt])"), function(el){ el.dataset.rt = 1; refresh(el); }); } })
     .observe(document.documentElement, {childList: true, subtree: true});
 
+  // 제목 줄 누르면 펼치기·접기 (어느 지수를 열어 뒀는지 기억)
+  document.addEventListener("click", function(ev){
+    var h = ev.target.closest && ev.target.closest(".ixc-h"); if (!h) return;
+    var el = h.closest(".ixc"); if (!el) return;
+    var f = el.classList.toggle("fold");
+    if (window.store){ store.ixo = store.ixo || {}; if (f) delete store.ixo[el.dataset.sym]; else store.ixo[el.dataset.sym] = 1; if (window.save) try { save(); } catch(x) {} }
+    if (!f) redraw(el);
+  });
   // 기간 바꾸기
   document.addEventListener("click", function(ev){
     var b = ev.target.closest && ev.target.closest(".ixc-seg button"); if (!b) return;
@@ -283,6 +292,10 @@
     ".ixb-card[data-g=us] .ixb-i[data-g=us],.ixb-card[data-g=kr] .ixb-i[data-g=kr],.ixb-card[data-g=gl] .ixb-i[data-g=gl],.ixb-card[data-g=as] .ixb-i[data-g=as]{display:block}" +
     ".ixc-seg+.ixb-i>.ixc{border-top:0}" +
     ".ixc-seg{margin:2px 0 4px}.ixc{padding:14px 0 12px;border-top:1px solid var(--line)}.ixc-seg+.ixc{border-top:0}" +
+    ".ixc.fold>:not(.ixc-h){display:none!important}.ixc.fold{padding:11px 0}.ixc-h{cursor:pointer}" +
+    ".ixc-ar{font-style:normal;display:inline-block;width:16px;color:var(--dim);font-size:12px;transition:transform .15s}.ixc:not(.fold) .ixc-ar{transform:rotate(90deg)}" +
+    ".ixc.fold .ixc-n{font-size:15px}.ixc.fold .ixc-d{display:none}.ixc.fold .ixc-h{align-items:center}" +
+    ".ixc.fold .ixc-v{display:flex;align-items:baseline;gap:8px}.ixc.fold .ixc-v b{display:inline;font-size:16px}.ixc.fold .ixc-v span{min-width:62px;text-align:right}" +
     ".ixc-h{display:flex;justify-content:space-between;align-items:flex-end}.ixc-n{font-weight:800;font-size:16px;letter-spacing:-.2px}.ixc-d{font-size:11px;margin-top:1px}" +
     ".ixc-v{text-align:right}.ixc-v b{display:block;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.4px;line-height:1.1}.ixc-v span{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}" +
     ".ixc-pp{display:flex;align-items:center;gap:6px;font-size:12px;margin:6px 0 2px}.ixc-pp b{font-variant-numeric:tabular-nums}.ixc-lg{margin-left:auto;color:var(--sub);font-size:11px;display:flex;align-items:center;gap:4px}" +
