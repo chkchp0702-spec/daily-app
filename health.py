@@ -114,7 +114,8 @@ def app_checks():
             pg.close()
         # 🔗 누르면 제 화면으로 가나 (10/10: 클릭이 엉뚱한 곳으로 가로채이던 사고 뒤 추가)
         for start, sel, want in [("home", '.hm-c[data-goto="port~pokick"] .hm-h b', ("port", "pokick")), ("home", '.hm-c[data-goto="score"] .hm-h b', ("score", None)),
-                                 ("home", '.hm-chip[data-op]', ("onepager", None)), ("score", '.sc-c[data-goto="market~mkfo"] .sc-h b', ("market", "mkfo"))]:
+                                 ("home", '.hm-chip[data-op]', ("onepager", None)), ("score", '.sc-c[data-goto="market~mkfo"] .sc-h b', ("market", "mkfo")),
+                                 ("home", '#bnav button[data-g="sig"]', ("whale", None)), ("market", '#tabs .tab[data-k="sector"]', ("sector", None))]:
             pg = ctx.new_page(); pg.on("dialog", lambda d: d.dismiss())
             try:
                 pg.goto(APP + "?h=" + str(int(time.time())) + "#" + start, wait_until="domcontentloaded", timeout=45000)

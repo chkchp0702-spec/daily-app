@@ -23,7 +23,7 @@
     var t = ev.target.closest && ev.target.closest("#pobody [data-op], #pobrain [data-op]");
     if (t && window.openOP){ ev.preventDefault(); ev.stopPropagation(); openOP(t.getAttribute("data-op")); }
   }, true);
-  window.portView = function(){ setTimeout(function(){ if (window.brainCard) brainCard(document.getElementById("pobrain"), false); }, 0); return '<div id="pobrain"></div><div id="pobody"><div class="loading">포트 불러오는 중…</div></div>'; };
+  window.portView = function(){ return '<div id="pobody"><div class="loading">포트 불러오는 중…</div></div>'; };
   window.portInit = function(){
     var t = Date.now();
     Promise.all([fetch(URL_P + "?" + t).then(function(r){ if (!r.ok) throw 0; return r.json(); }),

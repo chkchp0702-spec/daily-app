@@ -43,7 +43,7 @@
       draw();
     }).catch(function(){ var b = document.getElementById("fdbody"); if (b) b.innerHTML = '<div class="empty">피드를 아직 못 가져왔어요. 잠시 뒤 다시 열어 주세요.</div>'; });
     var q = document.getElementById("fdq");
-    if (q) q.oninput = function(){ S.q = q.value.trim().toLowerCase(); list(); };
+    if (q) q.oninput = function(){ S.q = q.value.trim().toLowerCase(); S.lim = 40; list(); };
   };
 
   // 🎯 오늘의 집중에서 테마·종목 이름 뽑기 → 글에 들어 있으면 표시
@@ -92,7 +92,7 @@
       '<div class="fd-meta">' + e(d.at.slice(5).replace("-", "/")) + ' 모음 · 매시간 :40 · 7일치</div>' +
       (S.usedInfo && S.usedInfo.date ? '<div class="fd-sel">📝 ' + e(S.usedInfo.date.slice(5).replace("-", "/")) + ' 시황리포트: 글 <b>' + (S.usedInfo.read || "–") + '개</b> 읽고 <b>' + nU + '개</b> 골라 반영' +
         (S.usedInfo.skip ? '<small>안 쓴 이유: ' + e(S.usedInfo.skip) + '</small>' : '') + '</div>' : '');
-    [].forEach.call(srcEl.querySelectorAll("[data-fk]"), function(b){ b.onclick = function(){ S.f = b.getAttribute("data-fk"); draw(); }; });
+    [].forEach.call(srcEl.querySelectorAll("[data-fk]"), function(b){ b.onclick = function(){ S.f = b.getAttribute("data-fk"); S.lim = 40; draw(); }; });
     list();
   }
 
@@ -111,11 +111,12 @@
     var its = S.d.items.filter(pass), news = {};
     (S.d.new || []).forEach(function(i){ news[i] = 1; });
     if (!its.length){ b.innerHTML = '<div class="empty">' + (S.f === "PIN" ? "📌 모아 둔 글이 없어요. 글 오른쪽 📌 를 눌러 모아 두세요." : "해당하는 글이 없어요.") + '</div>'; return; }
-    var h = "", day = "";
+    var h = "", day = "", all = its.length;
+    S.lim = S.lim || 40; its = its.slice(0, S.lim);          // 처음엔 40개만 — 끝없이 긴 화면 대신 「더 보기」
     its.forEach(function(it){
       var dd = (it.at || it.first).slice(0, 10);
       if (dd !== day){ day = dd; h += '<div class="fd-day">' + dayLab(dd) + '</div>'; }
-      var long = it.text.length > 260, op = S.open[it.id];
+      var long = it.text.length > 150, op = S.open[it.id];
       var body = e(it.text).replace(/\n/g, "<br>");
       S.kw.length && it._h.forEach(function(w){ body = body.split(e(w)).join('<mark>' + e(w) + '</mark>'); });
       h += '<div class="fd-it fd-' + (it.kind || "bl") + '" data-fid="' + e(it.id) + '">' +
@@ -131,7 +132,9 @@
         '<div class="fd-ft">' + (long || (it.imgs && it.imgs.length) ? '<span class="fd-more">' + (op ? "접기 ▲" : "펼치기 ▼" + (it.imgs && it.imgs.length ? " · 사진 " + it.imgs.length : "")) + '</span>' : "<span></span>") +
         '<a class="fd-go" href="' + e(it.link) + '" target="_blank" rel="noopener">원문 ↗</a></div></div>';
     });
+    if (all > its.length) h += '<button class="fd-lim" id="fdlim">더 보기 ▾ <small>' + (all - its.length) + '개 남음</small></button>';
     b.innerHTML = h;
+    var lb = document.getElementById("fdlim"); if (lb) lb.onclick = function(){ var y = window.scrollY; S.lim += 60; list(); window.scrollTo(0, y); };
     [].forEach.call(b.querySelectorAll(".fd-it"), function(el){
       el.onclick = function(ev){
         if (ev.target.closest("a")) return;
@@ -166,7 +169,8 @@
     ".fd-used{font-size:12.5px;color:#7c9cff;margin:4px 0}" +
     ".fd-hit{font-size:12.5px;color:#ffb84d;margin:4px 0}" +
     ".fd-tx{font-size:14px;line-height:1.55;margin-top:5px;word-break:break-word}" +
-    ".fd-tx.cl{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}" +
+    ".fd-lim{display:block;width:100%;margin:6px 0 14px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:inherit;font-size:14.5px;font-weight:700;cursor:pointer}.fd-lim small{color:var(--sub);font-weight:400;margin-left:4px}" +
+    ".fd-tx.cl{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}" +
     ".fd-tx mark{background:rgba(255,184,77,.25);color:inherit;border-radius:3px;padding:0 2px}" +
     ".fd-fl{font-size:12.5px;color:var(--sub);margin-top:6px}" +
     ".fd-im{display:flex;gap:6px;overflow-x:auto;margin-top:8px}.fd-im img{height:150px;border-radius:8px;flex:none}" +

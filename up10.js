@@ -34,9 +34,11 @@
     var row = function(lab, key, opts){ return '<div class="us-r"><span>' + lab + '</span><div class="us-seg">' + opts.map(function(o){
       return '<button data-k="' + key + '" data-v="' + o[0] + '" class="' + (String(UI[key]) === String(o[0]) ? "on" : "") + '">' + o[1] + '</button>'; }).join("") + '</div></div>'; };
     d.innerHTML = '<b>⚙️ 보기 설정</b>' + row("화면", "theme", [["auto", "자동"], ["dark", "🌙 어둡게"], ["light", "☀️ 밝게"]]) +
-      row("글자", "fs", [[0.92, "작게"], [1, "보통"], [1.12, "크게"]]) + '<small>자동 = 휴대폰 설정(다크 모드)을 따라가요.</small>';
+      row("글자", "fs", [[0.92, "작게"], [1, "보통"], [1.12, "크게"]]) + '<small>자동 = 휴대폰 설정(다크 모드)을 따라가요.</small>' +
+      '<div class="us-go"><button data-go="alarm">🔔 알림 켜기·끄기</button><button data-go="idea">💬 의견함</button><button data-go="onepager">📄 종목리포트</button></div>';
     document.body.appendChild(d);
-    [].forEach.call(d.querySelectorAll("button"), function(b){ b.onclick = function(){ var k = b.dataset.k, v = b.dataset.v; UI[k] = k === "fs" ? +v : v; keepUI(); applyUI(); d.remove(); settings(); }; });
+    [].forEach.call(d.querySelectorAll("[data-go]"), function(b){ b.onclick = function(){ d.remove(); go(b.dataset.go); }; });
+    [].forEach.call(d.querySelectorAll("button[data-k]"), function(b){ b.onclick = function(){ var k = b.dataset.k, v = b.dataset.v; UI[k] = k === "fs" ? +v : v; keepUI(); applyUI(); d.remove(); settings(); }; });
     setTimeout(function(){ document.addEventListener("click", function off(ev){ if (!d.contains(ev.target) && ev.target.id !== "uibtn"){ d.remove(); document.removeEventListener("click", off); } }); }, 0);
   }
   function addBtn(){
@@ -53,7 +55,7 @@
     var t0 = Date.now();
     (function find(){
       var el = document.getElementById(anchor);
-      if (el){ var f = el.closest(".fold"); if (f && !f.classList.contains("open")) f.classList.add("open");
+      if (el){ if (window.unclamp) unclamp(el); var f = el.closest(".fold"); if (f && !f.classList.contains("open")) f.classList.add("open");
         if (el.classList.contains("xs-hid") && window.closeSheet){ /* 「더 보기」로 숨은 카드면 그대로 펼쳐 보이기 */ el.classList.remove("xs-hid"); }
         setTimeout(function(){ var hd = document.querySelector("header"), jb = document.querySelector(".fold-jump");
           var y = el.getBoundingClientRect().top + window.scrollY - ((hd ? hd.offsetHeight : 0) + (jb ? jb.offsetHeight : 0) + 8);
@@ -220,6 +222,7 @@
     "@media (max-width:350px){header .tab .ic{display:block;font-size:14px}header .tab{font-size:9.5px}}",
     "#uibtn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;padding:3px 8px;font-size:14px;margin-left:8px;cursor:pointer}",
     "#uiset{position:fixed;z-index:60;top:calc(env(safe-area-inset-top) + 52px);right:12px;width:260px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:0 18px 40px -12px rgba(0,0,0,.5)}",
+    ".us-go{display:flex;flex-direction:column;gap:6px;margin-top:10px;border-top:1px solid var(--line);padding-top:10px}.us-go button{text-align:left;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 10px;font:inherit;font-size:14px;cursor:pointer}",
     "#uiset b{display:block;margin-bottom:8px}#uiset small{display:block;color:var(--sub);font-size:11.5px;margin-top:8px}",
     ".us-r{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0}.us-r>span{font-size:13px;color:var(--sub)}",
     ".us-seg{display:flex;gap:4px}.us-seg button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:9px;padding:5px 8px;font:inherit;font-size:12px;cursor:pointer}.us-seg button.on{background:var(--c,#7c9cff);color:#111;border-color:transparent;font-weight:800}",
