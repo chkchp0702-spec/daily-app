@@ -54,6 +54,53 @@
   window.unclamp = function(el){ var c = el && el.closest && el.closest(".xs-clamp"); if (c){ c.classList.remove("xs-clamp"); var b = c.querySelector(":scope > .xs-cl"); if (b) b.textContent = "접기 ▴"; } };
 
 
+  // ⑤ 차트 글씨가 겹치면 비켜 쓰기 (섹터 시계·지도·되감기 — 10/11 사용자: "겹치면 비켜써")
+  function declutter(svg){
+    var ts = [].slice.call(svg.querySelectorAll("text.rotl"));
+    var sig = ts.map(function(t){ return (t.dataset.x0 || t.getAttribute("x")) + "," + (t.dataset.y0 || t.getAttribute("y")); }).join("|");
+    if (!ts.length || svg.dataset.dc === sig) return;
+    var boxes = [];
+    try {        // 점(동그라미)도 피해서
+      [].forEach.call(svg.querySelectorAll("circle"), function(c){ var r = +c.getAttribute("r"); if (r >= 3 && r <= 9){ var cx = +c.getAttribute("cx"), cy = +c.getAttribute("cy"); boxes.push({x: cx - r, y: cy - r, w: 2 * r, h: 2 * r}); } });
+    } catch(x) {}
+    try {        // 구역 이름(🔥 계속 강함 등)도 피해서
+      [].forEach.call(svg.querySelectorAll("text.rotq"), function(q){ var b = q.getBBox(); if (b.width) boxes.push({x: b.x, y: b.y, w: b.width, h: b.height}); });
+    } catch(x) {}
+    [].forEach.call(svg.querySelectorAll(".dc-ln"), function(l){ l.remove(); });
+    ts.sort(function(a, b){ return (+a.getAttribute("y")) - (+b.getAttribute("y")); });
+    var over = function(b){ return boxes.some(function(o){ return b.x < o.x + o.w + 1 && o.x < b.x + b.w + 1 && b.y < o.y + o.h && o.y < b.y + b.h; }); };
+    var W = (svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width) || 9999;
+    for (var i = 0; i < ts.length; i++){
+      var t = ts[i];
+      if (t.dataset.x0){ t.setAttribute("x", t.dataset.x0); t.setAttribute("y", t.dataset.y0); t.removeAttribute("text-anchor"); }
+      var bb; try { bb = t.getBBox(); } catch(x) { return; }
+      if (!bb.width) return;                                  // 아직 안 보이는 카드 — 보일 때 다시
+      var x0 = +t.getAttribute("x"), y0 = +t.getAttribute("y"); t.dataset.x0 = x0; t.dataset.y0 = y0;
+      var dy = bb.y - y0, dx = bb.x - x0, L = -(bb.width + 14), put = null;
+      var tries = [[0, 0], [L, 0], [0, -11], [0, 11], [L, -11], [L, 11], [0, -22], [0, 22], [L, -22], [L, 22], [0, -33], [0, 33], [L, -33], [L, 33], [0, -44], [0, 44]];
+      for (var j = 0; j < tries.length; j++){
+        var b = {x: x0 + dx + tries[j][0], y: y0 + dy + tries[j][1], w: bb.width, h: bb.height};
+        if (b.x < 0 || b.x + b.w > W) continue;
+        if (!over(b)){ put = tries[j]; boxes.push(b); break; }
+      }
+      if (!put){ boxes.push({x: bb.x, y: bb.y, w: bb.width, h: bb.height}); continue; }
+      if (put[0] || put[1]){
+        t.setAttribute("x", x0 + put[0]); t.setAttribute("y", y0 + put[1]);
+        if (Math.abs(put[1]) > 0){
+          var ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          ln.setAttribute("class", "dc-ln"); ln.setAttribute("x1", x0 - 6); ln.setAttribute("y1", y0 - 4);
+          ln.setAttribute("x2", put[0] ? x0 + put[0] + bb.width + 1 : x0 - 1); ln.setAttribute("y2", y0 + put[1] - 4);
+          t.parentNode.insertBefore(ln, t);
+        }
+      }
+    }
+    svg.dataset.dc = sig;
+  }
+  var DCT = null;
+  new MutationObserver(function(){ if (DCT) return; DCT = setTimeout(function(){ DCT = null;
+    [].forEach.call(document.querySelectorAll("svg"), function(sv){ if (sv.querySelector("text.rotl")) declutter(sv); }); }, 200); })
+    .observe(document.body, {childList: true, subtree: true});
+
   var css = document.createElement("style");
   css.textContent =
     // 위: 묶음 안의 작은 탭 (가로로 밀기)
@@ -78,6 +125,9 @@
     "#main > .hero .meta .chip{font-size:11px;padding:2px 7px}" +
     "#main > .hero p{display:none}#main > .hero.show p{display:block;margin-top:6px}" +
     "#main > .hero h1:after{content:' ⓘ';font-size:12px;color:var(--dim);font-weight:400}" +
+    // 겹친 글씨 비켜 쓴 선 · 밝은 화면의 카드 창 머리
+    "svg .dc-ln{stroke:var(--sub);stroke-width:.8;opacity:.6}" +
+    ":root[data-ui=light] .sh-top{background:rgba(255,255,255,.94)!important}:root[data-ui=light] .sh-top b{color:#141a26}" +
     // 날짜 칩 한 줄로 작게
     "#main .dates{margin-bottom:10px}#main .date{padding:5px 11px!important;border-radius:999px!important;font-size:11.5px!important;line-height:1.3}" +
     "#main .date b{display:inline!important;font-size:13.5px!important;margin-right:3px}" +
