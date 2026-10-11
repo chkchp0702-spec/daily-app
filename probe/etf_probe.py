@@ -1,29 +1,31 @@
-import json, re, sys, urllib.request
-UA_M = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148", "Accept": "application/json", "Referer": "https://m.stock.naver.com/"}
-UA_D = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36"}
-def get(u, h, raw=False):
-    with urllib.request.urlopen(urllib.request.Request(u, headers=h), timeout=25) as r:
+import json, sys, urllib.request, urllib.parse, datetime as dt
+H = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36",
+     "Referer": "http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201030108", "X-Requested-With": "XMLHttpRequest",
+     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
+def post(d):
+    req = urllib.request.Request("http://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd", data=urllib.parse.urlencode(d).encode(), headers=H)
+    with urllib.request.urlopen(req, timeout=30) as r:
         t = r.read().decode("utf-8", "ignore")
-    return t if raw else json.loads(t)
+    try: return json.loads(t)
+    except Exception: return {"raw": t[:400]}
 out = {}
 for code in sys.argv[1:]:
     o = {}
     try:
-        a = get(f"https://m.stock.naver.com/api/stock/{code}/etfAnalysis", UA_M)
-        o["top10"] = a.get("etfTop10MajorConstituentAssets")
-        o["keys"] = list(a.keys())
+        f = post({"bld": "dbms/comm/finder/finder_secuprodisu", "mktsel": "ETF", "searchText": code})
+        o["finder"] = (f.get("block1") or f)  if isinstance(f, dict) else f
+        isin = ((f.get("block1") or [{}])[0]).get("codeName") or ((f.get("block1") or [{}])[0]).get("full_code")
+        o["isin"] = isin
+        for back in range(0, 6):
+            d = (dt.date.today() - dt.timedelta(days=back)).strftime("%Y%m%d")
+            p = post({"bld": "dbms/MDC/STAT/standard/MDCSTAT05001", "locale": "ko_KR", "tboxisuCd_finder_secuprodisu1_0": code,
+                      "isuCd": isin, "isuCd2": isin, "codeNmisuCd_finder_secuprodisu1_0": "", "param1isuCd_finder_secuprodisu1_0": "",
+                      "trdDd": d, "share": "1", "money": "1", "csvxls_isNo": "false"})
+            rows = p.get("output") if isinstance(p, dict) else None
+            if rows:
+                o["date"] = d; o["n"] = len(rows); o["rows"] = rows[:4]; break
+            o.setdefault("tries", []).append({d: str(p)[:200]})
     except Exception as e:
-        o["naver_err"] = str(e)
-    try:
-        t = get(f"https://navercomp.wisereport.co.kr/v2/ETF/index.aspx?cmp_cd={code}", UA_D, raw=True)
-        o["wise_len"] = len(t); o["has_cu"] = "CU_data" in t
-        m = re.search(r"var\s+CU_data\s*=\s*(\{.*?\});", t, re.S)
-        if m:
-            g = json.loads(m.group(1)).get("grid_data") or []
-            o["wise_n"] = len(g); o["wise_first"] = g[:3]
-        else:
-            o["wise_head"] = t[:300]
-    except Exception as e:
-        o["wise_err"] = str(e)
+        o["err"] = str(e)
     out[code] = o
 json.dump(out, open("archive/x/probe_etf.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
