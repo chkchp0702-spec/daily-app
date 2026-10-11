@@ -188,7 +188,7 @@ CUR_BY_SUF = {"": "USD", "L": "GBp", "T": "JPY", "HK": "HKD", "TW": "TWD", "TWO"
               "DE": "EUR", "F": "EUR", "PA": "EUR", "AS": "EUR", "MI": "EUR", "MC": "EUR", "HE": "EUR", "BR": "EUR", "VI": "EUR", "LS": "EUR", "IR": "EUR",
               "SW": "CHF", "TO": "CAD", "V": "CAD", "AX": "AUD", "TA": "ILA", "ST": "SEK", "CO": "DKK", "OL": "NOK",
               "SS": "CNY", "SZ": "CNY", "SI": "SGD", "NS": "INR", "BO": "INR", "SA": "BRL", "MX": "MXN", "JO": "ZAc", "NZ": "NZD", "KL": "MYR", "BK": "THB", "JK": "IDR"}
-BAD_EX = {"PNK", "OTC", "OQB", "OQX", "OEM", "OBB", "OGM", "NEO", "CXE", "BUE", "MUN", "STU", "DUS", "HAM", "BER", "FRA", "EBS", "IOB"}
+BAD_EX = {"VIE", "PNK", "OTC", "OQB", "OQX", "OEM", "OBB", "OGM", "NEO", "CXE", "BUE", "MUN", "STU", "DUS", "HAM", "BER", "FRA", "EBS", "IOB"}
 CASH = re.compile(r"현금|예금|증거금|CASH|DEPOSIT|미수|미지급|원화|KRW|USD$", re.I)
 SKIP = re.compile(r"선물|FUT|스왑|SWAP|\b[FC] \d{6}|옵션", re.I)
 
@@ -198,7 +198,7 @@ def _suf(sym):
 
 
 def _clean(n):
-    n = re.sub(r"\s*-\s*(CL|CLASS)\s*[A-Z]\b|\b(CL|CLASS)\s+[A-Z]\b|\bADR\b|\bSPON\w*|\bREG\b|\bSHS\b|\bORD\b|\(.*?\)", " ", n, flags=re.I)
+    n = re.sub(r"\s*-\s*(CL|CLASS)\s*[A-Z]\b|\b(CL|CLASS)\s+[A-Z]\b|\s+-\s+[A-Z]\b|\bEquity\b|\bADR\b|\bSPON\w*|\bREG\b|\bSHS\b|\bORD\b|\(.*?\)", " ", n, flags=re.I)
     return re.sub(r"\s+", " ", n).strip()
 
 
@@ -223,10 +223,14 @@ def resolve(name, code=""):
                 d = get("https://query2.finance.yahoo.com/v1/finance/search?quotesCount=8&newsCount=0&q=" + urllib.parse.quote(q), UA_D, timeout=10)
                 qs = [z for z in d.get("quotes") or [] if z.get("quoteType") == "EQUITY" and z.get("exchange") not in BAD_EX
                       and _suf(z.get("symbol", "")) in CUR_BY_SUF]
-                if qs:                                # 미국 상장 먼저 (유럽 교차상장 .VI/.MI 피함), 없으면 본국
-                    w1 = re.sub(r"[^A-Z0-9]", "", name.upper().split()[0])[:5]
-                    us = [z for z in qs if "." not in z["symbol"] and w1 in re.sub(r"[^A-Z0-9]", "", (z.get("longname") or z.get("shortname") or "").upper())]
-                    sym = (us or qs)[0]["symbol"]
+                # 유럽 교차상장(빈 .VI · 밀라노 1XXX.MI · 독일 지방거래소)은 빼고 야후 순서대로.
+                # 이름에 ADR/-NY 가 있으면 미국 상장(ADR) 우선 — 반대로 본국 주식을 ADR 가격으로 계산하면 비중이 몇 배 틀어짐
+                qs = [z for z in qs if not z["symbol"].endswith(".VI") and not re.match(r"\d\w*\.MI$", z["symbol"])]
+                if qs:
+                    if re.search(r"\bADR\b|-NY\b|\bADS\b", name, re.I):
+                        us = [z for z in qs if "." not in z["symbol"]]
+                        qs = us or qs
+                    sym = qs[0]["symbol"]
                     break
                 time.sleep(0.3)
     except TimeoutError:

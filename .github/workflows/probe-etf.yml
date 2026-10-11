@@ -21,7 +21,7 @@ jobs:
           out = {}
           for f in glob.glob("tout/x/*.json"):
               x = json.load(open(f))
-              out[x["sym"]] = {"n_hold": x.get("n_hold"), "w_est": x.get("w_est"), "top": [[h["name"], h.get("w"), h.get("sh"), h.get("ysym")] for h in x["holdings"][:12]]}
+              out[x["sym"]] = {"n_hold": x.get("n_hold"), "w_est": x.get("w_est"), "top": [[h["name"], h.get("w"), h.get("sh"), h.get("ysym")] for h in x["holdings"][:40]]}
           json.dump(out, open("archive/x/probe_etf.json", "w"), ensure_ascii=False, indent=1)
           PY
           mkdir -p archive/x/probe_s && cp tout/s/418670*.html archive/x/probe_s/ || true
