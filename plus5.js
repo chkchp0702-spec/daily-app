@@ -80,12 +80,12 @@
     s += '<path d="M' + (cx + 40) + ',' + (cy - R - 4) + ' A' + (R + 4) + ',' + (R + 4) + ' 0 0 1 ' + (cx + R * .8).toFixed(1) + ',' + (cy - R * .62).toFixed(1) + '" stroke="#8a94a8" fill="none" marker-end="url(#ah)"/><defs><marker id="ah" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L6,3L0,6Z" fill="#8a94a8"/></marker></defs>';
     var mxv = Math.max.apply(null, ss.map(function(x){ return Math.hypot(x.r20 - m20, (x.r5 - m5) * 2); }).concat([1]));
     ss.forEach(function(x, i){ var dx = x.r20 - m20, dy = (x.r5 - m5) * 2, a = ang(dx, dy), rr = 30 + Math.min(1, Math.hypot(dx, dy) / mxv) * (R - 40);
-      var px = cx + rr * Math.sin(a), py = cy - rr * Math.cos(a), col = V.CAT[i % 6], tail = "";
+      var px = cx + rr * Math.sin(a), py = cy - rr * Math.cos(a), col = V.secCol(x.k, i), tail = "";
       if (x.path && x.path.length > 4){ var p0 = x.path[x.path.length - 5], d0x = p0[2] - m20, d0y = (p0[1] - m5) * 2, a0 = ang(d0x, d0y), r0 = 30 + Math.min(1, Math.hypot(d0x, d0y) / mxv) * (R - 40);
         tail = '<line x1="' + (cx + r0 * Math.sin(a0)).toFixed(1) + '" y1="' + (cy - r0 * Math.cos(a0)).toFixed(1) + '" x2="' + px.toFixed(1) + '" y2="' + py.toFixed(1) + '" stroke="' + col + '" stroke-opacity=".5" stroke-width="2" marker-end="url(#ah)"/>'; }
       var hour = ((a * 180 / Math.PI + 360) % 360) / 30;
       s += tail + '<g data-csec="' + e(x.k) + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + (Math.floor(hour) || 12) + "시 방향<br>1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20)) + '"><circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="6" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
-        '<text x="' + (px + 8).toFixed(1) + '" y="' + (py + 3).toFixed(1) + '" class="rotl">' + e(x.name) + '</text></g>'; });
+        '<text x="' + (px + 8).toFixed(1) + '" y="' + (py + 3).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(x.name) + '</text></g>'; });
     s += '</svg>';
     return card("🕐 섹터 로테이션 시계 <span class='mut'>돈은 시계 방향으로 돈다</span>", s +
       '<p class="note">교과서의 경기 순환처럼 섹터는 보통 🌱 새로 뜸(9~12시) → 🔥 강함(12~3시) → 🍂 힘 빠짐(3~6시) → 🧊 약함(6~9시) 순으로 돌아요. 화살표 = 지난 5일 이동. 9~12시 쪽에 있는 섹터가 다음 주인공 후보예요. 점을 누르면 종목.</p>');

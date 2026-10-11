@@ -453,8 +453,12 @@ svg.lc{touch-action:pan-y}.lc-x{stroke:var(--sub);stroke-width:1;stroke-dasharra
 .rb-gn{font-size:11.5px;color:var(--sub);margin-top:6px;white-space:nowrap}.rb-gn span{color:var(--text);font-weight:700;margin-left:4px}
 .rb-help{font-size:12.5px;line-height:1.6;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
 /* 섹터 시계·지도·되감기 글씨 (10/11 사용자: "글씨색이 너무 흐려서 잘 안 보여") — 테마 글자색 + 바탕색 테두리로 선 위에서도 읽히게 */
-svg .rotl{fill:var(--text)!important;font-size:12px!important;font-weight:800!important;paint-order:stroke;stroke:var(--panel);stroke-width:3.5px;stroke-linejoin:round}
+svg .rotl:not([style]){fill:var(--text)!important}svg .rotl{font-size:12px!important;font-weight:800!important;paint-order:stroke;stroke:var(--panel);stroke-width:3.5px;stroke-linejoin:round}
 svg .rotq{fill:var(--text)!important;opacity:.85;font-size:11.5px!important;font-weight:800!important;paint-order:stroke;stroke:var(--panel);stroke-width:3px}
 svg .rotq.u{fill:#e5484d!important;opacity:1}svg .rotq.d{fill:#2f6fd6!important;opacity:1}
 svg .rota{fill:var(--sub)!important;font-size:11px!important;font-weight:600}
 :root[data-ui=dark] svg .rotq.u{fill:#ff8a8a!important}:root[data-ui=dark] svg .rotq.d{fill:#8fb8ff!important}
+/* 되감기 섹터 고르기 (10/11) */
+.rots{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:8px 0 2px;padding-bottom:2px}.rots::-webkit-scrollbar{display:none}
+.rots button{flex:none;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:5px 11px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.rots button i{width:9px;height:9px;border-radius:50%;background:var(--sc)}.rots button.on{border-color:var(--sc,var(--text));background:color-mix(in srgb,var(--sc,#888) 16%,transparent)}

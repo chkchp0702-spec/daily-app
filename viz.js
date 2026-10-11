@@ -3,6 +3,11 @@
 var V = (function(){
   var UP = "#e66767", DN = "#3987e5", MID = "#2a3142";
   var CAT = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#9085e9"];
+  // 섹터 11개 고정 색 (10/11 사용자: "섹터 색깔과 글자색 일치") — 차트마다 같은 섹터는 같은 색, 겹치는 색 없음
+  var SECC = {"Technology": "#2563eb", "Energy": "#ea580c", "Financial Services": "#0d9488", "Healthcare": "#db2777", "Industrials": "#b45309",
+              "Basic Materials": "#7c3aed", "Consumer Cyclical": "#dc2626", "Consumer Defensive": "#16a34a", "Utilities": "#ca8a04",
+              "Real Estate": "#64748b", "Communication Services": "#0891b2"};
+  function secCol(k, i){ return SECC[k] || CAT[(i || 0) % 6]; }
   var FLAGS = {US:"🇺🇸", KR:"🇰🇷", JP:"🇯🇵", CN:"🇨🇳", HK:"🇭🇰"};
   var MKT = {US:"미국", KR:"한국", JP:"일본", CN:"중국", HK:"홍콩"};
 
@@ -252,7 +257,7 @@ var V = (function(){
 
   // 표시용 코드: 한국은 6자리, 나머지는 티커 그대로
   function cd(x){ x = String(x || ""); return /^\d{6}\.K[SQ]$/.test(x) ? x.slice(0, 6) : x; }
-  return {cd:cd, e:e, rich:rich, sgn:sgn, cls:cls, fmt:fmt, UP:UP, DN:DN, CAT:CAT, FLAGS:FLAGS, MKT:MKT,
+  return {cd:cd, e:e, rich:rich, sgn:sgn, cls:cls, fmt:fmt, UP:UP, DN:DN, CAT:CAT, secCol:secCol, FLAGS:FLAGS, MKT:MKT,
           spark:spark, hbars:hbars, dbars:dbars, cols:cols, lines:lines, donut:donut, progress:progress, range:range, heat:heat,
           price:price, fillSparks:fillSparks, hideTip:hideTip};
 })();

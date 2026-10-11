@@ -71,8 +71,8 @@
       '<text x="' + (W - P) + '" y="' + (H - 6) + '" text-anchor="end" class="rota">1개월 수익률 →</text><text x="6" y="' + (P - 8) + '" class="rota">↑ 1주 수익률</text>';
     ss.forEach(function(x, i){ var cx = X(x.r20), cy = Y(x.r5);
       s += '<g data-csec="' + e(x.k) + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b><br>1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + " · 오늘 " + pct(x.r1)) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="13" fill="transparent"/>' +
-        '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + V.CAT[i % 6] + '" stroke="#121826" stroke-width="2"/>' +
-        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl">' + e(x.name) + '</text></g>'; });
+        '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + V.secCol(x.k, i) + '" stroke="#121826" stroke-width="2"/>' +
+        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + V.secCol(x.k, i) + '">' + e(x.name) + '</text></g>'; });
     s += '</svg>';
     return card("🔄 섹터 로테이션 지도 <span class='mut'>돈이 어디로 움직이나</span>", s +
       '<p class="note">오른쪽 위 = 한 달 내내 강하고 이번 주도 강함 · 왼쪽 위 = 한 달은 약했는데 이번 주 살아남 (새로 뜨는 곳) · 오른쪽 아래 = 한 달 강했지만 이번 주 식음.</p>');

@@ -15,11 +15,12 @@
       (ch.length ? '<div class="sub2">국면이 바뀐 날</div><div class="xt">' + ch.slice(-6).reverse().map(function(c){ return '<div class="xr"><b>' + e(c[0]) + '</b><span class="mut">' + e(c[1]) + ' →</span><b class="' + (c[2] === "상승장" ? "up" : c[2] === "하락장" ? "dn" : "") + '">' + e(c[2]) + '</b></div>'; }).join("") + '</div>' : '<p class="note">이 기간엔 국면이 한 번도 안 바뀌었어요.</p>') +
       '<p class="note">🔔 알림 탭에서 "시장 국면 변화"를 구독하면 바뀌는 날만 푸시가 와요.</p>');
   }
-  function rotSvg(m, di){
+  var RSEL = {};       // 되감기: 고른 섹터만 (10/11 사용자: "섹터 선택하면 그것만 돌려 볼 수 있게, 전체 누르면 다시 전체")
+  function rotSvg(m, di, sel){
     var ss = (m.sectors || []).filter(function(x){ return x.path && x.path.length; });
     if (ss.length < 4) return "";
     var W = 330, H = 250, Pd = 26, all = [];
-    ss.forEach(function(x){ x.path.forEach(function(p){ all.push(p); }); });
+    ss.forEach(function(x){ if (!sel || x.k === sel) x.path.forEach(function(p){ all.push(p); }); });   // 한 섹터만 볼 땐 그 섹터 길이에 맞춰 크게
     var mx = Math.max.apply(null, all.map(function(p){ return Math.abs(p[2]); }).concat([1])) * 1.12, my = Math.max.apply(null, all.map(function(p){ return Math.abs(p[1]); }).concat([1])) * 1.12;
     var Xs = function(v){ return Pd + (v + mx) / (2 * mx) * (W - 2 * Pd); }, Ys = function(v){ return Pd + (my - v) / (2 * my) * (H - 2 * Pd); };
     var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="rotsv">' +
@@ -28,12 +29,14 @@
       '<text x="' + (W - Pd - 2) + '" y="' + (Pd + 12) + '" text-anchor="end" class="rotq u">🔥 계속 강함</text><text x="' + (Pd + 2) + '" y="' + (Pd + 12) + '" class="rotq">🌱 새로 뜨는 중</text>' +
       '<text x="' + (W - Pd - 2) + '" y="' + (H - Pd - 6) + '" text-anchor="end" class="rotq">🍂 힘 빠지는 중</text><text x="' + (Pd + 2) + '" y="' + (H - Pd - 6) + '" class="rotq d">🧊 계속 약함</text>';
     ss.forEach(function(x, i){
-      var p = x.path, k = Math.min(di, p.length - 1), tr = p.slice(Math.max(0, k - 4), k + 1);
-      var col = V.CAT[i % 6];
-      if (tr.length > 1) s += '<polyline points="' + tr.map(function(q){ return Xs(q[2]).toFixed(1) + "," + Ys(q[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="' + col + '" stroke-opacity=".45" stroke-width="2"/>';
+      if (sel && x.k !== sel) return;
+      var p = x.path, k = Math.min(di, p.length - 1), tr = p.slice(sel ? 0 : Math.max(0, k - 4), k + 1);   // 한 섹터만 볼 땐 처음부터 지나온 길 전부
+      var col = V.secCol(x.k, i);
+      if (tr.length > 1) s += '<polyline points="' + tr.map(function(q){ return Xs(q[2]).toFixed(1) + "," + Ys(q[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="' + col + '" stroke-opacity="' + (sel ? .8 : .45) + '" stroke-width="' + (sel ? 2.5 : 2) + '"/>' +
+        (sel ? tr.slice(0, -1).map(function(q){ return '<circle cx="' + Xs(q[2]).toFixed(1) + '" cy="' + Ys(q[1]).toFixed(1) + '" r="2" fill="' + col + '" opacity=".6"/>'; }).join("") : '');
       var cx = Xs(p[k][2]), cy = Ys(p[k][1]);
       s += '<g data-csec="' + e(x.k) + '" data-cm="' + MKX + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + p[k][0] + "<br>1주 " + pct(p[k][1]) + " · 1개월 " + pct(p[k][2])) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
-        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl">' + e(x.name) + '</text></g>';
+        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(x.name) + '</text></g>';
     });
     return s + '</svg>';
   }
@@ -43,21 +46,31 @@
     var n = Math.max.apply(null, ss.map(function(x){ return x.path.length; }));
     var days = ss[0].path.map(function(p){ return p[0]; });
     return card("🎞️ 섹터 흐름 되감기 <span class='mut'>최근 " + n + "거래일 · 꼬리 = 지난 4일 이동</span>",
-      '<div id="rotw-' + k + '">' + rotSvg(m, n - 1) + '</div><div class="rotc"><button class="btn" data-rotplay="' + k + '">▶︎ 재생</button><input type="range" min="0" max="' + (n - 1) + '" value="' + (n - 1) + '" data-rot="' + k + '"><b id="rotd-' + k + '">' + e(days[n - 1] || "") + '</b></div>' +
+      '<div id="rotw-' + k + '">' + rotSvg(m, n - 1, RSEL[k]) + '</div>' +
+      '<div class="rots">' + ['<button data-rsel="' + k + '|"' + (!RSEL[k] ? ' class="on"' : '') + '>전체</button>'].concat(ss.map(function(x, i){
+        return '<button data-rsel="' + k + '|' + e(x.k) + '" style="--sc:' + V.secCol(x.k, i) + '"' + (RSEL[k] === x.k ? ' class="on"' : '') + '><i></i>' + e(x.name) + '</button>'; })).join("") + '</div>' +
+      '<div class="rotc"><button class="btn" data-rotplay="' + k + '">▶︎ 재생</button><input type="range" min="0" max="' + (n - 1) + '" value="' + (n - 1) + '" data-rot="' + k + '"><b id="rotd-' + k + '">' + e(days[n - 1] || "") + '</b></div>' +
       '<p class="note">막대를 밀면 그날 기준 섹터 위치로 바뀌어요. 왼쪽 아래 → 왼쪽 위 → 오른쪽 위로 도는 섹터가 "새로 돈이 들어오는" 곳.</p>');
   }
   var CMP = null;
   document.addEventListener("input", function(ev){
     var t = ev.target; if (!t.getAttribute || !t.getAttribute("data-rot")) return;
     var k = t.getAttribute("data-rot"), m = CMP && CMP.markets[k]; if (!m) return;
-    $("rotw-" + k).innerHTML = rotSvg(m, +t.value);
+    $("rotw-" + k).innerHTML = rotSvg(m, +t.value, RSEL[k]);
     var ss = m.sectors.filter(function(x){ return x.path && x.path.length; }); $("rotd-" + k).textContent = (ss[0].path[+t.value] || [""])[0];
+  });
+  document.addEventListener("click", function(ev){       // 섹터 고르기 → 그 섹터만 처음부터 재생 · 전체 → 전체 재생
+    var b = ev.target.closest && ev.target.closest("[data-rsel]"); if (!b) return;
+    var a = b.getAttribute("data-rsel").split("|"), k = a[0];
+    RSEL[k] = a[1] || null;
+    [].forEach.call(b.parentNode.children, function(x){ x.classList.toggle("on", x === b); });
+    var pb = document.querySelector('[data-rotplay="' + k + '"]'); if (pb) pb.click();
   });
   document.addEventListener("click", function(ev){
     var b = ev.target.closest && ev.target.closest("[data-rotplay]"); if (!b) return;
     var k = b.getAttribute("data-rotplay"), r = document.querySelector('[data-rot="' + k + '"]'); if (!r) return;
-    var i = 0, n = +r.max;
-    var tick = function(){ if (!document.body.contains(r)) return; r.value = i; r.dispatchEvent(new Event("input", {bubbles: true})); if (i++ < n) setTimeout(tick, 380); };
+    var i = 0, n = +r.max, tok = r._tok = Math.random();      // 새로 누르면 앞의 재생은 멈춤
+    var tick = function(){ if (!document.body.contains(r) || r._tok !== tok) return; r.value = i; r.dispatchEvent(new Event("input", {bubbles: true})); if (i++ < n) setTimeout(tick, 380); };
     tick();
   });
   var KRN = {"005930.KS": "삼성전자", "000660.KS": "SK하이닉스", "042700.KS": "한미반도체", "403870.KQ": "HPSP", "267260.KS": "HD현대일렉트릭", "010120.KS": "LS ELECTRIC",
