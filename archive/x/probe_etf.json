@@ -1,0 +1,392 @@
+{
+ "418670": {
+  "top10": [
+   {
+    "seq": 1,
+    "itemCode": "053800",
+    "itemName": "안랩",
+    "stockCount": "77",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 2,
+    "itemCode": "",
+    "itemName": "NCC GROUP PLC",
+    "stockCount": "1,963",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 3,
+    "itemCode": "",
+    "itemName": "NETSKOPE INC-CL A",
+    "stockCount": "1,466",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 4,
+    "itemCode": "",
+    "itemName": "SAILPOINT INC",
+    "stockCount": "1,279",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 5,
+    "itemCode": "",
+    "itemName": "SENTINELONE INC -CLASS A",
+    "stockCount": "1,031",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 6,
+    "itemCode": "",
+    "itemName": "GEN DIGITAL INC",
+    "stockCount": "757",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 7,
+    "itemCode": "",
+    "itemName": "TENABLE HOLDINGS INC",
+    "stockCount": "699",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 8,
+    "itemCode": "",
+    "itemName": "VARONIS SYSTEMS INC",
+    "stockCount": "555",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 9,
+    "itemCode": "",
+    "itemName": "TELOS CORPORATION",
+    "stockCount": "541",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 10,
+    "itemCode": "",
+    "itemName": "A10 NETWORKS INC",
+    "stockCount": "495",
+    "etfWeight": "-"
+   }
+  ],
+  "keys": [
+   "itemCode",
+   "itemName",
+   "etfSummary",
+   "listedDate",
+   "issuerName",
+   "etfBaseIndex",
+   "marketValue",
+   "totalNav",
+   "nav",
+   "etfChaseEarningRateSymbol",
+   "etfChaseEarningRate",
+   "deviationSign",
+   "deviationRate",
+   "totalFee",
+   "chaseErrorRate",
+   "taxationTypeCode",
+   "themeReturns",
+   "returnPerformanceReferenceDate",
+   "returnPerformanceList",
+   "navPerformanceReferenceDate",
+   "navPerformanceList",
+   "cumulativeNetInflowList",
+   "assetPortfolioTotalWeight",
+   "assetPortfolioList",
+   "countryPortfolioTotalWeight",
+   "countryPortfolioList",
+   "sectorPortfolioTotalWeight",
+   "sectorPortfolioList",
+   "etfTop10MajorConstituentAssets",
+   "dividend",
+   "marketValueRaw"
+  ],
+  "wise_len": 54310,
+  "has_cu": true,
+  "wise_n": 32,
+  "wise_first": [
+   {
+    "TRD_DT": "2026-10-08",
+    "AGMT_STK_CNT": 1963.45,
+    "STK_NM_KOR": "NCC GROUP PLC",
+    "ETF_WEIGHT": null
+   },
+   {
+    "TRD_DT": "2026-10-08",
+    "AGMT_STK_CNT": 1466.02,
+    "STK_NM_KOR": "NETSKOPE INC-CL A",
+    "ETF_WEIGHT": null
+   },
+   {
+    "TRD_DT": "2026-10-08",
+    "AGMT_STK_CNT": 1278.59,
+    "STK_NM_KOR": "SAILPOINT INC",
+    "ETF_WEIGHT": null
+   }
+  ]
+ },
+ "069500": {
+  "top10": [
+   {
+    "seq": 1,
+    "itemCode": "005930",
+    "itemName": "삼성전자",
+    "stockCount": "6,969",
+    "etfWeight": "34.57%"
+   },
+   {
+    "seq": 2,
+    "itemCode": "000660",
+    "itemName": "SK하이닉스",
+    "stockCount": "849",
+    "etfWeight": "27.02%"
+   },
+   {
+    "seq": 3,
+    "itemCode": "402340",
+    "itemName": "SK스퀘어",
+    "stockCount": "137",
+    "etfWeight": "2.72%"
+   },
+   {
+    "seq": 4,
+    "itemCode": "009150",
+    "itemName": "삼성전기",
+    "stockCount": "83",
+    "etfWeight": "2.43%"
+   },
+   {
+    "seq": 5,
+    "itemCode": "105560",
+    "itemName": "KB금융",
+    "stockCount": "455",
+    "etfWeight": "1.40%"
+   },
+   {
+    "seq": 6,
+    "itemCode": "005380",
+    "itemName": "현대차",
+    "stockCount": "203",
+    "etfWeight": "1.25%"
+   },
+   {
+    "seq": 7,
+    "itemCode": "055550",
+    "itemName": "신한지주",
+    "stockCount": "609",
+    "etfWeight": "1.15%"
+   },
+   {
+    "seq": 8,
+    "itemCode": "006400",
+    "itemName": "삼성SDI",
+    "stockCount": "91",
+    "etfWeight": "0.98%"
+   },
+   {
+    "seq": 9,
+    "itemCode": "034020",
+    "itemName": "두산에너빌리티",
+    "stockCount": "648",
+    "etfWeight": "0.96%"
+   },
+   {
+    "seq": 10,
+    "itemCode": "086790",
+    "itemName": "하나금융지주",
+    "stockCount": "368",
+    "etfWeight": "0.87%"
+   }
+  ],
+  "keys": [
+   "itemCode",
+   "itemName",
+   "etfSummary",
+   "listedDate",
+   "issuerName",
+   "etfBaseIndex",
+   "marketValue",
+   "totalNav",
+   "nav",
+   "etfChaseEarningRateSymbol",
+   "etfChaseEarningRate",
+   "deviationSign",
+   "deviationRate",
+   "totalFee",
+   "chaseErrorRate",
+   "taxationTypeCode",
+   "themeReturns",
+   "returnPerformanceReferenceDate",
+   "returnPerformanceList",
+   "navPerformanceReferenceDate",
+   "navPerformanceList",
+   "cumulativeNetInflowList",
+   "assetPortfolioTotalWeight",
+   "assetPortfolioList",
+   "countryPortfolioTotalWeight",
+   "countryPortfolioList",
+   "sectorPortfolioTotalWeight",
+   "sectorPortfolioList",
+   "etfTop10MajorConstituentAssets",
+   "dividend",
+   "marketValueRaw"
+  ],
+  "wise_len": 68181,
+  "has_cu": true,
+  "wise_n": 202,
+  "wise_first": [
+   {
+    "TRD_DT": "2026-10-08",
+    "AGMT_STK_CNT": 6969.0,
+    "STK_NM_KOR": "삼성전자",
+    "ETF_WEIGHT": 34.57
+   },
+   {
+    "TRD_DT": "2026-10-08",
+    "AGMT_STK_CNT": 849.0,
+    "STK_NM_KOR": "SK하이닉스",
+    "ETF_WEIGHT": 27.02
+   },
+   {
+    "TRD_DT": "2026-10-08",
+    "AGMT_STK_CNT": 137.0,
+    "STK_NM_KOR": "SK스퀘어",
+    "ETF_WEIGHT": 2.72
+   }
+  ]
+ },
+ "381180": {
+  "top10": [
+   {
+    "seq": 1,
+    "itemCode": "",
+    "itemName": "NVIDIA CORP",
+    "stockCount": "816",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 2,
+    "itemCode": "",
+    "itemName": "INTEL CORP",
+    "stockCount": "671",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 3,
+    "itemCode": "",
+    "itemName": "BROADCOM INC",
+    "stockCount": "405",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 4,
+    "itemCode": "",
+    "itemName": "GLOBALFOUNDRIES INC",
+    "stockCount": "374",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 5,
+    "itemCode": "",
+    "itemName": "MICROCHIP TECHNOLOGY INC",
+    "stockCount": "370",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 6,
+    "itemCode": "",
+    "itemName": "QUALCOMM INC",
+    "stockCount": "352",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 7,
+    "itemCode": "",
+    "itemName": "KLA CORP",
+    "stockCount": "342",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 8,
+    "itemCode": "",
+    "itemName": "MARVELL TECHNOLOGY INC",
+    "stockCount": "284",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 9,
+    "itemCode": "",
+    "itemName": "ON SEMICONDUCTOR",
+    "stockCount": "265",
+    "etfWeight": "-"
+   },
+   {
+    "seq": 10,
+    "itemCode": "",
+    "itemName": "TEXAS INSTRUMENTS INC",
+    "stockCount": "230",
+    "etfWeight": "-"
+   }
+  ],
+  "keys": [
+   "itemCode",
+   "itemName",
+   "etfSummary",
+   "listedDate",
+   "issuerName",
+   "etfBaseIndex",
+   "marketValue",
+   "totalNav",
+   "nav",
+   "etfChaseEarningRateSymbol",
+   "etfChaseEarningRate",
+   "deviationSign",
+   "deviationRate",
+   "totalFee",
+   "chaseErrorRate",
+   "taxationTypeCode",
+   "themeReturns",
+   "returnPerformanceReferenceDate",
+   "returnPerformanceList",
+   "navPerformanceReferenceDate",
+   "navPerformanceList",
+   "cumulativeNetInflowList",
+   "assetPortfolioTotalWeight",
+   "assetPortfolioList",
+   "countryPortfolioTotalWeight",
+   "countryPortfolioList",
+   "sectorPortfolioTotalWeight",
+   "sectorPortfolioList",
+   "etfTop10MajorConstituentAssets",
+   "dividend",
+   "marketValueRaw"
+  ],
+  "wise_len": 54566,
+  "has_cu": true,
+  "wise_n": 32,
+  "wise_first": [
+   {
+    "TRD_DT": "2026-10-08",
+    "AGMT_STK_CNT": 816.12,
+    "STK_NM_KOR": "NVIDIA CORP",
+    "ETF_WEIGHT": null
+   },
+   {
+    "TRD_DT": "2026-10-08",
+    "AGMT_STK_CNT": 671.0,
+    "STK_NM_KOR": "INTEL CORP",
+    "ETF_WEIGHT": null
+   },
+   {
+    "TRD_DT": "2026-10-08",
+    "AGMT_STK_CNT": 405.44,
+    "STK_NM_KOR": "BROADCOM INC",
+    "ETF_WEIGHT": null
+   }
+  ]
+ }
+}
