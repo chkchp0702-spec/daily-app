@@ -107,7 +107,7 @@
     // 3) 지수 흐름
     if (m.index.length && window.IXC){ h += IXC(m, k, regChip);
       // 🏁 포트 비교 지수 (세계·자산배분) — 같은 차트로. 나라 지수(S&P·코스피·닛케이·항셍·CSI300 등)는 각 나라 탭에
-      if (k === "US" && C.bench && C.bench.length) h += IXC({index: C.bench}, "GL", regChip, '🏁 포트 비교 지수 <span class="mut">세계·자산배분 · 나라 지수는 각 나라 탭</span>');
+      if (window.IXB) h += IXB(C, regChip);      // 🏁 포트 비교 지수 14개 (어느 나라 탭이든 같은 목록)
     }
     else if (m.index.length){
       var ixTabs = m.index.length > 1 ? '<div class="seg2" id="cpix">' + m.index.map(function(x, i){ return '<button' + (i ? '' : ' class="on"') + ' data-i="' + i + '">' + e(x.name) + '</button>'; }).join("") + '</div>' : '';

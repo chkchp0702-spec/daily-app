@@ -182,6 +182,27 @@
       '<div class="seg2 ixc-seg">' + PER.map(function(p){ return '<button data-p="' + p[0] + '"' + (p[0] === P[0] ? ' class="on"' : '') + '>' + p[1] + '</button>'; }).join("") + '</div>' +
       list.map(function(ix){ return block(ix, {reg: reg, mk: mk}); }).join("") + '</section>';
   };
+  // 🏁 포트 비교 지수 14개 — 포트 「비교」 순위표와 같은 목록, 같은 차트 (10/11)
+  var BENCH = [["^GSPC", "US", "us"], ["^KS11", "KR", "kr"], ["AOR", "GL", "gl"], ["^NDX", "US", "us"], ["^DJI", "US", "us"], ["^KQ11", "KR", "kr"],
+               ["ACWI", "GL", "gl"], ["URTH", "GL", "gl"], ["EEM", "GL", "gl"], ["^N225", "JP", "as"], ["^HSI", "HK", "as"],
+               ["000300.SS", "CN", "as"], ["399001.SZ", "CN", "as"], ["000688.SS", "CN", "as"]];
+  var BG = [["all", "전체 14"], ["us", "🇺🇸 미국"], ["kr", "🇰🇷 한국"], ["gl", "🌍 세계·배분"], ["as", "🌏 일본·중화권"]];
+  window.IXB = function(C, reg){
+    var find = function(sym, mk){ var m = mk === "GL" ? {index: C.bench || []} : (C.markets || {})[mk] || {}; return (m.index || []).filter(function(x){ return x.sym === sym; })[0]; };
+    var list = BENCH.map(function(b){ var ix = find(b[0], b[1]); return ix ? {ix: ix, mk: b[1], g: b[2]} : null; }).filter(Boolean);
+    if (!list.length) return "";
+    var P = per(), G = (window.store && store.ixg) || "all";
+    return '<section class="card ixc-card ixb-card" data-g="' + G + '"><h3>🏁 포트 비교 지수 <span class="mut">포트가 이겨야 할 ' + list.length + '개 · 같은 차트</span></h3>' +
+      '<div class="seg2 ixb-g">' + BG.map(function(g){ return '<button data-g="' + g[0] + '"' + (g[0] === G ? ' class="on"' : '') + '>' + g[1] + '</button>'; }).join("") + '</div>' +
+      '<div class="seg2 ixc-seg">' + PER.map(function(p){ return '<button data-p="' + p[0] + '"' + (p[0] === P[0] ? ' class="on"' : '') + '>' + p[1] + '</button>'; }).join("") + '</div>' +
+      list.map(function(x){ return '<div class="ixb-i" data-g="' + x.g + '">' + block(x.ix, {reg: reg, mk: x.mk}) + '</div>'; }).join("") + '</section>';
+  };
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest && ev.target.closest(".ixb-g button"); if (!b) return;
+    if (window.store){ store.ixg = b.dataset.g; if (window.save) try { save(); } catch(x) {} }
+    var c = b.closest(".ixb-card"); c.dataset.g = b.dataset.g;
+    [].forEach.call(c.querySelectorAll(".ixb-g button"), function(x){ x.classList.toggle("on", x === b); });
+  });
   function ppHtml(o){
     var P = o.P || per(), lab = P[1];
     if (P[0] === "1D" && o.day){ var S = SES[o.mk] || SES.KR; lab = o.day.date === local(Date.now(), S.tz).d ? "오늘" : (+o.day.date.slice(5, 7)) + "/" + (+o.day.date.slice(8, 10)) + " 하루"; }
@@ -258,6 +279,9 @@
 
   var css = document.createElement("style");
   css.textContent =
+    ".ixb-g{margin:2px 0 6px;flex-wrap:wrap}.ixb-card:not([data-g=all]) .ixb-i{display:none}" +
+    ".ixb-card[data-g=us] .ixb-i[data-g=us],.ixb-card[data-g=kr] .ixb-i[data-g=kr],.ixb-card[data-g=gl] .ixb-i[data-g=gl],.ixb-card[data-g=as] .ixb-i[data-g=as]{display:block}" +
+    ".ixc-seg+.ixb-i>.ixc{border-top:0}" +
     ".ixc-seg{margin:2px 0 4px}.ixc{padding:14px 0 12px;border-top:1px solid var(--line)}.ixc-seg+.ixc{border-top:0}" +
     ".ixc-h{display:flex;justify-content:space-between;align-items:flex-end}.ixc-n{font-weight:800;font-size:16px;letter-spacing:-.2px}.ixc-d{font-size:11px;margin-top:1px}" +
     ".ixc-v{text-align:right}.ixc-v b{display:block;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.4px;line-height:1.1}.ixc-v span{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}" +
