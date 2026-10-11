@@ -505,6 +505,12 @@ def main():
                 continue
             q = quad(c_, t_)[0]
             qs.setdefault(q, []).append(d)
+        try:   # 🧪 규칙 검증용: 2000년 이후 매주 점수·국면 전부 (market-strategy-report src/rules_bt.py 가 읽음)
+            full = [[d.strftime("%Y-%m-%d"), r_(cw.get(d), 0), r_(tw.get(d), 0), quad(cw.get(d), tw.get(d))[0] if cw.get(d) == cw.get(d) and tw.get(d) == tw.get(d) else None] for d in wk]
+            json.dump({"note": "주 단위 · 점수 무게는 같은 기간에서 정한 값(미래엔 덜 맞을 수 있음)", "rows": full},
+                      open(os.path.join(os.path.dirname(OUT), "regime_hist.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        except Exception as e_:
+            log("regime_hist 실패", e_)
         tables["quad"] = {}
         for q, ds in qs.items():
             ix = pd.DatetimeIndex(ds)
