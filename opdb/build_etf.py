@@ -224,7 +224,8 @@ def resolve(name, code=""):
                 qs = [z for z in d.get("quotes") or [] if z.get("quoteType") == "EQUITY" and z.get("exchange") not in BAD_EX
                       and _suf(z.get("symbol", "")) in CUR_BY_SUF]
                 if qs:                                # 미국 상장 먼저 (유럽 교차상장 .VI/.MI 피함), 없으면 본국
-                    us = [z for z in qs if "." not in z["symbol"]]
+                    w1 = re.sub(r"[^A-Z0-9]", "", name.upper().split()[0])[:5]
+                    us = [z for z in qs if "." not in z["symbol"] and w1 in re.sub(r"[^A-Z0-9]", "", (z.get("longname") or z.get("shortname") or "").upper())]
                     sym = (us or qs)[0]["symbol"]
                     break
                 time.sleep(0.3)
