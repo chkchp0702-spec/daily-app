@@ -3,92 +3,260 @@
   "n_hold": 503,
   "w_est": {
    "miss": [
+    "Palantir Technologies Inc -A",
+    "UBER TECHNOLOGIE",
+    "VISA INC-CLASS A SHARES",
+    "RAYTHEON TECHNOLOGIES CORP",
     "General Aerospace Co",
-    "CROWDSTRIKE HOLDINGS INC - A",
     "DOMINION RESOURCES INC/VA",
     "BLACKSTONE GROUP-A",
-    "KKR & CO INC-A Equity",
-    "MARSH & MCLENNAN COS",
-    "DOORDASH INC - A",
-    "VISTRA ENERGY CORP",
-    "DELL TECH-C",
-    "GOLDMAN SACHS GP Equity"
+    "Vivmark Residential",
+    "LOWE'S COS INC",
+    "PUBLIC SERVICE ENTERPRISE GP"
    ],
-   "got": 477,
+   "got": 463,
    "of": 503
   },
   "top": [
    [
     "NVIDIA Corp",
-    8.63,
+    8.87,
     316.96,
     "NVDA"
    ],
    [
     "APPLE Inc",
-    7.64,
+    7.85,
     191.14,
     "AAPL"
    ],
    [
     "MICROSOFT",
-    6.18,
+    6.35,
     97.25,
     "MSFT"
    ],
    [
     "Amazon.com Inc",
-    4.0,
+    4.12,
     128.56,
     "AMZN"
    ],
    [
     "ALPHABET INC-CL A",
-    3.2,
+    3.26,
     76.86,
-    "GOOA.VI"
+    "GOOG"
    ],
    [
     "BROADCOM LTD",
-    2.67,
+    2.75,
     62.31,
     "AVGO"
    ],
    [
     "ALPHABET INC-CL C",
-    2.57,
+    2.64,
     62.25,
-    "GOOC.VI"
+    "GOOG"
    ],
    [
     "Meta Platforms Inc-CL A",
-    2.46,
+    2.53,
     28.88,
     "META"
    ],
    [
     "MICRON TECH",
-    1.81,
+    1.86,
     14.79,
     "MU"
    ],
    [
     "TESLA MOTORS",
-    1.68,
+    1.72,
     36.91,
     "TSLA"
    ],
    [
     "ADVANCED MICRO DEVICES",
-    1.54,
+    1.59,
     21.38,
     "AMD"
    ],
    [
     "BERKSHIRE HATHAWAY CL B ORD.",
-    1.49,
+    1.53,
     24.39,
     "BRK-B"
+   ],
+   [
+    "ELI LILLY & CO",
+    1.51,
+    10.48,
+    "LLY"
+   ],
+   [
+    "JPMORGAN CHASE & CO",
+    1.42,
+    34.82,
+    "JPM"
+   ],
+   [
+    "EXXON MOBIL CORP",
+    1.11,
+    53.86,
+    "XOM"
+   ],
+   [
+    "JOHNSON & JOHNSON",
+    1.01,
+    31.56,
+    "JNJ"
+   ],
+   [
+    "INTEL Corp",
+    0.83,
+    65.08,
+    "INTC"
+   ],
+   [
+    "ABBVIE INC",
+    0.78,
+    23.14,
+    "ABBV"
+   ],
+   [
+    "MASTERCARD INC-CLASS A",
+    0.76,
+    10.59,
+    "MA"
+   ],
+   [
+    "CISCO SYSTEMS INC",
+    0.75,
+    51.62,
+    "CSCO"
+   ],
+   [
+    "CHEVRON CORP",
+    0.67,
+    25.88,
+    "CVX"
+   ],
+   [
+    "COSTCO WHOLESALE CORP",
+    0.67,
+    5.81,
+    "COST"
+   ],
+   [
+    "LAM RESEARCH",
+    0.64,
+    16.39,
+    "LRCX"
+   ],
+   [
+    "APPLIED MATERIALS INC",
+    0.64,
+    10.4,
+    "AMAT"
+   ],
+   [
+    "CATERPILLAR INC",
+    0.59,
+    6.02,
+    "CAT"
+   ],
+   [
+    "MERCK & CO. INC.",
+    0.57,
+    32.31,
+    "MRK"
+   ],
+   [
+    "BANK OF AMERICA CORP",
+    0.56,
+    85.18,
+    "BAC"
+   ],
+   [
+    "PROCTER & GAMBLE CO/THE",
+    0.56,
+    30.44,
+    "PG"
+   ],
+   [
+    "COCA-COLA CO/THE",
+    0.55,
+    50.72,
+    "KO"
+   ],
+   [
+    "PALO ALTO NETWORKS INC",
+    0.55,
+    10.67,
+    "PANW"
+   ],
+   [
+    "UNITEDHEALTH GROUP INC",
+    0.54,
+    11.76,
+    "UNH"
+   ],
+   [
+    "PHILIP MORRIS INTERNATIONAL",
+    0.5,
+    20.41,
+    "PM"
+   ],
+   [
+    "NETFLIX",
+    0.47,
+    54.54,
+    "NFLX"
+   ],
+   [
+    "HOME DEPOT INC",
+    0.46,
+    13.06,
+    "HD"
+   ],
+   [
+    "CROWDSTRIKE HOLDINGS INC - A",
+    0.45,
+    13.34,
+    "CRWD"
+   ],
+   [
+    "KLA Corp",
+    0.41,
+    17.11,
+    "KLAC"
+   ],
+   [
+    "TEXAS INSTRUMENTS",
+    0.41,
+    11.96,
+    "TXN"
+   ],
+   [
+    "WELLS FARGO & CO",
+    0.4,
+    39.61,
+    "WFC"
+   ],
+   [
+    "ORACLE",
+    0.39,
+    22.64,
+    "ORCL"
+   ],
+   [
+    "MARVELL TECHNOLOGY INC",
+    0.39,
+    11.47,
+    "MRVL"
    ]
   ]
  },
@@ -96,84 +264,175 @@
   "n_hold": 30,
   "w_est": {
    "miss": [
-    "CROWDSTRIKE HOLDINGS INC - A",
-    "HENNGE KK"
+    "RUBRIK INC-A",
+    "HENNGE KK",
+    "CHECK POINT SOFTWARE TECH"
    ],
-   "got": 28,
+   "got": 27,
    "of": 30
   },
   "top": [
    [
     "OKTA INC",
-    11.15,
+    11.19,
     264.35,
     "OKTA"
    ],
    [
+    "CROWDSTRIKE HOLDINGS INC - A",
+    8.76,
+    174.71,
+    "CRWD"
+   ],
+   [
     "PALO ALTO NETWORKS INC",
-    8.26,
+    8.29,
     108.57,
     "PANW"
    ],
    [
     "FORTINET INC",
-    8.17,
+    8.2,
     230.92,
     "FTNT"
    ],
    [
     "ZSCALER INC",
-    6.33,
+    6.35,
     148.99,
     "ZS"
    ],
    [
     "QUALYS INC",
-    6.18,
+    6.2,
     167.97,
     "QLYS"
    ],
    [
-    "RUBRIK INC-A",
-    5.99,
-    274.57,
-    "1RBRK.MI"
-   ],
-   [
     "NETSKOPE INC-CL A",
-    5.53,
+    5.55,
     1466.02,
     "NTSK"
    ],
    [
     "TENABLE HOLDINGS INC",
-    5.28,
+    5.3,
     698.97,
     "TENB"
    ],
    [
     "VARONIS SYSTEMS INC",
-    5.06,
+    5.07,
     555.18,
     "VRNS"
    ],
    [
+    "SENTINELONE INC -CLASS A",
+    4.94,
+    1031.17,
+    "S"
+   ],
+   [
     "SAILPOINT INC",
-    4.83,
+    4.84,
     1278.59,
     "SAIL"
    ],
    [
-    "SENTINELONE INC -CLASS A",
-    4.75,
-    1031.17,
-    "1SUS.MI"
-   ],
-   [
     "COMMVAULT SYSTEMS INC",
-    4.22,
+    4.23,
     147.67,
     "CVLT"
+   ],
+   [
+    "AKAMAI TECHNOLOGIES INC",
+    3.69,
+    189.05,
+    "AKAM"
+   ],
+   [
+    "TREND MICRO INC",
+    3.64,
+    417.61,
+    "4704.T"
+   ],
+   [
+    "GEN DIGITAL INC",
+    3.21,
+    756.95,
+    "GEN"
+   ],
+   [
+    "A10 NETWORKS INC",
+    2.68,
+    495.46,
+    "ATEN"
+   ],
+   [
+    "RADWARE LTD",
+    1.68,
+    298.06,
+    "RDWR"
+   ],
+   [
+    "RAPID7 INC",
+    1.16,
+    461.27,
+    "RPD"
+   ],
+   [
+    "ONESPAN INC",
+    0.86,
+    258.81,
+    "OSPN"
+   ],
+   [
+    "안랩",
+    0.79,
+    77.18,
+    "053800.KQ"
+   ],
+   [
+    "NCC GROUP PLC",
+    0.72,
+    1963.45,
+    "NCC.L"
+   ],
+   [
+    "DIGITAL ARTS INC",
+    0.65,
+    97.66,
+    "2326.T"
+   ],
+   [
+    "FFRI SECURITY INC",
+    0.59,
+    54.7,
+    "3692.T"
+   ],
+   [
+    "TELOS CORPORATION",
+    0.46,
+    541.41,
+    "TLS"
+   ],
+   [
+    "GORILLA TECHNOLOGY GROUP INC",
+    0.39,
+    191.04,
+    "GRRR"
+   ],
+   [
+    "AMIYA CORP",
+    0.38,
+    52.3,
+    "4258.T"
+   ],
+   [
+    "ARQIT QUANTUM INC",
+    0.21,
+    67.79,
+    "ARQQ"
    ]
   ]
  },
@@ -252,88 +511,355 @@
     0.83,
     null,
     null
+   ],
+   [
+    "셀트리온",
+    0.8,
+    null,
+    null
+   ],
+   [
+    "기아",
+    0.74,
+    null,
+    null
+   ],
+   [
+    "NAVER",
+    0.7,
+    null,
+    null
+   ],
+   [
+    "삼성생명",
+    0.65,
+    null,
+    null
+   ],
+   [
+    "현대모비스",
+    0.63,
+    null,
+    null
+   ],
+   [
+    "우리금융지주",
+    0.62,
+    null,
+    null
+   ],
+   [
+    "LG전자",
+    0.62,
+    null,
+    null
+   ],
+   [
+    "POSCO홀딩스",
+    0.59,
+    null,
+    null
+   ],
+   [
+    "SK",
+    0.57,
+    null,
+    null
+   ],
+   [
+    "LG에너지솔루션",
+    0.56,
+    null,
+    null
+   ],
+   [
+    "삼성화재",
+    0.51,
+    null,
+    null
+   ],
+   [
+    "KT&G",
+    0.45,
+    null,
+    null
+   ],
+   [
+    "LS ELECTRIC",
+    0.44,
+    null,
+    null
+   ],
+   [
+    "HD한국조선해양",
+    0.39,
+    null,
+    null
+   ],
+   [
+    "HD현대일렉트릭",
+    0.39,
+    null,
+    null
+   ],
+   [
+    "LG화학",
+    0.37,
+    null,
+    null
+   ],
+   [
+    "삼성중공업",
+    0.36,
+    null,
+    null
+   ],
+   [
+    "SK텔레콤",
+    0.36,
+    null,
+    null
+   ],
+   [
+    "HD현대중공업",
+    0.36,
+    null,
+    null
+   ],
+   [
+    "삼성바이오로직스",
+    0.35,
+    null,
+    null
+   ],
+   [
+    "SK이노베이션",
+    0.34,
+    null,
+    null
+   ],
+   [
+    "KT",
+    0.33,
+    null,
+    null
+   ],
+   [
+    "효성중공업",
+    0.33,
+    null,
+    null
+   ],
+   [
+    "한미반도체",
+    0.32,
+    null,
+    null
+   ],
+   [
+    "카카오",
+    0.31,
+    null,
+    null
+   ],
+   [
+    "LG",
+    0.28,
+    null,
+    null
+   ],
+   [
+    "두산",
+    0.28,
+    null,
+    null
+   ],
+   [
+    "한화오션",
+    0.27,
+    null,
+    null
    ]
   ]
  },
  "381180.KS": {
   "n_hold": 30,
   "w_est": {
-   "miss": [],
-   "got": 30,
+   "miss": [
+    "TAIWAN SEMICONDUCTOR-SP ADR",
+    "ASML HOLDING NV-NY REG SHS"
+   ],
+   "got": 28,
    "of": 30
   },
   "top": [
    [
     "NVIDIA CORP",
-    11.44,
+    12.42,
     816.12,
     "NVDA"
    ],
    [
     "BROADCOM INC",
-    8.97,
+    9.73,
     405.44,
     "AVGO"
    ],
    [
     "MICRON TECHNOLOGY INC",
-    7.89,
+    8.56,
     125.29,
     "MU"
    ],
    [
     "MARVELL TECHNOLOGY INC",
-    4.78,
+    5.19,
     283.76,
     "MRVL"
    ],
    [
     "ADVANCED MICRO DEVICES",
-    4.75,
+    5.15,
     127.59,
     "AMD"
    ],
    [
     "INTEL CORP",
-    4.3,
+    4.66,
     671.0,
     "INTC"
    ],
    [
     "ANALOG DEVICES INC",
-    4.12,
+    4.47,
     165.85,
     "ADI"
    ],
    [
     "KLA CORP",
-    4.09,
+    4.45,
     342.32,
     "KLAC"
    ],
    [
     "APPLIED MATERIALS INC",
-    4.06,
+    4.41,
     131.02,
     "AMAT"
    ],
    [
     "TEXAS INSTRUMENTS INC",
-    3.99,
+    4.34,
     230.19,
     "TXN"
    ],
    [
-    "TAIWAN SEMICONDUCTOR-SP ADR",
-    3.99,
-    144.61,
-    "TSFA.VI"
+    "LAM RESEARCH CORP",
+    4.22,
+    199.21,
+    "LRCX"
    ],
    [
-    "ASML HOLDING NV-NY REG SHS",
-    3.89,
-    35.41,
-    "ASMN.VI"
+    "QUALCOMM INC",
+    4.11,
+    352.3,
+    "QCOM"
+   ],
+   [
+    "MONOLITHIC POWER SYSTEMS INC",
+    3.08,
+    33.49,
+    "MPWR"
+   ],
+   [
+    "TERADYNE INC",
+    2.85,
+    106.55,
+    "TER"
+   ],
+   [
+    "COHERENT CORP",
+    2.77,
+    133.46,
+    "COHR"
+   ],
+   [
+    "ASTERA LABS INC",
+    2.69,
+    118.23,
+    "ALAB"
+   ],
+   [
+    "NXP SEMICONDUCTORS NV",
+    2.6,
+    171.85,
+    "NXPI"
+   ],
+   [
+    "MICROCHIP TECHNOLOGY INC",
+    1.86,
+    370.07,
+    "MCHP"
+   ],
+   [
+    "CREDO TECHNOLOGY GROUP HOLDI",
+    1.84,
+    128.08,
+    "CRDO"
+   ],
+   [
+    "ARM HOLDINGS PLC-ADR",
+    1.75,
+    99.07,
+    "ARM"
+   ],
+   [
+    "ON SEMICONDUCTOR",
+    1.37,
+    265.32,
+    "ON"
+   ],
+   [
+    "GLOBALFOUNDRIES INC",
+    1.2,
+    373.95,
+    "GFS"
+   ],
+   [
+    "QNITY ELECTRONICS INC",
+    1.2,
+    142.58,
+    "Q"
+   ],
+   [
+    "TOWER SEMICONDUCTOR LTD",
+    1.17,
+    76.89,
+    "TSEM"
+   ],
+   [
+    "ENTEGRIS INC",
+    1.15,
+    104.13,
+    "ENTG"
+   ],
+   [
+    "MACOM TECHNOLOGY SOLUTIONS H",
+    1.14,
+    52.04,
+    "MTSI"
+   ],
+   [
+    "SITIME CORP",
+    0.83,
+    20.49,
+    "SITM"
+   ],
+   [
+    "LATTICE SEMICONDUCTOR CORP",
+    0.81,
+    96.79,
+    "LSCC"
    ]
   ]
  },
@@ -342,83 +868,252 @@
   "w_est": {
    "miss": [
     "OIL & NATURAL GAS CORP LTD",
+    "BAJAJ FINANCE LTD",
     "TATA CONSULTANCY SVCS LTD"
    ],
-   "got": 48,
+   "got": 47,
    "of": 50
   },
   "top": [
    [
     "HDFC BANK LIMITED",
-    27.43,
+    11.19,
     5442.54,
-    "HDB"
+    "HDFCBANK.NS"
    ],
    [
     "ICICI BANK LTD",
-    8.06,
+    10.03,
     2545.05,
     "ICICIBANK.NS"
    ],
    [
     "RELIANCE INDUSTRIES LIMITED",
-    6.5,
+    8.08,
     2374.17,
     "RELIANCE.NS"
    ],
    [
     "BHARTI AIRTEL LTD",
-    4.56,
+    5.67,
     1079.83,
     "BHARTIARTL.BO"
    ],
    [
     "LARSEN & TOUBRO LTD",
-    3.6,
+    4.47,
     415.61,
     "LT.NS"
    ],
    [
     "STATE BANK OF INDIA",
-    3.29,
+    4.09,
     1467.46,
     "SBIN.NS"
    ],
    [
     "AXIS BANK LTD",
-    3.01,
+    3.74,
     1020.8,
     "AXISBANK.BO"
    ],
    [
     "INFOSYS LTD",
-    3.0,
+    3.73,
     1254.06,
     "INFY.BO"
    ],
    [
     "KOTAK MAHINDRA BANK LTD",
-    2.7,
+    3.35,
     2614.69,
     "KOTAKBANK.NS"
    ],
    [
-    "BAJAJ FINANCE LTD",
-    2.17,
-    968.87,
-    "BAJFINANCE.NS"
-   ],
-   [
     "ITC LTD",
-    2.13,
+    2.65,
     3423.24,
     "ITC.NS"
    ],
    [
     "MAHINDRA & MAHINDRA LTD",
-    2.07,
+    2.58,
     317.24,
     "M&M.NS"
+   ],
+   [
+    "ETERNAL LTD",
+    2.42,
+    2572.95,
+    "ETERNAL.NS"
+   ],
+   [
+    "SUN PHARMACEUTICAL INDUS",
+    1.92,
+    375.99,
+    "SUNPHARMA.NS"
+   ],
+   [
+    "HINDUSTAN UNILEVER LTD",
+    1.7,
+    315.05,
+    "HINDUNILVR.NS"
+   ],
+   [
+    "NTPC LTD",
+    1.53,
+    1687.37,
+    "NTPC.NS"
+   ],
+   [
+    "MARUTI SUZUKI INDIA LTD",
+    1.53,
+    46.17,
+    "MARUTI.NS"
+   ],
+   [
+    "TATA STEEL LTD",
+    1.49,
+    2946.13,
+    "TATASTEEL.BO"
+   ],
+   [
+    "ADANI PORTS AND SPECIAL ECON",
+    1.42,
+    278.27,
+    "ADANIPORTS.NS"
+   ],
+   [
+    "BSE LTD",
+    1.39,
+    145.09,
+    "BSE.NS"
+   ],
+   [
+    "BHARAT ELECTRONICS LTD",
+    1.36,
+    1271.68,
+    "BEL.NS"
+   ],
+   [
+    "SHRIRAM FINANCE LTD",
+    1.36,
+    497.39,
+    "SHRIRAMFIN.NS"
+   ],
+   [
+    "HINDALCO INDUSTRIES LTD",
+    1.35,
+    514.07,
+    "HINDALCO.NS"
+   ],
+   [
+    "HCL TECHNOLOGIES LTD",
+    1.32,
+    374.1,
+    "HCLTECH.NS"
+   ],
+   [
+    "ULTRATECH CEMENT LTD",
+    1.3,
+    42.03,
+    "ULTRACEMCO.BO"
+   ],
+   [
+    "POWER GRID CORP OF INDIA LTD",
+    1.16,
+    1607.85,
+    "POWERGRID.NS"
+   ],
+   [
+    "JSW STEEL LTD",
+    1.16,
+    341.84,
+    "JSWSTEEL.BO"
+   ],
+   [
+    "GRASIM INDUSTRIES LTD",
+    1.13,
+    134.0,
+    "GRASIM.NS"
+   ],
+   [
+    "INTERGLOBE AVIATION LTD",
+    1.13,
+    80.38,
+    "INDIGO.NS"
+   ],
+   [
+    "BAJAJ AUTO LTD",
+    1.1,
+    38.74,
+    "BAJAJ-AUTO.BO"
+   ],
+   [
+    "ASIAN PAINTS LTD",
+    1.09,
+    160.48,
+    "ASIANPAINT.BO"
+   ],
+   [
+    "BAJAJ FINSERV LTD",
+    1.04,
+    206.41,
+    "BAJAJFINSV.NS"
+   ],
+   [
+    "COAL INDIA LTD",
+    1.02,
+    850.62,
+    "COALINDIA.NS"
+   ],
+   [
+    "TRENT LTD",
+    1.0,
+    118.13,
+    "TRENT.NS"
+   ],
+   [
+    "EICHER MOTORS LTD",
+    1.0,
+    48.99,
+    "EICHERMOT.NS"
+   ],
+   [
+    "NESTLE INDIA LTD",
+    0.99,
+    254.6,
+    "NESTLEIND.BO"
+   ],
+   [
+    "TECH MAHINDRA LTD",
+    0.99,
+    225.55,
+    "TECHM.BO"
+   ],
+   [
+    "ADANI ENTERPRISES LTD",
+    0.92,
+    120.39,
+    "ADANIENT.BO"
+   ],
+   [
+    "APOLLO HOSPITALS ENTERPRISE",
+    0.85,
+    36.54,
+    "APOLLOHOSP.NS"
+   ],
+   [
+    "SBI LIFE INSURANCE CO LTD",
+    0.78,
+    159.6,
+    "SBILIFE.NS"
+   ],
+   [
+    "DR. REDDYS LABORATORIES",
+    0.76,
+    216.56,
+    "RDY"
    ]
   ]
  }
