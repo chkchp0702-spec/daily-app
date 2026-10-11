@@ -198,7 +198,7 @@ def _suf(sym):
 
 
 def _clean(n):
-    n = re.sub(r"\s*-\s*(CL|CLASS)\s*[A-Z]\b|\b(CL|CLASS)\s+[A-Z]\b|\s+-\s+[A-Z]\b|\bEquity\b|\bADR\b|\bSPON\w*|\bREG\b|\bSHS\b|\bORD\b|\(.*?\)", " ", n, flags=re.I)
+    n = re.sub(r"\s*-\s*(CL|CLASS)\s*[A-Z]\b|\b(CL|CLASS)\s+[A-Z]\b|\s*-\s*[A-Z]\s*$|-NY\b|\bEquity\b|\bADR\b|\bADS\b|-SP\b|\bSPON\w*|\bREG\b|\bSHS\b|\bSHARES\b|\bORD\b|/[A-Z]{2}\b|\(.*?\)", " ", n, flags=re.I)
     return re.sub(r"\s+", " ", n).strip()
 
 
@@ -219,7 +219,10 @@ def resolve(name, code=""):
                     break
         else:
             bare = re.sub(r"\b(LTD|LIMITED|CORP(ORATION)?|INC|PLC|CO|COMPANY|HOLDINGS?|GROUP|SA|AG|NV|SE|KK|OF INDIA|THE|SVCS|TECH)\b\.?", " ", _clean(name), flags=re.I)
-            for q in dict.fromkeys([name, _clean(name), re.sub(r"\s+", " ", bare).strip()]):
+            bare = re.sub(r"\s+", " ", re.sub(r"[^A-Za-z0-9& ]", " ", bare)).strip()
+            for q in dict.fromkeys([name, _clean(name), bare, " ".join([w for w in bare.split() if w != "&"][:2])]):
+                if not q:
+                    continue
                 d = {}
                 for k in range(3):                    # 야후가 잠깐 막으면(429) 쉬었다 다시
                     try:
