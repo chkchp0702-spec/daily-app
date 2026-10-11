@@ -8,7 +8,26 @@
    }
   ],
   "isin": "KR7418670006",
-  "err": "HTTP Error 400: Bad Request"
+  "tries": [
+   {
+    "20261011": "{'http': 400, 'body': 'LOGOUT'}"
+   },
+   {
+    "20261010": "{'http': 400, 'body': 'LOGOUT'}"
+   },
+   {
+    "20261009": "{'http': 400, 'body': 'LOGOUT'}"
+   },
+   {
+    "20261008": "{'http': 400, 'body': 'LOGOUT'}"
+   },
+   {
+    "20261007": "{'http': 400, 'body': 'LOGOUT'}"
+   },
+   {
+    "20261006": "{'http': 400, 'body': 'LOGOUT'}"
+   }
+  ]
  },
  "381180": {
   "finder": [
@@ -19,6 +38,25 @@
    }
   ],
   "isin": "KR7381180009",
-  "err": "HTTP Error 400: Bad Request"
+  "tries": [
+   {
+    "20261011": "{'http': 400, 'body': 'LOGOUT'}"
+   },
+   {
+    "20261010": "{'http': 400, 'body': 'LOGOUT'}"
+   },
+   {
+    "20261009": "{'http': 400, 'body': 'LOGOUT'}"
+   },
+   {
+    "20261008": "{'http': 400, 'body': 'LOGOUT'}"
+   },
+   {
+    "20261007": "{'http': 400, 'body': 'LOGOUT'}"
+   },
+   {
+    "20261006": "{'http': 400, 'body': 'LOGOUT'}"
+   }
+  ]
  }
 }
