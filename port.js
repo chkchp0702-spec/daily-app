@@ -95,9 +95,9 @@
       '<div class="po-in"><label>내 투자금</label><div class="po-amt"><input id="poamt" inputmode="numeric" value="' + S.amt.toLocaleString("ko-KR") + '"><span>원</span></div>' +
       '<div class="po-q">' + [3e6, 1e7, 3e7, 1e8].map(function(v){ return '<button data-v="' + v + '">' + won(v) + '</button>'; }).join("") + '</div>' +
       (K ? '<div class="po-mode po-pf"><button data-pf="base" class="' + (S.pf === "base" ? "on" : "") + '">💼 기본 포트</button><button data-pf="kick" class="' + (S.pf === "kick" ? "on" : "") + '">⚡ 킥 포함</button></div>' : '') +
-      '<div class="po-mode"><button data-m="us" class="' + (S.mode === "us" ? "on" : "") + '">🇺🇸 미국 ETF로</button><button data-m="kr" class="' + (S.mode === "kr" ? "on" : "") + '">🇰🇷 한국 상장 ETF로</button></div></div>' +
+      '<div class="po-mode"><button data-m="us" class="' + (S.mode === "us" ? "on" : "") + '">💵 외화로</button><button data-m="kr" class="' + (S.mode === "kr" ? "on" : "") + '">₩ 원화로</button></div></div>' +
       '<div id="porows"></div><div class="po-cp"><button class="btn" id="pocopy">📋 주문 목록 복사</button><span id="pocpst"></span></div>' +
-      '<p class="note">환율 ' + (P.fx ? P.fx.toLocaleString("ko-KR") + "원" : "–") + ' · 주 수는 ' + md(P.asof) + ' 종가 기준 내림. 한국 ETF가 없는 칸은 미국 상품으로 적었어요. ' +
+      '<p class="note">환율 ' + (P.fx ? P.fx.toLocaleString("ko-KR") + "원" : "–") + ' · 주 수는 ' + md(P.asof) + ' 종가 기준 내림. <b>외화로</b> = 미국 ETF를 달러로 · <b>원화로</b> = 같은 걸 담은 한국 상장 ETF로 바꿔 원화로. 원화 상품이 없는 칸과 해외 개별 종목(🇭🇰 등)은 원화로에서도 외화예요. ' +
       '<b>비중이 바뀐 날(아래 「비중 바뀐 날」)에만 고치면</b> 돼요.</p></section>';
 
     // ③ 비중 바뀐 날
