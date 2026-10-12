@@ -68,6 +68,9 @@ def st(x):
     return {"s": x["c"], "n": x["n"], "r": round(x["r"], 2), "p": x["p"]}
 
 
+STATUS = {}   # 10/12: 시장마다 이번 실행 결과 → archive/x/live_status.json (앱이 「휴장·지연」 판단, 원인 추적)
+
+
 def run(mk, sec, names):
     import yfinance as yf
     import pandas as pd
@@ -107,8 +110,16 @@ def run(mk, sec, names):
                        "date": sub.index[-1].strftime("%Y-%m-%d")})
         except Exception:
             pass
+    lastd = {}
+    for s, _ in cand[:80]:
+        try:
+            d_ = df[s]["Close"].dropna().index[-1].date().isoformat(); lastd[d_] = lastd.get(d_, 0) + 1
+        except Exception:
+            pass
+    STATUS[mk] = {"t": NOW.strftime("%H:%M"), "today": str(today), "rows": len(rows), "cand": len(cand), "last_bar": lastd, "ix": [i.get("date") for i in ix]}
     if len(rows) < 50:
-        print(mk, "오늘 자료가 적음 (휴장?)", len(rows))
+        print(mk, "오늘 자료가 적음 (휴장?)", len(rows), lastd)
+        STATUS[mk]["why"] = "오늘 봉 적음"
         return
     up = sum(1 for x in rows if x["r"] > EPS)
     dn = sum(1 for x in rows if x["r"] < -EPS)
@@ -166,6 +177,14 @@ def main():
             import traceback
             traceback.print_exc()
             print(k, "실패", e)
+            STATUS[k] = {"t": NOW.strftime("%H:%M"), "why": "실패: " + str(e)[:120]}
+    try:
+        sp = os.path.join("archive", "x", "live_status.json")
+        old = json.load(open(sp, encoding="utf-8")) if os.path.exists(sp) else {}
+        old.update(STATUS); old["at"] = NOW.strftime("%Y-%m-%d %H:%M")
+        json.dump(old, open(sp, "w", encoding="utf-8"), ensure_ascii=False)
+    except Exception as e:
+        print("상태 저장 실패", e)
 
 
 if __name__ == "__main__":
