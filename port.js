@@ -302,8 +302,13 @@
         '<div class="cn-s">S&P500 ' + (R.spx || 0).toLocaleString("en-US") + ' · 200일선보다 <b>' + sg(R.gap, 1) + '</b> · ' + md(R.since) + '부터' +
         (R.kospi_up != null ? ' · 코스피 ' + (R.kospi_up ? "🟢" : "🔴") + ' (' + sg(R.kospi_gap, 1) + ')' : '') + '</div>' +
         (R.raw_today !== up ? '<div class="cn-w">⚠ 오늘 종가는 반대쪽 — 3거래일 이어지면 판정이 바뀌어요</div>' : '') + '</div>' +
-      '<div class="cn-h">지금 담을 것 <small>' + won(S.amt) + '원 기준 · 다음 거래일 종가</small></div>' +
-      (CN.now || []).map(function(x){ return '<div class="cn-r"><b>' + x.pct + '%</b><span>' + e(x.name) + ' <small>' + (x.t === "BIL" ? "SGOV" : '<span class="po-tk" data-op="' + e(x.t) + '">' + e(x.t) + '</span>') + ' · ₩ ' + e(x.kr.name) + ' ' + e(x.kr.code) + '</small></span><em>' + won(S.amt * x.pct / 100) + '원</em></div>'; }).join("") +
+      '<div class="cn-h">지금 살 것 <small>' + won(S.amt) + '원 기준 · ' + (S.mode === "kr" ? "₩ 원화 베이스" : "💵 외화 베이스") + ' · 다음 거래일 종가</small></div>' +
+      concPlan().map(function(c){ var it = c.items[0] || {};
+        return '<div class="cn-buy" data-op="' + e(it.code) + '"><b class="pct">' + c.x.pct + '%</b><span class="nm">' + e(c.x.name) + '<small>' + e(it.nm) + (it.code && it.code !== it.nm ? ' ' + e(it.code) : '') + '</small></span>' +
+          '<span class="q"><b>' + (it.sh != null ? it.sh.toLocaleString("ko-KR") + '주' : '가격 확인') + '</b><small>' + won(c.amt) + '원</small></span></div>'; }).join("") +
+      (CN.vol_rule && CN.vol_rule.on ? '<div class="cn-vr">🦴 변동성 방어(' + e(CN.vol_rule.role) + ') · 주식 <b>' + CN.vol_rule.eq_scale + '%</b> 유지 <small>20일 흔들림 ' + CN.vol_rule.vol20 + '% / 목표 ' + CN.vol_rule.target + '%</small></div>' : '') +
+      '<p class="cn-n2">판정이 바뀌는 날(🟢↔🔴)에만 고치면 돼요. 금액·환율 바꾸기는 아래 📋 따라하기에서.</p>' +
+      '<details class="cn-d"><summary>📊 성적·검증 보기</summary>' +
       '<div class="cn-h">' + md(CN.start) + '부터 <small>비용 포함 · 달러 기준</small></div>' +
       '<div class="cn-v">' + [["🎯 집중", CN.ret], ["💼 기본", CN.base], ["⚡ 킥", CN.kick], ["S&P500", CN.spy_ret], ["나스닥100", CN.qqq_ret]].map(function(x){
         return '<div' + (x[0] === "🎯 집중" ? ' class="me"' : '') + '><small>' + x[0] + '</small><b class="' + cls(x[1]) + '">' + sg(x[1]) + '</b></div>'; }).join("") + '</div>';
@@ -322,7 +327,7 @@
           '<div class="cn-lg"><span><i class="a"></i>🎯 규칙</span><span><i class="b"></i>S&P500</span><span>● 이긴 해</span></div>';
       }
     }
-    h += '<details class="cn-d"><summary>왜 이 규칙인가 · 규칙 그대로</summary><p>' +
+    h += '</details><details class="cn-d"><summary>왜 이 규칙인가 · 규칙 그대로</summary><p>' +
       '「강한 섹터 2~3개에 몰기」는 2017년 이후 576가지 조합 중 2~7%만 S&P를 이겼어요(섹터를 늦게 타고 늦게 내림 + 비용). 지는 가장 큰 이유는 상승장에서도 현금·금을 크게 들고 있는 것이었어요. ' +
       '그래서 「섹터」가 아니라 「시장에 싣는 양」에 집중합니다. 상승장 판정은 평균 수익을 올리기보다 나쁜 꼬리(20일 최악 10%: −3.6% vs −7%)를 절반으로 줄여요.</p>' +
       '<p><b>판정</b> ' + e(CN.rule.judge) + '<br>' + e(CN.rule.on) + '<br>' + e(CN.rule.off) + '<br><small>' + e(CN.rule.how) + '</small></p>' +
@@ -409,6 +414,7 @@
     ".po-mx table{width:100%;border-collapse:collapse;font-size:12.5px}.po-mx td,.po-mx th{white-space:nowrap}.po-mx th{font-size:11px;color:var(--sub);font-weight:600;text-align:right;padding:3px}.po-mx th:first-child{text-align:left}" +
     ".po-mx td{text-align:right;padding:8px 3px;border-top:1px solid var(--line);vertical-align:top}.po-mx td:first-child{text-align:left;font-weight:800;white-space:nowrap}.po-mx td small{display:block;font-weight:400;font-size:10.5px;color:var(--sub)}" +
     ".po-mx td em{display:block;font-style:normal;font-size:10.5px}.po-mx tr[data-pf]{cursor:pointer}.po-mx tr.on td{background:rgba(233,196,106,.08)}.po-mx tr.mkt td{color:var(--sub);font-size:12px}" +
+    ".cn-buy{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);cursor:pointer}.cn-buy .pct{font-size:18px;min-width:46px}.cn-buy .nm{flex:1;min-width:0;font-weight:700}.cn-buy .nm small{display:block;font-weight:400;color:var(--sub);font-size:11.5px;margin-top:2px}.cn-buy .q{text-align:right}.cn-buy .q b{font-size:17px;display:block}.cn-buy .q small{color:var(--sub);font-size:11.5px}.cn-vr{margin:8px 0 2px;font-size:12.5px}.cn-vr small{color:var(--sub);margin-left:4px}.cn-n2{font-size:11.5px;color:var(--sub);margin:6px 0 8px}.cn-d>summary{cursor:pointer;font-size:13px;font-weight:700;padding:8px 0}" +
     ".po-vr{margin:4px 0 6px;font-size:12.5px;color:var(--text)}.po-vr small{color:var(--sub);margin-left:4px}.po-pf2{margin:12px 0 8px}.po-hero.kick{background:linear-gradient(160deg,rgba(255,107,107,.16),rgba(18,24,38,.4) 60%)}.po-hero.conc{background:linear-gradient(160deg,rgba(77,212,122,.16),rgba(18,24,38,.4) 60%)}" +
     ".po-go{font-style:normal;color:var(--c,#e9c46a);font-weight:800;margin-left:2px}.po-it[data-op],.po-kp[data-op],.po-tk{cursor:pointer}.po-tk{text-decoration:underline dotted;text-underline-offset:2px;color:var(--text)}" +
     ".po-it[data-op]:active,.po-kp[data-op]:active{background:rgba(255,255,255,.05)}" +
