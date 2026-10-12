@@ -33,7 +33,7 @@
       var now = q && q.r != null ? '<small class="fo-now ' + (q.r >= 0 ? "up" : "dn") + '">지금 ' + (q.r >= 0 ? "+" : "") + q.r.toFixed(1) + '%</small>' : '';
       return '<a class="fo-st" href="javascript:openOP(\'' + e(x.t).replace(/'/g, "") + '\')"><span class="fo-nm">' + flag + ' <b>' + e(nm.length > 13 ? nm.slice(0, 12) + "…" : nm) + '</b>' + (x.star ? ' <em>★' + e(x.star) + '</em>' : '') + pos + '</span>' +
         '<span>' + now + (x.r5 != null ? pc(x.r5) : '') + ' <i class="fo-t ' + tagc(x.act || "") + '">' + e(x.act || "") + '</i></span></a>'; };
-    var al = (L && L.alerts || []).slice(-4).reverse();
+    var al = (function(){ var seen = {}, out = []; (L && L.alerts || []).slice().reverse().forEach(function(a){ var k = a.name + "|" + a.k; if (!seen[k]){ seen[k] = 1; out.push(a); } }); return out.slice(0, 4); })(); // 같은 종목·같은 신호는 최신 1건만
     var h = (al.length ? '<div class="fo-al">' + al.map(function(a){ return '<div class="' + (a.k === "돌파" ? "ok" : "ng") + '">' + (a.k === "돌파" ? "✅" : "⚠️") + ' <b>' + e(a.name) + '</b> ' + e(a.msg) + ' <small>' + e(a.at) + '</small></div>'; }).join("") + '</div>' : '') +
       (liveOn ? '<div class="fo-live"><span class="ixc-on">●</span> 장중 추적 ' + e(L.at) + ' · 10분마다 · 기준가 돌파/20일선 이탈은 알림 탭 「🎯」 구독하면 휴대폰으로</div>' : '');
     h += '<div class="fo-sub" style="margin-top:2px">① 돈의 길 — 5개 시장 1주</div><div class="fo-cs">' + (F.countries || []).map(function(c, i){
