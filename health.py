@@ -77,6 +77,15 @@ def data_checks():
 def app_checks():
     from playwright.sync_api import sync_playwright
     res, probs = [], []
+    # 버전 짝 검사: index.html APPV·sw.js VER·version.txt 가 다르면 휴대폰에 새 버전이 안 들어감 (10/12 b~e 사고)
+    try:
+        here = os.path.dirname(os.path.abspath(__file__))
+        apv = re.search(r'var APPV = "(\w+)"', open(os.path.join(here, "index.html"), encoding="utf-8").read()).group(1)
+        swv = re.search(r'var VER = "(\w+)"', open(os.path.join(here, "sw.js"), encoding="utf-8").read()).group(1)
+        vt = open(os.path.join(here, "version.txt"), encoding="utf-8").read().strip()
+        if not (apv == swv == vt): probs.append(f"버전 짝 안 맞음: index {apv} · sw {swv} · version.txt {vt} → 휴대폰에 새 버전이 안 들어감")
+    except Exception as ex:
+        probs.append(f"버전 짝 검사 실패: {ex}")
     with sync_playwright() as p:
         b = p.chromium.launch()
         ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2)
