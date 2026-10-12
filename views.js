@@ -486,19 +486,20 @@
   RENDER.accum = function(it, el){
     getJSON(file("accum", it.id, "list.json")).then(function(rows){
       var strong = rows.filter(function(r){ return r.tag === "강한 매집"; }).length, dist = rows.filter(function(r){ return r.dist; }).length;
-      var h = '<div class="sum3"><div class="kv"><small>매집 종목</small><b>' + rows.length + '</b></div><div class="kv"><small>강한 매집</small><b class="up">' + strong + '</b></div><div class="kv"><small>분배 의심</small><b class="dn">' + dist + '</b></div></div>';
-      h += card("매집 점수 순위", V.hbars(rows.slice(0, 10).map(function(r){ return {label: (V.FLAGS[r.mkt] || "") + " " + e(r.name.length > 14 ? r.name.slice(0, 13) + "…" : r.name) + ' <em class="tk">' + e(V.cd(r.code)) + '</em>', v: r.score || 0, text: r.score != null ? r.score.toFixed(0) : "–",
-        color: r.dist ? V.DN : r.tag === "강한 매집" ? V.UP : "#d55181", attr: ' onclick="openOP(\'' + e(r.code) + '\')"', tip: "<b>" + e(r.name) + "</b><br>" + e(r.tag) + " · 거래량 " + fmt(r.vol) + "배 · 한달 " + sgn(r.m1) + "%"}; }), {max: 100}) +
-        '<div class="lg"><span><i style="background:' + V.UP + '"></i>강한 매집</span><span><i style="background:#d55181"></i>매집·중립</span><span><i style="background:' + V.DN + '"></i>분배 의심</span></div>');
+      // 10/12 참고용으로 낮춤: 2012~ 검증에서 매집 신호·점수·「강한 매집」 모두 지수·아무 종목보다 못함 (market-strategy-report brain/accum_lab.md)
+      var h = '<div class="sum3"><div class="kv"><small>거래량 이상</small><b>' + rows.length + '</b></div><div class="kv"><small>분배 의심</small><b class="dn">' + dist + '</b></div><div class="kv"><small>미국</small><b>' + rows.filter(function(r){ return r.mkt === "US"; }).length + '</b></div></div>';
+      h += card("거래량 이상 종목 <span class='mut'>거래량 배수 순 · 점수는 성과와 무관해서 뺐어요</span>", V.hbars(rows.slice().sort(function(a, b){ return (b.vol || 0) - (a.vol || 0); }).slice(0, 10).map(function(r){ return {label: (V.FLAGS[r.mkt] || "") + " " + e(r.name.length > 14 ? r.name.slice(0, 13) + "…" : r.name) + ' <em class="tk">' + e(V.cd(r.code)) + '</em>', v: r.vol || 0, text: r.vol != null ? r.vol.toFixed(1) + "배" : "–",
+        color: r.dist ? V.DN : "#8a93a6", attr: ' onclick="openOP(\'' + e(r.code) + '\')"', tip: "<b>" + e(r.name) + "</b><br>거래량 " + fmt(r.vol) + "배 · 한달 " + sgn(r.m1) + "%"}; })) +
+        '<div class="lg"><span><i style="background:#8a93a6"></i>거래량 이상</span><span><i style="background:' + V.DN + '"></i>분배 의심</span></div>');
       h += sec("종목 카드") + filterSeg("aseg", rows, function(k){ P.set(k); }) + '<div id="abox"></div>';
       el.innerHTML = h;
       var aCard = function(r){
         var link = r.mkt === "KR" ? "https://m.stock.naver.com/domestic/stock/" + r.code + "/total" : "https://finance.yahoo.com/quote/" + r.code;
         return '<div class="cc"><div class="row"><div class="nm2">' + (V.FLAGS[r.mkt] || "") + ' <a href="' + link + '" target="_blank"><b>' + e(r.name) + '</b></a><span class="cd">' + e(r.code) + '</span></div>' +
-          chip(r.dist ? "분배 의심" : e(r.tag), r.dist ? "cool" : r.tag === "강한 매집" ? "hot" : "c") + '</div>' +
+          chip(r.dist ? "분배 의심" : "거래량 이상", r.dist ? "cool" : "c") + '</div>' +
           '<div class="sp-box" data-spark="' + e(r.code) + '"></div>' +
-          '<div class="st4">' + stat("매집점수", r.score != null ? r.score.toFixed(0) : "–") + stat("거래량", r.vol != null ? r.vol.toFixed(1) + "배" : "–") + stat("한달 가격", '<span class="' + cls(r.m1) + '">' + sgn(r.m1) + '%</span>') + stat("주가강도", r.rs != null ? r.rs.toFixed(0) : "–") + '</div>' +
-          '<div class="row"><span class="tm">' + (r.sector && r.sector !== "미분류" ? e(r.sector) : (V.MKT[r.mkt] || "")) + (r.days > 1 ? " · 매집 " + r.days + "일째" : "") + '</span>' + opBtn(r.code) + '</div></div>';
+          '<div class="st4">' + stat("거래량", r.vol != null ? r.vol.toFixed(1) + "배" : "–") + stat("한달 가격", '<span class="' + cls(r.m1) + '">' + sgn(r.m1) + '%</span>') + stat("주가강도", r.rs != null ? r.rs.toFixed(0) : "–") + stat("며칠째", r.days ? r.days + "일" : "–") + '</div>' +
+          '<div class="row"><span class="tm">' + (r.sector && r.sector !== "미분류" ? e(r.sector) : (V.MKT[r.mkt] || "")) + '</span>' + opBtn(r.code) + '</div></div>';
       };
       var P = pager("abox", rows, aCard); P.draw();
     }).catch(function(){ el.innerHTML = '<div class="empty">자료를 못 불러왔어요.</div>'; });

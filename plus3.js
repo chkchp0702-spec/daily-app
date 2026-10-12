@@ -373,12 +373,12 @@
   /* ======================= 🤫 조용한 매집 ======================= */
   P.wrap("accum", function(it, a){
     Promise.all([X("accum_x.json"), getJSON(file("accum", it.id, "list.json")).catch(function(){ return []; }), X("perf_accum.json")]).then(function(r){
-      var A = r[0], rows = r[1], Pf = r[2], by = {}, h = "";
+      var A = r[0], rows = r[1], Pf = r[2], by = {}, h = '<div class="acc-ref">📎 <b>참고용</b> — 거래량만 크게 늘고 가격은 제자리인 종목이에요. 2012년부터 다시 돌려 보니 <b>지수도, 아무 종목도 못 이겼어요</b>(40일 초과수익 −1.9%·−2.2%). 박스 돌파 확인도 더 나빴어요. 매수 신호가 아니고, 킥 포트 후보에서도 뺐어요.</div>';
       rows.forEach(function(x){ by[x.code] = x; });
       var items = ((A && A.items) || []).filter(function(x){ return by[x.code]; });
       // ① 매집 강도 순위
       var pw = items.filter(function(x){ return x.power != null; }).sort(function(p, q){ return q.power - p.power; });
-      if (pw.length) h += card("🏋️ 매집 강도 순위 <span class='mut'>점수 + 변동성 축소 + 거래량 + 수급</span>", V.hbars(pw.slice(0, 12).map(function(x){ var r0 = by[x.code];
+      if (false && pw.length) h += card("🏋️ 매집 강도 순위 <span class='mut'>점수 + 변동성 축소 + 거래량 + 수급</span>", V.hbars(pw.slice(0, 12).map(function(x){ var r0 = by[x.code];
         return {label: (V.FLAGS[r0.mkt] || "") + " " + e(r0.name.slice(0, 13)), v: x.power, text: x.power, color: x.power >= 75 ? V.UP : "#d55181", attr: ' onclick="openOP(\'' + e(x.code) + '\')"',
           tip: "<b>" + e(r0.name) + "</b><br>" + Object.keys(x.comp || {}).map(function(k){ return e(k) + " " + x.comp[k]; }).join("<br>") + (x.contr != null ? "<br>최근 10일 변동폭 = 60일의 " + Math.round(x.contr * 100) + "%" : "")}; }), {max: 100}) +
         '<p class="note">"조용히 모은다" = 가격 변동폭은 줄고(축소) 거래는 꾸준. 네 가지를 0~100으로 바꿔 섞었어요. 막대를 길게 누르면 항목별 점수.</p>');

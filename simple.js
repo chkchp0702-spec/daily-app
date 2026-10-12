@@ -10,7 +10,7 @@
     cup:    /오늘 컵 지도|나라별|많이 나온 섹터|돌파 임박/,
     gap:    /오늘 갭 지도|나라별|많이 나온 섹터/,
     sector: /국면 신호판|장중 나침반|5개 시장 한눈에|대표 지수|포트 비교 지수|섹터 등락/,
-    accum:  /매집 강도 순위|박스 돌파|매집 점수 순위/,
+    accum:  /거래량 이상 종목|박스 돌파/,
     danta:  /전광판|날짜별 성적/,
     alarm:  /내 알림|처음 한 번만|알림 기록/
   };
@@ -73,7 +73,19 @@
       d.querySelector(".xs-list").appendChild(row);
     });
     var dd = document.getElementById("xs-more");
-    if (dd){ drawer(body); var n = dd.querySelectorAll(".xs-row").length; dd.querySelector("#xs-n").textContent = n + "개 · 누르면 열려요"; }
+    if (dd){ drawer(body); var n = dd.querySelectorAll(".xs-row").length; dd.querySelector("#xs-n").textContent = n + "개 · 누르면 열려요"; fold(dd); }
+  }
+  // 📂 더 보기 줄이 많으면 처음엔 5개만 · 「전체 n개 보기 ▾」 (10/12)
+  var MORE_OPEN = {};
+  function fold(dd){
+    var rows = dd.querySelectorAll(".xs-row"), n = rows.length, k = cur, open = !!MORE_OPEN[k];
+    var b = dd.querySelector(".xs-all");
+    if (n <= 6){ if (b) b.remove(); [].forEach.call(rows, function(r){ r.hidden = false; }); return; }
+    [].forEach.call(rows, function(r, i){ r.hidden = !open && i >= 5; });
+    if (!b){ b = document.createElement("button"); b.type = "button"; b.className = "xs-all clp-btn"; dd.appendChild(b);
+      b.onclick = function(){ MORE_OPEN[cur] = !MORE_OPEN[cur]; fold(dd); }; }
+    else dd.appendChild(b);
+    b.textContent = open ? "접기 ▴" : "전체 " + n + "개 보기 ▾";
   }
 
   // 나침반 묶음 만들기
@@ -127,7 +139,7 @@
         row.innerHTML = '<span class="xs-t"></span><span class="xs-s mut"></span><span class="hgo">›</span>';
         row.querySelector(".xs-t").textContent = x.t; row.querySelector(".xs-s").textContent = x.sub;
         row.onclick = function(){ openCard(x.c, x.t); }; d.querySelector(".xs-list").appendChild(row); });
-      var dd = document.getElementById("xs-more"); dd.querySelector("#xs-n").textContent = dd.querySelectorAll(".xs-row").length + "개 · 누르면 열려요";
+      var dd = document.getElementById("xs-more"); dd.querySelector("#xs-n").textContent = dd.querySelectorAll(".xs-row").length + "개 · 누르면 열려요"; fold(dd);
     } else { var old = document.getElementById("xs-more"); if (old && !old.querySelector(".xs-row")) old.remove(); }
   }
 
@@ -143,11 +155,11 @@
       "<b>어떻게 고르나</b> — 갭 전 횡보 4주 이상 · 시가가 박스 고점 위 · 거래량 1.5배 이상 · 지금도 박스 위에 있는 것. 그다음 그림으로 눈 검사.",
       "<b>사는 자리</b> — 갭 시가 위에서 버티는 동안. 박스 안으로 다시 들어오면(갭 메움) 실패. 갭 시가보다 +15% 넘게 오른 건 추격 금지.",
       "<b>보는 법</b> — 위 <b>갭 지도</b> 숫자·막대를 누르면 그 종목만. 🎯 갭 크기×거래량 그림에서 오른쪽 위일수록 힘이 센 갭."]],
-    accum: ["🤫 조용한 매집을 찾는 화면", [
-      "<b>무엇을</b> — <b>가격은 거의 제자리</b>인데 최근 한 달 <b>거래량이 그 전 석 달의 3배</b> 이상으로 꾸준히 늘어난 종목. 누군가 티 안 나게 사 모으는 흔적(와이코프 '흡수')이에요.",
-      "<b>어떻게 고르나</b> — 한 달 가격 변화 −5%~+3% · 거래량 2배 넘는 날이 10일 이상(하루이틀 터진 것 제외) · 52주 고점 −40% 안. 위꼬리·하락일 거래량이 많으면 「분배 의심」으로 따로 표시.",
-      "<b>쓰는 법</b> — 매집 점수가 높고 <b>박스 위쪽</b>에 붙어 있으면 돌파 직전 후보. 박스를 뚫는 날(📦 박스 돌파)이 실제 매수 신호예요.",
-      "<b>보는 법</b> — 점수 순위 막대·카드 이름을 누르면 종목리포트. 외국인·기관 순매수가 같이 늘면 더 믿을 만해요."]]
+    accum: ["🤫 거래량 이상 종목 (참고용)", [
+      "<b>무엇을</b> — <b>가격은 거의 제자리</b>인데 최근 한 달 <b>거래량이 그 전 석 달의 3배</b> 이상으로 꾸준히 늘어난 종목. 누군가 사 모으는 흔적일 수도, 파는 흔적(분배)일 수도 있어요.",
+      "<b>성적</b> — 2012년부터 5개 시장에서 다시 돌려 보니 지수도, 같은 시장 아무 종목도 못 이겼어요(40일 초과수익 2012~19년 −1.9% · 2020년~ −2.2%). 점수·「강한 매집」·박스 돌파 확인도 나아지지 않았어요.",
+      "<b>쓰는 법</b> — <b>매수 신호가 아니에요.</b> 이미 관심 있는 종목에 거래량이 몰리는지 확인하는 참고로만. 킥 포트 후보에서도 뺐어요(10/12).",
+      "<b>보는 법</b> — 막대·카드 이름을 누르면 종목리포트."]]
   };
   HELP.whale = ["🐋 유명 펀드·투자자의 보유 종목을 보는 화면", [
       "<b>무엇을</b> — 버핏·애크먼 같은 유명 펀드·투자자 40곳(고래)이 미국 SEC에 분기마다 내는 보유 보고서(13F)를 모아, <b>무엇을 새로 사고 늘리고 팔았는지</b> 보여줘요.",
@@ -161,9 +173,9 @@
       "<b>보는 법</b> — 종목 이름을 누르면 종목리포트. 잘 맞는 시간대·업종 통계도 아래 「더 보기」에 있어요."]];
   function addHelp(){
     var h = HELP[cur]; if (!h) return;
-    var body = document.getElementById("body"); if (!body || body.querySelector(":scope > .xp-card")) return;
-    var d = document.createElement("details"); d.className = "card xp-card"; d.dataset.xs = "keep";
-    d.innerHTML = '<summary><span>❓ 이 화면은 무엇을 찾나요?</span><small>' + h[0] + ' · 눌러서 보기</small></summary>' + h[1].map(function(x){ return '<p>' + x + '</p>'; }).join("");
+    var body = document.getElementById("body"); if (!body || body.querySelector(":scope > .xp-card, :scope > .xp-mini")) return;
+    var d = document.createElement("details"); d.className = "xp-mini no-clp"; d.dataset.xs = "keep";
+    d.innerHTML = '<summary>ⓘ 이 화면은? <span>' + h[0] + '</span></summary><div class="xp-in">' + h[1].map(function(x){ return '<p>' + x + '</p>'; }).join("") + '</div>';
     body.insertBefore(d, body.firstChild);
   }
 

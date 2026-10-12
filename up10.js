@@ -100,13 +100,12 @@
     var spark = (window.V && P.nav && P.nav.length > 1) ? V.lines([{name: "⚡ 킥", color: "#ff6b6b", vals: P.kick_line}].concat((function(){ var c = (P.conc_line || []).slice(), n = (P.nav || []).length; while (c.length && c.length < n) c.unshift(0); return c.length === n ? [{name: "🎯 집중", color: "#4dd47a", vals: c}] : []; })()).concat([{name: "💼 기본", color: "#e9c46a", vals: P.nav}, {name: "S&P", color: "#7c9cff", vals: P.spy_line, dash: 1}]),
       (P.nav || []).map(function(_, i){ return i ? "" : md(P.start); }), {h: 96, unit: "%", zero: 1, nodots: 1}) : "";
     h += card("port~pohero", "💼", "포트", md(P.start) + "부터 · " + md(P.asof) + " 미국 종가",
-      (P.conc != null ? '<div class="hm-cn ' + (P.conc_up ? "g" : "r") + '" data-goto="port~poconc"><span>🎯 집중 <b class="' + cls(P.conc) + '">' + sg(P.conc) + '</b></span><span>' + (P.conc_up ? "🟢 오르는 시장 · 주식 100%" : "🔴 상승장 아님 · 주식 50%") + ' <small>S&P 200일선 ' + sg(P.conc_gap, 1) + '</small> ›</span></div>' : '') +
-      '<div class="hm-big"><div><small>⚡ 킥</small><b class="' + cls(P.kick) + '">' + sg(P.kick) + '</b>' + hon(P.kick_honest, {note: "돌파 칸은 다음 거래일 종가에 사고, 사고팔 때마다 비용을 뺌"}) + '</div><div><small>💼 기본</small><b class="' + cls(P.base) + '">' + sg(P.base) + '</b>' + hon(P.base_honest, {note: "주 1회(+배분표 바뀐 날)만 비중을 맞추고 그때마다 비용을 뺌"}) + '</div><div><small>S&P500</small><b>' + sg(P.spy) + '</b></div></div>' +
-      '<div class="hm-l">어제(' + md(P.d1_date) + ') 💼 <b class="' + cls(P.d1) + '">' + sg(P.d1) + '</b> · ⚡ <b class="' + cls(P.d1_kick) + '">' + sg(P.d1_kick) + '</b> · S&P ' + sg(P.d1_spy) +
-      ' · <a data-goto="port~pocmp">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a>' + (ex < 0 ? ' · S&P까지 ' + sg(ex) + 'p' : '') + '</div>' +
+      // 10/12 정리: 큰 숫자 3개(집중·킥·기본) + 한 줄(S&P·몇 곳 앞섬) + 그래프 + 바뀜 알림 한 줄. 정직 계산·강약 칩은 포트 탭에서
+      '<div class="hm-big">' + (P.conc != null ? '<div data-goto="port~poconc"><small>🎯 집중</small><b class="' + cls(P.conc) + '">' + sg(P.conc) + '</b></div>' : '') +
+        '<div data-goto="port~pokick"><small>⚡ 킥</small><b class="' + cls(P.kick) + '">' + sg(P.kick) + '</b></div><div data-goto="port~pohero"><small>💼 기본</small><b class="' + cls(P.base) + '">' + sg(P.base) + '</b></div></div>' +
+      '<div class="hm-l">S&amp;P500 <b class="' + cls(P.spy) + '">' + sg(P.spy) + '</b> · <a data-goto="port~pocmp">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a>' + (P.conc != null ? ' · ' + (P.conc_up ? "🟢 상승장" : "🔴 상승장 아님") : '') + '</div>' +
       '<div class="hm-sp">' + spark + '</div>' +
-      (P.change ? '<div class="hm-alert" data-goto="port~pofollow">🔁 ' + md(P.change.date) + ' 비중·상품 바뀜 — <b>따라하기에서 맞추기 ›</b><small>' + e(String(P.change.why || "").replace(/\s*\([^()]*\)/g, "").slice(0, 120)) + '…</small></div>' : '') +
-      ((P.weak || []).length ? '<div class="hm-chips">' + P.weak.map(function(x){ return '<span class="hm-chip b" data-goto="port~poct">약함 ' + e(x) + '</span>'; }).join("") + (P.strong || []).slice(0, 3).map(function(x){ return '<span class="hm-chip g" data-goto="port~poct">강함 ' + e(x) + '</span>'; }).join("") + '</div>' : ''));
+      (P.change ? '<div class="hm-alert" data-goto="port~pofollow">🔁 ' + md(P.change.date) + ' 비중·상품 바뀜 — <b>따라하기에서 맞추기 ›</b></div>' : ''));
     // ⚡ 킥
     var ev = K.events || [];
     h += card("port~pokick", "⚡", "킥 — 오늘 할 일", K.n + "종목 · 포트의 " + K.w + "%",
