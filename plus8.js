@@ -129,6 +129,8 @@
       }
       // ①-1 🎯 오늘의 집중 (market-strategy-report/market/focus.json — 돈의 길 → 담는 법 → 행동)
       h += '<section class="card mk-focus" id="mkfo"><div class="mk-lab">🎯 오늘의 집중 <span class="mut">돈의 길 → 담는 법 → 행동</span></div><div class="fo-b"><div class="loading">불러오는 중…</div></div></section>';
+      // ①-1b 💡 새 규칙 오늘 (10/12 검증 통과분 — kick.json ideas: 🧭 추세 칸 · 📊 실적 표류 · 👻 그림자)
+      h += '<section class="card" id="mkid"><div class="mk-lab">💡 새 규칙 오늘 <span class="mut">10/12 과거 검증 · 통과한 것만 포트에</span></div><div class="id-b"><div class="loading">불러오는 중…</div></div></section>';
       // ①-2 🔥 지금 주도 테마 (리포트 data.leaders + 아침 자동 레이더 market/sectors.json)
       h += '<section class="card mk-lead2" id="mkld"><div class="mk-lab">🔥 지금 돈이 몰리는 곳</div>' +
         (d.leaders && d.leaders.title ? '<div class="mk-t2">' + rich(strip(d.leaders.title)) + '</div>' + (d.leaders.so ? '<div class="mk-so">→ ' + rich(strip(d.leaders.so)) + '</div>' : '') +
@@ -147,6 +149,13 @@
       a.innerHTML = h;
       // 🎯 집중 채우기 (단계·흐름 선·시차·자리·수급 + 장중 추적)
       getJSON(RAW + "market-strategy-report/main/market/focus.json?" + Date.now()).then(function(F){
+        (function(){ getJSON(RAW + "market-strategy-report/main/market/kick.json?" + Date.now()).then(function(K){
+          var bx = document.querySelector("#mkid .id-b"); if (!bx) return; var I = K.ideas || {}, T = K.trend || {};
+          var row = function(k){ var x = I[k]; if (!x) return ''; return '<div class="id-r"><b>' + e(x.state) + ' ' + e(x.name) + '</b> <span class="mut">' + e(x.state === "✅" ? "포트에 반영" : x.state === "🧪" ? "절반 크기로 시험" : x.state === "👻" ? "그림자 채점만" : "기각 · 채점만") + '</span>' +
+            ((x.today || []).length ? '<div class="id-t">' + (k === "trend" ? "지금 들고 있음: " : e((x.today_d || "").slice(5)) + " 신호: ") + x.today.map(function(t){ return '<a href="javascript:openOP(\'' + e(t) + '\')">' + e(t) + '</a>'; }).join(" · ") + '</div>' : '<div class="id-t mut">오늘 신호 없음</div>') + '</div>'; };
+          bx.innerHTML = row("trend") + row("pead") + row("nh52") + row("dip") +
+            '<div class="mut" style="font-size:11.5px;margin-top:6px">🧭 추세 = 금·원유·장기채·달러·지수 ETF 100일 고점 돌파에 사고 50일 저점 이탈에 팖 · 킥 포트의 5% 칸' + (T.from ? ' (' + e(T.from.slice(5)) + '부터)' : '') + ' · 📊 실적 표류 = 실적 철 미국 갭 +8%↑·거래량 3배↑ → 최대 40일. 매수 권유가 아니라 규칙 상태 표시예요.</div>';
+        }).catch(function(){ var bx = document.querySelector("#mkid .id-b"); if (bx) bx.innerHTML = '<div class="mut">자료를 못 불러왔어요.</div>'; }); })();
         var box = document.querySelector("#mkfo .fo-b"); if (!box) return;
         if (!F || !F.themes || !F.themes.length){ box.innerHTML = '<div class="mut">오늘 집중 자료가 아직 없어요.</div>'; return; }
         window.__FO = F;
