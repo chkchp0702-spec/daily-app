@@ -403,7 +403,7 @@ em.tk{font-style:normal;font-size:11px;color:var(--dim);margin-left:4px;font-wei
 .cp-wk{padding:8px 0;border-bottom:1px solid var(--line)}.cp-wk:last-child{border:0}
 .cp-wk>span{float:right;font-weight:800}
 </style>
-<link rel="stylesheet" href="plus.css?v=38">
+<link rel="stylesheet" href="plus.css?v=39">
 </head>
 <body>
 <header>
@@ -1368,7 +1368,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261012c";
+var APPV = "20261012d";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1417,7 +1417,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="plus5.js?v=6"></script>
 <script defer src="plus6.js?v=12"></script>
 <script defer src="plus7.js?v=4"></script>
-<script defer src="plus8.js?v=9"></script>
+<script defer src="plus8.js?v=10"></script>
 <script defer src="gsearch.js?v=1"></script>
 <script defer src="brain.js?v=4"></script>
 <script defer src="feed.js?v=6"></script>

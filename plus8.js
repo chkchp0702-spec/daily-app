@@ -36,11 +36,11 @@
       '<div class="fo-dg">' + row("오늘", pc(c.chg1)) + row("1주", pc(c.chg5)) + row("1개월", pc(c.chg20)) + row("국면", e(c.regime || "—")) + row("10일선 위", c.breadth10 != null ? e(c.breadth10) + "%" : "—") + '</div>' +
       (hot || '<div class="mut" style="font-size:12px">뜨는 업종 자료 없음</div>') + '<div class="mut" style="font-size:11px;margin-top:4px">종목 이름을 누르면 차트가 열려요</div></div>';
   }
-  document.addEventListener("click", function(ev){
-    var c = ev.target.closest && ev.target.closest("[data-foc]"); if (!c) return;
-    var i = +c.getAttribute("data-foc"); FOSEL = FOSEL === i ? null : i;
+  window.foSel = function(i){
+    FOSEL = FOSEL === i ? null : i;
     var b = document.querySelector("#mkfo .fo-b"); if (b && window.__FO) b.innerHTML = focusHtml(window.__FO.F, window.__FO.L);
-  });
+    var d = b && b.querySelector(".fo-cd"); if (d && d.scrollIntoView) d.scrollIntoView({block: "nearest", behavior: "smooth"});
+  };
   function focusHtml(F, L){
     window.__FO = {F: F, L: L};
     var px = (L && L.px) || {}, liveOn = L && L.date && L.at;
@@ -55,7 +55,7 @@
     var h = (al.length ? '<div class="fo-al">' + al.map(function(a){ return '<div class="' + (a.k === "돌파" ? "ok" : "ng") + '">' + (a.k === "돌파" ? "✅" : "⚠️") + ' <b>' + e(a.name) + '</b> ' + e(a.msg) + ' <small>' + e(a.at) + '</small></div>'; }).join("") + '</div>' : '') +
       (liveOn ? '<div class="fo-live"><span class="ixc-on">●</span> 장중 추적 ' + e(L.at) + ' · 10분마다 · 기준가 돌파/20일선 이탈은 알림 탭 「🎯」 구독하면 휴대폰으로</div>' : '');
     h += '<div class="fo-sub" style="margin-top:2px">① 돈의 길 — 5개 시장 1주</div><div class="fo-cs">' + (F.countries || []).map(function(c, i){
-      return '<div class="fo-c' + (i === 0 && c.label ? " fo-top" : "") + (FOSEL === i ? " fo-on" : "") + '" data-foc="' + i + '" role="button" tabindex="0"><div class="fo-n">' + c.flag + " " + e(c.name) + ' <span class="fo-ar">' + (FOSEL === i ? "▴" : "▾") + '</span></div><div class="fo-v">' + pc(c.chg5) + '</div><small>' + (c.label ? e(c.label) : "1주 " + e(c.ix || "")) + '</small>' +
+      return '<div class="fo-c' + (i === 0 && c.label ? " fo-top" : "") + (FOSEL === i ? " fo-on" : "") + '" data-foc="' + i + '" role="button" tabindex="0" onclick="foSel(' + i + ')"><div class="fo-n">' + c.flag + " " + e(c.name) + ' <span class="fo-ar">' + (FOSEL === i ? "▴" : "▾") + '</span></div><div class="fo-v">' + pc(c.chg5) + '</div><small>' + (c.label ? e(c.label) : "1주 " + e(c.ix || "")) + '</small>' +
         ((c.hot || [])[0] ? '<small class="fo-h">▲ ' + e(c.hot[0].name) + '</small>' : '') + '</div>'; }).join("") + '</div>' + countryDetail((F.countries || [])[FOSEL]);
     h += F.themes.slice(0, 2).map(function(t, i){
       var sg = t.stage || {}, fl = t.flow, lg = t.lag, sp = t.supply;
