@@ -91,6 +91,7 @@
         ' <small>S&P였다면 ' + (B["S&P500"][B["S&P500"].length - 1] >= 0 ? "+" : "−") + won(Math.abs(S.amt * B["S&P500"][B["S&P500"].length - 1] / 100)) + '원 · 금액은 📋 따라하기 투자금 기준</small></div>' +
       (F.k === "conc" && CN && CN.now ? '<div class="po-cbuy"><div class="po-cbh">🛒 지금 살 것 <small>' + won(S.amt) + '원 · ' + (S.mode === "kr" ? "₩ 원화" : "💵 외화") + ' · ' + (CN.regime && CN.regime.up ? "🟢 오르는 시장" : "🔴 오르는 시장 아님") + '</small></div>' +
         concPlan().map(function(c){ var it = c.items[0] || {};
+          if (c.kick) return '<div class="cn-buy" data-goto="port~pofollow"><b class="pct">' + c.x.pct + '%</b><span class="nm">⚡ 킥 종목 ' + c.items.length + '개<small>' + c.items.slice(0, 4).map(function(t){ return e(t.short); }).join(" · ") + (c.items.length > 4 ? " …" : "") + '</small></span><span class="q"><b>›</b><small>' + won(c.amt) + '원</small></span></div>';
           return '<div class="cn-buy" data-op="' + e(it.code) + '"><b class="pct">' + c.x.pct + '%</b><span class="nm">' + e(c.x.name) + '<small>' + e(it.nm) + (it.code && it.code !== it.nm ? ' ' + e(it.code) : '') + '</small></span>' +
             '<span class="q"><b>' + (it.sh != null ? it.sh.toLocaleString("ko-KR") + '주' : '가격 확인') + '</b><small>' + won(c.amt) + '원</small></span></div>'; }).join("") +
         '<div class="po-cbn">판정이 바뀌는 날에만 고치면 돼요 · 투자금은 📋 따라하기에서</div></div>' : '') +
@@ -110,12 +111,12 @@
 
     // ② 따라하기
     var isC = S.pf === "conc" && CN && CN.now;
-    var segs = isC ? CN.now.map(function(x, i){ return {label: x.name, v: x.pct, color: COL[i % COL.length]}; }) : P.hold.map(function(x, i){ return {label: x.name, v: x.pct, color: COL[i % COL.length]}; });
+    var segs = isC ? concPlan().map(function(c, i){ return {label: c.x.name, v: c.x.pct, color: c.kick ? "#ff6b6b" : COL[i % COL.length]}; }) : P.hold.map(function(x, i){ return {label: x.name, v: x.pct, color: COL[i % COL.length]}; });
     h += '<div class="sec">📋 지금 이렇게 담으면 돼요 <small class="mut">' + md(P.changes[0] && P.changes[0].date) + ' 배분표 기준</small></div>' +
-      '<section class="card po-follow">' + V.donut(segs, segs.length + "칸", isC ? "🎯 집중" : "비중") +
+      '<section class="card po-follow">' + V.donut(segs, segs.length + "칸", isC ? "🎯 집중+킥" : "비중") +
       '<div class="po-in"><label>내 투자금</label><div class="po-amt"><input id="poamt" inputmode="numeric" value="' + S.amt.toLocaleString("ko-KR") + '"><span>원</span></div>' +
       '<div class="po-q">' + [3e6, 1e7, 3e7, 1e8].map(function(v){ return '<button data-v="' + v + '">' + won(v) + '</button>'; }).join("") + '</div>' +
-      '<div class="po-mode po-pf"><button data-pf="base" class="' + (S.pf === "base" ? "on" : "") + '">💼 기본</button>' + (K ? '<button data-pf="kick" class="' + (S.pf === "kick" ? "on" : "") + '">⚡ 킥 포함</button>' : '') + (CN && CN.now ? '<button data-pf="conc" class="' + (S.pf === "conc" ? "on" : "") + '">🎯 집중</button>' : '') + '</div>' +
+      '<div class="po-mode po-pf"><button data-pf="base" class="' + (S.pf === "base" ? "on" : "") + '">💼 기본</button>' + (K ? '<button data-pf="kick" class="' + (S.pf === "kick" ? "on" : "") + '">⚡ 킥 포함</button>' : '') + (CN && CN.now ? '<button data-pf="conc" class="' + (S.pf === "conc" ? "on" : "") + '">🎯 집중+킥</button>' : '') + '</div>' +
       '<div class="po-mode"><button data-m="us" class="' + (S.mode === "us" ? "on" : "") + '">💵 외화 베이스</button><button data-m="kr" class="' + (S.mode === "kr" ? "on" : "") + '">₩ 원화 베이스</button></div></div>' +
       '<div id="porows"></div><div class="po-cp"><button class="btn" id="pocopy">📋 주문 목록 복사</button><span id="pocpst"></span></div>' +
       '<p class="note">환율 ' + (P.fx ? P.fx.toLocaleString("ko-KR") + "원" : "–") + ' · 주 수는 ' + md(P.asof) + ' 종가 기준 내림. <b>외화 베이스</b> = 미국 ETF를 달러로 · <b>원화 베이스</b> = 같은 걸 담은 한국 상장 ETF로 바꿔 원화로. 원화 상품이 없는 칸과 해외 개별 종목(🇭🇰 등)은 원화 베이스에서도 외화예요. ' +
@@ -208,13 +209,20 @@
   function kickW(){ return (K && S.pf === "kick") ? kHold().reduce(function(a, o){ return a + (o.w || 0); }, 0) : 0; }
   // 🎯 집중 포트 따라하기 (10/12) — conc.json now(지금 담을 것) · 가격은 기본 포트 칸에서 같은 티커를 찾아 씀
   function concPlan(){
+    // 10/12 사용자: 집중 = S&P·나스닥 뼈대 + ⚡ 킥 종목 같이. 킥 칸 비중만큼 뼈대를 줄이고, 킥 줄은 킥 포함과 같은 모양
     var px = {}; P.hold.forEach(function(h){ (h.us || []).forEach(function(u){ px[u.t] = u; }); (h.kr || []).forEach(function(k){ px[k.code] = k; }); });
-    return CN.now.map(function(n, i){
-      var amt = S.amt * n.pct / 100, items = [], kr = n.kr && px[n.kr.code];
+    var KH = K ? kHold() : [], kw = KH.reduce(function(a, o){ return a + (o.w || 0); }, 0), share = (100 - kw) / 100;
+    var out = CN.now.map(function(n, i){
+      var pct = Math.round(n.pct * share * 10) / 10, amt = S.amt * pct / 100, items = [], kr = n.kr && px[n.kr.code];
       if (S.mode === "kr" && n.kr){ var kp = kr && kr.px; items.push({nm: n.kr.name, code: n.kr.code, amt: amt, sh: kp ? Math.floor(amt / kp) : null, px: kp, cur: "원"}); }
       else { var u = px[n.t] || {}, usd = P.fx ? amt / P.fx : null; items.push({nm: n.t, code: n.t, amt: amt, usd: usd, sh: usd && u.px ? Math.floor(usd / u.px) : null, px: u.px, cur: "$"}); }
-      return {x: {name: n.name, pct: n.pct}, i: i, amt: amt, items: items};
+      return {x: {name: n.name, pct: pct}, i: i, amt: amt, items: items};
     });
+    if (kw) out.push({x: {name: "⚡ 킥", pct: Math.round(kw * 10) / 10}, i: -1, amt: S.amt * kw / 100, kick: 1, items: KH.map(function(o){
+      var a2 = S.amt * o.w / 100, kr2 = /^\d{6}\.K[SQ]$/.test(o.code), us2 = /^[A-Z\-]+$/.test(o.code), usd2 = us2 && P.fx ? a2 / P.fx : null;
+      return {tags: o.tags || "", short: nm(o.name), nm: (o.tags ? o.tags + " " : "") + nm(o.name), code: o.code, amt: a2, usd: usd2, cur: us2 ? "$" : kr2 ? "원" : "현지",
+              sh: us2 ? (usd2 && o.now ? Math.floor(usd2 / o.now) : null) : kr2 ? Math.floor(a2 / o.now) : null, note: o.rule || ""}; })});
+    return out;
   }
   function plan(){
     if (S.pf === "conc" && CN && CN.now) return concPlan();
@@ -308,7 +316,7 @@
         (R.kospi_up != null ? ' · 코스피 ' + (R.kospi_up ? "🟢" : "🔴") + ' (' + sg(R.kospi_gap, 1) + ')' : '') + '</div>' +
         (R.raw_today !== up ? '<div class="cn-w">⚠ 오늘 종가는 반대쪽 — 3거래일 이어지면 판정이 바뀌어요</div>' : '') + '</div>' +
       '<div class="cn-h">지금 살 것 <small>' + won(S.amt) + '원 기준 · ' + (S.mode === "kr" ? "₩ 원화 베이스" : "💵 외화 베이스") + ' · 다음 거래일 종가</small></div>' +
-      concPlan().map(function(c){ var it = c.items[0] || {};
+      concPlan().filter(function(c){ return !c.kick; }).map(function(c){ var it = c.items[0] || {};
         return '<div class="cn-buy" data-op="' + e(it.code) + '"><b class="pct">' + c.x.pct + '%</b><span class="nm">' + e(c.x.name) + '<small>' + e(it.nm) + (it.code && it.code !== it.nm ? ' ' + e(it.code) : '') + '</small></span>' +
           '<span class="q"><b>' + (it.sh != null ? it.sh.toLocaleString("ko-KR") + '주' : '가격 확인') + '</b><small>' + won(c.amt) + '원</small></span></div>'; }).join("") +
       (CN.vol_rule && CN.vol_rule.on ? '<div class="cn-vr">🦴 변동성 방어(' + e(CN.vol_rule.role) + ') · 주식 <b>' + CN.vol_rule.eq_scale + '%</b> 유지 <small>20일 흔들림 ' + CN.vol_rule.vol20 + '% / 목표 ' + CN.vol_rule.target + '%</small></div>' : '') +
