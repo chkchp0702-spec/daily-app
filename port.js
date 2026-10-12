@@ -69,8 +69,8 @@
       .concat(PF.map(function(f){ return {f: f, ret: f.ret}; })).sort(function(a, b){ return b.ret - a.ret; });
     var h = '<div class="sec">🏁 시장 ' + BM.length + '곳과 비교 <small class="mut">' + md(P.start) + '부터 · 달러 기준</small></div><section class="card po-lb">' +
       '<div class="po-lbs">' + PF.map(function(f){ var w = beat(f);
-        return '<button data-pf="' + f.k + '" class="' + (S.pf === f.k ? "on" : "") + (f.k === "kick" ? " k" : "") + '"><small>' + f.ic + ' ' + f.t + '</small><b class="' + cls(f.ret) + '">' + sg(f.ret) + '</b>' + honC(f) +
-          '<em><span class="po-wbar"><i style="width:' + (w / BM.length * 100).toFixed(0) + '%"></i></span>' + BM.length + '곳 중 <b>' + w + '</b>곳 이김</em></button>'; }).join("") + '</div>' +
+        return '<button data-pf="' + f.k + '" class="' + (S.pf === f.k ? "on" : "") + (f.k === "kick" ? " k" : "") + '"><small>' + f.ic + ' ' + f.t + '</small><b class="po-big ' + cls(f.ret) + '">' + sg(f.ret) + '</b><span class="po-hs">' + (honC(f) || '<span class="po-hn">정직 계산 준비 중</span>') + '</span>' +
+          '<em><span class="po-wbar"><i style="width:' + (w / BM.length * 100).toFixed(0) + '%"></i></span><b>' + w + '</b>/' + BM.length + '곳 이김</em></button>'; }).join("") + '</div>' +
       '<div class="po-chips">' + BGRP.filter(function(g){ return g === "전체" || BM.some(function(m){ return m.group === g; }); }).map(function(g){
         return '<button data-bg="' + g + '" class="' + (S.bg === g ? "on" : "") + '">' + g + '</button>'; }).join("") + '</div>' +
       '<div class="po-rk">' + rowsB.map(function(x, i){
@@ -382,6 +382,10 @@
     ".po-pf2{margin:12px 0 8px}.po-hero.kick{background:linear-gradient(160deg,rgba(255,107,107,.16),rgba(18,24,38,.4) 60%)}" +
     ".po-go{font-style:normal;color:var(--c,#e9c46a);font-weight:800;margin-left:2px}.po-it[data-op],.po-kp[data-op],.po-tk{cursor:pointer}.po-tk{text-decoration:underline dotted;text-underline-offset:2px;color:var(--text)}" +
     ".po-it[data-op]:active,.po-kp[data-op]:active{background:rgba(255,255,255,.05)}" +
+    ".po-lbs button{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;min-width:0;overflow:hidden}.po-lbs .po-big{font-size:20px;line-height:1.2;white-space:nowrap}" +
+    ".po-lbs .po-hs{display:block;width:100%;min-height:20px;margin:3px 0 6px}.po-lbs .po-hs .hon-chip{background:none!important;border:0!important;padding:0!important;display:inline-flex;align-items:center;gap:3px;width:auto;max-width:100%;margin:0;font-size:10.5px;white-space:nowrap;overflow:hidden}" +
+    ".po-lbs .po-hs .hon-chip b{font-size:11px!important;line-height:1}.po-lbs .po-hs .hon-chip i{font-style:normal;opacity:.7}.po-lbs .po-hn{font-size:10.5px;color:var(--sub);white-space:nowrap}" +
+    ".po-lbs em{margin-top:auto!important;width:100%;white-space:nowrap}.po-lbs em b{font-size:12px!important}" +
     ".po-lbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px}.po-lbs button{text-align:left;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:8px 10px;font:inherit;cursor:pointer}" +
     ".po-lbs button.on{border-color:#e9c46a;background:rgba(233,196,106,.1)}.po-lbs button.k.on{border-color:#ff6b6b;background:rgba(255,107,107,.1)}.po-lbs small{display:block;font-size:11.5px;color:var(--sub)}.po-lbs b{font-size:20px}" +
     ".po-lbs em{display:block;font-style:normal;font-size:11.5px;color:var(--sub);margin-top:2px}.po-lbs em b{font-size:12px;color:var(--text)}.po-wbar{display:block;height:5px;border-radius:3px;background:var(--panel);margin:3px 0 2px;overflow:hidden}.po-wbar i{display:block;height:100%;background:#4dd47a}" +
