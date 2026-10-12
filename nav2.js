@@ -8,7 +8,7 @@
     {k: "home", ic: "🏠", t: "오늘", tabs: ["home"]},
     {k: "mkt",  ic: "🌐", t: "시장", tabs: ["market", "sector"]},
     {k: "inv",  ic: "💼", t: "포트", tabs: ["port", "score"]},
-    {k: "sig",  ic: "🎯", t: "신호", tabs: ["whale", "cup", "gap", "accum", "danta"]},
+    {k: "sig",  ic: "🎯", t: "신호", tabs: ["whale", "cup", "gap"]},   // 10/12: 🤫 매집·⚡ 단타는 메뉴에서 뺌 — 알림(앱·텔레그램)으로만. 알림을 누르면 그 화면은 그대로 열림
     {k: "feed", ic: "📰", t: "피드", tabs: ["feed"]}
   ];
   var LAB = {market: "🌐 시황", sector: "🧭 나침반", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타"};

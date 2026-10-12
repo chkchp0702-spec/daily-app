@@ -118,8 +118,7 @@
       H.focus.map(function(t){ return '<div class="hm-f"><b>' + e(t.name) + '</b> <span class="hm-chip ' + (t.stage === "과열" ? "b" : "g") + '">' + e(t.stage || "") + '</span> <small>5일 ' + sg(t.r5, 1) + ' · S&P 대비 20일 ' + sg(t.rs20, 1) + 'p</small>' +
         '<div class="hm-l">' + e(t.do || "") + ((t.stars || []).length ? ' · ★ ' + t.stars.map(function(s){ return '<a data-op="' + e(s.t) + '">' + e(s.name) + '</a>'; }).join(", ") : '') + ((t.etf_kr || []).length ? ' · 🇰🇷 <a data-op="' + e(t.etf_kr[0].t) + '">' + e(t.etf_kr[0].name) + '</a>' : '') + '</div></div>'; }).join(""), "시황");
     // ⚡ 단타
-    h += card("danta", "🔔", "단타 알람", "오늘 " + (D.today || 0) + "건",
-      '<div class="hm-l">' + ((D.strong || []).length ? '⭐ 이기는 자리: <b>' + e(D.strong.join(", ")) + '</b>' : '아직 「강함」 자리 없음') + ((D.observe || []).length ? ' · 👀 관찰만: ' + e(D.observe.join(", ")) : '') + '</div>', "단타");
+    // 10/12: ⚡ 단타 카드 뺌 — 단타는 알림(앱·텔레그램)으로만
     // 🧠 두뇌
     if (Bn.summary) h += card("feed~fdbrain", "🧠", "지금 생각", (Bn.regime || "") + " · " + md(Bn.at) + " " + String(Bn.at || "").slice(11, 16),
       '<div class="hm-l">' + e(Bn.summary) + '</div>' + ((Bn.ideas || []).length ? '<div class="hm-chips">' + Bn.ideas.map(function(x){ var t = typeof x === "string" ? x : ((x["칸"] || x.box || "") + " " + (x["제안"] || x.idea || "")); return t.trim() ? '<span class="hm-chip" data-goto="port~poct">💡 ' + e(t) + '</span>' : ''; }).join("") + '</div>' : ''), "피드");

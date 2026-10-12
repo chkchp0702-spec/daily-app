@@ -67,7 +67,7 @@
     var bmx = Math.max.apply(null, BM.map(function(m){ return Math.abs(m.ret); }).concat(PF.map(function(f){ return Math.abs(f.ret); }), [0.5]));
     var rowsB = BM.filter(function(m){ return S.bg === "전체" || m.group === S.bg; }).map(function(m){ return {b: m, ret: m.ret}; })
       .concat(PF.map(function(f){ return {f: f, ret: f.ret}; })).sort(function(a, b){ return b.ret - a.ret; });
-    var h = '<div class="sec">🏁 시장 ' + BM.length + '곳과 비교 <small class="mut">' + md(P.start) + '부터 · 달러 기준</small></div><section class="card po-lb">' +
+    var cmpH = '<div class="sec">🏁 시장 ' + BM.length + '곳과 비교 <small class="mut">' + md(P.start) + '부터 · 달러 기준</small></div><section class="card po-lb">' +
       '<div class="po-lbs">' + PF.map(function(f){ var w = beat(f);
         return '<button data-pf="' + f.k + '" class="' + (S.pf === f.k ? "on" : "") + (f.k === "kick" ? " k" : "") + '"><small>' + f.ic + ' ' + f.t + '</small><b class="po-big ' + cls(f.ret) + '">' + sg(f.ret) + '</b><span class="po-hs">' + (honC(f) || '<span class="po-hn">정직 계산 준비 중</span>') + '</span>' +
           '<em><span class="po-wbar"><i style="width:' + (w / BM.length * 100).toFixed(0) + '%"></i></span><b>' + w + '</b>/' + BM.length + '곳 이김</em></button>'; }).join("") + '</div>' +
@@ -84,7 +84,7 @@
       '<p class="note" style="margin:6px 0 0">지수 줄을 누르면 아래 그래프에 넣고 빼요(최대 5개). 「앞섬·뒤짐」은 ' + F.ic + ' ' + F.t + ' 기준. 포트와 같은 달러 기준이라 코스피·니케이처럼 현지 통화와 다를 땐 「현지」 수익률을 함께 적었어요.</p></section>';
     var ex = F.ret - B["S&P500"][B["S&P500"].length - 1];
     var cmp = S.bsel.slice(0, 4);
-    h += (PF.length > 1 ? '<div class="po-mode po-pf2">' + PF.map(function(f){ return '<button data-pf="' + f.k + '" class="' + (S.pf === f.k ? "on" : "") + '">' + f.ic + ' ' + f.t + '</button>'; }).join("") + '</div>' : '') +
+    var h = (PF.length > 1 ? '<div class="po-mode po-pf2">' + PF.map(function(f){ return '<button data-pf="' + f.k + '" class="' + (S.pf === f.k ? "on" : "") + '">' + f.ic + ' ' + f.t + '</button>'; }).join("") + '</div>' : '') +
       '<section class="po-hero' + (F.k === "kick" ? " kick" : "") + '"><div class="po-k">' + F.ic + ' <b>' + F.t + '</b> · ' + F.s + ' · ' + md(P.start) + '부터</div>' +
       '<div class="po-big ' + cls(F.ret) + '">' + sg(F.ret) + '</div>' + (honV(F) != null ? '<div class="po-hon">' + honC(F) + '<small>' + (F.k === "kick" ? "돌파 칸은 다음 거래일 종가에 사고 비용을 뺀 값" : "주 1회만 비중을 맞추고 그때 비용을 뺀 값") + '</small></div>' : '') +
       '<div class="po-won">💰 ' + won(S.amt) + '원 넣었다면 <b class="' + cls(F.ret) + '">' + (F.ret >= 0 ? "+" : "−") + won(Math.abs(S.amt * F.ret / 100)) + '원</b>' +
@@ -96,6 +96,7 @@
         P.dates.map(md), {h: 200, unit: "%", zero: 1, nodots: P.dates.length > 12, marks: marks(F)}) + '</div>' +
       '<div class="po-mk"><span><i style="background:#ffb84d"></i>비중·상품 바뀐 날</span>' + (F.k === "kick" ? '<span><i style="background:#4dd47a"></i>킥 사기</span><span><i style="background:#ff6b6b"></i>킥 팔기</span>' : '') + '</div>' +
       '<div class="po-w">S&P를 이긴 날 <b>' + F.win + ' / ' + F.days + '</b>' + (F.best ? ' · 가장 좋았던 날 ' + md(F.best.d) + ' <b class="up">' + sg(F.best.r) + '</b>' : '') + (F.worst ? ' · 가장 나빴던 날 ' + md(F.worst.d) + ' <b class="dn">' + sg(F.worst.r) + '</b>' : '') + '</div></section>';
+    h += cmpH;   // 10/12: 위 바로가기 칩 순서(💼 성적 → 🏁 비교)와 맞춤
 
     if (CN && CN.regime) h += concHtml();
     if (K && S.pf === "kick") h += kickHtml();
