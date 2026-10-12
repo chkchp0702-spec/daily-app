@@ -24,7 +24,25 @@
       '<polyline fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" points="' + pts + '"/></svg>';
   }
   function man(v){ var a = Math.abs(v); return (v >= 0 ? "+" : "−") + (a >= 1e4 ? (a / 1e4).toFixed(a >= 1e5 ? 0 : 1) + "만" : Math.round(a).toLocaleString()) + "주"; }
+  // 돈의 길 나라 카드 → 눌러서 펼침 (지수 1일·1주·1개월, 국면, 오르는 종목 비율, 뜨는 업종과 대장주)
+  var FOSEL = null;
+  function countryDetail(c){
+    if (!c) return '';
+    var row = function(k, v){ return '<div class="fo-dr"><span>' + k + '</span><b>' + v + '</b></div>'; };
+    var hot = (c.hot || []).map(function(h){
+      return '<div class="fo-dh"><div class="fo-dt">▲ <b>' + e(h.name) + '</b> <span>오늘 ' + pc(h.r1) + ' · 1주 ' + pc(h.r5) + '</span></div><div class="fo-dl">' +
+        (h.lead || []).map(function(l){ return '<a href="javascript:openOP(\'' + e(l.s).replace(/'/g, "") + '\')">' + e(l.n || l.s) + ' ' + pc(l.r1) + '</a>'; }).join("") + '</div></div>'; }).join("");
+    return '<div class="fo-cd"><div class="fo-dhd">' + c.flag + ' <b>' + e(c.name) + '</b> · ' + e(c.ix || "") + (c.date ? ' <small>' + e(c.date.slice(5)) + ' 기준</small>' : '') + '</div>' +
+      '<div class="fo-dg">' + row("오늘", pc(c.chg1)) + row("1주", pc(c.chg5)) + row("1개월", pc(c.chg20)) + row("국면", e(c.regime || "—")) + row("10일선 위", c.breadth10 != null ? e(c.breadth10) + "%" : "—") + '</div>' +
+      (hot || '<div class="mut" style="font-size:12px">뜨는 업종 자료 없음</div>') + '<div class="mut" style="font-size:11px;margin-top:4px">종목 이름을 누르면 차트가 열려요</div></div>';
+  }
+  document.addEventListener("click", function(ev){
+    var c = ev.target.closest && ev.target.closest("[data-foc]"); if (!c) return;
+    var i = +c.getAttribute("data-foc"); FOSEL = FOSEL === i ? null : i;
+    var b = document.querySelector("#mkfo .fo-b"); if (b && window.__FO) b.innerHTML = focusHtml(window.__FO.F, window.__FO.L);
+  });
   function focusHtml(F, L){
+    window.__FO = {F: F, L: L};
     var px = (L && L.px) || {}, liveOn = L && L.date && L.at;
     var tagc = function(a){ return a === "추격 금지" ? "r" : a === "눌림 대기" ? "o" : /★/.test(a) ? "g" : "x"; };
     var usOpen = (function(){ var a = (L && L.at) || "", h = +a.slice(0, 2); return a && (h >= 22 || h < 6); })();
@@ -37,8 +55,8 @@
     var h = (al.length ? '<div class="fo-al">' + al.map(function(a){ return '<div class="' + (a.k === "돌파" ? "ok" : "ng") + '">' + (a.k === "돌파" ? "✅" : "⚠️") + ' <b>' + e(a.name) + '</b> ' + e(a.msg) + ' <small>' + e(a.at) + '</small></div>'; }).join("") + '</div>' : '') +
       (liveOn ? '<div class="fo-live"><span class="ixc-on">●</span> 장중 추적 ' + e(L.at) + ' · 10분마다 · 기준가 돌파/20일선 이탈은 알림 탭 「🎯」 구독하면 휴대폰으로</div>' : '');
     h += '<div class="fo-sub" style="margin-top:2px">① 돈의 길 — 5개 시장 1주</div><div class="fo-cs">' + (F.countries || []).map(function(c, i){
-      return '<div class="fo-c' + (i === 0 && c.label ? " fo-top" : "") + '"><div class="fo-n">' + c.flag + " " + e(c.name) + '</div><div class="fo-v">' + pc(c.chg5) + '</div><small>' + (c.label ? e(c.label) : "1주 " + e(c.ix || "")) + '</small>' +
-        ((c.hot || [])[0] ? '<small class="fo-h">▲ ' + e(c.hot[0].name) + '</small>' : '') + '</div>'; }).join("") + '</div>';
+      return '<div class="fo-c' + (i === 0 && c.label ? " fo-top" : "") + (FOSEL === i ? " fo-on" : "") + '" data-foc="' + i + '" role="button" tabindex="0"><div class="fo-n">' + c.flag + " " + e(c.name) + ' <span class="fo-ar">' + (FOSEL === i ? "▴" : "▾") + '</span></div><div class="fo-v">' + pc(c.chg5) + '</div><small>' + (c.label ? e(c.label) : "1주 " + e(c.ix || "")) + '</small>' +
+        ((c.hot || [])[0] ? '<small class="fo-h">▲ ' + e(c.hot[0].name) + '</small>' : '') + '</div>'; }).join("") + '</div>' + countryDetail((F.countries || [])[FOSEL]);
     h += F.themes.slice(0, 2).map(function(t, i){
       var sg = t.stage || {}, fl = t.flow, lg = t.lag, sp = t.supply;
       return '<div class="fo-th"><div class="fo-tt"><b>' + (i ? "③" : "②") + " " + e(t.name) + '</b> <small>' + e(t.sym) + '</small>' + (t.streak >= 3 ? ' <em>🔥' + t.streak + '일</em>' : '') +
