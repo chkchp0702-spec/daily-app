@@ -806,7 +806,10 @@ function pdfButton(make, name){
     b.disabled = true; b.innerHTML = "⏳ PDF 만드는 중…<small>그림이 많으면 몇 초 걸려요</small>";
     make().then(function(bl){ blob = bl; b.disabled = false; b.classList.add("ready");
       b.innerHTML = "⬇️ PDF 저장하기<small>" + esc(name) + ".pdf · 눌러서 저장/공유</small>"; })
-    .catch(function(err){ try { console.error("pdf", err); } catch(e) {} b.disabled = false; b.innerHTML = "다시 시도<small>PDF를 못 만들었어요</small>"; });
+    .catch(function(err){ try { console.error("pdf", err); } catch(e) {} b.disabled = false;
+      var why = String((err && (err.message || err)) || "").slice(0, 80);   // 10/14: 왜 실패했는지 보이게 (아이폰 원인 찾기)
+      b.innerHTML = "다시 시도<small>PDF를 못 만들었어요" + (why ? " · " + esc(why) : "") + "</small>";
+      try { fetch("https://ntfy.sh/chkchp-ch-pdferr", {method: "POST", body: (navigator.userAgent || "").slice(0, 120) + " | " + name + " | " + why}).catch(function(){}); } catch(e) {} });
   };
   wrap.appendChild(b); return wrap;
 }
@@ -1369,7 +1372,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261014a";
+var APPV = "20261014b";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1425,7 +1428,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="push.js?v=2"></script>
 <script defer src="port.js?v=33"></script>
 <script defer src="simple.js?v=15"></script>
-<script defer src="pdfx.js?v=5"></script>
+<script defer src="pdfx.js?v=6"></script>
 <script defer src="honest.js?v=1"></script>
 <script defer src="up10.js?v=12"></script>
 <script defer src="nav2.js?v=13"></script>

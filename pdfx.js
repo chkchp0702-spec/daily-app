@@ -3,7 +3,9 @@
    지금: ① 화면을 몰래 복제해 SVG 차트는 다 그려진 PNG로, 외부 사진·로고는 중계 서버(wsrv.nl)로 받아 그림 데이터로 바꾸고
          ② 카드(섹션)를 한 장씩 작은 캔버스로 찍어 ③ PDF 쪽에 차례로 붙인다. 카드가 쪽 경계에서 잘리지 않는다. */
 (function(){
-  var PW = 114, PH = 203, M = 4;          // PDF 쪽 크기(mm)·여백 — 휴대폰 화면 비율
+  var PW = 114, PH = 203, M = 4;
+  // 아이폰 사파리: 캔버스 메모리 한도가 작아 한 번에 많이 그리면 실패 → 작게 찍고, 쓴 캔버스는 바로 비우고, 한 카드가 실패해도 건너뛰고 계속
+  var IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);          // PDF 쪽 크기(mm)·여백 — 휴대폰 화면 비율
   var CPROPS = ["fill", "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "opacity", "fill-opacity", "stroke-opacity",
                 "font-size", "font-weight", "font-family", "text-anchor", "dominant-baseline", "color"];
   function rgb(v){ return window.toRGB ? toRGB(v) : v; }
@@ -24,7 +26,7 @@
       if (!ok) return null;
       var c = w.document.createElement("canvas"), s = 2; c.width = Math.ceil(r.width * s); c.height = Math.ceil(r.height * s);
       var g = c.getContext("2d"); g.scale(s, s); g.drawImage(img, 0, 0, r.width, r.height);
-      var out = w.document.createElement("img"); out.src = c.toDataURL("image/png");
+      var out = w.document.createElement("img"); out.src = c.toDataURL("image/png"); c.width = c.height = 0;   // 캔버스 메모리 바로 돌려줌(아이폰)
       out.style.cssText = "display:block;width:" + r.width + "px;height:" + r.height + "px;max-width:100%";
       return loadImg(out).then(function(){ return out; });
     });
@@ -79,7 +81,7 @@
       // 10/14: 예전엔 카드마다 문서 전체(수천 개)의 색을 다시 고쳐서 나침반이 2분 넘게 걸리고 휴대폰에선 멈춤
       //   → 색 고치기는 복제본에 한 번만, 찍을 땐 원래 화면은 건너뜀(ignoreElements)
       fixOnce(host, w);
-      var opt = {margin: 0, jsPDF: {unit: "px", format: [width, 2000], orientation: "portrait", hotfixes: ["px_scaling"]}, html2canvas: {scale: (w.devicePixelRatio > 2 ? 1.5 : 1.8), backgroundColor: bg, useCORS: true, logging: false, scrollX: 0, scrollY: 0,
+      var opt = {margin: 0, jsPDF: {unit: "px", format: [width, 2000], orientation: "portrait", hotfixes: ["px_scaling"]}, html2canvas: {scale: IOS ? 1.25 : (w.devicePixelRatio > 2 ? 1.5 : 1.8), backgroundColor: bg, useCORS: true, logging: false, scrollX: 0, scrollY: 0,
                                 ignoreElements: function(n){ return n.parentNode === d.body && n !== host && !/^(HEAD|STYLE|LINK)$/.test(n.tagName); }}};
       // 4) PDF 만들기 — 쪽 너비에 맞춰 카드를 차례로 붙이고, 남은 자리가 모자라면 새 쪽
       return H2P().set({jsPDF: {unit: "mm", format: [PW, PH], orientation: "portrait"}}).from(d.createElement("div")).toPdf().get("pdf").then(function(tmp){
@@ -87,17 +89,19 @@
         var hx = (function(c){ var m = String(c).match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/); return m ? "#" + [m[1], m[2], m[3]].map(function(x){ return ("0" + (+x).toString(16)).slice(-2); }).join("") : c; })(bg);
         var paint = function(){ PDF.setFillColor(hx); PDF.rect(0, 0, PW, PH, "F"); };
         paint();
-        var y = M, i = 0, scale = (PW - M * 2) / width;    // mm per css px
+        var y = M, i = 0, scale = (PW - M * 2) / width, okN = 0, failN = 0, lastErr = null;    // mm per css px
         // 첫 줄: 제목
         var next = function(){
           if (i >= parts.length) return Promise.resolve();
           var el = parts[i++];
           if (prog) try { prog(i, parts.length); } catch(e) {}
-          return wait(30).then(function(){ return H2P().set(opt).from(el).toCanvas().get("canvas"); }).then(function(cv){   // 카드 사이 숨 고르기 — 화면이 멈추지 않게
+          return wait(IOS ? 60 : 30).then(function(){ return H2P().set(opt).from(el).toCanvas().get("canvas"); }).then(function(cv){   // 카드 사이 숨 고르기 — 화면이 멈추지 않게
+            [].forEach.call(d.querySelectorAll(".html2pdf__overlay,.html2pdf__container"), function(x){ x.remove(); });
+            if (!cv || !cv.width || !cv.height) throw new Error("빈 그림");
             var wmm = PW - M * 2, hmm = cv.height / cv.width * wmm, gap = 2.2;   // 찍힌 그림 비율 그대로
             if (hmm <= PH - M * 2){
               if (y + hmm > PH - M){ PDF.addPage([PW, PH], "portrait"); paint(); y = M; }
-              PDF.addImage(cv.toDataURL("image/jpeg", 0.92), "JPEG", M, y, wmm, hmm); y += hmm + gap;
+              PDF.addImage(cv.toDataURL("image/jpeg", 0.88), "JPEG", M, y, wmm, hmm); y += hmm + gap;
             } else {                                         // 한 쪽보다 긴 카드: 쪽 높이로 잘라 이어 붙임
               var pxPerMm = cv.height / hmm, off = 0;
               if (y > M + 1){ PDF.addPage([PW, PH], "portrait"); paint(); y = M; }
@@ -105,14 +109,18 @@
                 var take = Math.min(PH - M * 2, hmm - off), sc = d.createElement("canvas");
                 sc.width = cv.width; sc.height = Math.ceil(take * pxPerMm);
                 sc.getContext("2d").drawImage(cv, 0, Math.floor(off * pxPerMm), cv.width, sc.height, 0, 0, cv.width, sc.height);
-                PDF.addImage(sc.toDataURL("image/jpeg", 0.92), "JPEG", M, y, wmm, take); off += take; y += take + gap;
+                PDF.addImage(sc.toDataURL("image/jpeg", 0.88), "JPEG", M, y, wmm, take); off += take; y += take + gap; sc.width = sc.height = 0;
                 if (off < hmm - 0.5){ PDF.addPage([PW, PH], "portrait"); paint(); y = M; }
               }
             }
+            cv.width = cv.height = 0; okN++;
             return next();
-          });
+          }).catch(function(e){ failN++; lastErr = e; [].forEach.call(d.querySelectorAll(".html2pdf__overlay,.html2pdf__container"), function(x){ x.remove(); }); return next(); });
         };
-        return next().then(function(){ return PDF.output("blob"); });
+        return next().then(function(){
+          if (!okN) throw new Error("카드를 하나도 못 찍음 · " + (lastErr && (lastErr.message || lastErr) || ""));
+          if (failN) try { console.warn("pdf: 건너뛴 카드", failN, lastErr); } catch(e) {}
+          return PDF.output("blob"); });
       });
     }).finally(function(){ host.remove();
       // 10/14: html2pdf 가 남기는 투명 덮개(html2pdf__overlay)가 화면을 덮어 「PDF 저장하기」를 못 누르던 문제 — 다 치움
