@@ -293,7 +293,7 @@
         var ch = h.querySelector(".fchev"); h.insertBefore(ib, ch || null);
       } else h.classList.add("tt-h");
       // 카드의 「읽는 법」 글을 설명 칸으로 (조작 버튼·현재 상태 글은 카드에 그대로)
-      var ns = c.matches(".fold") ? [] : [].filter.call(c.querySelectorAll(":scope > p.note"), function(n){
+      var ns = [].filter.call(c.querySelectorAll(c.matches(".fold") ? ":scope > .fold-b > section > p.note, :scope > .fold-b > p.note" : ":scope > p.note"), function(n){
         return !n.dataset.nt && n.textContent.trim() && !n.querySelector("button,a,input,select,textarea,label") && !KEEPV.test(n.textContent); });
       if (ns.length){ ns.forEach(function(n){ n.dataset.nt = "1"; n.classList.add("tt-note"); }); }
       h._tt = {t: t, ns: ns};
