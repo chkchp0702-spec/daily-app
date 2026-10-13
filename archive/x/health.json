@@ -1,89 +1,86 @@
 {
- "at": "2026-10-13 16:51",
+ "at": "2026-10-14 00:10",
  "ok": false,
  "problems": [
-  "피드 0개·실패: 이데일리 증권"
+  "버전 짝 안 맞음: index 20261013i · sw 20261013f · version.txt 20261013i → 휴대폰에 새 버전이 안 들어감"
  ],
  "data": [
   {
    "name": "💼 포트",
    "ok": true,
-   "age_h": 0.4,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "⚡ 킥",
    "ok": true,
-   "age_h": 0.4,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 0.4,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 0.4,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "🌏 동종주",
    "ok": true,
-   "age_h": 0.4,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 10.0,
+   "age_h": 17.4,
    "lim": 30
   },
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.2,
-   "lim": 1.5,
-   "zero": [
-    "이데일리 증권"
-   ]
+   "age_h": 0.1,
+   "lim": 1.5
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.3,
+   "age_h": 0.4,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 1.8,
+   "age_h": 9.1,
    "lim": 30
   },
   {
    "name": "📱 앱 목록",
    "ok": true,
-   "age_h": 0.3,
+   "age_h": 1.1,
    "lim": 30
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 0.5,
-   "cards": 5,
-   "len": 1006,
+   "s": 0.9,
+   "cards": 7,
+   "len": 1640,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "market",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 29,
-   "len": 7553,
+   "len": 7499,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -92,7 +89,7 @@
    "tab": "port",
    "s": 0.1,
    "cards": 9,
-   "len": 2851,
+   "len": 2472,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -101,7 +98,7 @@
    "tab": "score",
    "s": 0.3,
    "cards": 9,
-   "len": 2025,
+   "len": 2204,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -110,14 +107,14 @@
    "tab": "whale",
    "s": 0.3,
    "cards": 21,
-   "len": 961,
+   "len": 977,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "cup",
-   "s": 0.4,
+   "s": 0.2,
    "cards": 11,
    "len": 3309,
    "bad": [],
@@ -128,16 +125,16 @@
    "tab": "gap",
    "s": 0.3,
    "cards": 16,
-   "len": 2695,
+   "len": 2687,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "sector",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 39,
-   "len": 4322,
+   "len": 4569,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -145,15 +142,15 @@
   {
    "tab": "accum",
    "s": 0.3,
-   "cards": 12,
-   "len": 1311,
+   "cards": 13,
+   "len": 1399,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "onepager",
-   "s": 0.2,
+   "s": 0.1,
    "cards": 1,
    "len": 319,
    "bad": [],
@@ -162,9 +159,9 @@
   },
   {
    "tab": "danta",
-   "s": 0.4,
+   "s": 0.3,
    "cards": 12,
-   "len": 1466,
+   "len": 1454,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -191,7 +188,7 @@
    "tab": "feed",
    "s": 0.3,
    "cards": 1,
-   "len": 13814,
+   "len": 14798,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -258,13 +255,13 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-13T07:50"
+   "when": "2026-10-13T15:04"
   },
   {
    "repo": "daily-app",
    "job": "collect",
    "ok": true,
-   "when": "2026-10-13T07:33"
+   "when": "2026-10-13T14:05"
   },
   {
    "repo": "daily-app",
@@ -276,7 +273,7 @@
    "repo": "daily-app",
    "job": "opprice",
    "ok": true,
-   "when": "2026-10-13T02:37"
+   "when": "2026-10-13T07:20"
   },
   {
    "repo": "daily-app",
@@ -318,37 +315,37 @@
    "repo": "daily-app",
    "job": "watch",
    "ok": true,
-   "when": "2026-10-13T07:02"
+   "when": "2026-10-13T14:47"
   },
   {
    "repo": "daily-app",
    "job": "live",
    "ok": true,
-   "when": "2026-10-13T07:43"
+   "when": "2026-10-13T15:03"
   },
   {
    "repo": "daily-app",
    "job": "regime",
    "ok": true,
-   "when": "2026-10-13T02:43"
+   "when": "2026-10-13T11:50"
   },
   {
    "repo": "daily-app",
    "job": "keeper",
    "ok": true,
-   "when": "2026-10-13T07:28"
+   "when": "2026-10-13T14:56"
   },
   {
    "repo": "daily-app",
    "job": "feedback",
    "ok": true,
-   "when": "2026-10-13T06:44"
+   "when": "2026-10-13T15:12"
   },
   {
    "repo": "daily-app",
    "job": "oppdf",
    "ok": true,
-   "when": "2026-10-13T03:53"
+   "when": "2026-10-13T14:21"
   },
   {
    "repo": "daily-app",
@@ -366,7 +363,7 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-13T07:25"
+   "when": "2026-10-13T07:50"
   },
   {
    "repo": "market-strategy-report",
@@ -378,7 +375,7 @@
    "repo": "market-strategy-report",
    "job": "build-report",
    "ok": true,
-   "when": "2026-10-13T07:50"
+   "when": "2026-10-13T14:43"
   },
   {
    "repo": "market-strategy-report",
@@ -396,13 +393,13 @@
    "repo": "market-strategy-report",
    "job": "my-feed",
    "ok": true,
-   "when": "2026-10-13T02:41"
+   "when": "2026-10-13T06:02"
   },
   {
    "repo": "market-strategy-report",
    "job": "fetch-market",
    "ok": true,
-   "when": "2026-10-13T07:26"
+   "when": "2026-10-13T14:56"
   },
   {
    "repo": "market-strategy-report",
@@ -420,7 +417,13 @@
    "repo": "market-strategy-report",
    "job": "lab",
    "ok": true,
-   "when": "2026-10-13T07:35"
+   "when": "2026-10-13T14:43"
+  },
+  {
+   "repo": "market-strategy-report",
+   "job": "q16-live",
+   "ok": true,
+   "when": "2026-10-13T08:32"
   },
   {
    "repo": "market-strategy-report",
@@ -462,7 +465,7 @@
    "repo": "stock-screener",
    "job": "push-relay",
    "ok": true,
-   "when": "2026-10-12T22:33"
+   "when": "2026-10-13T06:50"
   },
   {
    "repo": "stock-screener",
@@ -474,7 +477,7 @@
    "repo": "stock-screener",
    "job": "screener",
    "ok": true,
-   "when": "2026-10-13T04:27"
+   "when": "2026-10-13T10:19"
   },
   {
    "repo": "stock-screener",
@@ -527,7 +530,10 @@
   "10/12 ⏰ 시세 수집(fetch.yml) 깨우기 — 피드 이어달리기가 15분마다 보고, 예약 시간대인데 마지막 실행",
   "10/12 🩺 건강검진을 지킴이가 16:25 에 직접 켬",
   "10/13 📋 선호 ETF 목록 82개(ledger/pref_etf.json) · RULES 1-L — 모든 포트에서 ",
-  "10/13 📰 언론 RSS 가 받아지지만 글이 전부 옛것(2일 창 밖)이면 구글뉴스 site: 로 대신 받기 · 🩺 건"
+  "10/13 📰 언론 RSS 가 받아지지만 글이 전부 옛것(2일 창 밖)이면 구글뉴스 site: 로 대신 받기 · 🩺 건",
+  "10/13 📈 Q16 반영 — 🔌 고객사→납품사(🧪 절반) · 🕵 내부자 기회형 매수 3명↑(✅) 킥 새 신호 · 🎰 ",
+  "10/13 🔔 더 자주 열게: ① 아침 「☕ 오늘 한 줄」 알림(킥·집중·비중 변경·어제 예고 ✓✗ — nudge --",
+  "10/13 🧠 두뇌 선제 아이디어: ① 우리 신호(컵·갭·매집·고래·집중 ★)와 겹칠 때만 bets, 뉴스만은 「👀 관"
  ],
  "note": "매일 16:30 자동 검사. 「자가 업그레이드」(16:47)가 problems 를 먼저 고친다."
 }
