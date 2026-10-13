@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>CH Investing 설치 방법</title>
 <meta name="description" content="아이폰·갤럭시 홈 화면에 CH Investing 앱을 설치하는 방법">
+<link rel="manifest" href="app.webmanifest">
+<meta name="theme-color" content="#0b0f17">
 <link rel="apple-touch-icon" href="icon.png?v=2">
 <link rel="icon" href="icon.png?v=2">
 <style>
@@ -28,6 +30,8 @@ header p{margin:4px 0 0;color:#c9d2e6;font-size:15px}
 .step b.k{background:var(--hl);color:var(--ink);padding:0 5px;border-radius:5px}
 .pic{grid-column:1/-1;display:flex;justify-content:center;margin-top:10px}
 .pic svg{width:100%;max-width:260px;height:auto}
+.inst{display:block;width:100%;font:inherit;font-size:19px;font-weight:900;padding:16px;border:0;border-radius:16px;background:var(--ok);color:#fff;cursor:pointer;margin-top:8px}
+.tip a.go{display:block;margin-top:10px;text-align:center;font-weight:900;font-size:17px;padding:12px;border-radius:14px;background:var(--ink);color:#fff;text-decoration:none}
 .tip{background:#fff6d6;border:1px solid #f3dc87;border-radius:14px;padding:10px 12px;font-size:15px;color:#5a4a10;margin-top:8px}
 .ok{background:#e8f7ee;border:1px solid #b7e4c7;color:#0f5132}
 .warn{background:#fff0f0;border:1px solid #ffc9c9;color:#7a1f1f}
@@ -111,6 +115,10 @@ footer{color:var(--sub);font-size:13px;text-align:center;margin-top:24px}
   <div class="tip">💡 버튼이 안 보이면: 아래 주소를 <b>복사</b>해서 <b>크롬</b>(🔴🟡🟢 동그라미 앱)을 직접 열고 위쪽 주소창에 붙여넣어도 돼요.
   <div class="addr"><span>chkchp0702-spec.github.io/daily-app</span><button onclick="cp()">복사</button></div></div></div>
 
+<div class="card" id="quick" hidden><p class="big">📲 크롬이면 이 버튼 하나로 끝</p>
+  <button class="inst" onclick="inst()">CH Investing 설치하기</button>
+  <p style="margin:8px 0 0;font-size:15px;color:var(--sub)">버튼이 안 되면 아래 2~4번대로 하세요.</p></div>
+
 <div class="card"><div class="step"><div class="num">2</div><div>
   <h2>크롬 오른쪽 위 <b class="k">⋮</b> 를 누르세요</h2></div>
   <div class="pic"><svg viewBox="0 0 260 200"><rect x="20" y="4" width="220" height="192" rx="26" fill="#1b1f2a"/><rect x="30" y="14" width="200" height="172" rx="18" fill="#fff"/>
@@ -131,6 +139,10 @@ footer{color:var(--sub);font-size:13px;text-align:center;margin-top:24px}
   <rect x="44" y="40" width="172" height="110" rx="14" fill="#fff"/><text x="62" y="66" font-size="14" font-weight="800">홈 화면에 추가</text>
   <image href="icon.png?v=2" x="60" y="78" width="30" height="30"/><text x="98" y="98" font-size="13">CH Investing</text>
   <text x="120" y="136" font-size="13" fill="#2f6bff">취소</text><text x="184" y="136" font-size="14" fill="#2f6bff" font-weight="900">추가</text><circle class="ring" cx="182" cy="131" r="16"/><text x="186" y="176" font-size="24">👆</text></svg></div></div>
+  <div class="tip">⚠️ <b>「설치 — 이 앱을 설치할 수 없습니다」</b>와 <b>「바로가기 만들기」</b>가 같이 뜨면:<br>
+  ① 아래 <b>「앱 화면 열기」</b>를 눌러 앱 화면으로 간 뒤, 거기서 다시 <b>⋮ → 홈 화면에 추가(앱 설치)</b> 하세요.<br>
+  ② 그래도 같으면 <b class="k">바로가기 만들기</b>를 누르세요. 아이콘이 생기고 똑같이 쓸 수 있어요(크롬으로 열려요).
+  <a class="go" href="./">📈 앱 화면 열기 ›</a></div>
   <div class="tip">삼성 인터넷(파란 행성 🌐 앱)을 쓰면: 아래쪽 <b>≡</b> → <b>현재 페이지 추가</b> → <b>홈 화면</b>.</div></div>
 </div>
 
@@ -156,6 +168,7 @@ footer{color:var(--sub);font-size:13px;text-align:center;margin-top:24px}
 
 <div class="card"><p class="big">❓ 잘 안 될 때</p>
 <p style="margin:0 0 6px">• <b>「홈 화면에 추가」가 없어요</b> → 아직 카톡 안이에요. 1번으로 돌아가 사파리(아이폰)·크롬(갤럭시)으로 여세요.</p>
+<p style="margin:0 0 6px">• <b>갤럭시에서 「이 앱을 설치할 수 없습니다」가 떠요</b> → 앱 화면(<a href="./">여기</a>)으로 가서 다시 ⋮ → 홈 화면에 추가. 그래도 같으면 <b>「바로가기 만들기」</b>를 눌러도 돼요.</p>
 <p style="margin:0 0 6px">• <b>화면이 하얗게 멈췄어요</b> → 위 방법대로 완전히 끄고 다시 켜세요.</p>
 <p style="margin:0">• <b>알림을 받고 싶어요</b> → 앱 안 <b>🔔 알림</b> 탭에 쉬운 설명이 있어요.</p></div>
 
@@ -175,6 +188,12 @@ function cp(){
   else prompt("아래 주소를 길게 눌러 복사하세요", URL_APP);
 }
 show(/android/i.test(navigator.userAgent) ? "and" : "ios");
+// 크롬(갤럭시)에서 이 페이지에서도 바로 설치되게 — 앱과 같은 서비스 워커·매니페스트
+var DP = null;
+if ("serviceWorker" in navigator) try { navigator.serviceWorker.register("sw.js", {scope: "./"}).catch(function(){}); } catch(e) {}
+window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); DP = e; var q = document.getElementById("quick"); if (q) q.hidden = false; });
+window.addEventListener("appinstalled", function(){ var q = document.getElementById("quick"); if (q) q.innerHTML = '<p class="big">✅ 설치됐어요! 홈 화면의 CH Investing 아이콘으로 여세요.</p>'; });
+function inst(){ if (!DP){ alert("크롬 ⋮ → 「홈 화면에 추가」로 해 주세요."); return; } DP.prompt(); DP.userChoice.then(function(){ DP = null; }); }
 </script>
 </body>
 </html>
