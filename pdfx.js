@@ -42,6 +42,14 @@
       .catch(function(){ img.style.visibility = "hidden"; });
   }
 
+  // 복제본 안의 색 계산값 color(srgb …) 를 rgb 로 한 번만 (html2canvas 가 못 읽음)
+  var FPROPS = ["color", "background-color", "background-image", "border-top-color", "border-right-color", "border-bottom-color", "border-left-color", "box-shadow", "outline-color", "text-decoration-color"];
+  function fixOnce(root, w){
+    [].forEach.call(root.querySelectorAll("*"), function(el){
+      var cs = w.getComputedStyle(el);
+      FPROPS.forEach(function(p){ var v = cs.getPropertyValue(p); if (v && v.indexOf("color(") >= 0) el.style.setProperty(p, rgb(v), "important"); });
+    });
+  }
   /* w: 화면이 있는 window(iframe 이면 그 contentWindow), root: 찍을 영역, bg: 배경색 */
   window.screenPdf = function(w, root, name, bg, prog){
     var d = w.document, H2P = w.html2pdf;
@@ -68,12 +76,16 @@
         parts.push(ch); }); })(clone);
       if (!parts.length) parts = [clone];
       // 찍는 폭 = 화면 폭 그대로 (html2pdf 는 쪽 너비로 다시 배치하므로 쪽을 px 로 화면 폭과 같게)
-      var opt = {margin: 0, jsPDF: {unit: "px", format: [width, 2000], orientation: "portrait", hotfixes: ["px_scaling"]}, html2canvas: {scale: (w.devicePixelRatio > 2 ? 1.6 : 2), backgroundColor: bg, useCORS: true, logging: false, scrollX: 0, scrollY: 0,
-                                onclone: function(cd){ if (window.fixColors) try { fixColors(cd); } catch(e) {} }}};
+      // 10/14: 예전엔 카드마다 문서 전체(수천 개)의 색을 다시 고쳐서 나침반이 2분 넘게 걸리고 휴대폰에선 멈춤
+      //   → 색 고치기는 복제본에 한 번만, 찍을 땐 원래 화면은 건너뜀(ignoreElements)
+      fixOnce(host, w);
+      var opt = {margin: 0, jsPDF: {unit: "px", format: [width, 2000], orientation: "portrait", hotfixes: ["px_scaling"]}, html2canvas: {scale: (w.devicePixelRatio > 2 ? 1.5 : 1.8), backgroundColor: bg, useCORS: true, logging: false, scrollX: 0, scrollY: 0,
+                                ignoreElements: function(n){ return n.parentNode === d.body && n !== host && !/^(HEAD|STYLE|LINK)$/.test(n.tagName); }}};
       // 4) PDF 만들기 — 쪽 너비에 맞춰 카드를 차례로 붙이고, 남은 자리가 모자라면 새 쪽
       return H2P().set({jsPDF: {unit: "mm", format: [PW, PH], orientation: "portrait"}}).from(d.createElement("div")).toPdf().get("pdf").then(function(tmp){
         var PDF = tmp;                                     // 빈 첫 쪽이 하나 있는 jsPDF — 배경을 칠하고 그 위에 그린다
-        var paint = function(){ PDF.setFillColor(bg); PDF.rect(0, 0, PW, PH, "F"); };
+        var hx = (function(c){ var m = String(c).match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/); return m ? "#" + [m[1], m[2], m[3]].map(function(x){ return ("0" + (+x).toString(16)).slice(-2); }).join("") : c; })(bg);
+        var paint = function(){ PDF.setFillColor(hx); PDF.rect(0, 0, PW, PH, "F"); };
         paint();
         var y = M, i = 0, scale = (PW - M * 2) / width;    // mm per css px
         // 첫 줄: 제목
@@ -102,6 +114,8 @@
         };
         return next().then(function(){ return PDF.output("blob"); });
       });
-    }).finally(function(){ host.remove(); });
+    }).finally(function(){ host.remove();
+      // 10/14: html2pdf 가 남기는 투명 덮개(html2pdf__overlay)가 화면을 덮어 「PDF 저장하기」를 못 누르던 문제 — 다 치움
+      [].forEach.call(d.querySelectorAll(".html2pdf__overlay,.html2pdf__container"), function(x){ x.remove(); }); });
   };
 })();

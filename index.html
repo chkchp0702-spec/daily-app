@@ -853,7 +853,8 @@ function pdfBar(host, getEl, name, title){
   host.appendChild(pdfButton(function(){
     return loadScript(document, H2P).then(function(){
       // 화면 그대로 (pdfx.js) — 실패하면 예전 방식
-      if (window.screenPdf) return screenPdf(window, getEl(), name, "#0b0f17").catch(function(){ return oldWay(); });
+      var bg = (function(){ try { var c = getComputedStyle(document.body).backgroundColor; return /rgba\(0, 0, 0, 0\)|transparent/.test(c) ? "#0b0f17" : (window.toRGB ? toRGB(c) : c); } catch(e) { return "#0b0f17"; } })();   // 밝은 화면이면 밝은 바탕
+      if (window.screenPdf) return screenPdf(window, getEl(), name, bg).catch(function(){ return oldWay(); });
       return oldWay();
     });
     function oldWay(){
@@ -1368,7 +1369,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261013i";
+var APPV = "20261014a";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1424,7 +1425,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="push.js?v=2"></script>
 <script defer src="port.js?v=33"></script>
 <script defer src="simple.js?v=15"></script>
-<script defer src="pdfx.js?v=4"></script>
+<script defer src="pdfx.js?v=5"></script>
 <script defer src="honest.js?v=1"></script>
 <script defer src="up10.js?v=12"></script>
 <script defer src="nav2.js?v=13"></script>
