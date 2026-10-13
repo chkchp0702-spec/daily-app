@@ -385,9 +385,11 @@ def one(mk, D, cal, comp, comb, prev):
     c_low, t_low = cn_ < MIN_SIG, tn_ < MIN_SIG
     label, verdict = RG.quad(0 if (c_low and sc is not None) else sc, 0 if (t_low and stt is not None) else stt)
     if c_low and sc is not None:
-        verdict += f" (경기 신호가 {cn_}개뿐이라 경기 쪽은 판단 보류)"
+        verdict = verdict.replace("경기는 중립, ", "").replace("경기는 중립인데 ", "").replace("경기는 중립", "")
+        verdict += f" · 경기 쪽은 신호가 {cn_}개뿐이라 판단 보류"
     if t_low and stt is not None:
-        verdict += f" (시장 신호가 {tn_}개뿐이라 시장 쪽은 판단 보류)"
+        verdict = verdict.replace("시장은 방향을 못 정했지만 ", "")
+        verdict += f" · 시장 쪽은 신호가 {tn_}개뿐이라 판단 보류"
 
     def look(rows, v):
         for row in rows or []:
