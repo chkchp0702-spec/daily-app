@@ -29,7 +29,7 @@
   }
   function gaugeHelp(R){
     var t = R.now_timing, c = R.now_cycle;
-    var f = function(q, h){ return q && q.us ? '이 점수대(' + e(q.lab) + ')였던 ' + q.n + '주 → ' + h + ' 뒤 S&P500 평균 ' + pc(q.us[0]) + ' · 코스피 ' + pc(q.kr[0]) : ''; };
+    var f = function(q, h){ return q && q.mk ? '이 점수대(' + e(q.lab) + ')였던 ' + q.n + '주 → ' + h + ' 뒤 ' + e(R.index) + ' 평균 ' + pc(q.mk[0]) : q && q.us ? '이 점수대(' + e(q.lab) + ')였던 ' + q.n + '주 → ' + h + ' 뒤 S&P500 평균 ' + pc(q.us[0]) + ' · 코스피 ' + pc(q.kr[0]) : ''; };
     return '<div class="rb-help"><b>점수 읽는 법</b> — 신호마다 🟢 좋음 +1 · ⚪ 보통 0 · 🔴 경고 −1 을 매겨 (중요한 신호는 무게를 더 줘서) 평균 낸 것을 −100~+100으로 바꾼 숫자예요. ' +
       '<b>0 근처 = 좋은 신호와 나쁜 신호가 반반</b>, +면 좋은 쪽이 많고 −면 경고가 많아요.' +
       '<br>📊 <b>시장 타이밍</b> = 주가 흐름 자체(지수 200일선·오른 종목 수·신고가·공포지수·외국인 등)로 본 1~3개월 날씨' + (t ? ' · ' + f(t, "3개월") : '') +
@@ -65,16 +65,19 @@
     s += '<text x="10" y="12" fill="#8a94a8" font-size="10">' + e(h[0][0].slice(0, 7)) + '</text><text x="' + (W - 10) + '" y="12" fill="#8a94a8" font-size="10" text-anchor="end">' + e(h[n - 1][0].slice(0, 7)) + '</text></svg>';
     return s + '<div class="lg"><span><i style="background:#ffb84d"></i>경기 사이클</span><span><i style="background:#7c9cff"></i>시장 타이밍</span><span class="mut">최근 2년 · 매주</span></div>';
   }
+  // 🌏 10/13 시장별 판: 표·과거 성적 칸을 그 시장 지수 하나로 (합본은 미·한 두 칸)
+  function cols(R){ return R && R.mk ? [[R.flag + " " + R.index, "mk"]] : [["🇺🇸 S&P500", "us"], ["🇰🇷 코스피", "kr"]]; }
+  var CUR = null;
   function past(q, h){
-    if (!q || !q.us) return "";
+    if (!q || !(q.us || q.mk)) return "";
     return '<div class="rb-past"><div class="rb-ph">📜 2000년 이후 지금과 같은 국면이었던 ' + q.n + '주 → ' + h + ' 동안</div><div class="rb-pg">' +
-      [["🇺🇸 S&P500", q.us], ["🇰🇷 코스피", q.kr]].map(function(x){ var a = x[1] || [];
+      cols(CUR).map(function(c){ return [c[0], q[c[1]]]; }).map(function(x){ var a = x[1] || [];
         return '<div><small>' + x[0] + '</small><b style="color:' + (a[3] >= 35 ? V.DN : a[3] <= 20 ? V.UP : "#c9a227") + '">' + (a[3] != null ? a[3] + "%" : "–") + '</b><em>−10% 넘게 빠진 비율<br>평균 수익 ' + pc(a[0]) + ' · 플러스 ' + (a[1] != null ? a[1] + "%" : "–") + '</em></div>'; }).join("") + '</div></div>';
   }
   function btLine(s){
     var b = s.bt;
     if (!b) return '<div class="rb-bt">🧪 과거 자료가 없어 검증은 못 했어요 · 무게 1</div>';
-    var txt = b.since + '년 이후 검증 (' + b.h + ' 안에 −10% 넘게 빠진 비율, 미·한 평균): 경고일 때 <b class="dn">' + b.neg[3] + '%</b> · 좋음일 때 <b class="up">' + b.pos[3] + '%</b> <span class="mut">(평균 수익 경고 ' + pc(b.neg[1]) + ' · 좋음 ' + pc(b.pos[1]) + ')</span>';
+    var txt = b.since + '년 이후 검증 (' + b.h + ' 안에 −10% 넘게 빠진 비율, ' + (b.one && CUR && CUR.index ? CUR.index : '미·한 평균') + '): 경고일 때 <b class="dn">' + b.neg[3] + '%</b> · 좋음일 때 <b class="up">' + b.pos[3] + '%</b> <span class="mut">(평균 수익 경고 ' + pc(b.neg[1]) + ' · 좋음 ' + pc(b.pos[1]) + ')</span>';
     if (!(s.w > 0)) return '<div class="rb-bt off">🧪 ' + txt + ' — 위험을 잘 못 갈라서 <b>점수에서 뺐어요</b> (참고로만)</div>';
     return '<div class="rb-bt">🧪 ' + txt + ' → 무게 ' + s.w + '</div>';
   }
@@ -89,16 +92,25 @@
   }
   function table(rows, h, now){
     if (!rows || !rows.length) return "";
-    return '<table class="rb-tb"><tr><th>점수</th><th>주</th><th>🇺🇸 −10% 확률 · 수익</th><th>🇰🇷 −10% 확률 · 수익</th></tr>' + rows.map(function(r){
+    var C = cols(CUR);
+    return '<table class="rb-tb"><tr><th>점수</th><th>주</th>' + C.map(function(c){ return '<th>' + c[0] + ' −10% 확률 · 수익</th>'; }).join("") + '</tr>' + rows.map(function(r){
       var on = now && now.lab === r.lab;
-      return '<tr' + (on ? ' class="on"' : '') + '><td>' + e(r.lab) + (on ? ' ◀' : '') + '</td><td>' + r.n + '</td>' + ["us", "kr"].map(function(k){ var a = r[k];
+      return '<tr' + (on ? ' class="on"' : '') + '><td>' + e(r.lab) + (on ? ' ◀' : '') + '</td><td>' + r.n + '</td>' + C.map(function(c){ return c[1]; }).map(function(k){ var a = r[k];
         return '<td>' + (a ? '<b class="' + (a[3] >= 35 ? "dn" : a[3] <= 20 ? "up" : "") + '">' + a[3] + '%</b> <small>' + pc(a[0]) + '</small>' : '<span class="mut">표본 적음</span>') + '</td>'; }).join("") + '</tr>'; }).join("") + '</table>';
   }
-  function board(R){
+  var MKS = [["US", "🇺🇸 미국"], ["KR", "🇰🇷 한국"], ["JP", "🇯🇵 일본"], ["CN", "🇨🇳 중국"], ["HK", "🇭🇰 홍콩"], ["ALL", "🌐 미·한 합본"]];
+  function tabs(cur, M){
+    return '<div class="rb-tabs" role="tablist">' + MKS.filter(function(m){ return m[0] === "ALL" || (M && M[m[0]]); }).map(function(m){
+      var r = m[0] === "ALL" ? null : M[m[0]];
+      return '<button type="button" class="rb-tab' + (m[0] === cur ? ' on' : '') + '" data-rmk="' + m[0] + '">' + m[1] + (r && r.label ? '<small>' + e(r.label) + '</small>' : '<small>💼 현금 규칙이 씀</small>') + '</button>'; }).join("") + '</div>';
+  }
+  function board(R, cur, M){
     if (!R || !R.sig) return "";
-    if (!R.v) return card("🧭 국면 신호판", '<p class="note">새 계산 방식으로 바꾸는 중이에요. 다음 갱신 때 보여요.</p>');
+    CUR = R;
+    if (!R.v && !R.mk) return card("🧭 국면 신호판", '<p class="note">새 계산 방식으로 바꾸는 중이에요. 다음 갱신 때 보여요.</p>');
     var cyc = R.sig.filter(function(s){ return s.grp === "cycle"; }), tim = R.sig.filter(function(s){ return s.grp === "timing"; });
-    var h = '<div class="rb-top"><div class="rb-lab"><small>지금 국면</small><b>' + e(R.label) + '</b></div><em>' + e((R.updated || "").slice(5)) + '</em></div>' +
+    var h = tabs(cur, M) + (cur === "ALL" ? '<p class="note rb-mknote">🌐 미국 경기 신호 + 미·한 주가 신호를 섞은 판이에요(💼 포트 현금 비중이 이 판을 써요). 나라별로는 위 탭을 누르세요.</p>' : '') +
+      '<div class="rb-top"><div class="rb-lab"><small>' + (R.mk ? e(R.flag + " " + R.name) + ' · ' : '') + '지금 국면</small><b>' + e(R.label) + '</b></div><em>' + e((R.updated || "").slice(5)) + '</em></div>' +
       '<p class="rb-verdict">' + e(R.verdict) + '</p>' +
       '<div class="rb-g2">' + gauge("경기 사이클", "6~18개월 뒤", R.cycle, cyc, "cycle") + gauge("시장 타이밍", "1~3개월 뒤", R.timing, tim, "timing") + '</div>' +
       '<div class="rb-x" id="rbx" hidden></div>' + gaugeHelp(R) +
@@ -115,7 +127,7 @@
       '<p class="note">큰 글씨 = 그 기간 안에 고점 대비 −10% 넘게 빠진 적이 있는 비율 · 작은 글씨 = 평균 수익 · ◀ = 지금. ' + e(R.bt_note || "") + '</p></details>';
     h += '<p class="note">▲ 좋음 +1 · ▼ 경고 −1 · – 중립 0 에 지표별 무게(과거에 「크게 빠질 위험」을 잘 가른 만큼, 0~2)를 곱해 평균 ×100. 이 지표들은 평균 수익보다 하락 위험을 훨씬 잘 맞혀요. 줄을 누르면 뜻·기준·과거 검증·출처가 보여요.' + (R.errors && R.errors.length ? ' <em class="mut">오늘 못 받은 자료 ' + R.errors.length + '개</em>' : '') + '</p>';
     h += '</details>';
-    return card("🧭 국면 신호판 <span class='mut'>지금 시장은 어느 국면인가</span>", h, "", "rbboard");
+    return card("🧭 국면 신호판 <span class='mut'>" + (R.mk ? e(R.flag + " " + R.name) + " 시장은 어느 국면인가" : "미·한 합본") + "</span>", h, "", "rbboard");
   }
   // 🧭 두 점수를 누르면 아래에 설명 (10/11 사용자: "경기 사이클과 시장 타이밍 눌렀을 때 밑에 설명 이쁘게 · 닫기 버튼도")
   var LASTR = null;
@@ -128,7 +140,9 @@
       '<b>' + sg(v) + ' <span>' + word(v) + '</span></b></div><button class="rbx-x" type="button">닫기 ✕</button></div>' +
       '<p class="rbx-what">' + (cyc ? "금리·신용·실업·경기선행지수처럼 <b>경기 자체</b>를 보는 신호예요. 느리게 움직이고, 6~18개월 뒤 경기가 좋을지 미리 알려 줘요."
                                    : "지수 200일선·오른 종목 수·신고가·공포지수·외국인처럼 <b>주가 흐름 자체</b>를 보는 신호예요. 빨리 움직이고, 1~3개월 날씨를 알려 줘요.") + '</p>';
-    if (q && q.us) h += '<div class="rbx-past"><small>2000년 이후 이 점수대(' + e(q.lab) + ')였던 ' + q.n + '주 → ' + (cyc ? "6개월" : "3개월") + ' 뒤</small>' +
+    if (q && q.mk) h += '<div class="rbx-past"><small>2000년 이후 이 점수대(' + e(q.lab) + ')였던 ' + q.n + '주 → ' + (cyc ? "6개월" : "3개월") + ' 뒤</small>' +
+      '<div><span>' + e(R.flag + " " + R.index) + ' <b class="' + (q.mk[0] >= 0 ? "up" : "dn") + '">' + pc(q.mk[0]) + '</b></span><span>−10% 넘게 빠질 확률 <b>' + q.mk[3] + '%</b></span></div></div>';
+    else if (q && q.us) h += '<div class="rbx-past"><small>2000년 이후 이 점수대(' + e(q.lab) + ')였던 ' + q.n + '주 → ' + (cyc ? "6개월" : "3개월") + ' 뒤</small>' +
       '<div><span>🇺🇸 S&P500 <b class="' + (q.us[0] >= 0 ? "up" : "dn") + '">' + pc(q.us[0]) + '</b></span><span>🇰🇷 코스피 <b class="' + (q.kr[0] >= 0 ? "up" : "dn") + '">' + pc(q.kr[0]) + '</b></span>' +
       '<span>−10% 넘게 빠질 확률 <b>' + q.us[3] + '%</b></span></div></div>';
     h += '<div class="rbx-sh">신호 ' + sigs.length + '개 — 지금 어떤가</div><div class="rbx-list">' + sigs.map(function(s){
@@ -154,6 +168,10 @@
   });
   var css2 = document.createElement("style");
   css2.textContent =
+    ".rb-tabs{display:flex;gap:6px;overflow-x:auto;margin:-2px -2px 10px;padding:2px;scrollbar-width:none}.rb-tabs::-webkit-scrollbar{display:none}" +
+    ".rb-tab{flex:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:6px 10px;font:inherit;font-size:13px;font-weight:800;cursor:pointer;text-align:left;line-height:1.25}" +
+    ".rb-tab small{display:block;font-size:10.5px;font-weight:600;color:var(--sub)}.rb-tab.on{background:var(--text);color:var(--bg);border-color:var(--text)}.rb-tab.on small{color:var(--bg);opacity:.75}" +
+    ".rb-mknote{margin:0 0 8px}" +
     ".rb-gc[data-gk]{cursor:pointer;border:1.5px solid transparent;transition:border-color .15s}.rb-gc.on{border-color:var(--text)}.rb-gc:active{transform:scale(.98)}" +
     ".rb-tap{font-style:normal;font-size:11px;color:var(--sub);font-weight:400}" +
     ".rb-x{margin:4px 0 10px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);padding:12px 12px 10px;font-size:13px;line-height:1.55}" +
@@ -169,7 +187,25 @@
     ".rbx-r small{display:block;color:var(--sub);font-size:11.5px;line-height:1.45}.rbx-d{flex:none;font-size:13px;line-height:1.5}" +
     ".rbx-how{margin:8px 0 0;font-size:11.5px;color:var(--sub)}.rbx-x2{display:block;width:100%;margin-top:10px;padding:9px}";
   document.head.appendChild(css2);
+  var MKD = null, ALLR = null, CEL = null;
+  function pick(){ var k = null; try { k = localStorage.getItem("rbmk"); } catch (_){}
+    if (k === "ALL" && ALLR) return k; return k && MKD && MKD[k] ? k : (MKD && MKD.US ? "US" : "ALL"); }
+  function draw(k){
+    var R = k === "ALL" ? ALLR : (MKD || {})[k];
+    if (!R){ k = "ALL"; R = ALLR; }
+    LASTR = R; CEL.innerHTML = R ? board(R, k, MKD) : "";
+  }
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest && ev.target.closest(".rb-tab[data-rmk]"); if (!b || !CEL) return;
+    try { localStorage.setItem("rbmk", b.dataset.rmk); } catch (_){}
+    var y = CEL.getBoundingClientRect().top; draw(b.dataset.rmk);
+    var y2 = CEL.getBoundingClientRect().top; if (Math.abs(y2 - y) > 2) window.scrollBy(0, y2 - y);
+  });
   window.CPREG = function(el){
-    X("regime.json").then(function(R){ LASTR = R; el.innerHTML = R ? board(R) : ""; });
+    CEL = el;
+    Promise.all([X("regime.json"), X("regime_mk.json")]).then(function(a){
+      ALLR = a[0]; MKD = a[1] && a[1].markets ? a[1].markets : null;
+      draw(pick());
+    });
   };
 })();
