@@ -158,6 +158,17 @@ def s_vix(Y, cal):
                     lead="1~3개월", rule="18 미만 또는 40 이상(역발상) = 좋음 · 28~40 = 경고", src="야후 ^VIX", hist=[r_(x, 1) for x in Y["^VIX"].iloc[-60:]])
 
 
+def s_rvol(Y, cal, tk, label):
+    """그 시장 자체의 흔들림(20일 실현 변동성) — 미국 VIX 대신 (10/13: 한국이 폭락해도 미국 VIX 가 차분하면 🟢 이던 문제)"""
+    x = Y[tk].reindex(cal).ffill()
+    rv = (np.log(x).diff().rolling(20).std() * np.sqrt(252) * 100)
+    pct = rv.rolling(756, min_periods=252).rank(pct=True)
+    st = tri(pct <= 0.5, pct >= 0.8, pct)
+    return st, dict(name=f"{label} 흔들림 (20일 변동성)", val=f"연 {rv.iloc[-1]:.0f}% · 3년 중 상위 {100 - pct.iloc[-1]*100:.0f}%",
+                    mean="그 시장 자체가 얼마나 크게 출렁이는지 — 3년 중 가장 출렁이는 20% 구간이면 겁먹은 장", lead="1~3개월",
+                    rule="3년 중 하위 절반 = 좋음 · 상위 20% = 경고", src=f"야후 {tk}", hist=[r_(v, 0) for v in rv.iloc[-60:]])
+
+
 def build(mk, D, cal):
     """시장 하나 → {id: (상태, 설명, 그룹)}  (과거 자료 있는 것만)"""
     Y, out = D.get("Y", {}), {}
@@ -215,8 +226,11 @@ def build(mk, D, cal):
             add("fx", "timing", s_fx, Y, cal, "CNY=X", "위안화", False)
         if "HG=F" in Y:
             add("copper", "timing", s_copper, Y, cal)
-    if "^VIX" in Y:
-        add("vix", "timing", s_vix, Y, cal)
+    if mk == "US":
+        if "^VIX" in Y:
+            add("vix", "timing", s_vix, Y, cal)
+    elif tk in Y:
+        add("rvol", "timing", s_rvol, Y, cal, tk, inm)
     return out
 
 

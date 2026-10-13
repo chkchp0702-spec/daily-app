@@ -203,7 +203,9 @@
   });
   window.CPREG = function(el){
     CEL = el;
-    Promise.all([X("regime.json"), X("regime_mk.json")]).then(function(a){
+    // 10/13: 국면 파일은 하루 두 번 바뀌는데 X() 는 수집 시각으로만 주소를 바꿔 옛 판이 남던 문제 → 5분마다 새 주소
+    var t5 = Math.floor(Date.now() / 300000), gx = function(n){ return getJSON("archive/x/" + n + "?r" + t5).catch(function(){ return X(n); }); };
+    Promise.all([gx("regime.json"), gx("regime_mk.json")]).then(function(a){
       ALLR = a[0]; MKD = a[1] && a[1].markets ? a[1].markets : null;
       draw(pick());
     });
