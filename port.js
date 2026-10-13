@@ -93,7 +93,7 @@
     var cmp = S.bsel.slice(0, 4);
     var spN = B["S&P500"][B["S&P500"].length - 1];
     var gapB = function(v){ var d = v - spN; return '<em class="' + (d >= 0 ? "w" : "l") + '">' + (d >= 0 ? "앞섬 " : "뒤짐 ") + sg(d).replace("%", "%p") + '</em>'; };
-    var h = '<section class="po-sum" id="posum"><div class="po-sh">' + md(P.start) + '부터 성적 <small>S&P500보다</small></div>' +
+    var h = '<section class="po-sum" id="posum"><div class="po-sh">' + md(P.start) + '부터 성적 <small>S&P500보다 <button class="po-shb" type="button" data-pshare="1">📤 공유</button></small></div>' +
       PF.map(function(f){ return '<button class="po-sr' + (S.pf === f.k ? " on" : "") + ' ' + f.k + '" data-pf="' + f.k + '"><span>' + f.ic + ' ' + f.t + '</span><b class="' + cls(f.ret) + '">' + sg(f.ret) + '</b>' + gapB(f.ret) + '</button>'; }).join("") +
       '<div class="po-sr sp"><span>🇺🇸 S&P500</span><b class="' + cls(spN) + '">' + sg(spN) + '</b><em>기준</em></div></section>' +
       '<section class="po-hero' + (F.k === "kick" ? " kick" : F.k === "conc" ? " conc" : "") + '"><div class="po-k">' + F.ic + ' <b>' + F.t + '</b> · ' + F.s + ' · ' + md(P.start) + '부터</div>' +
@@ -199,6 +199,8 @@
       var sm = document.getElementById("posum"), upd = function(){ if (!st.isConnected) return window.removeEventListener("scroll", upd);
         var r = sm ? sm.getBoundingClientRect() : null; st.classList.toggle("mini-on", !!r && r.bottom < ((document.querySelector("header") || {}).offsetHeight || 0) + 10); };
       window.addEventListener("scroll", upd, {passive: true}); upd(); }
+    [].forEach.call(b.querySelectorAll("[data-pshare]"), function(x){ x.onclick = function(ev){ ev.stopPropagation(); if (!window.chShare) return;
+      chShare("CH Investing", "💼 CH Investing 포트 (" + md(P.start) + "부터)\n" + PF.map(function(f){ return f.ic + " " + f.t + " " + sg(f.ret) + " (S&P보다 " + sg(f.ret - spN).replace("%", "%p") + ")"; }).join("\n") + "\n🇺🇸 S&P500 " + sg(spN) + "\n\n※ 투자 참고용 · 매수 추천 아님", "port"); }; });
     // ③ 비교표 전체/내 자리
     [].forEach.call(b.querySelectorAll("[data-lball]"), function(x){ x.onclick = function(){ S.lbAll = !S.lbAll; keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     // ④ 막대·범례를 누르면 그 칸 줄로
@@ -511,6 +513,7 @@
     ".po-mk{display:flex;gap:12px;font-size:11px;color:var(--sub);margin-top:2px}.po-mk i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}" +
         ".po-sum{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 12px 6px;margin:4px 0 10px}" +
     ".po-sh{font-size:13px;font-weight:800;color:var(--sub);display:flex;justify-content:space-between;margin:0 2px 4px}.po-sh small{font-weight:400;font-size:11.5px}" +
+    ".po-shb{margin-left:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:2px 9px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}" +
     ".po-sr{display:grid;grid-template-columns:1fr auto 92px;align-items:center;gap:10px;width:100%;background:none;border:0;border-top:1px solid var(--line);color:var(--text);font:inherit;padding:11px 4px;text-align:left;cursor:pointer;border-radius:0}" +
     ".po-sr:first-of-type{border-top:0}.po-sr>span{font-size:15px;font-weight:700}.po-sr>b{font-size:18px;font-weight:900;letter-spacing:-.3px}.po-sr>em{font-style:normal;font-size:12.5px;font-weight:800;text-align:right}" +
     ".po-sr>em.w{color:#4dd47a}.po-sr>em.l{color:#7cb0ff}.po-sr.on{background:rgba(233,196,106,.1);border-radius:12px;border-top-color:transparent}.po-sr.on+.po-sr{border-top-color:transparent}" +

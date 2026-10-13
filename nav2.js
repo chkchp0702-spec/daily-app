@@ -312,7 +312,7 @@
     box.innerHTML = '<div class="ttx-h"><div><small>ⓘ 이 카드는</small><b></b>' + (sub ? '<em></em>' : '') + '</div><button class="ttx-x" type="button">닫기 ✕</button></div>' +
       (d ? '<p class="ttx-what"></p>' : '') + '<div class="ttx-n"></div>' +
       (ls.length ? '<div class="ttx-go"><small>관련 화면</small>' + ls.map(function(x){ return '<button type="button" class="ttx-l" data-goto="' + x[2] + '">' + x[1] + ' ›</button>'; }).join("") + '</div>' : '') +
-      '<button class="ttx-x ttx-x2" type="button">설명 닫기 ▴</button>';
+      '<div class="ttx-bt"><button class="ttx-sh" type="button">📤 이 카드 공유</button><button class="ttx-x ttx-x2" type="button">설명 닫기 ▴</button></div>';
     box.querySelector("b").textContent = t;
     if (sub) box.querySelector("em").textContent = sub;
     if (d) box.querySelector(".ttx-what").textContent = d[1];
@@ -332,12 +332,31 @@
       if (x.classList.contains("ttx-x2") && h){ var y = h.getBoundingClientRect().top + window.scrollY - ((document.querySelector("header") || {}).offsetHeight || 0) - 12;
         if (h.getBoundingClientRect().top < 0) window.scrollTo({top: Math.max(0, y), behavior: "smooth"}); }
       return; }
+    var sh = t.closest(".ttx-sh");
+    if (sh){ ev.stopPropagation(); var bx2 = sh.closest(".tt-x"), h2 = bx2.previousElementSibling, c2 = h2 && (h2.closest(".fold") || h2.closest("section.card"));
+      var title = (h2 && h2._tt && h2._tt.t) || "", body = "";
+      if (c2){ var all = (c2.innerText || "").replace(bx2.innerText || "", ""), seen = {}, out = [];
+        all.split("\n").map(function(l){ return l.replace(/\s+/g, " ").trim(); }).forEach(function(l){
+          if (!l || l === title || l.indexOf(title) === 0 || /^(ⓘ|전체 보기|접기|더 보기|자세히)/.test(l) || seen[l]) return; seen[l] = 1;
+          if (out.length && (l.length <= 6 || out[out.length - 1].length <= 3)) out[out.length - 1] += " · " + l; else out.push(l); });
+        body = out.slice(0, 6).join("\n"); }
+      chShare("CH Investing", "📌 " + title + (body ? "\n" + body.slice(0, 260) : "") + "\n\n※ 투자 참고용 · 매수 추천 아님", cur); return; }
     var ib = t.closest(".tt-i"); if (ib){ ev.stopPropagation(); ttOpen(ib.closest(".fold-h")); return; }
     var h = t.closest("h3.tt-h, .mk-lab.tt-h"); if (!h) return;
     if (t.closest("button,a,input,select,label,textarea,[data-op],[data-goto]")) return;
     ttOpen(h);
   }, true);
 
+  // ⑨ 공유 (10/13 「더 자주 열게」 ⑧) — 휴대폰 공유창(카톡 등) · 안 되면 복사
+  window.chShare = function(title, text, hash){
+    var url = "https://chkchp0702-spec.github.io/daily-app/" + (hash ? "#" + hash : "");
+    var toast = function(m){ var d = document.createElement("div"); d.className = "ch-toast"; d.textContent = m; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2600); };
+    var copy = function(){ var all = text + "\n" + url;
+      if (navigator.clipboard) navigator.clipboard.writeText(all).then(function(){ toast("복사했어요 — 카톡 대화창에 붙여넣기 하세요"); }, function(){ prompt("길게 눌러 복사하세요", all); });
+      else prompt("길게 눌러 복사하세요", all); };
+    if (navigator.share) navigator.share({title: title, text: text, url: url}).catch(function(e){ if (e && e.name !== "AbortError") copy(); });
+    else copy();
+  };
   // ⑥ 나침반: 설명 글은 「ⓘ 설명」을 눌러야 보이게 (10/11 사용자: "지우지 말고 밑에 누르면 설명 부분 나오게 · 나침반이 복잡해 보여")
   var NOTE_TABS = {sector: 1};
   function notes(){
@@ -401,6 +420,8 @@
     ".ttx-n p.note{margin:4px 0 0!important;font-size:12.5px;color:var(--text)}" +
     ".ttx-go{margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px}.ttx-go>small{flex-basis:100%}" +
     ".ttx-l{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}" +
+    ".ttx-bt{display:flex;gap:6px;margin-top:10px}.ttx-bt .ttx-x2{flex:1;margin:0}.ttx-sh{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}" +
+    ".ch-toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);z-index:99;background:var(--text);color:var(--bg);border-radius:12px;padding:10px 14px;font-size:13.5px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center}" +
     ".ttx-x2{display:block;width:100%;margin-top:10px;padding:9px}" +
     // 나침반 접기·설명
     ".nt-h{display:none!important}.nt-b{display:inline-block;border:0;background:none;color:var(--sub);font:inherit;font-size:12px;padding:4px 2px;margin:2px 0;cursor:pointer}" +

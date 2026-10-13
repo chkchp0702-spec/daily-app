@@ -95,6 +95,29 @@
     var P = H.port || {}, K = H.kick || {}, D = H.danta || {}, Bn = H.brain || {}, S = H.scores || {};
     var now = new Date(Date.now() + 9 * 3600e3), wd = "일월화수목금토"[now.getUTCDay()];
     var h = '<div class="hm-day">' + (now.getUTCMonth() + 1) + '월 ' + now.getUTCDate() + '일 ' + wd + '요일 · <span class="mut">' + e(String(H.at || "").slice(5)) + ' 기준</span></div>';
+    // 10/13 「더 자주 열게」 ③ 어제보다 바뀐 것 · ⑦ 이번 주 복기(주말) · ⑥ 어제 예고 → 오늘 결과
+    var CH = (H.chg && H.chg.items) || [];
+    if (CH.length) h += '<section class="card hm-chg"><div class="hm-cht">🆕 ' + (H.chg.since ? md(H.chg.since) + ' 이후 ' : '') + '바뀐 것</div>' +
+      CH.map(function(x){ return '<div class="hm-chi" data-goto="' + e(x.go || "home") + '"><span>' + e(x.ic) + '</span><b>' + e(x.t) + '</b><i>›</i></div>'; }).join("") + '</section>';
+    var Wk = H.week || {}, dw = now.getUTCDay();
+    if ((dw === 6 || dw === 0) && Wk.days){
+      var wb = [["💼 기본", Wk.base], ["⚡ 킥", Wk.kick], ["🎯 집중", Wk.conc]].filter(function(x){ return x[1] != null; });
+      h += card("port", "📅", "이번 주 복기", md(Wk.from) + "부터 " + Wk.days + "거래일 (미국 날짜)",
+        '<div class="hm-big">' + wb.map(function(x){ return '<div><small>' + x[0] + '</small><b class="' + cls(x[1]) + '">' + sg(x[1]) + '</b></div>'; }).join("") + '</div>' +
+        '<div class="hm-l">S&amp;P500 <b class="' + cls(Wk.spy) + '">' + sg(Wk.spy) + '</b> · 코스피 <b class="' + cls(Wk.kospi) + '">' + sg(Wk.kospi) + '</b>' +
+        (Wk.rep && Wk.rep.n ? ' · 시황 예고 ✓' + Wk.rep.win + ' ✗' + Wk.rep.loss : '') +
+        (Wk.kick_ev && (Wk.kick_ev.buy || Wk.kick_ev.sell) ? ' · 킥 사기 ' + Wk.kick_ev.buy + ' · 팔기 ' + Wk.kick_ev.sell : '') + '</div>' +
+        ((Wk.next || []).length ? '<div class="hm-wn"><small>앞으로 볼 일정</small>' + Wk.next.map(function(x){ return '<div><b>' + e(x.when) + '</b> ' + e(x.what) + '</div>'; }).join("") + '</div>' : '') +
+        '<button class="hm-sh" data-share="week">📤 카톡으로 공유</button>', "포트");
+    }
+    var G = H.grade;
+    if (G && (G.items || []).length){
+      var ok = G.items.filter(function(x){ return x.cls === "ok"; }).length, no = G.items.filter(function(x){ return x.cls === "no"; }).length;
+      h += card("market", "🎯", "어제 예고 → 오늘 결과", md(G.date) + " " + e(G.label || "") + " 채점 · ✓" + ok + " ✗" + no + (G.rate != null ? " · 누적 적중 " + G.rate + "%" : ""),
+        G.items.map(function(x){ return '<div class="hm-gr ' + e(x.cls || "") + '"><span>' + e(x.mark || "·") + '</span><div><b>' + e(x.t) + '</b><small>' + e(x.x) + '</small></div></div>'; }).join("") +
+        ((G.next || []).length ? '<div class="hm-wn"><small>🔮 오늘의 예고 — 내일 아침 채점</small>' + G.next.map(function(x){ return '<div>' + (x.p != null ? '<b class="hm-p">' + Math.round(x.p * 100) + '%</b> ' : '') + e(x.t) + '</div>'; }).join("") + '</div>' : '') +
+        '<button class="hm-sh" data-share="grade">📤 카톡으로 공유</button>', "시황");
+    }
     // 💼 포트
     var ex = (P.kick || 0) - (P.spy || 0);
     var spark = (window.V && P.nav && P.nav.length > 1) ? V.lines([{name: "⚡ 킥", color: "#ff6b6b", vals: P.kick_line}].concat((function(){ var c = (P.conc_line || []).slice(), n = (P.nav || []).length; while (c.length && c.length < n) c.unshift(0); return c.length === n ? [{name: "🎯 집중", color: "#4dd47a", vals: c}] : []; })()).concat([{name: "💼 기본", color: "#e9c46a", vals: P.nav}, {name: "S&P", color: "#7c9cff", vals: P.spy_line, dash: 1}]),
@@ -105,7 +128,8 @@
         '<div data-goto="port~pokick"><small>⚡ 킥</small><b class="' + cls(P.kick) + '">' + sg(P.kick) + '</b></div><div data-goto="port~pohero"><small>💼 기본</small><b class="' + cls(P.base) + '">' + sg(P.base) + '</b></div></div>' +
       '<div class="hm-l">S&amp;P500 <b class="' + cls(P.spy) + '">' + sg(P.spy) + '</b> · <a data-goto="port~pocmp">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a>' + (P.conc != null ? ' · ' + (P.conc_up ? "🟢 상승장" : "🔴 상승장 아님") : '') + '</div>' +
       '<div class="hm-sp">' + spark + '</div>' +
-      (P.change ? '<div class="hm-alert" data-goto="port~pofollow">🔁 ' + md(P.change.date) + ' 비중·상품 바뀜 — <b>따라하기에서 맞추기 ›</b></div>' : ''));
+      (P.change ? '<div class="hm-alert" data-goto="port~pofollow">🔁 ' + md(P.change.date) + ' 비중·상품 바뀜 — <b>따라하기에서 맞추기 ›</b></div>' : '') +
+      '<button class="hm-sh" data-share="port">📤 카톡으로 공유</button>');
     // ⚡ 킥
     var ev = K.events || [];
     h += card("port~pokick", "⚡", "킥 — 오늘 할 일", K.n + "종목 · 포트의 " + K.w + "%",
@@ -126,7 +150,19 @@
     h += card("score", "📊", "성적 한 줄", "무엇이 이기고 지나",
       '<div class="hm-l">' + ((S.good || []).length ? '✅ ' + e(S.good.join(" · ")) : '') + ((S.bad || []).length ? '<br>❌ ' + e(S.bad.join(" · ")) : '') + (!(S.good || []).length && !(S.bad || []).length ? '표본이 쌓이는 중' : '') + '</div>', "성적표");
     b.innerHTML = h;
+    HSH = H;
   }
+  // ⑧ 공유: 카드 내용을 글로 만들어 휴대폰 공유창(카톡 등)으로
+  var HSH = null;
+  document.addEventListener("click", function(ev){
+    var t = ev.target.closest && ev.target.closest("[data-share]"); if (!t || !HSH) return;
+    ev.preventDefault(); ev.stopPropagation();
+    var H = HSH, P = H.port || {}, k = t.dataset.share, txt = "", hash = "";
+    if (k === "port"){ txt = "💼 CH Investing 포트 (" + md(P.start) + "부터)\n" + (P.conc != null ? "🎯 집중 " + sg(P.conc) + " · " : "") + "⚡ 킥 " + sg(P.kick) + " · 💼 기본 " + sg(P.base) + "\nS&P500 " + sg(P.spy) + " · 시장 " + P.n_bench + "곳 중 " + P.beat_kick + "곳보다 앞섬"; hash = "port"; }
+    else if (k === "grade"){ var G = H.grade || {}; txt = "🎯 시황 예고 채점 (" + md(G.date) + ")\n" + (G.items || []).map(function(x){ return x.mark + " " + x.t; }).join("\n") + (G.rate != null ? "\n누적 적중 " + G.rate + "%" : "") + ((G.next || []).length ? "\n\n🔮 오늘 예고\n" + G.next.map(function(x){ return (x.p != null ? Math.round(x.p * 100) + "% " : "") + x.t; }).join("\n") : ""); hash = "market"; }
+    else if (k === "week"){ var W = H.week || {}; txt = "📅 이번 주 복기 (" + md(W.from) + "부터)\n💼 기본 " + sg(W.base) + (W.kick != null ? " · ⚡ 킥 " + sg(W.kick) : "") + (W.conc != null ? " · 🎯 집중 " + sg(W.conc) : "") + "\nS&P500 " + sg(W.spy) + " · 코스피 " + sg(W.kospi); hash = "home"; }
+    if (window.chShare) chShare("CH Investing", txt + "\n\n※ 투자 참고용 · 매수 추천 아님", hash);
+  }, true);
 
   /* ---------- ③ 📊 성적표 ---------- */
   window.scoreView = function(){ return '<div id="scbody"><div class="loading">채점 모으는 중…</div></div>'; };
@@ -240,6 +276,10 @@
     /* 홈 */
     ".hm-day{font-size:13px;color:var(--sub);margin:-4px 2px 10px}",
     ".hm-c{cursor:pointer;transition:transform .12s}.hm-c:active{transform:scale(.99)}",
+    ".hm-chg{padding:12px 14px!important}.hm-cht{font-weight:800;font-size:14px;margin-bottom:6px}.hm-chi{display:flex;align-items:center;gap:8px;padding:8px 2px;border-top:1px solid var(--line);font-size:13.5px;cursor:pointer}.hm-chi:first-of-type{border-top:0}.hm-chi b{flex:1;font-weight:600}.hm-chi i{font-style:normal;color:var(--dim)}",
+    ".hm-gr{display:flex;gap:9px;padding:7px 0;border-top:1px solid var(--line)}.hm-gr:first-of-type{border-top:0}.hm-gr>span{font-weight:900;font-size:16px;min-width:16px}.hm-gr.ok>span{color:#4dd47a}.hm-gr.no>span{color:#ff8a8a}.hm-gr.hold>span{color:var(--sub)}.hm-gr b{display:block;font-size:13.5px}.hm-gr small{display:block;font-size:12px;color:var(--sub);line-height:1.45}",
+    ".hm-wn{margin-top:8px;background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:12.5px;line-height:1.5}.hm-wn small{display:block;color:var(--sub);font-weight:700;margin-bottom:2px}.hm-p{color:#ffb84d}",
+    ".hm-sh{display:block;margin:10px 0 0 auto;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}",
     ".hm-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}.hm-h>div{flex:1;min-width:0}.hm-h b{font-size:16px}.hm-h small{display:block;font-size:11.5px;color:var(--sub)}",
     ".hm-i{font-size:22px;width:36px;height:36px;border-radius:11px;background:var(--panel2);display:flex;align-items:center;justify-content:center;flex:none}",
     ".hm-go{font-size:12px;color:var(--sub);white-space:nowrap}",
