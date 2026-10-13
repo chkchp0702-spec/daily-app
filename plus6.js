@@ -17,15 +17,25 @@
   }
   // 점수를 처음 보는 사람도: 말로 된 판정 + 신호 개수 + 막대 양 끝 뜻 (10/11)
   function word(v){ return v == null ? "–" : v >= 35 ? "좋음" : v >= 10 ? "조금 좋음" : v > -10 ? "반반 (엇갈림)" : v > -35 ? "조금 나쁨" : "나쁨"; }
+  // 10/13: 점수에 들어간 신호가 3개 미만이면 「판단 보류」 · 개수와 점수 방향이 다르면 무게를 같이 보여 줌
+  function act(sigs){ return (sigs || []).filter(function(s){ return s.st != null && s.w > 0 && !(s.id === "thrust" && s.st === 0); }); }
+  function wline(a, v){
+    var n = function(k){ return a.filter(function(s){ return s.st === k; }).length; }, W = function(k){ return a.filter(function(s){ return s.st === k; }).reduce(function(t, s){ return t + s.w; }, 0); };
+    var dc = n(1) - n(-1), sv = v == null ? 0 : v >= 10 ? 1 : v <= -10 ? -1 : 0, sc = dc > 0 ? 1 : dc < 0 ? -1 : 0;
+    if (sc === sv) return "";
+    var f = function(x){ return (Math.round(x * 10) / 10).toString(); };
+    return '<div class="rb-gwt">중요도 반영: 🟢 무게 ' + f(W(1)) + ' · 🔴 무게 ' + f(W(-1)) + '<br>' + (W(1) > W(-1) ? "🟢 쪽에 중요한 신호가 더 많아요" : W(1) < W(-1) ? "🔴 쪽에 중요한 신호가 더 많아요" : "무게로는 똑같아요") + '</div>';
+  }
   function gauge(name, sub, v, sigs, gk){
-    var x = v == null ? 50 : (v + 100) / 2;
-    var a = (sigs || []).filter(function(s){ return s.st != null && s.w > 0 && !(s.id === "thrust" && s.st === 0); });
+    var a = act(sigs), low = a.length > 0 && a.length < 3;
+    var x = v == null ? 50 : (v + 100) / 2, c = low ? "#8a94a8" : col(v);
     var n = function(k){ return a.filter(function(s){ return s.st === k; }).length; };
-    return '<div class="rb-gc" data-gk="' + (gk || "") + '" role="button"><div class="rb-gt"><b>' + name + ' <i class="rb-tap">ⓘ</i></b><small>' + sub + '</small></div>' +
-      '<div class="rb-gv" style="color:' + col(v) + '">' + sg(v) + '<span class="rb-gw">' + word(v) + '</span></div>' +
-      '<div class="rb-gb"><i style="left:' + x.toFixed(1) + '%;background:' + col(v) + '"></i></div>' +
+    return '<div class="rb-gc' + (low ? " low" : "") + '" data-gk="' + (gk || "") + '" role="button"><div class="rb-gt"><b>' + name + ' <i class="rb-tap">ⓘ</i></b><small>' + sub + '</small></div>' +
+      '<div class="rb-gv" style="color:' + c + '">' + sg(v) + '<span class="rb-gw">' + (low ? "판단 보류" : word(v)) + '</span></div>' +
+      '<div class="rb-gb"><i style="left:' + x.toFixed(1) + '%;background:' + c + '"></i></div>' +
       '<div class="rb-ge"><span>−100 경고</span><span>0</span><span>+100 좋음</span></div>' +
-      (a.length ? '<div class="rb-gn">신호 ' + a.length + '개 <span>🟢' + n(1) + ' ⚪' + n(0) + ' 🔴' + n(-1) + '</span></div>' : '') + '</div>';
+      (a.length ? '<div class="rb-gn">신호 ' + a.length + '개 <span>🟢' + n(1) + ' ⚪' + n(0) + ' 🔴' + n(-1) + '</span></div>' : '') +
+      (low ? '<div class="rb-gwt warn">신호가 ' + a.length + '개뿐이라 점수를 믿기 어려워요 — 국면은 이 쪽을 0으로 보고 정해요</div>' : wline(a, v)) + '</div>';
   }
   function gaugeHelp(R){
     var t = R.now_timing, c = R.now_cycle;
@@ -134,10 +144,11 @@
   function explain(R, gk){
     var cyc = gk === "cycle", v = cyc ? R.cycle : R.timing, q = cyc ? R.now_cycle : R.now_timing;
     var sigs = R.sig.filter(function(s){ return s.grp === gk && s.st != null && !(s.id === "thrust" && s.st === 0); })
-      .sort(function(a, b){ return (b.st - a.st) || ((b.w || 0) - (a.w || 0)); });
+      .sort(function(a, b){ return ((b.w > 0) - (a.w > 0)) || (b.st - a.st) || ((b.w || 0) - (a.w || 0)); });
     var dot = function(st){ return st === 1 ? "🟢" : st === -1 ? "🔴" : "⚪"; };
     var h = '<div class="rbx-h" style="--gc:' + col(v) + '"><div><small>' + (cyc ? "🏭 경기 사이클 · 6~18개월 뒤 경기" : "📊 시장 타이밍 · 1~3개월 뒤 주가 흐름") + '</small>' +
-      '<b>' + sg(v) + ' <span>' + word(v) + '</span></b></div><button class="rbx-x" type="button">닫기 ✕</button></div>' +
+      '<b>' + sg(v) + ' <span>' + (act(sigs).length && act(sigs).length < 3 ? "판단 보류" : word(v)) + '</span></b></div><button class="rbx-x" type="button">닫기 ✕</button></div>' +
+      (act(sigs).length && act(sigs).length < 3 ? '<p class="rbx-low">⚠️ 점수에 들어간 신호가 <b>' + act(sigs).length + '개</b>뿐이에요. 하나만 바뀌어도 점수가 크게 출렁여서, 이 쪽은 <b>판단 보류</b>로 보고 국면을 정해요.</p>' : '') +
       '<p class="rbx-what">' + (cyc ? "금리·신용·실업·경기선행지수처럼 <b>경기 자체</b>를 보는 신호예요. 느리게 움직이고, 6~18개월 뒤 경기가 좋을지 미리 알려 줘요."
                                    : "지수 200일선·오른 종목 수·신고가·공포지수·외국인처럼 <b>주가 흐름 자체</b>를 보는 신호예요. 빨리 움직이고, 1~3개월 날씨를 알려 줘요.") + '</p>';
     if (q && q.mk) h += '<div class="rbx-past"><small>2000년 이후 이 점수대(' + e(q.lab) + ')였던 ' + q.n + '주 → ' + (cyc ? "6개월" : "3개월") + ' 뒤</small>' +
@@ -146,7 +157,7 @@
       '<div><span>🇺🇸 S&P500 <b class="' + (q.us[0] >= 0 ? "up" : "dn") + '">' + pc(q.us[0]) + '</b></span><span>🇰🇷 코스피 <b class="' + (q.kr[0] >= 0 ? "up" : "dn") + '">' + pc(q.kr[0]) + '</b></span>' +
       '<span>−10% 넘게 빠질 확률 <b>' + q.us[3] + '%</b></span></div></div>';
     h += '<div class="rbx-sh">신호 ' + sigs.length + '개 — 지금 어떤가</div><div class="rbx-list">' + sigs.map(function(s){
-      return '<div class="rbx-r st' + s.st + '"><span class="rbx-d">' + dot(s.st) + '</span><div><b>' + e(s.name) + (s.w >= 1.5 ? ' <em>중요</em>' : '') + '</b>' +
+      return '<div class="rbx-r st' + s.st + (s.w > 0 ? '' : ' w0') + '"><span class="rbx-d">' + dot(s.st) + '</span><div><b>' + e(s.name) + (s.w >= 1.5 ? ' <em>중요</em>' : '') + (s.w > 0 ? '' : ' <em>참고 · 점수엔 안 들어감</em>') + '</b>' +
         '<small>' + e(s.val || "") + (s.rule ? ' · ' + e(s.rule) : '') + '</small></div></div>'; }).join("") + '</div>' +
       '<p class="rbx-how">점수 = 신호마다 🟢 +1 · ⚪ 0 · 🔴 −1 (중요 신호는 무게를 더) 평균을 −100~+100 으로. 0 근처면 반반이에요.</p>' +
       '<button class="rbx-x rbx-x2" type="button">설명 닫기 ▴</button>';
@@ -180,6 +191,8 @@
     ".rbx-h small{display:block;color:var(--sub);font-size:12px}.rbx-h b{font-size:22px;font-weight:900;color:var(--gc)}.rbx-h b span{font-size:13px;color:var(--text);font-weight:700}" +
     ".rbx-x{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}" +
     ".rbx-what{margin:10px 0 8px;color:var(--text)}" +
+    ".rb-gwt{font-size:11.5px;color:var(--sub);margin-top:6px;line-height:1.45}.rb-gwt.warn{color:#ffb84d}.rb-gc.low .rb-gb{opacity:.5}" +
+    ".rbx-low{margin:8px 0;padding:8px 10px;border-radius:10px;background:rgba(255,184,77,.1);color:#ffb84d;font-size:12.5px}.rbx-r.w0{opacity:.55}" +
     ".rbx-past{background:var(--panel);border-radius:10px;padding:8px 10px;margin-bottom:8px}.rbx-past small{color:var(--sub);font-size:11.5px}.rbx-past div{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:3px;font-size:12.5px}" +
     ".rbx-sh{font-weight:800;font-size:12.5px;color:var(--sub);margin:6px 0 4px}" +
     ".rbx-list{display:flex;flex-direction:column;gap:4px}.rbx-r{display:flex;gap:8px;align-items:flex-start;background:var(--panel);border-radius:10px;padding:7px 9px}" +

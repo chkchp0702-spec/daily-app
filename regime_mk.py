@@ -169,6 +169,9 @@ def s_rvol(Y, cal, tk, label):
                     rule="3년 중 하위 절반 = 좋음 · 상위 20% = 경고", src=f"야후 {tk}", hist=[r_(v, 0) for v in rv.iloc[-60:]])
 
 
+MIN_SIG = 3                                # 점수에 들어간 신호가 이보다 적으면 판단 보류
+
+
 def build(mk, D, cal):
     """시장 하나 → {id: (상태, 설명, 그룹)}  (과거 자료 있는 것만)"""
     Y, out = D.get("Y", {}), {}
@@ -376,7 +379,15 @@ def one(mk, D, cal, comp, comb, prev):
         den = sum(s["w"] for s in a)
         return round(sum(s["w"] * s["st"] for s in a) / den * 100) if den else None
     sc, stt = score("cycle"), score("timing")
-    label, verdict = RG.quad(sc, stt)
+    # 10/13 사용자: "경기 사이클 점수와 문구 수정 필요" — 점수에 들어간 신호가 3개 미만이면 그 쪽은 판단 보류(0으로 보고 국면을 정함)
+    nact = lambda g: sum(1 for s in sig if s["grp"] == g and s["st"] is not None and s["w"] > 0 and not (s["id"] == "thrust" and s["st"] == 0))
+    cn_, tn_ = nact("cycle"), nact("timing")
+    c_low, t_low = cn_ < MIN_SIG, tn_ < MIN_SIG
+    label, verdict = RG.quad(0 if (c_low and sc is not None) else sc, 0 if (t_low and stt is not None) else stt)
+    if c_low and sc is not None:
+        verdict += f" (경기 신호가 {cn_}개뿐이라 경기 쪽은 판단 보류)"
+    if t_low and stt is not None:
+        verdict += f" (시장 신호가 {tn_}개뿐이라 시장 쪽은 판단 보류)"
 
     def look(rows, v):
         for row in rows or []:
@@ -393,6 +404,7 @@ def one(mk, D, cal, comp, comb, prev):
     for k, s in stats.items():
         log(f"    {k:8s} w={s['w']} {s['h']} 좋음 {s['pos']} 경고 {s['neg']} 위험차 {s['risk']}")
     return {"mk": mk, "name": nm, "flag": fl, "index": inm, "cycle": sc, "timing": stt, "label": label, "verdict": verdict,
+            "cycle_n": cn_, "timing_n": tn_, "cycle_low": c_low, "timing_low": t_low,
             "quad_stats": qt.get(label), "now_cycle": look(tables["cycle"], sc), "now_timing": look(tables["timing"], stt),
             "tables": tables, "quad_all": qt, "sig": sig, "changes": changes, "hist": hist, "daily": dh[-120:],
             "n_green": sum(1 for s in sig if s["st"] == 1), "n_red": sum(1 for s in sig if s["st"] == -1), "n_total": sum(1 for s in sig if s["st"] is not None),
