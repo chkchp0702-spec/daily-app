@@ -14,7 +14,12 @@
     var s = (el.innerText || el.textContent || "").toUpperCase(), tt = t.toUpperCase();
     if (s.split(/\s+/).indexOf(tt) >= 0) return true;
     // 단어 단위로 들어 있나 (TOST 안의 'OST' 같은 우연 제외)
-    return new RegExp("(^|[^A-Z0-9])" + tt.replace(/[.\-]/g, "\\$&") + "($|[^A-Z0-9])").test(s);
+    var re = new RegExp("(^|[^A-Z0-9])" + tt.replace(/[.\-]/g, "\\$&") + "($|[^A-Z0-9])");
+    if (re.test(s)) return true;
+    // A2 (10/13): 글자 조각마다 따로 봄 — 순위 숫자(「1」)와 붙어 「1INSM」으로 읽혀 이름=티커인데 티커 줄이 한 번 더 붙던 것
+    var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n;
+    while ((n = w.nextNode())) if (re.test(String(n.nodeValue || "").toUpperCase())) return true;
+    return false;
   }
   function add(el, t){
     if (el.dataset.tk) return; el.dataset.tk = "1";

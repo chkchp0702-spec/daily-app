@@ -1368,7 +1368,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261013b";
+var APPV = "20261013c";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1429,7 +1429,8 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="up10.js?v=11"></script>
 <script defer src="nav2.js?v=11"></script>
 <script defer src="clamp.js?v=1"></script>
-<script defer src="ticker.js?v=1"></script>
+<script defer src="ticker.js?v=2"></script>
+<script defer src="ux1013.js?v=1"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
 </html>
