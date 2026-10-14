@@ -45,19 +45,23 @@
   }
   // 10/14 사용자 「각 시장 밑에 오르고 내릴 섹터 확률도, 그 안에 종목들 확률도」 → archive/x/prob_sec.json (prob_sec.yml)
   var SECX = null, SOPEN = {}, SALL = {};
-  function secCard(mk){
+  function lg(p){ p = Math.min(0.9999, Math.max(0.0001, p)); return Math.log(p / (1 - p)); }
+  function sgm(x){ return 1 / (1 + Math.exp(-x)); }
+  function secCard(mk, M0){
     var S = SECX && SECX.markets && SECX.markets[mk];
     if (!S) return '<section class="card"><h3>🧭 섹터·종목 확률</h3><p class="note" style="margin:0">아직 계산 전이에요 — 하루 4번(장 마감 뒤) 새로 계산해요.</p></section>';
-    var b5 = S.base.y5, br = S.base.yr5, all = SALL[mk], secs = S.sectors || [];
+    // 섹터·종목 확률 = 위 시장 카드의 일주일 확률(M0.p5) + 그 섹터·종목만의 기울기(d5) → 시장 카드와 같은 「평소」(M0.pb5) 기준
+    var b5 = M0 && M0.pb5 != null ? M0.pb5 : S.base.y5, mp5 = M0 && M0.p5 != null ? M0.p5 : S.base.y5, br = S.base.yr5, all = SALL[mk], secs = S.sectors || [];
+    var ab = function(x){ return x.d5 != null ? sgm(lg(mp5) + x.d5) : x.p5; };
     var show = all || secs.length <= 9 ? secs : secs.slice(0, 5).concat([null]).concat(secs.slice(-3));
     var row = function(x){
       if (!x) return '<div class="ps-gap">⋯</div>';
-      var e5 = (x.p5 - b5) * 100, er = (x.pr5 - br) * 100, op = SOPEN[mk + x.k];
+      var a5 = ab(x), e5 = (a5 - b5) * 100, er = (x.pr5 - br) * 100, op = SOPEN[mk + x.k];
       return '<div class="ps-r' + (op ? " open" : "") + '" data-sk="' + e(x.k) + '"><div class="ps-h"><span class="hm-i">' + x.icon + '</span><b>' + e(x.name) + '</b><small class="mut">' + x.n + '종목</small>' +
-        '<span class="ps-v"><b class="' + ecls(e5) + '">' + ep(e5) + '</b><small>오를 ' + pc(x.p5) + '</small></span><i class="fchev">▾</i></div>' +
-        '<div class="ps-bar">' + zbar(x.p5, b5).split('<div class="zl">')[0] + '</div>' +
+        '<span class="ps-v"><b class="' + ecls(e5) + '">' + ep(e5) + '</b><small>오를 ' + pc(a5) + '</small></span><i class="fchev">▾</i></div>' +
+        '<div class="ps-bar">' + zbar(a5, b5).split('<div class="zl">')[0] + '</div>' +
         '<small class="ps-sub">시장보다 나을 확률 <b class="' + ecls(er) + '">' + pc(x.pr5) + '</b> (평소 ' + pc(br) + ') · 지난 5일 ' + sg(x.r5) + ' · 오를 쪽 종목 ' + x.up5 + '/' + x.n + '</small>' +
-        (op ? '<div class="ps-st">' + x.st.map(function(t, i){ var te = (t.p5 - b5) * 100, tr = (t.pr5 - br) * 100;
+        (op ? '<div class="ps-st">' + x.st.map(function(t, i){ var te = (ab(t) - b5) * 100, tr = (t.pr5 - br) * 100;
           return '<a class="ps-t" href="javascript:openOP(\'' + e(t.s).replace(/'/g, "") + '\')"><span class="ps-tn"><b>' + e(t.n) + '</b><em class="tk">' + e(V.cd ? V.cd(t.s) : t.s) + '</em></span>' +
             '<span class="ps-tv"><b class="' + ecls(te) + '">' + ep(te) + '</b><small>시장보다 <span class="' + ecls(tr) + '">' + pc(t.pr5) + '</span> · 내일 ' + pc(t.p1) + '</small></span></a>'; }).join("") + '</div>' : '') + '</div>';
     };
@@ -66,7 +70,7 @@
       (S.rel ? '<div class="pr-sg"><span class="pr-bd ' + RL[1] + '">' + RL[0] + ' 모델 ' + e(S.rel) + '</span><small class="mut">검증 AUC ' + S.auc.y5 + (S.rel === "믿을 만" ? '' : ' — 확률을 평소 쪽으로 눌러 보여 줘요(순위는 그대로)') + '</small></div>' : '') +
       show.map(row).join("") +
       (secs.length > 9 ? '<button class="fold ps-all" data-mk="' + mk + '">' + (all ? "줄이기 ▴" : "섹터 " + secs.length + "개 모두 보기 ▾") + '</button>' : '') +
-      '<p class="note">큰 숫자 = 그 섹터(종목)가 일주일 뒤 오를 확률이 이 시장 평소(' + pc(b5) + ')보다 얼마나 높고 낮은지. 섹터를 누르면 종목 — 「시장보다」 높은 순. ' + S.n + '종목 · 검증 AUC 일주일 ' + (S.auc.y5 != null ? S.auc.y5 : "–") + ' · 시장 대비 ' + (S.auc.yr5 != null ? S.auc.yr5 : "–") + ' (0.5 = 동전, 0.55 넘으면 쓸 만)</p></section>';
+      '<p class="note">큰 숫자 = 그 섹터(종목)가 일주일 뒤 오를 확률이 평소(' + pc(b5) + ')보다 얼마나 높고 낮은지 — 위 시장 확률(' + pc(mp5) + ')에 그 섹터·종목만의 기울기를 더한 값. 섹터를 누르면 종목 — 「시장보다」 높은 순. ' + S.n + '종목 · 검증 AUC 일주일 ' + (S.auc.y5 != null ? S.auc.y5 : "–") + ' · 시장 대비 ' + (S.auc.yr5 != null ? S.auc.yr5 : "–") + ' (0.5 = 동전, 0.55 넘으면 쓸 만)</p></section>';
   }
   function mcard(m, D){
     var open = OPEN[m.mk];
@@ -119,7 +123,7 @@
     if (!SEL || !D.markets[SEL]) SEL = ks[0];
     var h = '<section class="card"><h3>🎲 내일 · 평소보다 <span class="mut">' + e(D.t) + ' 기준 · 매시간</span></h3>' + strip(D) +
       '<p class="note">큰 숫자 = 그 시장 「평소」(2000년 이후 오른 날 비율)보다 오를 확률이 얼마나 높고 낮은지. 내일 방향은 프로도 55% 넘기 어려워서 ±2%p 면 의미 있는 기울기, ±4%p 면 강한 편이에요. 막대는 40~60% 구간을 확대한 것.</p></section>';
-    h += mcard(D.markets[SEL], D) + secCard(SEL) + allScore(D) + howCard(D);
+    h += mcard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
     b.innerHTML = h;
     [].forEach.call(b.querySelectorAll(".pr5c[data-m]"), function(x){ x.onclick = function(){ SEL = x.dataset.m; draw(D); window.scrollTo({top: 0, behavior: "smooth"}); }; });
     [].forEach.call(b.querySelectorAll(".ps-r .ps-h"), function(x){ x.onclick = function(){ var k = SEL + x.parentNode.dataset.sk; SOPEN[k] = !SOPEN[k]; var y = window.scrollY; draw(D); window.scrollTo(0, y); }; });

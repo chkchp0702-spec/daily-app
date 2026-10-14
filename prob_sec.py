@@ -444,6 +444,13 @@ def main():
                 c = cur.loc[s]
                 st.append({"s": s, "n": names.get(s, s), "k": info[s]["sec"], "p1": r2(probs.loc[s, "y1"], 3), "p5": r2(probs.loc[s, "y5"], 3), "pr5": r2(probs.loc[s, "yr5"], 3),
                            "r1": r2(c["r1"] * 100), "r5": r2(c["r5"] * 100), "cap": info[s]["cap"]})
+            # 시장 방향 몫을 빼고(같은 날 모든 종목 평균과의 로그오즈 차이) 남는 「이 종목·섹터만의 기울기」 — 앱이 시장 카드 확률 위에 더함
+            lg = lambda p: math.log(max(1e-4, min(1 - 1e-4, p)) / (1 - max(1e-4, min(1 - 1e-4, p))))
+            for t in ("p1", "p5"):
+                tw_ = sum(x["cap"] for x in st) or 1
+                mlog = sum(lg(x[t]) * x["cap"] for x in st if x[t] is not None) / tw_
+                for x in st:
+                    x["d" + t[1:]] = r2(lg(x[t]) - mlog, 3) if x[t] is not None else None
             by = defaultdict(list)
             for x in st:
                 by[x["k"]].append(x)
@@ -456,9 +463,10 @@ def main():
                 xs.sort(key=lambda x: -(x["pr5"] or 0))
                 i0 = info[xs[0]["s"]]
                 secs.append({"k": k, "icon": i0["icon"], "name": i0["sname"], "n": len(xs), "p1": r2(wavg("p1"), 3), "p5": r2(wavg("p5"), 3), "pr5": r2(wavg("pr5"), 3),
+                             "d1": r2(wavg("d1"), 3), "d5": r2(wavg("d5"), 3),
                              "r5": r2(wavg("r5"), 2), "up5": sum(1 for x in xs if (x["p5"] or 0) > mres["base"]["y5"]),
-                             "st": [{kk: x[kk] for kk in ("s", "n", "p1", "p5", "pr5", "r1", "r5")} for x in xs]})
-            secs.sort(key=lambda x: -(x["p5"] or 0))
+                             "st": [{kk: x[kk] for kk in ("s", "n", "p1", "p5", "pr5", "d1", "d5", "r1", "r5")} for x in xs]})
+            secs.sort(key=lambda x: -(x["d5"] or 0))
             a5 = mres["auc"].get("y5") or 0.5
             rel = "믿을 만" if a5 >= 0.56 else "약함" if a5 >= 0.52 else "동전 수준"
             res[mk] = {"name": cfg["name"], "flag": cfg["flag"], "n": len(st), "last": mres["last"], "auc": mres["auc"], "base": mres["base"], "k": mres.get("k"), "rel": rel, "rows": mres["n_rows"], "sectors": secs}

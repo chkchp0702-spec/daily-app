@@ -224,7 +224,7 @@
       if (wp){
         var PC = {"고래": [25, "#3dd6c6"], "차트": [25, "#7c9cff"], "수급": [15, "#ffb84d"], "흐름": [20, "#c38bff"], "뉴스·실적": [15, "#f4a261"]};
         h += '<section class="hero2 whale-hero"><div class="hero2-k">🐋 고래 원픽 <span class="mut">고래 종목 ' + WP.n_pool + '개 중 · ' + e(WP.at.slice(5)) + '</span></div>' +
-             '<div class="row"><div><div class="big-t">' + e(wp.n) + ' <span class="mut" style="font-size:14px">' + e(wp.s) + '</span></div><div class="mut">' + wp.tot + '점 / 100 · 지난 20일 ' + (wp.r20 > 0 ? "+" : "") + wp.r20 + '%</div></div>' + opBtn(wp.s, "종목리포트 →") + '</div>' +
+             '<div class="row"><div><div class="big-t" style="font-size:24px;line-height:1.25">' + e(wp.n) + ' <span class="mut" style="font-size:13px">' + e(wp.s) + '</span></div><div class="mut">' + wp.tot + '점 / 100 · 지난 20일 ' + (wp.r20 > 0 ? "+" : "") + wp.r20 + '%</div></div>' + opBtn(wp.s, "종목리포트 →") + '</div>' +
              '<div class="wp-parts">' + Object.keys(PC).map(function(k){ var v = wp.parts[k] || 0, mx = PC[k][0];
                return '<div><small>' + k + '</small><span class="xbar" style="flex:1"><i style="width:' + Math.max(0, v / mx * 100).toFixed(0) + '%;background:' + PC[k][1] + '"></i></span><b>' + v.toFixed(0) + '<em>/' + mx + '</em></b></div>'; }).join("") + '</div>' +
              '<div class="wp-why">' + wp.why.map(function(x){ return '<div>' + e(x) + '</div>'; }).join("") + '</div>' +
