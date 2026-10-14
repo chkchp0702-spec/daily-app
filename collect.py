@@ -319,6 +319,17 @@ def compass():
             put("sector", today, "compass.json", text=txt)
 
 
+def screen():
+    """🔎 아침 거르기: opdata 의 screens.json → archive/screen/<날짜>/screens.json (날마다 쌓여 나중에 성적 계산)"""
+    import urllib.request
+    url = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/screens.json"
+    with urllib.request.urlopen(url, timeout=30) as r:
+        txt = r.read().decode("utf-8")
+    d = json.loads(txt)
+    if DATE_RE.match(d.get("date", "")):
+        put("screen", d["date"], "screens.json", text=txt)
+
+
 # ---------- 조용한 매집 ----------
 def accum():
     path = src("Cup", "results", "list3_accum.csv")
@@ -345,7 +356,7 @@ def accum():
 
 def manifest():
     cats = {}
-    for cat in ["market", "danta", "whale", "cup", "gap", "sector", "accum", "onepager"]:
+    for cat in ["market", "danta", "whale", "cup", "gap", "sector", "accum", "screen", "onepager"]:
         base = os.path.join(ARC, cat)
         items = []
         if os.path.isdir(base):
@@ -360,7 +371,7 @@ def manifest():
 
 
 if __name__ == "__main__":
-    for fn in (market, danta, whale, sector, compass, accum, cup_cards, gap_cards):
+    for fn in (market, danta, whale, sector, compass, screen, accum, cup_cards, gap_cards):
         try:
             fn()
         except Exception as e:

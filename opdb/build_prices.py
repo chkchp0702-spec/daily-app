@@ -21,7 +21,7 @@ def main():
     uni = universe(os.path.join("_src", "Cup"))
     syms = [s for s, _, _ in uni]
     mkt_of = {s: m for s, _, m in uni}
-    daily, hl, hlh = {}, {}, {}  # 나침반용: 최근 일봉, 52주 신고가/신저가, 최근 40일 신고가·신저가 기록
+    daily, hl, hlh, px = {}, {}, {}, {}  # px: 🔎 아침 거르기용 일봉(종가·고가·저가·거래량)  # 나침반용: 최근 일봉, 52주 신고가/신저가, 최근 40일 신고가·신저가 기록
     ep = os.path.join(a.dest, "etf_list.json")
     if os.path.exists(ep):                       # ETF 도 같이
         have = set(syms)
@@ -58,6 +58,13 @@ def main():
             w = c.resample("W-FRI").last().dropna()
             if s in mkt_of:
                 daily[s] = c.iloc[-260:]          # 나침반 섹터 히트맵(1주~12개월)까지 쓰려고 1년치
+                try:
+                    g = df[s] if isinstance(df.columns, pd.MultiIndex) else df
+                    px[s] = pd.DataFrame({"c": c, "h": g["High"].reindex(c.index), "l": g["Low"].reindex(c.index),
+                                          "v": g["Volume"].reindex(c.index)}).iloc[-260:].astype("float32")
+                    px[s]["h"] = px[s]["h"].fillna(px[s]["c"]); px[s]["l"] = px[s]["l"].fillna(px[s]["c"])
+                except Exception:
+                    pass
                 if len(c) > 200:
                     last = float(c.iloc[-1])
                     hl[s] = 1 if last >= float(c.max()) * 0.999 else -1 if last <= float(c.min()) * 1.001 else 0
@@ -95,6 +102,13 @@ def main():
         import traceback
         traceback.print_exc()
         print("나침반 실패", e, flush=True)
+    try:
+        from screens import build as screens_build
+        screens_build(px, mkt_of, a.dest, fx=fx, whale_src=os.path.join("_src", "whale40"))
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print("아침 거르기 실패", e, flush=True)
 
 
 if __name__ == "__main__":

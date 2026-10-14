@@ -474,6 +474,7 @@ var CATS = [
   {key:"gap",    name:"갭차트", short:"갭",   icon:"📈", color:"#c38bff", desc:"갭 돌파 후보"},
   {key:"sector", name:"나침반", short:"나침반", icon:"🧭", color:"#4dd47a", desc:"5개 시장 등락 종목 수 · 지수 흐름 · 강한 섹터"},
   {key:"accum",  name:"조용한 매집", short:"매집", icon:"🤫", color:"#ff8fc7", desc:"거래량은 늘고 가격은 제자리인 종목"},
+  {key:"screen", name:"아침 거르기", short:"거르기", icon:"🔎", color:"#7ee0b5", desc:"약 2만 7천 종목을 매일 아침 네 가지 거름망으로 — 살펴볼 후보 (사라는 뜻 아님)"},
   {key:"onepager", name:"종목리포트", short:"종목", icon:"📄", color:"#5ac8fa", desc:"약 2만 종목 + ETF 6천 개 · 검색하면 바로"},
   {key:"danta",  name:"단타", short:"단타",     icon:"⚡", color:"#ff6b6b", desc:"장중 단타 알람 · 이후 수익률 추적 · 시험 중"},
   {key:"alarm",  name:"알림", short:"알림",     icon:"🔔", color:"#ffd166", desc:"이 휴대폰으로 알림 받을지 켜고 끄기"},
@@ -779,7 +780,7 @@ function compare(a, b){
 }
 
 /* ---------- 화면 → PDF (PDF가 따로 없는 탭) ---------- */
-var NOPDF = {sector: 1, accum: 1, danta: 1};
+var NOPDF = {sector: 1, accum: 1, danta: 1, screen: 1};
 var H2P = new URL("lib/html2pdf.bundle.min.js", location.href).href;   // 앱에 같이 넣어둔 html2pdf.js 0.10.1 (MIT)
 function loadScript(doc, src){
   return new Promise(function(ok, no){
@@ -1032,6 +1033,55 @@ var RENDER = {
     if ($("smd")) getText(file("sector", it.id, "sector.md")).then(function(t){ mdInto($("smd"), t); });
   },
 
+  /* 🔎 아침 거르기 (10/14) — opdb/screens.py 가 만든 screens.json */
+  screen: function(it, el){
+    getJSON(file("screen", it.id, "screens.json")).then(function(D){
+      var FL = {US:"🇺🇸", KR:"🇰🇷", JP:"🇯🇵", CN:"🇨🇳", HK:"🇭🇰"};
+      var SC = [
+        {k:"quiet", ic:"🤫", nm:"조용한 돈 유입", rule:"최근 20일 가격이 좁은 폭에서 움직이는데(그 앞 20일보다 폭이 줄어듦), 최근 10일 중 3일 이상 거래대금이 평소의 1.5배를 넘은 종목. 50일선 위 · 10일 동안 −5%~+10% 안에서만."},
+        {k:"lead", ic:"🏆", nm:"섹터 1등주", rule:"시장마다 최근 20일 동안 시장보다 가장 강했던 세부 섹터 3곳 → 그 안에서 52주 고점 5% 안이고 20일선 위인 종목."},
+        {k:"hush", ic:"🌱", nm:"조용한 신고가", rule:"52주 신고가를 새로 썼는데 거래대금은 아직 50일 평균의 1.5배가 안 되는 종목 (오늘·최근 5일 모두). 시장에서 가장 큰 50개 종목은 뺌. 종목별 뉴스 수는 전 종목 자료가 없어 「거래가 아직 안 몰림」으로 대신."},
+        {k:"triple", ic:"🐋", nm:"고래+임원+차트", rule:"13F 고래(집중 투자자)가 새로 담았고 + 최근 90일 안에 회사 임원이 자기 돈으로 샀고(5만 달러 이상) + 주가가 50일선 위인 미국 종목."}
+      ];
+      var sel = store.scrSel || "quiet", mk = "ALL";
+      function grid(a){ return '<div class="grid4">' + a.map(function(x){ return '<div class="kv"><small>' + x[0] + '</small><b>' + x[1] + '</b></div>'; }).join("") + '</div>'; }
+      function num(v, s){ return v == null ? "–" : v + (s || ""); }
+      function row(r){
+        var g = sel === "quiet" ? [["거래 몰린 날", r.hot + "일 / 10일"], ["가격 폭", num(r.rng, "%")], ["거래대금", num(r.tvx, "배")], ["20일", pct(r.r20)]]
+              : sel === "lead" ? [["섹터 강도", '<span class="up">+' + num(r.rs) + '%p</span>'], ["고점까지", pct(r.hi)], ["20일", pct(r.r20)], ["오늘", pct(r.r1)]]
+              : sel === "hush" ? [["오늘 거래", num(r.t1, "배")], ["5일 거래", num(r.t5, "배")], ["20일", pct(r.r20)], ["오늘", pct(r.r1)]]
+              : [["임원 매수", "$" + num(r.ins_v, "M") + (r.ins_n > 1 ? " · " + r.ins_n + "건" : "")], ["50일선 위", pct(r.ma50)], ["20일", pct(r.r20)], ["오늘", pct(r.r1)]];
+        var sub = (FL[r.m] || r.m) + (r.sub ? " · " + esc(r.sub) : "") + (r.tv != null ? " · 하루 거래대금 약 " + (r.tv >= 10000 ? (r.tv / 10000).toFixed(r.tv >= 100000 ? 0 : 1) + "조" : won(r.tv) + "억") + " 원" : "");
+        if (sel === "quiet" && r.shrink != null) sub += " · 가격 폭이 앞 20일의 " + r.shrink + "%";
+        if (sel === "triple") sub += '<br>🐋 ' + esc((r.wh || []).join(", ")) + ' · 👔 ' + esc(r.ins_who || "") + (r.ins_last ? " (" + esc(r.ins_last.slice(5)) + ")" : "");
+        return '<div class="st"><div class="row"><div class="nm"><a href="javascript:openOP(\'' + esc(r.s) + '\')">' + esc(r.n) + '</a>' + (r.m === "US" ? "" : '<span class="cd">' + esc(r.s) + '</span>') + '</div>' +
+               '<a class="btn" data-tk="1" style="padding:2px 7px" href="javascript:openOP(\'' + esc(r.s) + '\')">종목리포트</a></div>' +
+               '<div class="tm" style="margin-top:4px">' + sub + '</div>' + grid(g) + '</div>';
+      }
+      function draw(){
+        var S = SC.filter(function(x){ return x.k === sel; })[0], all = D[sel] || [];
+        var mks = {}; all.forEach(function(r){ mks[r.m] = (mks[r.m] || 0) + 1; });
+        if (mk !== "ALL" && !mks[mk]) mk = "ALL";
+        var list = all.filter(function(r){ return mk === "ALL" || r.m === mk; });
+        var h = '<div class="seg" id="scrk">' + SC.map(function(x){ return '<button data-k="' + x.k + '" class="' + (x.k === sel ? "on" : "") + '">' + x.ic + " " + x.nm + " " + (D[x.k] || []).length + '</button>'; }).join("") + '</div>';
+        h += '<p class="note">' + S.rule + '</p>';
+        if (sel === "lead" && D.lead_sec){
+          h += '<div class="tm" style="margin:6px 0">' + Object.keys(D.lead_sec).map(function(m){
+            return (FL[m] || m) + " " + D.lead_sec[m].map(function(x){ return esc(x.name) + ' <span class="up">+' + x.rs + '%p</span>'; }).join(" · ");
+          }).join("<br>") + '</div>';
+        }
+        if (sel === "triple" && D.notes && D.notes.triple) h += '<p class="note">' + esc(D.notes.triple) + '</p>';
+        if (Object.keys(mks).length > 1) h += '<div class="seg" id="scrm">' + ["ALL"].concat(Object.keys(mks)).map(function(k){
+          return '<button data-k="' + k + '" class="' + (k === mk ? "on" : "") + '">' + (k === "ALL" ? "전체 " + all.length : (FL[k] || k) + " " + mks[k]) + '</button>'; }).join("") + '</div>';
+        h += list.length ? '<div class="list">' + list.map(row).join("") + '</div>' : '<div class="empty">오늘은 이 거름망에 걸린 종목이 없어요.</div>';
+        h += '<p class="note">거른 날 ' + esc(D.updated || "") + ' · 대상 ' + won(D.n) + '종목 (하루 거래대금 10억 원 이상만) · 시장마다 최대 8개. 살펴볼 후보일 뿐 사라는 뜻이 아니에요 — 날마다 쌓아 두고, 쌓이면 이후 수익률로 성적을 매깁니다.</p>';
+        el.innerHTML = h;
+        [].forEach.call(el.querySelectorAll("#scrk button"), function(b){ b.onclick = function(){ sel = b.dataset.k; store.scrSel = sel; save(); mk = "ALL"; draw(); }; });
+        [].forEach.call(el.querySelectorAll("#scrm button"), function(b){ b.onclick = function(){ mk = b.dataset.k; draw(); }; });
+      }
+      draw();
+    }).catch(function(){ el.innerHTML = '<div class="empty">자료를 못 불러왔어요. 매일 아침 6시쯤 채워져요.</div>'; });
+  },
   accum: function(it, el){
     getJSON(file("accum", it.id, "list.json")).then(function(rows){
       var mk = {}; rows.forEach(function(r){ mk[r.mkt] = (mk[r.mkt] || 0) + 1; });
@@ -1373,7 +1423,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261014d";
+var APPV = "20261014e";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1432,7 +1482,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="pdfx.js?v=7"></script>
 <script defer src="honest.js?v=1"></script>
 <script defer src="up10.js?v=12"></script>
-<script defer src="nav2.js?v=13"></script>
+<script defer src="nav2.js?v=14"></script>
 <script defer src="clamp.js?v=1"></script>
 <script defer src="ticker.js?v=2"></script>
 <script defer src="ux1013.js?v=1"></script>

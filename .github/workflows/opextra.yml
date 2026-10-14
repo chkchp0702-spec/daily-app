@@ -102,6 +102,7 @@ jobs:
         run: |
           git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
           git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/whale40 _src/whale40 || true
           git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata
           pip install -q yfinance pandas
       - uses: actions/download-artifact@v4

@@ -28,6 +28,7 @@ jobs:
         run: |
           git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup _src/Cup
           git clone -q --depth 1 https://github.com/chkchp0702-spec/stock-onepager _src/stock-onepager
+          git clone -q --depth 1 https://github.com/chkchp0702-spec/whale40 _src/whale40 || true
           pip install -q yfinance pandas
           git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata \
             || (mkdir opdata && cd opdata && git init -q -b opdata && git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}")
