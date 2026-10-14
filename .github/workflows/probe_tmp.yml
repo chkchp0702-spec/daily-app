@@ -10,8 +10,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: pip install -q yfinance pandas matplotlib
-      - run: python probe/aapl_chart.py
+      - run: pip install -q yfinance pandas numpy pyyaml
+      - run: git clone -q --depth 1 https://github.com/chkchp0702-spec/Cup Cup && python probe/aapl_why.py
       - run: |
           git config user.name bot; git config user.email bot@users.noreply.github.com
-          git add probe/aapl.png probe/aapl_weekly.txt && git commit -m "probe aapl" && (git pull --rebase -q; git push -q) || true
+          git add probe/aapl_why.txt && git commit -m "probe aapl" && (git pull --rebase -q; git push -q) || true
