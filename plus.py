@@ -687,7 +687,8 @@ def today_hits():
     da, dday = latest_json("danta", "alerts.json", [])
     if dday == X.TODAY:
         for r in da or []:
-            add(r["code"], f"⚡ 단타 알람 {r.get('time')} {r.get('type')}", "danta")
+            if r.get("sent", True):   # 🙋 기록만 한 알람은 관심종목 알림에도 안 넣음 (10/14)
+                add(r["code"], f"⚡ 단타 알람 {r.get('time')} {r.get('type')}", "danta")
     wx = X.jl(os.path.join(X.OUT, "whale_x.json"), {}) or {}
     for c in (wx.get("consensus") or [])[:20]:
         add(c["t"], f"🐋 고래 {c['n']}명 새로 매수", "whale")

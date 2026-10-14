@@ -105,6 +105,7 @@ def danta():
                 "stop": num(r.get("손절")),
                 "t1": num(r.get("목표1")),
                 "t2": num(r.get("목표2")),
+                "sent": (r.get("알림") or "보냄") != "기록만",   # 🙋 자신 있어 알림 보냄 / 기록만 (10/14)
             })
     for day, rows in days.items():
         put("danta", day, "alerts.json", text=json.dumps(rows, ensure_ascii=False), overwrite=True)

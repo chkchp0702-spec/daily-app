@@ -168,7 +168,7 @@
       var cu = r[0] || {}; (cu.ath || []).concat(cu.top || []).forEach(function(c){ if (c.brk) add(c.code, "☕ 컵 돌파", "cup"); else if (c.dist != null && c.dist >= -3) add(c.code, "☕ 돌파 임박", "cup"); else add(c.code, "☕ 컵 후보", "cup"); });
       ((r[1] || {}).top || []).forEach(function(c){ add(c.code, "📈 갭 " + (c.hold ? "유지" : "메움"), "gap"); });
       (r[2] || []).forEach(function(c){ add(c.code, "🤫 " + (c.tag || "매집"), "accum"); });
-      (r[3] || []).forEach(function(c){ add(c.code, "⚡ 단타 " + c.time, "danta"); });
+      (r[3] || []).forEach(function(c){ if (c.sent !== false) add(c.code, "⚡ 단타 " + c.time, "danta"); });
       ((r[4] || {}).consensus || []).forEach(function(c){ add(c.t, "🐋 고래 " + c.n + "명 매수", "whale"); });
       ((r[5] || {}).items || []).forEach(function(c){ if (c.brk) add(c.code, "🚀 박스 돌파", "accum"); });
       return o;

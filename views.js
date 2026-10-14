@@ -166,12 +166,15 @@
           '<div class="lg"><span><i style="background:' + V.UP + '"></i>플러스</span><span><i style="background:' + V.DN + '"></i>마이너스</span><span class="mut">막대를 누르면 자세히</span></div>');
       }
       h += '<div id="bt"></div>' + sec("알람 " + rows.length + "건");
+      var qn = rows.filter(function(x){ return x.sent === false; }).length;
+      if (qn) h += '<div class="note mut" style="margin:4px 0 8px;font-size:12px">🙋 자신 있는 알람만 알림으로 가요 — 오늘 ' + qn + '건은 증거가 모자라 기록만 했어요(📝). 성적이 쌓여 이기는 자리로 확인되면 저절로 알림이 켜져요.</div>';
       if (!rows.length) h += '<div class="empty"><div class="big">⚡</div>오늘은 아직 알람이 없어요.<br><small class="mut">텔레그램으로 알람이 오면 1~5분 안에 여기에도 떠요. 새로고침 해보세요.</small></div>';
       h += '<div class="list">' + rows.map(function(x){
         var ex = x.exit ? chip(e(x.exit), /손절|이탈/.test(x.exit) ? "cool" : "hot") : "";
-        return '<div class="st"><div class="row"><div class="nm"><a href="https://m.stock.naver.com/domestic/stock/' + e(x.code) + '/total" target="_blank">' + e(x.name) + '</a><span class="cd">' + e(x.code) + '</span></div>' +
+        var qt = x.sent === false ? '<span class="chip" title="자신 없어 알림은 안 보내고 기록만 한 알람">📝 기록만</span>' : "";
+        return '<div class="st' + (x.sent === false ? ' mutey' : '') + '"><div class="row"><div class="nm"><a href="https://m.stock.naver.com/domestic/stock/' + e(x.code) + '/total" target="_blank">' + e(x.name) + '</a><span class="cd">' + e(x.code) + '</span></div>' +
           '<span class="tm">' + e(x.time) + '</span></div>' +
-          '<div class="row" style="margin:6px 0 2px;justify-content:flex-start;gap:6px;flex-wrap:wrap">' + chip(e(x.type), "c") + ex + '<span class="tm">알람가 ' + won(x.price) + '원 · 당일 ' + sgn(x.chg) + '%</span></div>' +
+          '<div class="row" style="margin:6px 0 2px;justify-content:flex-start;gap:6px;flex-wrap:wrap">' + chip(e(x.type), "c") + ex + qt + '<span class="tm">알람가 ' + won(x.price) + '원 · 당일 ' + sgn(x.chg) + '%</span></div>' +
           V.range(x.low, x.high, x.now) +
           '<div class="row" style="margin-top:10px"><span class="tm">' + (x.stop ? '🛑 ' + won(x.stop) + ' · 💰 ' + won(x.t1) + (x.t2 ? ' · 💎 ' + won(x.t2) : '') : '30분 후 ' + sgn(x.m30) + '%') + '</span>' + opBtn(x.code) + '</div></div>';
       }).join("") + '</div>';

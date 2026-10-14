@@ -971,7 +971,7 @@ def alerts():
     ds = sorted(glob.glob(os.path.join(ARC, "danta", "20*", "alerts.json")))
     if ds:
         day = os.path.basename(os.path.dirname(ds[-1]))
-        rows = jl(ds[-1], []) or []
+        rows = [r for r in (jl(ds[-1], []) or []) if r.get("sent", True)]   # 🙋 기록만 한 알람은 푸시 안 함 (10/14)
         if day == TODAY and rows:
             push("danta", f"⚡ 오늘 단타 알람 {len(rows)}건 (시험 중)", ", ".join(f"{r['time']} {r['name']}" for r in rows[-8:]), "danta", f"danta:{day}:{len(rows)}", syms=[[r["code"], r.get("price")] for r in rows[-8:]], quiet=None)
 
