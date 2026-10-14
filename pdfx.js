@@ -8,7 +8,7 @@
   var IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);          // PDF 쪽 크기(mm)·여백 — 휴대폰 화면 비율
   var CPROPS = ["fill", "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "opacity", "fill-opacity", "stroke-opacity",
                 "font-size", "font-weight", "font-family", "text-anchor", "dominant-baseline", "color"];
-  function rgb(v){ return window.toRGB ? toRGB(v) : v; }
+  function rgb(v){ return conv(v); }
   function wait(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
   function loadImg(img){
     return new Promise(function(ok){ if (img.complete && img.naturalWidth) return ok(true);
@@ -44,13 +44,33 @@
       .catch(function(){ img.style.visibility = "hidden"; });
   }
 
-  // 복제본 안의 색 계산값 color(srgb …) 를 rgb 로 한 번만 (html2canvas 가 못 읽음)
-  var FPROPS = ["color", "background-color", "background-image", "border-top-color", "border-right-color", "border-bottom-color", "border-left-color", "box-shadow", "outline-color", "text-decoration-color"];
+  // 복제본 안의 색 계산값 color(srgb …)·color(display-p3 …) 등을 rgb 로 한 번만 (html2canvas 가 못 읽음 — 아이폰 사파리 「unsupported color function "color"」)
+  //   10/14: 아이폰은 색이 들어가는 모든 속성(테두리·그림자·글자 장식·::before/::after 까지)에서 color() 가 나와서, 이름에 색 관련 말이 든 속성은 전부 + 앞뒤 꾸밈(가상 요소)까지 고친다
+  function conv(v){
+    if (!v || !/(color|lab|lch|oklab|oklch)\(/.test(v)) return v;
+    v = v.replace(/color\(\s*(srgb|srgb-linear|display-p3|a98-rgb|prophoto-rgb|rec2020|xyz|xyz-d50|xyz-d65)\s+([-\d.e]+|none)\s+([-\d.e]+|none)\s+([-\d.e]+|none)(?:\s*\/\s*([-\d.e%]+|none))?\s*\)/g, function(_, sp, r, g, b, a){
+      var f = function(x){ x = x === "none" ? 0 : +x; return Math.max(0, Math.min(255, Math.round(x * 255))); };
+      var al = a == null || a === "none" ? 1 : (/%$/.test(a) ? parseFloat(a) / 100 : +a);
+      return "rgba(" + f(r) + "," + f(g) + "," + f(b) + "," + al + ")"; });
+    return v.replace(/(oklab|oklch|lab|lch|color)\([^()]*\)/g, "rgba(128,128,128,0.5)");   // 못 바꾸는 건 회색으로 (그림이 실패하는 것보다 낫게)
+  }
+  var CKEYS = null;
   function fixOnce(root, w){
-    [].forEach.call(root.querySelectorAll("*"), function(el){
-      var cs = w.getComputedStyle(el);
-      FPROPS.forEach(function(p){ var v = cs.getPropertyValue(p); if (v && v.indexOf("color(") >= 0) el.style.setProperty(p, rgb(v), "important"); });
+    var d = root.ownerDocument, css = [], n = 0;
+    var keys = function(cs){ if (CKEYS) return CKEYS; CKEYS = [];
+      for (var k = 0; k < cs.length; k++){ var p = cs[k]; if (/color|shadow|background|border|outline|decoration|fill|stroke|caret|column-rule|emphasis/.test(p)) CKEYS.push(p); }
+      return CKEYS; };
+    [root].concat([].slice.call(root.querySelectorAll("*"))).forEach(function(el){
+      var cs = w.getComputedStyle(el), ks = keys(cs);
+      ks.forEach(function(p){ var v = cs.getPropertyValue(p); if (v && v.indexOf("(") >= 0 && /(color|lab|lch)\(/.test(v)) el.style.setProperty(p, conv(v), "important"); });
+      ["::before", "::after"].forEach(function(ps){
+        var pc = w.getComputedStyle(el, ps); if (!pc || pc.content === "none" || pc.content === "normal") return;
+        var rule = "";
+        ks.forEach(function(p){ var v = pc.getPropertyValue(p); if (v && v.indexOf("(") >= 0 && /(color|lab|lch)\(/.test(v)) rule += p + ":" + conv(v) + " !important;"; });
+        if (rule){ if (!el.dataset.pfx) el.dataset.pfx = String(++n); css.push('[data-pfx="' + el.dataset.pfx + '"]' + ps + "{" + rule + "}"); }
+      });
     });
+    if (css.length){ var st = d.createElement("style"); st.textContent = css.join("\n"); root.appendChild(st); }
   }
   /* w: 화면이 있는 window(iframe 이면 그 contentWindow), root: 찍을 영역, bg: 배경색 */
   window.screenPdf = function(w, root, name, bg, prog){
@@ -81,8 +101,11 @@
       // 10/14: 예전엔 카드마다 문서 전체(수천 개)의 색을 다시 고쳐서 나침반이 2분 넘게 걸리고 휴대폰에선 멈춤
       //   → 색 고치기는 복제본에 한 번만, 찍을 땐 원래 화면은 건너뜀(ignoreElements)
       fixOnce(host, w);
+      // 문서 바탕(html·body)의 색도 html2canvas 가 읽음 — 잠깐 rgb 로 바꿔 두고 끝나면 되돌림
+      [d.documentElement, d.body].forEach(function(el){ var cs = w.getComputedStyle(el), keep = el.getAttribute("style");
+        (CKEYS || []).forEach(function(p){ var v = cs.getPropertyValue(p); if (v && /(color|lab|lch)\(/.test(v)){ if (!el.__pfxKeep) el.__pfxKeep = [keep]; el.style.setProperty(p, conv(v), "important"); } }); });
       var opt = {margin: 0, jsPDF: {unit: "px", format: [width, 2000], orientation: "portrait", hotfixes: ["px_scaling"]}, html2canvas: {scale: IOS ? 1.25 : (w.devicePixelRatio > 2 ? 1.5 : 1.8), backgroundColor: bg, useCORS: true, logging: false, scrollX: 0, scrollY: 0,
-                                ignoreElements: function(n){ return n.parentNode === d.body && n !== host && !/^(HEAD|STYLE|LINK)$/.test(n.tagName); }}};
+                                ignoreElements: function(n){ return n.parentNode === d.body && n !== host && !(n.classList && n.classList.contains("html2pdf__overlay")) && !/^(HEAD|STYLE|LINK|SCRIPT)$/.test(n.tagName); }}};
       // 4) PDF 만들기 — 쪽 너비에 맞춰 카드를 차례로 붙이고, 남은 자리가 모자라면 새 쪽
       return H2P().set({jsPDF: {unit: "mm", format: [PW, PH], orientation: "portrait"}}).from(d.createElement("div")).toPdf().get("pdf").then(function(tmp){
         var PDF = tmp;                                     // 빈 첫 쪽이 하나 있는 jsPDF — 배경을 칠하고 그 위에 그린다
@@ -123,6 +146,7 @@
           return PDF.output("blob"); });
       });
     }).finally(function(){ host.remove();
+      [d.documentElement, d.body].forEach(function(el){ if (el.__pfxKeep){ var k = el.__pfxKeep[0]; if (k == null) el.removeAttribute("style"); else el.setAttribute("style", k); el.__pfxKeep = null; } });
       // 10/14: html2pdf 가 남기는 투명 덮개(html2pdf__overlay)가 화면을 덮어 「PDF 저장하기」를 못 누르던 문제 — 다 치움
       [].forEach.call(d.querySelectorAll(".html2pdf__overlay,.html2pdf__container"), function(x){ x.remove(); }); });
   };

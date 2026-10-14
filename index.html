@@ -816,7 +816,8 @@ function pdfButton(make, name){
 // html2canvas 는 color-mix()(계산값 color(srgb …))를 못 읽어서, 복제본의 색을 rgb 로 바꿔 넣는다
 var CPROPS = ["color", "background-color", "background-image", "border-top-color", "border-right-color", "border-bottom-color", "border-left-color", "box-shadow", "fill", "stroke", "outline-color", "text-decoration-color"];
 function toRGB(v){
-  return v.replace(/color\(srgb\s+([-\d.e]+)\s+([-\d.e]+)\s+([-\d.e]+)(?:\s*\/\s*([-\d.e]+))?\)/g, function(_, r, g, b, a){
+  return v.replace(/color\(\s*(?:srgb|srgb-linear|display-p3|a98-rgb|prophoto-rgb|rec2020)\s+([-\d.e]+|none)\s+([-\d.e]+|none)\s+([-\d.e]+|none)(?:\s*\/\s*([-\d.e]+|none))?\s*\)/g, function(_, r, g, b, a){
+    r = r === "none" ? 0 : r; g = g === "none" ? 0 : g; b = b === "none" ? 0 : b; a = a === "none" ? null : a;
     var f = function(x){ return Math.max(0, Math.min(255, Math.round(+x * 255))); };
     return "rgba(" + f(r) + "," + f(g) + "," + f(b) + "," + (a == null ? 1 : +a) + ")";
   });
@@ -1372,7 +1373,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261014b";
+var APPV = "20261014c";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1428,7 +1429,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="push.js?v=2"></script>
 <script defer src="port.js?v=33"></script>
 <script defer src="simple.js?v=15"></script>
-<script defer src="pdfx.js?v=6"></script>
+<script defer src="pdfx.js?v=7"></script>
 <script defer src="honest.js?v=1"></script>
 <script defer src="up10.js?v=12"></script>
 <script defer src="nav2.js?v=13"></script>
