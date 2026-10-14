@@ -14,8 +14,8 @@
   function md(d){ return d ? String(d).slice(5, 10).replace("-", "/") : ""; }
   function hon(v, o){ return window.HON ? HON.chip(v, o) : ""; }   // 🧾 정직 계산 칩 (honest.js · 자료 없으면 빈칸)
   function J(name){ return getJSON(RAW + name + "?" + Math.floor(Date.now() / 120000), {ttl: 120000}); }   // 같은 2분 안엔 한 번만 받음 (index.html getJSON)
-  var UI = {theme: "auto", fs: 1, home: "time"};   // 10/14 A9-1: home = "time"(시간대 맞춤 순서) | "fixed"(고정)
-  try { var u = JSON.parse(localStorage.getItem("ui") || "{}"); if (u.theme) UI.theme = u.theme; if (u.fs) UI.fs = u.fs; if (u.home) UI.home = u.home; } catch(x) {}
+  var UI = {theme: "auto", fs: "auto", home: "time"};   // 10/14 A15-3: fs = "auto"(아이폰 글자 크기 따라감) | 0.88~1.22   // 10/14 A9-1: home = "time"(시간대 맞춤 순서) | "fixed"(고정)
+  try { var u = JSON.parse(localStorage.getItem("ui") || "{}"); if (u.theme) UI.theme = u.theme; if (u.fs) UI.fs = u.fs === 1 ? "auto" : u.fs === 0.92 ? 0.94 : u.fs === 1.12 ? 1.1 : u.fs; if (u.home) UI.home = u.home; } catch(x) {}
   function keepUI(){ try { localStorage.setItem("ui", JSON.stringify(UI)); } catch(x) {} }
 
   /* ---------- ⑥ 테마 · 글자 크기 ---------- */
@@ -24,8 +24,10 @@
     var t = UI.theme === "auto" ? (mq && mq.matches ? "light" : "dark") : UI.theme;
     document.documentElement.setAttribute("data-ui", t);
     var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", t === "light" ? "#f5f6fa" : "#0b0f17");
-    document.documentElement.style.setProperty("--fs", UI.fs);
-    document.body && (document.body.style.zoom = UI.fs === 1 ? "" : UI.fs);
+    document.documentElement.style.setProperty("--fs", UI.fs === "auto" ? 1 : UI.fs);
+    // 10/14 A15-3: zoom(카드·여백까지 다 커짐) 대신 글자만 키움 — ux1014c.js chFont 가 글자 크기 규칙만 고쳐 씀
+    if (document.body) document.body.style.zoom = "";
+    if (window.chFont) window.chFont(UI.fs);
   }
   if (mq && mq.addEventListener) mq.addEventListener("change", applyUI);
   applyUI();
@@ -35,13 +37,13 @@
     var row = function(lab, key, opts){ return '<div class="us-r"><span>' + lab + '</span><div class="us-seg">' + opts.map(function(o){
       return '<button data-k="' + key + '" data-v="' + o[0] + '" class="' + (String(UI[key]) === String(o[0]) ? "on" : "") + '">' + o[1] + '</button>'; }).join("") + '</div></div>'; };
     d.innerHTML = '<b>⚙️ 보기 설정</b>' + row("화면", "theme", [["auto", "자동"], ["dark", "🌙 어둡게"], ["light", "☀️ 밝게"]]) +
-      row("글자", "fs", [[0.92, "작게"], [1, "보통"], [1.12, "크게"]]) +
+      row("글자", "fs", [["auto", "📱 자동"], [0.88, "가"], [0.94, "가"], [1, "가"], [1.1, "가"], [1.22, "가"]]) +
       row("🏠 홈 순서", "home", [["time", "🕘 시간대"], ["fixed", "고정"]]) +
-      '<small>자동 = 휴대폰 설정(다크 모드)을 따라가요. 홈 「시간대」 = 아침·장중·저녁·밤마다 지금 볼 카드를 맨 위로.</small>' +
+      '<small>글자 「📱 자동」 = 아이폰 설정 › 디스플레이 › 텍스트 크기를 따라가요(가 다섯 개 = 아주 작게 ~ 아주 크게, 카드 모양은 그대로). 화면 자동 = 휴대폰 설정(다크 모드)을 따라가요. 홈 「시간대」 = 아침·장중·저녁·밤마다 지금 볼 카드를 맨 위로.</small>' +
       '<div class="us-go"><button data-go="alarm">🔔 알림 켜기·끄기</button><button data-go="idea">💬 의견함</button><button data-go="onepager">📄 종목리포트</button></div>';
     document.body.appendChild(d);
     [].forEach.call(d.querySelectorAll("[data-go]"), function(b){ b.onclick = function(){ d.remove(); go(b.dataset.go); }; });
-    [].forEach.call(d.querySelectorAll("button[data-k]"), function(b){ b.onclick = function(){ var k = b.dataset.k, v = b.dataset.v; UI[k] = k === "fs" ? +v : v; keepUI(); applyUI(); d.remove(); settings();
+    [].forEach.call(d.querySelectorAll("button[data-k]"), function(b){ b.onclick = function(){ var k = b.dataset.k, v = b.dataset.v; UI[k] = k === "fs" && v !== "auto" ? +v : v; keepUI(); applyUI(); d.remove(); settings();
       if (k === "home" && window.cur === "home" && window.homeInit) homeInit(); }; });
     setTimeout(function(){ document.addEventListener("click", function off(ev){ if (!d.contains(ev.target) && ev.target.id !== "uibtn"){ d.remove(); document.removeEventListener("click", off); } }); }, 0);
   }
@@ -153,7 +155,7 @@
       '<button class="hm-story" id="hmstory" aria-label="30초로 보기">▶ 30초</button></div>';
     // 10/13 「더 자주 열게」 ③ 어제보다 바뀐 것 · ⑦ 이번 주 복기(주말) · ⑥ 어제 예고 → 오늘 결과
     var CH = (H.chg && H.chg.items) || [];
-    if (CH.length) h += '<section class="card hm-chg"><div class="hm-cht">🆕 ' + (H.chg.since ? md(H.chg.since) + ' 이후 ' : '') + '바뀐 것</div>' +
+    if (CH.length) h += '<section class="card hm-chg" data-strip="home"><div class="hm-h"><span class="hm-i">🆕</span><div><b>바뀐 것</b><small>' + (H.chg.since ? md(H.chg.since) + ' 이후 · ' : '') + CH.length + '가지</small></div></div>' +
       CH.map(function(x){ return '<div class="hm-chi" data-goto="' + e(x.go || "home") + '"><span>' + e(x.ic) + '</span><b>' + e(x.t) + '</b><i>›</i></div>'; }).join("") + '</section>';
     var Wk = H.week || {}, dw = now.getUTCDay();
     if ((dw === 6 || dw === 0) && Wk.days){
