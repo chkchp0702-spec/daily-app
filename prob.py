@@ -310,9 +310,22 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
         es = H.get("ES=F")
         g = None
         if es is not None and len(es) > 2 and not FAKE:
-            e = es["Close"].dropna()
-            if e.index[-1] > today:                               # 10/15: 미국 마감 뒤 새 선물 세션이 열렸을 때만 (아니면 오늘 움직임을 다시 세는 것)
-                g = float(e.iloc[-1] / e.iloc[-2] - 1)
+            # 10/15: 일봉 날짜 표시가 세션과 어긋나서(저녁에도 어제 날짜) → 30분봉으로 「미국 마지막 마감(뉴욕 16:00) 뒤 선물 등락」을 잰다
+            try:
+                import yfinance as yf
+                from zoneinfo import ZoneInfo
+                ny = ZoneInfo("America/New_York")
+                ib = yf.download("ES=F", period="5d", interval="30m", progress=False, auto_adjust=False)
+                ic = ib["Close"].dropna()
+                ic = ic.iloc[:, 0] if hasattr(ic, "columns") else ic
+                ic.index = pd.to_datetime(ic.index).tz_convert(ny)
+                cut = pd.Timestamp(today.strftime("%Y-%m-%d") + " 16:00", tz=ny)
+                before, after = ic[ic.index < cut], ic[ic.index >= cut]
+                if len(before) and len(after) and not open_now:
+                    g = float(after.iloc[-1] / before.iloc[-1] - 1)
+                    print(f"🛰️ 선물 {mk}: {today.date()} 16:00 뒤 {g*100:+.2f}% (30분봉 {after.index[-1]})")
+            except Exception as ex:
+                print("선물 30분봉 실패", ex)
         elif FAKE:
             g = 0.002
         if g is not None:
