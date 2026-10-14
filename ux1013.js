@@ -60,6 +60,7 @@
       [].forEach.call(bar.children, function(x){ x.classList.toggle("on", x === bt); }); bar.scrollLeft = bt.offsetLeft - 60;
       var y = el.getBoundingClientRect().top + window.scrollY - (hh() + bar.offsetHeight + 8);
       window.scrollTo({top: Math.max(0, y), behavior: "smooth"}); }; });
+    if (window.mkTocExtra) try { mkTocExtra(bar); } catch(x) {}   // A10-5 📝 요약 / 📖 전체 (ux1014.js)
   }
   var tt = null;
   new MutationObserver(function(){ if (window.cur === "port" && !document.getElementById("potm") && document.getElementById("pobody")) setTimeout(tmMount, 0);

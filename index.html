@@ -251,6 +251,7 @@ iframe.rep{width:100%;border:0;border-radius:12px;background:#fff;min-height:70v
 /* 툴팁 */
 .vtip{position:fixed;z-index:50;display:none;max-width:260px;background:#e8ecf4;color:#0b0f17;border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none}
 .vtip i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
+.mb-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--dim,#8a94a8);opacity:.6;margin-right:4px;vertical-align:1px}.mb-dot.on{background:#24c08a;opacity:1;box-shadow:0 0 0 2px color-mix(in srgb,#24c08a 25%,transparent)}.board .kv small.mb-cl{display:block;font-size:9.5px;color:var(--dim,#8a94a8);margin-top:1px}.mb-gl{font-size:12px;font-weight:700;margin:-4px 0 8px;color:var(--sub)}
 .board .kv b.up,.board .kv small.up{color:var(--up)}.board .kv b.dn,.board .kv small.dn{color:var(--down)}
 
 .fzb{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:700;color:var(--sub);border:1px solid var(--line);border-radius:6px;padding:0 5px;vertical-align:1px}
@@ -1142,20 +1143,37 @@ function dantaLive(){
     return R;
   });
 }
+// A10-1: 값 하나의 「장중/마감」 — asof_utc 는 그 시장 현지 시각(+0900·-0400). 받은 시각(fT)과 40분 안이면 장중
+function mktState(x, fT){
+  var a = x && x.asof_utc; if (!a) return null;
+  var T = Date.parse(String(a).replace(/([+-]\d\d)(\d\d)$/, "$1:$2")); if (isNaN(T)) return null;
+  var m = String(a).match(/^\d{4}-(\d\d)-(\d\d)/), md = m ? (+m[1]) + "/" + (+m[2]) : "";
+  return {live: !isNaN(fT) && Math.abs(fT - T) < 40 * 60000, md: md, T: T};
+}
 function marketBoard(el){
   if (!el) return;
   getJSON(RAW + "market-strategy-report/main/market/latest.json?" + Date.now()).then(function(d){
     var keys = ["kospi","kosdaq","foreign_kospi","sp500","nasdaq","dow","vix","us10y","usdkrw","dxy","wti","gold","samsung","hynix","nvidia","micron"];
     var it = d.items || {};
+    window.__LATEST = d;
+    // A10-1 (10/14): 타일마다 장중/마감 — 값의 시각이 받은 시각과 40분 안이면 🟢 장중, 아니면 ⚪ 「M/D 마감」(그 시장 날짜)
+    var fk = String(d.fetched_kst || "").replace(" ", "T") + ":00+09:00", fT = Date.parse(fk);
+    var st = function(x){ return window.mktState ? mktState(x, fT) : null; };
+    var KR = ["kospi","kosdaq","foreign_kospi","samsung","hynix"], US = ["sp500","nasdaq","dow","vix","us10y","nvidia","micron"];
+    var grp = function(L, flag){ var s = L.map(function(k){ return it[k] && st(it[k]); }).filter(Boolean); if (!s.length) return "";
+      var live = s.filter(function(x){ return x.live; }).length; return flag + (live * 2 >= s.length ? " 장중" : " " + (s[0].md || "") + " 마감"); };
+    var gl = [grp(KR, "🇰🇷"), grp(US, "🇺🇸")].filter(Boolean).join(" · ");
     var cells = keys.filter(function(k){ return it[k] && it[k].value != null; }).map(function(k){
-      var x = it[k], v = x.value, cp = x.change_pct;
+      var x = it[k], v = x.value, cp = x.change_pct, s = st(x);
       var val = k === "foreign_kospi" ? (v > 0 ? "+" : "") + Math.round(v).toLocaleString() + "억" :
                 (Math.abs(v) >= 1000 ? Math.round(v).toLocaleString() : v.toLocaleString(undefined, {maximumFractionDigits:2}));
       var cls = (k === "foreign_kospi" ? v : cp) > 0 ? "up" : (k === "foreign_kospi" ? v : cp) < 0 ? "dn" : "";
-      return '<div class="kv"><small>' + esc(x.name.replace("코스피 외국인 순매수(억원)", "외국인 순매수")) + '</small><b class="' + cls + '">' + val + '</b>' +
-             (cp != null ? '<small class="' + cls + '">' + (cp > 0 ? "+" : "") + cp.toFixed(2) + '%</small>' : '') + '</div>';
+      return '<div class="kv"><small>' + (s ? '<i class="mb-dot' + (s.live ? ' on' : '') + '" title="' + (s.live ? '장중' : esc(s.md) + ' 마감') + '"></i>' : '') + esc(x.name.replace("코스피 외국인 순매수(억원)", "외국인 순매수")) + '</small><b class="' + cls + '">' + val + '</b>' +
+             (cp != null ? '<small class="' + cls + '">' + (cp > 0 ? "+" : "") + cp.toFixed(2) + '%</small>' : '') +
+             (s && !s.live && s.md ? '<small class="mb-cl">' + esc(s.md) + ' 마감</small>' : '') + '</div>';
     }).join("");
-    el.innerHTML = '<div class="card"><h3>실시간 시장판 <span class="tm">' + esc(d.fetched_kst || "") + ' 기준</span></h3><div class="board">' + cells + '</div></div>';
+    el.innerHTML = '<div class="card"><h3>실시간 시장판 <span class="tm">' + esc(d.fetched_kst || "") + ' 기준</span></h3>' + (gl ? '<div class="mb-gl">' + esc(gl) + ' <span class="mut">· 🟢 장중 ⚪ 마감값</span></div>' : '') + '<div class="board">' + cells + '</div></div>';
+    try { document.dispatchEvent(new CustomEvent("latest-ready")); } catch(x) {}
   }).catch(function(){ el.innerHTML = ""; });
 }
 function backtestCard(el){
@@ -1423,7 +1441,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261014f";
+var APPV = "20261014g";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1461,7 +1479,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 })();
 </script>
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
-<script defer src="views.js?v=28"></script>
+<script defer src="views.js?v=29"></script>
 <script defer src="ixchart.js?v=7"></script>
 <script defer src="compass.js?v=18"></script>
 <script defer src="extras.js?v=8"></script>
@@ -1472,7 +1490,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="plus5.js?v=6"></script>
 <script defer src="plus6.js?v=15"></script>
 <script defer src="plus7.js?v=4"></script>
-<script defer src="plus8.js?v=11"></script>
+<script defer src="plus8.js?v=12"></script>
 <script defer src="gsearch.js?v=1"></script>
 <script defer src="brain.js?v=4"></script>
 <script defer src="feed.js?v=6"></script>
@@ -1483,10 +1501,11 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="honest.js?v=1"></script>
 <script defer src="up10.js?v=13"></script>
 <script defer src="nav2.js?v=14"></script>
-<script defer src="clamp.js?v=1"></script>
+<script defer src="clamp.js?v=2"></script>
 <script defer src="ticker.js?v=2"></script>
-<script defer src="ux1013.js?v=1"></script>
+<script defer src="ux1013.js?v=2"></script>
 <script defer src="story.js?v=1"></script>
+<script defer src="ux1014.js?v=1"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
 </html>

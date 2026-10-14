@@ -112,6 +112,7 @@
     };
     (window.opLoadIdx ? opLoadIdx() : Promise.resolve()).then(draw, draw);
   }
+  function sameHead(a, b){ var n = function(x){ return String(x || "").replace(/<[^>]*>/g, "").replace(/[\s「」'"·,.—–-]/g, "").slice(0, 12); }; return !!a && !!b && n(a) === n(b); }
   P.wrap("market", function(it, a){
     if (it.files.indexOf("data.json") < 0) return;
     getJSON(file("market", it.id, "data.json")).then(function(d){
@@ -141,7 +142,7 @@
       var bm = String(d.basis || "").match(/미국[^·]*/);
       if (s.title || s.lead || us.length){
         h += '<section class="card mk-us"><div class="mk-lab">🇺🇸 전일 미국장 핵심' + (bm ? ' <span class="mut">' + e(bm[0].trim()) + '</span>' : '') + '</div>' +
-          (s.title ? '<div class="mk-t2">' + rich(strip(s.title)) + '</div>' : '') +
+          (s.title && !sameHead(s.title, d.one_liner) ? '<div class="mk-t2">' + rich(strip(s.title)) + '</div>' : '') +   // A10-4: 맨 위 띠와 같은 제목이면 한 번만
           (s.lead ? '<p class="mk-lead">' + rich(strip(s.lead)) + '</p>' : '') +
           (us.length ? '<div class="mk-q">' + us.map(function(q){
             return '<div><small>' + e(String(q.who || "").replace(/^🇺🇸\s*/, "")) + '</small><b>' + rich(strip(q.said)) + '</b>' + (q.so ? '<span>→ ' + rich(strip(q.so).replace(/^\s*→?\s*(<b>)?\s*그래서\?\s*(<\/b>)?\s*/, "")) + '</span>' : '') + '</div>'; }).join("") + '</div>' : '') + '</section>';

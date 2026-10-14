@@ -42,8 +42,12 @@
     btn.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); var o = !OPEN[k]; OPEN[k] = o; set(o);
       if (!o){ var r = el.getBoundingClientRect(); if (r.top < 60) el.scrollIntoView({block: "start", behavior: "smooth"}); } };
     el.insertAdjacentElement("afterend", btn);
-    set(!!OPEN[k]);
+    el.__clpSet = function(all){ set(all || !!OPEN[k]); };
+    set(allOn() || !!OPEN[k]);
   }
+  // A10-5 (10/14): 「📖 전체」 스위치 — 켜져 있으면 새로 접힐 글도 펼친 채로 (window.CLAMP_ALL 이 참을 돌려줄 때)
+  function allOn(){ try { return !!(window.CLAMP_ALL && window.CLAMP_ALL()); } catch(x) { return false; } }
+  window.clampAll = function(){ var a = allOn(); [].forEach.call(document.querySelectorAll("[data-clp]"), function(el){ if (el.__clpSet) el.__clpSet(a); }); };
 
   function scan(root){
     var cand = (root || document).querySelectorAll("main p, main ul, main div, #sheet p, #sheet ul, #sheet div");

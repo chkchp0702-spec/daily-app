@@ -48,10 +48,10 @@
     Promise.all([getJSON(file("market", it.id, "data.json")), ledger()]).then(function(r){
       var d = r[0], L = r[1];
       // 1) 오늘의 한 줄
-      $("mhead").innerHTML = '<section class="hero2"><div class="hero2-k">' + e(d.edition_label || "") + ' · ' + e(d.basis || "") + '</div>' +
-        '<div class="hero2-t">' + rich(d.one_liner || "") + '</div>' +
-        /* 킥은 plus8.js가 화면 맨 위에 따로 보여줌 */
-        ((d.decision && d.decision.badges) ? '<div class="hero2-b">' + d.decision.badges.map(function(b){ return chip(e(b), "c"); }).join("") + '</div>' : "") + '</section>';
+      // A10-4 (10/14): 오늘 결론 한 줄은 얇은 띠로 화면 맨 위(날짜 칩 바로 아래)에 — 판단 칩은 ✅ 할 일 카드에 이미 있어 뺌
+      $("mhead").innerHTML = '<section class="hero2 mk-strip"><div class="hero2-k">' + e(d.edition_label || "") + (d.basis ? ' · <span>' + e(d.basis) + '</span>' : '') + '</div>' +
+        '<div class="hero2-t">' + rich(d.one_liner || "") + '</div></section>';
+      (function(){ var mh = $("mhead"), root = mh && mh.closest("#body"); if (root && root.firstChild !== mh) root.insertBefore(mh, root.firstChild); })();
       var h = "";
       // 2) 핵심 숫자
       if (d.kpis && d.kpis.length) h += sec("오늘의 숫자") + '<div class="kpis2">' + d.kpis.map(function(k){
