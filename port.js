@@ -8,6 +8,29 @@
   var URL_C = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/conc.json";   // 🎯 집중 포트 (10/11)
   var CN = null;
   var P = null, K = null, PE = null, S = {amt: 10000000, mode: "us", pf: "base", bg: "전체", bsel: ["S&P500", "코스피", "코스닥", "MSCI 전세계"], cmine: 1, hv: 0, have: {}, my: {spx: 40, ndx: 40, gold: 5, per: 3, wm: "all", w: {}, pick: {}, own: [], nm: ""}, mySaved: [], myEdit: null, inf: 0};   // my: 10/14 🙋 내 포트(뼈대 비중 직접 + 킥 종목 체크) · inf: 포트 설명 칸 열림   // cmine: 10/14 A11-2 「내 포트만」 그래프 · hv/have: 10/14 A11-4 「갖고 있는 주 수 → 바꿀 것만」(휴대폰에만 저장)
+  // 📅 비교 구간 (10/14 사용자: "포트 수익률과 비교 구간은 10/2 기본, 날짜를 바꿀 수도 있게") — S.from 이 없으면 port.json start(10/02)
+  //   고른 날 전 거래일 종가를 0% 로 다시 맞춤(모든 포트·지수 같은 기준) · 앱을 다시 열면 기본(10/02)으로
+  var P0 = null, WB = 0;
+  function winIdx(){ var ds = P0.dates, f = S.from || P0.start, bi = 0; for (var i = 0; i < ds.length; i++) if (ds[i] < f) bi = i; return Math.max(0, Math.min(bi, ds.length - 2)); }
+  function rbase(arr, bi){ if (!arr) return arr; var b = arr[bi]; b = b == null ? 0 : b;
+    return arr.slice(bi).map(function(v){ return v == null ? null : Math.round(((1 + v / 100) / (1 + b / 100) - 1) * 10000) / 100; }); }
+  function winApply(PF){   // 전체 줄로 계산한 뒤 고른 구간만 잘라 다시 0% 부터
+    WB = winIdx(); if (!WB) return;
+    var Bn = {}; Object.keys(P0.bench).forEach(function(n){ Bn[n] = rbase(P0.bench[n], WB); });
+    var ds = P0.dates.slice(WB);
+    P = Object.assign({}, P0, {dates: ds, start: ds[1], bench: Bn, daily: (P0.daily || []).filter(function(d){ return d.d >= ds[1]; })});
+    PF.forEach(function(f){ f.line = rbase(f.line, WB); });
+  }
+  function winHtml(){
+    var ds = P0.dates, last = ds[ds.length - 1], cur = P.start, def = !WB;
+    var ago = function(n){ var d = new Date(last + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() - n); return d.toISOString().slice(0, 10); };
+    var pre = [["기본", P0.start]].concat([[ "1주", ago(7)], ["2주", ago(14)], ["1개월", ago(30)], ["3개월", ago(91)]].filter(function(x){ return x[1] > P0.start; }))
+      .concat(ds.length > 2 ? [["마지막 하루", ds[ds.length - 1]]] : []);
+    return '<div class="po-win"><span class="po-wl">📅 비교 구간</span>' + pre.map(function(x){ var on = x[0] === "기본" ? def : (!def && S.from === x[1]);
+        return '<button type="button" data-win="' + x[1] + '" class="' + (on ? "on" : "") + '">' + x[0] + (x[0] === "기본" ? ' <small>' + md(P0.start) + '</small>' : '') + '</button>'; }).join("") +
+      '<label class="po-wd"><input type="date" id="powin" value="' + cur + '" min="' + P0.start + '" max="' + last + '"></label>' +
+      '<small class="po-wn">' + md(cur) + ' ~ ' + md(last) + ' · ' + (P.dates.length - 1) + '거래일' + (def ? '' : ' · <b>바꾼 구간</b>') + '</small></div>';
+  }
   var URL_PE = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/peers.json";
   try { var sv = JSON.parse(localStorage.getItem("portSet") || "{}"); ["amt", "mode", "pf", "bg"].forEach(function(k){ if (sv[k]) S[k] = sv[k]; }); if (sv.cmine != null) S.cmine = sv.cmine ? 1 : 0; if (sv.hv) S.hv = 1; if (sv.have && typeof sv.have === "object") S.have = sv.have; if (sv.bsel && sv.bsel.length) S.bsel = sv.bsel; if (sv.my && typeof sv.my === "object") S.my = Object.assign(S.my, sv.my, {pick: sv.my.pick || {}, w: sv.my.w || {}, own: sv.my.own || []}); if (sv.mySaved && sv.mySaved.length) S.mySaved = sv.mySaved; if (sv.myEdit != null) S.myEdit = sv.myEdit; if (sv.inf) S.inf = 1; } catch(e) {}
   // 비교 지수 색 (늘 같은 색)
@@ -21,7 +44,7 @@
   function won(v){ if (v >= 1e8) return (v / 1e8).toFixed(v >= 1e9 ? 1 : 2).replace(/\.?0+$/, "") + "억"; if (v >= 1e4) return Math.round(v / 1e4).toLocaleString("ko-KR") + "만"; return Math.round(v).toLocaleString("ko-KR"); }
   function md(d){ return d ? d.slice(5).replace("-", "/") : ""; }
   // 🧾 정직 계산 (10/11) — 기본: port.json honest.base(주 1회 리밸런싱·비용) · 킥: kick.json honest.ret(다음 날 진입·비용). 없으면 숨김
-  function honV(f){ if (f.k === "conc" || f.k === "mine") return null; return f.k === "kick" ? (K && K.honest ? K.honest.ret : null) : ((P.honest && P.honest.base != null) ? P.honest.base : (P.stat || {}).base_honest); }
+  function honV(f){ if (WB || f.k === "conc" || f.k === "mine") return null; return f.k === "kick" ? (K && K.honest ? K.honest.ret : null) : ((P.honest && P.honest.base != null) ? P.honest.base : (P.stat || {}).base_honest); }
   function honC(f){ var v = honV(f); return v == null || !window.HON ? "" : HON.chip(v, {d: 2, note: f.k === "kick" ? (K.honest || {}).note : (P.honest || {}).note}); }
 
   document.addEventListener("click", function(ev){
@@ -35,12 +58,13 @@
                  fetch(URL_K + "?" + t).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
                  fetch(URL_PE + "?" + t).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
                  fetch(URL_C + "?" + t).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })])
-      .then(function(a){ P = a[0]; K = a[1]; PE = a[2]; CN = a[3]; draw(); })
+      .then(function(a){ P = P0 = a[0]; K = a[1]; PE = a[2]; CN = a[3]; draw(); })
       .catch(function(err){ try { console.error("port", err); } catch(x) {} var b = document.getElementById("pobody"); if (b) b.innerHTML = '<div class="empty"><div class="big">💼</div>포트 계산이 아직 안 올라왔어요.<br>다음 자동 수집(매시간) 때 채워져요.</div>'; });
   };
 
   function draw(){
-    var b = document.getElementById("pobody"); if (!b || !P) return;
+    var b = document.getElementById("pobody"); if (!b || !P0) return;
+    P = P0; WB = 0;
     var B = P.bench, mk = [["S&P500", "S&P500"], ["코스피", "코스피"], ["주식60·채권40", "60·40"]];
     // 두 포트 (같은 날짜 줄)
     var PF = [{k: "base", ic: "💼", t: "기본 포트", s: "킥 없음 · 배분표 그대로", s2: "킥 없음", line: P.nav, color: "#e9c46a"}];
@@ -53,6 +77,7 @@
     // 🙋 내 포트 (10/14 사용자) — S&P·나스닥·금 비중은 내가 정하고, ⚡ 킥 종목은 체크한 것만 · 계산은 휴대폰에서(myLine)
     var MW = myW();
     PF.push({k: "mine", ic: "🙋", t: S.my.nm || "내 포트", s: "S&P " + r1(MW.spx) + "% · 나스닥 " + r1(MW.ndx) + "% · 금 " + r1(MW.gold) + "% · 종목 " + MW.st.length + "개", s2: "내가 고른 것", line: myLine(MW), color: "#f472b6"});
+    winApply(PF); B = P.bench;   // 📅 고른 구간으로 자르고 다시 0% 부터
     PF.forEach(function(f){
       var v = f.line, n = v.length, peak = -1e9, mdd = 0, win = 0, best = null, worst = null;
       for (var i = 0; i < n; i++){ var x = 1 + v[i] / 100; peak = Math.max(peak, x); mdd = Math.min(mdd, (x / peak - 1) * 100);
@@ -109,7 +134,7 @@
     var cmp = S.bsel.slice(0, 4);
     var spN = B["S&P500"][B["S&P500"].length - 1];
     var gapB = function(v){ var d = v - spN; return '<em class="' + (d >= 0 ? "w" : "l") + '">' + (d >= 0 ? "앞섬 " : "뒤짐 ") + sg(d).replace("%", "%p") + '</em>'; };
-    var h = '<section class="po-sum" id="posum"><div class="po-sh">' + md(P.start) + '부터 성적 <small>S&P500보다 <button class="po-shb" type="button" data-pshare="1">📤 공유</button></small></div>' +
+    var h = winHtml() + '<section class="po-sum" id="posum"><div class="po-sh">' + md(P.start) + '부터 성적 <small>S&P500보다 <button class="po-shb" type="button" data-pshare="1">📤 공유</button></small></div>' +
       PF.map(function(f){ return '<button class="po-sr' + (S.pf === f.k ? " on" : "") + ' ' + f.k + '" data-pf="' + f.k + '"><span>' + f.ic + ' ' + f.t + '</span><b class="' + cls(f.ret) + '">' + sg(f.ret) + '</b>' + gapB(f.ret) + '</button>'; }).join("") +
       '<div class="po-sr sp"><span>🇺🇸 S&P500</span><b class="' + cls(spN) + '">' + sg(spN) + '</b><em>기준</em></div></section>' + infHtml() +
       '<section class="po-hero' + (F.k === "kick" ? " kick" : F.k === "conc" ? " conc" : F.k === "mine" ? " mine" : "") + '"><div class="po-k">' + F.ic + ' <b>' + F.t + '</b> · ' + F.s + ' · ' + md(P.start) + '부터</div>' +
@@ -184,7 +209,7 @@
 
     // ④ 칸별 기여
     var mx = Math.max.apply(null, P.hold.map(function(x){ return Math.abs(x.contrib) || 0.01; }));
-    h += '<div class="sec">🧩 어느 칸이 벌고 잃었나 <small class="mut">' + md(P.start) + '부터 기여 %p · 칸별 신호(S&P 대비·20일선)</small></div><section class="card po-ct">' +
+    h += '<div class="sec">🧩 어느 칸이 벌고 잃었나 <small class="mut">' + md(P0.start) + '부터 기여 %p' + (WB ? ' (📅 구간과 상관없이 처음부터)' : '') + '  · 칸별 신호(S&P 대비·20일선)</small></div><section class="card po-ct">' +
       P.hold.slice().sort(function(a, b){ return b.contrib - a.contrib; }).map(function(x){
         var i = P.hold.indexOf(x), w = Math.abs(x.contrib) / mx * 50;
         var us = x.us.map(function(u){ return '<span class="po-tk" data-op="' + e(u.t) + '">' + e(u.t) + '</span> ' + sg(u.since, 1); }).join(" · ");
@@ -251,6 +276,8 @@
       if (i >= 0){ if (S.bsel.length > 1) S.bsel.splice(i, 1); } else { S.bsel.push(n); if (S.bsel.length > 5) S.bsel.shift(); }
       keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     [].forEach.call(b.querySelectorAll("[data-bg]"), function(x){ x.onclick = function(){ S.bg = x.dataset.bg; keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    [].forEach.call(b.querySelectorAll("[data-win]"), function(x){ x.onclick = function(){ S.from = x.dataset.win === P0.start ? null : x.dataset.win; var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    var wi = document.getElementById("powin"); if (wi) wi.onchange = function(){ var v = wi.value; if (!v) return; S.from = v <= P0.start ? null : v; var y = window.scrollY; draw(); window.scrollTo(0, y); };
     [].forEach.call(b.querySelectorAll("[data-cm]"), function(x){ x.onclick = function(){ S.cmine = +x.dataset.cm; keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });   // A11-2
   }
 
@@ -258,7 +285,7 @@
   function marks(F){
     var out = [], idx = function(d){ var i = P.dates.indexOf(d); if (i < 0) for (var j = 0; j < P.dates.length; j++) if (P.dates[j] >= d){ i = j; break; } return i; };
     (P.changes || []).forEach(function(c){ var i = idx(c.date); if (i > 0) out.push({i: i, color: "#ffb84d", t: "🔁 " + md(c.date) + " 비중·상품 바뀜"}); });
-    if (F.k === "kick" && K) (K.events || []).forEach(function(ev){ if (ev.k !== "사기" && ev.k !== "팔기") return; var i = idx(ev.d); if (i >= 0) out.push({i: i, color: ev.k === "사기" ? "#4dd47a" : "#ff6b6b", t: (ev.k === "사기" ? "🟢 사기 " : "🔴 팔기 ") + nm(ev.name) + (ev.r != null ? " " + sg(ev.r, 1) : "")}); });
+    if (F.k === "kick" && K) (K.events || []).forEach(function(ev){ if (ev.k !== "사기" && ev.k !== "팔기") return; if (ev.d < P.dates[0]) return; var i = idx(ev.d); if (i >= 0) out.push({i: i, color: ev.k === "사기" ? "#4dd47a" : "#ff6b6b", t: (ev.k === "사기" ? "🟢 사기 " : "🔴 팔기 ") + nm(ev.name) + (ev.r != null ? " " + sg(ev.r, 1) : "")}); });
     return out;
   }
   // 포트 고르기(기본·킥·집중): 다시 그린 뒤 「누른 버튼」이 화면 같은 자리에 오도록 (위 칸 높이가 바뀌어도 안 튐 · 10/12)
@@ -790,6 +817,10 @@
     ".po-ctg{display:flex;align-items:center;gap:6px;margin:10px 0 4px}.po-ctg button{font:inherit;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--sub)}.po-ctg button.on{background:var(--text);color:var(--bg);border-color:transparent}.po-ctg small{margin-left:auto;font-size:11px;color:var(--sub)}" +
     ".po-mk{display:flex;gap:12px;font-size:11px;color:var(--sub);margin-top:2px}.po-mk i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}" +
         ".po-sum{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 12px 6px;margin:4px 0 10px}" +
+    ".po-win{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 2px 10px}.po-wl{font-size:12.5px;font-weight:800;color:var(--sub);margin-right:2px}" +
+    ".po-win button{border:1px solid var(--line,#2a3142);background:transparent;color:var(--sub);border-radius:999px;padding:5px 10px;font-size:12px;cursor:pointer}.po-win button small{opacity:.7;font-size:10.5px}" +
+    ".po-win button.on{background:var(--acc,#7c9cff);border-color:var(--acc,#7c9cff);color:#fff;font-weight:700}.po-wd input{border:1px solid var(--line,#2a3142);background:transparent;color:inherit;border-radius:8px;padding:4px 6px;font-size:12px;color-scheme:dark light}" +
+    ".po-wn{flex-basis:100%;font-size:11px;color:var(--sub)}.po-wn b{color:#ffb84d}" +
     ".po-sh{font-size:13px;font-weight:800;color:var(--sub);display:flex;justify-content:space-between;margin:0 2px 4px}.po-sh small{font-weight:400;font-size:11.5px}" +
     ".po-shb{margin-left:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:2px 9px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}" +
     ".po-sr{display:grid;grid-template-columns:1fr auto 92px;align-items:center;gap:10px;width:100%;background:none;border:0;border-top:1px solid var(--line);color:var(--text);font:inherit;padding:11px 4px;text-align:left;cursor:pointer;border-radius:0}" +
