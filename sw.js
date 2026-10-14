@@ -3,7 +3,7 @@
    · 앱 파일(js·css·그림, ?v= 붙은 것): 한 번 받으면 버전이 바뀔 때까지 저장본 → 두 번째부터 바로 뜸
    · 첫 화면(index.html): 새로 받기, 끊기면 저장본
    · 10/11: 저장본을 보여 줄 땐 X-From-Cache·X-Saved-At 머리표 + 화면에 메시지 → 위쪽 「⚠ 연결이 느려 HH:MM 저장본」 띠 · 앱 파일 저장소 이름에 버전 */
-var VER = "20261014n";                                  // 앱 버전과 같이 올림 → 옛 ?v= 파일 저장본은 activate 때 지움
+var VER = "20261014p";                                  // 앱 버전과 같이 올림 → 옛 ?v= 파일 저장본은 activate 때 지움
 var DC = "ch-data-v1", SC = "ch-static-" + VER;
 self.addEventListener("install", function(){ self.skipWaiting(); });
 self.addEventListener("activate", function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return [DC, SC, "ch-page", "ch-lib"].indexOf(k) < 0; }).map(function(k){ return caches.delete(k); })); }).then(function(){ return self.clients.claim(); })); });
