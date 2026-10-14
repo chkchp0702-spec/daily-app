@@ -97,6 +97,41 @@ def load_hist(syms):
     return out
 
 
+# 📅 10/15 사용자: "한국장은 오늘이 15일인데 15일 확률을 얘기해야지" — 야후 일봉이 아시아 지수의 어제 봉을
+#   늦게(몇 시간~반나절) 올려서 10/15 아침에도 10/13 마감 기준 「10/14」 확률이 떴음.
+#   → 장중 나침반(live_*.json: 한국 = 네이버, 나머지 = 야후 장중)이 이미 가진 마감 값으로 빠진 마지막 봉을 채움
+LIVE_IX = {"KR": ("kr", "코스피"), "JP": ("jp", "닛케이 225"), "CN": ("cn", "상해종합"), "HK": ("hk", "항셍"), "US": ("us", "S&P500")}
+PATCHED = {}
+
+def patch_live(H):
+    from zoneinfo import ZoneInfo
+    for mk, (f, nm) in LIVE_IX.items():
+        cfg, px = MK[mk], H.get(MK[mk]["ix"])
+        if px is None or not len(px):
+            continue
+        try:
+            j = json.load(open(os.path.join("archive", "x", f"live_{f}.json"), encoding="utf-8"))
+        except Exception:
+            continue
+        ix = next((x for x in j.get("index") or [] if x.get("name") == nm and x.get("last")), None)
+        if not ix:
+            continue
+        d = ix.get("date") or j.get("sess") or j.get("date")      # 한국은 index 에 date 가 없음 → 파일 date
+        if not d:
+            continue
+        loc = NOW.astimezone(ZoneInfo(cfg["tz"]))
+        ld, hm = loc.strftime("%Y-%m-%d"), loc.hour * 100 + loc.minute
+        closed = d < ld or (d == ld and hm >= cfg["close"] + 10) or (mk == "KR" and ix.get("status") == "CLOSE" and d == ld and hm >= cfg["close"])
+        last_bar = px.index[-1].strftime("%Y-%m-%d")
+        if d <= last_bar or not closed or pd.Timestamp(d).dayofweek >= 5:
+            continue
+        c = float(ix["last"])
+        row = pd.DataFrame({"Open": [c], "Close": [c]}, index=[pd.Timestamp(d)])   # 시가는 모름 → 종가로 (갭 특성 하루치만 0)
+        H[cfg["ix"]] = pd.concat([px, row])
+        PATCHED[mk] = d
+        print(f"📅 {mk} 마지막 봉 채움: {last_bar} → {d} {c} (live_{f}.json)")
+
+
 def feats(px):
     """지수 일봉 → 특성 표"""
     c = px["Close"].astype(float)
@@ -440,7 +475,7 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
         for k in ("p1", "p5"):
             x[k] = r2(x[k], 3)
         x.pop("sig1", None); x.pop("sig5", None); x.pop("q5", None); x.pop("auc_p1", None); x.pop("auc_p5", None)
-    return {"mk": mk, "name": cfg["name"], "flag": cfg["flag"], "ixn": ixn, "base_date": base_date, "open_now": open_now,
+    return {"mk": mk, "name": cfg["name"], "flag": cfg["flag"], "ixn": ixn, "base_date": base_date, "open_now": open_now, "filled": PATCHED.get(mk),
             "last": r2(last["c"]), "chg": r2(last["r"] * 100), "p1": r2(p1, 3), "p5": r2(p5, 3), "tone1": tone1, "tone5": tone5,
             "band1": band1, "band5": band5, "m5": r2(m5), "widen": widen, "state": state, "methods": M,
             "next_day": nxt.strftime("%Y-%m-%d"), "n_hist": int(len(d)),
@@ -511,6 +546,11 @@ def score(hist, H, res):
 def main():
     syms = sorted({c["ix"] for c in MK.values()} | set(EXTRA))
     H = load_hist(syms)
+    if not FAKE:
+        try:
+            patch_live(H)
+        except Exception as e:
+            print("마지막 봉 채우기 실패", e)
     brain, events = {}, []
     if not FAKE:
         try:

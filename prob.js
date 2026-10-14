@@ -9,6 +9,10 @@
   function sg(v, d){ return v == null ? "–" : (v > 0 ? "+" : "") + Number(v).toFixed(d == null ? 1 : d) + "%"; }
   function tcls(p){ return p == null ? "" : p >= 0.57 ? "up" : p <= 0.43 ? "dn" : ""; }
   function md(d){ return d ? d.slice(5).replace("-", "/") : ""; }
+  // 📅 10/15 사용자: 오늘 열리는 장이면 「오늘」 — 예측 날이 한국 날짜로 오늘이면 오늘, 다음 날이면 내일, 더 뒤(주말 끼임)면 요일
+  function kd(off){ var t = new Date(Date.now() + 9 * 3600e3 + (off || 0) * 864e5); return t.toISOString().slice(0, 10); }
+  function dlab(d){ if (!d) return "다음 장"; if (d <= kd(0)) return "오늘(" + md(d) + ")"; if (d === kd(1)) return "내일(" + md(d) + ")";
+    return "다음 장 " + ["일", "월", "화", "수", "목", "금", "토"][new Date(d + "T00:00:00Z").getUTCDay()] + "(" + md(d) + ")"; }
   // 확률 막대: 가운데 50, 왼쪽(파랑) 내릴 쪽 · 오른쪽(빨강) 오를 쪽
   function pbar(p, big){
     if (p == null) return '<div class="pb' + (big ? " big" : "") + '"><i class="pm" style="left:50%"></i></div>';
@@ -98,9 +102,9 @@
   }
   function mcard(m, D){
     var open = OPEN[m.mk];
-    var h = '<section class="card pr-c"><h3>' + m.flag + ' ' + e(m.name) + ' <span class="mut">' + e(m.ixn) + ' ' + V.fmt(m.last) + ' <b class="' + cls(m.chg) + '">' + sg(m.chg, 2) + '</b> · ' + md(m.base_date) + (m.open_now ? ' 장중' : ' 마감') + ' 기준</span></h3>' +
+    var h = '<section class="card pr-c"><h3>' + m.flag + ' ' + e(m.name) + ' <span class="mut">' + e(m.ixn) + ' ' + V.fmt(m.last) + ' <b class="' + cls(m.chg) + '">' + sg(m.chg, 2) + '</b> · ' + md(m.base_date) + (m.open_now ? ' 장중' : ' 마감') + ' 기준' + (m.filled ? ' <span title="야후 일봉이 늦어 장중 나침반의 마감 값으로 채움">📅</span>' : '') + '</span></h3>' +
       (m.strength ? '<div class="pr-sg"><span class="pr-bd s' + ({"강": 3, "보통": 2, "약": 1}[m.strength]) + '">' + STR[m.strength] + '</span>' + votes(m.votes) + '</div>' : '') +
-      '<div class="pr-two"><div><small>내일(' + md(m.next_day) + ') · 평소보다</small><b class="' + ecls(m.e1) + '">' + ep(m.e1) + '</b><em>오를 확률 ' + pc(m.p1) + ' (평소 ' + pc(m.pb1) + ') · 68% 폭 ' + sg(m.band1[0]) + ' ~ ' + sg(m.band1[1]) + '</em>' + (m.pb1 != null ? zbar(m.p1, m.pb1) : pbar(m.p1, 1)) + '</div>' +
+      '<div class="pr-two"><div><small>' + dlab(m.next_day) + ' · 평소보다</small><b class="' + ecls(m.e1) + '">' + ep(m.e1) + '</b><em>오를 확률 ' + pc(m.p1) + ' (평소 ' + pc(m.pb1) + ') · 68% 폭 ' + sg(m.band1[0]) + ' ~ ' + sg(m.band1[1]) + '</em>' + (m.pb1 != null ? zbar(m.p1, m.pb1) : pbar(m.p1, 1)) + '</div>' +
       '<div><small>일주일(5일) · 평소보다</small><b class="' + ecls(m.e5) + '">' + ep(m.e5) + '</b><em>오를 확률 ' + pc(m.p5) + ' (평소 ' + pc(m.pb5) + ') · 68% 폭 ' + sg(m.band5[0]) + ' ~ ' + sg(m.band5[1]) + '</em>' + (m.pb5 != null ? zbar(m.p5, m.pb5) : pbar(m.p5, 1)) + '</div></div>' +
       tailCard(m) +
       '<p class="note pr-st">' + e(m.state) + (m.widen > 1 ? ' · 📣 이벤트로 폭 ×' + m.widen : '') + (m.open_now ? ' · 장중이라 오늘 봉이 아직 움직여요 — 마감 뒤 확률이 기록·채점돼요' : '') + '</p>';
@@ -160,7 +164,7 @@
     var ks = ORDER.filter(function(k){ return D.markets[k]; });
     if (!ks.length){ b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률 자료가 아직 없어요.</div>'; return; }
     if (!SEL || !D.markets[SEL]) SEL = ks[0];
-    var h = '<section class="card"><h3>🎲 내일 · 평소보다 <span class="mut">' + e(D.t) + ' 기준 · 매시간</span></h3>' + strip(D) +
+    var h = '<section class="card"><h3>🎲 다음 장 · 평소보다 <span class="mut">' + e(D.t) + ' 기준 · 매시간</span></h3>' + strip(D) +
       '<p class="note">큰 숫자 = 그 시장 「평소」(2000년 이후 오른 날 비율)보다 오를 확률이 얼마나 높고 낮은지. 내일 방향은 프로도 55% 넘기 어려워서 ±2%p 면 의미 있는 기울기, ±4%p 면 강한 편이에요. 막대는 40~60% 구간을 확대한 것.</p></section>';
     h += mcard(D.markets[SEL], D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
     b.innerHTML = h;
