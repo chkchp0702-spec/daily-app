@@ -14,8 +14,8 @@
   function md(d){ return d ? String(d).slice(5, 10).replace("-", "/") : ""; }
   function hon(v, o){ return window.HON ? HON.chip(v, o) : ""; }   // 🧾 정직 계산 칩 (honest.js · 자료 없으면 빈칸)
   function J(name){ return getJSON(RAW + name + "?" + Math.floor(Date.now() / 120000), {ttl: 120000}); }   // 같은 2분 안엔 한 번만 받음 (index.html getJSON)
-  var UI = {theme: "auto", fs: 1};
-  try { var u = JSON.parse(localStorage.getItem("ui") || "{}"); if (u.theme) UI.theme = u.theme; if (u.fs) UI.fs = u.fs; } catch(x) {}
+  var UI = {theme: "auto", fs: 1, home: "time"};   // 10/14 A9-1: home = "time"(시간대 맞춤 순서) | "fixed"(고정)
+  try { var u = JSON.parse(localStorage.getItem("ui") || "{}"); if (u.theme) UI.theme = u.theme; if (u.fs) UI.fs = u.fs; if (u.home) UI.home = u.home; } catch(x) {}
   function keepUI(){ try { localStorage.setItem("ui", JSON.stringify(UI)); } catch(x) {} }
 
   /* ---------- ⑥ 테마 · 글자 크기 ---------- */
@@ -35,11 +35,14 @@
     var row = function(lab, key, opts){ return '<div class="us-r"><span>' + lab + '</span><div class="us-seg">' + opts.map(function(o){
       return '<button data-k="' + key + '" data-v="' + o[0] + '" class="' + (String(UI[key]) === String(o[0]) ? "on" : "") + '">' + o[1] + '</button>'; }).join("") + '</div></div>'; };
     d.innerHTML = '<b>⚙️ 보기 설정</b>' + row("화면", "theme", [["auto", "자동"], ["dark", "🌙 어둡게"], ["light", "☀️ 밝게"]]) +
-      row("글자", "fs", [[0.92, "작게"], [1, "보통"], [1.12, "크게"]]) + '<small>자동 = 휴대폰 설정(다크 모드)을 따라가요.</small>' +
+      row("글자", "fs", [[0.92, "작게"], [1, "보통"], [1.12, "크게"]]) +
+      row("🏠 홈 순서", "home", [["time", "🕘 시간대"], ["fixed", "고정"]]) +
+      '<small>자동 = 휴대폰 설정(다크 모드)을 따라가요. 홈 「시간대」 = 아침·장중·저녁·밤마다 지금 볼 카드를 맨 위로.</small>' +
       '<div class="us-go"><button data-go="alarm">🔔 알림 켜기·끄기</button><button data-go="idea">💬 의견함</button><button data-go="onepager">📄 종목리포트</button></div>';
     document.body.appendChild(d);
     [].forEach.call(d.querySelectorAll("[data-go]"), function(b){ b.onclick = function(){ d.remove(); go(b.dataset.go); }; });
-    [].forEach.call(d.querySelectorAll("button[data-k]"), function(b){ b.onclick = function(){ var k = b.dataset.k, v = b.dataset.v; UI[k] = k === "fs" ? +v : v; keepUI(); applyUI(); d.remove(); settings(); }; });
+    [].forEach.call(d.querySelectorAll("button[data-k]"), function(b){ b.onclick = function(){ var k = b.dataset.k, v = b.dataset.v; UI[k] = k === "fs" ? +v : v; keepUI(); applyUI(); d.remove(); settings();
+      if (k === "home" && window.cur === "home" && window.homeInit) homeInit(); }; });
     setTimeout(function(){ document.addEventListener("click", function off(ev){ if (!d.contains(ev.target) && ev.target.id !== "uibtn"){ d.remove(); document.removeEventListener("click", off); } }); }, 0);
   }
   function addBtn(){
@@ -90,11 +93,64 @@
   function card(go, ic, t, sub, body, goLab){
     return '<section class="card hm-c" data-goto="' + go + '"><div class="hm-h"><span class="hm-i">' + ic + '</span><div><b>' + t + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</div><span class="hm-go">' + (goLab || "열기") + ' ›</span></div>' + body + '</section>';
   }
+  /* ---------- 🗳 A9-5 「🔮 예고에 내 표 던지기」 — 표는 이 휴대폰 안(localStorage)에만 ---------- */
+  var VOTE = {}, VH = {};
+  try { VOTE = JSON.parse(localStorage.getItem("hvote") || "{}") || {}; VH = JSON.parse(localStorage.getItem("hvote_hist") || "{}") || {}; } catch(x) {}
+  function keepVote(){ try { localStorage.setItem("hvote", JSON.stringify(VOTE)); localStorage.setItem("hvote_hist", JSON.stringify(VH)); } catch(x) {} }
+  function prevKey(G){   // 어제 예고의 날짜: home.json 이 주면 그것, 없으면 표가 있는 날 중 채점일보다 앞선 가장 최근
+    if (G.prev) return G.prev;
+    var ks = Object.keys(VOTE).filter(function(k){ return !G.date || k < G.date; }).sort();
+    return ks.length ? ks[ks.length - 1] : null;
+  }
+  function gradeVotes(G){   // 채점 카드 한 줄 — 앱 ✓✗ 와 내 ✓✗ 나란히 · 누적은 날짜당 한 번만 셈
+    var pk = prevKey(G), mine = pk && VOTE[pk] || {}, out = {rows: [], me_ok: 0, me_n: 0, app_ok: 0, app_n: 0};
+    (G.items || []).forEach(function(x, i){
+      var v = mine[String(i + 1)], scored = x.cls === "ok" || x.cls === "no";
+      if (scored){ out.app_n++; if (x.cls === "ok") out.app_ok++; }
+      var r = null;
+      if (v && scored){ r = (v > 0) === (x.cls === "ok"); out.me_n++; if (r) out.me_ok++; }
+      out.rows.push({v: v, r: r});
+    });
+    if (G.date && out.app_n && !VH[G.date]){ VH[G.date] = {app_ok: out.app_ok, app_n: out.app_n, me_ok: out.me_ok, me_n: out.me_n}; keepVote(); }
+    var T = {app_ok: 0, app_n: 0, me_ok: 0, me_n: 0};
+    Object.keys(VH).forEach(function(k){ var h = VH[k]; T.app_ok += h.app_ok || 0; T.app_n += h.app_n || 0; T.me_ok += h.me_ok || 0; T.me_n += h.me_n || 0; });
+    out.tot = T;
+    return out;
+  }
+  function voteBtns(date, i){
+    var v = (VOTE[date] || {})[String(i)];
+    return '<span class="hm-vt"><button data-vote="' + e(date) + '|' + i + '|1" class="' + (v > 0 ? "on" : "") + '" aria-label="그렇다">👍</button><button data-vote="' + e(date) + '|' + i + '|-1" class="' + (v < 0 ? "on" : "") + '" aria-label="아니다">👎</button></span>';
+  }
+  document.addEventListener("click", function(ev){
+    var t = ev.target.closest && ev.target.closest("[data-vote]"); if (!t) return;
+    ev.preventDefault(); ev.stopPropagation();
+    var p = t.dataset.vote.split("|"), d = p[0], i = p[1], v = +p[2];
+    VOTE[d] = VOTE[d] || {};
+    if (VOTE[d][i] === v) delete VOTE[d][i]; else VOTE[d][i] = v;   // 같은 걸 또 누르면 취소
+    keepVote();
+    var wrap = t.closest(".hm-vt"); if (wrap){ [].forEach.call(wrap.children, function(b){ b.classList.toggle("on", (VOTE[d][i] || 0) === +b.dataset.vote.split("|")[2]); }); }
+    if (window.P && window.P.toast) window.P.toast(VOTE[d][i] ? (v > 0 ? "👍 그렇다 — 내일 아침 채점해요" : "👎 아니다 — 내일 아침 채점해요") : "표 취소");
+  }, true);
+
+  /* ---------- 🌅 A9-1 시간대 맞춤 홈 — 지금 볼 카드를 맨 위로 (설정 「홈 순서」로 고정 가능) ---------- */
+  function edition(now){   // now = 한국 시간으로 맞춘 Date (getUTC* 로 읽음)
+    var m = now.getUTCHours() * 60 + now.getUTCMinutes();
+    if (m < 6 * 60) return {k: "night", ic: "🌙", t: "밤판", order: ["port", "score", "kick", "grade", "focus", "brain"], why: "미국 장 끝 — 포트 성적부터"};
+    if (m < 9 * 60) return {k: "morn", ic: "🌅", t: "아침판", order: ["grade", "kick", "port", "focus", "brain", "score"], why: "어제 결과·오늘 할 일부터"};
+    if (m < 15 * 60 + 30) return {k: "day", ic: "🌞", t: "장중판", order: ["focus", "brain", "kick", "port", "grade", "score"], why: "한국 장중 — 오늘 집중·지금 생각부터"};
+    if (m < 22 * 60 + 30) return {k: "eve", ic: "🌆", t: "저녁판", order: ["kick", "grade", "port", "focus", "brain", "score"], why: "미국 장 전 — 킥 할 일·🔮 예고부터"};
+    return {k: "night", ic: "🌙", t: "밤판", order: ["port", "score", "kick", "grade", "focus", "brain"], why: "미국 장중 — 포트 성적부터"};
+  }
+  var FIXED = ["grade", "port", "kick", "focus", "brain", "score"];
+
   function drawHome(H){
     var b = document.getElementById("hmbody"); if (!b) return;
     var P = H.port || {}, K = H.kick || {}, D = H.danta || {}, Bn = H.brain || {}, S = H.scores || {};
     var now = new Date(Date.now() + 9 * 3600e3), wd = "일월화수목금토"[now.getUTCDay()];
-    var h = '<div class="hm-day">' + (now.getUTCMonth() + 1) + '월 ' + now.getUTCDate() + '일 ' + wd + '요일 · <span class="mut">' + e(String(H.at || "").slice(5)) + ' 기준</span></div>';
+    var ED = edition(now), useTime = UI.home !== "fixed";
+    var h = '<div class="hm-day">' + (now.getUTCMonth() + 1) + '월 ' + now.getUTCDate() + '일 ' + wd + '요일 · <span class="mut">' + e(String(H.at || "").slice(5)) + ' 기준</span>' +
+      (useTime ? ' · <span class="hm-ed" id="hmed" title="' + e(ED.why) + '">' + ED.ic + ' ' + e(ED.t) + '</span>' : '') +
+      '<button class="hm-story" id="hmstory" aria-label="30초로 보기">▶ 30초</button></div>';
     // 10/13 「더 자주 열게」 ③ 어제보다 바뀐 것 · ⑦ 이번 주 복기(주말) · ⑥ 어제 예고 → 오늘 결과
     var CH = (H.chg && H.chg.items) || [];
     if (CH.length) h += '<section class="card hm-chg"><div class="hm-cht">🆕 ' + (H.chg.since ? md(H.chg.since) + ' 이후 ' : '') + '바뀐 것</div>' +
@@ -110,47 +166,62 @@
         ((Wk.next || []).length ? '<div class="hm-wn"><small>앞으로 볼 일정</small>' + Wk.next.map(function(x){ return '<div><b>' + e(x.when) + '</b> ' + e(x.what) + '</div>'; }).join("") + '</div>' : '') +
         '<button class="hm-sh" data-share="week">📤 카톡으로 공유</button>', "포트");
     }
+    var C = {};   // 카드 조각 — 시간대별 순서로 붙임 (A9-1)
     var G = H.grade;
     if (G && (G.items || []).length){
       var ok = G.items.filter(function(x){ return x.cls === "ok"; }).length, no = G.items.filter(function(x){ return x.cls === "no"; }).length;
-      h += card("market", "🎯", "어제 예고 → 오늘 결과", md(G.date) + " " + e(G.label || "") + " 채점 · ✓" + ok + " ✗" + no + (G.rate != null ? " · 누적 적중 " + G.rate + "%" : ""),
-        G.items.map(function(x){ return '<div class="hm-gr ' + e(x.cls || "") + '"><span>' + e(x.mark || "·") + '</span><div><b>' + e(x.t) + '</b><small>' + e(x.x) + '</small></div></div>'; }).join("") +
-        ((G.next || []).length ? '<div class="hm-wn"><small>🔮 오늘의 예고 — 내일 아침 채점</small>' + G.next.map(function(x){ return '<div>' + (x.p != null ? '<b class="hm-p">' + Math.round(x.p * 100) + '%</b> ' : '') + e(x.t) + '</div>'; }).join("") + '</div>' : '') +
+      var GV = gradeVotes(G), meTxt = GV.me_n ? ' · 나 ✓' + GV.me_ok + ' ✗' + (GV.me_n - GV.me_ok) : '';
+      var tot = GV.tot, cum = (tot.me_n >= 1 && tot.app_n >= 1) ? '<div class="hm-vs"><span>🗳 나 vs 앱 적중률</span>' +
+        '<div><small>나</small><i><b style="width:' + Math.round(tot.me_ok / tot.me_n * 100) + '%"></b></i><em>' + Math.round(tot.me_ok / tot.me_n * 100) + '% <span class="mut">(' + tot.me_n + '건)</span></em></div>' +
+        '<div><small>앱</small><i><b style="width:' + Math.round(tot.app_ok / tot.app_n * 100) + '%"></b></i><em>' + Math.round(tot.app_ok / tot.app_n * 100) + '% <span class="mut">(' + tot.app_n + '건)</span></em></div></div>' : '';
+      C.grade = card("market", "🎯", "어제 예고 → 오늘 결과", md(G.date) + " " + e(G.label || "") + " 채점 · 앱 ✓" + ok + " ✗" + no + meTxt + (G.rate != null ? " · 누적 적중 " + G.rate + "%" : ""),
+        G.items.map(function(x, i){ var r = GV.rows[i] || {};
+          return '<div class="hm-gr ' + e(x.cls || "") + '"><span>' + e(x.mark || "·") + '</span><div><b>' + e(x.t) +
+            (r.v ? ' <span class="hm-me ' + (r.r === true ? "ok" : r.r === false ? "no" : "") + '">나 ' + (r.v > 0 ? "👍" : "👎") + (r.r === true ? " ✓" : r.r === false ? " ✗" : "") + '</span>' : '') +
+            '</b><small>' + e(x.x) + '</small></div></div>'; }).join("") + cum +
+        ((G.next || []).length ? '<div class="hm-wn"><small>🔮 오늘의 예고 — 내일 아침 채점 · 👍👎 로 내 표도</small>' + G.next.map(function(x, i){
+          return '<div class="hm-nx">' + (x.p != null ? '<span class="hm-pb" title="앱이 보는 확률 ' + Math.round(x.p * 100) + '%"><i style="width:' + Math.round(x.p * 100) + '%"></i><b>' + Math.round(x.p * 100) + '%</b></span>' : '') +
+            '<span class="hm-nxt">' + e(x.t) + '</span>' + (G.date ? voteBtns(G.date, i + 1) : '') + '</div>'; }).join("") + '</div>' : '') +
         '<button class="hm-sh" data-share="grade">📤 카톡으로 공유</button>', "시황");
     }
-    // 💼 포트
+    // 💼 포트 (A9-2: 선 끝에 값 · 범례 없음)
     var ex = (P.kick || 0) - (P.spy || 0);
-    var spark = (window.V && P.nav && P.nav.length > 1) ? V.lines([{name: "⚡ 킥", color: "#ff6b6b", vals: P.kick_line}].concat((function(){ var c = (P.conc_line || []).slice(), n = (P.nav || []).length; while (c.length && c.length < n) c.unshift(0); return c.length === n ? [{name: "🎯 집중", color: "#4dd47a", vals: c}] : []; })()).concat([{name: "💼 기본", color: "#e9c46a", vals: P.nav}, {name: "S&P", color: "#7c9cff", vals: P.spy_line, dash: 1}]),
-      (P.nav || []).map(function(_, i){ return i ? "" : md(P.start); }), {h: 96, unit: "%", zero: 1, nodots: 1}) : "";
-    h += card("port~pohero", "💼", "포트", md(P.start) + "부터 · " + md(P.asof) + " 미국 종가",
+    var spark = (window.V && P.nav && P.nav.length > 1) ? V.lines([{name: "⚡ 킥", short: "⚡", color: "#ff6b6b", vals: P.kick_line}].concat((function(){ var c = (P.conc_line || []).slice(), n = (P.nav || []).length; while (c.length && c.length < n) c.unshift(0); return c.length === n ? [{name: "🎯 집중", short: "🎯", color: "#4dd47a", vals: c}] : []; })()).concat([{name: "💼 기본", short: "💼", color: "#e9c46a", vals: P.nav}, {name: "S&P", short: "S&P", color: "#7c9cff", vals: P.spy_line, dash: 1}]),
+      (P.nav || []).map(function(_, i){ return i ? "" : md(P.start); }), {h: 96, unit: "%", zero: 1, nodots: 1, endLabels: 1, nolegend: 1}) : "";
+    C.port = card("port~pohero", "💼", "포트", md(P.start) + "부터 · " + md(P.asof) + " 미국 종가",
       // 10/12 정리: 큰 숫자 3개(집중·킥·기본) + 한 줄(S&P·몇 곳 앞섬) + 그래프 + 바뀜 알림 한 줄. 정직 계산·강약 칩은 포트 탭에서
       '<div class="hm-big">' + (P.conc != null ? '<div data-goto="port~poconc"><small>🎯 집중</small><b class="' + cls(P.conc) + '">' + sg(P.conc) + '</b></div>' : '') +
         '<div data-goto="port~pokick"><small>⚡ 킥</small><b class="' + cls(P.kick) + '">' + sg(P.kick) + '</b></div><div data-goto="port~pohero"><small>💼 기본</small><b class="' + cls(P.base) + '">' + sg(P.base) + '</b></div></div>' +
-      '<div class="hm-l">S&amp;P500 <b class="' + cls(P.spy) + '">' + sg(P.spy) + '</b> · <a data-goto="port~pocmp">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a>' + (P.conc != null ? ' · ' + (P.conc_up ? "🟢 상승장" : "🔴 상승장 아님") : '') + '</div>' +
+      '<div class="hm-l">S&amp;P500 <b class="' + cls(P.spy) + '">' + sg(P.spy) + '</b> · <a data-goto="port~pocmp" class="hm-nw">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a>' + (P.conc != null ? ' <span class="hm-nw">· ' + (P.conc_up ? "🟢 상승장" : "🔴 상승장 아님") + '</span>' : '') + '</div>' +
       '<div class="hm-sp">' + spark + '</div>' +
       (P.change ? '<div class="hm-alert" data-goto="port~pofollow">🔁 ' + md(P.change.date) + ' 비중·상품 바뀜 — <b>따라하기에서 맞추기 ›</b></div>' : '') +
       '<button class="hm-sh" data-share="port">📤 카톡으로 공유</button>');
-    // ⚡ 킥
+    // ⚡ 킥 (A9-3: 할 일 없는 날은 「쉬는 날」 · 잘 가는/안 가는 두 줄)
     var ev = K.events || [];
-    h += card("port~pokick", "⚡", "킥 — 오늘 할 일", K.n + "종목 · 포트의 " + K.w + "%",
+    var hasBuy = ev.some(function(x){ return x.k === "사기"; }), hasSell = ev.some(function(x){ return x.k !== "사기"; });
+    var chips = function(arr){ return (arr || []).map(function(o){ return '<span class="hm-chip" data-op="' + e(o.code) + '">' + e(o.tags || "") + ' ' + e(o.name) + ' <b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></span>'; }).join(""); };
+    C.kick = card("port~pokick", "⚡", ev.length ? '<span class="hm-kt ' + (hasSell ? "sell" : "buy") + '">킥 — 오늘 할 일 ' + (hasBuy ? "🟢" : "") + (hasSell ? "🔴" : "") + '</span>' : '<span class="hm-kt rest">킥 — 오늘은 쉬는 날 ✓</span>', K.n + "종목 · 포트의 " + K.w + "%",
       (ev.length ? ev.map(function(x){ return '<div class="hm-ev ' + (x.k === "사기" ? "buy" : "sell") + '">' + (x.k === "사기" ? "🟢 사기" : x.k === "팔기" ? "🔴 팔기" : "🟡 절반") + ' <b data-op="' + e(x.code) + '">' + e(x.name) + ' ›</b>' + (x.r != null ? ' ' + sg(x.r, 1) : '') + (x.why ? ' <small>' + e(x.why) + '</small>' : '') + '</div>'; }).join("")
-        : '<div class="hm-l">' + md(K.asof) + ' 사고판 것 없음 — 들고 있는 그대로</div>') +
-      '<div class="hm-chips">' + (K.best || []).map(function(o){ return '<span class="hm-chip" data-op="' + e(o.code) + '">' + e(o.tags || "") + ' ' + e(o.name) + ' <b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></span>'; }).join("") +
-      (K.worst || []).map(function(o){ return '<span class="hm-chip" data-op="' + e(o.code) + '">' + e(o.tags || "") + ' ' + e(o.name) + ' <b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></span>'; }).join("") + '</div>', "킥 보기");
+        : '<div class="hm-l mut">' + md(K.asof) + ' 사고판 것 없음 — 들고 있는 그대로</div>') +
+      ((K.best || []).length ? '<div class="hm-chips"><small class="hm-cl">🔥 잘 가는</small>' + chips(K.best) + '</div>' : '') +
+      ((K.worst || []).length ? '<div class="hm-chips"><small class="hm-cl">🧊 안 가는</small>' + chips(K.worst) + '</div>' : ''), "킥 보기");
     // 🎯 집중
-    if ((H.focus || []).length) h += card("market~mkfo", "🎯", "오늘 집중", "돈이 몰리는 테마",
+    if ((H.focus || []).length) C.focus = card("market~mkfo", "🎯", "오늘 집중", "돈이 몰리는 테마",
       H.focus.map(function(t){ return '<div class="hm-f"><b>' + e(t.name) + '</b> <span class="hm-chip ' + (t.stage === "과열" ? "b" : "g") + '">' + e(t.stage || "") + '</span> <small>5일 ' + sg(t.r5, 1) + ' · S&P 대비 20일 ' + sg(t.rs20, 1) + 'p</small>' +
         '<div class="hm-l">' + e(t.do || "") + ((t.stars || []).length ? ' · ★ ' + t.stars.map(function(s){ return '<a data-op="' + e(s.t) + '">' + e(s.name) + '</a>'; }).join(", ") : '') + ((t.etf_kr || []).length ? ' · 🇰🇷 <a data-op="' + e(t.etf_kr[0].t) + '">' + e(t.etf_kr[0].name) + '</a>' : '') + '</div></div>'; }).join(""), "시황");
     // ⚡ 단타
     // 10/12: ⚡ 단타 카드 뺌 — 단타는 알림(앱·텔레그램)으로만
     // 🧠 두뇌
-    if (Bn.summary) h += card("feed~fdbrain", "🧠", "지금 생각", (Bn.regime || "") + " · " + md(Bn.at) + " " + String(Bn.at || "").slice(11, 16),
+    if (Bn.summary) C.brain = card("feed~fdbrain", "🧠", "지금 생각", (Bn.regime || "") + " · " + md(Bn.at) + " " + String(Bn.at || "").slice(11, 16),
       '<div class="hm-l">' + e(Bn.summary) + '</div>' + ((Bn.ideas || []).length ? '<div class="hm-chips">' + Bn.ideas.map(function(x){ var t = typeof x === "string" ? x : ((x["칸"] || x.box || "") + " " + (x["제안"] || x.idea || "")); return t.trim() ? '<span class="hm-chip" data-goto="port~poct">💡 ' + e(t) + '</span>' : ''; }).join("") + '</div>' : ''), "피드");
     // 📊 성적
-    h += card("score", "📊", "성적 한 줄", "무엇이 이기고 지나",
+    C.score = card("score", "📊", "성적 한 줄", "무엇이 이기고 지나",
       '<div class="hm-l">' + ((S.good || []).length ? '✅ ' + e(S.good.join(" · ")) : '') + ((S.bad || []).length ? '<br>❌ ' + e(S.bad.join(" · ")) : '') + (!(S.good || []).length && !(S.bad || []).length ? '표본이 쌓이는 중' : '') + '</div>', "성적표");
+    (useTime ? ED.order : FIXED).forEach(function(k){ if (C[k]) h += C[k]; });
     b.innerHTML = h;
     HSH = H;
+    var edl = document.getElementById("hmed"); if (edl) edl.onclick = function(ev){ ev.stopPropagation(); if (window.P && window.P.toast) window.P.toast(ED.ic + " " + ED.t + " — " + ED.why + " · 순서는 ⚙️ 설정에서"); };
+    var sb = document.getElementById("hmstory"); if (sb) sb.onclick = function(ev){ ev.stopPropagation(); if (window.hmStory) hmStory(); };
   }
   // ⑧ 공유: 카드 내용을 글로 만들어 휴대폰 공유창(카톡 등)으로
   var HSH = null;
@@ -274,7 +345,20 @@
     ".us-r{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0}.us-r>span{font-size:13px;color:var(--sub)}",
     ".us-seg{display:flex;gap:4px}.us-seg button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:9px;padding:5px 8px;font:inherit;font-size:12px;cursor:pointer}.us-seg button.on{background:var(--c,#7c9cff);color:#111;border-color:transparent;font-weight:800}",
     /* 홈 */
-    ".hm-day{font-size:13px;color:var(--sub);margin:-4px 2px 10px}",
+    ".hm-day{font-size:13px;color:var(--sub);margin:-4px 2px 10px;display:flex;align-items:center;flex-wrap:wrap;gap:0 4px}",
+    /* 10/14 A9-1 시간대 라벨 · A9-4 30초 스토리 버튼 */
+    ".hm-ed{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:11.5px;color:var(--text);cursor:pointer;white-space:nowrap}",
+    ".hm-story{margin-left:auto;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}",
+    /* A9-2 줄 안 꺾임 · 선 끝 라벨 */
+    ".hm-nw{white-space:nowrap}.lc-e{font-size:10.5px}",
+    /* A9-3 킥 제목 · 잘 가는/안 가는 줄 */
+    ".hm-kt.rest{color:var(--sub);font-weight:700}.hm-kt.buy{color:#4dd47a}.hm-kt.sell{color:#ff8a8a}.hm-cl{flex:none;align-self:center;font-size:11px;color:var(--sub);font-weight:700;margin-right:2px}",
+    /* A9-5 🔮 예고 표 · 확률 막대 · 나 vs 앱 */
+    ".hm-nx{display:flex;align-items:center;gap:7px;padding:5px 0;border-top:1px dashed var(--line)}.hm-nx:first-of-type{border-top:0}.hm-nxt{flex:1;min-width:0}",
+    ".hm-pb{position:relative;flex:none;width:44px;height:16px;border-radius:5px;background:var(--panel);overflow:hidden;border:1px solid var(--line)}.hm-pb i{position:absolute;left:0;top:0;bottom:0;background:rgba(255,184,77,.55)}.hm-pb b{position:absolute;inset:0;font-size:10.5px;font-weight:800;color:var(--text);display:flex;align-items:center;justify-content:center}",
+    ".hm-vt{display:flex;flex:none;gap:3px}.hm-vt button{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:2px 6px;font-size:14px;line-height:1.2;cursor:pointer;opacity:.75}.hm-vt button.on{opacity:1;border-color:#ffb84d;background:rgba(255,184,77,.22)}",
+    ".hm-me{font-size:11px;font-weight:700;color:var(--sub);background:var(--panel2);border-radius:6px;padding:0 5px;margin-left:4px;white-space:nowrap}.hm-me.ok{color:#4dd47a}.hm-me.no{color:#ff8a8a}",
+    ".hm-vs{margin-top:8px;background:var(--panel2);border-radius:10px;padding:7px 10px;font-size:12px}.hm-vs>span{display:block;font-weight:800;margin-bottom:4px}.hm-vs>div{display:flex;align-items:center;gap:7px;margin:3px 0}.hm-vs small{width:18px;color:var(--sub);font-weight:700}.hm-vs i{flex:1;height:8px;border-radius:4px;background:var(--panel);overflow:hidden;display:block}.hm-vs i b{display:block;height:100%;background:#7c9cff;border-radius:4px}.hm-vs>div:first-of-type i b{background:#ffb84d}.hm-vs em{font-style:normal;font-weight:800;width:72px;text-align:right;white-space:nowrap}",
     ".hm-c{cursor:pointer;transition:transform .12s}.hm-c:active{transform:scale(.99)}",
     ".hm-chg{padding:12px 14px!important}.hm-cht{font-weight:800;font-size:14px;margin-bottom:6px}.hm-chi{display:flex;align-items:center;gap:8px;padding:8px 2px;border-top:1px solid var(--line);font-size:13.5px;cursor:pointer}.hm-chi:first-of-type{border-top:0}.hm-chi b{flex:1;font-weight:600}.hm-chi i{font-style:normal;color:var(--dim)}",
     ".hm-gr{display:flex;gap:9px;padding:7px 0;border-top:1px solid var(--line)}.hm-gr:first-of-type{border-top:0}.hm-gr>span{font-weight:900;font-size:16px;min-width:16px}.hm-gr.ok>span{color:#4dd47a}.hm-gr.no>span{color:#ff8a8a}.hm-gr.hold>span{color:var(--sub)}.hm-gr b{display:block;font-size:13.5px}.hm-gr small{display:block;font-size:12px;color:var(--sub);line-height:1.45}",

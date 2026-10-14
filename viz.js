@@ -151,7 +151,8 @@ var V = (function(){
   // series: [{name, color, vals:[...]}], labels: [...]
   function lines(series, labels, opt){
     opt = opt || {};
-    var W = 340, H = opt.h || 170, L = 6, R = 52, T = 10, B = 22;
+    // 10/14 A9-2: opt.endLabels = 선 끝에 「이름 값」 (오른쪽 눈금 숫자는 뺌 — 눈금이 끝값처럼 읽히던 문제) · opt.nolegend = 범례 줄 없음
+    var W = 340, H = opt.h || 170, L = 6, R = opt.endLabels ? 84 : 52, T = 10, B = 22;
     var all = [];
     series.forEach(function(s){ s.vals.forEach(function(v){ if (v != null) all.push(v); }); });
     if (!all.length || labels.length < 2) return '<div class="spark-empty">데이터가 더 쌓이면 그려져요</div>';
@@ -160,7 +161,7 @@ var V = (function(){
     var n = labels.length, x = function(i){ return L + i * (W - L - R) / (n - 1); }, y = function(v){ return T + (hi - v) / r * (H - T - B); };
     var s = '<svg class="lc" viewBox="0 0 ' + W + ' ' + H + '">';
     for (var g = 0; g < 3; g++){ var gv = lo + r * (g + 0.5) / 3; s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(gv).toFixed(1) + '" y2="' + y(gv).toFixed(1) + '" class="lc-g"/>' +
-      '<text x="' + (W - R + 4) + '" y="' + (y(gv) + 3).toFixed(1) + '" class="lc-a">' + fmt(gv) + (opt.unit || "") + '</text>'; }
+      (opt.endLabels ? '' : '<text x="' + (W - R + 4) + '" y="' + (y(gv) + 3).toFixed(1) + '" class="lc-a">' + fmt(gv) + (opt.unit || "") + '</text>'); }
     if (opt.zero && lo < 0 && hi > 0) s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(0).toFixed(1) + '" y2="' + y(0).toFixed(1) + '" class="lc-z"/>';
     s += '<text x="' + L + '" y="' + (H - 6) + '" class="lc-a">' + e(labels[0]) + '</text><text x="' + (W - R) + '" y="' + (H - 6) + '" class="lc-a" text-anchor="end">' + e(labels[n - 1]) + '</text>';
     var ends = [];
@@ -170,8 +171,16 @@ var V = (function(){
       s += '<polyline points="' + p.map(function(q){ return q[0].toFixed(1) + "," + q[1].toFixed(1); }).join(" ") + '" fill="none" stroke="' + sr.color + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"' + (sr.dash ? ' stroke-dasharray="4 4"' : '') + '/>';
       if (opt.nodots){ var lq = p[p.length - 1]; s += '<circle cx="' + lq[0].toFixed(1) + '" cy="' + lq[1].toFixed(1) + '" r="4" fill="' + sr.color + '" stroke="#121826" stroke-width="2"/>'; }
       else p.forEach(function(q){ s += '<circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="2.5" fill="' + sr.color + '" stroke="#121826" stroke-width="1.5"/>'; });
-      ends.push([p[p.length - 1][1], sr]);
+      ends.push([p[p.length - 1][1], sr, p[p.length - 1][2]]);
     });
+    if (opt.endLabels){   // 선 끝 라벨 — 겹치면 위아래로 밀고, 선 끝과 라벨을 가는 선으로 이음
+      ends.sort(function(a, b){ return a[0] - b[0]; });
+      for (var k2 = 1; k2 < ends.length; k2++) if (ends[k2][0] - ends[k2 - 1][0] < 13) ends[k2][0] = ends[k2 - 1][0] + 13;
+      var yTop = T + 5, yBot = H - B - 3;
+      for (var k3 = ends.length - 1; k3 >= 0; k3--){ if (ends[k3][0] > yBot) ends[k3][0] = yBot; if (k3 < ends.length - 1 && ends[k3 + 1][0] - ends[k3][0] < 13) ends[k3][0] = ends[k3 + 1][0] - 13; }
+      ends.forEach(function(en){ var yy = Math.max(yTop, en[0]), sr = en[1];
+        s += '<text x="' + (W - R + 6) + '" y="' + (yy + 3.5).toFixed(1) + '" class="lc-a lc-e" style="fill:' + sr.color + ';font-weight:700">' + e(sr.short || sr.name) + ' ' + fmt(en[2]) + (opt.unit || "") + '</text>'; });
+    }
     // ② 표시점 (opt.marks = [{i, color, t}]) — 비중 바뀐 날·킥 매매 등
     var mk = {};
     (opt.marks || []).forEach(function(m){ if (m.i == null || m.i < 0 || m.i >= n) return; var X = x(m.i).toFixed(1);
@@ -189,7 +198,7 @@ var V = (function(){
       s += '<rect x="' + x0.toFixed(1) + '" y="0" width="' + (x1 - x0).toFixed(1) + '" height="' + (H - B) + '" fill="transparent" data-x="' + x(i).toFixed(1) + '" data-tip="' + e(tip) + '"/>';
     }
     s += '</svg>';
-    var leg = series.length > 1 ? '<div class="lg">' + series.map(function(sr){ var lv = sr.vals.filter(function(v){ return v != null; }).pop();
+    var leg = series.length > 1 && !opt.nolegend ? '<div class="lg">' + series.map(function(sr){ var lv = sr.vals.filter(function(v){ return v != null; }).pop();
       return '<span><i style="background:' + sr.color + '"></i>' + e(sr.name) + ' <b>' + fmt(lv) + (opt.unit || "") + '</b></span>'; }).join("") + '</div>' : "";
     return leg + s;
   }
