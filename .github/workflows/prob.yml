@@ -1,0 +1,31 @@
+name: prob
+# 🎲 시장확률 — 5개 시장 내일·일주일 오를 확률 (10가지 방법 결합) · 매시간 + 각 시장 마감 직후 기록
+on:
+  schedule:
+    - cron: "12 * * * *"       # 매시 12분
+    - cron: "50 6 * * 1-5"     # KST 15:50 한국·일본 마감 직후
+    - cron: "20 8 * * 1-5"     # KST 17:20 홍콩 마감 직후
+    - cron: "10 21 * * 1-5"    # 뉴욕 16:10 (EDT) 미국 마감 직후
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prob
+  cancel-in-progress: false
+
+jobs:
+  prob:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q yfinance pandas numpy
+      - name: 시장확률
+        run: python prob.py
+      - name: 저장
+        run: bash scripts/push.sh "prob $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/prob.json archive/x/prob_hist.json

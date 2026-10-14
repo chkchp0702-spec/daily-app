@@ -474,6 +474,7 @@ var CATS = [
   {key:"cup",    name:"컵차트", short:"컵",   icon:"☕", color:"#ffb84d", desc:"컵앤핸들 돌파 후보"},
   {key:"gap",    name:"갭차트", short:"갭",   icon:"📈", color:"#c38bff", desc:"갭 돌파 후보"},
   {key:"sector", name:"나침반", short:"나침반", icon:"🧭", color:"#4dd47a", desc:"5개 시장 등락 종목 수 · 지수 흐름 · 강한 섹터"},
+  {key:"prob",   name:"시장확률", short:"확률", icon:"🎲", color:"#9b7cff", desc:"내일·일주일 뒤 오를 확률 — 5개 시장 · 10가지 방법을 합쳐 계산하고 매일 채점"},
   {key:"accum",  name:"조용한 매집", short:"매집", icon:"🤫", color:"#ff8fc7", desc:"거래량은 늘고 가격은 제자리인 종목"},
   {key:"screen", name:"아침 거르기", short:"거르기", icon:"🔎", color:"#7ee0b5", desc:"약 2만 7천 종목을 매일 아침 네 가지 거름망으로 — 살펴볼 후보 (사라는 뜻 아님)"},
   {key:"onepager", name:"종목리포트", short:"종목", icon:"📄", color:"#5ac8fa", desc:"약 2만 종목 + ETF 6천 개 · 검색하면 바로"},
@@ -578,8 +579,8 @@ function go(key, id){
   var items = (M.cats[key] || []);
   curDate = id || (items[0] && items[0].id);
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
-          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">켜기 · 끄기만</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "port" ? '<span class="chip">10/2부터 · 매일 갱신</span>' : key === "home" ? '<span class="chip">매시간 갱신</span><span class="chip">누르면 그 탭으로</span>' : key === "score" ? '<span class="chip">매시간 자동 채점</span>' : key === "feed" ? '<span class="chip">블로그 5 · 텔레그램 8 · 뉴스 47</span><span class="chip">15분마다</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
-          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" && key !== "port" && key !== "home" && key !== "score" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
+          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">켜기 · 끄기만</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "port" ? '<span class="chip">10/2부터 · 매일 갱신</span>' : key === "home" ? '<span class="chip">매시간 갱신</span><span class="chip">누르면 그 탭으로</span>' : key === "score" ? '<span class="chip">매시간 자동 채점</span>' : key === "prob" ? '<span class="chip">매시간 계산</span><span class="chip">마감 뒤 채점</span>' : key === "feed" ? '<span class="chip">블로그 5 · 텔레그램 8 · 뉴스 47</span><span class="chip">15분마다</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
+          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" && key !== "port" && key !== "home" && key !== "score" && key !== "prob" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
   if (key === "onepager") { $("main").innerHTML = h + opView(); opInit(id); window.scrollTo(0, 0); return; }
   if (key === "alarm") { $("main").innerHTML = h + alarmView(); alarmInit(); window.scrollTo(0, 0); return; }
   if (key === "idea") { $("main").innerHTML = h + ideaView(); ideaInit(); window.scrollTo(0, 0); return; }
@@ -587,6 +588,7 @@ function go(key, id){
   if (key === "home") { $("main").innerHTML = h + homeView(); homeInit(); window.scrollTo(0, 0); return; }
   if (key === "score") { $("main").innerHTML = h + scoreView(); scoreInit(); window.scrollTo(0, 0); return; }
   if (key === "feed") { $("main").innerHTML = h + feedView(); feedInit(); window.scrollTo(0, 0); return; }
+  if (key === "prob") { $("main").innerHTML = h + probView(); probInit(); window.scrollTo(0, 0); return; }
   if (!items.length) {
     h += '<div class="empty"><div class="big">🗂️</div>아직 모인 자료가 없어요.<br>' +
          "다음 자동 수집 때 채워져요." + '</div>';
@@ -1482,6 +1484,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="views.js?v=29"></script>
 <script defer src="ixchart.js?v=7"></script>
 <script defer src="compass.js?v=18"></script>
+<script defer src="prob.js?v=1"></script>
 <script defer src="extras.js?v=8"></script>
 <script defer src="plus.js?v=2"></script>
 <script defer src="plus2.js?v=1"></script>
