@@ -7,7 +7,7 @@
   var TEXT_TAGS = {DIV:1, P:1, SPAN:1, B:1, I:1, EM:1, STRONG:1, SMALL:1, A:1, BR:1, UL:1, OL:1, LI:1, SUP:1, SUB:1, MARK:1, U:1, S:1, CODE:1};
   var SKIP = "button,svg,canvas,table,img,input,select,textarea,details,iframe,video,[data-op],[data-pf],[data-foc],[data-goto],[role=button],.bar,.chip,.pill";
   var OPEN = {};                 // 펼친 글
-  var SHOW = 3, MIN = 5;         // 3줄 보이고, 5줄 넘을 때만 접음
+  var SHOW = 2, MIN = 4;         // 10/14 밤 「한눈에」: 2줄 보이고, 4줄 넘을 때만 접음
 
   function key(el){ return (el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 40); }
   function isText(el){
