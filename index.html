@@ -417,7 +417,7 @@ em.tk{font-style:normal;font-size:11px;color:var(--dim);margin-left:4px;font-wei
 <main id="main"><div class="loading">불러오는 중…</div></main>
 <footer>※ 참고용 자료입니다. 투자 판단과 책임은 본인에게 있습니다.</footer>
 
-<script src="viz.js?v=10"></script>
+<script src="viz.js?v=11"></script>
 <script>
 /* ---------- ⚠ 저장본 알림 띠 (10/11) — 서비스 워커가 느려서 마지막 저장본을 보여 주면 위쪽에 잠깐 ---------- */
 (function(){
@@ -1441,7 +1441,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261014g";
+var APPV = "20261014h";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1495,7 +1495,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="brain.js?v=4"></script>
 <script defer src="feed.js?v=6"></script>
 <script defer src="push.js?v=2"></script>
-<script defer src="port.js?v=33"></script>
+<script defer src="port.js?v=34"></script>
 <script defer src="simple.js?v=15"></script>
 <script defer src="pdfx.js?v=7"></script>
 <script defer src="honest.js?v=1"></script>
@@ -1505,7 +1505,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ticker.js?v=2"></script>
 <script defer src="ux1013.js?v=2"></script>
 <script defer src="story.js?v=1"></script>
-<script defer src="ux1014.js?v=1"></script>
+<script defer src="ux1014.js?v=2"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
 </html>

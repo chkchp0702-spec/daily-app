@@ -160,6 +160,15 @@ var V = (function(){
     lo -= r * 0.1; hi += r * 0.1; r = hi - lo;
     var n = labels.length, x = function(i){ return L + i * (W - L - R) / (n - 1); }, y = function(v){ return T + (hi - v) / r * (H - T - B); };
     var s = '<svg class="lc" viewBox="0 0 ' + W + ' ' + H + '">';
+    if (opt.niceTicks){   // 10/14 A11-2: 눈금을 둥근 수(0·1·2·5…)로 — 어중간한 값(2.29·−4.04…) 대신. endLabels 와 같이 쓰면 눈금 글자는 왼쪽 위에 작게
+      var steps = [0.05, 0.1, 0.2, 0.25, 0.5, 1, 2, 2.5, 5, 10, 20, 25, 50, 100], st = steps[steps.length - 1];
+      var tf = function(v){ return (v > 0 ? "+" : v < 0 ? "−" : "") + String(+Math.abs(v).toFixed(2)); };
+      for (var si = 0; si < steps.length; si++){ if (r / steps[si] <= 5){ st = steps[si]; break; } }
+      for (var tv = Math.ceil(lo / st) * st; tv <= hi + 1e-9; tv += st){ var tvr = Math.round(tv / st) * st; if (Math.abs(tvr) < 1e-9) tvr = 0;
+        s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(tvr).toFixed(1) + '" y2="' + y(tvr).toFixed(1) + '" class="lc-g"/>' +
+          (opt.endLabels ? '<text x="' + (L + 2) + '" y="' + (y(tvr) - 2).toFixed(1) + '" class="lc-a" style="font-size:9px;opacity:.85;paint-order:stroke;stroke:var(--panel);stroke-width:3px">' + tf(tvr) + (opt.unit || "") + '</text>'
+                         : '<text x="' + (W - R + 4) + '" y="' + (y(tvr) + 3).toFixed(1) + '" class="lc-a">' + tf(tvr) + (opt.unit || "") + '</text>'); }
+    } else
     for (var g = 0; g < 3; g++){ var gv = lo + r * (g + 0.5) / 3; s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(gv).toFixed(1) + '" y2="' + y(gv).toFixed(1) + '" class="lc-g"/>' +
       (opt.endLabels ? '' : '<text x="' + (W - R + 4) + '" y="' + (y(gv) + 3).toFixed(1) + '" class="lc-a">' + fmt(gv) + (opt.unit || "") + '</text>'); }
     if (opt.zero && lo < 0 && hi > 0) s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(0).toFixed(1) + '" y2="' + y(0).toFixed(1) + '" class="lc-z"/>';

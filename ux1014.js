@@ -117,3 +117,29 @@
     ".mk-toc .mk-full small{font-size:10px;color:var(--dim,#8a94a8);font-weight:600}.mk-toc .mk-full.on{border-color:var(--c)}";
   document.head.appendChild(st);
 })();
+
+/* ---------- 10/14 11시 A11-1 🪜 스크롤 내리면 머리 접기 ----------
+   아래로 내리는 동안 머리(상표 줄 + 「포트/성적표」 줄)를 위로 밀어 올리고(transform — 문서 높이는 안 바뀌어 스크롤 위치가 안 튐), 조금만 위로 올리면 다시 내림.
+   위에 붙는 성적 띠·바로가기 칩은 --hh(머리 높이)를 따라가므로 접을 때 --hh 도 같이 줄임. */
+(function(){
+  var hd = document.querySelector("header"); if (!hd) return;
+  var st = document.createElement("style");
+  st.textContent =
+    "header{transition:transform .22s ease;will-change:transform}header.hd-min{transform:translateY(calc(-1 * var(--hdc,98px)))}" +
+    "header.hd-min .top,header.hd-min .tabs.sub{pointer-events:none}" +
+    ".po-stk,.fold-jump{transition:top .22s ease}";
+  document.head.appendChild(st);
+  var lastY = window.scrollY || 0, acc = 0;
+  function setHH(){ var h = hd.offsetHeight; if (hd.classList.contains("hd-min")){ document.documentElement.style.setProperty("--hdc", (h - 2) + "px"); document.documentElement.style.setProperty("--hh", "2px"); }
+    else document.documentElement.style.setProperty("--hh", h + "px"); }
+  function set(min){ if (hd.classList.contains("hd-min") === min) return; hd.classList.toggle("hd-min", min); setHH(); }
+  window.addEventListener("scroll", function(){
+    var y = window.scrollY || 0, d = y - lastY; lastY = y;
+    if ((d > 0) !== (acc > 0)) acc = 0;
+    acc += d;
+    if (y < 80 || acc < -24) set(false);
+    else if (y > 160 && acc > 24) set(true);
+  }, {passive: true});
+  window.addEventListener("hashchange", function(){ set(false); });
+  window.addEventListener("resize", function(){ setTimeout(setHH, 50); });
+})();
