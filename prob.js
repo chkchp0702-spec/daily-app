@@ -61,7 +61,9 @@
           return '<a class="ps-t" href="javascript:openOP(\'' + e(t.s).replace(/'/g, "") + '\')"><span class="ps-tn"><b>' + e(t.n) + '</b><em class="tk">' + e(V.cd ? V.cd(t.s) : t.s) + '</em></span>' +
             '<span class="ps-tv"><b class="' + ecls(te) + '">' + ep(te) + '</b><small>시장보다 <span class="' + ecls(tr) + '">' + pc(t.pr5) + '</span> · 내일 ' + pc(t.p1) + '</small></span></a>'; }).join("") + '</div>' : '') + '</div>';
     };
+    var RL = {"믿을 만": ["✅", "s3"], "약함": ["👀", "s2"], "동전 수준": ["💤", "s1"]}[S.rel] || ["", ""];
     return '<section class="card"><h3>🧭 섹터·종목 확률 <span class="mut">일주일 · 평소보다 · ' + e(S.last.slice(5).replace("-", "/")) + ' 마감 기준</span></h3>' +
+      (S.rel ? '<div class="pr-sg"><span class="pr-bd ' + RL[1] + '">' + RL[0] + ' 모델 ' + e(S.rel) + '</span><small class="mut">검증 AUC ' + S.auc.y5 + (S.rel === "믿을 만" ? '' : ' — 확률을 평소 쪽으로 눌러 보여 줘요(순위는 그대로)') + '</small></div>' : '') +
       show.map(row).join("") +
       (secs.length > 9 ? '<button class="fold ps-all" data-mk="' + mk + '">' + (all ? "줄이기 ▴" : "섹터 " + secs.length + "개 모두 보기 ▾") + '</button>' : '') +
       '<p class="note">큰 숫자 = 그 섹터(종목)가 일주일 뒤 오를 확률이 이 시장 평소(' + pc(b5) + ')보다 얼마나 높고 낮은지. 섹터를 누르면 종목 — 「시장보다」 높은 순. ' + S.n + '종목 · 검증 AUC 일주일 ' + (S.auc.y5 != null ? S.auc.y5 : "–") + ' · 시장 대비 ' + (S.auc.yr5 != null ? S.auc.yr5 : "–") + ' (0.5 = 동전, 0.55 넘으면 쓸 만)</p></section>';

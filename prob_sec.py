@@ -204,9 +204,16 @@ def fit_market(P):
         w = logistic_fit(Xs_tr, tr[t].values)
         a = auc(te[t].values, pred(w, ((X_of(te) - mu) / sd).values)) if len(te) > 200 else None
         w2 = logistic_fit(((X_of(D) - mu) / sd).values, D[t].values)
-        probs[t] = pred(w2, ((X_of(cur) - mu) / sd).values)
+        raw = pred(w2, ((X_of(cur) - mu) / sd).values)
+        # 검증 AUC 만큼만 믿기: 0.56↑ = 그대로, 0.50 이하 = 평소 쪽으로 80% 눌러 줌 (순위는 그대로)
+        b = float(D[t].mean())
+        k = 0.2 if a is None else min(1.0, max(0.2, (a - 0.5) / 0.06))
+        lb = math.log(b / (1 - b))
+        lr = np.log(np.clip(raw, 1e-4, 1 - 1e-4) / (1 - np.clip(raw, 1e-4, 1 - 1e-4)))
+        probs[t] = 1 / (1 + np.exp(-(lb + k * (lr - lb))))
         out["auc"][t] = r2(a, 3)
-        out["base"][t] = r2(D[t].mean(), 3)
+        out["base"][t] = r2(b, 3)
+        out.setdefault("k", {})[t] = r2(k, 2)
     return out, cur.set_index("s"), probs
 
 
@@ -452,7 +459,9 @@ def main():
                              "r5": r2(wavg("r5"), 2), "up5": sum(1 for x in xs if (x["p5"] or 0) > mres["base"]["y5"]),
                              "st": [{kk: x[kk] for kk in ("s", "n", "p1", "p5", "pr5", "r1", "r5")} for x in xs]})
             secs.sort(key=lambda x: -(x["p5"] or 0))
-            res[mk] = {"name": cfg["name"], "flag": cfg["flag"], "n": len(st), "last": mres["last"], "auc": mres["auc"], "base": mres["base"], "rows": mres["n_rows"], "sectors": secs}
+            a5 = mres["auc"].get("y5") or 0.5
+            rel = "믿을 만" if a5 >= 0.56 else "약함" if a5 >= 0.52 else "동전 수준"
+            res[mk] = {"name": cfg["name"], "flag": cfg["flag"], "n": len(st), "last": mres["last"], "auc": mres["auc"], "base": mres["base"], "k": mres.get("k"), "rel": rel, "rows": mres["n_rows"], "sectors": secs}
             print(mk, "섹터", len(secs), "종목", len(st), "AUC", mres["auc"], "기저", mres["base"], f"{time.time()-t0:.0f}s")
             if mk == "US":
                 try:
@@ -471,7 +480,7 @@ def main():
             old = {}
     old.update(res)
     out = {"at": int(time.time() * 1000), "t": NOW.strftime("%m-%d %H:%M"), "markets": old,
-           "note": "종목마다 2년 일봉으로 「내일 오름 · 5일 뒤 오름 · 5일 동안 시장보다 나음」을 로지스틱 회귀로 계산 · 섹터는 속한 종목의 시가총액 가중 평균 · AUC 는 마지막 60거래일(학습에서 뺀 구간) 검증, 0.5 = 동전."}
+           "note": "종목마다 2년 일봉으로 「내일 오름 · 5일 뒤 오름 · 5일 동안 시장보다 나음」을 로지스틱 회귀로 계산 · 섹터는 속한 종목의 시가총액 가중 평균 · AUC 는 마지막 60거래일(학습에서 뺀 구간) 검증, 0.5 = 동전. 검증이 약한 시장은 확률을 평소 쪽으로 눌러 보여 줌(순위는 그대로)."}
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     if whale:
         json.dump(whale, open(WOUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
