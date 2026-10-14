@@ -361,6 +361,33 @@ def market(mk, H, brain, events):
     m1 = 0.0; m5 = base["q5"][2] if base and base.get("q5") and base["q5"][2] is not None else 0.0
     band1 = [r2(m1 - s1), r2(m1 + s1)]
     band5 = [r2(m5 - s5), r2(m5 + s5)]
+    # 10/14 사용자 「50% 언저리에서 노는 게 볼품없다」 → 평소(기저율) 대비 차이 · 방법 찬반 · 큰 움직임 확률(꼬리)을 같이 보여 줌
+    pb1, pb5 = float(d["y1"].mean()), float(d["y5"].mean())
+    votes = {"up": 0, "down": 0, "flat": 0}
+    for x in M:
+        if x.get("p1") is None or not x.get("w"):
+            continue
+        dv = x["p1"] - pb1
+        votes["up" if dv > 0.005 else "down" if dv < -0.005 else "flat"] += 1
+    e1 = p1 - pb1
+    nv = votes["up"] + votes["down"] + votes["flat"]
+    agree = (votes["up"] if e1 >= 0 else votes["down"]) / nv if nv else 0
+    strength = "강" if abs(e1) >= 0.04 and agree >= 0.7 else "보통" if abs(e1) >= 0.02 and agree >= 0.6 else "약"
+    from statistics import NormalDist
+    N = NormalDist()
+    def tails(p, sig, sig_n, pb, th):
+        """정규 근사: 평균 = σ·Φ⁻¹(p) · 지금 σ(현재 변동성) vs 평소 σ(20일 변동성 중앙값)"""
+        mu, mu_n = sig * N.inv_cdf(min(max(p, .01), .99)), sig_n * N.inv_cdf(min(max(pb, .01), .99))
+        up = 1 - N.cdf((th - mu) / sig); dn = N.cdf((-th - mu) / sig)
+        upn = 1 - N.cdf((th - mu_n) / sig_n); dnn = N.cdf((-th - mu_n) / sig_n)
+        return [r2(up, 3), r2(upn, 3)], [r2(dn, 3), r2(dnn, 3)]
+    sn1 = float(d["r"].rolling(20).std().median() * 100)
+    th1 = 1.0 if sn1 < 1.3 else 1.5
+    th5 = 3.0 if sn1 < 1.3 else 4.0
+    u1, d1_ = tails(p1, s1, sn1, pb1, th1)
+    u5, d5_ = tails(p5, s5, sn1 * math.sqrt(5), pb5, th5)
+    tail = [{"k": f"내일 +{th1:g}% 넘게 오름", "now": u1[0], "norm": u1[1]}, {"k": f"내일 −{th1:g}% 넘게 내림", "now": d1_[0], "norm": d1_[1]},
+            {"k": f"일주일 +{th5:g}% 넘게 오름", "now": u5[0], "norm": u5[1]}, {"k": f"일주일 −{th5:g}% 넘게 내림", "now": d5_[0], "norm": d5_[1]}]
     tone1 = "오를 쪽" if p1 >= 0.57 else "내릴 쪽" if p1 <= 0.43 else "반반"
     tone5 = "오를 쪽" if p5 >= 0.58 else "내릴 쪽" if p5 <= 0.42 else "반반"
     ixn = cfg["ixn"]
@@ -372,7 +399,9 @@ def market(mk, H, brain, events):
     return {"mk": mk, "name": cfg["name"], "flag": cfg["flag"], "ixn": ixn, "base_date": base_date, "open_now": open_now,
             "last": r2(last["c"]), "chg": r2(last["r"] * 100), "p1": r2(p1, 3), "p5": r2(p5, 3), "tone1": tone1, "tone5": tone5,
             "band1": band1, "band5": band5, "m5": r2(m5), "widen": widen, "state": state, "methods": M,
-            "next_day": nxt.strftime("%Y-%m-%d"), "n_hist": int(len(d))}
+            "next_day": nxt.strftime("%Y-%m-%d"), "n_hist": int(len(d)),
+            "pb1": r2(pb1, 3), "pb5": r2(pb5, 3), "e1": r2((p1 - pb1) * 100, 1), "e5": r2((p5 - pb5) * 100, 1),
+            "votes": votes, "agree": r2(agree * 100, 0), "strength": strength, "tail": tail, "sig_now": r2(s1), "sig_norm": r2(sn1)}
 
 
 # ---------------- 채점 ----------------

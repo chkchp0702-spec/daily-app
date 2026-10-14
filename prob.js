@@ -15,16 +15,41 @@
     var x = Math.min(95, Math.max(5, p * 100));
     return '<div class="pb' + (big ? " big" : "") + '"><i class="pf ' + (p >= 0.5 ? "u" : "d") + '" style="left:' + Math.min(50, x) + '%;width:' + Math.abs(x - 50) + '%"></i><i class="pm" style="left:' + x + '%"></i></div>';
   }
+  function ep(v){ return v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1) + "%p"; }
+  function ecls(v){ return v == null ? "" : v >= 1 ? "up" : v <= -1 ? "dn" : ""; }
+  var STR = {"강": "🔥 강한 신호", "보통": "👀 보통 신호", "약": "💤 약한 신호"};
+  // 확대 막대: 40~60% 구간만 그려 작은 차이도 보이게 (평소 = 점선)
+  function zbar(p, pb){
+    var z = function(v){ return Math.min(100, Math.max(0, (v - 0.4) / 0.2 * 100)); };
+    var x = z(p), b = z(pb);
+    return '<div class="zb"><i class="zf ' + (p >= pb ? "u" : "d") + '" style="left:' + Math.min(x, b) + '%;width:' + Math.abs(x - b) + '%"></i><i class="zn" style="left:' + b + '%"></i><i class="pm" style="left:' + x + '%"></i></div><div class="zl"><span>40%</span><span>평소 ' + pc(pb) + '</span><span>60%</span></div>';
+  }
+  function votes(v){
+    if (!v) return "";
+    var dots = new Array(v.up + 1).join('<i class="u"></i>') + new Array(v.flat + 1).join('<i></i>') + new Array(v.down + 1).join('<i class="d"></i>');
+    return '<div class="pv"><span class="pvd">' + dots + '</span><small>방법 ' + (v.up + v.down + v.flat) + '개 중 <b class="up">' + v.up + ' 오를 쪽</b> · <b class="dn">' + v.down + ' 내릴 쪽</b> · ' + v.flat + ' 평소</small></div>';
+  }
+  function tailCard(m){
+    if (!m.tail) return "";
+    var mx = Math.max.apply(null, m.tail.map(function(t){ return Math.max(t.now, t.norm); }).concat([0.05]));
+    return '<div class="sub2">📏 큰 움직임 확률 <span class="mut">지금 변동성 ' + m.sig_now + '% vs 평소 ' + m.sig_norm + '% (하루 1σ)</span></div>' + m.tail.map(function(t){
+      var r = t.norm ? t.now / t.norm : 1, up = /오름/.test(t.k);
+      return '<div class="pt"><div class="row"><span>' + e(t.k) + '</span><b class="' + (up ? "up" : "dn") + '">' + pc(t.now) + '</b></div>' +
+        '<div class="ptb"><i class="' + (up ? "u" : "d") + '" style="width:' + (t.now / mx * 100).toFixed(0) + '%"></i><i class="ptn" style="left:' + (t.norm / mx * 100).toFixed(0) + '%"></i></div>' +
+        '<small class="mut">평소 ' + pc(t.norm) + ' · <b class="' + (r >= 1.15 ? (up ? "up" : "dn") : "") + '">' + (r >= 1.05 ? "평소의 " + r.toFixed(1) + "배" : r <= 0.95 ? "평소보다 적음 (" + r.toFixed(1) + "배)" : "평소와 비슷") + '</b></small></div>'; }).join("");
+  }
   function strip(D){
     return '<div class="pr5">' + ORDER.filter(function(k){ return D.markets[k]; }).map(function(k){ var m = D.markets[k];
       return '<button class="pr5c' + (k === SEL ? " on" : "") + '" data-m="' + k + '"><b>' + m.flag + ' ' + e(m.name) + '</b>' +
-        '<span class="pr5p ' + tcls(m.p1) + '">' + pc(m.p1) + '</span>' + pbar(m.p1) + '<small>주 ' + pc(m.p5) + (m.open_now ? ' · 장중' : '') + '</small></button>'; }).join("") + '</div>';
+        '<span class="pr5p ' + ecls(m.e1) + '">' + ep(m.e1) + '</span>' + (m.pb1 != null ? zbar(m.p1, m.pb1).split('<div class="zl">')[0] : pbar(m.p1)) + '<small>' + pc(m.p1) + ' · 주 ' + ep(m.e5) + '</small></button>'; }).join("") + '</div>';
   }
   function mcard(m, D){
     var open = OPEN[m.mk];
     var h = '<section class="card pr-c"><h3>' + m.flag + ' ' + e(m.name) + ' <span class="mut">' + e(m.ixn) + ' ' + V.fmt(m.last) + ' <b class="' + cls(m.chg) + '">' + sg(m.chg, 2) + '</b> · ' + md(m.base_date) + (m.open_now ? ' 장중' : ' 마감') + ' 기준</span></h3>' +
-      '<div class="pr-two"><div><small>내일(' + md(m.next_day) + ') 오를 확률</small><b class="' + tcls(m.p1) + '">' + pc(m.p1) + '</b><em>' + e(m.tone1) + ' · 68% 폭 ' + sg(m.band1[0]) + ' ~ ' + sg(m.band1[1]) + '</em>' + pbar(m.p1, 1) + '</div>' +
-      '<div><small>일주일(5일) 뒤 오를 확률</small><b class="' + tcls(m.p5) + '">' + pc(m.p5) + '</b><em>' + e(m.tone5) + ' · 68% 폭 ' + sg(m.band5[0]) + ' ~ ' + sg(m.band5[1]) + '</em>' + pbar(m.p5, 1) + '</div></div>' +
+      (m.strength ? '<div class="pr-sg"><span class="pr-bd s' + ({"강": 3, "보통": 2, "약": 1}[m.strength]) + '">' + STR[m.strength] + '</span>' + votes(m.votes) + '</div>' : '') +
+      '<div class="pr-two"><div><small>내일(' + md(m.next_day) + ') · 평소보다</small><b class="' + ecls(m.e1) + '">' + ep(m.e1) + '</b><em>오를 확률 ' + pc(m.p1) + ' (평소 ' + pc(m.pb1) + ') · 68% 폭 ' + sg(m.band1[0]) + ' ~ ' + sg(m.band1[1]) + '</em>' + (m.pb1 != null ? zbar(m.p1, m.pb1) : pbar(m.p1, 1)) + '</div>' +
+      '<div><small>일주일(5일) · 평소보다</small><b class="' + ecls(m.e5) + '">' + ep(m.e5) + '</b><em>오를 확률 ' + pc(m.p5) + ' (평소 ' + pc(m.pb5) + ') · 68% 폭 ' + sg(m.band5[0]) + ' ~ ' + sg(m.band5[1]) + '</em>' + (m.pb5 != null ? zbar(m.p5, m.pb5) : pbar(m.p5, 1)) + '</div></div>' +
+      tailCard(m) +
       '<p class="note pr-st">' + e(m.state) + (m.widen > 1 ? ' · 📣 이벤트로 폭 ×' + m.widen : '') + (m.open_now ? ' · 장중이라 오늘 봉이 아직 움직여요 — 마감 뒤 확률이 기록·채점돼요' : '') + '</p>';
     // 방법들 (접기)
     var rows = (m.methods || []).map(function(x){
@@ -67,8 +92,8 @@
     var ks = ORDER.filter(function(k){ return D.markets[k]; });
     if (!ks.length){ b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률 자료가 아직 없어요.</div>'; return; }
     if (!SEL || !D.markets[SEL]) SEL = ks[0];
-    var h = '<section class="card"><h3>🎲 내일 오를 확률 <span class="mut">' + e(D.t) + ' 기준 · 매시간</span></h3>' + strip(D) +
-      '<p class="note">50% 가 동전. 57% 넘으면 「오를 쪽」, 43% 아래면 「내릴 쪽」 — 그 사이는 반반이에요. 막대를 누르면 그 시장을 자세히.</p></section>';
+    var h = '<section class="card"><h3>🎲 내일 · 평소보다 <span class="mut">' + e(D.t) + ' 기준 · 매시간</span></h3>' + strip(D) +
+      '<p class="note">큰 숫자 = 그 시장 「평소」(2000년 이후 오른 날 비율)보다 오를 확률이 얼마나 높고 낮은지. 내일 방향은 프로도 55% 넘기 어려워서 ±2%p 면 의미 있는 기울기, ±4%p 면 강한 편이에요. 막대는 40~60% 구간을 확대한 것.</p></section>';
     h += mcard(D.markets[SEL], D) + allScore(D) + howCard(D);
     b.innerHTML = h;
     [].forEach.call(b.querySelectorAll(".pr5c[data-m]"), function(x){ x.onclick = function(){ SEL = x.dataset.m; draw(D); window.scrollTo({top: 0, behavior: "smooth"}); }; });
@@ -94,6 +119,17 @@
     ".pr-mh{display:flex;align-items:center;gap:7px;font-size:13.5px}.pr-mh .hm-i{font-size:16px}.pr-mp{margin-left:auto;font-weight:800;font-size:14px}.pr-mp small{font-weight:500;color:var(--sub);margin-left:5px}.pr-mp .up{color:var(--up)}.pr-mp .dn{color:var(--down)}.pr-w{font-size:11px}" +
     ".pr-ev{display:block;font-size:11.5px;color:var(--sub);line-height:1.5;margin-top:3px;word-break:keep-all}" +
     ".pr-rc{display:flex;flex-direction:column;gap:4px;font-size:12px;margin-top:6px}.pr-rc span{padding:5px 8px;border-radius:8px;background:var(--panel2,rgba(255,255,255,.03))}.pr-rc .up{color:var(--up)}.pr-rc .dn{color:var(--down)}" +
+    ".zb{position:relative;height:10px;border-radius:5px;background:rgba(124,156,255,.18);margin:8px 0 2px}.pr5c .zb{height:6px;margin:3px 0}" +
+    ".zb .zf{position:absolute;top:0;height:100%;border-radius:5px}.zb .zf.u{background:var(--up)}.zb .zf.d{background:var(--down)}" +
+    ".zb .zn{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dashed var(--sub)}" +
+    ".zb .pm{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--text);border:2px solid var(--panel);transform:translate(-50%,-50%)}.pr5c .zb .pm{width:9px;height:9px}" +
+    ".zl{display:flex;justify-content:space-between;font-size:10px;color:var(--sub)}" +
+    ".pr-sg{display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap}.pr-bd{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--panel2,#2a3142)}" +
+    ".pr-bd.s3{background:color-mix(in srgb,var(--up) 22%,transparent)}.pr-bd.s2{background:color-mix(in srgb,#ffb84d 22%,transparent)}" +
+    ".pv{display:flex;flex-direction:column;gap:2px}.pvd{display:flex;gap:3px}.pvd i{width:10px;height:10px;border-radius:50%;background:#6b7385}.pvd i.u{background:var(--up)}.pvd i.d{background:var(--down)}.pv small{font-size:11px;color:var(--sub)}" +
+    ".pt{padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}.pt:last-child{border:0}.pt .row{display:flex;justify-content:space-between}" +
+    ".ptb{position:relative;height:8px;border-radius:4px;background:rgba(124,156,255,.15);margin:5px 0 3px}.ptb i.u,.ptb i.d{display:block;height:100%;border-radius:4px}.ptb i.u{background:var(--up)}.ptb i.d{background:var(--down)}" +
+    ".ptb .ptn{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dashed var(--text)}.pt small{font-size:11px}" +
     ".pr-how{margin-top:8px}.pr-hw{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}.pr-hw:last-of-type{border:0}.pr-hw small{display:block;color:var(--sub);font-size:11.5px;line-height:1.5;margin-top:2px;word-break:keep-all}";
     document.head.appendChild(st); })();
 })();
