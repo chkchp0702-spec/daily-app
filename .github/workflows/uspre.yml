@@ -1,0 +1,36 @@
+name: uspre
+# 🌙 미국 개장 전 나침반 — 미국 정규장이 닫힌 동안 10분마다 (선물·세계 증시·해외 거울 섹터·미국 시간외 가격)
+#   KST 06:03 ~ 22:53 (평일). 정규장 시간이면 스크립트가 바로 끝남 (⚡ live.yml 이 맡음)
+on:
+  schedule:
+    - cron: "3-59/10 0-13 * * 1-5"   # KST 09:03 ~ 22:53 (월~금)
+    - cron: "3-59/10 21-23 * * 0-4"  # KST 06:03 ~ 08:53 (월~금)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "정규장 시간이어도 돌리기"
+        default: "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: uspre
+  cancel-in-progress: false
+
+jobs:
+  pre:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q yfinance pandas
+      - name: 개장 전 나침반
+        env:
+          FORCE: ${{ github.event.inputs.force == 'true' && '1' || '' }}
+        run: python live_us_pre.py
+      - name: 저장
+        run: bash scripts/push.sh "uspre $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/live_us_pre.json
