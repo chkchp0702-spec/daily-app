@@ -47,6 +47,30 @@
   var SECX = null, SOPEN = {}, SALL = {};
   function lg(p){ p = Math.min(0.9999, Math.max(0.0001, p)); return Math.log(p / (1 - p)); }
   function sgm(x){ return 1 / (1 + Math.exp(-x)); }
+  // 😱 심리 지표 카드 — 우리 공포·탐욕 게이지 · 항목 · 연구 표(구간별 다음 5일 상승 확률)
+  function rtable(tb, now){
+    if (!tb || !tb.length) return "";
+    return '<table class="pr-tb"><tr><th>구간</th><th>날수</th><th>내일↑</th><th>5일↑</th><th>5일 중앙값</th></tr>' + tb.map(function(r){
+      return '<tr' + (r.now ? ' class="now"' : '') + '><td>' + (r.now ? '👉 ' : '') + e(r.k) + '</td><td>' + (r.n || 0).toLocaleString() + '</td><td class="' + tcls(r.p1) + '">' + pc(r.p1) + '</td><td class="' + tcls(r.p5) + '">' + pc(r.p5) + '</td><td class="' + cls(r.m5) + '">' + (r.m5 != null ? sg(r.m5, 2) : "–") + '</td></tr>'; }).join("") + '</table>';
+  }
+  function sentiCard(m, D){
+    var R = m.research || {}, S = R.senti;
+    if (!S || S.now == null) return "";
+    var v = S.now, lab = v < 20 ? "극공포" : v < 40 ? "공포" : v < 60 ? "중립" : v < 80 ? "탐욕" : "극탐욕", col = v < 20 ? "#2f6fd0" : v < 40 ? "#5b8fd8" : v < 60 ? "#6b7385" : v < 80 ? "#d98a7a" : "#e05555";
+    var B = SECX && SECX.markets && SECX.markets[m.mk] && SECX.markets[m.mk].breadth, op = OPEN["_s" + m.mk];
+    var h = '<section class="card"><h3>😱 심리 지표 <span class="mut">우리 공포·탐욕 · 매시간</span></h3>' +
+      '<div class="sg-w"><div class="sg-n" style="color:' + col + '">' + Math.round(v) + '</div><div style="flex:1"><b style="color:' + col + '">' + lab + '</b>' +
+      '<div class="sg-b"><i style="left:' + v + '%"></i></div><div class="zl"><span>극공포</span><span>중립</span><span>극탐욕</span></div></div></div>' +
+      '<div class="sg-ps">' + (S.parts || []).map(function(p){ return '<div><small>' + e(p.k) + '</small><span class="xbar" style="flex:1"><i style="width:' + p.v + '%;background:' + (p.v >= 60 ? "var(--up)" : p.v <= 40 ? "var(--down)" : "#6b7385") + '"></i></span><b>' + p.v + '</b></div>'; }).join("") + '</div>' +
+      '<div class="sub2">📚 연구: 심리 구간별 그 뒤 성적 <span class="mut">' + e(m.ixn) + ' · ' + e(S.since || "") + '~</span></div>' + rtable(S.table) +
+      '<button class="fold pr-f' + (op ? " open" : "") + '" data-f="_s' + m.mk + '">🔬 다른 심리·폭 지표 연구 표 <i class="fchev">▾</i></button><div style="' + (op ? "" : "display:none") + '">' +
+      (R.vterm ? '<div class="sub2">🌡️ VIX ÷ VIX3M 구간별</div>' + rtable(R.vterm) : '') +
+      (R.cnn ? '<div class="sub2">📰 CNN 공포·탐욕 구간별</div>' + rtable(R.cnn) : '') +
+      (R.crypto ? '<div class="sub2">🪙 크립토 공포·탐욕 구간별 (2018~)</div>' + rtable(R.crypto) : '') +
+      (B && B.table ? '<div class="sub2">📊 50일선 위 종목 비율 구간별 (최근 2년 · 지금 ' + B.pct50 + '%' + (B.thrust ? ' · ⚡ 쯔바이크 신호' : '') + ')</div>' + rtable(B.table) : '') + '</div>' +
+      '<p class="note">' + e(D.senti_how || "") + ' 항목 막대 = 1년 중 백분위(높을수록 탐욕).</p></section>';
+    return h;
+  }
   function secCard(mk, M0){
     var S = SECX && SECX.markets && SECX.markets[mk];
     if (!S) return '<section class="card"><h3>🧭 섹터·종목 확률</h3><p class="note" style="margin:0">아직 계산 전이에요 — 하루 4번(장 마감 뒤) 새로 계산해요.</p></section>';
@@ -81,14 +105,26 @@
       tailCard(m) +
       '<p class="note pr-st">' + e(m.state) + (m.widen > 1 ? ' · 📣 이벤트로 폭 ×' + m.widen : '') + (m.open_now ? ' · 장중이라 오늘 봉이 아직 움직여요 — 마감 뒤 확률이 기록·채점돼요' : '') + '</p>';
     // 방법들 (접기)
-    var rows = (m.methods || []).map(function(x){
-      var has = x.p1 != null && x.w;
+    // 10/14 밤: 방법을 묶음(가격·심리·자금·선행·폭·일정·판단·모델)으로 · 평소 대비 기울기 · 믿음(표본 크기)
+    var GO = ["가격", "심리", "자금", "선행", "폭·수급", "일정", "판단", "모델"], GI = {"가격": "📈", "심리": "😱", "자금": "💵", "선행": "🛰️", "폭·수급": "📊", "일정": "🗓️", "판단": "🧠", "모델": "🤖"};
+    var mrow = function(x){
+      var has = x.p1 != null && x.w, dv = has ? (x.p1 - m.pb1) * 100 : null;
       return '<div class="pr-m' + (has ? "" : " off") + '"><div class="pr-mh"><span class="hm-i">' + x.ic + '</span><b>' + e(x.name) + '</b>' +
-        (has ? '<span class="pr-mp"><span class="' + tcls(x.p1) + '">' + pc(x.p1) + '</span><small>주 ' + pc(x.p5) + '</small></span>' : '<span class="pr-mp mut">기울기 없음</span>') +
-        (has ? '<span class="pr-w mut">×' + x.w + '</span>' : '') + '</div>' + (has ? pbar(x.p1) : '') + '<small class="pr-ev">' + e(x.ev) + '</small></div>';
+        (has ? '<span class="pr-mp"><span class="' + ecls(dv) + '">' + ep(dv) + '</span><small>' + pc(x.p1) + ' · 주 ' + pc(x.p5) + '</small></span>' : '<span class="pr-mp mut">기울기 없음</span>') + '</div>' +
+        (has ? zbar(x.p1, m.pb1).split('<div class="zl">')[0] : '') + '<small class="pr-ev">' + e(x.ev) + '</small>' +
+        (has && x.eb != null ? '<small class="pr-eb">믿음 ' + Math.round(x.eb * 100) + '%' + (x.n ? ' (표본 ' + x.n.toLocaleString() + '일)' : '') + ' · 가중치 ×' + (x.w_eff != null ? x.w_eff : x.w) + '</small>' : '') + '</div>';
+    };
+    var grp = {};
+    (m.methods || []).forEach(function(x){ (grp[x.grp || "기타"] = grp[x.grp || "기타"] || []).push(x); });
+    var rows = GO.concat(Object.keys(grp).filter(function(k){ return GO.indexOf(k) < 0; })).filter(function(k){ return grp[k]; }).map(function(k){
+      var xs = grp[k], act = xs.filter(function(x){ return x.p1 != null && x.w; }), up = act.filter(function(x){ return x.p1 > m.pb1 + 0.005; }).length, dn = act.filter(function(x){ return x.p1 < m.pb1 - 0.005; }).length;
+      return '<div class="pr-g"><b>' + (GI[k] || "•") + ' ' + e(k) + '</b><small class="mut">' + act.length + '개 · <span class="up">↑' + up + '</span> <span class="dn">↓' + dn + '</span></small></div>' + xs.map(mrow).join("");
     }).join("");
+    var CB = m.comb && m.comb.p1;
     h += '<button class="fold pr-f' + (open ? " open" : "") + '" data-f="' + m.mk + '">🧩 왜 이 숫자인가 — 방법 ' + (m.methods || []).length + '가지 <i class="fchev">▾</i></button>' +
-      '<div class="pr-ms" style="' + (open ? "" : "display:none") + '">' + rows + '<p class="note">결합 = 각 방법의 확률을 로그오즈로 가중 평균(×는 가중치) → 평소와의 차이를 ×' + (D.shrink || 0.6) + ' 로 줄여 과신을 막음. 「기울기 없음」은 이번엔 조건에 안 걸린 방법.</p></div>';
+      '<div class="pr-ms" style="' + (open ? "" : "display:none") + '">' +
+      (CB ? '<div class="pr-cb">⚖️ 근거 <b>' + CB.m + '</b>개 → 서로 겹치는 정도를 빼면 독립 근거 <b>' + CB.meff + '</b>개 몫 → 평소보다 <b class="' + ecls(m.e1) + '">' + ep(m.e1) + '</b></div>' : '') +
+      rows + '<p class="note">큰 숫자 = 그 방법만 보면 평소보다 몇 %p. 「믿음」= 표본이 많을수록 높음 (n ÷ (n+150)) — 표본이 적은 극단 통계가 혼자 흔들지 못하게. 결합은 아래 📖 설명의 ⚖️ 칸.</p></div>';
     // 채점 (시장별)
     var S = D.score && D.score[m.mk];
     if (S && (S.d1.n || S.d5.n)){
@@ -102,11 +138,14 @@
     return h + '</section>';
   }
   function howCard(D){
-    var open = OPEN._how;
-    return '<button class="fold pr-f' + (open ? " open" : "") + '" data-f="_how">📖 시장확률이란 — 어떻게 계산하나 <i class="fchev">▾</i></button>' +
+    var open = OPEN._how, last = null;
+    return '<button class="fold pr-f' + (open ? " open" : "") + '" data-f="_how">📖 시장확률이란 — 어떻게 계산하나 (' + (D.how || []).length + '가지) <i class="fchev">▾</i></button>' +
       '<section class="card pr-how" style="' + (open ? "" : "display:none") + '"><p class="note" style="margin:0 0 10px">' + e(D.note || "") + '</p>' +
-      (D.how || []).map(function(x, i){ return '<div class="pr-hw"><span class="rk">' + (i + 1) + '</span><div><b>' + e(x[0]) + '</b><small>' + e(x[1]) + '</small></div></div>'; }).join("") +
-      '<p class="note">브라이어 점수 = (확률 − 결과)² 의 평균. 0 이면 완벽, 0.25 면 늘 50% 라고 한 것과 같음. 「오를 쪽」이라 한 날들이 실제로 그만큼 올랐는지(보정표)가 100건 넘게 쌓이면 ×0.6 수축을 보정표로 바꿔요.</p></section>';
+      '<p class="note" style="margin:0 0 6px"><b>공통 원리</b> — 모든 지표는 같은 방식으로 확률이 돼요: 「지금과 같은 구간이었던 과거 날들의 다음 날·5일 뒤 상승 비율」. 지어낸 가중치가 아니라 이 앱이 매시간 과거 자료로 다시 세는 숫자예요.</p>' +
+      (D.how || []).map(function(x, i){ var g = x.length > 2 ? x[0] : "", t = x.length > 2 ? x[1] : x[0], d = x.length > 2 ? x[2] : x[1];
+        var hd = g && g !== last ? '<div class="pr-g"><b>' + e(g) + '</b></div>' : ''; last = g;
+        return hd + '<div class="pr-hw"><span class="rk">' + (i + 1) + '</span><div><b>' + e(t) + '</b><small>' + e(d) + '</small></div></div>'; }).join("") +
+      '<p class="note">브라이어 점수 = (확률 − 결과)² 의 평균. 0 이면 완벽, 0.25 면 늘 50% 라고 한 것과 같음. 「오를 쪽」이라 한 날들이 실제로 그만큼 올랐는지(보정표)는 아래 채점에서.</p></section>';
   }
   function allScore(D){
     var A = D.score && D.score.all; if (!A || !(A.d1.n || A.d5.n)) return '';
@@ -123,7 +162,7 @@
     if (!SEL || !D.markets[SEL]) SEL = ks[0];
     var h = '<section class="card"><h3>🎲 내일 · 평소보다 <span class="mut">' + e(D.t) + ' 기준 · 매시간</span></h3>' + strip(D) +
       '<p class="note">큰 숫자 = 그 시장 「평소」(2000년 이후 오른 날 비율)보다 오를 확률이 얼마나 높고 낮은지. 내일 방향은 프로도 55% 넘기 어려워서 ±2%p 면 의미 있는 기울기, ±4%p 면 강한 편이에요. 막대는 40~60% 구간을 확대한 것.</p></section>';
-    h += mcard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
+    h += mcard(D.markets[SEL], D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
     b.innerHTML = h;
     [].forEach.call(b.querySelectorAll(".pr5c[data-m]"), function(x){ x.onclick = function(){ SEL = x.dataset.m; draw(D); window.scrollTo({top: 0, behavior: "smooth"}); }; });
     [].forEach.call(b.querySelectorAll(".ps-r .ps-h"), function(x){ x.onclick = function(){ var k = SEL + x.parentNode.dataset.sk; SOPEN[k] = !SOPEN[k]; var y = window.scrollY; draw(D); window.scrollTo(0, y); }; });
@@ -167,6 +206,14 @@
     ".ps-gap{text-align:center;color:var(--sub);padding:2px 0;letter-spacing:4px}.ps-all{margin-top:8px}" +
     ".ps-st{margin:8px 0 2px;border-radius:10px;background:var(--panel2,rgba(255,255,255,.03));padding:2px 8px}.ps-t{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--text);text-decoration:none}.ps-t:last-child{border:0}" +
     ".ps-tn{flex:1;min-width:0;overflow:hidden}.ps-tn b{font-size:13px;white-space:nowrap}.ps-tn .tk{margin-left:5px;font-style:normal;font-size:10.5px;color:var(--sub)}.ps-tv{text-align:right;line-height:1.2}.ps-tv b{font-size:13.5px}.ps-tv small{display:block;font-size:10.5px;color:var(--sub)}.ps-tv .up{color:var(--up)}.ps-tv .dn{color:var(--down)}" +
+    ".pr-g{display:flex;align-items:center;gap:8px;margin:12px 0 2px;padding-bottom:4px;border-bottom:1px solid var(--line);font-size:13px}.pr-g small{margin-left:auto}.pr-g .up{color:var(--up)}.pr-g .dn{color:var(--down)}" +
+    ".pr-eb{display:block;font-size:10.5px;color:var(--sub);opacity:.8;margin-top:2px}.pr-m .zb{height:6px;margin:5px 0 3px}" +
+    ".pr-cb{font-size:13px;padding:9px 10px;border-radius:10px;background:var(--panel2,rgba(255,255,255,.04));margin:4px 0 4px}.pr-cb .up{color:var(--up)}.pr-cb .dn{color:var(--down)}" +
+    ".sg-w{display:flex;align-items:center;gap:14px}.sg-n{font-size:40px;font-weight:800;line-height:1}.sg-b{position:relative;height:10px;border-radius:5px;margin:8px 0 2px;background:linear-gradient(90deg,#2f6fd0,#5b8fd8,#6b7385,#d98a7a,#e05555)}" +
+    ".sg-b i{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:var(--text);border:2px solid var(--panel);transform:translate(-50%,-50%)}" +
+    ".sg-ps{display:flex;flex-direction:column;gap:4px;margin:12px 0 4px}.sg-ps>div{display:flex;align-items:center;gap:8px;font-size:11.5px}.sg-ps small{flex:0 0 46%;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sg-ps b{flex:0 0 26px;text-align:right}" +
+    ".pr-tb{width:100%;border-collapse:collapse;font-size:12px;margin:4px 0}.pr-tb th{color:var(--sub);font-weight:500;text-align:right;padding:4px 3px;border-bottom:1px solid var(--line)}.pr-tb th:first-child,.pr-tb td:first-child{text-align:left}" +
+    ".pr-tb td{text-align:right;padding:5px 3px;border-bottom:1px solid var(--line)}.pr-tb tr.now td{background:color-mix(in srgb,var(--acc,#7c9cff) 14%,transparent);font-weight:700}.pr-tb .up{color:var(--up)}.pr-tb .dn{color:var(--down)}" +
     ".pr-how{margin-top:8px}.pr-hw{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}.pr-hw:last-of-type{border:0}.pr-hw small{display:block;color:var(--sub);font-size:11.5px;line-height:1.5;margin-top:2px;word-break:keep-all}";
     document.head.appendChild(st); })();
 })();

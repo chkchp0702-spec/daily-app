@@ -28,4 +28,4 @@ jobs:
       - name: 시장확률
         run: python prob.py
       - name: 저장
-        run: bash scripts/push.sh "prob $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/prob.json archive/x/prob_hist.json
+        run: bash scripts/push.sh "prob $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/prob.json archive/x/prob_hist.json archive/x/foreign_hist.json

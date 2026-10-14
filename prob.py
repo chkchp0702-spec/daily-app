@@ -1,7 +1,7 @@
 """
 🎲 시장확률 — 내일·일주일 뒤 시장이 오를 확률 (prob.yml, 매시간)
   10/14 사용자 「다 합쳐서 확률로 만들어서 나침반 옆에 '시장확률' — 누르면 설명·방법들 · 다섯 개 시장 다」
-  10가지 방법을 각각 「내일 오를 확률 p1 · 5일 뒤 오를 확률 p5」로 내고, 로그오즈 평균으로 합친 뒤 과신을 줄이려 0.5 쪽으로 눌러 준다.
+  방법마다 「내일 오를 확률 p1 · 5일 뒤 오를 확률 p5」를 내고, 경험적 베이즈 + 유효 독립 개수로 합친다 (10/14 밤 — 심리·자금·일정·폭·수급 지표는 prob_x.py).
   지난 예측은 실제 결과로 채점(브라이어 점수·적중률·보정표) → archive/x/prob.json, prob_hist.json
     ① 기저율      지금과 같은 상태(연속 하락/상승 일수 · 5일 수익률)였던 과거 날들의 다음 날·5일 결과
     ② 추세 국면   200일선 위/아래 · 50일선 기울기 국면별 과거 결과
@@ -25,6 +25,8 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
+import prob_x
+
 KST = dt.timezone(dt.timedelta(hours=9))
 NOW = dt.datetime.now(KST)
 FAKE = os.environ.get("FAKE") == "1"
@@ -40,11 +42,15 @@ MK = {
     "HK": {"ix": "^HSI", "name": "홍콩", "flag": "🇭🇰", "ixn": "항셍", "tz": "Asia/Hong_Kong", "open": 930, "close": 1610, "lead": "US_prev", "iv": None},
     "US": {"ix": "^GSPC", "name": "미국", "flag": "🇺🇸", "ixn": "S&P500", "tz": "America/New_York", "open": 930, "close": 1600, "lead": "fut", "iv": "^VIX"},
 }
-EXTRA = ["^VIX", "ES=F"]
+EXTRA = ["^VIX", "ES=F"] + prob_x.XSYMS
 # 2026 FOMC 결정일 (둘째 날) — 연준 공개 일정. 그 밖의 이벤트는 prob_events.json 에서
 FOMC_2026 = ["2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-09"]
-SHRINK = 0.6          # 결합 로그오즈에 곱해 과신을 줄임 (100건 넘게 채점되면 보정표로 바꿀 것)
+SHRINK = 0.6          # (옛 방식 — 기록용) 10/14 밤부터는 아래 경험적 베이즈 + 유효 독립 개수로 결합
+N0 = 150              # 경험적 베이즈: 표본 n 인 방법의 기울기를 n/(n+N0) 만큼만 믿음
+RHO = 0.6             # 방법끼리 평균 상관 (같은 가격에서 나온 지표라 꽤 겹침) → 유효 독립 개수 m/(1+(m−1)ρ)
+CAP = 0.45            # 결합 로그오즈 기울기 상한 (±약 11%p)
 MIN_N = 30            # 조건부 통계 최소 표본
+AUTO_W = {}
 
 
 def get(url, timeout=30):
@@ -196,7 +202,7 @@ def is_open_now(cfg):
 
 
 # ---------------- 시장 하나 ----------------
-def market(mk, H, brain, events):
+def market(mk, H, brain, events, G=None, ext=None, breadth=None):
     cfg = MK[mk]
     px = H.get(cfg["ix"])
     if px is None or len(px) < 600:
@@ -319,8 +325,25 @@ def market(mk, H, brain, events):
         tilt = -0.04 if "회피" in part else 0.04 if "선호" in part else 0.0
         why = f"🧠 두뇌 regime 「{reg}」 → {'−' if tilt < 0 else '+' if tilt > 0 else '±'}{abs(tilt)*100:.0f}%p 기울기 ({brain.get('last_review','')[-5:]} 검토)"
     M.append({"k": "brain", "ic": "🧠", "name": "두뇌 국면", "p1": 0.5 + tilt, "p5": 0.5 + tilt * 1.5, "n": 0, "w": 0.4 if tilt else 0, "ev": why})
-    # ⑨ 로지스틱 앙상블
+    # ⑪~ 심리·위험선호·자금·일정·폭 (prob_x)
+    research = {}
+    if G is not None:
+        try:
+            MX, research = prob_x.methods(mk, d, H, G, ext or {}, cond, (breadth or {}).get(mk))
+            M.extend(MX)
+        except Exception as e:
+            import traceback; traceback.print_exc(); print(mk, "보강 지표 실패", e)
+    GRP = {"base": "가격", "trend": "가격", "ob": "가격", "vol": "심리", "lead": "선행", "season": "일정", "event": "일정", "brain": "판단", "ml": "모델"}
+    for x in M:
+        x.setdefault("grp", GRP.get(x["k"], "기타"))
+    # ⑨ 로지스틱 앙상블 (심리·크레딧·VIX 기간구조 특성까지)
     cols = ["streak", "r5", "r20", "mom", "ma200", "ma50s", "rvp", "rsi", "tom"]
+    if G is not None:
+        al = (lambda s_: s_.reindex(d.index)) if mk == "US" else (lambda s_: prob_x.align(s_, d.index))
+        for gc in ("senti", "vterm", "credit20", "riskon20"):
+            if gc in G:
+                d["g_" + gc] = al(G[gc])
+                cols.append("g_" + gc)
     D = d.dropna(subset=cols + ["y1", "y5"])
     ml = None
     if len(D) > 1500:
@@ -335,27 +358,45 @@ def market(mk, H, brain, events):
             s = 1 / (1 + np.exp(-(np.c_[np.ones(len(D) - cut), Xs[cut:]] @ w)))
             a = auc(y[cut:], s)
             w2 = logistic_fit(Xs, y)
-            x_now = (d[cols].iloc[-1].values.astype(float) - mu) / sd
+            x_now = (d[cols].ffill().iloc[-1].values.astype(float) - mu) / sd
             x_now = np.nan_to_num(x_now)
             res[tgt] = (float(sigm(float(np.r_[1, x_now] @ w2))), a)
         ml = res
-        M.append({"k": "ml", "ic": "🤖", "name": "로지스틱 앙상블", "p1": res["y1"][0], "p5": res["y5"][0], "n": int(len(D)), "w": 0.8,
-                  "ev": f"특성 9개(연속일수·5일·20일·모멘텀·200일선·50일선·변동성·RSI·월말) · {len(D):,}일 학습 · 최근 1년 검증 AUC 내일 {res['y1'][1]:.2f} · 5일 {res['y5'][1]:.2f} (0.5 = 동전, 0.55 넘으면 쓸 만)"})
+        M.append({"k": "ml", "ic": "🤖", "name": "로지스틱 앙상블", "grp": "모델", "p1": res["y1"][0], "p5": res["y5"][0], "n": int(len(D)), "w": 0.8,
+                  "auc_p1": res["y1"][1], "auc_p5": res["y5"][1],
+                  "ev": f"특성 {len(cols)}개(연속일수·5일·20일·모멘텀·200일선·50일선·변동성·RSI·월말" + (" + 심리 종합·VIX 기간구조·크레딧·위험선호" if len(cols) > 9 else "") + f") · {len(D):,}일 학습 · 최근 1년 검증 AUC 내일 {res['y1'][1]:.2f} · 5일 {res['y5'][1]:.2f} (0.5 = 동전, 0.55 넘으면 쓸 만)"})
 
     # ⑩ 결합
     PB = {"p1": float(d["y1"].mean()), "p5": float(d["y5"].mean())}
+    AW = (AUTO_W or {}).get(mk, {})
     def combine(key):
-        """로그오즈 가중 평균을 「평소(기저율)」 쪽으로 수축 — 0.5 쪽이 아니라 (평소 오른 날 비율이 51~55% 라서)"""
+        """10/14 밤 — 논리적으로 확률을 「높이는」 결합 (부풀리기 아님)
+           ① 방법마다 평소와의 로그오즈 차이 dev 를 표본 크기만큼만 믿음: dev × n/(n+N0)  (경험적 베이즈)
+           ② 가중 평균 dev 에 「유효 독립 개수」 m/(1+(m−1)ρ) 를 곱함 — 서로 다른 근거가 같은 쪽을 가리키면 확률이 실제로 올라감
+              (평균만 내면 근거가 늘어도 확률이 안 움직이고, 그냥 더하면 겹치는 근거를 두 번 셈 — 그 사이)
+           ③ 채점 60건 넘은 방법은 브라이어 점수로 가중치 자동 조정 · ④ 상한 ±CAP"""
+        b = logit(PB[key])
         num = den = 0.0
+        m = 0
         for x in M:
             p = x.get(key)
             if p is None or not x.get("w"):
                 continue
-            num += x["w"] * logit(p); den += x["w"]
-        b = logit(PB[key])
+            n = x.get("n") or 0
+            eb = n / (n + N0) if n else (0.5 if x["k"] in ("ml", "brain") else 0)
+            if x["k"] == "ml":
+                eb = max(0.2, min(1.0, ((x.get("auc_" + key) or 0.5) - 0.5) / 0.06))
+            w = x["w"] * AW.get(x["k"], 1.0)
+            x["eb"] = round(eb, 2); x["w_eff"] = round(w, 2)
+            num += w * eb * (logit(p) - b); den += w
+            m += 1
         if not den:
             return PB[key]
-        return sigm(b + SHRINK * (num / den - b))
+        meff = m / (1 + (m - 1) * RHO)
+        dev = max(-CAP, min(CAP, num / den * meff))
+        INFO[key] = {"m": m, "meff": round(meff, 2), "dev": round(dev, 3)}
+        return sigm(b + dev)
+    INFO = {}
     p1, p5 = combine("p1"), combine("p5")
     vol = next((x for x in M if x["k"] == "vol"), None)
     s1 = (vol["sig1"] if vol else float(last["r"].std() if False else d["r"].tail(20).std() * 100)) * widen
@@ -398,13 +439,14 @@ def market(mk, H, brain, events):
     for x in M:
         for k in ("p1", "p5"):
             x[k] = r2(x[k], 3)
-        x.pop("sig1", None); x.pop("sig5", None); x.pop("q5", None)
+        x.pop("sig1", None); x.pop("sig5", None); x.pop("q5", None); x.pop("auc_p1", None); x.pop("auc_p5", None)
     return {"mk": mk, "name": cfg["name"], "flag": cfg["flag"], "ixn": ixn, "base_date": base_date, "open_now": open_now,
             "last": r2(last["c"]), "chg": r2(last["r"] * 100), "p1": r2(p1, 3), "p5": r2(p5, 3), "tone1": tone1, "tone5": tone5,
             "band1": band1, "band5": band5, "m5": r2(m5), "widen": widen, "state": state, "methods": M,
             "next_day": nxt.strftime("%Y-%m-%d"), "n_hist": int(len(d)),
             "pb1": r2(pb1, 3), "pb5": r2(pb5, 3), "e1": r2((p1 - pb1) * 100, 1), "e5": r2((p5 - pb5) * 100, 1),
-            "votes": votes, "agree": r2(agree * 100, 0), "strength": strength, "tail": tail, "sig_now": r2(s1), "sig_norm": r2(sn1)}
+            "votes": votes, "agree": r2(agree * 100, 0), "strength": strength, "tail": tail, "sig_now": r2(s1), "sig_norm": r2(sn1),
+            "comb": INFO, "research": research}
 
 
 # ---------------- 채점 ----------------
@@ -416,7 +458,8 @@ def score(hist, H, res):
         if r.get("open_now"):
             continue                                   # 장중엔 종가가 안 정해졌으니 기록하지 않음 (마감 뒤 첫 실행이 기록)
         if (mk, r["base_date"]) not in seen:
-            rows.append({"mk": mk, "base_date": r["base_date"], "made": NOW.strftime("%Y-%m-%d %H:%M"), "p1": r["p1"], "p5": r["p5"], "c0": r["last"]})
+            rows.append({"mk": mk, "base_date": r["base_date"], "made": NOW.strftime("%Y-%m-%d %H:%M"), "p1": r["p1"], "p5": r["p5"], "c0": r["last"],
+                         "mp": {x["k"]: [x["p1"], x["p5"]] for x in r["methods"] if x.get("p1") is not None and x.get("w")}})
     for x in rows:
         px = H.get(MK[x["mk"]]["ix"])
         if px is None:
@@ -445,6 +488,20 @@ def score(hist, H, res):
                 bk.append({"k": lab, "n": int(m.sum()), "pred": r2(p[m].mean() * 100, 0), "real": r2(y[m].mean() * 100, 0)})
         return {"n": len(done), "brier": r2(brier, 3), "hit": r2(hit * 100, 0), "buckets": bk}
     sc = {"all": {"d1": summ(rows, "p1"), "d5": summ(rows, "p5")}}
+    # 방법별 브라이어 (내일) — 60건 넘으면 다음 실행부터 가중치에 반영 (prob_hist.json auto_w)
+    mb = {}
+    for x in rows:
+        if x.get("y1") is None:
+            continue
+        for k, v in (x.get("mp") or {}).items():
+            if v and v[0] is not None:
+                mb.setdefault(k, []).append((v[0] - x["y1"]) ** 2)
+    base_b = sc["all"]["d1"].get("brier")
+    sc["methods"] = {k: {"n": len(v), "brier": r2(np.mean(v), 3)} for k, v in mb.items()}
+    hist["auto_w"] = {}
+    if base_b:
+        for mk in MK:
+            hist["auto_w"][mk] = {k: r2(min(2.0, max(0.3, 1 + 20 * (base_b - np.mean(v)))), 2) for k, v in mb.items() if len(v) >= 60}
     for mk in MK:
         rs = [x for x in rows if x["mk"] == mk]
         sc[mk] = {"d1": summ(rs, "p1"), "d5": summ(rs, "p5"), "recent": [{"d": x["base_date"], "p1": x["p1"], "r1": x.get("r1"), "p5": x["p5"], "r5": x.get("r5")} for x in rs[-7:]]}
@@ -464,10 +521,33 @@ def main():
         events = json.load(open(EV_FILE, encoding="utf-8")).get("events", []) if os.path.exists(EV_FILE) else []
     except Exception:
         events = []
+    ext = prob_x.load_ext(FAKE)
+    try:
+        fr = prob_x.load_foreign(FAKE)
+        if len(fr):
+            ext["foreign"] = fr
+    except Exception as e:
+        print("외국인 수급 실패", e)
+    G = None
+    try:
+        G = prob_x.build_global(H)
+        print("심리 종합(미국) 지금", round(float(G["senti"].dropna().iloc[-1]), 1), "· 시작", G["senti"].dropna().index[0].date())
+    except Exception as e:
+        import traceback; traceback.print_exc(); print("심리 종합 실패", e)
+    breadth = {}
+    try:
+        breadth = {k: v.get("breadth") for k, v in json.load(open(os.path.join("archive", "x", "prob_sec.json"), encoding="utf-8")).get("markets", {}).items()}
+    except Exception as e:
+        print("폭 자료 없음", e)
+    global AUTO_W
+    try:
+        AUTO_W = json.load(open(HIST, encoding="utf-8")).get("auto_w", {})
+    except Exception:
+        AUTO_W = {}
     res = {}
     for mk in MK:
         try:
-            r = market(mk, H, brain, events)
+            r = market(mk, H, brain, events, G, ext, breadth)
             if r:
                 res[mk] = r
         except Exception as e:
@@ -481,16 +561,28 @@ def main():
     sc = score(hist, H, res) if res else {}
     out = {"at": int(time.time() * 1000), "t": NOW.strftime("%H:%M"), "date": NOW.strftime("%Y-%m-%d"), "markets": res, "score": sc, "shrink": SHRINK,
            "how": [
-               ["📚 기저율", "지금과 같은 상태(연속 하락·상승 일수, 5일 수익률 부호)였던 2000년 이후의 날들이 그 다음 날·5일 뒤 어떻게 됐는지 그대로 셈"],
-               ["📈 추세 국면", "200일선 위/아래 · 50일선 기울기로 4가지 국면을 나눠 각 국면의 과거 결과"],
-               ["🌊 변동성", "20일 실현 변동성의 2년 백분위(미국은 VIX)로 국면을 나눈 과거 결과 + 68% 예상 폭(±1σ)"],
-               ["🛰️ 선행 시장", "아시아는 직전 미국 S&P 등락이 비슷했던 날의 결과 · 미국은 선물이 가리키는 시가 갭이 비슷했던 날의 종가 방향"],
-               ["🔁 과매도·과매수", "RSI(14) 30 아래·70 위, 5일 ±3% 넘는 극단일 때만 되돌림 통계 (수급 자료의 대용)"],
-               ["📅 모멘텀·계절성", "12-1개월 모멘텀 부호 · 다음 날 요일 · 월말월초 효과"],
-               ["📣 이벤트", "FOMC·CPI 같은 큰 이벤트가 일주일 안이면 방향은 안 건드리고 예상 폭만 넓힘"],
-               ["🧠 두뇌 국면", "🧠 시황 두뇌의 위험 선호/중립/회피 판단 → ±4%p 작은 기울기"],
-               ["🤖 로지스틱 앙상블", "위 특성 9개로 학습한 로지스틱 회귀 · 최근 1년은 학습에서 빼고 검증(AUC 공개)"],
-               ["⚖️ 결합·보정", "방법마다 확률을 로그오즈로 바꿔 가중 평균 → 평소(기저율)와의 차이를 ×0.6 으로 줄여 과신을 막음 → 지난 예측을 브라이어 점수로 채점(0 완벽 · 0.25 동전)"]],
+               ["가격", "📚 기저율", "지금과 같은 상태(연속 하락·상승 일수, 5일 수익률 부호)였던 2000년 이후의 날들이 다음 날·5일 뒤 어떻게 됐는지 그대로 셈. 가장 단순하고 가장 과소평가된 방법"],
+               ["가격", "📈 추세 국면", "200일선 위/아래 × 50일선 기울기 4개 국면. 상승 국면에선 오른 날 비율이 높고 하락 국면에선 낮다는 오래된 사실"],
+               ["가격", "🔁 과매도·과매수", "RSI(14) 30↓·70↑, 5일 ±3% 극단일 때만 — 짧은 기간의 과한 움직임은 되돌아가는 경향(단기 반전)"],
+               ["심리", "🌊 변동성", "20일 실현 변동성 백분위(미국은 VIX)별 결과 + 68% 예상 폭. 변동성이 높을 땐 방향보다 폭이 커짐"],
+               ["심리", "😱 심리 종합(우리 공포·탐욕)", "CNN 공포·탐욕과 같은 뼈대를 공개 시세로 매일 다시 계산(2007년~): ① 지수/125일선 ② VIX/50일 평균(반대) ③ VIX/VIX3M(반대) ④ 하이일드/투자등급 채권 20일 ⑤ 주식−국채 20일 ⑥ 경기소비/필수소비 20일 ⑦ 주식/금 20일 → 각각 1년 백분위 평균. 아시아는 자기 지수 모멘텀·변동성·자국 통화(+한국 코스닥/코스피)를 더함. 극공포 구간 뒤 수익이 좋고 극탐욕 뒤는 평범하다는 「역발상」이 오래 확인된 성질"],
+               ["심리", "🌡️ VIX 기간구조", "VIX ÷ VIX3M. 보통은 1 아래(먼 미래가 더 불확실). 1을 넘는 역전 = 지금 당장의 공포가 극단 → 역사적으로 그 뒤 1~4주 수익이 플러스 쪽으로 쏠림. 아시아에는 다음 날 옮겨 붙음"],
+               ["심리", "🧊 VIX 수준", "아시아 시장에 미국 공포 수준을 그대로 적용 (미국 마감 뒤 아시아 장이 열리므로 미리 아는 정보)"],
+               ["심리", "🎢 위험선호", "미국 경기소비/필수소비, 한국 코스닥/코스피 20일 — 돈이 공격적인 쪽으로 가는지 방어 쪽으로 가는지. 지수보다 먼저 꺾이는 경우가 많음"],
+               ["심리", "🪙 크립토 공포·탐욕", "alternative.me 지수(2018년~) — 개인 투자자 위험선호가 가장 먼저 드러나는 곳"],
+               ["심리", "📰 CNN 공포·탐욕", "원본 CNN 지수 — 받아지는 날만 (막히면 우리 심리 종합이 대신함)"],
+               ["자금", "💳 크레딧", "하이일드(HYG)/투자등급(LQD) 채권 20일 — 회사채 시장이 주식보다 먼저 위험을 알아챔. 급히 나빠지면 주식 약세 확률↑"],
+               ["자금", "💱 환율", "한국 원/달러 · 일본 엔/달러 · 중국·홍콩 위안/달러 · 미국 달러 인덱스 5일 — 달러 강세는 외국인 자금이 빠지는 쪽"],
+               ["선행", "🛰️ 선행 시장", "아시아 = 직전 미국 S&P 등락이 비슷했던 날의 결과 · 미국 = 선물이 가리키는 시가 갭이 비슷했던 날의 종가 방향"],
+               ["폭·수급", "🌏 외국인 수급(한국)", "네이버 투자자별 매매 — 외국인 20일 누적 순매수가 최근 2년 중 어디쯤인지(백분위) + 연속 순매도·순매수 일수. 한국은 외국인 20일 누적이 돌아서는 때가 코스피 전환과 거의 같음. 매도 극단은 대개 매도가 다 나온 뒤"],
+               ["폭·수급", "📊 시장 폭", "시총 상위 250종목 중 50일선 위 비율·10일 상승 비율(최근 2년) — 지수보다 종목 폭이 먼저 돎. 10일 상승 비율이 40%↓에서 61.5%↑로 급반전하면 쯔바이크 신호"],
+               ["일정", "📅 모멘텀·계절성", "12-1개월 모멘텀 부호 × 다음 날 요일 × 월말월초(연기금·월급 자금)"],
+               ["일정", "🗓️ 옵션 만기 주간", "미국 셋째 금 · 한국 둘째 목 · 일본 둘째 금 · 홍콩 월말 전날 · 중국 넷째 수 — 만기 주간은 수익 분포가 다름"],
+               ["일정", "📣 이벤트", "FOMC·CPI·실적 등이 일주일 안이면 방향은 안 건드리고 예상 폭만 넓힘"],
+               ["판단", "🧠 두뇌 국면", "🧠 시황 두뇌의 위험 선호/중립/회피 판단 → 작은 기울기"],
+               ["모델", "🤖 로지스틱 앙상블", "위 가격·심리·크레딧·위험선호 특성을 한꺼번에 넣은 로지스틱 회귀 · 최근 1년은 학습에서 빼고 검증(AUC) → AUC 만큼만 믿음"],
+               ["결합", "⚖️ 결합 — 논리적으로 확률을 높이는 법", "① 방법마다 「평소와의 차이」를 표본 크기만큼만 믿음: n/(n+150) (표본 30개짜리 극단 통계가 혼자 흔들지 못하게) ② 가중 평균에 유효 독립 개수 m/(1+(m−1)×0.6)을 곱함 — 서로 다른 근거(가격·심리·자금·일정)가 같은 쪽을 가리키면 확률이 실제로 올라가고, 엇갈리면 서로 지움. 평균만 내면 근거가 아무리 늘어도 확률이 안 움직이고, 그냥 더하면 겹치는 근거를 두 번 셈 — 그 사이 ③ 채점 60건 넘은 방법은 브라이어 점수로 가중치 자동 조정(잘 맞힌 방법 ×최대 2, 못 맞힌 방법 ×0.3) ④ 한쪽으로 ±11%p 넘지 않게 상한"]],
+           "senti_how": "심리지표 연구 — 공포·탐욕 계열 지표는 「극단에서만」 쓸모가 있다는 게 공통 결론이에요(중간 구간은 거의 동전). 극공포는 대개 매도가 다 나온 뒤라 그 뒤 1~4주 수익이 평소보다 좋고, 극탐욕은 하락 신호라기보다 「추가 수익이 평범해지는」 신호. 그래서 아래 표에서 지금 구간과 양 끝 구간의 차이를 보세요. 표는 이 앱이 2007년 이후 매일 다시 계산한 결과예요(미리 정한 숫자가 아님).",
            "note": "내일 방향을 맞힐 확률의 상한은 대략 53~56%예요. 그래서 맞히기가 아니라 「확률 분포를 그리고 보정하기」가 목표 — 사라는 뜻도, 팔라는 뜻도 아니에요."}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))

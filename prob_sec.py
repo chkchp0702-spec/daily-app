@@ -438,6 +438,31 @@ def main():
                 print(mk, "지수 없음"); continue
             P = panel(H, cfg["ix"], info)
             mres, cur, probs = fit_market(P)
+            # 📊 시장 폭 (최근 2년) — 50일선 위 비율 · 10일 상승 비율 · 쯔바이크 급반전 → 지수의 다음 날·5일 통계 (prob.py 가 씀)
+            breadth = None
+            try:
+                g = P.groupby("date")
+                bt = pd.DataFrame({"pct50": g["ma50d"].apply(lambda v: (v > 0).mean()), "adv": g["r1"].apply(lambda v: (v > 0).mean())})
+                bt["adv10"] = bt["adv"].rolling(10).mean()
+                ixc = H[cfg["ix"]]["Close"].reindex(bt.index).ffill()
+                bt["y1"] = (ixc.shift(-1) > ixc).astype(float).where(ixc.shift(-1).notna())
+                bt["y5"] = (ixc.shift(-5) > ixc).astype(float).where(ixc.shift(-5).notna())
+                bt = bt.dropna(subset=["pct50", "adv10"])
+                q = bt["pct50"].quantile([0.2, 0.4, 0.6, 0.8]).values
+                edges = [-0.01, *q, 1.01]
+                bk = pd.cut(bt["pct50"], edges, labels=False)
+                cb = int(bk.iloc[-1])
+                h = bt[(bk == cb)]
+                thrust = bool(bt["adv10"].iloc[-10:].min() < 0.40 and bt["adv10"].iloc[-1] > 0.615)
+                tbl = []
+                for i in range(5):
+                    hh = bt[bk == i]
+                    tbl.append({"k": f"{max(0, edges[i]*100):.0f}~{min(100, edges[i+1]*100):.0f}%", "n": int(hh["y1"].notna().sum()), "p1": r2(hh["y1"].mean(), 3), "p5": r2(hh["y5"].mean(), 3), "now": i == cb})
+                breadth = {"pct50": r2(bt["pct50"].iloc[-1] * 100, 1), "adv10": r2(bt["adv10"].iloc[-1] * 100, 1), "thrust": thrust,
+                           "p1": r2(h["y1"].mean(), 3), "p5": r2(h["y5"].mean(), 3), "n": int(h["y1"].notna().sum()), "table": tbl,
+                           "hist": [[str(i_.date()), r2(a * 100, 0)] for i_, a in bt["pct50"].iloc[-120:].items()]}
+            except Exception as e:
+                print(mk, "폭 실패", e)
             # 종목·섹터
             st = []
             for s in probs.index:
@@ -469,7 +494,7 @@ def main():
             secs.sort(key=lambda x: -(x["d5"] or 0))
             a5 = mres["auc"].get("y5") or 0.5
             rel = "믿을 만" if a5 >= 0.56 else "약함" if a5 >= 0.52 else "동전 수준"
-            res[mk] = {"name": cfg["name"], "flag": cfg["flag"], "n": len(st), "last": mres["last"], "auc": mres["auc"], "base": mres["base"], "k": mres.get("k"), "rel": rel, "rows": mres["n_rows"], "sectors": secs}
+            res[mk] = {"name": cfg["name"], "flag": cfg["flag"], "n": len(st), "last": mres["last"], "auc": mres["auc"], "base": mres["base"], "k": mres.get("k"), "rel": rel, "rows": mres["n_rows"], "sectors": secs, "breadth": breadth}
             print(mk, "섹터", len(secs), "종목", len(st), "AUC", mres["auc"], "기저", mres["base"], f"{time.time()-t0:.0f}s")
             if mk == "US":
                 try:
