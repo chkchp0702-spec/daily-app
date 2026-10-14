@@ -87,10 +87,16 @@ HORIZONS = [5, 20, 60]
 def signals_from(cat, fname, lists):
     """날짜별 목록에서 '처음 나타난 날'을 신호로 (10일 넘게 빠졌다가 다시 나오면 새 신호)"""
     days = sorted(d for d in os.listdir(os.path.join(ARC, cat)) if re.match(r"20\d\d-\d\d-\d\d$", d))
+    # 10/14 사용자: "눈으로 확인하기 전 수익률이 들어가서 그런 것 — 눈 검사 이후로 바꿔" → 컵·갭은 눈 검사(eye.done)가 끝난 날의 목록만 신호로 센다
+    if cat in ("cup", "gap"):
+        ok = [d for d in days if ((jl(os.path.join(ARC, cat, d, fname)) or {}).get("eye") or {}).get("done") is True] if True else days
+        days = ok
     last_seen, sig = {}, []
     for d in days:
         j = jl(os.path.join(ARC, cat, d, fname))
         if j is None:
+            continue
+        if cat in ("cup", "gap") and not ((j.get("eye") or {}) if isinstance(j, dict) else {}).get("done"):
             continue
         rows = []
         if isinstance(j, list):
@@ -255,6 +261,9 @@ def perf(cat, fname, lists, extra=None):
     rows = [x for x in (perf_one(s, extra) for s in sig) if x and x["now"] is not None and abs(x["now"]) < 300 and (x["maxup"] or 0) < 1000]
     rows.sort(key=lambda r: r["d0"], reverse=True)
     res = {"updated": NOW.strftime("%Y-%m-%d %H:%M"), "first": days[0], "days": len(days), "stats": stats(rows), "signals": rows[:300]}
+    if cat in ("cup", "gap"):
+        res["eye_only"] = True
+        res["note_eye"] = f"{days[0][5:].replace('-', '/')}부터 · 사람 눈으로 거른(눈 검사 통과) 종목만 채점 — 그 전 자동 선별분은 뺌"
     if cat == "gap":
         g = [r for r in rows if "filled" in r]
         def fr(n):

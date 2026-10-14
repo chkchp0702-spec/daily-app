@@ -43,7 +43,7 @@
         '<span class="mut">' + s.d0.slice(5).replace("-", "/") + '</span><b class="' + cls(s.now) + '">' + pct(s.now) + '</b><span class="mut">최고 ' + pct(s.maxup) + '</span>' +
         (s.filled != null ? (s.filled ? chip("메움", "cool") : chip("유지", "")) : s.brk != null ? (s.brk ? chip("돌파", "hot") : "") : "") + '</div>';
     }).join("") + '</div>';
-    h += '<p class="note">' + P.first + '부터 ' + P.days + '일치 기록 · 신호 = 목록에 처음 나온 날 종가로 샀다고 가정 · 수수료 제외</p>';
+    h += '<p class="note">' + P.first + '부터 ' + P.days + '일치 기록' + (P.eye_only ? ' · <b>👁 눈 검사 통과 종목만</b>(자동 선별분은 뺌)' : '') + ' · 신호 = 목록에 처음 나온 날 종가로 샀다고 가정 · 수수료 제외</p>';
     return card("📊 " + label + " 성적표 <span class='mut'>신호 " + P.signals.length + "개</span>", h);
   }
   function sectorPerf(P){
