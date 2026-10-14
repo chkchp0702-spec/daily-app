@@ -104,12 +104,24 @@ def insider_yahoo(syms, days=90, min_v=50_000):
     import yfinance as yf
     import pandas as pd
     out, cut = {}, pd.Timestamp.now() - pd.Timedelta(days=days)
+    import time
+    st = {"ok": 0, "fail": 0}
     for s in syms:
-        try:
-            df = yf.Ticker(s).insider_transactions
-        except Exception:
+        df = None
+        for k in range(3):                          # 전 종목을 받은 직후라 야후가 잠깐 막을 수 있음 → 쉬었다 다시
+            try:
+                df = yf.Ticker(s).insider_transactions
+                if df is not None:
+                    break
+                time.sleep(3 * (k + 1))
+            except Exception as e:
+                print("내부자 재시도", s, str(e)[:80], flush=True)
+                time.sleep(5 * (k + 1))
+        if df is None:
+            st["fail"] += 1
             continue
-        if df is None or not len(df):
+        st["ok"] += 1
+        if not len(df):
             continue
         for _, r in df.iterrows():
             txt = str(r.get("Text") or "") + " " + str(r.get("Transaction") or "")
@@ -124,6 +136,8 @@ def insider_yahoo(syms, days=90, min_v=50_000):
             ds = d.strftime("%Y-%m-%d")
             if ds > o["last"]:
                 o["last"], o["who"] = ds, f"{str(r.get('Insider') or '').title()} ({str(r.get('Position') or '')[:12]})"
+    print("야후 내부자", st, "매수", len(out), flush=True)
+    insider_yahoo.st = st
     return out
 
 
@@ -256,7 +270,9 @@ def build(px, mkt_of, dest, fx=None, whale_src=None, meta=None, names=None):
         if mkt == "US" and W and INS is None:           # OpenInsider 가 막히면 고래 신규 + 50일선 위 후보만 야후로
             cand = [x["s"] for x in rows if (x["s"] in W or x["s"].replace(".", "-") in W) and x["c"] > x["ma50"]]
             try:
-                INS = insider_yahoo(cand); INS_SRC = f"야후 (후보 {len(cand)}종목만 확인)"
+                INS = insider_yahoo(cand); st = getattr(insider_yahoo, "st", {}); INS_SRC = "야후"; res["diag"] = {"ins": st, "cand": len(cand), "buys": len(INS or {})}
+                if st.get("ok", 0) < max(1, len(cand) // 2):   # 반도 못 받았으면 「못 받음」으로 (0건을 진짜 0건처럼 보이지 않게)
+                    INS = None
             except Exception as e:
                 print("야후 내부자 실패", e, flush=True)
             res["notes"]["triple"] = (f"고래 신규 {len(W)}종목 · 그중 50일선 위 {len(cand)}종목의 최근 90일 임원 매수를 {INS_SRC.split(' ')[0]}에서 확인" if INS is not None
