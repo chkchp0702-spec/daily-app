@@ -59,7 +59,7 @@
         (has ? '<span class="pr-w mut">×' + x.w + '</span>' : '') + '</div>' + (has ? pbar(x.p1) : '') + '<small class="pr-ev">' + e(x.ev) + '</small></div>';
     }).join("");
     h += '<button class="fold pr-f' + (open ? " open" : "") + '" data-f="' + m.mk + '">🧩 왜 이 숫자인가 — 방법 ' + (m.methods || []).length + '가지 <i class="fchev">▾</i></button>' +
-      '<div class="pr-ms" style="' + (open ? "" : "display:none") + '">' + rows + '<p class="note">결합 = 각 방법의 확률을 로그오즈로 가중 평균(×는 가중치) → ×' + (D.shrink || 0.6) + ' 로 50% 쪽에 눌러 과신을 줄임. 「기울기 없음」은 이번엔 조건에 안 걸린 방법.</p></div>';
+      '<div class="pr-ms" style="' + (open ? "" : "display:none") + '">' + rows + '<p class="note">결합 = 각 방법의 확률을 로그오즈로 가중 평균(×는 가중치) → 평소와의 차이를 ×' + (D.shrink || 0.6) + ' 로 줄여 과신을 막음. 「기울기 없음」은 이번엔 조건에 안 걸린 방법.</p></div>';
     // 채점 (시장별)
     var S = D.score && D.score[m.mk];
     if (S && (S.d1.n || S.d5.n)){

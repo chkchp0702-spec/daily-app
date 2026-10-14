@@ -343,16 +343,19 @@ def market(mk, H, brain, events):
                   "ev": f"특성 9개(연속일수·5일·20일·모멘텀·200일선·50일선·변동성·RSI·월말) · {len(D):,}일 학습 · 최근 1년 검증 AUC 내일 {res['y1'][1]:.2f} · 5일 {res['y5'][1]:.2f} (0.5 = 동전, 0.55 넘으면 쓸 만)"})
 
     # ⑩ 결합
+    PB = {"p1": float(d["y1"].mean()), "p5": float(d["y5"].mean())}
     def combine(key):
+        """로그오즈 가중 평균을 「평소(기저율)」 쪽으로 수축 — 0.5 쪽이 아니라 (평소 오른 날 비율이 51~55% 라서)"""
         num = den = 0.0
         for x in M:
             p = x.get(key)
             if p is None or not x.get("w"):
                 continue
             num += x["w"] * logit(p); den += x["w"]
+        b = logit(PB[key])
         if not den:
-            return 0.5
-        return sigm(SHRINK * num / den)
+            return PB[key]
+        return sigm(b + SHRINK * (num / den - b))
     p1, p5 = combine("p1"), combine("p5")
     vol = next((x for x in M if x["k"] == "vol"), None)
     s1 = (vol["sig1"] if vol else float(last["r"].std() if False else d["r"].tail(20).std() * 100)) * widen
@@ -487,7 +490,7 @@ def main():
                ["📣 이벤트", "FOMC·CPI 같은 큰 이벤트가 일주일 안이면 방향은 안 건드리고 예상 폭만 넓힘"],
                ["🧠 두뇌 국면", "🧠 시황 두뇌의 위험 선호/중립/회피 판단 → ±4%p 작은 기울기"],
                ["🤖 로지스틱 앙상블", "위 특성 9개로 학습한 로지스틱 회귀 · 최근 1년은 학습에서 빼고 검증(AUC 공개)"],
-               ["⚖️ 결합·보정", "방법마다 확률을 로그오즈로 바꿔 가중 평균 → ×0.6 으로 0.5 쪽에 눌러 과신을 줄임 → 지난 예측을 브라이어 점수로 채점(0 완벽 · 0.25 동전)"]],
+               ["⚖️ 결합·보정", "방법마다 확률을 로그오즈로 바꿔 가중 평균 → 평소(기저율)와의 차이를 ×0.6 으로 줄여 과신을 막음 → 지난 예측을 브라이어 점수로 채점(0 완벽 · 0.25 동전)"]],
            "note": "내일 방향을 맞힐 확률의 상한은 대략 53~56%예요. 그래서 맞히기가 아니라 「확률 분포를 그리고 보정하기」가 목표 — 사라는 뜻도, 팔라는 뜻도 아니에요."}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
