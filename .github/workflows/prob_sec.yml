@@ -1,0 +1,31 @@
+name: prob_sec
+# 🎲 섹터·종목 확률 (5개 시장) + 🐋 고래 원픽 — 하루 4번
+on:
+  schedule:
+    - cron: "40 21 * * 0-4"   # KST 06:40 미국 마감 뒤
+    - cron: "50 0 * * 1-5"    # KST 09:50 고래 자료 수집 뒤
+    - cron: "20 7 * * 1-5"    # KST 16:20 한국·일본·중국 마감 뒤
+    - cron: "40 8 * * 1-5"    # KST 17:40 홍콩 마감 뒤
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prob_sec
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q yfinance pandas numpy
+      - name: 섹터·종목 확률 + 고래 원픽
+        run: python prob_sec.py
+      - name: 저장
+        run: bash scripts/push.sh "prob_sec $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/prob_sec.json archive/x/whale_pick.json archive/x/whale_pick_log.json

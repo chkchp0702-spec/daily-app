@@ -215,11 +215,24 @@
       WIDX ? Promise.resolve(WIDX) : getJSON("archive/whale/index.json?" + (M.updated || "")).then(function(j){ WIDX = j; return j; }).catch(function(){ return {}; }),
       WRANK ? Promise.resolve(WRANK) : getJSON("archive/whale/ranking.json?" + (M.updated || "")).then(function(j){ WRANK = j; return j; }).catch(function(){ return null; }),
       getJSON("archive/whale/backtest.json?" + (M.updated || "")).catch(function(){ return null; }),
-      getJSON("archive/whale/hero_log.json?" + (M.updated || "")).catch(function(){ return null; })
+      getJSON("archive/whale/hero_log.json?" + (M.updated || "")).catch(function(){ return null; }),
+      getJSON("archive/x/whale_pick.json?" + Math.floor(Date.now() / 300000)).catch(function(){ return null; })
     ]).then(function(r){
-      var d = r[0], idx = r[1], rk = r[2], BT = r[3], HERO = r[4], sg = d.signals || {}, h = "";
-      // 영웅 종목
-      if (sg.hero){
+      var d = r[0], idx = r[1], rk = r[2], BT = r[3], HERO = r[4], WP = r[5], sg = d.signals || {}, h = "";
+      // 10/14 사용자 「고래 픽 기준이 뭐야? 차트·수급·흐름·뉴스로 고래 원픽을」 → 🐋 고래 원픽 (prob_sec.py) · 옛 13F 기준 픽은 아래 한 줄로
+      var wp = WP && WP.pick;
+      if (wp){
+        var PC = {"고래": [25, "#3dd6c6"], "차트": [25, "#7c9cff"], "수급": [15, "#ffb84d"], "흐름": [20, "#c38bff"], "뉴스·실적": [15, "#f4a261"]};
+        h += '<section class="hero2 whale-hero"><div class="hero2-k">🐋 고래 원픽 <span class="mut">고래 종목 ' + WP.n_pool + '개 중 · ' + e(WP.at.slice(5)) + '</span></div>' +
+             '<div class="row"><div><div class="big-t">' + e(wp.n) + ' <span class="mut" style="font-size:14px">' + e(wp.s) + '</span></div><div class="mut">' + wp.tot + '점 / 100 · 지난 20일 ' + (wp.r20 > 0 ? "+" : "") + wp.r20 + '%</div></div>' + opBtn(wp.s, "종목리포트 →") + '</div>' +
+             '<div class="wp-parts">' + Object.keys(PC).map(function(k){ var v = wp.parts[k] || 0, mx = PC[k][0];
+               return '<div><small>' + k + '</small><span class="xbar" style="flex:1"><i style="width:' + Math.max(0, v / mx * 100).toFixed(0) + '%;background:' + PC[k][1] + '"></i></span><b>' + v.toFixed(0) + '<em>/' + mx + '</em></b></div>'; }).join("") + '</div>' +
+             '<div class="wp-why">' + wp.why.map(function(x){ return '<div>' + e(x) + '</div>'; }).join("") + '</div>' +
+             '<div class="sp-box" data-spark="' + e(wp.s) + '" data-h="80"></div>' +
+             (WP.rank && WP.rank.length > 1 ? '<details class="wp-rk"><summary>2~10위 보기</summary>' + WP.rank.slice(1).map(function(x, i){ return '<a class="wp-r" href="javascript:openOP(\'' + e(x.s) + '\')"><span class="rk">' + (i + 2) + '</span><b>' + e(x.n) + '</b><span class="mut">' + e(x.s) + '</span><b style="margin-left:auto">' + x.tot.toFixed(0) + '점</b></a>'; }).join("") + '</details>' : '') +
+             '<p class="note">' + e(WP.how) + (sg.hero && sg.hero !== wp.s ? ' · 옛 기준(13F 점수·실적 임박) 픽: <b>' + e(sg.hero) + '</b>' : '') +
+             (WP.log_summ && WP.log_summ.n ? ' · 원픽 성적 ' + WP.log_summ.n + '건 S&P 대비 평균 ' + (WP.log_summ.avg_alpha > 0 ? "+" : "") + WP.log_summ.avg_alpha + '%p, 이긴 비율 ' + WP.log_summ.win + '%' : ' · 성적은 내일부터 쌓여요') + '</p></section>';
+      } else if (sg.hero){
         var sc = (sg.top10_score || {})[sg.hero];
         h += '<section class="hero2 whale-hero"><div class="hero2-k">오늘 이것 하나</div><div class="row"><div><div class="big-t">' + e(sg.hero) + '</div>' +
              (sc != null ? '<div class="mut">고래 점수 ' + sc + '</div>' : '') + '</div>' + opBtn(sg.hero, "종목리포트 →") + '</div>' +
