@@ -50,6 +50,11 @@ N0 = 150              # 경험적 베이즈: 표본 n 인 방법의 기울기를
 RHO = 0.6             # 방법끼리 평균 상관 (같은 가격에서 나온 지표라 꽤 겹침) → 유효 독립 개수 m/(1+(m−1)ρ)
 CAP = 0.45            # 결합 로그오즈 기울기 상한 (±약 11%p)
 MIN_N = 30            # 조건부 통계 최소 표본
+# 🧭 10/15 「닻」: 그날 확률을 실제로 크게 움직이는 「이미 아는 정보」(간밤 미국 · 미국 선물 갭 · 장중 등락)는 여러 의견 중 하나로 평균 내지 않고 출발점으로 씀
+LEAD_E9 = [-0.02, -0.01, -0.005, -0.002, 0.002, 0.005, 0.01, 0.02]   # 9칸
+LEAD_PRIOR = 20       # 칸 비율을 평소 쪽으로 당기는 세기(베타 사전 20일치) — 검증에서 쓴 값
+LEAD_HIT = {"KR": "53.5→61.8%", "JP": "51.7→65.1%", "CN": "51.8→56.7%", "HK": "50.0→59.6%", "US": "54.3→63.7%"}
+OTHERS_CAP = 0.2      # 닻 위에 나머지 방법들이 더할 수 있는 로그오즈 (±약 5%p)
 AUTO_W = {}
 
 
@@ -242,11 +247,15 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
     px = H.get(cfg["ix"])
     if px is None or len(px) < 600:
         return None
+    open_now, loc = is_open_now(cfg)
+    # 예측 기준일: 마지막 봉이 오늘이고 장중이면 「오늘 종가 기준 내일」을 아직 못 세움 → 그 봉(장중 값)을 떼고 어제 마감 기준으로 「오늘」
+    #   10/15: 뗀 장중 값은 버리지 않고 「장중 닻」으로 씀 — 지금 +x% 이고 남은 시간이 이만큼이면 종가가 어제보다 높을 확률
+    partial = None
+    if open_now and len(px) and px.index[-1].strftime("%Y-%m-%d") == loc.strftime("%Y-%m-%d"):
+        partial = float(px["Close"].iloc[-1]); px = px.iloc[:-1]
     d = feats(px)
     last = d.iloc[-1]
     today = d.index[-1]
-    open_now, loc = is_open_now(cfg)
-    # 예측 기준일: 마지막 봉이 오늘이고 장중이면 「오늘 종가 기준 내일」을 아직 못 세움 → 마지막 마감 봉 기준으로 「다음 거래일」
     base_date = today.strftime("%Y-%m-%d")
     M = []   # 방법들
 
@@ -283,36 +292,42 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
     sp = H.get("^GSPC")
     if cfg["lead"] == "US_prev" and sp is not None:
         us = sp["Close"].pct_change()
-        # 아시아 날짜 t 의 결과 ← 미국 t−1 종가 등락 (미국이 먼저 마감)
-        us_prev = us.reindex(d.index, method="ffill").shift(1)   # 그 날 아침에 알 수 있던 마지막 미국 등락
+        # 10/15 고침: 아시아 행 t 의 y1 = (아시아 t+1 > t). 그 사이에 열리는 건 「미국 날짜 t」 장(아시아 t 마감 뒤 · t+1 개장 전).
+        #   예전엔 .shift(1) 로 미국 t−1(이미 아시아 t 종가에 반영된 것)을 써서 동전 던지기가 됐음.
+        #   검증(probe/lead_bt.json, 2012~ 걸어가며): 코스피 적중 53.5→61.8% · 닛케이 51.7→65.1% · 항셍 50.0→59.6% · 상해 51.8→56.7%
+        us_t = us.reindex(d.index)                                # 미국 휴장인 날은 비움
         cur_us = float(us.dropna().iloc[-1]) if len(us.dropna()) else 0.0
-        us_d = us.dropna().index[-1].strftime("%m/%d")
-        def bk(v):
-            return -2 if v < -0.01 else -1 if v < -0.003 else 0 if v <= 0.003 else 1 if v <= 0.01 else 2
-        bks = us_prev.apply(lambda v: bk(v) if not np.isnan(v) else np.nan)
-        m = cond(d, bks == bk(cur_us), "미국 직전 " + f"{cur_us*100:+.1f}%")
+        us_last = us.dropna().index[-1] if len(us.dropna()) else None
+        us_d = us_last.strftime("%m/%d") if us_last is not None else ""
+        fresh = us_last is not None and us_last >= today          # 아시아 마지막 마감 뒤에 열린 미국 장이 있어야 「간밤 정보」
+        bks = pd.Series(np.digitize(us_t.values, LEAD_E9), index=d.index).where(us_t.notna())
+        m = cond(d, bks == int(np.digitize([cur_us], LEAD_E9)[0]), "미국 간밤 " + f"{cur_us*100:+.1f}%") if fresh else None
         if m:
-            M.append({"k": "lead", "ic": "🛰️", "name": "선행 시장", "p1": m["p1"], "p5": m["p5"], "n": m["n"], "w": 0.9,
-                      "ev": f"미국 S&P 직전 장({us_d}) {cur_us*100:+.2f}% · 비슷한 미국 등락 뒤 {cfg['ixn']} {m['n']}번 → 다음 날 {m['p1']*100:.0f}% · 5일 {m['p5']*100:.0f}%"})
+            pa = (m["p1"] * m["n"] + LEAD_PRIOR * float(d["y1"].mean())) / (m["n"] + LEAD_PRIOR)
+            M.append({"k": "lead", "ic": "🛰️", "name": "선행 시장 (간밤 미국)", "p1": pa, "p5": m["p5"], "n": m["n"], "w": 0.9, "anchor": 1,
+                      "ev": f"간밤 미국 S&P({us_d}) {cur_us*100:+.2f}% · 비슷한 간밤 뒤 {cfg['ixn']} {m['n']}번 → 다음 날 오름 {m['p1']*100:.0f}% · 5일 {m['p5']*100:.0f}% — 🧭 오늘 확률의 닻(2012~ 검증 적중 " + LEAD_HIT.get(mk, "") + ")"})
     elif cfg["lead"] == "fut":
         es = H.get("ES=F")
         g = None
         if es is not None and len(es) > 2 and not FAKE:
             e = es["Close"].dropna()
-            g = float(e.iloc[-1] / e.iloc[-2] - 1)
+            if e.index[-1] > today:                               # 10/15: 미국 마감 뒤 새 선물 세션이 열렸을 때만 (아니면 오늘 움직임을 다시 세는 것)
+                g = float(e.iloc[-1] / e.iloc[-2] - 1)
         elif FAKE:
             g = 0.002
         if g is not None:
             def gb(v):
-                return -2 if v < -0.01 else -1 if v < -0.003 else 0 if v <= 0.003 else 1 if v <= 0.01 else 2
-            # 과거: 시가 갭 g 였던 날의 「종가 > 전일 종가」 비율 — 갭이 그날 방향을 얼마나 말해 주나
-            dd = d.copy(); dd["y0"] = (dd["c"] > dd["c"].shift(1)).astype(float); dd["gb"] = dd["gap"].apply(lambda v: gb(v) if not np.isnan(v) else np.nan)
-            h = dd[(dd["gb"] == gb(g)) & dd["gap"].notna()]
+                return int(np.digitize([v], LEAD_E9)[0])
+            # 과거: 시가 갭 g 였던 날의 「종가 > 전일 종가」 비율 — 갭이 그날 방향을 얼마나 말해 주나 (검증 2012~ 적중 54.3→63.7%)
+            dd = d.copy(); dd["y0"] = (dd["c"] > dd["c"].shift(1)).astype(float)
+            gp = dd["gap"].where(dd["gap"].abs() > 1e-6)              # 옛 야후 자료의 시가=전일 종가 날은 뺌
+            dd["gb"] = pd.Series(np.digitize(gp.fillna(0).values, LEAD_E9), index=dd.index).where(gp.notna())
+            h = dd[(dd["gb"] == gb(g)) & dd["gb"].notna()]
             m5 = cond(d, dd["gb"] == gb(g), "갭")
             if len(h) >= MIN_N:
-                p_today = float(h["y0"].mean())
-                M.append({"k": "lead", "ic": "🛰️", "name": "선행 시장", "p1": p_today, "p5": m5["p5"] if m5 else None, "n": int(len(h)), "w": 0.9,
-                          "ev": f"S&P 선물 {g*100:+.2f}% → 비슷한 시가 갭이었던 {len(h)}일 중 종가가 전일보다 높게 끝난 비율 {p_today*100:.0f}%" + (f" · 5일 {m5['p5']*100:.0f}%" if m5 else "")})
+                p_today = (float(h["y0"].sum()) + LEAD_PRIOR * float(dd["y0"].mean())) / (len(h) + LEAD_PRIOR)
+                M.append({"k": "lead", "ic": "🛰️", "name": "선행 시장 (선물)", "p1": p_today, "p5": m5["p5"] if m5 else None, "n": int(len(h)), "w": 0.9, "anchor": 1,
+                          "ev": f"S&P 선물 {g*100:+.2f}% → 비슷한 시가 갭이었던 {len(h)}일 중 종가가 전일보다 높게 끝난 비율 {float(h['y0'].mean())*100:.0f}%" + (f" · 5일 {m5['p5']*100:.0f}%" if m5 else "") + " — 🧭 오늘 확률의 닻(2012~ 검증 적중 " + LEAD_HIT.get(mk, "") + ")"})
     # ⑤ 과매도·과매수
     rsi = float(last["rsi"]) if not np.isnan(last["rsi"]) else 50
     if rsi <= 30 or rsi >= 70 or abs(last["r5"]) >= 0.03:
@@ -413,9 +428,12 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
         b = logit(PB[key])
         num = den = 0.0
         m = 0
+        anc = ANCHOR.get(key)
         for x in M:
             p = x.get(key)
             if p is None or not x.get("w"):
+                continue
+            if anc is not None and x.get("anchor"):
                 continue
             n = x.get("n") or 0
             eb = n / (n + N0) if n else (0.5 if x["k"] in ("ml", "brain") else 0)
@@ -428,10 +446,32 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
         if not den:
             return PB[key]
         meff = m / (1 + (m - 1) * RHO)
+        if anc is not None:                                   # 닻 + 나머지 방법의 작은 기울기
+            dev = max(-OTHERS_CAP, min(OTHERS_CAP, num / den * meff)) if den else 0.0
+            INFO[key] = {"m": m, "meff": round(meff, 2), "dev": round(dev, 3), "anchor": anc["k"], "p_anchor": round(anc["p"], 3)}
+            return sigm(logit(anc["p"]) + dev)
         dev = max(-CAP, min(CAP, num / den * meff))
         INFO[key] = {"m": m, "meff": round(meff, 2), "dev": round(dev, 3)}
         return sigm(b + dev)
     INFO = {}
+    ANCHOR = {}
+    # 🧭 닻 고르기 (내일=오늘 장 확률 p1 에만): ① 장중이면 지금 등락 + 남은 시간 ② 아니면 간밤 미국 / 선물 갭
+    if partial is not None:
+        from statistics import NormalDist
+        sig_d = float(d["r"].tail(20).std()) or 0.01
+        tot = (cfg["close"] // 100 * 60 + cfg["close"] % 100) - (cfg["open"] // 100 * 60 + cfg["open"] % 100)
+        el = (loc.hour * 60 + loc.minute) - (cfg["open"] // 100 * 60 + cfg["open"] % 100)
+        rem = max(0.02, 1 - el / tot)
+        chg = math.log(partial / float(last["c"]))
+        pi = NormalDist().cdf(chg / (sig_d * math.sqrt(rem)))
+        pi = min(0.99, max(0.01, pi))
+        M.insert(0, {"k": "intra", "ic": "⏱️", "name": "장중 닻", "p1": pi, "p5": None, "n": 0, "w": 0, "anchor": 1,
+                     "ev": f"지금 {cfg['ixn']} {(partial / float(last['c']) - 1) * 100:+.2f}% · 장 남은 시간 {rem * 100:.0f}% · 하루 흔들림 {sig_d * 100:.1f}% → 종가가 어제보다 높을 확률 {pi * 100:.0f}% (무작위 걸음 근사)"})
+        ANCHOR["p1"] = {"k": "intra", "p": pi}
+    else:
+        la = next((x for x in M if x["k"] == "lead" and x.get("anchor") and x.get("p1") is not None), None)
+        if la:
+            ANCHOR["p1"] = {"k": "lead", "p": la["p1"]}
     p1, p5 = combine("p1"), combine("p5")
     vol = next((x for x in M if x["k"] == "vol"), None)
     s1 = (vol["sig1"] if vol else float(last["r"].std() if False else d["r"].tail(20).std() * 100)) * widen
@@ -452,6 +492,8 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
     nv = votes["up"] + votes["down"] + votes["flat"]
     agree = (votes["up"] if e1 >= 0 else votes["down"]) / nv if nv else 0
     strength = "강" if abs(e1) >= 0.04 and agree >= 0.7 else "보통" if abs(e1) >= 0.02 and agree >= 0.6 else "약"
+    if ANCHOR.get("p1"):   # 🧭 닻이 있으면 세기는 닻이 얼마나 기울었나로 (검증: 60%↑·40%↓ 날 적중 67~79%)
+        strength = "강" if abs(e1) >= 0.12 else "보통" if abs(e1) >= 0.06 else "약"
     from statistics import NormalDist
     N = NormalDist()
     def tails(p, sig, sig_n, pb, th):

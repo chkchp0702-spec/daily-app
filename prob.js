@@ -24,9 +24,11 @@
   var STR = {"강": "🔥 강한 신호", "보통": "👀 보통 신호", "약": "💤 약한 신호"};
   // 확대 막대: 40~60% 구간만 그려 작은 차이도 보이게 (평소 = 점선)
   function zbar(p, pb){
-    var z = function(v){ return Math.min(100, Math.max(0, (v - 0.4) / 0.2 * 100)); };
+    // 10/15: 닻(간밤 미국·선물·장중)으로 40~60% 밖까지 가면 막대도 10~90% 로 넓힘
+    var wide = p < 0.4 || p > 0.6, lo = wide ? 0.1 : 0.4, sp = wide ? 0.8 : 0.2;
+    var z = function(v){ return Math.min(100, Math.max(0, (v - lo) / sp * 100)); };
     var x = z(p), b = z(pb);
-    return '<div class="zb"><i class="zf ' + (p >= pb ? "u" : "d") + '" style="left:' + Math.min(x, b) + '%;width:' + Math.abs(x - b) + '%"></i><i class="zn" style="left:' + b + '%"></i><i class="pm" style="left:' + x + '%"></i></div><div class="zl"><span>40%</span><span>평소 ' + pc(pb) + '</span><span>60%</span></div>';
+    return '<div class="zb"><i class="zf ' + (p >= pb ? "u" : "d") + '" style="left:' + Math.min(x, b) + '%;width:' + Math.abs(x - b) + '%"></i><i class="zn" style="left:' + b + '%"></i><i class="pm" style="left:' + x + '%"></i></div><div class="zl"><span>' + (wide ? "10%" : "40%") + '</span><span>평소 ' + pc(pb) + '</span><span>' + (wide ? "90%" : "60%") + '</span></div>';
   }
   function votes(v){
     if (!v) return "";
@@ -104,6 +106,8 @@
     var open = OPEN[m.mk];
     var h = '<section class="card pr-c"><h3>' + m.flag + ' ' + e(m.name) + ' <span class="mut">' + e(m.ixn) + ' ' + V.fmt(m.last) + ' <b class="' + cls(m.chg) + '">' + sg(m.chg, 2) + '</b> · ' + md(m.base_date) + (m.open_now ? ' 장중' : ' 마감') + ' 기준' + (m.filled ? ' <span title="야후 일봉이 늦어 장중 나침반의 마감 값으로 채움">📅</span>' : '') + '</span></h3>' +
       (m.strength ? '<div class="pr-sg"><span class="pr-bd s' + ({"강": 3, "보통": 2, "약": 1}[m.strength]) + '">' + STR[m.strength] + '</span>' + votes(m.votes) + '</div>' : '') +
+      (function(){ var c = (m.comb || {}).p1 || {}, a = c.anchor && (m.methods || []).filter(function(x){ return x.k === c.anchor; })[0]; if (!a) return '';   // 🧭 10/15 닻
+        return '<div class="pr-anc">' + a.ic + ' <b>닻 ' + pc(c.p_anchor) + '</b> — ' + e(a.ev) + (c.dev ? ' · 나머지 방법 ' + (c.dev > 0 ? '+' : '') + (c.dev * 25).toFixed(1) + '%p 남짓' : '') + '</div>'; })() +
       '<div class="pr-two"><div><small>' + dlab(m.next_day) + ' · 평소보다</small><b class="' + ecls(m.e1) + '">' + ep(m.e1) + '</b><em>오를 확률 ' + pc(m.p1) + ' (평소 ' + pc(m.pb1) + ') · 68% 폭 ' + sg(m.band1[0]) + ' ~ ' + sg(m.band1[1]) + '</em>' + (m.pb1 != null ? zbar(m.p1, m.pb1) : pbar(m.p1, 1)) + '</div>' +
       '<div><small>일주일(5일) · 평소보다</small><b class="' + ecls(m.e5) + '">' + ep(m.e5) + '</b><em>오를 확률 ' + pc(m.p5) + ' (평소 ' + pc(m.pb5) + ') · 68% 폭 ' + sg(m.band5[0]) + ' ~ ' + sg(m.band5[1]) + '</em>' + (m.pb5 != null ? zbar(m.p5, m.pb5) : pbar(m.p5, 1)) + '</div></div>' +
       tailCard(m) +
@@ -165,7 +169,7 @@
     if (!ks.length){ b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률 자료가 아직 없어요.</div>'; return; }
     if (!SEL || !D.markets[SEL]) SEL = ks[0];
     var h = '<section class="card"><h3>🎲 다음 장 · 평소보다 <span class="mut">' + e(D.t) + ' 기준 · 매시간</span></h3>' + strip(D) +
-      '<p class="note">큰 숫자 = 그 시장 「평소」(2000년 이후 오른 날 비율)보다 오를 확률이 얼마나 높고 낮은지. 내일 방향은 프로도 55% 넘기 어려워서 ±2%p 면 의미 있는 기울기, ±4%p 면 강한 편이에요. 막대는 40~60% 구간을 확대한 것.</p></section>';
+      '<p class="note">큰 숫자 = 그 시장 「평소」(2000년 이후 오른 날 비율)보다 오를 확률이 얼마나 높고 낮은지. 🧭 10/15부터 <b>이미 아는 정보를 닻</b>으로 써요 — 아시아는 간밤 미국 장, 미국은 선물 갭, 장이 열려 있으면 지금 등락과 남은 시간. 2012년 이후 걸어가며 검증한 적중률: 한국 62% · 일본 65% · 홍콩 60% · 중국 57% · 미국 64% (예전 52~54%). 60% 넘거나 40% 밑인 날은 67~79% 맞았어요.</p></section>';
     h += mcard(D.markets[SEL], D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
     b.innerHTML = h;
     [].forEach.call(b.querySelectorAll(".pr5c[data-m]"), function(x){ x.onclick = function(){ SEL = x.dataset.m; draw(D); window.scrollTo({top: 0, behavior: "smooth"}); }; });
@@ -198,6 +202,7 @@
     ".zb .zn{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dashed var(--sub)}" +
     ".zb .pm{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--text);border:2px solid var(--panel);transform:translate(-50%,-50%)}.pr5c .zb .pm{width:9px;height:9px}" +
     ".zl{display:flex;justify-content:space-between;font-size:10px;color:var(--sub)}" +
+    ".pr-anc{font-size:12.5px;line-height:1.5;margin:-2px 0 10px;padding:7px 10px;border-radius:10px;background:var(--panel2,#2a3142);color:var(--sub)}.pr-anc b{color:var(--tx,inherit)}" +
     ".pr-sg{display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap}.pr-bd{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--panel2,#2a3142)}" +
     ".pr-bd.s3{background:color-mix(in srgb,var(--up) 22%,transparent)}.pr-bd.s2{background:color-mix(in srgb,#ffb84d 22%,transparent)}" +
     ".pv{display:flex;flex-direction:column;gap:2px}.pvd{display:flex;gap:3px}.pvd i{width:10px;height:10px;border-radius:50%;background:#6b7385}.pvd i.u{background:var(--up)}.pvd i.d{background:var(--down)}.pv small{font-size:11px;color:var(--sub)}" +
