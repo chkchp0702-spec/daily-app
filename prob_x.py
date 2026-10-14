@@ -46,7 +46,7 @@ def load_ext(fake=False):
     except Exception as e:
         print("크립토 공포·탐욕 실패", e)
     try:
-        j = _get("https://production.dataviz.cnn.io/index/fearandgreed/graphdata/2011-01-01")
+        j = _get("https://production.dataviz.cnn.io/index/fearandgreed/graphdata/2021-01-01")
         hist = j.get("fear_and_greed_historical", {}).get("data", [])
         s = pd.Series({pd.Timestamp(int(x["x"]), unit="ms").normalize(): float(x["y"]) for x in hist}).sort_index()
         s = s[~s.index.duplicated(keep="last")]
@@ -61,8 +61,9 @@ def load_ext(fake=False):
 FR_FILE = "archive/x/foreign_hist.json"
 
 
-def load_foreign(fake=False, pages=60):
-    """코스피 외국인 순매수(억원) 일별 — 네이버 「투자자별 매매동향」 페이지. 한 번 모아 두면 다음부터는 앞 2쪽만 (archive/x/foreign_hist.json)"""
+def load_foreign(fake=False):
+    """코스피 외국인 순매수(억원) 일별 — 네이버 옛 일별 페이지는 막힘(410) → 오늘 값을 매일 쌓음 (archive/x/foreign_hist.json)
+       처음엔 시황 장부(ledger) 의 외국인 기록으로 채움. 120거래일 넘게 쌓이면 🌏 외국인 수급 방법이 켜짐"""
     import os
     hist = {}
     try:
@@ -71,33 +72,25 @@ def load_foreign(fake=False, pages=60):
         hist = {}
     if fake:
         return pd.Series(dtype=float)
-    need = 2 if len(hist) > 300 else pages
-    got = 0
-    for pg in range(1, need + 1):
+    if len(hist) < 5:
         try:
-            url = f"https://finance.naver.com/sise/investorDealTrendDay.naver?bizdate={pd.Timestamp.now(tz='Asia/Seoul'):%Y%m%d}&sosok=&page={pg}"
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://finance.naver.com/"})
-            html = urllib.request.urlopen(req, timeout=20).read().decode("euc-kr", "ignore")
-            import re
-            rows = re.findall(r'<td class="date2">\s*([\d.]+)\s*</td>(.*?)</tr>', html, re.S)
-            for dd, rest in rows:
-                nums = [x.replace(",", "") for x in re.findall(r'>\s*([-+]?[\d,]+)\s*<', rest)]
-                if len(nums) >= 2:
-                    y, mo, da = dd.split(".")
-                    yy = ("20" + y) if len(y) == 2 else y
-                    hist[f"{yy}-{mo}-{da}"] = float(nums[1])     # 개인, 외국인, 기관계 … 순서
-                    got += 1
-            if not rows:
-                break
+            L = _get("https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/ledger/ledger.json")
+            for x in (L.get("series") or {}).get("foreign_kospi", []):
+                hist.setdefault(x["date"], float(x["value"]))
         except Exception as e:
-            print("외국인 수급 실패", pg, e)
-            break
-    if got:
-        try:
-            json.dump(dict(sorted(hist.items())[-1500:]), open(FR_FILE, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-        except Exception:
-            pass
-    print("외국인 수급", len(hist), "일 (이번에 받음", got, ")")
+            print("장부 외국인 실패", e)
+    try:
+        req = urllib.request.Request("https://m.stock.naver.com/api/index/KOSPI/trend", headers={"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)", "Referer": "https://m.stock.naver.com/"})
+        j = json.loads(urllib.request.urlopen(req, timeout=20).read().decode("utf-8"))
+        d = j["bizdate"]
+        hist[f"{d[:4]}-{d[4:6]}-{d[6:]}"] = float(str(j["foreignValue"]).replace(",", "").replace("+", ""))
+    except Exception as e:
+        print("외국인 오늘 실패", e)
+    try:
+        json.dump(dict(sorted(hist.items())[-1500:]), open(FR_FILE, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    except Exception:
+        pass
+    print("외국인 수급", len(hist), "일 쌓임")
     if not hist:
         return pd.Series(dtype=float)
     return pd.Series({pd.Timestamp(k): v for k, v in hist.items()}).sort_index()
@@ -225,8 +218,10 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
         fx = _c(H, FX[mk][0])
         if fx is not None:
             loc[FX[mk][1] + "(반대 · 자국 통화 강세 = 탐욕)"] = rank252(-fx.reindex(idx).ffill().pct_change(20)) * 100
+        gm = pd.DataFrame(comps).mean(axis=1, skipna=True)          # 미국 7개 항목 평균
+        lm = pd.DataFrame(loc).mean(axis=1, skipna=True)            # 자기 시장 항목 평균
         comps.update(loc)
-        S = rank252(pd.DataFrame(comps).mean(axis=1, skipna=True)) * 100
+        S = rank252(0.5 * gm + 0.5 * lm.reindex(gm.index)) * 100     # 미국 심리 반 · 자기 시장 반 (항목 수가 달라도 한쪽이 덮지 않게)
     cur = S.iloc[-1] if len(S) else None
     edges = [-1, 20, 40, 60, 80, 101]
     labs = ["극공포(0~20)", "공포(20~40)", "중립(40~60)", "탐욕(60~80)", "극탐욕(80~100)"]
@@ -271,6 +266,14 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
         add("fx", "💱", "환율(" + fxn + ")", "자금", m, 0.6, f"{fxn} 5일 {cv*100:+.2f}% — 달러 강세는 외국인 자금이 빠지는 쪽")
     # 🌏 외국인 수급 (한국) — 20일 누적 순매수의 2년 백분위 + 연속 순매도 일수
     fr = ext.get("foreign")
+    if mk == "KR" and fr is not None and 0 < len(fr) <= 120:
+        c5 = fr.iloc[-5:].sum()
+        sgv = np.sign(fr.values); k_ = 0
+        for v in sgv[::-1]:
+            if v == sgv[-1]: k_ += 1
+            else: break
+        M.append({"k": "foreign", "ic": "🌏", "name": "외국인 수급", "grp": "폭·수급", "p1": None, "p5": None, "n": len(fr), "w": 0,
+                  "ev": f"외국인 최근 5일 {c5/10000:+.2f}조 · {'연속 순매도' if sgv[-1] < 0 else '연속 순매수'} {k_}일 — 매일 쌓는 중 {len(fr)}/120일 (네이버 옛 일별 자료가 막혀서 오늘부터 모음). 120일 넘으면 확률에 들어가요"})
     if mk == "KR" and fr is not None and len(fr) > 120:
         f = fr.reindex(idx).fillna(0) if True else fr
         f = f[f.index >= fr.index[0]]
