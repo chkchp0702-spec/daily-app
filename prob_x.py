@@ -61,9 +61,9 @@ def load_ext(fake=False):
 FR_FILE = "archive/x/foreign_hist.json"
 
 
-def load_foreign(fake=False):
-    """코스피 외국인 순매수(억원) 일별 — 네이버 옛 일별 페이지는 막힘(410) → 오늘 값을 매일 쌓음 (archive/x/foreign_hist.json)
-       처음엔 시황 장부(ledger) 의 외국인 기록으로 채움. 120거래일 넘게 쌓이면 🌏 외국인 수급 방법이 켜짐"""
+def load_foreign(fake=False, pages=40):
+    """코스피 외국인 순매수(억원) 일별 — 다음 금융 API (finance.daum.net/api/investor/KOSPI/days, 2026-10-14 찾음)
+       네이버 옛 일별 페이지(410)·KRX(로그인 필요)는 막힘. 처음엔 여러 쪽을 받아 2~3년치, 그다음부터는 앞 1~2쪽만 → archive/x/foreign_hist.json"""
     import os
     hist = {}
     try:
@@ -72,25 +72,37 @@ def load_foreign(fake=False):
         hist = {}
     if fake:
         return pd.Series(dtype=float)
-    if len(hist) < 5:
+    need = 2 if len(hist) > 400 else pages
+    got = 0
+    H = {"User-Agent": "Mozilla/5.0", "Referer": "https://finance.daum.net/"}
+    for pg in range(1, need + 1):
         try:
-            L = _get("https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/ledger/ledger.json")
-            for x in (L.get("series") or {}).get("foreign_kospi", []):
-                hist.setdefault(x["date"], float(x["value"]))
+            req = urllib.request.Request(f"https://finance.daum.net/api/investor/KOSPI/days?page={pg}&perPage=30", headers=H)
+            j = json.loads(urllib.request.urlopen(req, timeout=20).read().decode("utf-8"))
+            rows = j.get("data") or []
+            for x in rows:
+                v = x.get("foreignStraightPurchasePrice")
+                if v is not None:
+                    hist[x["date"][:10]] = round(float(v) / 1e8, 1)      # 원 → 억원
+                    got += 1
+            if len(rows) < 30:
+                break
         except Exception as e:
-            print("장부 외국인 실패", e)
-    try:
-        req = urllib.request.Request("https://m.stock.naver.com/api/index/KOSPI/trend", headers={"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)", "Referer": "https://m.stock.naver.com/"})
-        j = json.loads(urllib.request.urlopen(req, timeout=20).read().decode("utf-8"))
-        d = j["bizdate"]
-        hist[f"{d[:4]}-{d[4:6]}-{d[6:]}"] = float(str(j["foreignValue"]).replace(",", "").replace("+", ""))
-    except Exception as e:
-        print("외국인 오늘 실패", e)
+            print("외국인 수급(다음) 실패", pg, e)
+            break
+    if got == 0:                                                       # 다음이 막히면 네이버 오늘 값이라도
+        try:
+            req = urllib.request.Request("https://m.stock.naver.com/api/index/KOSPI/trend", headers={"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)", "Referer": "https://m.stock.naver.com/"})
+            j = json.loads(urllib.request.urlopen(req, timeout=20).read().decode("utf-8"))
+            d = j["bizdate"]
+            hist[f"{d[:4]}-{d[4:6]}-{d[6:]}"] = float(str(j["foreignValue"]).replace(",", "").replace("+", ""))
+        except Exception as e:
+            print("외국인 오늘(네이버) 실패", e)
     try:
         json.dump(dict(sorted(hist.items())[-1500:]), open(FR_FILE, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     except Exception:
         pass
-    print("외국인 수급", len(hist), "일 쌓임")
+    print("외국인 수급", len(hist), "일 (이번에 받음", got, ")")
     if not hist:
         return pd.Series(dtype=float)
     return pd.Series({pd.Timestamp(k): v for k, v in hist.items()}).sort_index()
@@ -273,7 +285,7 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
             if v == sgv[-1]: k_ += 1
             else: break
         M.append({"k": "foreign", "ic": "🌏", "name": "외국인 수급", "grp": "폭·수급", "p1": None, "p5": None, "n": len(fr), "w": 0,
-                  "ev": f"외국인 최근 5일 {c5/10000:+.2f}조 · {'연속 순매도' if sgv[-1] < 0 else '연속 순매수'} {k_}일 — 매일 쌓는 중 {len(fr)}/120일 (네이버 옛 일별 자료가 막혀서 오늘부터 모음). 120일 넘으면 확률에 들어가요"})
+                  "ev": f"외국인 최근 5일 {c5/10000:+.2f}조 · {'연속 순매도' if sgv[-1] < 0 else '연속 순매수'} {k_}일 — 자료 {len(fr)}일 (120일 넘으면 확률에 들어가요)"})
     if mk == "KR" and fr is not None and len(fr) > 120:
         f = fr.reindex(idx).fillna(0) if True else fr
         f = f[f.index >= fr.index[0]]
