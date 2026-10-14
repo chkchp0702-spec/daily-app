@@ -157,15 +157,14 @@ def build(px, mkt_of, dest, fx=None, whale_src=None, meta=None, names=None):
         if s in mkt_of:
             by_m[mkt_of[s]].append(s)
     W = whale_new(whale_src)
-    INS = insider_buys() if W else None
-    INS_SRC = "OpenInsider"
     old = {}
     try:
         old = json.load(open(os.path.join(dest, "screens.json"), encoding="utf-8"))
     except Exception:
         pass
-    res["notes"]["triple"] = (f"고래 신규 {len(W)}종목 · 임원 매수 {len(INS)}종목 (최근 90일, 5만 달러 이상)" if INS is not None
-                              else "임원 매수 자료를 오늘은 못 받았어요")
+    # ⑤ 임원 매수 확인은 따로 (python opdb/screens.py --triple) — 전 종목을 받은 직후엔 야후가 내부자 표를 비워 보냄
+    res["triple"] = old.get("triple", []); res["notes"]["triple"] = old.get("notes", {}).get("triple", "임원 매수 확인 전")
+    res["tri_date"] = old.get("tri_date", "")
     for mkt in ["US", "KR", "JP", "CN", "HK"]:
         syms = by_m.get(mkt, [])
         if len(syms) < 50:
@@ -266,32 +265,48 @@ def build(px, mkt_of, dest, fx=None, whale_src=None, meta=None, names=None):
         hu.sort(key=lambda d: d["t5"])
         res["hush"] += hu[:PER_MKT]
 
-        # ⑤ 고래 + 임원 + 50일선 (미국만 — 13F·임원 매수 공시가 미국 자료)
-        if mkt == "US" and W and INS is None:           # OpenInsider 가 막히면 고래 신규 + 50일선 위 후보만 야후로
-            cand = [x["s"] for x in rows if (x["s"] in W or x["s"].replace(".", "-") in W) and x["c"] > x["ma50"]]
-            try:
-                INS = insider_yahoo(cand); st = getattr(insider_yahoo, "st", {}); INS_SRC = "야후"; res["diag"] = {"ins": st, "cand": len(cand), "buys": len(INS or {})}
-                if st.get("ok", 0) < max(1, len(cand) // 2):   # 반도 못 받았으면 「못 받음」으로 (0건을 진짜 0건처럼 보이지 않게)
-                    INS = None
-            except Exception as e:
-                print("야후 내부자 실패", e, flush=True)
-            res["notes"]["triple"] = (f"고래 신규 {len(W)}종목 · 그중 50일선 위 {len(cand)}종목의 최근 90일 임원 매수를 {INS_SRC.split(' ')[0]}에서 확인" if INS is not None
-                                      else "임원 매수 자료를 오늘은 못 받았어요")
-        if mkt == "US" and W and INS:
-            tr = []
-            for x in rows:
-                s2 = x["s"].replace(".", "-")
-                if (x["s"] in W or s2 in W) and s2 in INS and x["c"] > x["ma50"]:
-                    ins = INS[s2]
-                    tr.append(item(x, wh=(W.get(x["s"]) or W.get(s2))[:3], ins_n=ins["n"], ins_v=_r(ins["v"] / 1e6, 2),
-                                   ins_last=ins["last"], ins_who=ins["who"], ma50=_r((x["c"] / x["ma50"] - 1) * 100)))
-            tr.sort(key=lambda d: -(d["ins_v"] or 0))
-            res["triple"] = tr[:15]
-    if (INS is None or not W) and old.get("triple"):      # 오늘 임원·고래 자료를 못 받으면 지난번 것 유지 (표시)
-        res["triple"] = old["triple"]
-        res["notes"]["triple"] += f" · 지난번({old.get('date', '')}) 목록 그대로"
+        # ⑤ 고래 + 50일선 위 후보 (미국) — 임원 매수는 --triple 단계에서
+        if mkt == "US" and W:
+            res["tri_cand"] = [item(x, wh=(W.get(x["s"]) or W.get(x["s"].replace(".", "-")))[:3], ma50=_r((x["c"] / x["ma50"] - 1) * 100))
+                               for x in rows if (x["s"] in W or x["s"].replace(".", "-") in W) and x["c"] > x["ma50"]]
+            res["tri_n"] = len(W)
     for k in ("quiet", "lead", "hush"):
         res["notes"][k] = f"{len(res[k])}개"
     json.dump(res, open(os.path.join(dest, "screens.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("아침 거르기", {k: len(res[k]) for k in ("quiet", "lead", "hush", "triple")}, "대상", res["n"], flush=True)
     return res
+
+
+def triple(dest):
+    """⑤ 고래 신규 + 50일선 위 후보(tri_cand) 중 최근 90일 임원 공개시장 매수가 있는 종목 → screens.json 의 triple"""
+    p = os.path.join(dest, "screens.json")
+    res = json.load(open(p, encoding="utf-8"))
+    cand = res.get("tri_cand") or []
+    if not cand:
+        print("⑤ 후보 없음", flush=True); return
+    INS, src = insider_buys(), "OpenInsider"
+    if INS is None:
+        INS = insider_yahoo([c["s"] for c in cand]); src = "야후"
+        st = getattr(insider_yahoo, "st", {})
+        res["diag"] = {"ins": st, "cand": len(cand), "buys": len(INS)}
+        if st.get("ok", 0) < max(1, len(cand) // 2):
+            res["notes"]["triple"] = (res["notes"].get("triple", "") .split(" · 오늘")[0] + " · 오늘은 임원 매수 자료를 못 받아 지난번 목록").strip(" ·")
+            json.dump(res, open(p, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":")); return
+    tr = []
+    for c in cand:
+        ins = INS.get(c["s"].replace(".", "-"))
+        if ins:
+            d = dict(c); d.update(ins_n=ins["n"], ins_v=_r(ins["v"] / 1e6, 2), ins_last=ins["last"], ins_who=ins["who"]); tr.append(d)
+    tr.sort(key=lambda d: -(d["ins_v"] or 0))
+    res["triple"] = tr[:15]; res["tri_date"] = res.get("date", "")
+    res["notes"]["triple"] = f"고래 신규 {res.get('tri_n', '?')}종목 → 50일선 위 {len(cand)}종목 → 최근 90일 임원 매수(5만 달러 이상, {src}) {len(tr)}종목"
+    json.dump(res, open(p, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print("⑤ 고래+임원+차트", len(tr), flush=True)
+
+
+if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser(); ap.add_argument("--dest", required=True); ap.add_argument("--triple", action="store_true")
+    a = ap.parse_args()
+    if a.triple:
+        triple(a.dest)

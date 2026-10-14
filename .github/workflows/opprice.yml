@@ -19,6 +19,8 @@ jobs:
   prices:
     runs-on: ubuntu-latest
     timeout-minutes: 150
+    outputs:
+      skip: ${{ steps.chk.outputs.skip }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,7 +38,7 @@ jobs:
         id: chk
         run: |
           T=$(git -C opdata log -1 --format='%ct %s' 2>/dev/null || echo "0 x")
-          if [ "${{ github.event_name }}" = "schedule" ] && echo "$T" | grep -q " prices" && [ $(( $(date +%s) - ${T%% *} )) -lt 5400 ]; then echo "skip=1" >> $GITHUB_OUTPUT; echo "최근 실행됨 → 건너뜀"; fi
+          if [ "${{ github.event_name }}" = "schedule" ] && echo "$T" | grep -qE " (prices|screens)" && [ $(( $(date +%s) - ${T%% *} )) -lt 5400 ]; then echo "skip=1" >> $GITHUB_OUTPUT; echo "최근 실행됨 → 건너뜀"; fi
       - name: 해외 종목 한글 이름 (검색용)
         if: steps.chk.outputs.skip != '1' && github.event.schedule != '47 20 * * *' && github.event.schedule != '27 21 * * *'
         run: python opdb/names_ko.py --dest opdata || true
@@ -53,8 +55,27 @@ jobs:
           git add -A
           git commit -qm "prices $(TZ=Asia/Seoul date '+%F %H:%M')"
           git push -q -f origin fresh:opdata
-      - name: 앱에 나침반 반영 (collect 실행)
-        if: always() && steps.chk.outputs.skip != '1'
+  triple:
+    # 🔎 아침 거르기 ⑤ 고래+임원+차트 — 임원 매수 확인은 새 서버에서 (전 종목을 받은 서버는 야후가 내부자 표를 비워 보냄)
+    needs: prices
+    if: always() && needs.prices.outputs.skip != '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: ⑤ 임원 매수 확인
+        run: |
+          pip install -q yfinance pandas
+          git clone -q --depth 1 -b opdata "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" opdata
+          python opdb/screens.py --triple --dest opdata || true
+          cd opdata
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          git add screens.json && git commit -qm "screens triple $(TZ=Asia/Seoul date '+%F %H:%M')" && git push -q origin HEAD:opdata || echo "바뀐 것 없음"
+      - name: 앱에 나침반·거르기 반영 (collect 실행)
+        if: always()
         run: |
           curl -s -X POST -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/actions/workflows/collect.yml/dispatches -d '{"ref":"main"}' || true
