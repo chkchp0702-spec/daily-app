@@ -7,7 +7,7 @@
   var TEXT_TAGS = {DIV:1, P:1, SPAN:1, B:1, I:1, EM:1, STRONG:1, SMALL:1, A:1, BR:1, UL:1, OL:1, LI:1, SUP:1, SUB:1, MARK:1, U:1, S:1, CODE:1};
   var SKIP = "button,svg,canvas,table,img,input,select,textarea,details,iframe,video,[data-op],[data-pf],[data-foc],[data-goto],[role=button],.bar,.chip,.pill";
   var OPEN = {};                 // 펼친 글
-  var SHOW = 2, MIN = 4;         // 10/14 밤 「한눈에」: 2줄 보이고, 4줄 넘을 때만 접음
+  var SHOW = 3, MIN = 6;         // 10/15: 2줄에서 자르니 어색(「오늘의 판단」 두 줄도 접혔음) → 6줄 넘을 때만, 3줄 보이게
 
   function key(el){ return (el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 40); }
   function isText(el){
@@ -66,7 +66,7 @@
   function later(){ if (t) return; var w = Math.max(250, 600 - (Date.now() - last));
     t = setTimeout(function(){ t = null; last = Date.now(); try { scan(); } catch(e) {} }, w); }
   var st = document.createElement("style");
-  st.textContent = ".clp{overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent);mask-image:linear-gradient(to bottom,#000 55%,transparent)}" +
+  st.textContent = ".clp{overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,#000 66%,transparent);mask-image:linear-gradient(to bottom,#000 66%,transparent)}" +
     ".clp-btn{display:block;margin:2px 0 6px auto;padding:3px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--sub);font:inherit;font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}";
   document.head.appendChild(st);
   // 새로 그려질 때 + 숨어 있던 칸이 보일 때(탭·접기 전환은 class/hidden/style 만 바뀜)

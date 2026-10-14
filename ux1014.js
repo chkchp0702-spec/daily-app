@@ -113,7 +113,9 @@
     ".mk-thr button b{color:#ff8a6a}.mk-thr button small{color:var(--dim,#8a94a8);font-size:10px}" +
     ".mk-thr button.nw{border-color:color-mix(in srgb,#24c08a 55%,var(--line));}" +
     /* A10-5 스위치: 목차 줄 오른쪽 끝에 붙어 있음 */
-    ".mk-toc .mk-full{position:sticky;right:0;margin-left:auto;flex:0 0 auto;background:var(--panel);box-shadow:-10px 0 10px -4px var(--bg)}" +
+    ".mk-toc{overflow:visible!important;align-items:center}" +
+    ".mk-tsc{display:flex;gap:5px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 22px),transparent);padding-right:14px}.mk-tsc::-webkit-scrollbar{display:none}" +
+    ".mk-toc .mk-full{position:static;margin-left:4px;flex:0 0 auto;background:var(--panel)}" +
     ".mk-toc .mk-full small{font-size:10px;color:var(--dim,#8a94a8);font-weight:600}.mk-toc .mk-full.on{border-color:var(--c)}";
   document.head.appendChild(st);
 })();
@@ -130,7 +132,9 @@
     ".po-stk,.fold-jump{transition:top .22s ease}";
   document.head.appendChild(st);
   var lastY = window.scrollY || 0, acc = 0;
-  function setHH(){ var h = hd.offsetHeight; if (hd.classList.contains("hd-min")){ document.documentElement.style.setProperty("--hdc", (h - 2) + "px"); document.documentElement.style.setProperty("--hh", "2px"); }
+  var sp = document.createElement("div"); sp.style.cssText = "position:fixed;top:0;left:0;height:env(safe-area-inset-top);width:0;visibility:hidden;pointer-events:none"; document.body.appendChild(sp);
+  function safeTop(){ return sp.offsetHeight || 0; }   // 10/15: 아이폰 상태 표시줄 높이 — 접혀도 칩이 시계·배터리 밑으로 안 들어가게
+  function setHH(){ var h = hd.offsetHeight, s = safeTop(); if (hd.classList.contains("hd-min")){ document.documentElement.style.setProperty("--hdc", (h - s - 2) + "px"); document.documentElement.style.setProperty("--hh", (s + 2) + "px"); }
     else document.documentElement.style.setProperty("--hh", h + "px"); }
   function set(min){ if (hd.classList.contains("hd-min") === min) return; hd.classList.toggle("hd-min", min); setHH(); }
   window.addEventListener("scroll", function(){

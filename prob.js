@@ -15,11 +15,14 @@
     return "다음 장 " + ["일", "월", "화", "수", "목", "금", "토"][new Date(d + "T00:00:00Z").getUTCDay()] + "(" + md(d) + ")"; }
   // 확률 막대: 가운데 50, 왼쪽(파랑) 내릴 쪽 · 오른쪽(빨강) 오를 쪽
   function pbar(p, big){
-    if (p == null) return '<div class="pb' + (big ? " big" : "") + '"><i class="pm" style="left:50%"></i></div>';
+    if (p == null) return '<div class="prb' + (big ? " big" : "") + '"><i class="pm" style="left:50%"></i></div>';
     var x = Math.min(95, Math.max(5, p * 100));
-    return '<div class="pb' + (big ? " big" : "") + '"><i class="pf ' + (p >= 0.5 ? "u" : "d") + '" style="left:' + Math.min(50, x) + '%;width:' + Math.abs(x - 50) + '%"></i><i class="pm" style="left:' + x + '%"></i></div>';
+    return '<div class="prb' + (big ? " big" : "") + '"><i class="pf ' + (p >= 0.5 ? "u" : "d") + '" style="left:' + Math.min(50, x) + '%;width:' + Math.abs(x - 50) + '%"></i><i class="pm" style="left:' + x + '%"></i></div>';
   }
   function ep(v){ return v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1) + "%p"; }
+  // 10/15 사용자 「확률에 마이너스가 말이 되니?」 — 큰 숫자는 확률 그대로(31%), 평소와의 차이는 말로(「평소 54%보다 23%p 낮음」)
+  function gapTx(v, pb){ if (v == null) return ""; var a = Math.abs(v).toFixed(Math.abs(v) >= 10 ? 0 : 1); if (Math.abs(v) < 0.5) return "평소" + (pb != null ? "(" + pc(pb) + ")" : "") + "와 비슷"; return (pb != null ? "평소 " + pc(pb) + "보다 " : "평소보다 ") + a + "%p " + (v > 0 ? "높음 ▲" : "낮음 ▼"); }
+  function arw(v){ return v == null ? "" : Math.abs(v) < 0.5 ? "평소쯤" : (v > 0 ? "▲" : "▼") + Math.abs(v).toFixed(Math.abs(v) >= 10 ? 0 : 1) + "%p"; }
   function ecls(v){ return v == null ? "" : v >= 1 ? "up" : v <= -1 ? "dn" : ""; }
   var STR = {"강": "🔥 강한 신호", "보통": "👀 보통 신호", "약": "💤 약한 신호"};
   // 확대 막대: 40~60% 구간만 그려 작은 차이도 보이게 (평소 = 점선)
@@ -47,7 +50,7 @@
   function strip(D){
     return '<div class="pr5">' + ORDER.filter(function(k){ return D.markets[k]; }).map(function(k){ var m = D.markets[k];
       return '<button class="pr5c' + (k === SEL ? " on" : "") + '" data-m="' + k + '"><b>' + m.flag + ' ' + e(m.name) + '</b>' +
-        '<span class="pr5p ' + ecls(m.e1) + '">' + ep(m.e1).replace("%p", "") + '<small>%p</small></span>' + (m.pb1 != null ? zbar(m.p1, m.pb1).split('<div class="zl">')[0] : pbar(m.p1)) + '<small>' + pc(m.p1) + ' · 주 ' + ep(m.e5) + '</small></button>'; }).join("") + '</div>';
+        '<span class="pr5p ' + ecls(m.e1) + '">' + Math.round(m.p1 * 100) + '<small>%</small></span>' + (m.pb1 != null ? zbar(m.p1, m.pb1).split('<div class="zl">')[0] : pbar(m.p1)) + '<small class="' + ecls(m.e1) + '">' + (Math.abs(m.e1) < 0.5 ? "평소쯤" : (m.e1 > 0 ? "▲" : "▼") + Math.abs(m.e1).toFixed(0) + "%p") + '</small></button>'; }).join("") + '</div>';
   }
   // 10/14 사용자 「각 시장 밑에 오르고 내릴 섹터 확률도, 그 안에 종목들 확률도」 → archive/x/prob_sec.json (prob_sec.yml)
   var SECX = null, SOPEN = {}, SALL = {};
@@ -88,12 +91,12 @@
       if (!x) return '<div class="ps-gap">⋯</div>';
       var a5 = ab(x), e5 = (a5 - b5) * 100, er = (x.pr5 - br) * 100, op = SOPEN[mk + x.k];
       return '<div class="ps-r' + (op ? " open" : "") + '" data-sk="' + e(x.k) + '"><div class="ps-h"><span class="hm-i">' + x.icon + '</span><b>' + e(x.name) + '</b><small class="mut">' + x.n + '종목</small>' +
-        '<span class="ps-v"><b class="' + ecls(e5) + '">' + ep(e5) + '</b><small>오를 ' + pc(a5) + '</small></span><i class="fchev">▾</i></div>' +
+        '<span class="ps-v"><b class="' + ecls(e5) + '">' + pc(a5) + '</b><small class="' + ecls(e5) + '">' + arw(e5) + '</small></span><i class="fchev">▾</i></div>' +
         '<div class="ps-bar">' + zbar(a5, b5).split('<div class="zl">')[0] + '</div>' +
         '<small class="ps-sub">시장보다 나을 확률 <b class="' + ecls(er) + '">' + pc(x.pr5) + '</b> (평소 ' + pc(br) + ') · 지난 5일 ' + sg(x.r5) + '</small>' +
         (op ? '<div class="ps-st">' + x.st.map(function(t, i){ var te = (ab(t) - b5) * 100, tr = (t.pr5 - br) * 100;
           return '<a class="ps-t" href="javascript:openOP(\'' + e(t.s).replace(/'/g, "") + '\')"><span class="ps-tn"><b>' + e(t.n) + '</b><em class="tk">' + e(V.cd ? V.cd(t.s) : t.s) + '</em></span>' +
-            '<span class="ps-tv"><b class="' + ecls(te) + '">' + ep(te) + '</b><small>시장보다 <span class="' + ecls(tr) + '">' + pc(t.pr5) + '</span> · 내일 ' + pc(t.p1) + '</small></span></a>'; }).join("") + '</div>' : '') + '</div>';
+            '<span class="ps-tv"><b class="' + ecls(te) + '">' + pc(ab(t)) + '</b><small><span class="' + ecls(te) + '">' + arw(te) + '</span> · 시장보다 나을 <span class="' + ecls(tr) + '">' + pc(t.pr5) + '</span></small></span></a>'; }).join("") + '</div>' : '') + '</div>';
     };
     var RL = {"믿을 만": ["✅", "s3"], "약함": ["👀", "s2"], "동전 수준": ["💤", "s1"]}[S.rel] || ["", ""];
     return '<section class="card"><h3>🧭 섹터·종목 확률 <span class="mut">일주일 · 평소보다 · ' + e(S.last.slice(5).replace("-", "/")) + ' 마감 기준</span></h3>' +
@@ -108,8 +111,8 @@
       (m.strength ? '<div class="pr-sg"><span class="pr-bd s' + ({"강": 3, "보통": 2, "약": 1}[m.strength]) + '">' + STR[m.strength] + '</span>' + votes(m.votes) + '</div>' : '') +
       (function(){ var c = (m.comb || {}).p1 || {}, a = c.anchor && (m.methods || []).filter(function(x){ return x.k === c.anchor; })[0]; if (!a) return '';   // 🧭 10/15 닻
         return '<div class="pr-anc">' + a.ic + ' <b>닻 ' + pc(c.p_anchor) + '</b> — ' + e(a.ev) + (c.dev ? ' · 나머지 방법 ' + (c.dev > 0 ? '+' : '') + (c.dev * 25).toFixed(1) + '%p 남짓' : '') + '</div>'; })() +
-      '<div class="pr-two"><div><small>' + dlab(m.next_day) + ' · 평소보다</small><b class="' + ecls(m.e1) + '">' + ep(m.e1) + '</b><em>오를 확률 ' + pc(m.p1) + ' (평소 ' + pc(m.pb1) + ') · 68% 폭 ' + sg(m.band1[0]) + ' ~ ' + sg(m.band1[1]) + '</em>' + (m.pb1 != null ? zbar(m.p1, m.pb1) : pbar(m.p1, 1)) + '</div>' +
-      '<div><small>일주일(5일) · 평소보다</small><b class="' + ecls(m.e5) + '">' + ep(m.e5) + '</b><em>오를 확률 ' + pc(m.p5) + ' (평소 ' + pc(m.pb5) + ') · 68% 폭 ' + sg(m.band5[0]) + ' ~ ' + sg(m.band5[1]) + '</em>' + (m.pb5 != null ? zbar(m.p5, m.pb5) : pbar(m.p5, 1)) + '</div></div>' +
+      '<div class="pr-two"><div><small>' + dlab(m.next_day) + ' · 오를 확률</small><b class="' + ecls(m.e1) + '">' + pc(m.p1) + '</b><em><span class="pr-gp ' + ecls(m.e1) + '">' + gapTx(m.e1, m.pb1) + '</span> · 68% 폭 ' + sg(m.band1[0]) + ' ~ ' + sg(m.band1[1]) + '</em>' + (m.pb1 != null ? zbar(m.p1, m.pb1) : pbar(m.p1, 1)) + '</div>' +
+      '<div><small>일주일(5일) · 오를 확률</small><b class="' + ecls(m.e5) + '">' + pc(m.p5) + '</b><em><span class="pr-gp ' + ecls(m.e5) + '">' + gapTx(m.e5, m.pb5) + '</span> · 68% 폭 ' + sg(m.band5[0]) + ' ~ ' + sg(m.band5[1]) + '</em>' + (m.pb5 != null ? zbar(m.p5, m.pb5) : pbar(m.p5, 1)) + '</div></div>' +
       tailCard(m) +
       '<p class="note pr-st">' + e(m.state) + (m.widen > 1 ? ' · 📣 이벤트로 폭 ×' + m.widen : '') + (m.open_now ? ' · 장중이라 오늘 봉이 아직 움직여요 — 마감 뒤 확률이 기록·채점돼요' : '') + '</p>';
     // 방법들 (접기)
@@ -118,7 +121,7 @@
     var mrow = function(x){
       var has = x.p1 != null && x.w, dv = has ? (x.p1 - m.pb1) * 100 : null;
       return '<div class="pr-m' + (has ? "" : " off") + '"><div class="pr-mh"><span class="hm-i">' + x.ic + '</span><b>' + e(x.name) + '</b>' +
-        (has ? '<span class="pr-mp"><span class="' + ecls(dv) + '">' + ep(dv) + '</span><small>' + pc(x.p1) + ' · 주 ' + pc(x.p5) + '</small></span>' : '<span class="pr-mp mut">기울기 없음</span>') + '</div>' +
+        (has ? '<span class="pr-mp"><span class="' + ecls(dv) + '">' + pc(x.p1) + '</span><small><span class="' + ecls(dv) + '">' + arw(dv) + '</span> · 주 ' + pc(x.p5) + '</small></span>' : '<span class="pr-mp mut">기울기 없음</span>') + '</div>' +
         (has ? zbar(x.p1, m.pb1).split('<div class="zl">')[0] : '') + '<small class="pr-ev">' + e(x.ev) + '</small>' +
         (has && x.eb != null ? '<small class="pr-eb">믿음 ' + Math.round(x.eb * 100) + '%' + (x.n ? ' (표본 ' + x.n.toLocaleString() + '일)' : '') + ' · 가중치 ×' + (x.w_eff != null ? x.w_eff : x.w) + '</small>' : '') + '</div>';
     };
@@ -168,8 +171,8 @@
     var ks = ORDER.filter(function(k){ return D.markets[k]; });
     if (!ks.length){ b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률 자료가 아직 없어요.</div>'; return; }
     if (!SEL || !D.markets[SEL]) SEL = ks[0];
-    var h = '<section class="card"><h3>🎲 다음 장 · 평소보다 <span class="mut">' + e(D.t) + ' 기준 · 매시간</span></h3>' + strip(D) +
-      '<p class="note">큰 숫자 = 그 시장 「평소」(2000년 이후 오른 날 비율)보다 오를 확률이 얼마나 높고 낮은지. 🧭 10/15부터 <b>이미 아는 정보를 닻</b>으로 써요 — 아시아는 간밤 미국 장, 미국은 선물 갭, 장이 열려 있으면 지금 등락과 남은 시간. 2012년 이후 걸어가며 검증한 적중률: 한국 62% · 일본 65% · 홍콩 60% · 중국 57% · 미국 64% (예전 52~54%). 60% 넘거나 40% 밑인 날은 67~79% 맞았어요.</p></section>';
+    var h = '<section class="card"><h3>🎲 다음 장 · 오를 확률 <span class="mut">' + e(D.t) + ' 기준 · 매시간</span></h3>' + strip(D) +
+      '<p class="note">큰 숫자 = 다음 장에서 그 시장이 어제보다 오를 확률. ▲▼ = 「평소」(2000년 이후 오른 날 비율)보다 얼마나 높고 낮은지. 🧭 10/15부터 <b>이미 아는 정보를 닻</b>으로 써요 — 아시아는 간밤 미국 장, 미국은 선물 갭, 장이 열려 있으면 지금 등락과 남은 시간. 2012년 이후 걸어가며 검증한 적중률: 한국 62% · 일본 65% · 홍콩 60% · 중국 57% · 미국 64% (예전 52~54%). 60% 넘거나 40% 밑인 날은 67~79% 맞았어요.</p></section>';
     h += mcard(D.markets[SEL], D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
     b.innerHTML = h;
     [].forEach.call(b.querySelectorAll(".pr5c[data-m]"), function(x){ x.onclick = function(){ SEL = x.dataset.m; draw(D); window.scrollTo({top: 0, behavior: "smooth"}); }; });
@@ -186,10 +189,10 @@
     ".pr5c{display:flex;flex-direction:column;gap:3px;align-items:stretch;text-align:left;border:1px solid var(--line);background:var(--panel2,var(--panel));color:var(--text);border-radius:10px;padding:6px 5px;font:inherit;cursor:pointer;min-width:0}" +
     ".pr5c.on{outline:2px solid var(--acc,#7c9cff)}.pr5c b{font-size:12px;white-space:nowrap}.pr5c small{font-size:10.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
     ".pr5p{font-size:16px;font-weight:800;white-space:nowrap}.pr5p small{font-size:10px;font-weight:600;margin-left:1px}.pr5p.up{color:var(--up)}.pr5p.dn{color:var(--down)}" +
-    ".pb{position:relative;height:6px;border-radius:3px;background:rgba(124,156,255,.22);overflow:visible;margin:3px 0}.pb.big{height:10px;margin:8px 0 2px}" +
-    ".pb:before{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--sub);opacity:.6}" +
-    ".pb .pf{position:absolute;top:0;height:100%;border-radius:3px}.pb .pf.u{background:var(--up)}.pb .pf.d{background:var(--down)}" +
-    ".pb .pm{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;background:var(--text);border:2px solid var(--panel);transform:translate(-50%,-50%)}.pb.big .pm{width:14px;height:14px}" +
+    ".prb{position:relative;height:6px;border-radius:3px;background:rgba(124,156,255,.22);overflow:visible;margin:3px 0}.prb.big{height:10px;margin:8px 0 2px}" +
+    ".prb:before{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--sub);opacity:.6}" +
+    ".prb .pf{position:absolute;top:0;height:100%;border-radius:3px}.prb .pf.u{background:var(--up)}.prb .pf.d{background:var(--down)}" +
+    ".prb .pm{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;background:var(--text);border:2px solid var(--panel);transform:translate(-50%,-50%)}.prb.big .pm{width:14px;height:14px}" +
     ".pr-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pr-two>div{background:var(--panel2,rgba(255,255,255,.03));border-radius:12px;padding:10px}.pr-two small{display:block;font-size:11.5px;color:var(--sub)}" +
     ".pr-two b{display:block;font-size:30px;font-weight:800;line-height:1.15;margin:2px 0}.pr-two b.up{color:var(--up)}.pr-two b.dn{color:var(--down)}.pr-two em{display:block;font-style:normal;font-size:11px;color:var(--sub)}" +
     ".pr-st{margin-top:10px}.pr-f{margin:12px 0 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer}.pr-f .fchev{transition:transform .15s;font-style:normal}.pr-f.open .fchev{transform:rotate(180deg)}" +
@@ -202,6 +205,7 @@
     ".zb .zn{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dashed var(--sub)}" +
     ".zb .pm{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--text);border:2px solid var(--panel);transform:translate(-50%,-50%)}.pr5c .zb .pm{width:9px;height:9px}" +
     ".zl{display:flex;justify-content:space-between;font-size:10px;color:var(--sub)}" +
+    ".pr-gp{font-weight:800}.pr-gp.up{color:var(--up)}.pr-gp.dn{color:var(--down)}" +
     ".pr-anc{font-size:12.5px;line-height:1.5;margin:-2px 0 10px;padding:7px 10px;border-radius:10px;background:var(--panel2,#2a3142);color:var(--sub)}.pr-anc b{color:var(--tx,inherit)}" +
     ".pr-sg{display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap}.pr-bd{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--panel2,#2a3142)}" +
     ".pr-bd.s3{background:color-mix(in srgb,var(--up) 22%,transparent)}.pr-bd.s2{background:color-mix(in srgb,#ffb84d 22%,transparent)}" +

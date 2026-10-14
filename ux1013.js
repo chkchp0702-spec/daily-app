@@ -52,12 +52,14 @@
     if (!bar){ bar = document.createElement("div"); bar.id = "mktoc"; bar.className = "fold-jump mk-toc"; body.parentNode.insertBefore(bar, body); }
     bar.dataset.sig = sig;
     var seen = {};
-    bar.innerHTML = secs.map(function(s, i){ var l = label(s); if (seen[l]) return ""; seen[l] = 1;
-      if (!s.id) s.id = "mkt" + i; return '<button data-j="' + e(s.id) + '">' + e(l) + '</button>'; }).join("");
-    [].forEach.call(bar.querySelectorAll("button"), function(bt){ bt.onclick = function(){
+    // 10/15: 칩은 안쪽 스크롤 칸(.mk-tsc)에 — 오른쪽 「📖 전체 펼치기」가 칩을 덮지 않게
+    bar.innerHTML = '<div class="mk-tsc">' + secs.map(function(s, i){ var l = label(s); if (seen[l]) return ""; seen[l] = 1;
+      if (!s.id) s.id = "mkt" + i; return '<button data-j="' + e(s.id) + '">' + e(l) + '</button>'; }).join("") + '</div>';
+    var sc = bar.querySelector(".mk-tsc");
+    [].forEach.call(sc.querySelectorAll("button"), function(bt){ bt.onclick = function(){
       var el = document.getElementById(bt.dataset.j); if (!el) return;
       if (window.unclamp) try { unclamp(el.querySelector(".xs-clamp") || el); } catch(x) {}
-      [].forEach.call(bar.children, function(x){ x.classList.toggle("on", x === bt); }); bar.scrollLeft = bt.offsetLeft - 60;
+      [].forEach.call(sc.children, function(x){ x.classList.toggle("on", x === bt); }); sc.scrollLeft = bt.offsetLeft - sc.offsetLeft - 60;
       var y = el.getBoundingClientRect().top + window.scrollY - (hh() + bar.offsetHeight + 8);
       window.scrollTo({top: Math.max(0, y), behavior: "smooth"}); }; });
     if (window.mkTocExtra) try { mkTocExtra(bar); } catch(x) {}   // A10-5 📝 요약 / 📖 전체 (ux1014.js)
