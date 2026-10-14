@@ -29,7 +29,7 @@ def _r(v, d=1):
 
 
 def _junk(name, ind, mkt):
-    if "스팩" in (ind or "") or "Shell" in (ind or "") or "Acquisition" in (name or ""):
+    if re.search(r"스팩|Shell|셸|기업인수목적", ind or "") or re.search(r"Acquisition|애퀴지션|스팩|기업인수목적", name or ""):
         return True
     if mkt == "KR" and re.search(r"우[A-Z]?$|우\(.*\)$", name or ""):
         return True
@@ -99,6 +99,34 @@ def insider_buys(days=90, min_k=50):
     return out
 
 
+def insider_yahoo(syms, days=90, min_v=50_000):
+    """OpenInsider 를 못 받으면: 후보 몇십 종목만 야후 내부자 거래로 (공개시장 매수 Purchase 만)"""
+    import yfinance as yf
+    import pandas as pd
+    out, cut = {}, pd.Timestamp.now() - pd.Timedelta(days=days)
+    for s in syms:
+        try:
+            df = yf.Ticker(s).insider_transactions
+        except Exception:
+            continue
+        if df is None or not len(df):
+            continue
+        for _, r in df.iterrows():
+            txt = str(r.get("Text") or "") + " " + str(r.get("Transaction") or "")
+            if "Purchase" not in txt:
+                continue
+            d = pd.to_datetime(r.get("Start Date"), errors="coerce")
+            v = float(r.get("Value") or 0) if r.get("Value") == r.get("Value") else 0.0
+            if d is pd.NaT or d != d or d < cut or v < min_v:
+                continue
+            o = out.setdefault(s.replace(".", "-"), {"n": 0, "v": 0.0, "last": "", "who": ""})
+            o["n"] += 1; o["v"] += v
+            ds = d.strftime("%Y-%m-%d")
+            if ds > o["last"]:
+                o["last"], o["who"] = ds, f"{str(r.get('Insider') or '').title()} ({str(r.get('Position') or '')[:12]})"
+    return out
+
+
 def build(px, mkt_of, dest, fx=None, whale_src=None, meta=None, names=None):
     """px: {심볼: pandas DataFrame(c,h,l,v) 최근 1년 일봉}"""
     import pandas as pd
@@ -116,6 +144,7 @@ def build(px, mkt_of, dest, fx=None, whale_src=None, meta=None, names=None):
             by_m[mkt_of[s]].append(s)
     W = whale_new(whale_src)
     INS = insider_buys() if W else None
+    INS_SRC = "OpenInsider"
     old = {}
     try:
         old = json.load(open(os.path.join(dest, "screens.json"), encoding="utf-8"))
@@ -136,7 +165,7 @@ def build(px, mkt_of, dest, fx=None, whale_src=None, meta=None, names=None):
                 continue
             m = meta.get(s) or ["", "", 0]
             nm = names.get(s, s)
-            if _junk(nm, m[1], mkt):
+            if not m[0] or _junk(nm, m[1], mkt):          # 섹터 정보 없는 것(ETF·펀드 등)은 빼기
                 continue
             c, h, l, v = f["c"], f["h"], f["l"], f["v"].fillna(0)
             tv = c * v * rate                              # 거래대금 (원)
@@ -224,6 +253,14 @@ def build(px, mkt_of, dest, fx=None, whale_src=None, meta=None, names=None):
         res["hush"] += hu[:PER_MKT]
 
         # ⑤ 고래 + 임원 + 50일선 (미국만 — 13F·임원 매수 공시가 미국 자료)
+        if mkt == "US" and W and INS is None:           # OpenInsider 가 막히면 고래 신규 + 50일선 위 후보만 야후로
+            cand = [x["s"] for x in rows if (x["s"] in W or x["s"].replace(".", "-") in W) and x["c"] > x["ma50"]]
+            try:
+                INS = insider_yahoo(cand); INS_SRC = f"야후 (후보 {len(cand)}종목만 확인)"
+            except Exception as e:
+                print("야후 내부자 실패", e, flush=True)
+            res["notes"]["triple"] = (f"고래 신규 {len(W)}종목 · 그중 50일선 위 {len(cand)}종목의 최근 90일 임원 매수를 {INS_SRC.split(' ')[0]}에서 확인" if INS is not None
+                                      else "임원 매수 자료를 오늘은 못 받았어요")
         if mkt == "US" and W and INS:
             tr = []
             for x in rows:
