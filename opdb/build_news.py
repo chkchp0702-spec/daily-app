@@ -5,6 +5,8 @@
       → ② 야후 검색 뉴스(해외 전부) → ③ 구글 영어 "<영문명> stock"(최근 30일, 해외 종목)
       → ④ 빙 뉴스(한국어·영어) → ⑤ 그래도 없으면 구글 한국어 기간 제한 없이 → (중국) 동방재부 기간 없이 → 회사 공시.
 ETF(etf_list.json)도 받는다: 한국 ETF = 구글 한국어 이름 / 미국 ETF = 야후 → 구글 영어 "정확한 이름" → 빙.
+  (10/15) 미국 ETF 야후는 야후가 그 티커에 묶어 둔 기사(relatedTickers)도 살림. 끝까지 없으면 따라가는 대상
+  (테마·지수·기초 종목, 예: 'T-Rex 2X Long Apple' → Apple) 뉴스를 「[관련]」 표시로 넣는다.
 구글이 막히면(연속 실패) 10분간 구글을 건너뛰고 야후·빙으로만 받는다.
 끝까지 뉴스가 없는 종목은 out/t/<shard>.json 에 '오늘 시도함'으로 남겨 다음 밤엔 뒤로 미룬다
 (예전엔 뉴스 없는 종목을 매일 맨 앞에서 다시 시도해서 하룻밤에 몇 개밖에 못 늘었다).
@@ -97,16 +99,23 @@ def bing(q, limit=6, mkt=None):
     return out[:limit]
 
 
-def yahoo(sym):
+def yahoo(sym, related=False, q=None, n=6):
+    """야후 검색 뉴스. related=True 면 야후가 그 티커에 묶어 둔 기사(relatedTickers)만 — ETF용
+    (제목에 티커가 없어도 야후가 그 ETF 기사로 분류한 것은 살린다)."""
     try:
         import yfinance as yf
         signal.alarm(20)
-        items = yf.Search(sym, news_count=6, max_results=1).news
+        items = yf.Search(q or sym, news_count=n, max_results=1).news
         signal.alarm(0)
     except Exception:
         signal.alarm(0)
         return []
-    return D.parse_yf_news(items)
+    if related:
+        items = [x for x in (items or []) if sym.upper() in [str(t).upper() for t in (x.get("relatedTickers") or [])]]
+    try:
+        return D.parse_yf_news(items)
+    except Exception:
+        return []
 
 
 def _cn_code(sym):
@@ -198,6 +207,32 @@ def _core(name):
     return n if len(n) >= 8 and " " in n else name      # 너무 짧으면(예: 'EA') 전체 이름
 
 
+_KR_BRAND = re.compile(r"^(KODEX|TIGER|ACE|SOL|RISE|KBSTAR|HANARO|PLUS|KOSEF|ARIRANG|KIWOOM|TIMEFOLIO|TIME|HK|WON|BNK|UNICORN|VITA|TRUSTON|KCGI|FOCUS|IBK|KoAct|KTOP|1Q|DAISHIN343|마이티|파워|히어로즈|에셋플러스|마이다스|흥국|대신343|신한|삼성|미래에셋)\s*", re.I)
+_KR_DROP = re.compile(r"\([^)]*\)|액티브|합성|Fn|TR\b|iSelect|INDXX|Solactive|KRX|MV|Plus\b|플러스|채권혼합|혼합|커버드콜|위클리|타겟|데일리|\d+%|프리미엄", re.I)
+_US_DROP = re.compile(r"\b(iShares|SPDR|Vanguard|Invesco|ProShares|Direxion|Global X|Innovator|First Trust|WisdomTree|VanEck|Schwab|Fidelity|JPMorgan|Franklin|Xtrackers|Amplify|Roundhill|Defiance|YieldMax|GraniteShares|Leverage Shares|T-Rex|Tradr|Tidal|NEOS|Simplify|ETF Opportunities|Bank Of Montreal|MAX|MicroSectors|Pacer|Goldman Sachs|BlackRock|Columbia|Dimensional|American Century|Capital Group|Avantis|Harbor|Hartford|Nuveen|PGIM|Principal|Putnam|Russell|Sprott|Strive|Themes|TCW|Virtus|abrdn|AB|Alpha Architect|Cambria|ARK|Grayscale|Bitwise|Trust|Funds?|Series|Shares|ETFs?|ETNs?|Exchange Traded|Index|Portfolio|Daily|Target|Strategy|Option|Income|Premium|Distribution|Leveraged|Long|Short|Inverse|Bull|Bear|Buffer|Barrier|Power|Ultra|LITE|Equity|II|III|\d+(\.\d+)?[xX%]|\d+x|January|February|March|April|May|June|July|August|September|October|November|December)\b", re.I)
+
+
+def _theme(disp, mkt):
+    """ETF 이름 → 따라가는 대상(테마) 핵심말. 예: 'TIGER 2차전지소재Fn' → '2차전지소재',
+    'T-Rex 2X Long Apple Daily Target ETF' → 'Apple', 'iShares MSCI Malaysia Index Fund' → 'MSCI Malaysia'"""
+    if mkt == "KR":
+        t = _KR_DROP.sub(" ", _KR_BRAND.sub("", disp or ""))
+    else:
+        t = _US_DROP.sub(" ", disp or "")
+    t = re.sub(r"[-–,/&]+", " ", t)
+    t = re.sub(r"(?<![A-Za-z])K(?=[가-힣])", "", t)    # K바이오 → 바이오
+    t = re.sub(r"\s+", " ", t).strip()
+    return t if len(t.replace(" ", "")) >= 2 else ""
+
+
+def _theme_hit(items, theme):
+    """제목에 테마 핵심 낱말(긴 것 2개)이 모두 있는 것만"""
+    ws = sorted([w.lower() for w in theme.split() if len(w) >= 2 and not w.isdigit()], key=len, reverse=True)[:2]
+    if not ws:
+        return []
+    return [n for n in items if all(w in (n.title or "").replace(" ", "").lower() for w in ws)]
+
+
 def recent(items, days=30):
     cut = (dt.date.today() - dt.timedelta(days=days)).isoformat()
     return [n for n in items if (n.date or "") >= cut]
@@ -219,7 +254,7 @@ def one(s, meta, etf, names, g, src):
                 news += _tick(clean(g.get(f'"{s}" ETF when:30d', hl="en-US", gl="US")), s)
             src["google_en"] += 1 if news else 0
             if len(news) < 3:
-                y = _tick(recent(yahoo(s), 45), s)
+                y = recent(yahoo(s, related=True), 45) or _tick(recent(yahoo(s), 45), s)
                 src["yahoo"] += 1 if y else 0
                 news += y
             if len(news) < 3 and ko:
@@ -233,6 +268,17 @@ def one(s, meta, etf, names, g, src):
             o = about(clean(g.get(f'"{disp}"' if mkt == "KR" else f'"{_core(disp)}"', **({} if mkt == "KR" else {"hl": "en-US", "gl": "US"}))), disp, _core(disp))
             src["old"] += 1 if o else 0
             news += o
+        if not news:                                # 10/15: 구글이 서버에서 거의 막혀 ETF 자체 기사가 안 잡힘
+            th = _theme(disp, mkt)                  #   → 따라가는 대상(테마·지수·기초 종목) 뉴스를 [관련] 표시로
+            if th:
+                if mkt == "KR":
+                    t = _theme_hit(clean(recent(bing(f"{th} ETF", mkt="ko"))), th) or _theme_hit(clean(recent(bing(th, mkt="ko"))), th)
+                else:
+                    t = _theme_hit(clean(recent(bing(f"{th} ETF"))), th) or _theme_hit(clean(recent(yahoo(s, q=f"{th}"), 30)), th) \
+                        or _theme_hit(clean(recent(bing(th))), th)
+                t = [dataclasses.replace(n, title="[관련] " + n.title) for n in t]
+                src["theme"] += 1 if t else 0
+                news += t
         src["etf"] += 1 if news else 0
         return news
     disp, mkt, _, long_name = meta[s][:4]           # ── 주식 ──
@@ -322,7 +368,7 @@ def main():
     today = dt.date.today().isoformat()
     tried = {}
     got = fresh = 0
-    src = {"google": 0, "yahoo": 0, "google_en": 0, "bing": 0, "old": 0, "cn": 0, "em": 0, "notice": 0, "etf": 0}
+    src = {"google": 0, "yahoo": 0, "google_en": 0, "bing": 0, "old": 0, "cn": 0, "em": 0, "notice": 0, "etf": 0, "theme": 0}
     for i, s in enumerate(syms):
         if time.time() - START > BUDGET or (a.limit and i >= a.limit):
             break
