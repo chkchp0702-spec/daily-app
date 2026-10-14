@@ -41,7 +41,7 @@
   function strip(D){
     return '<div class="pr5">' + ORDER.filter(function(k){ return D.markets[k]; }).map(function(k){ var m = D.markets[k];
       return '<button class="pr5c' + (k === SEL ? " on" : "") + '" data-m="' + k + '"><b>' + m.flag + ' ' + e(m.name) + '</b>' +
-        '<span class="pr5p ' + ecls(m.e1) + '">' + ep(m.e1) + '</span>' + (m.pb1 != null ? zbar(m.p1, m.pb1).split('<div class="zl">')[0] : pbar(m.p1)) + '<small>' + pc(m.p1) + ' · 주 ' + ep(m.e5) + '</small></button>'; }).join("") + '</div>';
+        '<span class="pr5p ' + ecls(m.e1) + '">' + ep(m.e1).replace("%p", "") + '<small>%p</small></span>' + (m.pb1 != null ? zbar(m.p1, m.pb1).split('<div class="zl">')[0] : pbar(m.p1)) + '<small>' + pc(m.p1) + ' · 주 ' + ep(m.e5) + '</small></button>'; }).join("") + '</div>';
   }
   function mcard(m, D){
     var open = OPEN[m.mk];
@@ -107,7 +107,7 @@
     ".pr5{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:2px 0 8px}" +
     ".pr5c{display:flex;flex-direction:column;gap:3px;align-items:stretch;text-align:left;border:1px solid var(--line);background:var(--panel2,var(--panel));color:var(--text);border-radius:10px;padding:6px 5px;font:inherit;cursor:pointer;min-width:0}" +
     ".pr5c.on{outline:2px solid var(--acc,#7c9cff)}.pr5c b{font-size:12px;white-space:nowrap}.pr5c small{font-size:10.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
-    ".pr5p{font-size:18px;font-weight:800}.pr5p.up{color:var(--up)}.pr5p.dn{color:var(--down)}" +
+    ".pr5p{font-size:16px;font-weight:800;white-space:nowrap}.pr5p small{font-size:10px;font-weight:600;margin-left:1px}.pr5p.up{color:var(--up)}.pr5p.dn{color:var(--down)}" +
     ".pb{position:relative;height:6px;border-radius:3px;background:rgba(124,156,255,.22);overflow:visible;margin:3px 0}.pb.big{height:10px;margin:8px 0 2px}" +
     ".pb:before{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--sub);opacity:.6}" +
     ".pb .pf{position:absolute;top:0;height:100%;border-radius:3px}.pb .pf.u{background:var(--up)}.pb .pf.d{background:var(--down)}" +
