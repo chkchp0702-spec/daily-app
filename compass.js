@@ -52,7 +52,7 @@
     var rows = ks.map(function(k){ var m = C.markets[k], ix = m.index[0] || {};
       var sc = m.fg ? m.fg.score : (m.breadth10 || 50);
       return {k: k, m: m, sc: sc, c20: ix.chg20}; }).sort(function(a, b){ return b.sc - a.sc; });
-    return card("🏁 지금 어느 시장이 제일 강할까 <span class='mut'>공포·탐욕 점수 순</span>", rows.map(function(r, i){
+    return card("🏁 지금 어느 시장이 제일 강할까 <span class='mut'>체감 온도 순</span>", rows.map(function(r, i){
       return '<div class="xr"><span class="rk">' + (i + 1) + '</span><b>' + r.m.flag + " " + e(r.m.name) + '</b>' + regChip(r.m.regime) +
         '<span class="xbar" style="flex:1"><i style="width:' + r.sc + '%;background:' + (r.sc >= 60 ? V.UP : r.sc <= 40 ? V.DN : "#6b7385") + '"></i></span><b>' + r.sc + '</b><span class="mut">20일 ' + pct(r.c20) + '</span></div>'; }).join("") +
       '<p class="note">점수 = 오른 종목 비율·신고가 비율·지수 위치·20일 수익률(미국은 VIX까지) 평균. 높을수록 사람들이 사고 싶어 하는 시장.</p>');
@@ -96,7 +96,8 @@
       (ix ? '<p class="note">📐 ' + e(ix.why) + '</p>' : '') +
       '<p class="cp-sum">' + e(m.summary) + '</p></section>';
     h += watchCard(m, k);
-    if (m.fg) h += card("😨😀 공포·탐욕 지수 <span class='mut'>" + e(m.name) + "</span>", fgGauge(m.fg));
+    if (m.fg) h += card("🌡️ 오늘 시장 체감 온도 <span class='mut'>" + e(m.name) + " · 종목 등락으로</span>", fgGauge(m.fg) +
+      '<p class="note">오늘 하루 종목들의 등락·신고가·지수 위치로 잰 「체감 온도」예요. CNN 방식의 <b>공포·탐욕</b>(심리 지표, 미국 심리 + 자기 시장)은 🎲 시장확률 탭에 5개 시장이 같이 있어요.</p>');
     // 2) 등락 종목 수
     var t = Math.max(1, m.up + m.flat + m.down);
     h += card("오늘 오른 종목 · 내린 종목 <span class='mut'>" + num(m.total) + "종목</span>",

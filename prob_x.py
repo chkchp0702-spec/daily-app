@@ -229,18 +229,21 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
     S = lag(G["senti"])
     comps = {c[2:]: lag(G[c]) for c in G.columns if c.startswith("c_")}
     c = d["c"]
-    loc = {"자기 지수 모멘텀": rank252(c / c.rolling(125).mean() - 1) * 100, "자기 지수 변동성(반대)": (1 - d["rvp"]) * 100}
-    if mk == "KR" and _c(H, "^KQ11") is not None:
-        kq = _c(H, "^KQ11").reindex(idx).ffill()
-        loc["코스닥/코스피(개인 위험선호)"] = rank252((kq / c).pct_change(20)) * 100
+    loc = {"자기 지수 모멘텀": rank252(c / c.rolling(125).mean() - 1) * 100, "자기 지수 변동성(반대)": (1 - d["rvp"]) * 100,
+           # 10/15 점검: CNN 지수의 「신고가 vs 신저가」 몫 — 지수가 52주 고점에서 얼마나 빠졌나(1년 백분위)
+           "자기 지수 52주 고점 대비": rank252(c / c.rolling(252, min_periods=120).max() - 1) * 100}
+    # 10/15 점검: 「코스닥/코스피」는 대형주 폭락 때 코스닥이 덜 빠져 극탐욕(98)으로 읽혀 한국 공포를 가렸음 → 뺌
     if not us:
         fx = _c(H, FX[mk][0])
         if fx is not None:
-            loc[FX[mk][1] + "(반대 · 자국 통화 강세 = 탐욕)"] = rank252(-fx.reindex(idx).ffill().pct_change(20)) * 100
+            if mk == "JP":   # 10/15 점검: 엔은 안전자산 — 엔 강세(엔/달러↓) = 공포, 엔 약세 = 위험선호. 예전엔 거꾸로라 닛케이 최고치 근처에서 극공포(9)
+                loc[FX[mk][1] + "(엔 약세 = 탐욕 · 엔은 안전자산)"] = rank252(fx.reindex(idx).ffill().pct_change(20)) * 100
+            else:
+                loc[FX[mk][1] + "(반대 · 자국 통화 강세 = 탐욕)"] = rank252(-fx.reindex(idx).ffill().pct_change(20)) * 100
         gm = pd.DataFrame(comps).mean(axis=1, skipna=True)          # 미국 7개 항목 평균
         lm = pd.DataFrame(loc).mean(axis=1, skipna=True)            # 자기 시장 항목 평균
         comps.update(loc)
-        S = rank252(0.5 * gm + 0.5 * lm.reindex(gm.index)) * 100     # 미국 심리 반 · 자기 시장 반 (항목 수가 달라도 한쪽이 덮지 않게)
+        S = rank252(gm / 3 + lm.reindex(gm.index) * 2 / 3) * 100     # 10/15 점검: 미국 1/3 · 자기 시장 2/3 (반반이면 한국 −17% 폭락이 미국 심리에 묻힘)
     cur = S.dropna().iloc[-1] if S.notna().any() else None        # 10/15: 기준일(모든 자료가 있는 날)의 값
     # 10/15 사용자 「공포지수 이게 맞니?」 — 큰 숫자가 어떻게 나왔는지(항목 평균 → 1년 백분위)와 CNN 원본을 화면에 같이
     def _l(x):
