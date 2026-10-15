@@ -28,7 +28,7 @@
       .concat(ds.length > 2 ? [["마지막 하루", ds[ds.length - 1]]] : []);
     return '<div class="po-win"><span class="po-wl">📅 비교 구간</span>' + pre.map(function(x){ var on = x[0] === "기본" ? def : (!def && S.from === x[1]);
         return '<button type="button" data-win="' + x[1] + '" class="' + (on ? "on" : "") + '">' + x[0] + (x[0] === "기본" ? ' <small>' + md(P0.start) + '</small>' : '') + '</button>'; }).join("") +
-      '<label class="po-wd"><input type="date" id="powin" value="' + cur + '" min="' + P0.start + '" max="' + last + '"></label>' +
+      '<details class="po-wdd"><summary>📅 날짜로</summary><label class="po-wd"><input type="date" id="powin" value="' + cur + '" min="' + P0.start + '" max="' + last + '"></label></details>' +
       '<small class="po-wn">' + md(cur) + ' ~ ' + md(last) + ' · ' + (P.dates.length - 1) + '거래일' + (def ? '' : ' · <b>바꾼 구간</b>') + '</small></div>';
   }
   var URL_PE = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/peers.json";
@@ -77,6 +77,7 @@
     // 🙋 내 포트 (10/14 사용자) — S&P·나스닥·금 비중은 내가 정하고, ⚡ 킥 종목은 체크한 것만 · 계산은 휴대폰에서(myLine)
     var MW = myW();
     PF.push({k: "mine", ic: "🙋", t: S.my.nm || "내 포트", s: "S&P " + r1(MW.spx) + "% · 나스닥 " + r1(MW.ndx) + "% · 금 " + r1(MW.gold) + "% · 종목 " + MW.st.length + "개", s2: "내가 고른 것", line: myLine(MW), color: "#f472b6"});
+    PF.forEach(function(f){ f.line0 = f.line; }); PFR = PF;   // 10/15 A11-3: 문지르기는 자르기 전 줄로 다시 셈
     winApply(PF); B = P.bench;   // 📅 고른 구간으로 자르고 다시 0% 부터
     PF.forEach(function(f){
       var v = f.line, n = v.length, peak = -1e9, mdd = 0, win = 0, best = null, worst = null;
@@ -112,10 +113,21 @@
     }
     var rkNow = rkH && rkH.length ? rkH[rkH.length - 1] : myRank;
     var rkDelta = rkY == null || rkNow == null ? '' : (rkNow < rkY ? '<em class="w">어제 ' + rkY + '위 ↑</em>' : rkNow > rkY ? '<em class="l">어제 ' + rkY + '위 ↓</em>' : '<em>어제도 ' + rkY + '위</em>');
+    // 10/15 A11-5: 포트 카드 4장(같은 「9/14곳 이김」 반복) → 등수 한 줄 띠 · 「전체」 묶음 기준 · 어제 등수와 비교
+    var rkOf = function(f, di){ var mv = f.line[di]; if (mv == null) return null; var c = 1;
+      BM.forEach(function(m){ var v = (B[m.name] || [])[di]; if (v != null && v > mv) c++; }); PF.forEach(function(g){ if (g !== f && g.line[di] != null && g.line[di] > mv) c++; }); return c; };
+    var nL = P.dates.length - 1, RK = PF.map(function(f){ return {f: f, now: rkOf(f, nL), y: nL >= 2 ? rkOf(f, nL - 1) : null, w: beat(f)}; })
+      .sort(function(a, b){ return (a.now || 99) - (b.now || 99); });
+    var wSame = RK.every(function(x){ return x.w === RK[0].w; });
+    var stripH = '<div class="po-rkb"><div class="po-rkbh">🏁 전체 ' + rkTot + '곳 중 등수 <small>누르면 그 포트 기준</small></div><div class="po-rkbr">' +
+      RK.map(function(x){ return '<button type="button" data-pf="' + x.f.k + '" class="' + (S.pf === x.f.k ? "on" : "") + '">' + x.f.ic + ' <b>' + (x.now || "–") + '</b>위</button>'; }).join("") + '</div>' +
+      '<div class="po-rkbs">' + (wSame ? (PF.length > 1 ? PF.length + '개 포트 모두 ' : '') + '시장 ' + BM.length + '곳 중 <b>' + RK[0].w + '</b>곳 이김'
+        : '이긴 시장 ' + RK.map(function(x){ return x.f.ic + ' <b>' + x.w + '</b>'; }).join(' · ') + ' / ' + BM.length + '곳') + '</div>' +
+      (nL >= 2 ? '<div class="po-rkbs">어제보다 ' + RK.map(function(x){ if (x.y == null || x.now == null) return x.f.ic + ' –';
+        return x.y === x.now ? x.f.ic + ' ' + x.now + ' 그대로' : '<span class="' + (x.now < x.y ? "w" : "l") + '">' + x.f.ic + ' ' + x.y + '→' + x.now + (x.now < x.y ? ' ↑' : ' ↓') + '</span>'; }).join(' · ') + '</div>' : '') +
+      (honC(F) ? '<div class="po-rkbo">' + F.ic + ' ' + F.t + ' ' + honC(F) + '</div>' : '') + '</div>';
     var cmpH = '<div class="sec">🏁 시장 ' + BM.length + '곳과 비교 <small class="mut">' + md(P.start) + '부터 · 달러 기준</small></div><section class="card po-lb">' +
-      '<div class="po-lbs n' + PF.length + '">' + PF.map(function(f){ var w = beat(f);
-        return '<button data-pf="' + f.k + '" class="' + (S.pf === f.k ? "on" : "") + (f.k === "kick" ? " k" : "") + '"><small>' + f.ic + ' ' + f.t + '</small><b class="po-big ' + cls(f.ret) + '">' + sg(f.ret) + '</b><span class="po-hs">' + (honC(f) || '<span class="po-hn">정직 계산 준비 중</span>') + '</span>' +
-          '<em><span class="po-wbar"><i style="width:' + (w / BM.length * 100).toFixed(0) + '%"></i></span><b>' + w + '</b>/' + BM.length + '곳 이김</em></button>'; }).join("") + '</div>' +
+      stripH +
       '<div class="po-chips">' + BGRP.filter(function(g){ return g === "전체" || BM.some(function(m){ return m.group === g; }); }).map(function(g){
         return '<button data-bg="' + g + '" class="' + (S.bg === g ? "on" : "") + '">' + g + '</button>'; }).join("") + '</div>' +
       '<div class="po-rank"><b>' + F.ic + ' ' + F.t + '</b>' + (rkSvg ? '<span class="po-rkh">' + rkDelta + rkSvg + '</span>' : '') + '<span class="po-rn">' + myRank + '<small>위 / ' + rowsB.length + '</small></span></div>' +
@@ -134,12 +146,17 @@
     var cmp = S.bsel.slice(0, 4);
     var spN = B["S&P500"][B["S&P500"].length - 1];
     var gapB = function(v){ var d = v - spN; return '<em class="' + (d >= 0 ? "w" : "l") + '">' + (d >= 0 ? "앞섬 " : "뒤짐 ") + sg(d).replace("%", "%p") + '</em>'; };
-    var h = winHtml() + '<section class="po-sum" id="posum"><div class="po-sh">' + md(P.start) + '부터 성적 <small>S&P500보다 <button class="po-shb" type="button" data-pshare="1">📤 공유</button></small></div>' +
+    var FB = PF.filter(function(f){ return f.k === "base"; })[0], FM = PF.filter(function(f){ return f.k === "mine"; })[0];
+    var fxv = FB && FM && FB.ret != null && FM.ret != null ? FM.ret - FB.ret : null, fxD = myDiff(MW);
+    var h = winHtml() + '<section class="po-sum" id="posum"><div class="po-sh"><span id="posumh">' + md(P.start) + '부터 성적</span> <small>S&P500보다 <button class="po-shb" type="button" data-pshare="1">📤 공유</button></small></div>' +
       PF.map(function(f){ return '<button class="po-sr' + (S.pf === f.k ? " on" : "") + ' ' + f.k + '" data-pf="' + f.k + '"><span>' + f.ic + ' ' + f.t + '</span><b class="' + cls(f.ret) + '">' + sg(f.ret) + '</b>' + gapB(f.ret) + '</button>'; }).join("") +
+      (fxv != null ? '<div class="po-myfx" id="pomyfx">🙋 내 선택 효과 ' + fxTag(fxv) + ' <small>' + (fxD.length ? '💼 기본 포트 대비' : '아직 기본과 같은 비중') + '</small></div>' : '') +
       '<div class="po-sr sp"><span>🇺🇸 S&P500</span><b class="' + cls(spN) + '">' + sg(spN) + '</b><em>기준</em></div></section>' + infHtml() +
       '<section class="po-hero' + (F.k === "kick" ? " kick" : F.k === "conc" ? " conc" : F.k === "mine" ? " mine" : "") + '"><div class="po-k">' + F.ic + ' <b>' + F.t + '</b> · ' + F.s + ' · ' + md(P.start) + '부터</div>' +
       '<div class="po-gap ' + (ex >= 0 ? "w" : "l") + '"><small>S&P500보다</small><b>' + sg(ex).replace("%", "%p") + '</b><em>' + (ex >= 0 ? "앞서는 중 👍" : "뒤지는 중") + '</em></div>' +
-      '<div class="po-rl2">수익률 <b class="' + cls(F.ret) + '">' + sg(F.ret) + '</b> · S&P500 <b class="' + cls(spN) + '">' + sg(spN) + '</b></div>' + (honV(F) != null ? '<div class="po-hon">' + honC(F) + '<small>' + (F.k === "kick" ? "돌파 칸은 다음 거래일 종가에 사고 비용을 뺀 값" : "주 1회만 비중을 맞추고 그때 비용을 뺀 값") + '</small></div>' : '') +
+      '<div class="po-rl2">수익률 <b class="' + cls(F.ret) + '">' + sg(F.ret) + '</b> · S&P500 <b class="' + cls(spN) + '">' + sg(spN) + '</b></div>' + (F.k === "mine" && fxv != null ? '<div class="po-fx"><div class="po-fxh">🙋 내 선택 효과 ' + fxTag(fxv) + '<small>내 포트 ' + sg(FM.ret) + ' vs 💼 기본 ' + sg(FB.ret) + '</small></div>' +
+        '<div class="po-fxd">' + (fxD.length ? '다른 점: ' + fxD.map(e).join(' · ') : '아직 기본 포트와 같은 비중이에요 — 아래 🙋 칸에서 바꾸면 여기 차이가 생겨요') + '</div>' +
+        '<details class="po-fxb"><summary>날짜별로 내 선택이 벌고 잃은 것</summary>' + fxBars(FM, FB) + '</details></div>' : '') + (honV(F) != null ? '<div class="po-hon">' + honC(F) + '<small>' + (F.k === "kick" ? "돌파 칸은 다음 거래일 종가에 사고 비용을 뺀 값" : "주 1회만 비중을 맞추고 그때 비용을 뺀 값") + '</small></div>' : '') +
       '<div class="po-won">💰 ' + won(S.amt) + '원 넣었다면 <b class="' + cls(F.ret) + '">' + (F.ret >= 0 ? "+" : "−") + won(Math.abs(S.amt * F.ret / 100)) + '원</b>' +
         ' <small>S&P였다면 ' + (B["S&P500"][B["S&P500"].length - 1] >= 0 ? "+" : "−") + won(Math.abs(S.amt * B["S&P500"][B["S&P500"].length - 1] / 100)) + '원 · 금액은 📋 따라하기 투자금 기준</small></div>' +
       (F.k === "conc" && CN && CN.now ? '<div class="po-cbuy"><div class="po-cbh">🛒 지금 살 것 <small>' + won(S.amt) + '원 · ' + (S.mode === "kr" ? "₩ 원화" : "💵 외화") + ' · ' + (CN.regime && CN.regime.up ? "🟢 오르는 시장" : "🔴 오르는 시장 아님") + '</small></div>' +
@@ -162,7 +179,11 @@
         : V.lines([{name: F.ic + " " + F.t, color: F.color, vals: F.line}].concat(S.bsel.map(function(n){ return {name: n, color: BCOL[n] || "#8a94a8", vals: B[n], dash: 1}; })),
             P.dates.map(md), {h: 200, unit: "%", zero: 1, nodots: P.dates.length > 12, marks: marks(F), niceTicks: 1})) + '</div>' +
       '<div class="po-mk"><span><i style="background:#ffb84d"></i>비중·상품 바뀐 날</span>' + (F.k === "kick" ? '<span><i style="background:#4dd47a"></i>킥 사기</span><span><i style="background:#ff6b6b"></i>킥 팔기</span>' : '') + '</div>' +
-      '<div class="po-w">S&P를 이긴 날 <b>' + F.win + ' / ' + F.days + '</b>' + (F.best ? ' · 가장 좋았던 날 ' + md(F.best.d) + ' <b class="up">' + sg(F.best.r) + '</b>' : '') + (F.worst ? ' · 가장 나빴던 날 ' + md(F.worst.d) + ' <b class="dn">' + sg(F.worst.r) + '</b>' : '') + '</div></section>';
+      '<div class="po-w">S&P를 이긴 날 <b>' + F.win + ' / ' + F.days + '</b>' + (F.best ? ' · 가장 좋았던 날 ' + md(F.best.d) + ' <b class="up">' + sg(F.best.r) + '</b>' : '') + (F.worst ? ' · 가장 나빴던 날 ' + md(F.worst.d) + ' <b class="dn">' + sg(F.worst.r) + '</b>' : '') + '</div>' +
+      (P0.dates.length > 3 ? '<div class="po-scr" id="poscr"><div class="po-scrh">👆 시작일 문지르기 <small>밀면 「그날부터 샀다면」이 바로 바뀌어요</small></div>' +
+        '<input type="range" id="poscrr" min="0" max="' + (P0.dates.length - 2) + '" step="1" value="' + WB + '" aria-label="비교 시작일">' +
+        '<div class="po-scrt"><span>' + md(P0.dates[1]) + '</span><span>' + md(P0.dates[P0.dates.length - 1]) + '</span></div>' +
+        '<div class="po-scro" id="poscro">' + scrubOut(WB) + '</div></div>' : '') + '</section>';
     if (S.pf === "mine") h += myHtml(MW);   // 🙋 고르는 칸은 성적 바로 아래 (바꾸면 위 숫자가 바로 바뀌는 게 보이게)
     h += cmpH;   // 10/12: 위 바로가기 칩 순서(💼 성적 → 🏁 비교)와 맞춤
 
@@ -279,8 +300,53 @@
     [].forEach.call(b.querySelectorAll("[data-win]"), function(x){ x.onclick = function(){ S.from = x.dataset.win === P0.start ? null : x.dataset.win; var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     var wi = document.getElementById("powin"); if (wi) wi.onchange = function(){ var v = wi.value; if (!v) return; S.from = v <= P0.start ? null : v; var y = window.scrollY; draw(); window.scrollTo(0, y); };
     [].forEach.call(b.querySelectorAll("[data-cm]"), function(x){ x.onclick = function(){ S.cmine = +x.dataset.cm; keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });   // A11-2
+    var sr = document.getElementById("poscrr");   // 10/15 A11-3: 미는 동안은 숫자만, 손 떼면 그래프·등수까지 다시 그림
+    if (sr){ sr.oninput = function(){ scrubLive(+sr.value); };
+      sr.onchange = function(){ var bi = +sr.value; S.from = bi ? P0.dates[bi + 1] : null; var top = sr.getBoundingClientRect().top; draw();
+        var n = document.getElementById("poscrr"); if (n) window.scrollTo({top: window.scrollY + n.getBoundingClientRect().top - top, behavior: "instant"}); }; }
   }
 
+  // 10/15 A11-4: 🙋 내 선택 효과 — 내 포트 − 기본 포트 (같은 구간·같은 날짜 줄)
+  function fxTag(v){ var z = Math.abs(v) < 0.005; return '<b class="' + (z ? "" : v > 0 ? "w" : "l") + '">' + (z ? "0.00%p" : sg(v).replace("%", "%p")) + '</b>'; }
+  function myDiff(MW){
+    var H = P0.hold || [], pk = function(re){ var x = H.filter(function(h){ return re.test(h.name); })[0]; return x ? +x.pct || 0 : 0; };
+    var bw = {spx: pk(/S&P/), ndx: pk(/나스닥/), gold: pk(/^금/), cash: pk(/현금/)}, out = [];
+    [["S&P", "spx"], ["나스닥", "ndx"], ["금", "gold"], ["현금", "cash"]].forEach(function(q){ var a = bw[q[1]], c = +MW[q[1]] || 0; if (Math.abs(a - c) >= 0.5) out.push(q[0] + " " + r1(a) + "→" + r1(c) + "%"); });
+    if (MW.st.length) out.push("⚡ 종목 " + MW.st.length + "개");
+    return out;
+  }
+  function fxBars(FM, FB){
+    var rows = [], mx = 0.05;
+    for (var i = 1; i < P.dates.length; i++){ var a = FM.line[i], a0 = FM.line[i - 1], c = FB.line[i], c0 = FB.line[i - 1]; if (a == null || c == null) continue;
+      var d = ((1 + a / 100) / (1 + (a0 || 0) / 100) - (1 + c / 100) / (1 + (c0 || 0) / 100)) * 100; rows.push([P.dates[i], d]); mx = Math.max(mx, Math.abs(d)); }
+    if (!rows.length) return '<p class="note">아직 날짜가 부족해요.</p>';
+    return rows.reverse().map(function(r){ var w = Math.abs(r[1]) / mx * 50, z = Math.abs(r[1]) < 0.005;
+      return '<div class="po-fxr"><span>' + md(r[0]) + '</span><div class="po-fxbar"><i class="' + (r[1] >= 0 ? "g" : "n") + '" style="width:' + w.toFixed(1) + '%"></i></div><b class="' + (z ? "" : r[1] > 0 ? "w" : "l") + '">' + (r[1] > 0 ? "+" : "") + r[1].toFixed(2) + '%p</b></div>'; }).join("") +
+      '<p class="note">초록 오른쪽 = 그날 내 선택이 기본보다 더 벌었음 · 파랑 왼쪽 = 덜 벌었음</p>';
+  }
+  // 10/15 A11-3: 👆 시작일 문지르기 — 미는 동안 「그날부터 샀다면」 숫자만 그 자리에서 다시 셈(그래프·등수는 손 뗄 때)
+  var PFR = null;
+  function relAt(arr, bi){ if (!arr) return null; var a = arr[bi], z = arr[arr.length - 1]; if (z == null) return null; a = a == null ? 0 : a; return ((1 + z / 100) / (1 + a / 100) - 1) * 100; }
+  function scrubVals(bi){ return {sp: relAt(P0.bench["S&P500"], bi), pf: (PFR || []).map(function(f){ return {f: f, r: relAt(f.line0, bi)}; })}; }
+  function scrubOut(bi){
+    var X = scrubVals(bi), d = P0.dates[bi + 1], sel = X.pf.filter(function(x){ return x.f.k === S.pf; })[0] || X.pf[0];
+    var gap = !sel || sel.r == null || X.sp == null ? null : sel.r - X.sp;
+    return '<div class="po-scd"><b>' + md(d) + '부터</b> 샀다면' + (gap == null ? '' : ' <em class="' + (gap >= 0 ? "w" : "l") + '">' + sel.f.ic + ' S&P보다 ' + (gap >= 0 ? "앞섬 " : "뒤짐 ") + sg(gap).replace("%", "%p") + '</em>') + '</div>' +
+      '<div class="po-scv">' + X.pf.map(function(x){ return '<span class="' + (x.f.k === S.pf ? "on" : "") + '">' + x.f.ic + ' <b class="' + cls(x.r) + '">' + sg(x.r) + '</b></span>'; }).join("") +
+      '<span class="sp">S&P <b class="' + cls(X.sp) + '">' + sg(X.sp) + '</b></span></div>';
+  }
+  function scrubLive(bi){
+    var o = document.getElementById("poscro"); if (o) o.innerHTML = scrubOut(bi);
+    var X = scrubVals(bi), sh = document.getElementById("posumh"); if (sh) sh.textContent = md(P0.dates[bi + 1]) + "부터 성적";
+    var R = {}; X.pf.forEach(function(x){ R[x.f.k] = x.r;
+      var row = document.querySelector('#posum .po-sr[data-pf="' + x.f.k + '"]'); if (!row || x.r == null) return;
+      var bb = row.querySelector("b"), ee = row.querySelector("em"); if (bb){ bb.className = cls(x.r); bb.textContent = sg(x.r); }
+      if (ee && X.sp != null){ var g = x.r - X.sp; ee.className = g >= 0 ? "w" : "l"; ee.textContent = (g >= 0 ? "앞섬 " : "뒤짐 ") + sg(g).replace("%", "%p"); } });
+    var spb = document.querySelector("#posum .po-sr.sp b"); if (spb && X.sp != null){ spb.className = cls(X.sp); spb.textContent = sg(X.sp); }
+    var fx = document.querySelector("#pomyfx b"); if (fx && R.mine != null && R.base != null){ var t = document.createElement("span"); t.innerHTML = fxTag(R.mine - R.base); fx.replaceWith(t.firstChild); }
+    var gp = document.querySelector("#pobody .po-hero .po-gap"); if (gp && R[S.pf] != null && X.sp != null){ var g2 = R[S.pf] - X.sp;
+      gp.className = "po-gap " + (g2 >= 0 ? "w" : "l"); var gb = gp.querySelector("b"), ge = gp.querySelector("em"); if (gb) gb.textContent = sg(g2).replace("%", "%p"); if (ge) ge.textContent = g2 >= 0 ? "앞서는 중 👍" : "뒤지는 중"; }
+  }
   // ② 그래프 표시: 비중·상품 바뀐 날(노랑) · 킥 사기(초록)·팔기(빨강) — 「그때 그 판단이 맞았나」를 눈으로
   function marks(F){
     var out = [], idx = function(d){ var i = P.dates.indexOf(d); if (i < 0) for (var j = 0; j < P.dates.length; j++) if (P.dates[j] >= d){ i = j; break; } return i; };
@@ -290,7 +356,7 @@
   }
   // 포트 고르기(기본·킥·집중): 다시 그린 뒤 「누른 버튼」이 화면 같은 자리에 오도록 (위 칸 높이가 바뀌어도 안 튐 · 10/12)
   function pfJump(x){
-    var grp = x.closest(".po-sum") ? ".po-sum" : x.closest(".po-pf") ? ".po-pf" : x.closest(".po-pf2") ? ".po-pf2" : x.closest(".po-lbs") ? ".po-lbs" : x.closest(".po-rk") ? ".po-rk" : null;
+    var grp = x.closest(".po-sum") ? ".po-sum" : x.closest(".po-pf") ? ".po-pf" : x.closest(".po-pf2") ? ".po-pf2" : x.closest(".po-lbs") ? ".po-lbs" : x.closest(".po-rkb") ? ".po-rkb" : x.closest(".po-rk") ? ".po-rk" : null;
     var top = x.getBoundingClientRect().top, y0 = window.scrollY;
     var fold = {}; [].forEach.call(document.querySelectorAll("#pobody .fold"), function(f){ fold[f.id] = f.classList.contains("open"); });
     draw();
@@ -821,6 +887,24 @@
     ".po-win button{border:1px solid var(--line,#2a3142);background:transparent;color:var(--sub);border-radius:999px;padding:5px 10px;font-size:12px;cursor:pointer}.po-win button small{opacity:.7;font-size:10.5px}" +
     ".po-win button.on{background:var(--acc,#7c9cff);border-color:var(--acc,#7c9cff);color:#fff;font-weight:700}.po-wd input{border:1px solid var(--line,#2a3142);background:transparent;color:inherit;border-radius:8px;padding:4px 6px;font-size:12px;color-scheme:dark light}" +
     ".po-wn{flex-basis:100%;font-size:11px;color:var(--sub)}.po-wn b{color:#ffb84d}" +
+    ".po-wdd summary{list-style:none;cursor:pointer;border:1px solid var(--line,#2a3142);color:var(--sub);border-radius:999px;padding:5px 10px;font-size:12px}.po-wdd summary::-webkit-details-marker{display:none}.po-wdd[open]{flex-basis:100%;display:flex;align-items:center;gap:8px}.po-wdd[open] summary{color:var(--text)}.po-wd input{font-family:inherit}" +
+    /* 10/15 A11-3 문지르기 */
+    ".po-scr{margin-top:12px;padding:12px 12px 10px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}.po-scrh{font-size:13px;font-weight:800}.po-scrh small{font-weight:400;font-size:11.5px;color:var(--sub);margin-left:4px}" +
+    "#poscrr{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:6px 0 0;cursor:pointer}" +
+    "#poscrr::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,rgba(124,156,255,.25),rgba(124,156,255,.6))}#poscrr::-moz-range-track{height:6px;border-radius:3px;background:rgba(124,156,255,.4)}" +
+    "#poscrr::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;background:#fff;border:3px solid var(--acc,#7c9cff);box-shadow:0 2px 8px rgba(0,0,0,.35)}#poscrr::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--acc,#7c9cff)}" +
+    ".po-scrt{display:flex;justify-content:space-between;font-size:11px;color:var(--dim)}.po-scro{margin-top:6px}.po-scd{font-size:14px}.po-scd em{font-style:normal;font-weight:800;margin-left:4px}.po-scd em.w{color:#4dd47a}.po-scd em.l{color:#7cb0ff}" +
+    ".po-scv{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px;font-size:13px;color:var(--sub)}.po-scv span{white-space:nowrap}.po-scv span.on{color:var(--text);font-weight:700}.po-scv b{font-variant-numeric:tabular-nums}" +
+    /* 10/15 A11-4 내 선택 효과 */
+    ".po-myfx{font-size:12.5px;color:var(--sub);padding:0 4px 8px 30px;margin-top:-4px}.po-myfx b{font-size:13.5px;margin:0 2px}.po-myfx b.w,.po-fx b.w,.po-fxr b.w{color:#4dd47a}.po-myfx b.l,.po-fx b.l,.po-fxr b.l{color:#7cb0ff}.po-myfx small{font-size:11px}" +
+    ".po-fx{margin:8px 0 6px;padding:10px 12px;border-radius:12px;background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.25)}.po-fxh{font-size:14px;font-weight:800;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}.po-fxh b{font-size:18px}.po-fxh small{font-weight:400;font-size:12px;color:var(--sub)}" +
+    ".po-fxd{font-size:12.5px;color:var(--sub);margin-top:3px}.po-fxb{margin-top:6px}.po-fxb summary{cursor:pointer;font-size:12.5px;color:var(--acc,#7c9cff);font-weight:700}" +
+    ".po-fxr{display:grid;grid-template-columns:40px minmax(0,1fr) 64px;align-items:center;gap:8px;font-size:12.5px;padding:3px 0}.po-fxr span{color:var(--sub)}.po-fxr b{text-align:right;font-variant-numeric:tabular-nums}" +
+    ".po-fxbar{position:relative;height:8px;background:var(--panel2);border-radius:4px}.po-fxbar::before{content:\"\";position:absolute;left:50%;top:-2px;bottom:-2px;width:1.5px;background:var(--sub);opacity:.6}.po-fxbar i{position:absolute;top:0;bottom:0;border-radius:4px}.po-fxbar i.g{left:50%;background:#4dd47a}.po-fxbar i.n{right:50%;background:#3987e5}" +
+    /* 10/15 A11-5 등수 한 줄 띠 */
+    ".po-rkb{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:10px 12px}.po-rkbh{font-size:12.5px;font-weight:800;color:var(--sub)}.po-rkbh small{font-weight:400;font-size:11px;margin-left:4px}" +
+    ".po-rkbr{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:5px;margin:7px 0 6px}.po-rkbr button{border:1px solid var(--line);background:var(--panel);color:var(--sub);border-radius:999px;padding:6px 2px;font:inherit;font-size:12.5px;min-width:0;overflow:hidden;cursor:pointer;white-space:nowrap}.po-rkbr button b{font-size:16px;color:var(--text);margin:0 1px}.po-rkbr button.on{border-color:#e9c46a;background:rgba(233,196,106,.12);color:var(--text);font-weight:800}" +
+    ".po-rkbs{font-size:12px;color:var(--sub);margin-top:2px}.po-rkbs b{color:var(--text)}.po-rkbs .w{color:#4dd47a}.po-rkbs .l{color:#7cb0ff}.po-rkbo{margin-top:6px;font-size:12px;color:var(--sub);display:flex;align-items:center;gap:6px;flex-wrap:wrap}" +
     ".po-sh{font-size:13px;font-weight:800;color:var(--sub);display:flex;justify-content:space-between;margin:0 2px 4px}.po-sh small{font-weight:400;font-size:11.5px}" +
     ".po-shb{margin-left:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:2px 9px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}" +
     ".po-sr{display:grid;grid-template-columns:1fr auto 92px;align-items:center;gap:10px;width:100%;background:none;border:0;border-top:1px solid var(--line);color:var(--text);font:inherit;padding:11px 4px;text-align:left;cursor:pointer;border-radius:0}" +
