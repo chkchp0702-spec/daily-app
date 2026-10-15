@@ -49,6 +49,30 @@ for k in range(1, 12):
             break
     if len(recent) >= 3: break
 out["src"]["daily_json"] = list(recent.keys())
+# 2b) 2019-10 뒤 빈 기간을 일별 JSON 으로 채움 (10/15 13시: 2019-11~2025 날짜 모두 200 확인)
+from concurrent.futures import ThreadPoolExecutor
+def one(day):
+    u = f"https://cdn.cboe.com/data/us/options/market_statistics/daily/{day}_daily_options"
+    for _ in range(2):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=20) as r:
+                j = json.loads(r.read()); v = {x["name"]: x["value"] for x in j.get("ratios", [])}
+                return day, float(v.get("TOTAL PUT/CALL RATIO", "nan")), float(v.get("EQUITY PUT/CALL RATIO", "nan")), float(v.get("INDEX PUT/CALL RATIO", "nan"))
+        except Exception:
+            pass
+    return day, None, None, None
+days = [d.date() for d in pd.bdate_range("2019-10-07", today - dt.timedelta(days=1))]
+with ThreadPoolExecutor(16) as ex: got = [g for g in ex.map(one, days) if g[1] is not None]
+print("일별 JSON 채움", len(got), "/", len(days))
+if got:
+    add = {"totalpc": {}, "equitypc": {}, "indexpc": {}}
+    for day, t, e, i in got:
+        add["totalpc"][pd.Timestamp(day)] = t; add["equitypc"][pd.Timestamp(day)] = e; add["indexpc"][pd.Timestamp(day)] = i
+    for nm, dct in add.items():
+        if nm in series:
+            ss = pd.concat([series[nm], pd.Series(dct)]).sort_index(); series[nm] = ss[~ss.index.duplicated(keep="first")].dropna()
+            print(nm, "합침", series[nm].index[0].date(), "→", series[nm].index[-1].date(), len(series[nm]), "지금 5일 평균", round(series[nm].iloc[-5:].mean(), 3))
+
 # 3) 야후 기호 시험
 for sym in ("^CPC", "^CPCE", "^PCCE", "^PCC"):
     b = fetch(f"https://query1.finance.yahoo.com/v8/finance/chart/{sym.replace('^','%5E')}?range=1y&interval=1d", 15)
@@ -69,14 +93,16 @@ def wf_brier(d, cut, prior=150, start="2008-01-01"):
     p = (num.fillna(0) + prior * base) / (den.fillna(0) + prior)
     ev = ok & (d.index >= start) & base.notna()
     ix = d.index[ev]; mid = ix[len(ix) // 2]; res = {"mid": str(mid.date())}
-    for nm, msk in (("앞", ev & (d.index < mid)), ("뒤", ev & (d.index >= mid))):
+    for nm, msk in (("앞", ev & (d.index < mid)), ("뒤", ev & (d.index >= mid)), ("2020~", ev & (d.index >= "2020-01-01")), ("최근2년", ev & (d.index >= d.index[-1] - pd.Timedelta(days=730)))):
         res[nm] = [round(float(((base[msk] - y[msk]) ** 2).mean()), 4), round(float(((p[msk] - y[msk]) ** 2).mean()), 4)]
     return res
 
 if series:
     H = prob.load_hist(sorted({c["ix"] for c in prob.MK.values()}))
     for nm, s in series.items():
-        feats = {"lv5": s.rolling(5).mean(), "rk": s.rolling(5).mean().rolling(252, min_periods=120).rank(pct=True)}
+        if nm == "indexpc": continue
+        feats = {"rk": s.rolling(5).mean().rolling(252, min_periods=120).rank(pct=True)}
+        print(nm, "지금 1년 백분위", round(float(feats["rk"].iloc[-1]), 3))
         for mk, cfg in prob.MK.items():
             d = prob.feats(H[cfg["ix"]]); d = d[(d.index >= s.index[0]) & (d.index <= s.index[-1] + pd.Timedelta(days=3))]
             lag = (lambda x: x.reindex(d.index).ffill(limit=3)) if mk == "US" else (lambda x: prob_x.align(x, d.index))
@@ -95,5 +121,5 @@ if series:
                     tb.append(row)
                 R = {"table": tb, "brier": wf_brier(d, cut), "mid": str(mid.date())}
                 out["mk"].setdefault(nm, {}).setdefault(mk, {})[fn] = R
-                print("==", nm, mk, fn, json.dumps(R, ensure_ascii=False))
+                print("==", nm, mk, fn, "브라이어", json.dumps(R["brier"], ensure_ascii=False)); print("   표", json.dumps([[r["k"], r["앞"] and r["앞"]["d1"], r["뒤"] and r["뒤"]["d1"], r["all"] and r["all"]["n"]] for r in R["table"]], ensure_ascii=False))
 json.dump(out, open("probe/pcr_bt.json", "w"), ensure_ascii=False, indent=1)
