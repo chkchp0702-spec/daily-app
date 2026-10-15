@@ -11,7 +11,7 @@
   sector  관심섹터    stock-screener/briefing_data/daily/<날짜>.txt  (+ sector-watch, 비공개)
   accum   조용한 매집  Cup/results/list3_accum.csv  → 그날 날짜로 보관
 """
-import csv, json, os, re, shutil, glob, datetime
+import csv, json, os, re, shutil, glob, datetime, sys
 
 SRC = "_src"
 ARC = "archive"
@@ -311,6 +311,13 @@ def compass():
     with urllib.request.urlopen(url, timeout=30) as r:
         txt = r.read().decode("utf-8")
     d = json.loads(txt)
+    try:      # 🧭 10/15: 지수·국면에 live 값 덧입히기 (아침 지수에 머물러 「코스피 −5% 횡보장」이 나왔음 · 일본·홍콩 빠진 어제 봉)
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "opdb"))
+        import ixlive
+        if ixlive.overlay(d, os.path.join("archive", "x")):
+            txt = json.dumps(d, ensure_ascii=False, separators=(",", ":"))
+    except Exception as e:
+        print("나침반 live 덧입히기 실패", e)
     days = [m.get("date", "") for m in d.get("markets", {}).values() if DATE_RE.match(m.get("date", ""))]
     if days:
         put("sector", max(days), "compass.json", text=txt)

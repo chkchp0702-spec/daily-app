@@ -47,9 +47,16 @@
   function sentence(m){
     var r = m.up / Math.max(1, m.up + m.down) * 100, ix = m.index[0] || {}, ss = (m.sectors || []).slice().sort(function(a, b){ return (b.r1 || 0) - (a.r1 || 0); });
     var lead = ss[0], lag = ss[ss.length - 1], st = (m.strong || [])[0];
-    var bigsmall = ix.chg1 != null && m.median1 != null ? (ix.chg1 - m.median1 > 0.7 ? "대형주가 끌고 중소형은 따라오지 못한" : m.median1 - ix.chg1 > 0.7 ? "지수보다 중소형이 더 힘을 낸" : "큰 회사와 작은 회사가 비슷하게 움직인") : "";
+    // 10/15: 종목은 어제(m.date)인데 지수는 오늘 장중이면 → 같은 날 지수 등락으로 비교, 「오늘」 대신 날짜
+    var ic = ix.chg1, day = "오늘";
+    if (ix.date && m.date && ix.date > m.date){
+      day = m.date.slice(5).replace("-", "/"); ic = null;
+      var o = ix.ohlc || [], j = o.map(function(r){ return r[0]; }).indexOf(m.date);
+      if (j > 0) ic = (o[j][4] / o[j - 1][4] - 1) * 100;
+    }
+    var bigsmall = ic != null && m.median1 != null ? (ic - m.median1 > 0.7 ? "대형주가 끌고 중소형은 따라오지 못한" : m.median1 - ic > 0.7 ? "지수보다 중소형이 더 힘을 낸" : "큰 회사와 작은 회사가 비슷하게 움직인") : "";
     var mood = r >= 65 ? "거의 모든 종목이 오른" : r >= 55 ? "오른 종목이 더 많은" : r > 45 ? "오르고 내린 종목이 반반인" : r > 35 ? "내린 종목이 더 많은" : "거의 모든 종목이 내린";
-    return "오늘 " + m.name + "은 " + (lead && (lead.r1 || 0) > 0 ? "<b>" + e(lead.name) + "</b>(" + pct(lead.r1) + ")이 끌고 " : "") + (lag && (lag.r1 || 0) < 0 ? "<b>" + e(lag.name) + "</b>(" + pct(lag.r1) + ")이 밀린, " : "") + mood + " 날" +
+    return day + " " + m.name + "은 " + (lead && (lead.r1 || 0) > 0 ? "<b>" + e(lead.name) + "</b>(" + pct(lead.r1) + ")이 끌고 " : "") + (lag && (lag.r1 || 0) < 0 ? "<b>" + e(lag.name) + "</b>(" + pct(lag.r1) + ")이 밀린, " : "") + mood + " 날" +
       (bigsmall ? " — " + bigsmall + " 장" : "") + "이었어요." + (st ? " 업종으로는 <b>" + e(st.name) + "</b>(" + pct(st.r1) + ")이 가장 셌고" + (st.lead && st.lead[0] ? ", 대장은 " + e(st.lead[0].n) + "." : ".") : "") +
       (m.highs != null ? " 52주 신고가 " + m.highs + "개 / 신저가 " + m.lows + "개." : "");
   }
@@ -57,14 +64,15 @@
     var ix = (m.index || [])[0]; if (!ix || !ix.ma20 || ix.ma20.length < 12 || !ix.ma60) return "";
     var a = ix.ma20, n = a.length, m20 = a[n - 1], sl = (a[n - 1] - a[n - 11]) / 10, m60 = ix.ma60, px = ix.last;
     var gap = (m20 / m60 - 1) * 100, pg = (px / m20 - 1) * 100, txt, days = null, to = null;
-    if (m.regime !== "상승장" && m20 < m60 && sl > 0){ days = Math.ceil((m60 - m20) / sl); to = "상승장"; txt = "20일선이 60일선 아래에서 하루 " + (sl / m20 * 100).toFixed(2) + "%씩 올라오는 중"; }
+    if (ix.crash){ txt = "📉 급락으로 하락장 — " + e(ix.why.replace(/^급락 — /, "")) + ". 선(20·60일)이 따라오기 전에 먼저 하락장으로 봐요. 지수가 20일선 위로 돌아오면 다시 선으로 판정"; }
+    else if (m.regime !== "상승장" && m20 < m60 && sl > 0){ days = Math.ceil((m60 - m20) / sl); to = "상승장"; txt = "20일선이 60일선 아래에서 하루 " + (sl / m20 * 100).toFixed(2) + "%씩 올라오는 중"; }
     else if (m.regime !== "하락장" && m20 > m60 && sl < 0){ days = Math.ceil((m20 - m60) / -sl); to = "하락장"; txt = "20일선이 60일선 위에서 하루 " + (sl / m20 * 100).toFixed(2) + "%씩 내려오는 중"; }
     else txt = m.regime === "상승장" ? "20일선이 60일선 위에서 계속 오르는 중 — 당장 바뀔 신호 없음" : m.regime === "하락장" ? "20일선이 60일선 아래에서 계속 내리는 중 — 당장 바뀔 신호 없음" : "20일선 기울기가 평평 — 방향을 기다리는 중";
     var bar = function(v){ return '<span class="xbar" style="flex:1"><i style="width:' + clamp(50 + v * 8).toFixed(0) + '%;background:' + (v >= 0 ? V.UP : V.DN) + '"></i></span>'; };
     return card("⏳ 국면 전환 예보 <span class='mut'>" + e(ix.name) + " · 지금 " + e(m.regime) + "</span>",
-      (days != null && days <= 60 ? '<div class="fc"><b class="' + (to === "상승장" ? "up" : "dn") + '">' + (to === "상승장" ? "▲" : "▼") + ' 약 ' + days + '거래일 뒤 ' + to + ' 조건</b><small>이 속도가 그대로 이어지면</small></div>' : '<div class="fc"><b>◆ 60거래일 안엔 바뀔 신호 없음</b></div>') +
+      (ix.crash ? '<div class="fc"><b class="dn">▼ 급락 — 지금 하락장</b><small>지수가 20일선(' + V.fmt(m20) + ') 위로 돌아오면 풀려요</small></div>' : days != null && days <= 60 ? '<div class="fc"><b class="' + (to === "상승장" ? "up" : "dn") + '">' + (to === "상승장" ? "▲" : "▼") + ' 약 ' + days + '거래일 뒤 ' + to + ' 조건</b><small>이 속도가 그대로 이어지면</small></div>' : '<div class="fc"><b>◆ 60거래일 안엔 바뀔 신호 없음</b></div>') +
       '<div class="xr"><span>지수 vs 20일선</span>' + bar(pg) + '<b class="' + cls(pg) + '">' + sgn(pg) + '%</b></div><div class="xr"><span>20일선 vs 60일선</span>' + bar(gap) + '<b class="' + cls(gap) + '">' + sgn(gap) + '%</b></div>' +
-      '<p class="note">' + txt + '. 상승장 = 지수가 20일선·60일선 위 + 20일선이 60일선 위 + 20일선이 오름. 예보는 지금 속도를 그대로 이은 것이라 하루 큰 움직임에 바로 바뀌어요.</p>');
+      '<p class="note">' + txt + '. 상승장 = 지수가 20일선·60일선 위 + 20일선이 60일선 위 + 20일선이 오름. 급락(20일선 아래 + 20일 −8% 이하 또는 20일 고점 대비 −10% 이하)은 바로 하락장. 예보는 지금 속도를 그대로 이은 것이라 하루 큰 움직임에 바로 바뀌어요.</p>');
   }
   function clock(m){
     var ss = (m.sectors || []).filter(function(x){ return x.r5 != null && x.r20 != null; }); if (ss.length < 4) return "";
@@ -92,7 +100,7 @@
       '<p class="note">교과서의 경기 순환처럼 섹터는 보통 🌱 새로 뜸(9~12시) → 🔥 강함(12~3시) → 🍂 힘 빠짐(3~6시) → 🧊 약함(6~9시) 순으로 돌아요. 화살표 = 지난 5일 이동. 9~12시 쪽에 있는 섹터가 다음 주인공 후보예요. 점을 누르면 종목.</p>');
   }
   window.CPX2 = function(m, k, C){
-    return '<section class="card sentc"><div class="sentc-k">🗣️ 오늘 ' + e(m.name) + ' 한 문장</div><p>' + sentence(m) + '</p></section>' + forecast(m) + clock(m);
+    return '<section class="card sentc"><div class="sentc-k">🗣️ ' + ((m.index || [])[0] && m.index[0].date > m.date ? e(m.date.slice(5).replace("-", "/")) + " 마감" : "오늘") + ' ' + e(m.name) + ' 한 문장</div><p>' + sentence(m) + '</p></section>' + forecast(m) + clock(m);
   };
 
   /* ======================= 🤫 조용한 매집 ======================= */

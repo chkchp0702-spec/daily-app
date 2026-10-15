@@ -36,11 +36,14 @@ jobs:
           pip install -q yfinance pandas
           python live_world.py || echo "일본·중국·홍콩·미국 실패"
           python focus_live.py || echo "🎯 집중 장중 실패"
+          # 🧭 10/15: 나침반 지수·국면에 방금 값 덧입히기 (아침 한 번 받은 지수에 머물러 「−5% 횡보장」이 나왔음)
+          CP=$(ls archive/sector/*/compass.json | sort | tail -1); echo "$CP" > /tmp/cp.txt
+          python opdb/ixlive.py "$CP" archive/x || echo "나침반 덧입히기 실패"
       - name: 저장
         run: |
           git config user.name "bot"
           git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/live_*.json archive/x/focus_live.json
+          bash scripts/push.sh "live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/live_*.json archive/x/focus_live.json "$(cat /tmp/cp.txt)"
       - name: 지킴이 살아 있나 (없으면 켬)
         if: always()
         env:

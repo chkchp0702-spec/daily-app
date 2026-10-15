@@ -14,6 +14,7 @@ for k, m in C.get("markets", {}).items():
         old = {x["sym"]: x for x in m.get("index", [])}
         got = {x["sym"] for x in ix}
         m["index"] = ix + [x for x in m.get("index", []) if x["sym"] not in got and "ohlc" in x]   # 이번에 못 받은 지수는 예전 것 유지
+        m["regime"] = m["index"][0]["regime"]      # 국면도 새 지수로 (예전엔 종목 묶음 실행 때 값이 남았음)
         print(k, [(x["sym"], len(x.get("ohlc") or [])) for x in ix], "(전:", list(old), ")")
 gl = index_block("GL")                     # 🏁 포트 비교 지수 (세계·자산배분)
 if gl:

@@ -100,6 +100,14 @@ def regime(closes):
     if m60 != m60:
         return "횡보장", "데이터가 짧아 판단 보류", ma20, None, slope
     above20, above60 = c > m20, c > m60
+    # 📉 10/15 사용자: "이걸 횡보장이라고 하는게 말이 되니?" — 코스피 20일 −17.6%·하루 −5% 인데 20일선이 아직 60일선 위라 「횡보장」.
+    # 급락은 선이 따라오기 전에 먼저 하락장으로: 지수가 20일선 아래 + (20일 등락 ≤ −8% 또는 20일 고점 대비 ≤ −10%).
+    # 1년 검증: 미국·상해·CSI300·항셍은 바뀐 날 0, 바뀐 날은 코스피 3월·7월·10월 급락 같은 구간뿐.
+    if len(s) > 21 and not above20:
+        r20 = (c / s.iloc[-21] - 1) * 100
+        dd20 = (c / s.iloc[-20:].max() - 1) * 100
+        if r20 <= -8 or dd20 <= -10:
+            return "하락장", f"급락 — 20거래일 {r20:+.1f}%, 20일 고점 대비 {dd20:+.1f}% (20일선 아래)", ma20, m60, slope
     if above20 and m20 > m60 and slope > 0.3:
         lab, why = "상승장", "지수가 20일선·60일선 위, 20일선이 오르는 중"
     elif (not above20) and m20 < m60 and slope < -0.3:
@@ -189,6 +197,22 @@ def alt_frame(s):
     return f[f.index >= f.index[-1] - pd.Timedelta(days=372)]
 
 
+MKT_TZ = {"US": ("America/New_York", 16, 0), "KR": ("Asia/Seoul", 15, 30), "JP": ("Asia/Tokyo", 15, 30),
+          "CN": ("Asia/Shanghai", 15, 0), "HK": ("Asia/Hong_Kong", 16, 10)}
+
+
+def _live(mkt, d):
+    """마지막 봉이 그 시장의 「오늘」이고 아직 마감 전이면 True (장중 숫자)"""
+    try:
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        tz, hh, mm = MKT_TZ[mkt]
+        now = datetime.now(ZoneInfo(tz))
+        return d.strftime("%Y-%m-%d") == now.strftime("%Y-%m-%d") and (now.hour, now.minute) < (hh, mm)
+    except Exception:
+        return False
+
+
 def index_block(mkt):
     import yfinance as yf
     import pandas as pd
@@ -244,7 +268,8 @@ def index_block(mkt):
             "hi52": _r(c.max()), "lo52": _r(c.min()),
             "dates": [d.strftime("%m/%d") for d in tail.index], "close": [_r(v) for v in tail.values],
             "ma20": [_r(v) for v in m20t.values], "ma60": _r(m60), "slope20": _r(slope),
-            "regime": lab, "why": why, "reg_hist": rh,
+            "regime": lab, "why": why, "reg_hist": rh, "crash": why.startswith("급락"),
+            "live": _live(mkt, c.index[-1]),
             "ohlc": ohlc_1y(sub, c),
         })
     return out
