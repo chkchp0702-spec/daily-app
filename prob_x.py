@@ -22,7 +22,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
-XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X"]
+XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX"]
 FX = {"KR": ("KRW=X", "원/달러"), "JP": ("JPY=X", "엔/달러"), "CN": ("CNY=X", "위안/달러"), "HK": ("CNY=X", "위안/달러"), "US": ("DX-Y.NYB", "달러 인덱스")}
 
 
@@ -295,6 +295,18 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
         cv = f5.iloc[-1]
         m, _ = bucket_stats(d, f5, [-9, -0.015, -0.004, 0.004, 0.015, 9], ["달러 크게 약세", "달러 약세", "그대로", "달러 강세", "달러 크게 강세"], cv, cond)
         add("fx", "💱", "환율(" + fxn + ")", "자금", m, 0.6, f"{fxn} 5일 {cv*100:+.2f}% — 달러 강세는 외국인 자금이 빠지는 쪽")
+    # 📐 장단기 금리차 (10/15 12시 #6 · probe/curve_bt.py) — 미 10년(^TNX) − 3개월(^IRX), 한국만
+    #   검증(2000~, 2013-04 기준 앞/뒤): 「보통(0.5~1.5)」 구간 뒤 코스피 다음 날 +2.2%p · +2.0%p (n 1,501) · 「가파름(>1.5)」 −0.8 · −3.5%p
+    #   걸어가며(그날 이전 자료만) 브라이어 0.2500→0.2498 · 0.2479→0.2471 · 최근 2년 0.2451→0.2423 — 세 기간 모두 개선
+    #   일본·중국·미국은 브라이어 개선 없음 ❌ · 홍콩은 뒤 기간 나빠짐 ➖ · 60일 변화(가팔라짐/평평해짐)는 5개 시장 모두 ❌
+    tn, ir = _c(H, "^TNX"), _c(H, "^IRX")
+    if mk == "KR" and tn is not None and ir is not None:
+        spd = (tn - ir).dropna()
+        if len(spd) > 500:
+            cs = align(spd, idx); cv = cs.iloc[-1]
+            m, tb = bucket_stats(d, cs, [-9, 0, 0.5, 1.5, 9], ["역전(<0)", "평평(0~0.5)", "보통(0.5~1.5)", "가파름(>1.5)"], cv, cond)
+            research["curve"] = tb
+            add("curve", "📐", "장단기 금리차", "자금", m, 0.4, f"미 10년 − 3개월 금리 {cv:+.2f}%p ({spd.index[-1].strftime('%m/%d')})")
     # 🌏 외국인 수급 (한국) — 20일 누적 순매수의 2년 백분위 + 연속 순매도 일수
     fr = ext.get("foreign")
     if mk == "KR" and fr is not None and 0 < len(fr) <= 120:
