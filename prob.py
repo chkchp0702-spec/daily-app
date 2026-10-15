@@ -128,6 +128,17 @@ def patch_live(H):
         ld, hm = loc.strftime("%Y-%m-%d"), loc.hour * 100 + loc.minute
         closed = d < ld or (d == ld and hm >= cfg["close"] + 10) or (mk == "KR" and ix.get("status") == "CLOSE" and d == ld and hm >= cfg["close"])
         last_bar = px.index[-1].strftime("%Y-%m-%d")
+        if not closed and d == ld and ix.get("chg") is not None:
+            # 10/15 09시: 장중엔 야후가 오늘 장중 봉은 주면서 어제 봉은 아직 없는 날이 있음(→ 그저께 기준으로 계산됨)
+            #   live 의 「지금 값 ÷ (1+등락률)」 = 어제 종가 → 빠진 어제 봉을 채움 (오늘 장중 봉은 그대로 두고 prob 이 장중 닻으로 씀)
+            pc = float(ix["last"]) / (1 + float(ix["chg"]) / 100)
+            pd_ = (pd.Timestamp(d) - pd.offsets.BDay(1))
+            bars = set(px.index.strftime("%Y-%m-%d"))
+            if pd_.strftime("%Y-%m-%d") not in bars and pd_ > px[px.index < pd.Timestamp(d)].index[-1]:
+                H[cfg["ix"]] = pd.concat([px, pd.DataFrame({"Open": [pc], "Close": [pc]}, index=[pd_])]).sort_index()
+                PATCHED[mk] = pd_.strftime("%Y-%m-%d")
+                print(f"📅 {mk} 장중 — 빠진 어제 봉 채움: {pd_.date()} {pc:.2f} (live 지금 {ix['last']} · {ix['chg']:+.2f}%)")
+            continue
         if d <= last_bar or not closed or pd.Timestamp(d).dayofweek >= 5:
             continue
         c = float(ix["last"])
