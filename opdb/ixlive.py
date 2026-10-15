@@ -91,6 +91,61 @@ def _fix_summary(m):
     m["summary"] = re.sub(re.escape(ix["name"]) + r" [+-]?\d+(\.\d+)?%", f"{ix['name']} {ch:+.1f}%", m["summary"], count=1)
 
 
+MK_FILE = {"KR": "kr", "JP": "jp", "CN": "cn", "HK": "hk", "US": "us"}
+
+
+def _mood(up, dn):
+    r = up / max(1, up + dn)
+    return ("오른 종목이 압도적으로 많은" if r >= .65 else "오른 종목이 더 많은" if r >= .55 else "오른 종목과 내린 종목이 비슷한" if r > .45
+            else "내린 종목이 더 많은" if r > .35 else "내린 종목이 압도적으로 많은")
+
+
+def _breadth_live(m, j, mk, log=print):
+    """🧭 10/15 사용자: "오른 종목과 내린 종목이 같다라….. 장난하냐?" — 코스피 −7.9% 인데 머리말 요약이 어제(10/14) 종목 수(1,252 vs 1,189).
+    live 가 더 새 장(오늘)이면 오른·내린 종목 수·중간값·요약을 live 로 바꾸고, 어제 것은 m.prev 에 남김 (10분마다 다시 해도 같은 결과)."""
+    d = (j or {}).get("sess") or (j or {}).get("date")
+    if not d or not m.get("date") or d <= m["date"] or not j.get("total"):
+        return
+    if not m.get("live"):
+        m["prev"] = {k: m.get(k) for k in ("date", "up", "down", "flat", "total", "median1", "limit_up", "summary")}
+    up, dn, fl = int(j["up"]), int(j["down"]), int(j.get("flat") or 0)
+    ss = sorted([x for x in j.get("sectors") or [] if x.get("r") is not None], key=lambda x: -x["r"])
+    st = (j.get("strong") or [None])[0]
+    m["live"] = {"date": d, "t": j.get("t"), "note": j.get("note"),
+                 "ss": [[x["name"], x["r"]] for x in ss],
+                 "st": {"name": st["name"], "r": st.get("r"), "lead": (st.get("lead") or [{}])[0].get("n")} if st else None}
+    m.update({"up": up, "down": dn, "flat": fl, "total": int(j["total"]), "median1": _r(j.get("median")), "limit_up": j.get("limit_up")})
+    lab = f"{int(d[5:7])}/{int(d[8:])}"
+    base = [b for b in m.get("breadth_hist") or [] if b[0] != lab]
+    # 흐름 막대는 같은 종목 묶음일 때만 오늘을 붙임 (일본·중국·홍콩 live 는 큰 회사 약 500종목이라 어제 전 종목 막대와 크기가 안 맞음)
+    same = int(j["total"]) >= 0.8 * (m["prev"].get("total") or 0)
+    m["breadth_hist"] = (base + [[lab, up, dn, fl]])[-60:] if same else base
+    u10 = [b[1] / max(1, b[1] + b[2]) for b in base[-9:]] + [up / max(1, up + dn)]
+    m["breadth10"] = round(sum(u10) / len(u10) * 100) if u10 else m.get("breadth10")
+    ix = (m.get("index") or [None])[0]
+    parts = [_mood(up, dn) + f" 장 (오른 {up:,} · 내린 {dn:,})"]
+    if ix and ix.get("chg1") is not None:
+        parts.append(f"{ix['name']} {ix['chg1']:+.1f}%")
+    best = [x["name"] for x in ss[:2] if x["r"] > 0]
+    worst = [x["name"] for x in ss[-2:] if x["r"] < 0]
+    if best:
+        parts.append("·".join(best) + " 강세")
+    if worst:
+        parts.append("·".join(reversed(worst)) + " 약세")
+    m["summary"] = ", ".join(parts) + "."
+    # 체감 온도도 오늘 값으로 (미국 VIX 는 원래 계산 그대로 두려고 미국은 건너뜀 — 미국은 live 가 같은 장이라 여기 안 옴)
+    try:
+        import sys as _s
+        _s.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from compass import fear_greed
+        fg = fear_greed(m, mk if mk != "US" else "_")
+        if fg:
+            m["fg"] = fg
+    except Exception as e:
+        log("체감 온도 다시 계산 실패", e)
+    log(f"🧮 {mk} 종목 수 → live {d} {j.get('t')}: 오른 {up} · 내린 {dn} (전 {m['prev'].get('date')}: {m['prev'].get('up')} · {m['prev'].get('down')})")
+
+
 def overlay(C, live_dir, now_utc=None, log=print):
     """compass.json(C) 의 각 시장 지수에 live 값을 덧입힘. 바꾼 지수 수를 돌려줌."""
     cache, done = {}, 0
@@ -136,7 +191,16 @@ def overlay(C, live_dir, now_utc=None, log=print):
                 log(f"🧭 {mk} {ix['name']}: {old} → {(ix['regime'], ix['last'], ix['date'])} live={ix['live']}")
         if m.get("index"):
             m["regime"] = m["index"][0]["regime"]
-            _fix_summary(m)
+            if not m.get("live"):
+                _fix_summary(m)
+        f = MK_FILE.get(mk)
+        if f and f not in cache:
+            try:
+                cache[f] = json.load(open(os.path.join(live_dir, f"live_{f}.json"), encoding="utf-8"))
+            except Exception:
+                cache[f] = None
+        if f:
+            _breadth_live(m, cache.get(f), mk, log)
     return done
 
 

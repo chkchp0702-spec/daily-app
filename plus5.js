@@ -44,7 +44,22 @@
     }
     return h;
   };
+  // 🧭 10/15 사용자: "오른 종목과 내린 종목이 같다라….. 장난하냐?" — 코스피 −7.9% 날 어제 종목 수로 「반반」. 오늘 장중(live) 숫자로 쓰기
+  function sentLive(m){
+    var L = m.live, r = m.up / Math.max(1, m.up + m.down) * 100, ix = m.index[0] || {}, ss = L.ss || [], st = L.st;
+    var lead = ss[0], lag = ss[ss.length - 1], ic = ix.date === L.date ? ix.chg1 : null, md = m.median1;
+    var gap = ic != null && md != null ? ic - md : null;
+    var bigsmall = gap == null ? "" : gap > 0.7 ? (ic < 0 ? "대형주보다 중소형이 더 크게 빠지는" : "대형주가 끌고 중소형은 따라오지 못하는") :
+      gap < -0.7 ? (ic < 0 ? "지수(대형주)가 보통 종목보다 더 크게 빠지는" : "지수보다 중소형이 더 힘을 내는") : "큰 회사와 작은 회사가 같이 움직이는";
+    var mood = r >= 65 ? "거의 모든 종목이 오르는" : r >= 55 ? "오른 종목이 더 많은" : r > 45 ? "오르고 내린 종목이 반반인" : r > 35 ? "내린 종목이 더 많은" : "거의 모든 종목이 내리는";
+    return "지금(" + e(L.t || "") + ") " + m.name + "은 " + (ic != null ? e(ix.name) + " <b class='" + cls(ic) + "'>" + pct(ic) + "</b>, " : "") +
+      "오른 " + (+m.up).toLocaleString() + " · 내린 " + (+m.down).toLocaleString() + "종목 — " + mood + " 장" + (bigsmall ? ", " + bigsmall + " 모습" : "") + "이에요." +
+      (md != null ? " 보통 종목(중간값)은 <b class='" + cls(md) + "'>" + pct(md) + "</b>." : "") +
+      (lead && lead[1] > 0 ? " 버티는 쪽은 <b>" + e(lead[0]) + "</b>(" + pct(lead[1]) + ")," : "") + (lag && lag[1] < 0 ? " 가장 약한 쪽은 <b>" + e(lag[0]) + "</b>(" + pct(lag[1]) + ")." : "") +
+      (st && st.r > 0 ? " 세부 업종으로는 <b>" + e(st.name) + "</b>(" + pct(st.r) + ")이 가장 셌고" + (st.lead ? ", 대장은 " + e(st.lead) + "." : ".") : "");
+  }
   function sentence(m){
+    if (m.live) return sentLive(m);
     var r = m.up / Math.max(1, m.up + m.down) * 100, ix = m.index[0] || {}, ss = (m.sectors || []).slice().sort(function(a, b){ return (b.r1 || 0) - (a.r1 || 0); });
     var lead = ss[0], lag = ss[ss.length - 1], st = (m.strong || [])[0];
     // 10/15: 종목은 어제(m.date)인데 지수는 오늘 장중이면 → 같은 날 지수 등락으로 비교, 「오늘」 대신 날짜
@@ -100,7 +115,7 @@
       '<p class="note">교과서의 경기 순환처럼 섹터는 보통 🌱 새로 뜸(9~12시) → 🔥 강함(12~3시) → 🍂 힘 빠짐(3~6시) → 🧊 약함(6~9시) 순으로 돌아요. 화살표 = 지난 5일 이동. 9~12시 쪽에 있는 섹터가 다음 주인공 후보예요. 점을 누르면 종목.</p>');
   }
   window.CPX2 = function(m, k, C){
-    return '<section class="card sentc"><div class="sentc-k">🗣️ ' + ((m.index || [])[0] && m.index[0].date > m.date ? e(m.date.slice(5).replace("-", "/")) + " 마감" : "오늘") + ' ' + e(m.name) + ' 한 문장</div><p>' + sentence(m) + '</p></section>' + forecast(m) + clock(m);
+    return '<section class="card sentc"><div class="sentc-k">🗣️ ' + (m.live ? "지금" : (m.index || [])[0] && m.index[0].date > m.date ? e(m.date.slice(5).replace("-", "/")) + " 마감" : "오늘") + ' ' + e(m.name) + ' 한 문장' + (m.live ? ' <span class="mut">' + e(m.live.t || "") + ' 장중</span>' : '') + '</div><p>' + sentence(m) + '</p></section>' + forecast(m) + clock(m);
   };
 
   /* ======================= 🤫 조용한 매집 ======================= */

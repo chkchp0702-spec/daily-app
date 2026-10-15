@@ -80,18 +80,22 @@
   }
   function highs(m){
     if (!m.high_list || !m.high_list.length) return "";
-    return card("🏔️ 52주 신고가 <span class='mut'>" + num(m.highs) + "종목 · 큰 회사 순</span>", '<div class="cp-sts">' + m.high_list.map(sChip).join("") + '</div>' +
+    return card("🏔️ 52주 신고가 <span class='mut'>" + (m.live ? md(m.date) + " 마감 · " : "") + num(m.highs) + "종목 · 큰 회사 순</span>", '<div class="cp-sts">' + m.high_list.map(sChip).join("") + '</div>' +
       (m.high_inds && m.high_inds.length ? '<div class="sub2">신고가가 많이 나온 업종 <span class="mut">누르면 종목</span></div>' + V.hbars(m.high_inds.map(function(x){ return {label: e(x[0]) + ' <span class="hgo">›</span>', v: x[1], text: x[1] + "개", color: "#e66767", attr: ' data-ind="' + e(x[0]) + '" data-im="high" style="cursor:pointer"'}; })) : ""));
   }
 
   // 📅 10/15: 지수는 오늘 장중(5,693 −5.3%)인데 머리말은 「10/14 마감」 — 지수 날짜·장중 여부를 같이 적기
+  function md(d){ return d ? (+d.slice(5, 7)) + "/" + (+d.slice(8, 10)) : ""; }
   function hdDate(m, ix){
+    if (m.live) return e(md(m.live.date)) + " " + e(m.live.t || "") + " 장중";
     if (!ix || !ix.date || ix.date <= m.date) return e(m.date) + " 마감";
     return "지수 " + e(ix.date.slice(5).replace("-", "/")) + (ix.live ? " 장중" : " 마감") + " · 종목 " + e(m.date.slice(5).replace("-", "/")) + " 마감";
   }
   function detail(k, C){
     var m = C.markets[k], ix = m.index[0], h = "";
-    var hiTxt = '<span class="chip2 hot">52주 신고가 ' + num(m.highs) + '</span><span class="chip2 cool">52주 신저가 ' + num(m.lows) + '</span>' +
+    var PD = m.live ? md(m.date) : "";      // 🧭 10/15: 위 숫자는 오늘 장중(live), 아래 업종·종목 카드는 어제 마감 → 카드 제목에 날짜
+    var T = function(t){ return PD ? t.replace("오늘", PD + " 마감") : t; };
+    var hiTxt = (PD ? '<span class="mut" style="margin-right:6px">' + PD + ' 마감</span>' : '') + '<span class="chip2 hot">52주 신고가 ' + num(m.highs) + '</span><span class="chip2 cool">52주 신저가 ' + num(m.lows) + '</span>' +
       (m.limit_up != null ? '<span class="chip2 c">' + (k === "KR" ? "상한가" : "상한가(+10%)") + ' ' + num(m.limit_up) + '</span>' : '');
     // 1) 국면 히어로
     h += '<section class="card cp-hero h-' + ((REG[m.regime] || REG["횡보장"]).c) + '">' +
@@ -99,13 +103,13 @@
       '<div class="cp-big">' + regChip(m.regime, true) + '</div></div>' +
       (ix ? '<div class="cp-ixb"><small>' + e(ix.name) + '</small><b>' + V.fmt(ix.last) + '</b><span class="' + cls(ix.chg1) + '">' + pct(ix.chg1) + '</span></div>' : '') + '</div>' +
       (ix ? '<p class="note">📐 ' + e(ix.why) + '</p>' : '') +
-      '<p class="cp-sum">' + (ix && ix.date > m.date ? '<span class="mut">' + e(m.date.slice(5).replace("-", "/")) + ' 종목 · </span>' : '') + e(m.summary) + '</p></section>';
+      '<p class="cp-sum">' + (m.live ? '<span class="mut">' + e(m.live.t || "") + ' 지금 · </span>' : ix && ix.date > m.date ? '<span class="mut">' + e(m.date.slice(5).replace("-", "/")) + ' 종목 · </span>' : '') + e(m.summary) + '</p></section>';
     h += watchCard(m, k);
     if (m.fg) h += card("🌡️ 오늘 시장 체감 온도 <span class='mut'>" + e(m.name) + " · 종목 등락으로</span>", fgGauge(m.fg) +
       '<p class="note">오늘 하루 종목들의 등락·신고가·지수 위치로 잰 「체감 온도」예요. CNN 방식의 <b>공포·탐욕</b>(심리 지표, 미국 심리 + 자기 시장)은 🎲 시장확률 탭에 5개 시장이 같이 있어요.</p>');
     // 2) 등락 종목 수
     var t = Math.max(1, m.up + m.flat + m.down);
-    h += card("오늘 오른 종목 · 내린 종목 <span class='mut'>" + num(m.total) + "종목</span>",
+    h += card("오늘 오른 종목 · 내린 종목 <span class='mut'>" + (m.live ? e(m.live.t || "") + " 장중 · " + (m.live.note && /큰/.test(m.live.note) ? "큰 회사 " : "") : "") + num(m.total) + "종목</span>",
       '<div class="cp-3"><div><small>상승</small><b class="up">' + num(m.up) + '</b><em>' + (m.up / t * 100).toFixed(0) + '%</em></div>' +
       '<div><small>보합</small><b>' + num(m.flat) + '</b><em>' + (m.flat / t * 100).toFixed(0) + '%</em></div>' +
       '<div><small>하락</small><b class="dn">' + num(m.down) + '</b><em>' + (m.down / t * 100).toFixed(0) + '%</em></div></div>' +
@@ -130,13 +134,13 @@
     }
     // 5) 섹터
     if (m.sectors.length){
-      h += card("섹터 등락 <span class='mut'>시가총액 가중 · 섹터를 누르면 종목</span>",
-        '<div class="seg2" id="cpsk"><button class="on" data-k="r1">오늘</button><button data-k="r5">1주</button><button data-k="r20">1개월</button></div><div id="cpsb">' + secBars(m, "r1") + '</div>');
+      h += card("섹터 등락 <span class='mut'>" + (PD ? PD + " 마감 · " : "") + "시가총액 가중 · 섹터를 누르면 종목</span>",
+        '<div class="seg2" id="cpsk"><button class="on" data-k="r1">' + (PD || "오늘") + '</button><button data-k="r5">1주</button><button data-k="r20">1개월</button></div><div id="cpsb">' + secBars(m, "r1") + '</div>');
     }
     h += rotation(m) + highs(m);
     // 6) 강한 업종
     if (m.strong.length){
-      h += '<details class="card cpx-d"><summary>🔥 오늘 강한 업종 TOP ' + Math.min(5, m.strong.length) + ' <span class="mut">' + e(m.strong[0].name) + ' ' + pct(m.strong[0].r1).replace(/<[^>]+>/g, "") + ' 외 · 누르면 종목까지</span></summary>' +
+      h += '<details class="card cpx-d"><summary>🔥 ' + T("오늘") + ' 강한 업종 TOP ' + Math.min(5, m.strong.length) + ' <span class="mut">' + e(m.strong[0].name) + ' ' + pct(m.strong[0].r1).replace(/<[^>]+>/g, "") + ' 외 · 누르면 종목까지</span></summary>' +
         m.strong.slice(0, 5).map(function(x, i){
           return '<section class="card cp-ind"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n" data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b></div>' +
             '<b class="' + cls(x.r1) + ' cp-r">' + pct(x.r1) + '</b></div>' +
@@ -145,11 +149,11 @@
         }).join("") + '</details>';
     }
     // 7) 대표 종목
-    h += card("⭐ 오늘 많이 오른 대형주", '<div class="cp-sts">' + m.leaders.map(sChip).join("") + '</div>' +
+    h += card("⭐ " + T("오늘") + " 많이 오른 대형주", '<div class="cp-sts">' + m.leaders.map(sChip).join("") + '</div>' +
       (m.laggards.length ? '<div class="sub2">많이 내린 대형주</div><div class="cp-sts">' + m.laggards.map(sChip).join("") + '</div>' : '') +
       '<div class="sub2">시가총액 TOP 10</div><div class="cp-sts">' + m.top_cap.map(sChip).join("") + '</div>');
     if (m.weak && m.weak.length){
-      h += card("🧊 약한 업종", m.weak.map(function(x){ return '<div class="cp-wk"><b data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><div class="cp-sts">' + x.lead.slice(-2).map(sChip).join("") + '</div></div>'; }).join(""));
+      h += card("🧊 " + (PD ? PD + " 마감 " : "") + "약한 업종", m.weak.map(function(x){ return '<div class="cp-wk"><b data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><div class="cp-sts">' + x.lead.slice(-2).map(sChip).join("") + '</div></div>'; }).join(""));
     }
     if (window.CPX) try { h += window.CPX(m, k, C); } catch(err) { console.error(err); }
     if (window.CPX2) try { var cut = h.indexOf("</section>") + 10; h = h.slice(0, cut) + window.CPX2(m, k, C) + h.slice(cut); } catch(err) { console.error(err); }
@@ -162,7 +166,7 @@
     if (!L.length) return "";
     L = L.map(function(x){ var br = x.n ? x.up / x.n : .5; return {x: x, sc: x.r1 + (x.r5 || 0) * .5 + (br - .5) * 4}; })
          .sort(function(a, b){ return b.sc - a.sc; }).slice(0, 3);
-    return '<section class="card cp-watch"><h3>🎯 오늘 이 업종·종목을 보자 <span class="mut">' + m.flag + ' ' + e(m.name) + ' · ' + e(String(m.date || "").slice(5).replace("-", "/")) + '</span></h3>' +
+    return '<section class="card cp-watch"><h3>🎯 오늘 이 업종·종목을 보자 <span class="mut">' + m.flag + ' ' + e(m.name) + ' · ' + e(String(m.date || "").slice(5).replace("-", "/")) + (m.live ? ' 마감 기준' : '') + '</span></h3>' +
       L.map(function(o, i){ var x = o.x;
         return '<div class="cw-row"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n" data-ind="' + e(x.name) + '">' + e(x.name) + ' <span class="hgo">›</span></b></div>' +
           '<span><b class="' + cls(x.r1) + '">' + pct(x.r1) + '</b> <small class="mut">1주 ' + pct(x.r5) + '</small></span></div>' +
