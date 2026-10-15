@@ -148,6 +148,13 @@ def build_global(H):
     dx = _c(H, "DX-Y.NYB")
     if dx is not None:
         G["dxy5"] = dx.reindex(G.index).ffill().pct_change(5)
+    # 10/15 09시: 야후가 S&P 는 어제 봉을 줬는데 XLY·XLP·HYG·LQD·TLT 는 아직 그저께에 멈춘 때가 있음 → ffill 로 섞이면 항목이 실행마다 크게 흔들림(29↔41)
+    #   → 모든 입력에 봉이 있는 마지막 날까지만 계산(그 뒤는 비움). 화면엔 이 기준일을 보여 줌.
+    lasts = [x.dropna().index[-1] for x in (sp, vix, v3, hy, lq, tlt, xy, xp, gd) if x is not None and len(x.dropna())]
+    if lasts:
+        common = min(lasts)
+        comp = {k: v.where(v.index <= common) for k, v in comp.items()}
+        G.attrs["asof"] = str(common.date())
     P = pd.DataFrame({k: rank252(v) for k, v in comp.items()})
     # 항목 평균을 다시 1년 백분위로 — 평균만 내면 가운데로 몰려 극단이 거의 안 나옴(극공포·극탐욕 표본이 몇 개뿐)
     G["senti_raw"] = P.mean(axis=1, skipna=True).where(P.notna().sum(axis=1) >= 4)
@@ -239,7 +246,7 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
     def _l(x):
         try: v = float(x.dropna().iloc[-1]); return None if math.isnan(v) else round(v, 0)
         except Exception: return None
-    how = {"avg": _l(pd.DataFrame(comps).mean(axis=1, skipna=True))}
+    how = {"avg": _l(pd.DataFrame(comps).mean(axis=1, skipna=True)), "asof": G.attrs.get("asof")}
     if not us:
         how.update({"us": _l(gm), "loc": _l(lm)})
     if "cnn" in ext and len(ext["cnn"]):

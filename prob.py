@@ -283,6 +283,17 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
     partial = None
     if open_now and len(px) and px.index[-1].strftime("%Y-%m-%d") == loc.strftime("%Y-%m-%d"):
         partial = float(px["Close"].iloc[-1]); px = px.iloc[:-1]
+    if open_now and partial is None and mk in LIVE_IX and not FAKE:
+        # 10/15: 야후가 오늘 장중 봉을 안 줄 때가 많음 → 장중 나침반 live_*.json(한국 네이버·나머지 야후 장중, 10분마다)의 지금 값
+        try:
+            f_, nm_ = LIVE_IX[mk]
+            j_ = json.load(open(os.path.join("archive", "x", f"live_{f_}.json"), encoding="utf-8"))
+            ix_ = next((x for x in j_.get("index") or [] if x.get("name") == nm_ and x.get("last")), None)
+            if ix_ and (ix_.get("date") or j_.get("sess") or j_.get("date")) == loc.strftime("%Y-%m-%d"):
+                partial = float(ix_["last"])
+                print(f"⏱️ {mk} 장중 값(live {j_.get('t')}): {partial} ({ix_.get('chg')}%)")
+        except Exception as ex:
+            print("장중 live 실패", mk, ex)
     d = feats(px)
     last = d.iloc[-1]
     today = d.index[-1]
