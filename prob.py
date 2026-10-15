@@ -53,6 +53,7 @@ MIN_N = 30            # 조건부 통계 최소 표본
 # 🧭 10/15 「닻」: 그날 확률을 실제로 크게 움직이는 「이미 아는 정보」(간밤 미국 · 미국 선물 갭 · 장중 등락)는 여러 의견 중 하나로 평균 내지 않고 출발점으로 씀
 LEAD_E9 = [-0.02, -0.01, -0.005, -0.002, 0.002, 0.005, 0.01, 0.02]   # 9칸
 LEAD_PRIOR = 20       # 칸 비율을 평소 쪽으로 당기는 세기(베타 사전 20일치) — 검증에서 쓴 값
+POST_OK = {"KR", "JP", "CN", "HK"}   # #3 마감 뒤 선물 더하기 — 검증 통과 시장
 LEAD_HIT = {"KR": "53.5→61.8%", "JP": "51.7→65.1%", "CN": "51.8→56.7%", "HK": "50.0→59.6%", "US": "54.3→63.7%"}
 OTHERS_CAP = 0.2      # 닻 위에 나머지 방법들이 더할 수 있는 로그오즈 (±약 5%p)
 AUTO_W = {}
@@ -289,6 +290,31 @@ def intra_var(mk, el, tot, rem):
 
 
 # ---------------- 시장 하나 ----------------
+_ES30 = {}
+def es_post(day):
+    """미국 날짜 day 의 뉴욕 16:00 뒤 ~ 지금 S&P 선물(ES=F 30분봉) 등락. 실패하면 None."""
+    if FAKE:
+        return 0.001
+    try:
+        import yfinance as yf
+        from zoneinfo import ZoneInfo
+        ny = ZoneInfo("America/New_York")
+        if "ic" not in _ES30:
+            ib = yf.download("ES=F", period="5d", interval="30m", progress=False, auto_adjust=False)
+            ic = ib["Close"].dropna()
+            ic = ic.iloc[:, 0] if hasattr(ic, "columns") else ic
+            ic.index = pd.to_datetime(ic.index).tz_convert(ny)
+            _ES30["ic"] = ic
+        ic = _ES30["ic"]
+        cut = pd.Timestamp(day.strftime("%Y-%m-%d") + " 16:00", tz=ny)
+        before, after = ic[ic.index < cut], ic[ic.index >= cut]
+        if len(before) and len(after) and (cut - before.index[-1]) <= pd.Timedelta(hours=1):
+            return float(after.iloc[-1] / before.iloc[-1] - 1)
+    except Exception as ex:
+        print("선물 마감 뒤 실패", ex)
+    return None
+
+
 def market(mk, H, brain, events, G=None, ext=None, breadth=None):
     cfg = MK[mk]
     px = H.get(cfg["ix"])
@@ -360,11 +386,18 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
         us_d = us_last.strftime("%m/%d") if us_last is not None else ""
         fresh = us_last is not None and us_last >= today          # 아시아 마지막 마감 뒤에 열린 미국 장이 있어야 「간밤 정보」
         bks = pd.Series(np.digitize(us_t.values, LEAD_E9), index=d.index).where(us_t.notna())
-        m = cond(d, bks == int(np.digitize([cur_us], LEAD_E9)[0]), "미국 간밤 " + f"{cur_us*100:+.1f}%") if fresh else None
+        # 10/15 10시 #3: 미국 마감(뉴욕 16:00) 뒤 ~ 아시아 개장 전 선물 등락을 더해 칸을 고름 (「간밤 미국 + 그 뒤 선물」 = 개장 전 아는 전부)
+        #   검증(probe/post_bt.py · ES 60분봉 2년 약 550일 · 이 코드와 같은 「2012~ 일봉 칸 + 합친 값」 · 앞/뒤 절반 모두 브라이어 개선):
+        #   한국 0.218→0.212 · 0.224→0.211 / 일본 0.214→0.207 · 0.224→0.208 / 홍콩 0.233→0.229 · 0.248→0.243 / 중국 0.240→0.239 · 0.249→0.246(작음)
+        #   선물 +0.2%↑ 뒤 코스피 오름 70%(83일) · −0.2%↓ 뒤 38%(73일) (평소 59%) — 앞/뒤 기간 모두 같은 쪽
+        post = es_post(us_last) if (fresh and not open_now and mk in POST_OK) else None
+        cur_s = cur_us + (post or 0.0)
+        m = cond(d, bks == int(np.digitize([cur_s], LEAD_E9)[0]), "미국 간밤 " + f"{cur_s*100:+.1f}%") if fresh else None
         if m:
             pa = (m["p1"] * m["n"] + LEAD_PRIOR * float(d["y1"].mean())) / (m["n"] + LEAD_PRIOR)
-            M.append({"k": "lead", "ic": "🛰️", "name": "선행 시장 (간밤 미국)", "p1": pa, "p5": m["p5"], "n": m["n"], "w": 0.9, "anchor": 1,
-                      "ev": f"간밤 미국 S&P({us_d}) {cur_us*100:+.2f}% · 비슷한 간밤 뒤 {cfg['ixn']} {m['n']}번 → 다음 날 오름 {m['p1']*100:.0f}% · 5일 {m['p5']*100:.0f}% — 🧭 오늘 확률의 닻(2012~ 검증 적중 " + LEAD_HIT.get(mk, "") + ")"})
+            pt = f" + 마감 뒤 선물 {post*100:+.2f}% = {cur_s*100:+.2f}%" if post is not None else ""
+            M.append({"k": "lead", "ic": "🛰️", "name": "선행 시장 (간밤 미국" + (" + 선물" if post is not None else "") + ")", "p1": pa, "p5": m["p5"], "n": m["n"], "w": 0.9, "anchor": 1,
+                      "ev": f"간밤 미국 S&P({us_d}) {cur_us*100:+.2f}%{pt} · 비슷한 간밤 뒤 {cfg['ixn']} {m['n']}번 → 다음 날 오름 {m['p1']*100:.0f}% · 5일 {m['p5']*100:.0f}% — 🧭 오늘 확률의 닻(2012~ 검증 적중 " + LEAD_HIT.get(mk, "") + ")"})
     elif cfg["lead"] == "fut":
         es = H.get("ES=F")
         g = None
@@ -738,7 +771,7 @@ def main():
                ["자금", "💳 크레딧", "하이일드(HYG)/투자등급(LQD) 채권 20일 — 회사채 시장이 주식보다 먼저 위험을 알아챔. 급히 나빠지면 주식 약세 확률↑"],
                ["자금", "💱 환율", "한국 원/달러 · 일본 엔/달러 · 중국·홍콩 위안/달러 · 미국 달러 인덱스 5일 — 달러 강세는 외국인 자금이 빠지는 쪽"],
                ["선행", "⏱️ 장중 닻", "장이 열려 있으면 「지금 등락 ÷ (하루 흔들림 × √남은 흔들림)」 → 종가가 어제보다 높을 확률. 남은 흔들림은 한국·일본·홍콩만 60분봉 2년 실측(시가 갭이 하루 흔들림의 큰 몫이라 장중엔 생각보다 덜 흔들림 · 두 기간 모두 브라이어 개선), 중국·미국은 남은 시간 비율 그대로"],
-               ["선행", "🛰️ 선행 시장", "아시아 = 직전 미국 S&P 등락이 비슷했던 날의 결과 · 미국 = 선물이 가리키는 시가 갭이 비슷했던 날의 종가 방향"],
+               ["선행", "🛰️ 선행 시장", "아시아 = 직전 미국 S&P 등락 + 미국 마감(뉴욕 16:00) 뒤 개장 전까지 S&P 선물 등락(10/15 더함 · 60분봉 2년 두 기간 모두 브라이어 개선)이 비슷했던 날의 결과 · 미국 = 선물이 가리키는 시가 갭이 비슷했던 날의 종가 방향"],
                ["폭·수급", "🌏 외국인 수급(한국)", "다음 금융 투자자별 매매(일별) — 외국인 20일 누적 순매수가 최근 2년 중 어디쯤인지(백분위) + 연속 순매도·순매수 일수. 한국은 외국인 20일 누적이 돌아서는 때가 코스피 전환과 거의 같음. 매도 극단은 대개 매도가 다 나온 뒤"],
                ["폭·수급", "📊 시장 폭", "시총 상위 250종목 중 50일선 위 비율·10일 상승 비율(최근 2년) — 지수보다 종목 폭이 먼저 돎. 10일 상승 비율이 40%↓에서 61.5%↑로 급반전하면 쯔바이크 신호"],
                ["일정", "📅 모멘텀·계절성", "12-1개월 모멘텀 부호 × 다음 날 요일 × 월말월초(연기금·월급 자금)"],
