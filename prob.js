@@ -67,7 +67,15 @@
     if (!S || S.now == null) return "";
     var v = S.now, lab = v < 20 ? "극공포" : v < 40 ? "공포" : v < 60 ? "중립" : v < 80 ? "탐욕" : "극탐욕", col = v < 20 ? "#2f6fd0" : v < 40 ? "#5b8fd8" : v < 60 ? "#6b7385" : v < 80 ? "#d98a7a" : "#e05555";
     var B = SECX && SECX.markets && SECX.markets[m.mk] && SECX.markets[m.mk].breadth, op = OPEN["_s" + m.mk];
-    var h = '<section class="card"><h3>😱 심리 지표 <span class="mut">우리 공포·탐욕 · 매시간</span></h3>' +
+    // 10/15 사용자 「공포탐욕이 왜 미국만 나와? 다른 시장도 다 나오게」 → 맨 위에 5개 시장 공포·탐욕 한 줄 (누르면 그 시장)
+    var fl = function(x){ return x < 20 ? "극공포" : x < 40 ? "공포" : x < 60 ? "중립" : x < 80 ? "탐욕" : "극탐욕"; };
+    var fc = function(x){ return x < 20 ? "#2f6fd0" : x < 40 ? "#5b8fd8" : x < 60 ? "#6b7385" : x < 80 ? "#d98a7a" : "#e05555"; };
+    var strip5 = '<div class="sg5">' + ORDER.filter(function(k){ return D.markets[k] && D.markets[k].research && D.markets[k].research.senti && D.markets[k].research.senti.now != null; }).map(function(k){
+        var mm = D.markets[k], x = Math.round(mm.research.senti.now);
+        return '<button class="sg5c' + (k === m.mk ? " on" : "") + '" data-m="' + k + '"><small>' + mm.flag + ' ' + e(mm.name) + '</small><b style="color:' + fc(x) + '">' + x + '</b><em style="color:' + fc(x) + '">' + fl(x) + '</em>' +
+          '<i class="sg5b"><i style="left:' + x + '%"></i></i></button>'; }).join("") + '</div>';
+    var h = '<section class="card"><h3>😱 공포·탐욕 <span class="mut">5개 시장 · 매시간</span></h3>' + strip5 +
+      '<div class="sub2" style="margin-top:4px">' + m.flag + ' ' + e(m.name) + ' 자세히</div>' +
       '<div class="sg-w"><div class="sg-n" style="color:' + col + '">' + Math.round(v) + '</div><div style="flex:1"><b style="color:' + col + '">' + lab + '</b>' +
       '<div class="sg-b"><i style="left:' + v + '%"></i></div><div class="zl"><span>극공포</span><span>중립</span><span>극탐욕</span></div></div></div>' +
       (function(){ var w = S.how || {}, fl = function(x){ return x < 20 ? "극공포" : x < 40 ? "공포" : x < 60 ? "중립" : x < 80 ? "탐욕" : "극탐욕"; }, t = [];   // 10/15 계산 풀이 + CNN 원본
@@ -77,7 +85,7 @@
         if (m.open_now && m.intra_chg != null && Math.abs(m.intra_chg) >= 1.5) t.push('⚠️ 오늘 장중 ' + (m.intra_chg > 0 ? '+' : '') + m.intra_chg.toFixed(1) + '%는 아직 안 들어갔어요 — 마감 뒤 다시 계산하면 ' + (m.intra_chg < 0 ? '공포 쪽으로' : '탐욕 쪽으로') + ' 움직여요');
         if (w.cnn != null) t.push('📰 CNN 공식 공포·탐욕(미국) <b>' + w.cnn + '</b> (' + fl(w.cnn) + ' · ' + md(w.cnn_d) + ')');
         return t.length ? '<div class="sg-how">' + t.join('<br>') + '</div>' : ''; })() +
-      '<div class="sg-ps">' + (S.parts || []).map(function(p){ return '<div><small>' + e(p.k) + '</small><span class="xbar" style="flex:1"><i style="width:' + p.v + '%;background:' + (p.v >= 60 ? "var(--up)" : p.v <= 40 ? "var(--down)" : "#6b7385") + '"></i></span><b>' + p.v + '</b></div>'; }).join("") + '</div>' +
+      '<div class="sg-ps">' + (S.parts || []).map(function(p){ var loc = /^자기 |코스닥\/코스피|\(반대 · 자국/.test(p.k); return '<div><small>' + (m.mk === "US" ? "🇺🇸 " : loc ? m.flag + " " : "🇺🇸 ") + e(p.k.replace(/^자기 지수/, (m.ixn || "") )) + '</small><span class="xbar" style="flex:1"><i style="width:' + p.v + '%;background:' + (p.v >= 60 ? "var(--up)" : p.v <= 40 ? "var(--down)" : "#6b7385") + '"></i></span><b>' + p.v + '</b></div>'; }).join("") + '</div>' +
       '<div class="sub2">📚 연구: 심리 구간별 그 뒤 성적 <span class="mut">' + e(m.ixn) + ' · ' + e(S.since || "") + '~</span></div>' + rtable(S.table) +
       '<button class="fold pr-f' + (op ? " open" : "") + '" data-f="_s' + m.mk + '">🔬 다른 심리·폭 지표 연구 표 <i class="fchev">▾</i></button><div style="' + (op ? "" : "display:none") + '">' +
       (R.vterm ? '<div class="sub2">🌡️ VIX ÷ VIX3M 구간별</div>' + rtable(R.vterm) : '') +
@@ -183,6 +191,8 @@
     h += mcard(D.markets[SEL], D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
     b.innerHTML = h;
     [].forEach.call(b.querySelectorAll(".pr5c[data-m]"), function(x){ x.onclick = function(){ SEL = x.dataset.m; draw(D); window.scrollTo({top: 0, behavior: "smooth"}); }; });
+    [].forEach.call(b.querySelectorAll(".sg5c[data-m]"), function(x){ x.onclick = function(){ var y = x.getBoundingClientRect().top; SEL = x.dataset.m; draw(D);   // 공포·탐욕 띠: 그 자리 그대로 시장만 바꿈
+      var n = b.querySelector('.sg5c[data-m="' + SEL + '"]'); if (n) window.scrollBy(0, n.getBoundingClientRect().top - y); }; });
     [].forEach.call(b.querySelectorAll(".ps-r .ps-h"), function(x){ x.onclick = function(){ var k = SEL + x.parentNode.dataset.sk; SOPEN[k] = !SOPEN[k]; var y = window.scrollY; draw(D); window.scrollTo(0, y); }; });
     [].forEach.call(b.querySelectorAll(".ps-all"), function(x){ x.onclick = function(){ SALL[x.dataset.mk] = !SALL[x.dataset.mk]; var y = window.scrollY; draw(D); window.scrollTo(0, y); }; });
     [].forEach.call(b.querySelectorAll(".pr-f[data-f]"), function(x){ x.onclick = function(){ var k = x.dataset.f, nx = x.nextElementSibling; OPEN[k] = !OPEN[k]; x.classList.toggle("open", OPEN[k]); if (nx) nx.style.display = OPEN[k] ? "" : "none"; try { localStorage.setItem("probopen", JSON.stringify(OPEN)); } catch(z) {} }; });
@@ -230,6 +240,9 @@
     ".pr-g{display:flex;align-items:center;gap:8px;margin:12px 0 2px;padding-bottom:4px;border-bottom:1px solid var(--line);font-size:13px}.pr-g small{margin-left:auto}.pr-g .up{color:var(--up)}.pr-g .dn{color:var(--down)}" +
     ".pr-eb{display:block;font-size:10.5px;color:var(--sub);opacity:.8;margin-top:2px}.pr-m .zb{height:6px;margin:5px 0 3px}" +
     ".pr-cb{font-size:13px;padding:9px 10px;border-radius:10px;background:var(--panel2,rgba(255,255,255,.04));margin:4px 0 4px}.pr-cb .up{color:var(--up)}.pr-cb .dn{color:var(--down)}" +
+    ".sg5{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:2px 0 8px}.sg5c{border:1px solid var(--line);background:var(--panel2,var(--panel));color:var(--text);border-radius:10px;padding:6px 4px 7px;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}" +
+    ".sg5c.on{outline:2px solid var(--acc,#7c9cff)}.sg5c small{font-size:11px;white-space:nowrap;color:var(--sub)}.sg5c b{font-size:20px;font-weight:800;line-height:1.1}.sg5c em{font-style:normal;font-size:10.5px;font-weight:700}" +
+    ".sg5b{position:relative;display:block;width:86%;height:5px;border-radius:3px;margin-top:4px;background:linear-gradient(90deg,#2f6fd0,#6b7385 50%,#e05555)}.sg5b i{position:absolute;top:-2px;width:3px;height:9px;border-radius:2px;background:var(--text);transform:translateX(-50%)}" +
     ".sg-w{display:flex;align-items:center;gap:14px}.sg-n{font-size:40px;font-weight:800;line-height:1}.sg-b{position:relative;height:10px;border-radius:5px;margin:8px 0 2px;background:linear-gradient(90deg,#2f6fd0,#5b8fd8,#6b7385,#d98a7a,#e05555)}" +
     ".sg-b i{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:var(--text);border:2px solid var(--panel);transform:translate(-50%,-50%)}" +
     ".sg-ps{display:flex;flex-direction:column;gap:4px;margin:12px 0 4px}.sg-ps>div{display:flex;align-items:center;gap:8px;font-size:11.5px}.sg-ps small{flex:0 0 46%;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sg-ps b{flex:0 0 26px;text-align:right}" +
