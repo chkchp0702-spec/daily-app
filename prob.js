@@ -73,7 +73,8 @@
       (function(){ var w = S.how || {}, fl = function(x){ return x < 20 ? "극공포" : x < 40 ? "공포" : x < 60 ? "중립" : x < 80 ? "탐욕" : "극탐욕"; }, t = [];   // 10/15 계산 풀이 + CNN 원본
         if (w.avg != null) t.push(m.mk === "US" ? '아래 ' + (S.parts || []).length + '개 항목 평균 <b>' + w.avg + '</b>점 → 지난 1년 중 몇 % 자리인지로 바꾸면 <b>' + Math.round(v) + '</b>점'
           : '🇺🇸 미국 심리 <b>' + w.us + '</b> · ' + m.flag + ' ' + e(m.name) + ' 자체 <b>' + w.loc + '</b> → 반반 섞어 지난 1년 중 몇 % 자리인지로 바꾸면 <b>' + Math.round(v) + '</b>점');
-        if (w.asof) t.push('<span class="mut">항목 기준일 ' + md(w.asof) + ' — 모든 항목 자료가 다 들어온 마지막 날</span>');
+        if (w.asof) t.push('<span class="mut">항목 기준일 ' + md(w.asof) + ' 마감 — 모든 항목 자료가 다 들어온 마지막 날</span>');
+        if (m.open_now && m.intra_chg != null && Math.abs(m.intra_chg) >= 1.5) t.push('⚠️ 오늘 장중 ' + (m.intra_chg > 0 ? '+' : '') + m.intra_chg.toFixed(1) + '%는 아직 안 들어갔어요 — 마감 뒤 다시 계산하면 ' + (m.intra_chg < 0 ? '공포 쪽으로' : '탐욕 쪽으로') + ' 움직여요');
         if (w.cnn != null) t.push('📰 CNN 공식 공포·탐욕(미국) <b>' + w.cnn + '</b> (' + fl(w.cnn) + ' · ' + md(w.cnn_d) + ')');
         return t.length ? '<div class="sg-how">' + t.join('<br>') + '</div>' : ''; })() +
       '<div class="sg-ps">' + (S.parts || []).map(function(p){ return '<div><small>' + e(p.k) + '</small><span class="xbar" style="flex:1"><i style="width:' + p.v + '%;background:' + (p.v >= 60 ? "var(--up)" : p.v <= 40 ? "var(--down)" : "#6b7385") + '"></i></span><b>' + p.v + '</b></div>'; }).join("") + '</div>' +

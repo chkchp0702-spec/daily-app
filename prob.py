@@ -527,6 +527,7 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
         return sigm(b + dev)
     INFO = {}
     ANCHOR = {}
+    INTRA_CHG = [None]
     # 🧭 닻 고르기 (내일=오늘 장 확률 p1 에만): ① 장중이면 지금 등락 + 남은 시간 ② 아니면 간밤 미국 / 선물 갭
     if partial is not None:
         from statistics import NormalDist
@@ -541,6 +542,7 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
         M.insert(0, {"k": "intra", "ic": "⏱️", "name": "장중 닻", "p1": pi, "p5": None, "n": 0, "w": 0, "anchor": 1,
                      "ev": f"지금 {cfg['ixn']} {(partial / float(last['c']) - 1) * 100:+.2f}% · 장 남은 시간 {rem * 100:.0f}% · 남은 흔들림 {vr * 100:.0f}% · 하루 흔들림 {sig_d * 100:.1f}% → 종가가 어제보다 높을 확률 {pi * 100:.0f}% ({'시각별 실측 보정 · 60분봉 2년' if mk in INTRA_VH else '무작위 걸음 근사'})"})
         ANCHOR["p1"] = {"k": "intra", "p": pi}
+        INTRA_CHG[0] = round((partial / float(last["c"]) - 1) * 100, 2)
     else:
         la = next((x for x in M if x["k"] == "lead" and x.get("anchor") and x.get("p1") is not None), None)
         if la:
@@ -590,7 +592,7 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
         for k in ("p1", "p5"):
             x[k] = r2(x[k], 3)
         x.pop("sig1", None); x.pop("sig5", None); x.pop("q5", None); x.pop("auc_p1", None); x.pop("auc_p5", None)
-    return {"mk": mk, "name": cfg["name"], "flag": cfg["flag"], "ixn": ixn, "base_date": base_date, "open_now": open_now, "filled": PATCHED.get(mk),
+    return {"mk": mk, "name": cfg["name"], "flag": cfg["flag"], "ixn": ixn, "base_date": base_date, "open_now": open_now, "filled": PATCHED.get(mk), "intra_chg": INTRA_CHG[0],
             "last": r2(last["c"]), "chg": r2(last["r"] * 100), "p1": r2(p1, 3), "p5": r2(p5, 3), "tone1": tone1, "tone5": tone5,
             "band1": band1, "band5": band5, "m5": r2(m5), "widen": widen, "state": state, "methods": M,
             "next_day": nxt.strftime("%Y-%m-%d"), "n_hist": int(len(d)),
