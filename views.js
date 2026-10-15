@@ -18,6 +18,36 @@
   function chip(t, c){ return '<span class="chip2 ' + (c || "") + '">' + t + '</span>'; }
   function after(el){ V.fillSparks(el); }
 
+  /* 📱 A12-1 (10/15): 컵·갭 카드 이름 — 한글 짧은 이름(archive/x/sig_names.json) · 없으면 영어 꼬리말(Inc.·Common Stock…) 떼기 */
+  function cleanNm(n){
+    n = String(n || "").replace(/\s+-\s.*$/, "").replace(/\s+-\s*$/, "").replace(/\b(Common Stock|Common Shares|Common stock|Ordinary Shares|Class [A-C]( Ordinary)?( Shares)?|American Depositary Shares?)\b/g, "").trim();
+    for (var i = 0; i < 3; i++) n = n.replace(/[,\s]+(Inc\.?|Incorporated|Corporation|Corp\.?|Company( Limited)?|Limited|Ltd\.?|LTD|Co\.?|CO|PLC|plc|N\.V\.|S\.A\.|AG|SE)\s*$/, "").trim();
+    return n.replace(/[,\-\s]+$/, "");
+  }
+  function nmOf(c){ var m = window.SIGNM || {}; return m[c.code] || cleanNm(c.name) || c.code; }
+  V.nmOf = nmOf; V.cleanNm = cleanNm;
+  window.SIGNMP = window.SIGNMP || getJSON("archive/x/sig_names.json?" + Math.floor(Date.now() / 3600000)).then(function(j){
+    window.SIGNM = j || {};
+    [].forEach.call(document.querySelectorAll("[data-nmk]"), function(b){ var k = b.getAttribute("data-nmk"); if (window.SIGNM[k]) b.textContent = window.SIGNM[k]; });
+    return window.SIGNM;
+  }).catch(function(){ window.SIGNM = {}; return {}; });
+  function nmB(c){ return '<b data-nmk="' + e(c.code) + '" title="' + e(String(c.name || "").trim()) + '">' + e(nmOf(c)) + '</b>'; }
+
+  /* 📱 A12-4 (10/15): 며칠째 — 정렬 칩 · 3일 안 ● · 20일 넘으면 「식은 신호」 옅게 */
+  function ageCls(c){ return c.streak >= 20 ? " old" : ""; }
+  function ageDot(c){ return c.streak && c.streak <= 3 ? '<i class="nwdot" title="' + (c.streak <= 1 ? "오늘 처음 들어옴" : c.streak + "일째 — 새로 들어옴") + '">●</i>' : ""; }
+  function ageTxt(c){ return c.streak > 1 ? " · " + (c.streak >= 20 ? "🕰 " : "") + c.streak + "일째" : (c.streak === 1 ? " · 🆕 오늘 처음" : ""); }
+  function sortSeg(id, list, P){
+    list.forEach(function(x, i){ if (x._o == null) x._o = i; });
+    setTimeout(function(){ [].forEach.call(document.querySelectorAll("#" + id + " button"), function(b){ b.onclick = function(){
+      [].forEach.call(document.querySelectorAll("#" + id + " button"), function(x){ x.classList.toggle("on", x === b); });
+      var k = b.dataset.k;
+      list.sort(function(a, c){ return k === "new" ? (a.streak || 0) - (c.streak || 0) || a._o - c._o : k === "old" ? (c.streak || 0) - (a.streak || 0) || a._o - c._o : a._o - c._o; });
+      P().draw(); }; }); }, 0);
+    var n3 = list.filter(function(x){ return x.streak && x.streak <= 3; }).length, n20 = list.filter(function(x){ return x.streak >= 20; }).length;
+    return '<div class="seg2 srt" id="' + id + '"><button class="on" data-k="score">점수순</button><button data-k="new">● 새것부터 ' + n3 + '</button><button data-k="old">🕰 오래된 것 ' + n20 + '</button></div>';
+  }
+
   /* ======================= 시황 ======================= */
   var LEDGER = null;
   function ledger(){ return LEDGER ? Promise.resolve(LEDGER) : getJSON("archive/market/ledger.json?" + (M.updated || "")).then(function(j){ LEDGER = j; return j; }).catch(function(){ return null; }); }
@@ -254,11 +284,19 @@
         return {label: '<span class="rk">' + (i + 1) + '</span>' + e(t[0]) + (st && st !== "관찰" ? ' <span class="chip2 ' + (stCls[st] || "") + '" style="font-size:10px;padding:1px 6px">' + e(st) + '</span>' : ''),
                 v: t[1], text: t[1], attr: ' onclick="openOP(\'' + e(t[0]) + '\')"', tip: "<b>" + e(t[0]) + "</b> 점수 " + t[1] + (st ? " · " + e(st) : "") + "<br>누르면 종목리포트"}; }), {color: "#199e70"}) +
         '<p class="note">상태: 관찰 → 접근(고래 평단 근처) → <b>매수 검토</b>(여러 신호가 겹침)</p>');
-      // 신호 묶음
-      var groups = [["big", "큰 신규 매수", "hot"], ["mov", "많이 움직인 종목", "c"], ["near", "평단 근처", ""], ["rebound", "반등", "c"], ["warn", "주의", "cool"]];
-      var gh = groups.filter(function(g){ return sg[g[0]] && sg[g[0]].length; }).map(function(g){
-        return '<div class="sig"><small>' + g[1] + '</small><div>' + sg[g[0]].slice(0, 10).map(function(t){ var s = typeof t === "string" ? t : (t.t || t.ticker || t[0] || ""); return '<a class="chip2 ' + g[2] + '" href="javascript:openOP(\'' + e(s) + '\')">' + e(s) + '</a>'; }).join("") + '</div></div>'; }).join("");
-      if (gh) h += card("오늘의 신호", gh);
+      // 신호 묶음 — 📱 A12-2 (10/15): 종목 한 번만 + 묶음 배지 여러 개, 겹친 수 많은 순
+      var groups = [["big", "큰 신규 매수", "🆕"], ["mov", "많이 움직임", "💨"], ["near", "평단 근처", "📍"], ["rebound", "반등", "↩️"], ["warn", "주의", "⚠️"]];
+      var wsg = {}, word = [];
+      groups.forEach(function(g, gi){ (sg[g[0]] || []).slice(0, 10).forEach(function(t){ var s = typeof t === "string" ? t : (t.t || t.ticker || t[0] || ""); if (!s) return;
+        if (!wsg[s]){ wsg[s] = []; word.push(s); } if (wsg[s].indexOf(gi) < 0) wsg[s].push(gi); }); });
+      word.sort(function(a, b){ return wsg[b].length - wsg[a].length || (wsg[a].indexOf(4) >= 0) - (wsg[b].indexOf(4) >= 0) || word.indexOf(a) - word.indexOf(b); });
+      var used = groups.filter(function(g, gi){ return word.some(function(s){ return wsg[s].indexOf(gi) >= 0; }); });
+      var multi = word.filter(function(s){ return wsg[s].length >= 2; }), top = multi.filter(function(s){ return wsg[s].length === wsg[multi[0]].length; });
+      var gh = word.length ? (multi.length ? '<p class="wsg-top">🔥 오늘 <b>' + wsg[multi[0]].length + '묶음</b>에 겹친 이름: ' + top.map(function(s){ return '<a href="javascript:openOP(\'' + e(s) + '\')"><b>' + e(s) + '</b></a>'; }).join(" · ") + (multi.length > top.length ? ' <span class="mut">· 2묶음 이상 ' + multi.length + '개</span>' : '') + '</p>' : '') +
+        '<div class="wsg">' + word.map(function(s){ var gs = wsg[s], warn = gs.indexOf(4) >= 0 && gs.length === 1;
+          return '<a class="chip2 wsgc' + (gs.length >= 2 ? " hot" : warn ? " cool" : "") + '" href="javascript:openOP(\'' + e(s) + '\')" title="' + gs.map(function(i){ return groups[i][1]; }).join(" · ") + '">' + e(s) + ' <span class="wsgi">' + gs.map(function(i){ return groups[i][2]; }).join("") + '</span></a>'; }).join("") + '</div>' +
+        '<p class="note wsg-k">' + used.map(function(g){ return g[2] + " " + g[1]; }).join(" · ") + '</p>' : "";
+      if (gh) h += card("오늘의 신호 <span class='mut'>" + word.length + "종목 · 겹친 순</span>", gh);
       // 가장 많이 보유
       if (d.hold && d.hold.length){
         var secs = {}; d.hold.forEach(function(x){ secs[x[2]] = (secs[x[2]] || 0) + 1; });
@@ -378,13 +416,13 @@
     getJSON(file("cup", it.id, "cards.json")).then(function(d){
       var cupCard = function(c){
         var near = c.dist != null && c.dist > -5 && c.dist <= 0;
-        return '<div class="cc"><div class="row"><div class="nm2">' + (V.FLAGS[c.mkt] || "") + ' <b>' + e(c.name) + '</b><span class="cd">' + e(c.code) + '</span></div>' +
+        return '<div class="cc' + ageCls(c) + '"><div class="row"><div class="nm2">' + ageDot(c) + (V.FLAGS[c.mkt] || "") + ' ' + nmB(c) + '<span class="cd">' + e(c.code) + '</span></div>' +
           (c.brk ? chip("돌파", "hot") : near ? chip("돌파 임박", "c") : chip("기준가까지 " + sgn(-c.dist) + "%", "")) + '</div>' +
           '<div class="sp-box" data-spark="' + e(c.code) + '"' + (c.pivot ? ' data-ref="' + c.pivot + '" data-label="매수기준 ' + fmt(c.pivot) + '"' : '') + '></div>' +
           '<div class="st4">' + stat("컵 깊이", c.depth != null ? c.depth.toFixed(0) + "%" : "–") + stat("기간", c.weeks != null ? c.weeks.toFixed(0) + "주" : "–") +
           stat("손잡이", c.handle != null ? c.handle.toFixed(0) + "%" : "–") + stat("주가강도", c.rs != null ? c.rs.toFixed(0) : "–") + '</div>' +
           (c.point ? '<p class="pt">' + e(c.point) + '</p>' : '') +
-          '<div class="row"><span class="tm">' + e(c.sector || "") + (c.shape ? " · " + e(c.shape) : "") + (c.streak > 1 ? " · " + c.streak + "일째" : "") + '</span>' + opBtn(c.code) + '</div></div>';
+          '<div class="row"><span class="tm">' + e(c.sector || "") + (c.shape ? " · " + e(c.shape) : "") + ageTxt(c) + '</span>' + opBtn(c.code) + '</div></div>';
       };
       var h = '<div class="sum3"><div class="kv"><small>컵 패턴 종목</small><b>' + d.total.toLocaleString() + '</b></div><div class="kv"><small>사상최고가 돌파</small><b class="up">' + d.ath.length + '</b></div>' +
               '<div class="kv"><small>돌파 완료</small><b>' + d.top.filter(function(c){ return c.brk; }).length + '<span class="mut"> / 상위 ' + d.top.length + '</span></b></div></div>';
@@ -392,7 +430,7 @@
       h += mapCard("🗺️", "컵", (d.ath || []).concat(d.top.filter(function(c){ return !(d.ath || []).some(function(x){ return x.code === c.code; }); })), "cseg", "255,184,77");
       h += '<div class="g2">' + card("나라별 <span class='mut'>누르면 그 나라</span>", marketBars(d.by_mkt, "cseg")) + card("많이 나온 섹터 <span class='mut'>누르면 그 섹터</span>", secBars(d.by_sec, "cseg", "#c98500")) + '</div>';
       if (d.ath.length) h += sec("★ 사상최고가 돌파") + '<div class="cgrid">' + d.ath.map(cupCard).join("") + '</div>';
-      h += sec("컵 점수 상위 " + d.top.length) + filterSeg("cseg", d.top, function(k){ P.set(k); }) + '<div id="cbox"></div>' + pdf;
+      h += sec("컵 점수 상위 " + d.top.length) + filterSeg("cseg", d.top, function(k){ P.set(k); }) + sortSeg("csrt", d.top, function(){ return P; }) + '<div id="cbox"></div>' + pdf;
       el.innerHTML = h;
       var P = pager("cbox", d.top, cupCard); P.draw(); window.CUPP = P; window.PAGERS.cseg = P;
       after(el);
@@ -405,14 +443,14 @@
     if (it.files.indexOf("cards.json") < 0){ el.innerHTML = pdfCard("갭 돌파 리포트", file("gap", it.id, "report.pdf")); return; }
     getJSON(file("gap", it.id, "cards.json")).then(function(d){
       var gapCard = function(c){
-        return '<div class="cc"><div class="row"><div class="nm2">' + (V.FLAGS[c.mkt] || "") + ' <b>' + e(c.name) + '</b><span class="cd">' + e(c.code) + '</span></div>' +
+        return '<div class="cc' + ageCls(c) + '"><div class="row"><div class="nm2">' + ageDot(c) + (V.FLAGS[c.mkt] || "") + ' ' + nmB(c) + '<span class="cd">' + e(c.code) + '</span></div>' +
           chip("갭 +" + (c.gap != null ? c.gap.toFixed(1) : "–") + "%", "hot") + '</div>' +
           '<div class="sp-box" data-spark="' + e(c.code) + '"' + (c.boxlo && c.boxhi ? ' data-band="' + c.boxlo + ',' + c.boxhi + '"' : '') + (c.gopen ? ' data-ref="' + c.gopen + '" data-label="갭 시가 ' + fmt(c.gopen) + '"' : '') + '></div>' +
           '<div class="st4">' + stat("갭 날짜", (c.gday || "").slice(5).replace("-", "/")) + stat("거래량", c.vol != null ? c.vol.toFixed(1) + "배" : "–") +
           stat("박스", c.boxw != null ? c.boxw.toFixed(0) + "주" : "–") + stat("주가강도", c.rs != null ? c.rs.toFixed(0) : "–") + '</div>' +
           '<div class="tags">' + (c.full ? chip("완전돌파", "c") : "") + (c.hold ? chip("갭 유지", "") : chip("갭 메움", "cool")) + (c.fresh ? chip("막 돌파", "hot") : "") + (c.new ? chip("NEW", "c") : "") + '</div>' +
           (c.point ? '<p class="pt">' + e(c.point) + '</p>' : '') +
-          '<div class="row"><span class="tm">' + e(c.sector || "") + (c.streak > 1 ? " · " + c.streak + "일째" : "") + '</span>' + opBtn(c.code) + '</div></div>';
+          '<div class="row"><span class="tm">' + e(c.sector || "") + ageTxt(c) + '</span>' + opBtn(c.code) + '</div></div>';
       };
       var held = d.top.filter(function(c){ return c.hold; }).length;
       var h = '<div class="sum3"><div class="kv"><small>갭 돌파 종목</small><b>' + d.total.toLocaleString() + '</b></div>' +
@@ -422,7 +460,7 @@
       h += mapCard("🗺️", "갭", d.top, "gseg", "144,133,233");
       h += '<div class="g2">' + card("나라별 <span class='mut'>누르면 그 나라</span>", marketBars(d.by_mkt, "gseg")) + card("많이 나온 섹터 <span class='mut'>누르면 그 섹터</span>", secBars(d.by_sec, "gseg", "#9085e9")) + '</div>';
       h += '<p class="note" style="margin:0 2px 10px">차트의 옅은 띠 = 갭 전 박스(횡보 구간), 점선 = 갭 시가</p>';
-      h += sec("갭 점수 상위 " + d.top.length) + filterSeg("gseg", d.top, function(k){ P.set(k); }) + '<div id="gbox"></div>' + pdf;
+      h += sec("갭 점수 상위 " + d.top.length) + filterSeg("gseg", d.top, function(k){ P.set(k); }) + sortSeg("gsrt", d.top, function(){ return P; }) + '<div id="gbox"></div>' + pdf;
       el.innerHTML = h;
       var P = pager("gbox", d.top, gapCard); P.draw(); window.GAPP = P; window.PAGERS.gseg = P;
     }).catch(function(){ el.innerHTML = pdfCard("갭 돌파 리포트", file("gap", it.id, "report.pdf")); });

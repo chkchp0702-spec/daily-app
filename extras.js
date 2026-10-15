@@ -94,6 +94,32 @@
     go(); new MutationObserver(go).observe(root, {childList: true, subtree: true});
   }
 
+  /* ☕ 돌파 임박 — 지금 값 (📱 A12-3 · cup_live.py) : 오늘 리포트일 때만, 40분 안 값만 「지금」 */
+  function nearLive(root, day){
+    var draw = function(){
+      var box = root.querySelector("#xnear"); if (!box) return;
+      getJSON("archive/x/cup_live.json?" + Math.floor(Date.now() / 120000), {ttl: 120000}).then(function(L){
+        if (!L || !L.items || L.day !== day) return;
+        var now = Date.now(), fresh = 0, crossed = 0;
+        [].forEach.call(box.querySelectorAll("[data-nc]"), function(r){
+          var x = L.items[r.getAttribute("data-nc")], nd = r.querySelector(".xnd"), nl = r.querySelector(".xnl"); if (!x || !nd || !nl) return;
+          var t = new Date(x.at.replace(" ", "T") + ":00+09:00").getTime(), age = (now - t) / 60000;
+          var live = age < 40 && x.s !== "마감", lab = live ? (x.s === "시간외" ? "🌙 시간외 " : "🟢 지금 ") : x.s === "마감" && age < 40 ? "📕 마감값 " : "⏱ ";
+          if (live) fresh++;
+          var bar = r.querySelector(".xbar i"); if (bar) bar.style.width = Math.max(4, Math.min(100, 100 + x.d / 3 * 100)).toFixed(0) + "%";
+          r.classList.toggle("xbrk", x.d >= 0);
+          if (x.d >= 0){ crossed++; nd.textContent = "넘음 +" + x.d.toFixed(1) + "%"; nl.textContent = "🎉 " + lab.replace(/^\S+ /, "") + x.at.slice(11); }
+          else { nd.textContent = sgn(-x.d) + "%"; nl.textContent = (x.x ? "🎉 " + x.x.slice(6) + " 넘었다 내려옴 · " : "") + lab + x.at.slice(11); }
+          nl.className = "xnl " + (live ? "on" : "old");
+        });
+        var n = root.querySelector("#xnearn");
+        if (n && (fresh || crossed)) n.innerHTML = (fresh ? "🟢 " + fresh + "종목 지금 값으로 다시 잼" : "📕 오늘 받은 값으로 다시 잼") + (crossed ? " · <b class='up'>🎉 " + crossed + "종목 돌파선 넘음</b>" : "") + " · 값이 없는 종목(작은 종목 등)은 「마감 기준」. 10분마다 바뀌어요.";
+      });
+    };
+    draw();
+    var iv = setInterval(function(){ if (!document.body.contains(root)) { clearInterval(iv); return; } if (!document.hidden) draw(); }, 120000);
+  }
+
   /* ======================= ☕ 컵 ======================= */
   wrap("cup", function(it, a, o){
     if (it.files.indexOf("cards.json") < 0) return;
@@ -111,13 +137,16 @@
       if (C && C.markets) h += '<div class="xreg">' + ["US", "KR", "JP", "CN", "HK"].filter(function(k){ return C.markets[k]; }).map(function(k){ var m = C.markets[k];
         return '<span class="xrg ' + (m.regime === "상승장" ? "u" : m.regime === "하락장" ? "d" : "") + '">' + m.flag + " " + RG[m.regime] + " " + e(m.regime) + '</span>'; }).join("") + '</div>' +
         '<p class="note" style="margin:0 2px 10px">🧭 나침반 국면 — <b>상승장</b>인 시장의 신호를 먼저, ★로 표시해요.</p>';
-      if (near.length) h += card("🎯 돌파 임박 <span class='mut'>돌파선까지 3% 이내</span>", '<div class="xt">' + near.slice(0, 12).map(function(c){
-        var hot = reg(c.mkt) === "상승장";
-        return '<div class="xr' + (hot ? " star" : "") + '">' + opA(c.code, (hot ? "★ " : "") + (V.FLAGS[c.mkt] || "") + ' <b>' + e(c.name.length > 16 ? c.name.slice(0, 15) + "…" : c.name) + '</b>') +
-          '<span class="xbar"><i style="width:' + Math.max(4, 100 + c.dist / 3 * 100).toFixed(0) + '%"></i></span><b class="up">' + sgn(-c.dist) + '%</b>' + (gapSet[c.code] ? chip("갭도", "hot") : "") + '</div>'; }).join("") + '</div>' +
-        '<p class="note">막대가 꽉 찰수록 돌파선에 가까워요. 🔔 알림 탭에서 "컵 돌파 임박"을 구독하면 휴대폰으로 받아요.</p>');
+      // 📱 A12-1·A12-3 (10/15): 한글 짧은 이름 · 장중·시간외엔 지금 값으로 돌파선 거리 다시 (archive/x/cup_live.json, 10분마다)
+      if (near.length) h += card("🎯 돌파 임박 <span class='mut'>돌파선까지 3% 이내</span>", '<div class="xt" id="xnear">' + near.slice(0, 12).map(function(c){
+        var hot = reg(c.mkt) === "상승장", nm = V.nmOf ? V.nmOf(c) : c.name;
+        return '<div class="xr' + (hot ? " star" : "") + '" data-nc="' + e(c.code) + '">' + opA(c.code, (hot ? "★ " : "") + (V.FLAGS[c.mkt] || "") + ' <b data-nmk="' + e(c.code) + '">' + e(nm.length > 16 ? nm.slice(0, 15) + "…" : nm) + '</b>') +
+          '<span class="xbar"><i style="width:' + Math.max(4, 100 + c.dist / 3 * 100).toFixed(0) + '%"></i></span><b class="up xnd">' + sgn(-c.dist) + '%</b>' + (gapSet[c.code] ? chip("갭도", "hot") : "") +
+          '<small class="xnl">마감 기준</small></div>'; }).join("") + '</div>' +
+        '<p class="note" id="xnearn">막대가 꽉 찰수록 돌파선에 가까워요. 숫자는 어제 마감 기준 — 장중·시간외엔 10분마다 지금 값으로 바뀌어요. 🔔 알림 탭에서 "컵 돌파 임박"을 구독하면 휴대폰으로 받아요.</p>');
       if (dual.length) h += card("✨ 이중 신호 <span class='mut'>컵 + 갭 동시</span>", '<div class="cp-sts">' + dual.map(function(c){ return opA(c.code, '<span class="cp-st"><b>' + (V.FLAGS[c.mkt] || "") + " " + e(c.name) + '</b><em class="tk">' + e(V.cd(c.code)) + '</em><span class="up">컵·갭</span></span>'); }).join("") + '</div>');
       a.innerHTML = h;
+      if (near.length) nearLive(a, it.id);
     });
   }, function(it, b){
     X("perf_cup.json").then(function(P){ b.innerHTML = scoreboard(P, "컵 신호") + sectorPerf(P); });

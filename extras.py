@@ -976,6 +976,28 @@ def alerts():
             push("danta", f"⚡ 오늘 단타 알람 {len(rows)}건 (시험 중)", ", ".join(f"{r['time']} {r['name']}" for r in rows[-8:]), "danta", f"danta:{day}:{len(rows)}", syms=[[r["code"], r.get("price")] for r in rows[-8:]], quiet=None)
 
 
+def sig_names():
+    """☕ 컵·📈 갭 카드 종목의 한글 짧은 이름 → sig_names.json (10/15 📱 A12-1 · 영어 정식명 두 줄 대신)"""
+    try:
+        with urllib.request.urlopen("https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/names_ko.json", timeout=40) as r:
+            names = json.loads(r.read().decode("utf-8"))
+    except Exception as e:
+        print("names_ko 실패", e)
+        return
+    out = {}
+    for cat in ("cup", "gap"):
+        fs = sorted(glob.glob(os.path.join(ARC, cat, "*", "cards.json")))[-3:]
+        for f in fs:
+            d = jl(f, {}) or {}
+            for c in (d.get("top") or []) + (d.get("ath") or []):
+                k = c.get("code") or ""
+                n = names.get(k) or names.get(k.split(".")[0] if c.get("mkt") == "US" else "")
+                if n and not re.match(r"^[가-힣]", c.get("name") or ""):
+                    out[k] = n
+    json.dump(out, open(os.path.join(OUT, "sig_names.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print("sig_names", len(out))
+
+
 def run(fn, *a):
     try:
         fn(*a)
@@ -996,6 +1018,7 @@ if __name__ == "__main__":
     run(accum)
     run(premarket)
     run(market_chips)
+    run(sig_names)
     run(alerts)
     try:
         import plus

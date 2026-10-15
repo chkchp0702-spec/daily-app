@@ -41,6 +41,7 @@
         return '<button class="tab' + (k === cur ? " on" : "") + '" style="--c:' + c.color + '" data-k="' + k + '">' + (LAB[k] || c.name) + '</button>'; }).join("");
       [].forEach.call(nav.children, function(b){ b.onclick = function(){ if (b.dataset.k !== cur) go(b.dataset.k); }; });
       var on = nav.querySelector(".on"); if (on && on.scrollIntoView) try { on.scrollIntoView({inline: "center", block: "nearest"}); } catch(x) {}
+      if (window.subBadges) try { subBadges(nav); } catch(x) {}   // 📱 A12-5 신호 탭 숫자 배지
     } else { nav.className = "tabs sub none"; nav.innerHTML = ""; }
     bar();
     setTimeout(function(){ var h = document.querySelector("header"); if (h) document.documentElement.style.setProperty("--hh", h.offsetHeight + "px"); }, 0);   // 접기 칩이 헤더 바로 아래 붙게

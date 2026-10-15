@@ -32,5 +32,7 @@ jobs:
         env:
           FORCE: ${{ github.event.inputs.force == 'true' && '1' || '' }}
         run: python live_us_pre.py
+      - name: ☕ 돌파 임박 시간외
+        run: python cup_live.py || echo "☕ 돌파 임박 실패"
       - name: 저장
-        run: bash scripts/push.sh "uspre $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/live_us_pre.json
+        run: bash scripts/push.sh "uspre $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/live_us_pre.json archive/x/cup_live.json
