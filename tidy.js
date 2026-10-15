@@ -11,8 +11,9 @@
   try { OFF = localStorage.getItem("tidyOff") === "1"; } catch(x) {}
   var OPEN = {}, MORE = {};
   // 설명 글로 보는 칸 (10/14 밤 탭별 점검으로 모음: 홈 어제 예고 풀이 · 시장 집중 근거 · 국면 신호판 풀이 · 포트 설명 · 성적 풀이 · 거르기 종목 풀이 · 피드 본문)
+  // 10/15 A10-2: 「→ 결론」 줄(.mk-so)은 설명이 아니라 카드의 결론이라 뺌 — ux1015b.js 가 2줄까지 보이고 눌러 펼침
   var NOTE_SEL = [".note", ".pr-ev", ".ps-sub", ".pr-eb", ".sc-few", ".wp-why > div", ".hero2 .mut", ".card small.mut", ".card p.mut", ".card .sub-note",
-    ".hm-gr small", ".fo-why", ".fo-lag", ".fo-stop", ".fo-sub .mut", ".mk-so", ".rb-bt", ".rb-r > p", ".cp-sum", ".cn-n", ".cn-n2", ".cn-d > p", ".tm-n",
+    ".hm-gr small", ".fo-why", ".fo-lag", ".fo-stop", ".fo-sub .mut", ".rb-bt", ".rb-r > p", ".cp-sum", ".cn-n", ".cn-n2", ".cn-d > p", ".tm-n",
     ".sc-li", ".st .tm", ".fd-tx", ".br-bi em", ".xp-in > p"].join(", ");
   var KEEP = ".keep, .lvoff, .pr-st, .tidy-keep, .clp-btn, nav *, header *, #bnav *, .tabs *, .ch-toast, .tip, .tt-x";
   var ROWS = ".xr, .ss-r, .sc-li, .lv-r, .pt, .ps-t, .pr-hw, .wp-r, .hl, .fd-it, .feed-item, .op-row, .mg-r, .row-item";

@@ -14,8 +14,8 @@
   function md(d){ return d ? String(d).slice(5, 10).replace("-", "/") : ""; }
   function hon(v, o){ return window.HON ? HON.chip(v, o) : ""; }   // 🧾 정직 계산 칩 (honest.js · 자료 없으면 빈칸)
   function J(name){ return getJSON(RAW + name + "?" + Math.floor(Date.now() / 120000), {ttl: 120000}); }   // 같은 2분 안엔 한 번만 받음 (index.html getJSON)
-  var UI = {theme: "auto", fs: "auto", home: "time"};   // 10/14 A15-3: fs = "auto"(아이폰 글자 크기 따라감) | 0.88~1.22   // 10/14 A9-1: home = "time"(시간대 맞춤 순서) | "fixed"(고정)
-  try { var u = JSON.parse(localStorage.getItem("ui") || "{}"); if (u.theme) UI.theme = u.theme; if (u.fs) UI.fs = u.fs === 1 ? "auto" : u.fs === 0.92 ? 0.94 : u.fs === 1.12 ? 1.1 : u.fs; if (u.home) UI.home = u.home; } catch(x) {}
+  var UI = {theme: "auto", fs: "auto", home: "time", mkt: "time"};   // 10/14 A15-3: fs = "auto"(아이폰 글자 크기 따라감) | 0.88~1.22   // 10/14 A9-1: home = "time"(시간대 맞춤 순서) | "fixed"(고정)
+  try { var u = JSON.parse(localStorage.getItem("ui") || "{}"); if (u.theme) UI.theme = u.theme; if (u.fs) UI.fs = u.fs === 1 ? "auto" : u.fs === 0.92 ? 0.94 : u.fs === 1.12 ? 1.1 : u.fs; if (u.home) UI.home = u.home; if (u.mkt) UI.mkt = u.mkt; } catch(x) {}
   function keepUI(){ try { localStorage.setItem("ui", JSON.stringify(UI)); } catch(x) {} }
 
   /* ---------- ⑥ 테마 · 글자 크기 ---------- */
@@ -39,13 +39,14 @@
     d.innerHTML = '<b>⚙️ 보기 설정</b>' + row("화면", "theme", [["auto", "자동"], ["dark", "🌙 어둡게"], ["light", "☀️ 밝게"]]) +
       row("글자", "fs", [["auto", "📱 자동"], [0.88, "가"], [0.94, "가"], [1, "가"], [1.1, "가"], [1.22, "가"]]) +
       row("🏠 홈 순서", "home", [["time", "🕘 시간대"], ["fixed", "고정"]]) +
-      '<small>글자 「📱 자동」 = 아이폰 설정 › 디스플레이 › 텍스트 크기를 따라가요(가 다섯 개 = 아주 작게 ~ 아주 크게, 카드 모양은 그대로). 화면 자동 = 휴대폰 설정(다크 모드)을 따라가요. 홈 「시간대」 = 아침·장중·저녁·밤마다 지금 볼 카드를 맨 위로.</small>' +
+      row("🌐 시황 순서", "mkt", [["time", "🕘 시간대"], ["fixed", "고정"]]) +
+      '<small>글자 「📱 자동」 = 아이폰 설정 › 디스플레이 › 텍스트 크기를 따라가요(가 다섯 개 = 아주 작게 ~ 아주 크게, 카드 모양은 그대로). 화면 자동 = 휴대폰 설정(다크 모드)을 따라가요. 홈·시황 「시간대」 = 아침·장중·저녁·밤마다 지금 볼 카드를 맨 위로.</small>' +
       '<div class="us-ver">앱 버전 v' + e(window.APPV || "") + (window.M && M.updated ? ' · 자료 목록 ' + e(String(M.updated).slice(5)) : '') + '</div>' +
       '<div class="us-go"><button data-go="alarm">🔔 알림 켜기·끄기</button><button data-go="idea">💬 의견함</button><button data-go="onepager">📄 종목리포트</button></div>';
     document.body.appendChild(d);
     [].forEach.call(d.querySelectorAll("[data-go]"), function(b){ b.onclick = function(){ d.remove(); go(b.dataset.go); }; });
     [].forEach.call(d.querySelectorAll("button[data-k]"), function(b){ b.onclick = function(){ var k = b.dataset.k, v = b.dataset.v; UI[k] = k === "fs" && v !== "auto" ? +v : v; keepUI(); applyUI(); d.remove(); settings();
-      if (k === "home" && window.cur === "home" && window.homeInit) homeInit(); }; });
+      if (k === "home" && window.cur === "home" && window.homeInit) homeInit(); if (k === "mkt" && window.cur === "market") go("market", window.curDate); }; });
     setTimeout(function(){ document.addEventListener("click", function off(ev){ if (!d.contains(ev.target) && ev.target.id !== "uibtn"){ d.remove(); document.removeEventListener("click", off); } }); }, 0);
   }
   function addBtn(){
