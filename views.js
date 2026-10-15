@@ -292,9 +292,9 @@
       word.sort(function(a, b){ return wsg[b].length - wsg[a].length || (wsg[a].indexOf(4) >= 0) - (wsg[b].indexOf(4) >= 0) || word.indexOf(a) - word.indexOf(b); });
       var used = groups.filter(function(g, gi){ return word.some(function(s){ return wsg[s].indexOf(gi) >= 0; }); });
       var multi = word.filter(function(s){ return wsg[s].length >= 2; }), top = multi.filter(function(s){ return wsg[s].length === wsg[multi[0]].length; });
-      var gh = word.length ? (multi.length ? '<p class="wsg-top">🔥 오늘 <b>' + wsg[multi[0]].length + '묶음</b>에 겹친 이름: ' + top.map(function(s){ return '<a href="javascript:openOP(\'' + e(s) + '\')"><b>' + e(s) + '</b></a>'; }).join(" · ") + (multi.length > top.length ? ' <span class="mut">· 2묶음 이상 ' + multi.length + '개</span>' : '') + '</p>' : '') +
+      var gh = word.length ? '<div id="wsig"></div>' + (multi.length ? '<p class="wsg-top">🔥 오늘 <b>' + wsg[multi[0]].length + '묶음</b>에 겹친 이름: ' + top.map(function(s){ return '<a href="javascript:openOP(\'' + e(s) + '\')"><b>' + e(s) + '</b></a>'; }).join(" · ") + (multi.length > top.length ? ' <span class="mut">· 2묶음 이상 ' + multi.length + '개</span>' : '') + '</p>' : '') +
         '<div class="wsg">' + word.map(function(s){ var gs = wsg[s], warn = gs.indexOf(4) >= 0 && gs.length === 1;
-          return '<a class="chip2 wsgc' + (gs.length >= 2 ? " hot" : warn ? " cool" : "") + '" href="javascript:openOP(\'' + e(s) + '\')" title="' + gs.map(function(i){ return groups[i][1]; }).join(" · ") + '">' + e(s) + ' <span class="wsgi">' + gs.map(function(i){ return groups[i][2]; }).join("") + '</span></a>'; }).join("") + '</div>' +
+          return '<a class="chip2 wsgc' + (gs.length >= 2 ? " hot" : warn ? " cool" : "") + '" data-g="' + gs.map(function(i){ return groups[i][0]; }).join(" ") + '" href="javascript:openOP(\'' + e(s) + '\')" title="' + gs.map(function(i){ return groups[i][1]; }).join(" · ") + '">' + e(s) + ' <span class="wsgi">' + gs.map(function(i){ return groups[i][2]; }).join("") + '</span></a>'; }).join("") + '</div>' +
         '<p class="note wsg-k">' + used.map(function(g){ return g[2] + " " + g[1]; }).join(" · ") + '</p>' : "";
       if (gh) h += card("오늘의 신호 <span class='mut'>" + word.length + "종목 · 겹친 순</span>", gh);
       // 가장 많이 보유

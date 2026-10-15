@@ -45,10 +45,66 @@
         var x = o[b.dataset.k]; if (!x || b.querySelector(".tbg")) return;
         var em = document.createElement("em"); em.className = "tbg" + (x.dot ? " dot" : "");
         em.textContent = (typeof x.n === "number" ? x.n.toLocaleString() : x.n) + (x.s ? " · " + x.s : "");
+        em.setAttribute("role", "button"); em.setAttribute("aria-label", x.t + " — 누르면 그 종목으로");
+        em.onclick = function(ev){ ev.stopPropagation(); ev.preventDefault(); jump(b.dataset.k); };
         b.appendChild(em); b.title = x.t;
       });
     });
   };
+  /* 숫자를 누르면 → 그 탭의 그 종목들 자리로 이동 (10/15 사용자 「숫자 누르면 그 종목들만 보이게 혹은 위치로 이동」)
+     🐋 큰 신규 매수만 남겨 보이기 · ☕ 돌파 임박 카드(접힌 줄까지 펼침) · 📈 갭 목록 · 🔎 거름망 고르는 칸 */
+  var ANCH = {whale: "wsig", cup: "xnear", gap: "gseg", screen: "scrk"};
+  var LEG = {whale: ["🐋", "큰 신규 매수"], cup: ["☕", "돌파 임박"], gap: ["📈", "갭 돌파"], screen: ["🔎", "거름망 4개 종목"]};
+  function jump(k){
+    var id = ANCH[k]; if (!id) return;
+    if (typeof go === "function" && window.cur !== k) go(k);
+    var t0 = Date.now();
+    (function find(){
+      var el = document.getElementById(id);
+      if (!el){ if (Date.now() - t0 < 8000) setTimeout(find, 150); return; }
+      var card = el.closest(".card") || el;
+      if (k === "cup"){ var t1 = Date.now(); (function more(){ var bt = card.querySelector(".td-more");   // 접힌 「＋N개 더 보기」(tidy.js)가 붙으면 펼침
+        if (bt){ if (/더 보기/.test(bt.textContent)) bt.click(); return; } if (Date.now() - t1 < 2500) setTimeout(more, 150); })(); }
+      if (k === "whale") whaleOnly(el.closest(".card"));
+      setTimeout(function(){
+        var hd = document.querySelector("header"), y = card.getBoundingClientRect().top + window.scrollY - ((hd ? hd.offsetHeight : 0) + 10);
+        window.scrollTo({top: Math.max(0, y), behavior: "smooth"});
+        card.classList.add("flash"); setTimeout(function(){ card.classList.remove("flash"); }, 1800);
+      }, 120);
+    })();
+  }
+  window.sigJump = jump;
+  function whaleOnly(card){
+    if (!card) return;
+    var chips = card.querySelectorAll(".wsgc"), n = 0;
+    [].forEach.call(chips, function(c){ var on = (" " + (c.getAttribute("data-g") || "") + " ").indexOf(" big ") >= 0; c.classList.toggle("wsg-off", !on); if (on) n++; });
+    var bar = card.querySelector(".wsg-only");
+    if (!bar){ bar = document.createElement("div"); bar.className = "wsg-only"; var w = card.querySelector(".wsg"); if (w) w.parentNode.insertBefore(bar, w); }
+    bar.innerHTML = "🆕 <b>큰 신규 매수 " + n + "종목</b>만 보는 중 <button type='button'>전체 보기 ✕</button>";
+    bar.querySelector("button").onclick = function(){ [].forEach.call(chips, function(c){ c.classList.remove("wsg-off"); }); bar.remove(); };
+  }
+  // 뜻풀이 한 줄 — 신호 화면 맨 위 (누르면 위와 똑같이 이동)
+  function legend(){
+    var main = document.querySelector("main"); if (!main || !LEG[window.cur]) return;
+    if (main.querySelector("#sgleg")) return;
+    counts().then(function(o){
+      if (!LEG[window.cur] || main.querySelector("#sgleg")) return;
+      var ks = ["whale", "cup", "gap", "screen"].filter(function(k){ return o[k]; }); if (!ks.length) return;
+      var d = document.createElement("div"); d.id = "sgleg";
+      d.innerHTML = '<small>탭 위 숫자 · 누르면 그 종목으로</small>' + ks.map(function(k){ var x = o[k];
+        return '<button type="button" data-j="' + k + '" class="' + (x.dot ? "dot" : "") + '"><i>' + (typeof x.n === "number" ? x.n.toLocaleString() : x.n) + '</i>' + LEG[k][0] + " " + LEG[k][1] + '</button>'; }).join("") +
+        '<small class="sgl-k">빨간 숫자 = 오늘 새로 들어온 게 있음</small>';
+      [].forEach.call(d.querySelectorAll("[data-j]"), function(b){ b.onclick = function(){ jump(b.dataset.j); }; });
+      main.insertBefore(d, main.firstChild);
+    });
+  }
+  (function watch(){
+    var main = document.querySelector("main");
+    if (!main){ setTimeout(watch, 300); return; }
+    new MutationObserver(function(){ if (LEG[window.cur] && !main.querySelector("#sgleg")) legend(); }).observe(main, {childList: true});
+    legend();
+  })();
+
   // 그려져 있는 탭에도 (처음 열 때)
   setTimeout(function(){ try { window.subBadges(); } catch(x) {} }, 600);
 
@@ -56,8 +112,13 @@
   css.textContent =
     // A12-5 탭 배지 — 오른쪽 위 작은 숫자 방울(탭 폭은 그대로 · 오늘 새로 생긴 게 있으면 빨강)
     "header .tabs.sub:has(.tbg){padding-top:7px}header .tabs.sub .tab{position:relative}" +
-    "header .tabs.sub .tab .tbg{position:absolute;top:-7px;right:-5px;font-style:normal;font-size:10.5px;font-weight:800;line-height:16px;min-width:16px;padding:0 5px;border-radius:999px;background:#3a4256;color:#fff;box-shadow:0 0 0 2px var(--bg);white-space:nowrap;pointer-events:none}" +
+    "header .tabs.sub .tab .tbg{position:absolute;top:-7px;right:-5px;font-style:normal;font-size:10.5px;font-weight:800;line-height:16px;min-width:16px;padding:0 5px;border-radius:999px;background:#3a4256;color:#fff;box-shadow:0 0 0 2px var(--bg);white-space:nowrap;cursor:pointer}header .tabs.sub .tab .tbg::before{content:'';position:absolute;inset:-8px}" +
     "header .tabs.sub .tab .tbg.dot{background:#e5484d}" +
+    // 뜻풀이 줄 · 고래 「큰 신규 매수만」
+    "#sgleg{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 2px 12px}#sgleg small{flex-basis:100%;color:var(--sub);font-size:12px}#sgleg small.sgl-k{font-size:11.5px;color:var(--dim)}" +
+    "#sgleg button{border:1px solid var(--line);background:var(--panel);color:var(--text);font:inherit;font-size:12.5px;border-radius:999px;padding:4px 10px 4px 4px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}" +
+    "#sgleg button i{font-style:normal;font-weight:800;font-size:11px;background:#3a4256;color:#fff;border-radius:999px;padding:1px 6px;min-width:18px;text-align:center}#sgleg button.dot i{background:#e5484d}" +
+    ".wsgc.wsg-off{display:none}.wsg-only{font-size:13px;margin:0 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.wsg-only button{border:1px solid var(--line);background:var(--panel);color:var(--sub);font:inherit;font-size:12px;border-radius:999px;padding:2px 9px;cursor:pointer}" +
     // A12-1 이름 한 줄
     ".cc .nm2 b[data-nmk]{word-break:keep-all}.cc .nm2{min-width:0}" +
     // A12-2 고래 오늘의 신호
