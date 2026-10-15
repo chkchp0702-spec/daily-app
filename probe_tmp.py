@@ -8,7 +8,7 @@ def dl(s, **k):
     if isinstance(x.columns, pd.MultiIndex): x.columns = x.columns.get_level_values(0)
     return x
 def brier(p, y): return float(np.mean((np.asarray(p) - np.asarray(y)) ** 2))
-sp = dl("^GSPC", period="5y", interval="1d")["Close"].dropna(); sp.index = pd.to_datetime(sp.index).tz_localize(None).normalize()
+sp = dl("^GSPC", period="max", interval="1d")["Close"].dropna(); sp.index = pd.to_datetime(sp.index).tz_localize(None).normalize()
 spr = sp.pct_change()
 es = dl("ES=F", period="730d", interval="60m")["Close"].dropna()
 ei = pd.to_datetime(es.index); ei = ei.tz_localize("UTC") if ei.tz is None else ei
@@ -30,10 +30,10 @@ def logit_fit(X, y, l2=1.0, it=50):
 def logit_pred(w, X): return 1 / (1 + np.exp(-(np.c_[np.ones(len(X)), X] @ w)))
 for mk, (sym, tz, op) in MK.items():
     try:
-        a = dl(sym, period="5y", interval="1d")["Close"].dropna(); a.index = pd.to_datetime(a.index).tz_localize(None).normalize()
+        a = dl(sym, period="max", interval="1d")["Close"].dropna(); a.index = pd.to_datetime(a.index).tz_localize(None).normalize()
         a = a[~a.index.duplicated(keep="last")]
         adays = list(a.index); rows = []
-        for t in spr.index:
+        for t in spr.index[spr.index >= es.index[0].tz_convert(None).normalize() - pd.Timedelta(days=3)]:
             if pd.isna(spr.get(t)): continue
             nxt = [D for D in adays if D > t][:1]
             if not nxt: continue
@@ -50,6 +50,16 @@ for mk, (sym, tz, op) in MK.items():
             post = float(aft.iloc[-1] / pre.iloc[-1] - 1)
             rows.append((D, float(spr[t]), post, int(a[D] > a[prevD])))
         R = pd.DataFrame(rows, columns=["D", "us", "post", "y"]).drop_duplicates("D")
+        # 긴 일봉 역사(5y, 미국 t → 아시아 다음 날)로 칸 비율 — prob.py 가 실제 쓰는 방식
+        L = []
+        for t in spr.index:
+            if pd.isna(spr.get(t)): continue
+            nx = a.index[a.index > t]
+            if not len(nx): continue
+            D = nx[0]; i = adays.index(D)
+            if i == 0 or adays[i - 1] > t: continue
+            L.append((D, float(spr[t]), int(a[D] > a[adays[i - 1]])))
+        L = pd.DataFrame(L, columns=["D", "us", "y"]).drop_duplicates("D")
         days = sorted(R["D"]); mid = days[len(days) // 2]
         A, B = R[R["D"] < mid], R[R["D"] >= mid]
         res = {"n": len(R), "split": str(mid.date()), "post_sd": round(float(R["post"].std()) * 100, 3),
@@ -66,6 +76,11 @@ for mk, (sym, tz, op) in MK.items():
             p1 = bucket_rate((tr["us"] + tr["post"]).values, tr["y"].values, (te["us"] + te["post"]).values, base)
             w0 = logit_fit(tr[["us"]].values * 100, tr["y"].values); w1 = logit_fit(tr[["us", "post"]].values * 100, tr["y"].values)
             q0 = logit_pred(w0, te[["us"]].values * 100); q1 = logit_pred(w1, te[["us", "post"]].values * 100)
+            Lt = L[~L["D"].isin(set(te["D"]))]; lb = float(Lt["y"].mean())
+            r0 = bucket_rate(Lt["us"].values, Lt["y"].values, te["us"].values, lb)
+            r1 = bucket_rate(Lt["us"].values, Lt["y"].values, (te["us"] + te["post"]).values, lb)
+            res[nm + "_긴역사"] = {"칸_us": round(brier(r0, y), 4), "칸_us+post": round(brier(r1, y), 4), "nL": len(Lt),
+                                  "hit_us": round(float(np.mean((r0 > .5) == (y == 1))), 3), "hit_us+post": round(float(np.mean((r1 > .5) == (y == 1))), 3)}
             res[nm] = {"n": len(te), "brier_base": round(brier(np.full(len(y), base), y), 4),
                        "칸_us": round(brier(p0, y), 4), "칸_us+post": round(brier(p1, y), 4),
                        "로짓_us": round(brier(q0, y), 4), "로짓_us+post": round(brier(q1, y), 4),
