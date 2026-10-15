@@ -5,7 +5,7 @@
    · 글을 누르면 펼침, 📌 로 모아 두기(이 기기에만), 「원문」으로 블로그·텔레그램 열기 */
 (function(){
   var RAWF = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/";
-  var S = {d: null, f: "ALL", q: "", kw: [], used: {}, open: {}};
+  var S = {d: null, f: "ALL", q: "", kw: [], used: {}, open: {}, gopen: {}};
   var PIN = {};
   try { PIN = JSON.parse(localStorage.getItem("feedpin") || "{}"); } catch(e) {}
   function savePin(){ try { localStorage.setItem("feedpin", JSON.stringify(PIN)); } catch(e) {} }
@@ -106,20 +106,11 @@
     return true;
   }
 
-  function list(){
-    var b = document.getElementById("fdbody"); if (!b || !S.d) return;
-    var its = S.d.items.filter(pass), news = {};
-    (S.d.new || []).forEach(function(i){ news[i] = 1; });
-    if (!its.length){ b.innerHTML = '<div class="empty">' + (S.f === "PIN" ? "📌 모아 둔 글이 없어요. 글 오른쪽 📌 를 눌러 모아 두세요." : "해당하는 글이 없어요.") + '</div>'; return; }
-    var h = "", day = "", all = its.length;
-    S.lim = S.lim || 40; its = its.slice(0, S.lim);          // 처음엔 40개만 — 끝없이 긴 화면 대신 「더 보기」
-    its.forEach(function(it){
-      var dd = (it.at || it.first).slice(0, 10);
-      if (dd !== day){ day = dd; h += '<div class="fd-day">' + dayLab(dd) + '</div>'; }
+  function card(it, news){
       var long = it.text.length > 150, op = S.open[it.id];
       var body = e(it.text).replace(/\n/g, "<br>");
       S.kw.length && it._h.forEach(function(w){ body = body.split(e(w)).join('<mark>' + e(w) + '</mark>'); });
-      h += '<div class="fd-it fd-' + (it.kind || "bl") + '" data-fid="' + e(it.id) + '">' +
+      return '<div class="fd-it fd-' + (it.kind || "bl") + '" data-fid="' + e(it.id) + '">' +
         '<div class="fd-hd"><span class="fd-sn">' + (IC[it.kind] || "🅽") + " " + e(it.name.replace(/\s*\(.*\)/, "")) + (it.press ? ' <small class="fd-press">· ' + e(it.press) + '</small>' : '') + '</span>' +
         '<span class="fd-tm">' + e((it.at || "").slice(11)) + '</span>' + (news[it.id] ? '<span class="fd-new">새 글</span>' : "") +
         '<button class="fd-pin' + (PIN[it.id] ? " on" : "") + '" data-pin="' + e(it.id) + '">📌</button></div>' +
@@ -131,10 +122,79 @@
         (it.imgs && it.imgs.length && op ? '<div class="fd-im">' + it.imgs.map(function(u){ return '<img loading="lazy" referrerpolicy="no-referrer" src="' + e(u) + '">'; }).join("") + '</div>' : "") +
         '<div class="fd-ft">' + (long || (it.imgs && it.imgs.length) ? '<span class="fd-more">' + (op ? "접기 ▲" : "펼치기 ▼" + (it.imgs && it.imgs.length ? " · 사진 " + it.imgs.length : "")) + '</span>' : "<span></span>") +
         '<a class="fd-go" href="' + e(it.link) + '" target="_blank" rel="noopener">원문 ↗</a></div></div>';
+  }
+
+  /* 🧵 A13-2 (10/15): 같은 채널(텔레그램·블로그) 글이 1시간 안에 연달아 오면 카드 한 장으로 묶음.
+     닫힌 묶음 = 머리(채널 · N개 · 시각~시각) + 글마다 첫 줄 · 누르면 글 카드가 하나씩 펼쳐짐(📌 는 글마다 그대로)
+     뉴스·AI 글은 안 묶음 · 🎯 집중 연결 · 📝 리포트 인용이 든 글이 있으면 묶음 머리에 표시 */
+  function tms(it){
+    var s = String(it.at || it.first || "");
+    if (s.length < 16) return null;
+    var t = Date.parse(s.slice(0, 10) + "T" + s.slice(11, 16) + ":00+09:00");
+    return isNaN(t) ? null : t;
+  }
+  function grp(its){
+    var out = [], cur = null;
+    its.forEach(function(it){
+      var p = cur && cur[cur.length - 1], tp = p && tms(p), ti = tms(it);
+      var ok = p && (it.kind === "tg" || it.kind === "blog") && it.kind === p.kind && it.src === p.src &&
+        String(it.at || it.first).slice(0, 10) === String(p.at || p.first).slice(0, 10) &&
+        tp != null && ti != null && Math.abs(tp - ti) <= 3600e3;
+      if (ok) cur.push(it); else { cur = [it]; out.push(cur); }
+    });
+    return out;
+  }
+  function firstLine(it){
+    var t = it.kind === "tg" ? "" : (it.title || "");
+    if (!t) t = (String(it.text || "").split(/\n+/).filter(function(x){ return x.trim(); })[0] || it.title || "").trim();
+    t = t.replace(/^[\s•·▪◦\-*>]+/, "") || t;
+    return t.length > 70 ? t.slice(0, 70) + "…" : t;
+  }
+  function grpCard(g, news){
+    var a = g[0], z = g[g.length - 1], gid = a.id, op = S.gopen[gid];
+    var t2 = String(a.at || "").slice(11, 16), t1 = String(z.at || "").slice(11, 16);
+    var nNew = g.filter(function(i){ return news[i.id]; }).length;
+    var nPin = g.filter(function(i){ return PIN[i.id]; }).length;
+    var nUsed = g.filter(function(i){ return S.used[i.id]; }).length;
+    var hit = []; g.forEach(function(i){ (i._h || []).forEach(function(w){ if (hit.indexOf(w) < 0) hit.push(w); }); });
+    return '<div class="fd-grp fd-' + (a.kind || "bl") + (op ? " op" : "") + '">' +
+      '<div class="fd-ghd" data-gid="' + e(gid) + '">' +
+        '<div class="fd-hd"><span class="fd-sn">' + (IC[a.kind] || "🅽") + " " + e(a.name.replace(/\s*\(.*\)/, "")) + '</span>' +
+        '<span class="fd-gn">' + g.length + '개</span><span class="fd-tm">' + e(t1 === t2 ? t2 : t1 + "~" + t2) + '</span>' +
+        (nNew ? '<span class="fd-new">새 글' + (nNew > 1 ? " " + nNew : "") + '</span>' : "") +
+        (nPin ? '<span class="fd-gp">📌' + (nPin > 1 ? nPin : "") + '</span>' : "") + '</div>' +
+        (nUsed ? '<div class="fd-used">📝 오늘 시황리포트 인용 ' + nUsed + '개</div>' : "") +
+        (hit.length ? '<div class="fd-hit">🎯 ' + hit.slice(0, 4).map(e).join(" · ") + '</div>' : "") +
+        (op ? "" : '<ul class="fd-gl">' + g.map(function(i){ return '<li>' + (S.used[i.id] ? "📝 " : "") + e(firstLine(i)) + '</li>'; }).join("") + '</ul>') +
+        '<div class="fd-ft"><span class="fd-more">' + (op ? "묶음 접기 ▲" : "하나씩 보기 ▼") + '</span><span></span></div>' +
+      '</div>' +
+      (op ? '<div class="fd-gin">' + g.map(function(i){ return card(i, news); }).join("") + '</div>' : "") +
+    '</div>';
+  }
+
+  function list(){
+    var b = document.getElementById("fdbody"); if (!b || !S.d) return;
+    var its = S.d.items.filter(pass), news = {};
+    (S.d.new || []).forEach(function(i){ news[i] = 1; });
+    if (!its.length){ b.innerHTML = '<div class="empty">' + (S.f === "PIN" ? "📌 모아 둔 글이 없어요. 글 오른쪽 📌 를 눌러 모아 두세요." : "해당하는 글이 없어요.") + '</div>'; return; }
+    var h = "", day = "", all = its.length;
+    S.lim = S.lim || 40; its = its.slice(0, S.lim);          // 처음엔 40개만 — 끝없이 긴 화면 대신 「더 보기」
+    grp(its).forEach(function(g){
+      var dd = (g[0].at || g[0].first).slice(0, 10);
+      if (dd !== day){ day = dd; h += '<div class="fd-day">' + dayLab(dd) + '</div>'; }
+      h += g.length > 1 ? grpCard(g, news) : card(g[0], news);
     });
     if (all > its.length) h += '<button class="fd-lim" id="fdlim">더 보기 ▾ <small>' + (all - its.length) + '개 남음</small></button>';
     b.innerHTML = h;
     var lb = document.getElementById("fdlim"); if (lb) lb.onclick = function(){ var y = window.scrollY; S.lim += 60; list(); window.scrollTo(0, y); };
+    [].forEach.call(b.querySelectorAll("[data-gid]"), function(el){
+      el.onclick = function(ev){
+        if (ev.target.closest("a")) return;
+        if (window.getSelection && String(window.getSelection()).length) return;
+        var id = el.getAttribute("data-gid"); S.gopen[id] = !S.gopen[id];
+        var y = window.scrollY; list(); window.scrollTo(0, y);
+      };
+    });
     [].forEach.call(b.querySelectorAll(".fd-it"), function(el){
       el.onclick = function(ev){
         if (ev.target.closest("a")) return;
@@ -175,6 +235,14 @@
     ".fd-fl{font-size:12.5px;color:var(--sub);margin-top:6px}" +
     ".fd-im{display:flex;gap:6px;overflow-x:auto;margin-top:8px}.fd-im img{height:150px;border-radius:8px;flex:none}" +
     ".fd-ft{display:flex;justify-content:space-between;align-items:center;margin-top:7px;font-size:12.5px}" +
+    ".fd-grp{background:var(--panel);border:1px solid var(--line);border-left:3px solid #4aa3ff;border-radius:12px;margin-bottom:8px;box-shadow:3px 3px 0 -1px var(--panel2),3px 3px 0 0 var(--line)}" +
+    ".fd-grp.fd-blog{border-left-color:#03c75a}.fd-ghd{padding:10px 12px;cursor:pointer}" +
+    ".fd-gn{background:rgba(74,163,255,.16);color:var(--text);border-radius:6px;padding:1px 6px;font-size:11.5px;font-weight:700}" +
+    ".fd-gp{margin-left:auto;font-size:13px}" +
+    ".fd-gl{list-style:none;margin:7px 0 0;padding:0}.fd-gl li{font-size:14px;line-height:1.5;padding:3px 0 3px 12px;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
+    ".fd-gl li:before{content:'';position:absolute;left:2px;top:.75em;width:4px;height:4px;border-radius:50%;background:var(--sub)}" +
+    ".fd-gl li+li{border-top:1px dashed var(--line)}" +
+    ".fd-gin{padding:0 8px 2px}.fd-gin .fd-it{border-left-width:1px;margin-bottom:6px}" +
     ".fd-more{color:var(--sub)}.fd-go{color:var(--c,#f4a261);text-decoration:none;font-weight:700}";
   document.head.appendChild(css);
 })();

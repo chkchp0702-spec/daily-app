@@ -16,7 +16,7 @@
     ".hm-gr small", ".fo-why", ".fo-lag", ".fo-stop", ".fo-sub .mut", ".rb-bt", ".rb-r > p", ".cp-sum", ".cn-n", ".cn-n2", ".cn-d > p", ".tm-n",
     ".sc-li", ".st .tm", ".fd-tx", ".br-bi em", ".xp-in > p"].join(", ");
   var KEEP = ".keep, .lvoff, .pr-st, .tidy-keep, .clp-btn, nav *, header *, #bnav *, .tabs *, .ch-toast, .tip, .tt-x";
-  var ROWS = ".xr, .ss-r, .sc-li, .lv-r, .pt, .ps-t, .pr-hw, .wp-r, .hl, .fd-it, .feed-item, .op-row, .mg-r, .row-item";
+  var ROWS = ".xr, .ss-r, .sc-li, .lv-r, .pt, .ps-t, .pr-hw, .wp-r, .hl, .fd-it, .fd-grp, .feed-item, .op-row, .mg-r, .row-item";
 
   function txt(el){ return (el.textContent || "").replace(/\s+/g, " ").trim(); }
   function key(el){ return txt(el).slice(0, 48); }
