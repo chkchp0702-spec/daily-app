@@ -70,6 +70,11 @@
     var h = '<section class="card"><h3>😱 심리 지표 <span class="mut">우리 공포·탐욕 · 매시간</span></h3>' +
       '<div class="sg-w"><div class="sg-n" style="color:' + col + '">' + Math.round(v) + '</div><div style="flex:1"><b style="color:' + col + '">' + lab + '</b>' +
       '<div class="sg-b"><i style="left:' + v + '%"></i></div><div class="zl"><span>극공포</span><span>중립</span><span>극탐욕</span></div></div></div>' +
+      (function(){ var w = S.how || {}, fl = function(x){ return x < 20 ? "극공포" : x < 40 ? "공포" : x < 60 ? "중립" : x < 80 ? "탐욕" : "극탐욕"; }, t = [];   // 10/15 계산 풀이 + CNN 원본
+        if (w.avg != null) t.push(m.mk === "US" ? '아래 ' + (S.parts || []).length + '개 항목 평균 <b>' + w.avg + '</b>점 → 지난 1년 중 몇 % 자리인지로 바꾸면 <b>' + Math.round(v) + '</b>점'
+          : '🇺🇸 미국 심리 <b>' + w.us + '</b> · ' + m.flag + ' ' + e(m.name) + ' 자체 <b>' + w.loc + '</b> → 반반 섞어 지난 1년 중 몇 % 자리인지로 바꾸면 <b>' + Math.round(v) + '</b>점');
+        if (w.cnn != null) t.push('📰 CNN 공식 공포·탐욕(미국) <b>' + w.cnn + '</b> (' + fl(w.cnn) + ' · ' + md(w.cnn_d) + ')');
+        return t.length ? '<div class="sg-how">' + t.join('<br>') + '</div>' : ''; })() +
       '<div class="sg-ps">' + (S.parts || []).map(function(p){ return '<div><small>' + e(p.k) + '</small><span class="xbar" style="flex:1"><i style="width:' + p.v + '%;background:' + (p.v >= 60 ? "var(--up)" : p.v <= 40 ? "var(--down)" : "#6b7385") + '"></i></span><b>' + p.v + '</b></div>'; }).join("") + '</div>' +
       '<div class="sub2">📚 연구: 심리 구간별 그 뒤 성적 <span class="mut">' + e(m.ixn) + ' · ' + e(S.since || "") + '~</span></div>' + rtable(S.table) +
       '<button class="fold pr-f' + (op ? " open" : "") + '" data-f="_s' + m.mk + '">🔬 다른 심리·폭 지표 연구 표 <i class="fchev">▾</i></button><div style="' + (op ? "" : "display:none") + '">' +
@@ -205,6 +210,7 @@
     ".zb .zn{position:absolute;top:-3px;bottom:-3px;width:0;border-left:2px dashed var(--sub)}" +
     ".zb .pm{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--text);border:2px solid var(--panel);transform:translate(-50%,-50%)}.pr5c .zb .pm{width:9px;height:9px}" +
     ".zl{display:flex;justify-content:space-between;font-size:10px;color:var(--sub)}" +
+    ".sg-how{font-size:12px;line-height:1.55;color:var(--sub);background:var(--panel2,#2a3142);border-radius:10px;padding:7px 10px;margin:-4px 0 12px}.sg-how b{color:var(--text)}" +
     ".pr-gp{font-weight:800}.pr-gp.up{color:var(--up)}.pr-gp.dn{color:var(--down)}" +
     ".pr-anc{font-size:12.5px;line-height:1.5;margin:-2px 0 10px;padding:7px 10px;border-radius:10px;background:var(--panel2,#2a3142);color:var(--sub)}.pr-anc b{color:var(--tx,inherit)}" +
     ".pr-sg{display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap}.pr-bd{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--panel2,#2a3142)}" +

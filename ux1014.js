@@ -132,11 +132,15 @@
     ".po-stk,.fold-jump{transition:top .22s ease}";
   document.head.appendChild(st);
   var lastY = window.scrollY || 0, acc = 0;
-  var sp = document.createElement("div"); sp.style.cssText = "position:fixed;top:0;left:0;height:env(safe-area-inset-top);width:0;visibility:hidden;pointer-events:none"; document.body.appendChild(sp);
-  function safeTop(){ return sp.offsetHeight || 0; }   // 10/15: 아이폰 상태 표시줄 높이 — 접혀도 칩이 시계·배터리 밑으로 안 들어가게
-  function setHH(){ var h = hd.offsetHeight, s = safeTop(); if (hd.classList.contains("hd-min")){ document.documentElement.style.setProperty("--hdc", (h - s - 2) + "px"); document.documentElement.style.setProperty("--hh", (s + 2) + "px"); }
+  // 10/15: 아이폰 상태 표시줄(시계·배터리) 자리 — 머리는 통째로 올려 숨기고, 그 자리엔 바탕색 띠를 깔아 칩·탭이 시계 밑으로 비치지 않게
+  var sp = document.createElement("div"); sp.id = "sbcover";
+  sp.style.cssText = "position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--bg);z-index:40;pointer-events:none";
+  document.body.appendChild(sp);
+  function safeTop(){ return sp.offsetHeight || 0; }
+  function setHH(){ var h = hd.offsetHeight, s = safeTop(); if (hd.classList.contains("hd-min")){ document.documentElement.style.setProperty("--hdc", h + "px"); document.documentElement.style.setProperty("--hh", s + "px"); }
     else document.documentElement.style.setProperty("--hh", h + "px"); }
-  function set(min){ if (hd.classList.contains("hd-min") === min) return; hd.classList.toggle("hd-min", min); setHH(); }
+  function set(min){ if (hd.classList.contains("hd-min") === min) return; hd.classList.toggle("hd-min", min); sp.style.display = min ? "" : "none"; setHH(); }
+  sp.style.display = "none";
   window.addEventListener("scroll", function(){
     var y = window.scrollY || 0, d = y - lastY; lastY = y;
     if ((d > 0) !== (acc > 0)) acc = 0;
