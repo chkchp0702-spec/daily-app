@@ -241,7 +241,7 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
         lm = pd.DataFrame(loc).mean(axis=1, skipna=True)            # 자기 시장 항목 평균
         comps.update(loc)
         S = rank252(0.5 * gm + 0.5 * lm.reindex(gm.index)) * 100     # 미국 심리 반 · 자기 시장 반 (항목 수가 달라도 한쪽이 덮지 않게)
-    cur = S.iloc[-1] if len(S) else None
+    cur = S.dropna().iloc[-1] if S.notna().any() else None        # 10/15: 기준일(모든 자료가 있는 날)의 값
     # 10/15 사용자 「공포지수 이게 맞니?」 — 큰 숫자가 어떻게 나왔는지(항목 평균 → 1년 백분위)와 CNN 원본을 화면에 같이
     def _l(x):
         try: v = float(x.dropna().iloc[-1]); return None if math.isnan(v) else round(v, 0)
@@ -254,7 +254,7 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
     edges = [-1, 20, 40, 60, 80, 101]
     labs = ["극공포(0~20)", "공포(20~40)", "중립(40~60)", "탐욕(60~80)", "극탐욕(80~100)"]
     m, table = bucket_stats(d, S, edges, labs, cur, cond)
-    parts = [{"k": k, "v": round(float(v.iloc[-1]), 0)} for k, v in comps.items() if len(v) and not math.isnan(v.iloc[-1])]
+    parts = [{"k": k, "v": round(float(v.dropna().iloc[-1]), 0)} for k, v in comps.items() if v.notna().any()]
     research["senti"] = {"now": round(float(cur), 1) if cur is not None and not math.isnan(cur) else None, "table": table, "parts": parts, "how": how,
                          "since": str(S.dropna().index[0].date()) if S.notna().any() else None}
     if cur is not None and not math.isnan(cur):
