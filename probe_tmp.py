@@ -24,58 +24,34 @@ def logit_fit(X, y, l2=1.0, it=50):
     return w
 def lp(w, X): return 1 / (1 + np.exp(-(np.c_[np.ones(len(X)), X] @ w)))
 def lg(p): p = np.clip(p, 1e-4, 1 - 1e-4); return np.log(p / (1 - p))
-sp, ks, ewy, krw = d1("^GSPC"), d1("^KS11"), d1("EWY"), d1("KRW=X")
-spr, ksr, ewr, kwr = sp.pct_change(), ks.pct_change(), ewy.pct_change(), krw.pct_change()
-kd = list(ks.index); rows = []
-for t in spr.index[spr.index >= "2012-01-01"]:
-    if pd.isna(spr.get(t)) or pd.isna(ewr.get(t)): continue
-    nx = ks.index[ks.index > t]
-    if not len(nx): continue
-    D = nx[0]; i = kd.index(D)
-    if i < 2 or kd[i - 1] > t: continue
-    P = kd[i - 1]
-    rows.append((D, float(spr[t]), float(ewr[t]), float(ksr[P]), float(kwr.get(t, np.nan)), int(ks[D] > ks[P])))
-R = pd.DataFrame(rows, columns=["D", "us", "ewy", "ksP", "krw", "y"]).drop_duplicates("D").dropna()
-R["ewyx"] = R["ewy"] - R["ksP"]          # EWY 등락 중 코스피 그날 장에 이미 반영된 몫을 뺀 것 ≈ 코스피 마감 뒤 소식
-OUT = {"n": len(R), "corr": {c: round(float(np.corrcoef(R[c], R["y"])[0, 1]), 3) for c in ["us", "ewy", "ewyx", "krw"]}}
-mid = R["D"].iloc[len(R) // 2]; A, B = R[R["D"] < mid], R[R["D"] >= mid]; OUT["split"] = str(mid.date())
-for nm, T in {"all": R, "A": A, "B": B}.items():
-    up, dn = T[T["ewyx"] > 0.005], T[T["ewyx"] < -0.005]
-    OUT["ewyx_" + nm] = {"up_n": len(up), "up_y": round(float(up["y"].mean()), 3), "dn_n": len(dn), "dn_y": round(float(dn["y"].mean()), 3), "base": round(float(T["y"].mean()), 3)}
-    # 같은 간밤 S&P 칸(약보합 ±0.2~0.5%) 안에서도 갈리나
-for nm, (tr, te) in {"앞→뒤": (A, B), "뒤→앞": (B, A)}.items():
-    y = te["y"].values; base = float(tr["y"].mean()); r = {"n": len(te)}
-    p0 = bucket_rate(tr["us"].values, tr["y"].values, te["us"].values, base)
-    p0tr = bucket_rate(tr["us"].values, tr["y"].values, tr["us"].values, base)
-    r["칸_us"] = round(brier(p0, y), 4); r["hit_us"] = round(float(np.mean((p0 > .5) == (y == 1))), 3)
-    for lab, cols in {"ewyx": ["ewyx"], "ewy": ["ewy"], "krw": ["krw"], "ewyx+krw": ["ewyx", "krw"]}.items():
-        Xtr = np.c_[lg(p0tr), tr[cols].values * 100]; Xte = np.c_[lg(p0), te[cols].values * 100]
-        w = logit_fit(Xtr, tr["y"].values); q = lp(w, Xte)
-        r["칸_us+" + lab] = round(brier(q, y), 4); r["hit_" + lab] = round(float(np.mean((q > .5) == (y == 1))), 3); r["w_" + lab] = [round(float(v), 3) for v in w]
-    p2 = bucket_rate(tr["ewy"].values, tr["y"].values, te["ewy"].values, base)
-    r["칸_ewy만"] = round(brier(p2, y), 4)
-    OUT[nm] = r
-# 밤사이 원달러(60분봉 2년): 코스피 마감 15:30 → 다음 날 08:30 KST
-try:
-    k = dl("KRW=X", period="730d", interval="60m")["Close"].dropna()
-    ki = pd.to_datetime(k.index); k.index = (ki.tz_localize("UTC") if ki.tz is None else ki).tz_convert("Asia/Seoul")
-    R2 = R[R["D"] >= k.index[0].tz_localize(None).normalize() + pd.Timedelta(days=3)].copy(); on = []
-    for D in R2["D"]:
-        P = kd[kd.index(D) - 1]
-        a = k[k.index <= pd.Timestamp(P.strftime("%Y-%m-%d") + " 15:30", tz="Asia/Seoul")]
-        b = k[k.index <= pd.Timestamp(D.strftime("%Y-%m-%d") + " 08:30", tz="Asia/Seoul")]
-        on.append(float(b.iloc[-1] / a.iloc[-1] - 1) if len(a) and len(b) and b.index[-1] > a.index[-1] else np.nan)
-    R2["kon"] = on; R2 = R2.dropna()
-    m2 = R2["D"].iloc[len(R2) // 2]; A2, B2 = R2[R2["D"] < m2], R2[R2["D"] >= m2]; O2 = {"n": len(R2), "split": str(m2.date()), "corr_kon_y": round(float(np.corrcoef(R2["kon"], R2["y"])[0, 1]), 3), "corr_kon_us": round(float(np.corrcoef(R2["kon"], R2["us"])[0, 1]), 3)}
-    for nm, (tr, te) in {"앞→뒤": (A2, B2), "뒤→앞": (B2, A2)}.items():
-        Lt = R[~R["D"].isin(set(te["D"]))]; base = float(Lt["y"].mean()); y = te["y"].values
-        p0 = bucket_rate(Lt["us"].values, Lt["y"].values, te["us"].values, base); p0tr = bucket_rate(Lt["us"].values, Lt["y"].values, tr["us"].values, base)
-        r = {"n": len(te), "칸_us": round(brier(p0, y), 4)}
-        for lab, cols in {"kon": ["kon"], "ewyx": ["ewyx"], "ewyx+kon": ["ewyx", "kon"]}.items():
-            w = logit_fit(np.c_[lg(p0tr), tr[cols].values * 100], tr["y"].values); q = lp(w, np.c_[lg(p0), te[cols].values * 100])
-            r[lab] = round(brier(q, y), 4); r["w_" + lab] = [round(float(v), 3) for v in w]
-        O2[nm] = r
-    OUT["krw_on"] = O2
-except Exception as e:
-    OUT["krw_on"] = {"err": repr(e)[:300]}
-print("KR4_BT " + json.dumps(OUT, ensure_ascii=False))
+OUT={}
+sp=d1("^GSPC"); spr=sp.pct_change()
+for mk,(ix,etf) in {"KR":("^KS11","EWY"),"JP":("^N225","EWJ"),"HK":("^HSI","EWH"),"CN":("000001.SS","FXI")}.items():
+  try:
+    ks=d1(ix); ew=d1(etf); ksr=ks.pct_change(); ewr=ew.pct_change(); kd=list(ks.index); rows=[]
+    for t in spr.index[spr.index >= "2012-01-01"]:
+        if pd.isna(spr.get(t)) or pd.isna(ewr.get(t)): continue
+        nx = ks.index[ks.index > t]
+        if not len(nx): continue
+        D = nx[0]; i = kd.index(D)
+        if i < 2 or kd[i - 1] > t: continue
+        P = kd[i - 1]
+        rows.append((D, float(spr[t]), float(ewr[t]) - float(ksr[P]), int(ks[D] > ks[P])))
+    R = pd.DataFrame(rows, columns=["D","us","ewyx","y"]).drop_duplicates("D").dropna()
+    mid = R["D"].iloc[len(R)//2]; A,B = R[R["D"]<mid], R[R["D"]>=mid]; O={"n":len(R),"split":str(mid.date())}
+    for nm,T in {"A":A,"B":B}.items():
+        up,dn=T[T["ewyx"]>0.005],T[T["ewyx"]<-0.005]; O[nm]=[len(up),round(float(up["y"].mean()),3),len(dn),round(float(dn["y"].mean()),3),round(float(T["y"].mean()),3)]
+    for nm,(tr,te) in {"앞→뒤":(A,B),"뒤→앞":(B,A)}.items():
+        y=te["y"].values; base=float(tr["y"].mean()); p0=bucket_rate(tr["us"].values,tr["y"].values,te["us"].values,base)
+        r={"칸":round(brier(p0,y),4)}
+        for b in [0.1,0.16,0.25,0.35]:
+            q=1/(1+np.exp(-(lg(p0)+np.clip(b*te["ewyx"].values*100,-0.3,0.3)))); r[str(b)]=round(brier(q,y),4)
+        # 최근 2년만
+        rec=te[te["D"]>=te["D"].max()-pd.Timedelta(days=730)]
+        if len(rec)>100 and nm=="앞→뒤":
+            p0r=bucket_rate(tr["us"].values,tr["y"].values,rec["us"].values,base); yr=rec["y"].values
+            r["최근2년"]={"n":len(rec),"칸":round(brier(p0r,yr),4),"0.16":round(brier(1/(1+np.exp(-(lg(p0r)+np.clip(0.16*rec["ewyx"].values*100,-0.3,0.3)))),yr),4)}
+        O[nm]=r
+    OUT[mk]=O
+  except Exception as e: OUT[mk]={"err":repr(e)[:200]}
+print("ETF_BT "+json.dumps(OUT,ensure_ascii=False))
