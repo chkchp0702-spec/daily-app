@@ -56,6 +56,7 @@ LEAD_PRIOR = 20       # 칸 비율을 평소 쪽으로 당기는 세기(베타 �
 LEAD_HIT = {"KR": "53.5→61.8%", "JP": "51.7→65.1%", "CN": "51.8→56.7%", "HK": "50.0→59.6%", "US": "54.3→63.7%"}
 OTHERS_CAP = 0.2      # 닻 위에 나머지 방법들이 더할 수 있는 로그오즈 (±약 5%p)
 AUTO_W = {}
+ERRS = []
 
 
 def get(url, timeout=30):
@@ -439,7 +440,7 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
             MX, research = prob_x.methods(mk, d, H, G, ext or {}, cond, (breadth or {}).get(mk))
             M.extend(MX)
         except Exception as e:
-            import traceback; traceback.print_exc(); print(mk, "보강 지표 실패", e)
+            import traceback; traceback.print_exc(); print(mk, "보강 지표 실패", e); ERRS.append(f"{mk} 보강: " + traceback.format_exc()[-600:])
     GRP = {"base": "가격", "trend": "가격", "ob": "가격", "vol": "심리", "lead": "선행", "season": "일정", "event": "일정", "brain": "판단", "ml": "모델"}
     for x in M:
         x.setdefault("grp", GRP.get(x["k"], "기타"))
@@ -693,6 +694,7 @@ def main():
         except Exception as e:
             import traceback; traceback.print_exc()
             print(mk, "실패", e)
+            ERRS.append(f"{mk}: " + traceback.format_exc()[-600:])     # 10/15: Actions 로그를 못 볼 때가 있어 결과 파일에 남김
     hist = {}
     try:
         hist = json.load(open(HIST, encoding="utf-8")) if os.path.exists(HIST) else {}
@@ -726,6 +728,8 @@ def main():
            "senti_how": "심리지표 연구 — 공포·탐욕 계열 지표는 「극단에서만」 쓸모가 있다는 게 공통 결론이에요(중간 구간은 거의 동전). 극공포는 대개 매도가 다 나온 뒤라 그 뒤 1~4주 수익이 평소보다 좋고, 극탐욕은 하락 신호라기보다 「추가 수익이 평범해지는」 신호. 그래서 아래 표에서 지금 구간과 양 끝 구간의 차이를 보세요. 표는 이 앱이 2007년 이후 매일 다시 계산한 결과예요(미리 정한 숫자가 아님).",
            "note": "내일 방향을 맞힐 확률의 상한은 대략 53~56%예요. 그래서 맞히기가 아니라 「확률 분포를 그리고 보정하기」가 목표 — 사라는 뜻도, 팔라는 뜻도 아니에요."}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
+    if ERRS:
+        out["errors"] = ERRS[-10:]
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     json.dump(hist, open(HIST, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     for mk, r in res.items():
