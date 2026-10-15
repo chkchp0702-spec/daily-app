@@ -37,7 +37,7 @@ for mk, (sym, tz, op) in MK.items():
             if pd.isna(spr.get(t)): continue
             nxt = [D for D in adays if D > t][:1]
             if not nxt: continue
-            D = nxt[0]; i = adays.index(D)
+            D = nxt[0]; i = int(a.index.get_loc(D))
             if i == 0: continue
             prevD = adays[i - 1]
             if prevD > t: continue                       # 아시아 직전 거래일이 미국 t 뒤면(미국 휴장 등) 건너뜀
@@ -52,11 +52,11 @@ for mk, (sym, tz, op) in MK.items():
         R = pd.DataFrame(rows, columns=["D", "us", "post", "y"]).drop_duplicates("D")
         # 긴 일봉 역사(5y, 미국 t → 아시아 다음 날)로 칸 비율 — prob.py 가 실제 쓰는 방식
         L = []
-        for t in spr.index:
+        for t in spr.index[spr.index >= "2012-01-01"]:
             if pd.isna(spr.get(t)): continue
             nx = a.index[a.index > t]
             if not len(nx): continue
-            D = nx[0]; i = adays.index(D)
+            D = nx[0]; i = int(a.index.get_loc(D))
             if i == 0 or adays[i - 1] > t: continue
             L.append((D, float(spr[t]), int(a[D] > a[adays[i - 1]])))
         L = pd.DataFrame(L, columns=["D", "us", "y"]).drop_duplicates("D")
