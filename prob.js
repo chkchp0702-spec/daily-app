@@ -8,6 +8,13 @@
   function pc(p){ return p == null ? "–" : Math.round(p * 100) + "%"; }
   function sg(v, d){ return v == null ? "–" : (v > 0 ? "+" : "") + Number(v).toFixed(d == null ? 1 : d) + "%"; }
   function tcls(p){ return p == null ? "" : p >= 0.57 ? "up" : p <= 0.43 ? "dn" : ""; }
+  // 10/15 사용자 「시장을 선택하면 자꾸 맨 밑으로 가」 — 다시 그린 뒤 접기·머리 줄이 시간차로 높이를 바꿈 → 0.8초 동안 누른 자리를 화면 같은 높이에 붙잡음(손대면 멈춤)
+  function holdAt(sel, y){
+    var stop = false, t0 = Date.now(), quit = function(){ stop = true; };
+    window.addEventListener("touchstart", quit, {once: true, passive: true}); window.addEventListener("wheel", quit, {once: true, passive: true});
+    (function f(){ if (stop) return; var n = document.querySelector(sel); if (n){ var d = n.getBoundingClientRect().top - y; if (Math.abs(d) > 1) window.scrollTo({top: window.scrollY + d, behavior: "instant"}); }
+      if (Date.now() - t0 < 800) requestAnimationFrame(f); })();
+  }
   function md(d){ return d ? d.slice(5).replace("-", "/") : ""; }
   // 📅 10/15 사용자: 오늘 열리는 장이면 「오늘」 — 예측 날이 한국 날짜로 오늘이면 오늘, 다음 날이면 내일, 더 뒤(주말 끼임)면 요일
   function kd(off){ var t = new Date(Date.now() + 9 * 3600e3 + (off || 0) * 864e5); return t.toISOString().slice(0, 10); }
@@ -192,7 +199,7 @@
     b.innerHTML = h;
     [].forEach.call(b.querySelectorAll(".pr5c[data-m]"), function(x){ x.onclick = function(){ SEL = x.dataset.m; draw(D); window.scrollTo({top: 0, behavior: "smooth"}); }; });
     [].forEach.call(b.querySelectorAll(".sg5c[data-m]"), function(x){ x.onclick = function(){ var y = x.getBoundingClientRect().top; SEL = x.dataset.m; draw(D);   // 공포·탐욕 띠: 그 자리 그대로 시장만 바꿈
-      var n = b.querySelector('.sg5c[data-m="' + SEL + '"]'); if (n) window.scrollBy(0, n.getBoundingClientRect().top - y); }; });
+      holdAt('.sg5c[data-m="' + SEL + '"]', y); }; });
     [].forEach.call(b.querySelectorAll(".ps-r .ps-h"), function(x){ x.onclick = function(){ var k = SEL + x.parentNode.dataset.sk; SOPEN[k] = !SOPEN[k]; var y = window.scrollY; draw(D); window.scrollTo(0, y); }; });
     [].forEach.call(b.querySelectorAll(".ps-all"), function(x){ x.onclick = function(){ SALL[x.dataset.mk] = !SALL[x.dataset.mk]; var y = window.scrollY; draw(D); window.scrollTo(0, y); }; });
     [].forEach.call(b.querySelectorAll(".pr-f[data-f]"), function(x){ x.onclick = function(){ var k = x.dataset.f, nx = x.nextElementSibling; OPEN[k] = !OPEN[k]; x.classList.toggle("open", OPEN[k]); if (nx) nx.style.display = OPEN[k] ? "" : "none"; try { localStorage.setItem("probopen", JSON.stringify(OPEN)); } catch(z) {} }; });

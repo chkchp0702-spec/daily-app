@@ -1,0 +1,62 @@
+"""🧪 화면 자동 점검 (10/15 사용자: 「앱의 기본적인 것들은 네가 알아서 — 일일이 내가 다 탭해 봐야겠니?」)
+   python3 tools/ui_audit.py home,market,sector,prob,port,score,whale,cup,gap,screen,feed
+   market-strategy-report 는 ../market-strategy-report 에 clone 해 두면 그 자료를 씀. 결과 /tmp/ui_audit.json
+   모든 탭: 화면 안 버튼을 하나씩 눌러 ① 누른 버튼이 화면에서 150px 넘게 튀는지 ② 화면 맨 위/맨 아래로 날아가는지 ③ JS 오류를 모은다"""
+import asyncio, os, re, sys, json
+from playwright.async_api import async_playwright
+APP=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); MSR=os.path.join(os.path.dirname(APP), "market-strategy-report")
+TABS=sys.argv[1].split(",")
+SEL="#main button, #main .fold, #main summary, #main [data-pf], #main [data-m], #main [data-f], #main [data-win], #main [data-bg], #main [data-cm], #main .chip[data-k]"
+JS_LIST="""(sel)=>{var a=[].slice.call(document.querySelectorAll(sel)).filter(function(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0&&!e.closest('a[href^=http]')&&!/공유|복사|📤|PDF|크게 보기|새 창/.test(e.innerText||'');});
+  a.forEach(function(e,i){e.setAttribute('data-au',i)}); return a.length;}"""
+async def main():
+    async with async_playwright() as p:
+        b=await p.chromium.launch()
+        out={}
+        for tab in TABS:
+            ctx=await b.new_context(viewport={"width":390,"height":844},is_mobile=True,has_touch=True)
+            pg=await ctx.new_page(); errs=[]; pg.on("pageerror",lambda e:errs.append(str(e)[:160]))
+            async def route(r):
+                u=r.request.url
+                for repo,root in (("market-strategy-report",MSR),("daily-app",APP)):
+                    m=re.search(repo+r"/(?:main|refs/heads/main)/(.+?)(\?|$)",u)
+                    if m:
+                        f=os.path.join(root,m.group(1)); return await (r.fulfill(path=f) if os.path.isfile(f) else r.fulfill(status=404,body=""))
+                m=re.search(r"//app/(.*?)(\?|#|$)",u)
+                if m:
+                    f=os.path.join(APP,m.group(1) or "index.html"); return await (r.fulfill(path=f) if os.path.isfile(f) else r.fulfill(status=404,body=""))
+                return await r.fulfill(status=404,body="")
+            await ctx.route("**/*",route)
+            await pg.goto("http://app/index.html#"+tab); await pg.wait_for_timeout(3500)
+            n=await pg.evaluate(JS_LIST, SEL); bad=[]
+            for i in range(min(n,140)):
+                h0=await pg.evaluate("location.hash")
+                info=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); if(!e||!e.isConnected) return null; e.scrollIntoView({{block:'center'}}); var r=e.getBoundingClientRect(); return [Math.round(r.top),(e.innerText||e.getAttribute('aria-label')||'').trim().slice(0,22).replace(/\\s+/g,' ')]}})()""")
+                if not info: continue
+                await pg.wait_for_timeout(120)
+                info=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); var r=e.getBoundingClientRect(); return [Math.round(r.top),((e.innerText||'').trim().slice(0,22).replace(/\\s+/g,' '))||e.outerHTML.slice(0,140)]}})()""")
+                try:
+                    await pg.evaluate(f"""document.querySelector('[data-au="{i}"]').click()""")
+                except Exception as ex:
+                    continue
+                await pg.wait_for_timeout(700)
+                h1=await pg.evaluate("location.hash")
+                if h1!=h0:      # 다른 화면으로 가는 버튼 — 되돌리고 계속
+                    await pg.goto("http://app/index.html#"+tab); await pg.wait_for_timeout(2500); await pg.evaluate(JS_LIST, SEL); continue
+                aft=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); var H=document.documentElement.scrollHeight, y=scrollY; if(!e||!e.isConnected) return [null,y,H]; var r=e.getBoundingClientRect(); return [Math.round(r.top),y,H]}})()""")
+                if aft[0] is None:
+                    # 다시 그려져 버튼이 바뀜 — 같은 글자의 버튼을 찾아 위치 비교
+                    aft2=await pg.evaluate("""(t)=>{var c=[].slice.call(document.querySelectorAll('#main button,#main [data-m],#main [data-pf],#main .fold')).filter(function(e){return (e.innerText||'').trim().slice(0,22).replace(/\\s+/g,' ')===t}); if(!c.length) return null; var best=c.map(function(e){return Math.round(e.getBoundingClientRect().top)}); return best}""", info[1])
+                    if aft2 and min(abs(x-info[0]) for x in aft2) > 150:
+                        bad.append({"btn":info[1],"before":info[0],"after":aft2[:3],"note":"다시 그려진 뒤 위치"})
+                    await pg.evaluate(JS_LIST, SEL)
+                elif abs(aft[0]-info[0])>150:
+                    bad.append({"btn":info[1],"before":info[0],"after":aft[0],"scrollY":aft[1]})
+            out[tab]={"buttons":n,"jumps":bad,"errors":sorted(set(errs))[:8]}
+            print(tab, n, "jumps", len(bad), "errors", len(set(errs)), flush=True)
+            for x in bad[:12]: print("   ", x)
+            for e in sorted(set(errs))[:5]: print("   ERR", e)
+            await ctx.close()
+        json.dump(out,open("/tmp/ui_audit.json","w"),ensure_ascii=False,indent=1)
+        await b.close()
+asyncio.run(main())
