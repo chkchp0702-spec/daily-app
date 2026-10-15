@@ -143,7 +143,7 @@ def patch_live(H):
                 PATCHED[mk] = pd_.strftime("%Y-%m-%d")
                 print(f"📅 {mk} 장중 — 빠진 어제 봉 채움: {pd_.date()} {pc:.2f} (live 지금 {ix['last']} · {ix['chg']:+.2f}%)")
             continue
-        if d <= last_bar or not closed or pd.Timestamp(d).dayofweek >= 5:
+        if d <= last_bar or not closed or pd.Timestamp(d).dayofweek >= 5 or d in set(px.index.strftime("%Y-%m-%d")):
             continue
         c = float(ix["last"])
         row = pd.DataFrame({"Open": [c], "Close": [c]}, index=[pd.Timestamp(d)])   # 시가는 모름 → 종가로 (갭 특성 하루치만 0)
@@ -652,6 +652,12 @@ def main():
             patch_live(H)
         except Exception as e:
             print("마지막 봉 채우기 실패", e)
+        for k_ in list(H):                                   # 안전망: 같은 날짜가 두 번 있으면 야후 원래 봉을 남김
+            try:
+                if H[k_] is not None and H[k_].index.duplicated().any():
+                    H[k_] = H[k_][~H[k_].index.duplicated(keep="first")]
+            except Exception:
+                pass
     brain, events = {}, []
     if not FAKE:
         try:
