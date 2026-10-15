@@ -100,6 +100,19 @@ def load_hist(syms):
             out[s] = sub[~sub.index.duplicated(keep="last")]
         except Exception as e:
             print("자료 없음", s, e)
+    # 10/15: 여러 종목을 한 번에 받으면 가끔 한 지수(^KS11 등)가 통째로 빠짐 → 시장 지수는 하나씩 한 번 더
+    for s in {c["ix"] for c in MK.values()}:
+        if s not in out or len(out[s]) < 600:
+            try:
+                one = yf.download(s, start="2000-01-01", interval="1d", auto_adjust=False, progress=False)
+                if isinstance(one.columns, pd.MultiIndex):
+                    one.columns = one.columns.get_level_values(0)
+                one = one[["Open", "Close"]].dropna(subset=["Close"])
+                one.index = pd.to_datetime(one.index).tz_localize(None)
+                out[s] = one[~one.index.duplicated(keep="last")]
+                print("다시 받음", s, len(out[s]))
+            except Exception as e:
+                print("다시 받기 실패", s, e)
     return out
 
 
@@ -280,6 +293,7 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
     cfg = MK[mk]
     px = H.get(cfg["ix"])
     if px is None or len(px) < 600:
+        ERRS.append(f"{mk}: 지수 일봉 부족 — {cfg['ix']} {0 if px is None else len(px)}개 (야후 응답 문제)")
         return None
     open_now, loc = is_open_now(cfg)
     # 예측 기준일: 마지막 봉이 오늘이고 장중이면 「오늘 종가 기준 내일」을 아직 못 세움 → 그 봉(장중 값)을 떼고 어제 마감 기준으로 「오늘」
