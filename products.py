@@ -549,8 +549,16 @@ def main():
     run("els_done", els, "02")
     run("td", tesouro)
     run("td_hist", tesouro_hist)
-    # 10/16 사용자 「사모펀드 다 빼고 이 리스트에 있는것만」 — 금투협 사모 전체 목록은 더 안 받음 (사모 라인업은 앱에서 암호문으로)
+    # 10/16 사용자 「사모펀드 다 빼고 이 리스트에 있는것만」 → 화면 목록에선 뺌.
+    # 10/16 2차 「수익률 매일매일 업데이트」 → 금투협 사모 기준가는 따로 pv_kofia.json 으로만 (사모 라인업 중 금투협 공시 펀드를 앱이 매일 이어 붙임)
     P.pop("pv", None)
+    try:
+        KP = private_funds()
+        json.dump({"asof": KP.get("asof"), "dates": KP.get("dates"), "i": {x["c"]: [x.get("nav"), x.get("d1"), x.get("w1"), x.get("m1"), x.get("m3")] for x in KP.get("items", []) if x.get("c")}},
+                  open(os.path.join(os.path.dirname(OUT), "pv_kofia.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        print("✓ pv_kofia", len(KP.get("items", [])))
+    except Exception as e:
+        ERR.append(f"금투협 사모 기준가: {str(e)[:120]}")
     run("anb", anbima)
     run("ust_all", ust_all, P.get("ust"))
     if isinstance(P.get("krw"), list):
