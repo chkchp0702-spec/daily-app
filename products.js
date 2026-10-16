@@ -228,14 +228,14 @@
     var f = [1], resets = [];
     for (var i = 1; i < pts.length; i++){ var r = pts[i][1] / pts[i - 1][1]; if (r < 0.85 && Math.abs(pts[i][1] - 1000) < 60){ r = 1; resets.push(pts[i][0]); } f.push(f[i - 1] * r); }
     var L_ = pts.length - 1, T = function(d){ return Date.parse(d + "T00:00:00Z"); }, now = T(pts[L_][0]);
-    var at = function(days, slack){ var t = now - days * 864e5, j = -1; for (var i = 0; i < L_; i++) if (T(pts[i][0]) <= t) j = i; if (j < 0 || t - T(pts[j][0]) > (slack || 6) * 864e5) return null; return Math.round((f[L_] / f[j] - 1) * 10000) / 100; };
+    var at = function(days, slack){ var t = now - days * 864e5, j = -1; for (var i = 0; i < L_; i++) if (T(pts[i][0]) <= t) j = i; if (j < 0 || t - T(pts[j][0]) > (slack || 8) * 864e5) return null; return Math.round((f[L_] / f[j] - 1) * 10000) / 100; };
     var out = {last: pts[L_][1], asof: pts[L_][0], resets: resets,
       d1: now - T(pts[L_ - 1][0]) <= 4 * 864e5 ? Math.round((f[L_] / f[L_ - 1] - 1) * 10000) / 100 : null,
       w1: at(7, 4), m1: at(30.4), m3: at(91.3), m6: at(182.6), y1: at(365.25)};
     var y0 = pts[L_][0].slice(0, 4) + "-01-01", j = -1; for (var k = 0; k < L_; k++) if (pts[k][0] < y0) j = k;
     out.ytd = j >= 0 && T(y0) - T(pts[j][0]) <= 10 * 864e5 ? Math.round((f[L_] / f[j] - 1) * 10000) / 100 : null;
     var wk = {}, wl = [];                          // 주마다 마지막 점 → 주간 수익률
-    pts.forEach(function(p, i){ var dt = new Date(T(p[0])), th = new Date(dt); th.setUTCDate(dt.getUTCDate() + 3 - ((dt.getUTCDay() + 6) % 7)); var key = th.getUTCFullYear() + "-" + Math.ceil(((th - Date.UTC(th.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7); wk[key] = i; });
+    pts.forEach(function(p, i){ var dt = new Date(T(p[0])), th = new Date(dt); th.setUTCDate(dt.getUTCDate() + 3 - ((dt.getUTCDay() + 6) % 7)); wk[th.toISOString().slice(0, 10)] = i; });
     Object.keys(wk).forEach(function(kk){ wl.push(wk[kk]); }); wl.sort(function(a, b){ return a - b; });
     out.wk = []; for (var w = 1; w < wl.length; w++){ var i0 = wl[w - 1], i1 = wl[w]; if (T(pts[i1][0]) - T(pts[i0][0]) <= 10 * 864e5) out.wk.push([pts[i1][0], Math.round((f[i1] / f[i0] - 1) * 10000) / 100]); }
     out.wk = out.wk.slice(-13);
