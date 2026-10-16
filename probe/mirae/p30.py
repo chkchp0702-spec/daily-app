@@ -7,12 +7,12 @@ async def main():
         b = await p.chromium.launch(); pg = await b.new_page()
         await pg.goto("https://dart.fss.or.kr/dsab007/main.do", timeout=90000); await pg.wait_for_timeout(2000)
         st = (datetime.date.today() - datetime.timedelta(days=10)).strftime("%Y%m%d"); en = datetime.date.today().strftime("%Y%m%d")
-        await pg.evaluate("""(a)=>{var f=document.searchForm; f.startDate.value=a[0]; f.endDate.value=a[1]; f.reportName.value='일괄신고추가서류'; var mr=document.getElementById('maxResultsCb'); if(mr) mr.value='100'; if (f.maxResults) f.maxResults.value='100';
+        await pg.evaluate("""(a)=>{var f=document.searchForm; f.startDate.value=a[0]; f.endDate.value=a[1]; f.reportName.value=''; f.textPresenterNm.value='삼성증권'; var mr=document.getElementById('maxResultsCb'); if(mr) mr.value='100'; if (f.maxResults) f.maxResults.value='100';
             document.querySelectorAll('input[name=publicType]').forEach(x=>x.checked=false); var o=document.getElementById('option'); if(o) o.value='report';}""", [st, en])
         await pg.evaluate("search(0)"); await pg.wait_for_timeout(8000)
         rows = await pg.evaluate("""()=>[...document.querySelectorAll('#listContents table tbody tr')].map(tr=>[...tr.querySelectorAll('td')].map(td=>td.innerText.trim()).concat([((tr.querySelector('a[href*=rcpNo]')||{}).href||'')]))""")
         res["rows"] = rows[:100]
-        els = [r for r in rows if "주가연계" in " ".join(r) or "파생결합" in " ".join(r)]
+        els = [r for r in rows if "일괄" in " ".join(r) or "투자설명" in " ".join(r) or "증권신고" in " ".join(r)]
         res["n_els"] = len(els)
         docs = {}
         for r in els[:3]:
