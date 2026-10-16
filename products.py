@@ -237,9 +237,9 @@ def main():
     run("els_done", els, "02")
     if isinstance(P.get("els_done"), list):
         P["els_done"] = P["els_done"][:60]
-    run("ind", indiv)
     # 헤알/원 = (원/달러) ÷ (헤알/달러) — 야후 BRLKRW=X 는 하루치만 줘서 두 환율로 계산
-    ub, uk = dict(fx_hist("BRL=X")), dict(fx_hist("KRW=X"))
+    ub, uk = dict(fx_hist("BRL=X")), dict(P["ust_hist"]["usdkrw"])
+    P["ust_hist"] = {"y10": fx_hist("^TNX"), "usdkrw": [[d, v] for d, v in fx_hist("KRW=X")]}
     P["brl"] = {"fx": [[d, round(uk[d] / ub[d], 2)] for d in sorted(set(ub) & set(uk)) if ub[d]], "usdbrl": [[d, ub[d]] for d in sorted(ub)]}
     if not P["brl"]["fx"] and old.get("brl"):
         P["brl"] = old["brl"]
