@@ -32,7 +32,10 @@ async def main():
             out[name] = {"url": pg.url, "text": txt, "xhr": xhr}
             await pg.close()
         json.dump(out, open(f"{OUT}/p14.json", "w"), ensure_ascii=False, indent=1)
-asyncio.run(main())
+try:
+    asyncio.run(main())
+except Exception as e:
+    import traceback; open(f"{OUT}/p14err.txt", "w").write(traceback.format_exc())
 S = requests.Session(); S.headers.update({"User-Agent": "Mozilla/5.0 Chrome/128"})
 log = {}
 for k in range(1, 6):
