@@ -46,19 +46,36 @@ async def lists():
     return out
 
 
-def detail(rc):
-    t = S.get(f"{B}/dsaf001/main.do?rcpNo={rc}", timeout=40).text
-    m = re.search(r"viewDoc\('(\d+)',\s*'(\d+)',\s*'(\d+)',\s*'(\d+)',\s*'(\d+)',\s*'([^']+)'", t)
-    if not m: return None
-    v = S.get(f"{B}/report/viewer.do?rcpNo={m.group(1)}&dcmNo={m.group(2)}&eleId={m.group(3)}&offset={m.group(4)}&length={m.group(5)}&dtd={m.group(6)}", timeout=40)
-    v.encoding = v.apparent_encoding or "utf-8"
-    x = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", v.text)))
+def parse(x):
+    x = re.sub(r"\s+", " ", x)
     g = lambda p: (re.search(p, x) or [None, None])[1]
-    num = lambda s: float(s.replace(",", "")) if s else None
+    num = lambda v: float(v.replace(",", "")) if v and re.match(r"^[\d,.]+$", v) else None
     nw = re.search(r"이번 보고서\s*([\d,]+)\s*([\d.]+)", x); pv = re.search(r"직전 보고서\s*([\d,\-]+)\s*([\d.\-]+)", x)
     return {"co": (g(r"발행회사명\s*(.+?)\s*발행회사와의") or "").strip(), "d": g(r"보고서작성기준일\s*:\s*(\d{4}년 \d{2}월 \d{2}일)"),
-            "r": num(nw.group(2)) if nw else None, "r0": num(pv.group(2)) if pv and pv.group(2) not in ("-",) else None,
-            "sh": num(nw.group(1)) if nw else None, "why": (g(r"보고사유\s*(.+?)\s*보유목적") or "").strip()[:60], "purp": (g(r"보유목적\s*(\S+)") or "").strip()}
+            "r": num(nw.group(2)) if nw else None, "r0": num(pv.group(2)) if pv else None,
+            "why": (g(r"보고사유\s*(.+?)\s*보유목적") or "").strip()[:60], "purp": (g(r"보유목적\s*(\S+)") or "").strip()}
+
+
+async def details(rcs):
+    """보고서 요약정보 — 화면 iframe(viewer.do) 글자를 읽음"""
+    from playwright.async_api import async_playwright
+    out = {}
+    async with async_playwright() as p:
+        b = await p.chromium.launch(); pg = await b.new_page()
+        for k, rc in enumerate(rcs):
+            try:
+                await pg.goto(f"{B}/dsaf001/main.do?rcpNo={rc}", timeout=60000); await pg.wait_for_timeout(1200)
+                txt = ""
+                for f in pg.frames:
+                    if "viewer.do" in f.url:
+                        try: txt = await f.inner_text("body")
+                        except Exception: pass
+                out[rc] = parse(txt) if txt else {}
+            except Exception as e:
+                out[rc] = {}; print("✗", rc, str(e)[:80])
+            if k % 50 == 0: print("detail", k, len(rcs))
+        await b.close()
+    return out
 
 
 def main():
@@ -68,20 +85,28 @@ def main():
     for m, L in (old.get("mg") or {}).items():
         for it in L: cache[it["rc"]] = it
     L = asyncio.run(lists())
-    res, err = {}, []
+    res, err, need = {}, [], []
+    for nm, rows in L.items():
+        if rows is None: continue
+        seen = set()
+        for r in rows[:100]:
+            co = re.sub(r"^(유|코|넥|기)\s+", "", r[1]).replace(" IR", "").strip()
+            if co in seen: continue
+            seen.add(co)
+            if r[-1] not in cache or cache[r[-1]].get("r") is None: need.append(r[-1])
+    D = asyncio.run(details(need[:600])) if need else {}
     for nm, rows in L.items():
         if rows is None: res[nm] = (old.get("mg") or {}).get(nm, []); err.append(nm); continue
-        items = []
+        items, seen = [], set()
         for r in rows[:100]:
-            rc = r[-1]; mk = "유" if r[1].startswith("유") else "코" if r[1].startswith("코") else "넥" if r[1].startswith("넥") else ""
-            if rc in cache: items.append(cache[rc]); continue
-            try:
-                d = detail(rc) or {}
-            except Exception as e:
-                d = {}; print("✗", rc, e)
-            it = {"rc": rc, "nm": re.sub(r"^(유|코|넥|기)\s+", "", r[1]).replace(" IR", "").strip(), "mk": mk, "date": r[4].replace(".", "-"), "title": r[2]}
-            it.update({k: v for k, v in d.items() if v not in (None, "")})
-            items.append(it); time.sleep(0.4)
+            rc = r[-1]; co = re.sub(r"^(유|코|넥|기)\s+", "", r[1]).replace(" IR", "").strip()
+            if co in seen: continue          # 같은 회사는 가장 최근 보고서 하나만
+            seen.add(co)
+            mk = r[1][:1] if r[1][:1] in ("유", "코", "넥") else ""
+            it = dict(cache.get(rc) or {})
+            it.update({"rc": rc, "nm": co, "mk": mk, "date": r[4].replace(".", "-"), "title": r[2]})
+            it.update({k: v for k, v in (D.get(rc) or {}).items() if v not in (None, "")})
+            items.append(it)
         res[nm] = items
     json.dump({"updated": datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M"), "src": "금융감독원 DART 주식등의 대량보유상황보고서(최종보고서)", "mg": res, "errors": err},
               open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
