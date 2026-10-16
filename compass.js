@@ -110,7 +110,7 @@
     var nm = String(m.name || "");
     var hhmm = /미국/.test(nm) ? null : /홍콩/.test(nm) ? "17:10" : /중국/.test(nm) ? "16:00" : "15:30";
     var close;
-    if (hhmm == null){ var x = new Date(Date.parse(d + "T00:00:00+09:00") + 864e5); close = Date.parse(x.toISOString().slice(0, 10) + "T" + (mo > 3 && mo < 11 ? "05:00" : "06:00") + ":00+09:00"); }
+    if (hhmm == null){ var x = new Date(Date.parse(d + "T00:00:00Z") + 864e5); close = Date.parse(x.toISOString().slice(0, 10) + "T" + (mo > 3 && mo < 11 ? "05:00" : "06:00") + ":00+09:00"); }
     else close = Date.parse(d + "T" + hhmm + ":00+09:00");
     return Date.now() > close + 3 * 60e3;
   }
