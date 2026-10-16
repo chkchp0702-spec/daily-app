@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: "47 20 * * *"   # KST 05:47 (미국 마감 후 → 나침반 8시 반 전)
     - cron: "27 21 * * *"   # KST 06:27 (예비 — 앞에서 이미 했으면 건너뜀)
+    - cron: "9 22 * * *"    # KST 07:09 (예비 2 — 10/17 새벽 05:47·06:27 예약이 GitHub 쪽에서 통째로 빠져 미국이 전날(10/15) 마감으로 남았음)
+    - cron: "41 22 * * *"   # KST 07:41 (예비 3)
     - cron: "20 7 * * 1-5"  # KST 16:20 (아시아 마감 후)
   workflow_dispatch:
 
@@ -40,7 +42,7 @@ jobs:
           T=$(git -C opdata log -1 --format='%ct %s' 2>/dev/null || echo "0 x")
           if [ "${{ github.event_name }}" = "schedule" ] && echo "$T" | grep -qE " (prices|screens)" && [ $(( $(date +%s) - ${T%% *} )) -lt 5400 ]; then echo "skip=1" >> $GITHUB_OUTPUT; echo "최근 실행됨 → 건너뜀"; fi
       - name: 해외 종목 한글 이름 (검색용)
-        if: steps.chk.outputs.skip != '1' && github.event.schedule != '47 20 * * *' && github.event.schedule != '27 21 * * *'
+        if: steps.chk.outputs.skip != '1' && github.event.schedule != '47 20 * * *' && github.event.schedule != '27 21 * * *' && github.event.schedule != '9 22 * * *' && github.event.schedule != '41 22 * * *'
         run: python opdb/names_ko.py --dest opdata || true
       - if: steps.chk.outputs.skip != '1'
         run: python opdb/merge_static.py --dest opdata
