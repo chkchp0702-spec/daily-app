@@ -194,7 +194,8 @@
      archive/x/pv_kofia.json(products.yml 하루 3번)의 최신 기준가 ÷ 10/15 기준가(kb) 비율로 이어 붙임:
      1일·1주·1개월·3개월 = 금투협 값 그대로 · 6개월·1년·올해 = 10/15 표 값 × 그 뒤 변화 (금투협 6개월·1년은 분배·결산으로 기준가가 리셋돼 틀림) */
   function pvLive(L){
-    return getJSON("archive/x/pv_kofia.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).then(function(K){
+    // 비교 기준선 KOSPI·KOSDAQ 도 매일 (products.json bm — 야후 지수)
+    return P().then(function(D){ if (D && D.bm && D.bm.length){ L.bm = D.bm; L.bmasof = D.bm[0].asof; } }, function(){}).then(function(){ return getJSON("archive/x/pv_kofia.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).then(function(K){
       var n = 0; L.kasof = K.asof;
       L.rows.forEach(function(o){
         var q = o.k && K.i ? K.i[o.k] : null; if (!q || !q[0] || !o.kb || !(K.asof > o.kd)) return;
@@ -207,7 +208,7 @@
         o.live = {asof: K.asof, ch: Math.round((ra - 1) * 10000) / 100}; n++;
       });
       L.nlive = n; return L;
-    }).catch(function(){ return L; });
+    }); }).catch(function(){ return L; });
   }
   var PVP = [["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"], ["ytd", "올해"]], PVPN = {d1: "1일", w1: "1주", m1: "1개월", m3: "3개월", m6: "6개월", y1: "1년", ytd: "올해(2026)"};
   var SG = [["", "전체"], ["Long", "롱"], ["Long/Short", "롱숏"], ["Multi", "멀티전략"], ["Fund of Fund", "재간접"], ["Pre-IPO", "Pre-IPO"], ["Mezzanine", "메자닌"], ["하이일드", "공모주하이일드"], ["코스닥벤처", "코스닥벤처"], ["PE", "PE·VC·사모대출"], ["USD", "💵 달러"]];
@@ -470,7 +471,7 @@
       h += '<div class="pd-pvh" data-pvhold="' + e(o.mg || "") + '"><div class="sub2">🧺 구성 엿보기 <span class="mut">불러오는 중…</span></div></div>';
       if (o.h && o.h.length) h += '<div style="margin:2px 0 8px">' + o.h.map(function(t){ return '<span class="chip2">' + e(t) + '</span>'; }).join("") + '</div>';
       h += '<p class="note">가입은 미래에셋 PB·영업점(일반투자자 최소 3억, 전문투자자 요건)이에요.</p>';
-      h += '<div class="sub2">📊 기간 수익률 <span class="mut">' + (usd ? '달러 기준 · ' : '') + '옆은 10/15 화면의 KOSPI / KOSDAQ</span></div>' + tbl([["d1", "1일"], ["w1", "1주"], ["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"]].map(function(p){
+      h += '<div class="sub2">📊 기간 수익률 <span class="mut">' + (usd ? '달러 기준 · ' : '') + '옆은 ' + (PVL && PVL.bmasof ? e(md(PVL.bmasof)) + ' 마감' : '10/15 화면의') + ' KOSPI / KOSDAQ</span></div>' + tbl([["d1", "1일"], ["w1", "1주"], ["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"]].map(function(p){
         var v = o[p[0]]; return [p[1] + ' <span class="mut">' + (kospi[p[0]] != null ? V.sgn(kospi[p[0]]) + '%' : '–') + ' / ' + (kosdaq[p[0]] != null ? V.sgn(kosdaq[p[0]]) + '%' : '–') + '</span>', v == null ? '–' : V.sgn(v) + '%', v == null ? '' : v >= 0 ? 'up' : 'dn']; }));
       var ys = ["2020", "2021", "2022", "2023", "2024", "2025", "2026"].filter(function(y){ return (o.y || {})[y] != null; });
       if (ys.length) h += '<div class="sub2">📅 연도별 수익률 <span class="mut">2026은 ' + (o.live ? e(md(o.live.asof)) : '10/15') + '까지 · 첫해는 설정일부터</span></div>' + V.dbars(ys.map(function(y){ return {label: y + '년', v: o.y[y]}; })) + (kospi.y ? '<p class="pd-bm">같은 해 코스피 ' + ys.filter(function(y){ return kospi.y[y] != null; }).map(function(y){ return y + ' <b class="' + cls(kospi.y[y]) + '">' + V.sgn(kospi.y[y], 1) + '%</b>'; }).join(' · ') + '</p>' : '');

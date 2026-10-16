@@ -3,7 +3,9 @@ name: products
 on:
   schedule:
     - cron: "41 22 * * 0-4"   # KST 07:41 (평일 아침)
+    - cron: "47 0 * * 1-5"    # KST 09:47 (장 시작 뒤 채권 금리·전날 펀드 기준가)
     - cron: "17 3 * * 1-5"    # KST 12:17 (ELS 청약 금액·장중 채권 금리)
+    - cron: "7 6 * * 1-5"     # KST 15:07 (장 마감 직전 금리·지수)
     - cron: "37 8 * * 1-5"    # KST 17:37 (마감 뒤 펀드 기준가·다음 날 미국채 판매정보 전)
   workflow_dispatch:
 permissions:

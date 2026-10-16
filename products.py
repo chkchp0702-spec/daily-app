@@ -139,6 +139,30 @@ def fx_hist(sym):
         return []
 
 
+def bm_index():
+    """사모 라인업 비교 기준선 KOSPI·KOSDAQ — 10/16 사용자 「금리 수익률 매일 업데이트」 (10/15 사진 값 대신 매일)
+       기간: 1일·1주(5거래일)·1·3·6개월·1년(달력) · 연도별 2020~올해"""
+    import yfinance as yf
+    out = []
+    for sym, nm in (("^KS11", "KOSPI"), ("^KQ11", "KOSDAQ")):
+        h = yf.download(sym, period="8y", interval="1d", progress=False, auto_adjust=False)
+        c = h["Close"].dropna()
+        if hasattr(c, "columns"): c = c.iloc[:, 0]
+        if len(c) < 300: continue
+        last, d = float(c.iloc[-1]), c.index[-1]
+        def ago(days):
+            x = c[c.index <= d - datetime.timedelta(days=days)]
+            return round((last / float(x.iloc[-1]) - 1) * 100, 2) if len(x) else None
+        o = {"n": nm, "nav": round(last, 2), "asof": d.strftime("%Y-%m-%d"), "d1": round((last / float(c.iloc[-2]) - 1) * 100, 2), "w1": round((last / float(c.iloc[-6]) - 1) * 100, 2),
+             "m1": ago(30), "m3": ago(91), "m6": ago(182), "y1": ago(365), "y": {}}
+        for y in range(2020, d.year + 1):
+            e_ = c[c.index.year == y]; p_ = c[c.index.year == y - 1]
+            if len(e_) and len(p_): o["y"][str(y)] = round((float(e_.iloc[-1]) / float(p_.iloc[-1]) - 1) * 100, 2)
+        out.append(o)
+    if not out: raise RuntimeError("지수 없음")
+    return out
+
+
 # ───────── ④ 펀드 ─────────
 F_KEEP = {"FDN": "n", "ADMICN": "co", "ZRN_BTYPN": "t", "ZRN_STYPN": "st", "PD_RSK_CLSS": "rk", "HAN_CLAS_NM": "cls",
           "WK1_BNFR": "w1", "M1_BNFR": "m1", "M3_BNFR": "m3", "M6_BNFR": "m6", "M12_BNFR": "y1", "M36_BNFR": "y3", "M60_BNFR": "y5",
@@ -581,6 +605,7 @@ def main():
     if isinstance(P.get("els_done"), list):
         P["els_done"] = P["els_done"][:60]
     # 헤알/원 = (원/달러) ÷ (헤알/달러) — 야후 BRLKRW=X 는 하루치만 줘서 두 환율로 계산
+    run("bm", bm_index)
     P["ust_hist"] = {"y10": fx_hist("^TNX"), "usdkrw": fx_hist("KRW=X")}
     if not P["ust_hist"]["y10"] and old.get("ust_hist"):
         P["ust_hist"] = old["ust_hist"]
