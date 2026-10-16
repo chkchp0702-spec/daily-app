@@ -202,18 +202,23 @@
       L.kasof = H && H.d ? H.d[H.d.length - 1] : K ? K.asof : null;
       L.rows.forEach(function(o){
         if (!o.k || !o.kb) return;
-        var c = H && H.v && H.v[o.k] ? navCalc(H.d, H.v[o.k]) : null, q = K && K.i ? K.i[o.k] : null;
+        var lev = /손익차등|[12]종/.test(o.n), c = H && H.v && H.v[o.k] ? navCalc(H.d, H.v[o.k], lev) : null, q = K && K.i ? K.i[o.k] : null;
+        // ✅ 검산: 10/15 까지의 기록만으로 계산한 값이 10/15 화면 값과 5%p 넘게 다르면 그 기간은 직접 계산을 안 믿음(분배·손익차등 구조 등)
+        var bad = {};
+        if (c && H){ var cut = H.d.filter(function(d){ return d <= o.kd; }).length, c0 = cut > 2 ? navCalc(H.d.slice(0, cut), H.v[o.k].slice(0, cut), lev) : null;
+          [["m1", "m1"], ["m3", "m3"], ["m6", "m6"], ["y1", "y1"], ["ytd", "ytd"]].forEach(function(pp){ var sv = pp[0] === "ytd" ? (o.y || {})["2026"] : o[pp[0]], cv = c0 ? c0[pp[1]] : null;
+            if (cv == null || sv == null || Math.abs(cv - sv) > 5) bad[pp[0]] = 1; }); }
         var lastNav = c ? c.last : q ? q[0] : null, asof = c ? c.asof : K ? K.asof : null;
         if (!lastNav || !(asof > o.kd)) return;
         var ra = lastNav / o.kb, chain = ra > 0.7 && ra < 1.4 ? function(v){ return v == null ? null : Math.round(((1 + v / 100) * ra - 1) * 10000) / 100; } : function(){ return null; };
         var src = {};
         ["d1", "w1", "m1", "m3", "m6", "y1"].forEach(function(p){
-          if (c && c[p] != null){ o[p] = c[p]; src[p] = "calc"; }
+          if (c && c[p] != null && !bad[p]){ o[p] = c[p]; src[p] = "calc"; }
           else if (q && (p === "d1" || p === "w1") && q[p === "d1" ? 1 : 2] != null){ o[p] = q[p === "d1" ? 1 : 2]; src[p] = "kofia"; }
           else { o[p] = chain(o[p]); src[p] = "chain"; }
         });
         o.y = o.y || {};
-        if (c && c.ytd != null){ o.y["2026"] = c.ytd; src.ytd = "calc"; } else if (o.y["2026"] != null){ o.y["2026"] = chain(o.y["2026"]); src.ytd = "chain"; }
+        if (c && c.ytd != null && !bad.ytd){ o.y["2026"] = c.ytd; src.ytd = "calc"; } else if (o.y["2026"] != null){ o.y["2026"] = chain(o.y["2026"]); src.ytd = "chain"; }
         if (o.nav != null && ra > 0.7 && ra < 1.4) o.nav = Math.round(o.nav * ra * 100) / 100;
         o.live = {asof: asof, ch: Math.round((ra - 1) * 10000) / 100, src: src, resets: c ? c.resets : []};
         o.wk = c ? c.wk : null; n++;
@@ -225,11 +230,11 @@
     }).catch(function(){ return L; });
   }
   /* 기준가 기록으로 직접 계산 — 결산(기준가가 1,000 근처로 리셋, 한 칸에 −15% 넘게)은 그 칸만 빼고 이어 붙임 */
-  function navCalc(ds, arr){
+  function navCalc(ds, arr, noReset){
     var pts = []; ds.forEach(function(d, i){ if (arr[i] != null && arr[i] > 0) pts.push([d, arr[i]]); });
     if (pts.length < 2) return null;
     var f = [1], resets = [];
-    for (var i = 1; i < pts.length; i++){ var r = pts[i][1] / pts[i - 1][1]; if (r < 0.85 && Math.abs(pts[i][1] - 1000) < 60){ r = 1; resets.push(pts[i][0]); } f.push(f[i - 1] * r); }
+    for (var i = 1; i < pts.length; i++){ var r = pts[i][1] / pts[i - 1][1]; if (!noReset && r < 0.85 && Math.abs(pts[i][1] - 1000) < 60){ r = 1; resets.push(pts[i][0]); } f.push(f[i - 1] * r); }
     var L_ = pts.length - 1, T = function(d){ return Date.parse(d + "T00:00:00Z"); }, now = T(pts[L_][0]);
     var at = function(days, slack){ var t = now - days * 864e5, j = -1; for (var i = 0; i < L_; i++) if (T(pts[i][0]) <= t) j = i; if (j < 0 || t - T(pts[j][0]) > (slack || 8) * 864e5) return null; return Math.round((f[L_] / f[j] - 1) * 10000) / 100; };
     var out = {last: pts[L_][1], asof: pts[L_][0], resets: resets,
@@ -285,7 +290,7 @@
       (bm || []).forEach(function(b){ var S4 = b.s ? serMkt(b.s.d, b.s.v) : null; if (S4) C.push([S4, b.n + " 지수", "ix"]); });
       var best = null;
       C.forEach(function(c){ var ft = fitCand(o, c[0]); if (ft && (!best || ft.err < best.ft.err)) best = {c: c, ft: ft}; });
-      if (!best || best.ft.err > 12) return;
+      if (!best || best.ft.err > 10) return;
       var S = best.c[0], st = !S.nav, b = best.ft.b, z = sAt(S, ANCHOR, st), lastD = S.d[S.d.length - 1], last = S.f[S.f.length - 1];
       if (!z) return;
       var tf = function(r){ return r == null ? null : Math.round((Math.exp(b * Math.log(1 + r)) - 1) * 10000) / 100; };
@@ -575,7 +580,7 @@
       if (o.live){ var SN = {d1: "1일", w1: "1주", m1: "1개월", m3: "3개월", m6: "6개월", y1: "1년", ytd: "올해"}, cs = [], ch_ = [];
         Object.keys(SN).forEach(function(k){ var v = o.live.src[k]; if (v === "calc" || v === "kofia") cs.push(SN[k]); else if (v === "chain") ch_.push(SN[k]); });
         h += '<p class="pd-lvp">📡 금융투자협회 공시 기준가로 ' + e(o.live.asof) + '까지 <b>직접 계산</b> — ' + (cs.length ? cs.join("·") + '은 기준가 기록으로' : '') + (ch_.length ? (cs.length ? ', ' : '') + ch_.join("·") + '은 아직 기록이 짧아 10/15 값에 그 뒤 변화(' + V.sgn(o.live.ch) + '%)를 이어 붙였어요(기록이 쌓이면 자동으로 직접 계산)' : '') + '.' + (o.live.resets && o.live.resets.length ? ' 결산으로 기준가가 리셋된 날(' + o.live.resets.map(function(d){ return d.slice(5); }).join(", ") + ')은 빼고 이어 붙였어요.' : '') + '</p>'; }
-      else if (o.est) h += '<p class="pd-lvp">🧮 <b>추정</b> — 이 펀드는 기준가가 어디에도 공개되지 않아 <b>' + e(o.est.by) + '</b>로 계산했어요. 후보 ' + o.est.tried + '개 중 10/15 화면의 기간 성적(' + o.est.n + '개 기간)과 가장 잘 맞음: 민감도 ' + o.est.b + '배, 평균 오차 ±' + o.est.err + '%p. 10/15 뒤 ' + (o.est.ch != null ? V.sgn(o.est.ch) + '%' : '변화 없음') + ' (' + e(o.est.asof) + (o.est.mkt ? ' 종가' : ' 기준가') + '까지). 1일·1주·주간 수익률은 이 추정 줄 그대로 · 1개월~올해는 10/15 값에 이어 붙임. 실제 기준가와 다를 수 있어요.</p>';
+      else if (o.est) h += '<p class="pd-lvp">🧮 <b>추정</b> — 이 펀드는 기준가가 어디에도 공개되지 않아 <b>' + e(o.est.by) + '</b>로 계산했어요. 후보 ' + o.est.tried + '개 중 10/15 화면의 기간 성적(' + o.est.n + '개 기간)과 가장 잘 맞음: 민감도 ' + o.est.b + '배, 평균 오차 ±' + o.est.err + '%p(' + (o.est.err < 3 ? '잘 맞음' : o.est.err < 6 ? '보통' : '느슨함 — 참고만') + '). 10/15 뒤 ' + (o.est.ch != null ? V.sgn(o.est.ch) + '%' : '변화 없음') + ' (' + e(o.est.asof) + (o.est.mkt ? ' 종가' : ' 기준가') + '까지). 1일·1주·주간 수익률은 이 추정 줄 그대로 · 1개월~올해는 10/15 값에 이어 붙임. 실제 기준가와 다를 수 있어요.</p>';
       else h += '<p class="pd-lvp">📷 10/15 화면 값 — 기준가가 공개되지 않고, 과거 성적과 잘 맞는 추정 후보(같은 운용사 공모펀드·보유 종목 바스켓·같은 전략 펀드·지수)도 없어서 그대로 뒀어요.</p>';
       h += '<p class="pd-lvp">' + ((o.oc || openClose(o)) === "폐쇄형" ? '🔒 <b>폐쇄형(추정)</b> — 만기 전엔 보통 환매가 안 돼요.' : '🔓 <b>개방형(추정)</b> — 보통 월·분기마다 환매 신청이 가능해요(환매 주기·수수료는 약관 확인).') + ' 사모펀드 약관은 공개되지 않아 이름·전략으로 구분했어요.</p>';
       if (o.m) h += '<div class="sub2">🏢 운용사</div><p>' + e(o.m) + '</p>';
