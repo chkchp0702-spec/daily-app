@@ -417,12 +417,13 @@
     var ua = {}; L.forEach(function(x){ String(x.ua || "").split(/,\s*/).forEach(function(u){ if (u) ua[u] = (ua[u] || 0) + 1; }); });
     var h = '<div class="mg-kv"><div><small>지금 청약 중</small><b>' + L.length + '개</b><em>ELS ' + np.length + ' · ELB(원금지급) ' + pp.length + '</em></div><div><small>최고 연 수익률</small><b class="up">' + (L[0] ? pc(L[0].cpn) : "–") + '</b><em>' + (L[0] ? e(L[0].n) : "") + '</em></div>' +
       '<div><small>청약 마감</small><b>' + (L.length ? e(md(L.map(function(x){ return x.e; }).sort()[0])) : "–") + '</b><em>' + (L.length ? dday(L.map(function(x){ return x.e; }).sort()[0]) : "") + '</em></div><div><small>많이 쓰는 기초자산</small><b style="font-size:14px">' + Object.keys(ua).sort(function(a, b){ return ua[b] - ua[a]; }).slice(0, 3).map(e).join(", ") + '</b></div></div>';
-    h += seg("pdseg", [["open", "🟢 청약 중 " + L.length], ["done", "최근 청약 완료"]], k) + '<div id="pdbody">' + elsBody(D, k) + '</div>';
+    h += seg("pdseg", [["open", "🟢 청약 중 " + L.length], ["cmp", "🏁 타사 비교"], ["done", "최근 청약 완료"]], k) + '<div id="pdbody">' + elsBody(D, k) + '</div>';
     h = doc("els") + h;
     h += '<details class="card cpx-d"><summary>📘 ELS 구조 빨리 읽기</summary><p class="note" style="margin:0">「85-85-85-80-75-70, KI 45」= 6개월마다 기초자산이 처음의 85%·85%·85%·80%·75%·70% 위에 있으면 그때 수익과 함께 끝. <b>KI 45</b>는 중간에 한 번이라도 45% 아래로 떨어지면 만기 때 떨어진 만큼 손실(최대 −100%). 기초자산이 여럿이면 <b>가장 못한 것</b> 기준. ELB는 원금을 증권사가 지급(증권사 신용 위험은 남음). 「고난도」 상품은 숙려기간이 있어 청약 뒤 하루 더 생각할 시간을 줘요.</p></details>';
     return h + WARN;
   }
   function elsBody(D, k){
+    if (k === "cmp") return elsCmp(D);
     if (k === "done"){
       var L = (D.els_done || []).slice(0, 40);
       return card("최근 청약 완료 <span class='mut'>" + L.length + "개 · 조건 참고용</span>", L.length ? '<div class="pd-list">' + L.map(function(x){ return elsRow(x, true); }).join("") + '</div>' : '<div class="empty">자료가 없어요.</div>');
@@ -434,6 +435,52 @@
       (!L.length ? '<div class="empty">지금 청약 중인 상품이 없어요.</div>' : '');
   }
 
+
+  /* 🏁 ELS 타사 비교 — 10/16 사용자 「Els도 타사들꺼랑 비교해 보기 편하게 · Els 나올때마다 똑같이 계속 비교」
+     archive/x/els_all.json ← els_dart.yml(평일 08:23·14:53): 모든 증권사가 DART 에 낸 ELS·ELB 공모 서류의 회차별 조건 */
+  var ELSALL = null, ELSWAIT = null;
+  var UAN = [[/코스피\s*200|KOSPI\s*200/i, "KOSPI200"], [/S&P\s*500/i, "S&P500"], [/유로\s*스탁스\s*50|EURO\s*STOXX\s*50/i, "EUROSTOXX50"], [/니(케|께)이\s*225|NIKKEI\s*225/i, "NIKKEI225"],
+             [/항셍\s*중국|HSCEI/i, "HSCEI"], [/항셍\s*(지수)?$|HSI$/i, "HSI"], [/나스닥\s*100|NASDAQ\s*100/i, "NASDAQ100"], [/코스닥\s*150|KOSDAQ\s*150/i, "KOSDAQ150"]];
+  function uaKey(s){ return String(s || "").split(/,|\/|·|및|\n/).map(function(x){ x = x.replace(/\([^)]*\)|\[[^\]]*\]|보통주|지수|주식/g, "").replace(/\s+/g, " ").trim();
+      for (var i = 0; i < UAN.length; i++) if (UAN[i][0].test(x)) return UAN[i][1]; return x.replace(/\s/g, ""); }).filter(function(x){ return x; }).sort().join(" + "); }
+  function elsCmp(D){
+    if (!ELSALL){ if (!ELSWAIT) ELSWAIT = getJSON("archive/x/els_all.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).then(function(j){ ELSALL = j; if (window.__pdRedraw) window.__pdRedraw(); }).catch(function(){ ELSALL = {items: [], err: 1}; if (window.__pdRedraw) window.__pdRedraw(); });
+      return '<div class="loading">전체 증권사 ELS 불러오는 중…</div>'; }
+    var today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+    var A = (ELSALL.items || []).filter(function(x){ return x.cpn != null && (x.e || "9999") >= today; });
+    if (!A.length) return card("🏁 ELS 타사 비교", '<div class="empty">' + (ELSALL.err ? '자료 준비 중 — 첫 수집 뒤 채워져요.' : '지금 청약 중인 타사 ELS 자료가 없어요.') + '</div>');
+    var mir = function(x){ return /미래에셋/.test(x.iss || ""); };
+    A.forEach(function(x){ x.uk = uaKey(x.ua); });
+    var f = SEL.elsk || "ELS", L = A.filter(function(x){ return f === "all" || x.kind === f; });
+    var iss = {}; L.forEach(function(x){ var k = (x.iss || "").replace(/주식회사|\(주\)/g, "").trim(); (iss[k] = iss[k] || []).push(x.cpn); });
+    var isl = Object.keys(iss).map(function(k){ var a = iss[k]; return [k, a.length, a.reduce(function(p, c){ return p + c; }, 0) / a.length, Math.max.apply(null, a)]; }).sort(function(a, b){ return b[2] - a[2]; });
+    var row = function(x, hi){ return '<tr class="' + (mir(x) ? 'me' : '') + '"><td><b>' + e((x.iss || "").replace(/주식회사|\(주\)/g, "").trim()) + '</b><br><span class="mut">' + e((x.nm.match(/제\s*\[?\d+\]?\s*회/) || [""])[0].replace(/[\[\]\s]/g, "")) + (x.risk ? ' · ' + e(x.risk.replace(/\(.*$/, "")) : '') + '</span></td>' +
+      '<td><b class="up">' + pc(x.cpn) + '</b><br><span class="mut">' + (x.kind === "ELB" || x.nolos ? '원금지급' : x.loss != null ? '최대 ' + x.loss + '%' : '원금 비보장') + '</span></td>' +
+      '<td>' + (x.bars && x.bars.length ? e(x.bars.join("-")) : '–') + (x.ki ? '<br><span class="mut">KI ' + x.ki + '</span>' : '') + '</td>' +
+      '<td>' + e(md(x.mat || "")) + '<br><span class="mut">마감 ' + e(md(x.e || "")) + '</span></td></tr>'; };
+    var tblh = '<table class="pd-ec"><tr><th>발행사</th><th>연 수익률</th><th>배리어 · KI</th><th>만기 · 청약</th></tr>';
+    var h = '<div class="mg-kv"><div><small>청약 중 전체 (DART)</small><b>' + L.length + '개</b><em>발행사 ' + isl.length + '곳 · ' + e(ELSALL.updated || "") + '</em></div>' +
+      '<div><small>가장 높은 연 수익률</small><b class="up">' + pc(Math.max.apply(null, L.map(function(x){ return x.cpn; }))) + '</b><em>' + e((L.slice().sort(function(a, b){ return b.cpn - a.cpn; })[0] || {}).iss || "") + '</em></div></div>' +
+      seg("pdelsk", [["ELS", "ELS(원금 비보장)"], ["ELB", "ELB(원금지급)"], ["all", "전체"]], f);
+    // ① 미래에셋 청약 중 상품마다: 같은 기초자산 타사
+    var M = (D.els || []).filter(function(x){ return f === "all" || (f === "ELB" ? (x.pp || 0) >= 100 : (x.pp || 0) < 100); });
+    if (M.length) h += card("🟠 미래에셋 청약 중 상품 vs 같은 기초자산 타사", M.map(function(m){
+      var k = uaKey(m.ua), S = L.filter(function(x){ return x.uk === k && !mir(x); }).sort(function(a, b){ return b.cpn - a.cpn; });
+      var better = S.filter(function(x){ return x.cpn > m.cpn; }).length;
+      return '<div class="pd-ecm"><div class="sub2">' + e(m.n) + ' <span class="mut">' + e(k) + '</span></div><p class="note" style="margin:0 0 6px">미래에셋 <b class="up">연 ' + pc(m.cpn) + '</b>' + (m.ki ? ' · KI ' + m.ki : '') + ' · 「' + e(m.desc || "") + '」 — ' +
+        (S.length ? '같은 기초자산 타사 ' + S.length + '개 중 미래에셋보다 수익률 높은 곳 <b>' + better + '개</b>' + (better ? ' (최고 ' + pc(S[0].cpn) + ' ' + e(S[0].iss) + ')' : ' — 미래에셋이 가장 높거나 같아요') : '지금 같은 기초자산 조합의 타사 청약이 없어요') + '</p>' +
+        (S.length ? tblh + S.slice(0, 8).map(function(x){ return row(x); }).join("") + '</table>' : '') + '</div>'; }).join("") +
+      '<p class="note">수익률만 보지 말고 KI(낮을수록 안전)·첫 조기상환 배리어(높을수록 상환이 어려움)·만기를 같이 비교하세요. 같은 기초자산이라도 구조가 다르면 수익률이 달라요.</p>');
+    // ② 발행사별 평균
+    h += card("🏢 발행사별 평균 연 수익률 <span class='mut'>청약 중 · " + (f === "all" ? "전체" : f) + "</span>", '<div class="pd-hl">' + isl.map(function(r){ var mx = isl[0][2] || 1;
+      return '<div><span class="n">' + e(r[0]) + ' <em>' + r[1] + '개 · 최고 ' + r[3].toFixed(2) + '%</em></span><span class="xbar"><i style="width:' + (r[2] / mx * 100).toFixed(0) + '%;background:' + (/미래에셋/.test(r[0]) ? '#f59e0b' : 'var(--c)') + '"></i></span><b>' + r[2].toFixed(2) + '%</b></div>'; }).join("") + '</div>');
+    // ③ 기초자산 조합별 전체
+    var G = {}; L.forEach(function(x){ (G[x.uk] = G[x.uk] || []).push(x); });
+    var gk = Object.keys(G).sort(function(a, b){ return G[b].length - G[a].length; });
+    h += '<div class="sec" style="margin-top:6px">기초자산 조합별 전체 <span class="mut">' + gk.length + '가지 · 연 수익률 높은 순</span></div>' + gk.map(function(k, i){ var a = G[k].sort(function(x, y){ return y.cpn - x.cpn; });
+      return '<details class="card cpx-d"' + (i < 2 ? ' open' : '') + '><summary>' + e(k || "기타") + ' <span class="mut">' + a.length + '개 · ' + pc(a[a.length - 1].cpn) + '~' + pc(a[0].cpn) + (a.some(mir) ? ' · 🟠 미래에셋 있음' : '') + '</span></summary>' + tblh + a.map(function(x){ return row(x); }).join("") + '</table></details>'; }).join("");
+    return h + '<p class="note">금융감독원 DART 「일괄신고추가서류(주가연계증권·주가연계파생결합사채)」를 회차마다 읽어 뽑은 조건이에요(' + e(ELSALL.updated || "") + ' · 평일 하루 두 번 새로 냄). 서류 문장을 자동으로 읽은 거라 배리어·KI 가 빠지거나 다르게 읽힐 수 있어요 — 청약 전엔 각 증권사 투자설명서로 확인하세요. 🟠 = 미래에셋.</p>';
+  }
   /* ───────── 🧾 누르면 펼쳐지는 설명·모의 투자계산서 ───────── */
   function W(v){ if (v == null || isNaN(v)) return "–"; var a = Math.abs(v), s = v < 0 ? "−" : ""; return a >= 1e8 ? s + (a / 1e8).toFixed(2).replace(/\.?0+$/, "") + "억원" : s + Math.round(a / 1e4).toLocaleString() + "만원"; }
   function amtBar(){ return '<div class="pd-amt"><span class="mut">투자금</span>' + [500, 1000, 3000, 5000, 10000].map(function(a){ return '<button data-amt="' + a + '"' + (a === AMT ? ' class="on"' : '') + '>' + (a >= 10000 ? (a / 10000) + "억" : a.toLocaleString() + "만") + '</button>'; }).join("") + '</div>'; }
@@ -687,10 +734,12 @@
       var full = function(){ var r = document.getElementById("pdroot"); if (!r || r.dataset.k !== key) return;
         r.innerHTML = (D.errors && D.errors.length ? '<p class="note" style="margin:0 0 8px">⚠️ 일부 자료를 못 받았어요: ' + e(D.errors.join(" · ").slice(0, 200)) + ' — 지난 값을 보여 줘요.</p>' : '') + VIEW[key](D);
         bindSeg("pdseg", function(k){ SEL[key] = k; keep(); redraw(); }); bindInner(); };
+      window.__pdRedraw = function(){ redraw(); };
       var redraw = function(){ var b = document.getElementById("pdbody"); if (!b) return; var y = b.getBoundingClientRect().top; b.innerHTML = BODY[key](D, SEL[key] || {bond: "gov", fund: "pv", els: "open"}[key]); holdAt("#pdbody", y); bindInner(); };
       var bindInner = function(){
         bindSeg("pdper", function(k){ PER = k; keep(); redraw(); });
         bindSeg("pdustk", function(k){ SEL.ustk = k; keep(); redraw(); });
+        bindSeg("pdelsk", function(k){ SEL.elsk = k; keep(); redraw(); });
         bindSeg("pdpvp", function(k){ SEL.pvp = k; keep(); redraw(); });
         bindSeg("pdpvs", function(k){ SEL.pvs = k; keep(); redraw(); });
         bindSeg("pdpvoc", function(k){ SEL.pvoc = k; keep(); redraw(); });
@@ -737,6 +786,6 @@
     ".pd-cf td{padding:6px 5px;border-top:1px solid var(--line);text-align:right;vertical-align:top}.pd-cf td:nth-child(1){text-align:left;color:var(--sub);font-size:11px;word-break:break-all}.pd-cf td:nth-child(2){text-align:left;word-break:keep-all}.pd-cf td:nth-child(3){white-space:nowrap}.pd-cf .mut{font-size:10.5px}.pd-cf td.dn{color:var(--down)}.pd-cf tr.sum td{background:var(--panel);font-weight:700}" +
     ".pd-stack{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px;margin:4px 0 6px}.pd-leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--sub);margin-bottom:8px}.pd-leg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}" +
     ".pd-hl div{display:grid;grid-template-columns:minmax(0,1fr) 56px 44px;gap:8px;align-items:center;font-size:12px;padding:4px 0;border-bottom:1px solid var(--line)}.pd-hl .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pd-hl em{font-style:normal;color:var(--dim);font-size:10.5px}.pd-hl b{text-align:right}" +
-    ".pd-grp{border-top:1px solid var(--line);padding:6px 0}.pd-grp>summary{cursor:pointer;padding:6px 2px;font-size:14px}.pd-grp>.pd-list{margin:4px 0 6px}.seg2.wrap{flex-wrap:wrap;overflow:visible}.pd-pw{display:flex;gap:8px}.pd-pw button{flex:none;border:0;border-radius:12px;padding:0 16px;background:var(--c);color:#fff;font:inherit;font-weight:700}.pd-close{display:block;width:100%;margin:10px 0 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--sub);font:inherit;font-size:13px}.pd-lv{color:var(--c);font-weight:600}.pd-es{color:#c98500;font-weight:600}.pd-lvp{font-size:12.5px!important;color:var(--sub)!important;margin:0 0 8px!important}.pd-pvl div{display:grid;grid-template-columns:minmax(0,1fr) 54px 58px;gap:2px 8px;align-items:baseline;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--line)}.pd-pvl .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pd-pvl em{font-style:normal;font-size:10px;color:var(--dim)}.pd-pvl b{text-align:right}.pd-pvl small{text-align:right;font-size:11px}.pd-pvl .d{grid-column:1/-1;font-size:10.5px;margin-top:-2px}.pd-pvl .xbar{grid-column:1/-1;height:4px;display:block;width:100%}.pd-pvl .hd{font-size:10.5px;color:var(--dim);padding:2px 0}.pd-pvl .hd b{font-weight:500}.pd-bm{font-size:12px;color:var(--sub);margin:4px 0 0;line-height:1.7}.pd-err{color:var(--down);font-size:13px;font-weight:600;margin:8px 2px 0}.pd-q{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px 12px;font:inherit;font-size:14px;margin:0 0 10px}";
+    ".pd-grp{border-top:1px solid var(--line);padding:6px 0}.pd-grp>summary{cursor:pointer;padding:6px 2px;font-size:14px}.pd-grp>.pd-list{margin:4px 0 6px}.seg2.wrap{flex-wrap:wrap;overflow:visible}.pd-pw{display:flex;gap:8px}.pd-pw button{flex:none;border:0;border-radius:12px;padding:0 16px;background:var(--c);color:#fff;font:inherit;font-weight:700}.pd-close{display:block;width:100%;margin:10px 0 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--sub);font:inherit;font-size:13px}.pd-lv{color:var(--c);font-weight:600}.pd-ec{width:100%;border-collapse:collapse;font-size:11.5px;table-layout:fixed;margin:0 0 6px}.pd-ec th{color:var(--sub);font-weight:600;text-align:left;padding:5px 4px;border-bottom:1px solid var(--line)}.pd-ec td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top;word-break:keep-all;overflow-wrap:anywhere}.pd-ec .mut{font-size:10.5px}.pd-ec tr.me td{background:rgba(245,158,11,.12)}.pd-ecm{padding:4px 0 8px;border-bottom:1px dashed var(--line);margin-bottom:8px}.pd-es{color:#c98500;font-weight:600}.pd-lvp{font-size:12.5px!important;color:var(--sub)!important;margin:0 0 8px!important}.pd-pvl div{display:grid;grid-template-columns:minmax(0,1fr) 54px 58px;gap:2px 8px;align-items:baseline;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--line)}.pd-pvl .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pd-pvl em{font-style:normal;font-size:10px;color:var(--dim)}.pd-pvl b{text-align:right}.pd-pvl small{text-align:right;font-size:11px}.pd-pvl .d{grid-column:1/-1;font-size:10.5px;margin-top:-2px}.pd-pvl .xbar{grid-column:1/-1;height:4px;display:block;width:100%}.pd-pvl .hd{font-size:10.5px;color:var(--dim);padding:2px 0}.pd-pvl .hd b{font-weight:500}.pd-bm{font-size:12px;color:var(--sub);margin:4px 0 0;line-height:1.7}.pd-err{color:var(--down);font-size:13px;font-weight:600;margin:8px 2px 0}.pd-q{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px 12px;font:inherit;font-size:14px;margin:0 0 10px}";
   document.head.appendChild(css);
 })();
