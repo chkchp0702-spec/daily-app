@@ -195,6 +195,19 @@ def els(prgs):
     return out
 
 
+def indiv():
+    """개인투자용국채 (미래에셋증권 단독 판매대행) — 이번 달 청약 조건. 공개 json 이 없으면 오류로 남김"""
+    out = {}
+    for path, data in (("/hks/hks4046/a01.json", {"next_term_tcd": "", "next_bd_intp_tcd": "", "next_itm_no": ""}),
+                       ("/hks/hks4046/a06.json", {"pbff_pcd": "08", "apy_fin_tcd": "12"})):
+        r = post(path, data, headers={"X-Requested-With": "XMLHttpRequest", "Referer": B + "/hks/hks4046/v01.do"})
+        try:
+            out[path.split("/")[-1]] = r.json()
+        except Exception:
+            out[path.split("/")[-1]] = r.text[:500]
+    return out
+
+
 def main():
     old = {}
     try:
@@ -222,7 +235,12 @@ def main():
     run("funds", funds)
     run("els", els, "01")
     run("els_done", els, "02")
-    P["brl"] = {"fx": fx_hist("BRLKRW=X"), "usdbrl": fx_hist("BRL=X")[-260:]}
+    if isinstance(P.get("els_done"), list):
+        P["els_done"] = P["els_done"][:60]
+    run("ind", indiv)
+    # 헤알/원 = (원/달러) ÷ (헤알/달러) — 야후 BRLKRW=X 는 하루치만 줘서 두 환율로 계산
+    ub, uk = dict(fx_hist("BRL=X")), dict(fx_hist("KRW=X"))
+    P["brl"] = {"fx": [[d, round(uk[d] / ub[d], 2)] for d in sorted(set(ub) & set(uk)) if ub[d]], "usdbrl": [[d, ub[d]] for d in sorted(ub)]}
     if not P["brl"]["fx"] and old.get("brl"):
         P["brl"] = old["brl"]
     P["errors"] = ERR
