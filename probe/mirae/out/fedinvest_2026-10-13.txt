@@ -1,1 +1,0 @@
-{"timestamp":"2026-10-16T04:50:56.695Z","status":403,"error":"Forbidden","path":"/GA-FI/FedInvest/selectSecurityPriceDate"}

@@ -36,7 +36,7 @@
       "<b>만기 고르기</b> — 1~2년짜리는 금리 변동에 둔감하고 환율만 보면 되고, 10년 넘는 것(2040·2050)은 미국 금리가 내리면 값이 크게 오르고 오르면 크게 빠져요(금리 하락에 거는 투자). 미래에셋은 매일 아침 「미국채 시장동향·판매정보」에 파는 종목과 시세를 올려요. 호주국채도 같은 방식(AUD)."],
     brl: ["🇧🇷 브라질국채가 뭐예요?", "브라질 정부가 헤알(BRL)로 발행한 채권이에요. 금리가 연 10%를 넘는 대신 ① 헤알 환율이 크게 흔들리고 ② 신용등급이 BB(투기등급)라 위험이 커요.<br><br>" +
       "<b>왜 인기였나</b> — 한국-브라질 조세협약으로 <b>개인은 이자·매매차익·환차익 모두 비과세</b>예요(법인은 과세). 금융소득종합과세에 안 잡혀서 자산가들이 많이 샀어요. 단, 협약·법이 바뀌면 달라질 수 있어요.<br><br>" +
-      "<b>종류 세 가지</b> — <b>이표채(NTN-F)</b>: 6개월마다 이자, 금리가 고정. <b>할인채(LTN)</b>: 이자 없이 싸게 사서 만기에 액면. <b>물가채(NTN-B)</b>: 「물가상승률(IPCA) + 고정금리」라 물가가 오르면 같이 올라요.<br><br>" +
+      "<b>여기서는 이표채(NTN-F)만</b> — 6개월마다(1월·7월 1일) 연 10% 이자를 주는 고정금리 채권이에요. 지금 시장 금리가 10%보다 높으면 액면보다 싸게, 낮으면 비싸게 거래돼요. 할인채(LTN)·물가채(NTN-B)는 목록에서 뺐어요.<br><br>" +
       "<b>환율이 전부</b> — 금리 12%를 받아도 헤알이 12% 떨어지면 원화로는 0이에요. 헤알/원이 쌀 때(아래 차트 낮은 쪽) 사면 환차익이 더해지고, 비쌀 때 사면 금리를 다 까먹을 수 있어요. 2011년 1헤알=700원이던 게 지금 260원대 — 긴 하락이었어요.<br><br>" +
       "<b>미래에셋에서는</b> — 판매가 아니라 <b>단순중개</b>: 홈페이지에 종목표가 없고 MAPS(해외채권 중개)나 영업점에서 종목·금리를 받아요. 수수료 연환산 오프라인 30bp·온라인 15bp. 아래 종목·금리는 브라질 재무부가 매일 공개하는 Tesouro Direto 기준이라 미래에셋 중개 금리와는 조금 다를 수 있어요."],
     oth: ["공사채·회사채·신종자본증권이 뭐예요?", "<b>공사채</b>는 한국전력·도로공사·수자원공사처럼 정부가 뒤에 있는 공기업이 발행한 채권(국채보다 금리 조금 높고 거의 안전). <b>지방채</b>는 서울·부산 같은 지자체(도시철도공채 등). <b>회사채</b>는 일반 기업 — 신용등급(AAA~BBB)이 낮을수록 금리가 높고 부도 위험이 있어요.<br><br>" +
@@ -44,10 +44,10 @@
       "<b>어떻게 보나</b> — 세후 수익률이 국고채보다 얼마나 높은지(그 차이가 위험의 값), 잔존기간, 위험 등급. 「후순위」는 회사가 망하면 다른 채권자보다 늦게 받는다는 뜻."],
     fund: ["📦 펀드가 뭐예요? (공모 · 사모 · 재간접)", "<b>펀드</b>는 여러 사람 돈을 모아 전문가(운용사)가 대신 투자하는 바구니예요. 바구니 값(기준가)이 매일 바뀌고, 수익률 = 기준가가 얼마나 올랐나.<br><br>" +
       "<b>공모펀드</b> — 누구나 1만원부터 살 수 있고, 금융투자협회에 매일 기준가·수익률을 공시해요. 미래에셋 펀드검색에 1,700여 개.<br>" +
-      "<b>사모펀드</b> — 49인 이하(일반투자자)에게만 비공개로 파는 펀드. 최소 3억원, 운용 전략을 공개 안 해도 되고 규제가 느슨해서 헤지펀드(롱숏·멀티전략)·부동산·메자닌 같은 특이한 투자를 해요. 수익률을 공개할 의무가 없어서 <b>인터넷에 성적표가 없어요</b> — 금융투자협회에 기준가를 올리는 1,300여 개만 볼 수 있고, 유명 주식형 헤지펀드(타임폴리오·DS 등)는 대부분 빠져 있어요.<br>" +
-      "<b>사모투자재간접형</b> — 공모펀드인데 안에 사모(헤지)펀드를 여러 개 담은 것. 일반 계좌로 500만원부터 사모펀드 성적을 받는 길이에요. 미래에셋에서 6개 팔아요.<br><br>" +
+      "<b>사모펀드</b> — 49인 이하(일반투자자)에게만 비공개로 파는 펀드. 일반투자자는 최소 3억원, 운용 전략·보유 종목을 공개 안 해도 되고 규제가 느슨해서 헤지펀드(롱숏·멀티전략)·Pre-IPO·메자닌·코스닥벤처 같은 투자를 해요. 성적을 공개할 의무가 없어서 인터넷에는 성적표가 없어요.<br>" +
+      "<b>🔒 사모 라인업</b> — 미래에셋증권이 파는 주요 사모펀드 라인업 화면(사내용)을 옮긴 거라 비밀번호로 잠가 두었어요. 전략별(롱·롱숏·멀티·Pre-IPO·메자닌·공모주하이일드·코스닥벤처·PE)로 걸러 보고, 펀드를 누르면 전략 설명과 연도별 성적이 나와요.<br><br>" +
       "<b>수익률 읽는 법</b> — 기간(3개월·1년·3년)마다 순위가 완전히 달라져요. 1년 +80%는 「작년에 좋았다」지 「내년에도」가 아니에요. 같은 유형끼리 비교(주식형 vs 주식형)하고, <b>순자산</b>이 너무 작은 펀드(10억 미만)는 수익률이 왜곡되기 쉬워 뺐어요. <b>위험 등급</b> 1(매우높음)~6(매우낮음). 수수료 「선취」는 살 때 떼고, 「총보수」는 매년 떼요(온라인 클래스 e 가 보통 싸요).<br><br>" +
-      "<b>사모 순위의 한계</b> — 사모펀드 수익률은 금융투자협회 「기준가격」을 1·3·6·12개월 전과 비교해 계산한 거라 <b>분배금(배당)·결산으로 기준가가 리셋된 펀드는 틀리게 나와요</b>. 부동산·특별자산 펀드가 특히 그래요. 「2종·손익차등형」은 후순위(레버리지)라 따로 표시했어요. 어느 판매사가 파는지는 공개 안 돼서 미래에셋 판매 여부는 표시 못 해요(재간접 6개만 확실)."],
+      "<b>사모 성적 읽는 법</b> — 운용사 기준가로 계산한 값이라 결산 때 이익을 나눠 주고 기준가가 1,000 근처로 돌아가는 펀드(멀티전략 하우스에 흔함)는 기준가 숫자가 아니라 <b>연도별 수익률</b>로 보세요. Pre-IPO·PE는 평가가 드물게 바뀌어 한동안 0%였다가 한 번에 뛰어요. 달러 펀드는 달러 기준. 「손익차등형 2종」은 후순위(레버리지)라 등락이 커요."],
     els: ["🎯 ELS · ELB · DLS가 뭐예요?", "<b>ELS(주가연계증권)</b>는 「정해진 조건만 지키면 연 X% 줄게」라는 증권사와의 약속이에요. 기초자산(KOSPI200·삼성전자 같은 지수나 주식)이 <b>많이 안 떨어지면</b> 이자를 받고, <b>많이 떨어지면</b> 그만큼 손실이에요. 주식처럼 오르는 만큼 버는 게 아니라, 「안 떨어지는 데」 거는 투자.<br><br>" +
       "<b>스텝다운 읽기</b> — 「85-85-85-80-75-70, KI 45」: 6개월마다 평가해서 기초자산이 처음의 85%(1·2·3차), 80%(4차), 75%(5차), 70%(만기) 위면 그때 이자와 함께 끝(조기상환). 숫자가 낮을수록 상환되기 쉬워요. <b>KI(녹인) 45</b>: 3년 중 한 번이라도 45% 아래로 떨어지면 만기 때 떨어진 만큼 손실(최대 −100%). 기초자산이 여럿이면 <b>가장 못한 것</b> 기준이라 개수가 많을수록 위험해요(그래서 금리도 높음).<br><br>" +
       "<b>ELB</b>는 원금지급형 — 조건이 안 맞아도 원금은 증권사가 줘요(다만 증권사가 망하면 못 받음 · 예금자보호 없음). <b>DLS</b>는 기초자산이 금리·환율·원유 같은 것. <b>월지급식</b>은 매달 이자를 주고, <b>주식지급형</b>은 손실 때 현금 대신 주식으로 줘요.<br><br>" +
@@ -101,6 +101,7 @@
           return '<div class="pd-it pd-tap"' + reg("ust", Object.assign({fx: U.fx}, r)) + '><div class="pd-h"><div class="pd-n"><b>' + e(r.name) + '</b><small>만기 ' + e(r.mat) + ' (약 ' + yr.toFixed(1) + '년) · 표면금리 ' + pc(r.cpn, 3) + ' · ' + e(r.cur) + '</small></div>' +
             '<div class="pd-v"><b class="up">' + pc(r.ytm) + '</b><small>시세 수익률(세전)</small></div></div></div>'; }).join("") + '</div>' : '<div class="empty">오늘 판매정보가 아직 없어요.</div>') +
         '<p class="note">미국채는 달러로 사요 — 수익률은 달러 기준이고, 원화로 바꾸면 환율만큼 더해지거나 빠져요. 이자는 과세(15.4%), 표면금리가 낮은 채권은 이자 대신 싸게 사서 만기에 액면을 받는 몫이 커요. 매일 아침 미래에셋이 올리는 「미국채 시장동향·판매정보」 글에서 가져왔어요' + (U.url ? ' (<a href="' + e(U.url) + '" target="_blank" rel="noopener">원문</a>)' : '') + '.</p>');
+      h += ustAll(D);
       h += card("미국 10년 국채 금리 <span class='mut'>1년 · 야후</span>", (y.length > 5 ? line1(vals(y), lbl(y), {name: "10년", color: "#e66767", h: 150}) : '<div class="spark-empty">자료 준비 중</div>') +
         '<p class="note">미래에셋 기준 10년 금리 ' + (U.y10 != null ? '<b>' + pc(U.y10) + '</b> (전일 ' + pc(U.y10_prev) + ')' : '–') + '. 금리가 오르면 이미 산 채권 값은 내려가고, 내리면 올라가요 — 만기가 길수록 더 크게.</p>');
       h += card("원/달러 환율 <span class='mut'>1년</span>", (fx.length > 5 ? line1(vals(fx), lbl(fx), {name: "원/달러", color: "#7c9cff", h: 130}) : '<div class="spark-empty">자료 준비 중</div>') +
@@ -113,10 +114,11 @@
     if (k === "brl"){
       var f = hist(B.fx, 260), ub = hist(B.usdbrl, 260), last = f.slice(-1)[0], first = f[0];
       var yr1 = last && first ? (last[1] / first[1] - 1) * 100 : null;
-      var T = (D.td || []).filter(function(x){ return x.code !== "LFT"; }), TH = D.td_hist || {};
+      /* 10/16 사용자 「브라질국채는 할인채랑 물가채 빼」 — LTN(할인채)·NTN-B/NTN-C(물가채) 숨김, 이표채 NTN-F 만 (LFT 는 접어서) */
+      var T = (D.td || []).filter(function(x){ return x.code === "NTN-F"; }), TH = {}; Object.keys(D.td_hist || {}).forEach(function(k){ if (/^NTN-F/.test(k)) TH[k] = D.td_hist[k]; });
       var grp = {}; T.forEach(function(x){ (grp[x.kind] = grp[x.kind] || []).push(x); });
       var h = doc("brl") + card("🇧🇷 브라질국채 <span class='mut'>미래에셋 · 단순중개</span>",
-        '<div class="pd-brl"><div><small>이자 세금</small><b class="up">비과세</b><em>개인 · 한-브라질 조세협약</em></div><div><small>신용등급</small><b>BB</b><em>투기등급 (국제)</em></div><div><small>통화</small><b>BRL</b><em>헤알 · USD 표시도</em></div><div><small>잔존만기</small><b>1~30년</b><em>이표채·물가채·할인채</em></div></div>' +
+        '<div class="pd-brl"><div><small>이자 세금</small><b class="up">비과세</b><em>개인 · 한-브라질 조세협약</em></div><div><small>신용등급</small><b>BB</b><em>투기등급 (국제)</em></div><div><small>통화</small><b>BRL</b><em>헤알 · USD 표시도</em></div><div><small>종류</small><b>NTN-F</b><em>이표채 · 연 10% · 6개월마다 이자</em></div></div>' +
         '<p class="note">미래에셋은 브라질국채를 「판매」가 아니라 <b>단순중개</b>로 다뤄요 — 홈페이지에 매일 파는 종목표가 올라오지 않고, MAPS(해외채권 중개 화면)나 영업점에서 종목·금리를 받아요. 수수료 연환산 오프라인 30bp · 온라인 15bp. 아래 종목·금리는 <b>브라질 재무부(Tesouro Direto)</b>가 매일 공개하는 값이라 미래에셋 중개 호가와는 조금 다를 수 있어요.</p>');
       var AN = D.anb || [], fxb = last ? last[1] : null;
       var brow = function(x){
@@ -125,9 +127,9 @@
           '<div class="pd-v"><b class="up">' + (x.code === "NTN-B" || x.code === "NTN-C" ? (x.code === "NTN-B" ? "IPCA+" : "IGPM+") : x.code === "LFT" ? "Selic+" : "") + (x.r != null ? x.r.toFixed(x.code === "LFT" ? 3 : 2) + "%" : "–") + '</b><small>' + (x.code === "LTN" || x.code === "NTN-F" ? "연 금리(헤알·고정)" : x.code === "LFT" ? "Selic 가산" : "물가 + 연") + '</small></div></div></div>'; };
       if (AN.length){
         var ag = {}; AN.forEach(function(x){ (ag[x.code] = ag[x.code] || []).push(x); });
-        h += card("만기별 브라질 국채 전 종목 <span class='mut'>" + AN.filter(function(x){ return x.code !== "LFT"; }).length + "개 · ANBIMA " + e(AN[0].asof) + "</span>",
-          ["NTN-F", "LTN", "NTN-B", "NTN-C"].filter(function(c){ return ag[c]; }).map(function(c){ return '<div class="sub2">' + e(c) + ' <span class="mut">' + e(ag[c][0].kind) + ' · ' + ag[c].length + '개</span></div><div class="pd-list">' + ag[c].map(brow).join("") + '</div>'; }).join("") +
-          '<p class="note">브라질 금융시장협회(ANBIMA)가 매일 내는 <b>유통시장 지표금리</b> — 시장에서 실제로 거래되는 브라질 국채 전부예요(한국 투자자가 주로 사는 NTN-F·LTN·NTN-B). 미래에셋 중개 호가는 이것과 조금 달라요. 종목을 누르면 만기까지 현금흐름이 나와요.</p>') +
+        h += card("브라질 이표채(NTN-F) 전 종목 <span class='mut'>" + AN.filter(function(x){ return x.code === "NTN-F"; }).length + "개 · ANBIMA " + e(AN[0].asof) + "</span>",
+          ["NTN-F"].filter(function(c){ return ag[c]; }).map(function(c){ return '<div class="sub2">' + e(c) + ' <span class="mut">' + e(ag[c][0].kind) + ' · ' + ag[c].length + '개</span></div><div class="pd-list">' + ag[c].map(brow).join("") + '</div>'; }).join("") +
+          '<p class="note">브라질 금융시장협회(ANBIMA)가 매일 내는 <b>유통시장 지표금리</b> — 시장에서 실제로 거래되는 고정금리 이표채(NTN-F) 전부예요 — 할인채(LTN)·물가채(NTN-B)는 뺐어요. 미래에셋 중개 호가는 이것과 조금 달라요. 종목을 누르면 만기까지 현금흐름이 나와요.</p>') +
           (ag.LFT ? '<details class="card cpx-d"><summary>LFT (Selic 변동금리) ' + ag.LFT.length + '개 <span class="mut">한국 투자자는 거의 안 사요</span></summary><div class="pd-list">' + ag.LFT.map(brow).join("") + '</div></details>' : '');
       } else if (T.length){
         h += card("만기별 브라질 국채 <span class='mut'>" + T.length + "개 · 브라질 재무부</span>", '<div class="pd-list">' + T.map(function(x){ return brow({code: x.code, kind: x.kind, mat: x.mat, pu: x.px, r: x.r, asof: x.asof}); }).join("") + '</div>');
@@ -145,6 +147,28 @@
       '<p class="note" style="margin:0 0 10px">「매우높은위험」으로 표시된 조건부자본증권(신종·후순위)은 은행이 어려워지면 원금을 날릴 수 있어서 금리가 높아요. 위험 등급을 꼭 같이 보세요.</p>' + bondRows(o));
   }
 
+  /* 🇺🇸 미국채 전 종목 — 10/16 사용자 「미국채 종류 훨씬 더 많을껴 다 찾고」. 미국 재무부 MSPD(월말 전 종목) + 일일 수익률 곡선으로 추정한 수익률 */
+  var UK = [["", "전체"], ["N", "Note(2~10년물)"], ["B", "Bond(20·30년물)"], ["TIPS", "물가연동(TIPS)"], ["Bill", "T-Bill(1년 이하)"], ["FRN", "변동금리(FRN)"]];
+  var UKN = {N: "Note", B: "Bond", TIPS: "물가연동 TIPS", Bill: "T-Bill", FRN: "변동금리 FRN"};
+  var UBK = [[0, 1, "1년 이내"], [1, 3, "1~3년"], [3, 7, "3~7년"], [7, 15, "7~15년"], [15, 25, "15~25년"], [25, 99, "25년 넘게"]];
+  function ustAll(D){
+    var UA = D.ust_all, U = D.ust || {}; if (!UA || !UA.items || !UA.items.length) return "";
+    var f = SEL.ustk || "", it = UA.items.filter(function(x){ return !f || x.k === f; }), now = Date.now();
+    var mq = {}; (U.items || []).forEach(function(x){ mq[(+x.cpn).toFixed(3) + x.mat] = x.ytm; });
+    var gaps = UA.items.filter(function(x){ return x.mir && x.y != null && mq[(+x.cpn).toFixed(3) + x.mat] != null; }).map(function(x){ return mq[(+x.cpn).toFixed(3) + x.mat] - x.y; });
+    var gap = gaps.length ? gaps.reduce(function(a, b){ return a + b; }, 0) / gaps.length : null;
+    var row = function(x){
+      var yr = Math.max(0, (new Date(x.mat) - now) / 365.25 / 864e5), mqy = mq[(+(x.cpn || 0)).toFixed(3) + x.mat];
+      return '<div class="pd-it pd-tap"' + reg("ust", {fx: U.fx, name: x.nm, mat: x.mat, cpn: x.cpn || 0, ytm: mqy != null ? mqy : x.y, est: mqy == null, tips: x.k === "TIPS", frn: x.k === "FRN", cur: "USD"}) + '><div class="pd-h"><div class="pd-n"><b>' + e(x.nm) + (x.mir ? ' <span class="chip2 hot" style="margin:0">미래에셋 판매</span>' : '') + '</b><small>' + e(UKN[x.k]) + ' · 만기 ' + e(x.mat) + ' (약 ' + yr.toFixed(1) + '년)' + (x.cpn != null ? ' · 표면 ' + pc(x.cpn, 3) : '') + (x.px ? ' · 가격 약 ' + x.px.toFixed(1) : '') + (x.out ? ' · 잔액 $' + fmt(x.out) + 'B' : '') + '</small></div>' +
+        '<div class="pd-v"><b class="up">' + (mqy != null ? pc(mqy) : x.y != null ? pc(x.y) : '변동') + '</b><small>' + (mqy != null ? '미래에셋 시세' : x.k === "TIPS" ? '실질(추정)' : x.y != null ? '추정 수익률' : '3개월물+α') + '</small></div></div></div>'; };
+    var groups = UBK.map(function(b){ var a = it.filter(function(x){ var t = (new Date(x.mat) - now) / 365.25 / 864e5; return t >= b[0] && t < b[1]; }); return [b, a]; }).filter(function(g){ return g[1].length; });
+    return card("🇺🇸 미국채 전 종목 <span class='mut'>" + UA.n + "개 · 미국 재무부</span>",
+      '<div class="seg2 wrap" id="pdustk">' + UK.map(function(x){ var n = UA.items.filter(function(r){ return !x[0] || r.k === x[0]; }).length; return '<button' + (x[0] === f ? ' class="on"' : '') + ' data-k="' + x[0] + '">' + x[1] + ' <span class="mut">' + n + '</span></button>'; }).join("") + '</div>' +
+      groups.map(function(g, i){ var ys = g[1].map(function(x){ return x.y; }).filter(function(v){ return v != null; }), nm = g[1].filter(function(x){ return x.mir; }).length;
+        return '<details class="pd-grp"><summary><b>' + g[0][2] + '</b> <span class="mut">' + g[1].length + '개' + (ys.length ? ' · ' + Math.min.apply(null, ys).toFixed(2) + '~' + Math.max.apply(null, ys).toFixed(2) + '%' : '') + (nm ? ' · 미래에셋 판매 ' + nm : '') + '</span></summary><div class="pd-list">' + g[1].map(row).join("") + '</div></details>'; }).join("") +
+      '<p class="note">지금 시장에서 거래되는 미국 국채 <b>전부</b>예요(재무부 월말 명세서 ' + e(UA.mspd) + ' 기준 · 그 뒤 새로 나온 건 다음 달에). 종목별 실시간 시세는 공개 안 돼서, 수익률은 재무부가 매일 내는 <b>수익률 곡선(' + e(UA.curve) + ')을 만기에 맞춰 끼워 넣은 추정치</b>예요' + (gap != null ? ' — 미래에셋이 실제로 파는 종목은 추정보다 평균 <b>' + V.sgn(gap) + '%p</b> 다르게 나와요(표면금리 낮은 옛 채권이 더 비싸게 거래되고, 매도 호가 차이가 있어서)' : '') + '. 「미래에셋 판매」 표시는 미래에셋 시세 그대로. 다른 종목도 미래에셋 해외채권(MAPS)·영업점에서 주문할 수 있는지는 따로 확인하세요. TIPS 수익률은 물가를 뺀 실질 수익률(5년 미만은 5년 값).</p>');
+  }
+
   /* ───────── 📦 펀드 ───────── */
   var PERS = [["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"], ["y3", "3년"]], PN = {m3: "3개월", m6: "6개월", y1: "1년", y3: "3년"};
   function fname(n){ return String(n || "").replace(/\s*\((?:수수료|운용|보수)[^)]*\)\s*/g, "").replace(/\s*(종류|클래스|Class|class|CLASS)\s*[A-Za-z][-A-Za-z0-9]*\s*(\([^)]*\))?\s*$/, ""); }
@@ -154,54 +178,69 @@
       '<div class="pd-v">' + (v == null ? '<b class="mut">–</b>' : sg(v)) + '<small>' + PN[per] + '</small></div></div>' +
       '<div class="pd-row"><span>3개월 ' + sg(x.m3) + '</span><span>1년 ' + sg(x.y1) + '</span><span>3년 ' + sg(x.y3) + '</span><span>순자산 <b>' + (x.aum != null ? fmt(x.aum) + '억' : '–') + '</b></span></div></div>';
   }
-  var PV_T = [["", "전체"], ["주식", "주식형"], ["혼합", "혼합"], ["채권", "채권형"], ["부동산", "부동산"], ["특별자산", "특별자산"], ["재간접", "재간접"]];
-  var PVPER = [["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"]], PVN = {m0: "월초 대비", m1: "1개월", m3: "3개월", m6: "6개월", y1: "1년"};
-  function fundView(D){
-    var F = (D.funds || []).filter(function(x){ return x.t; }), k = SEL.fund || "pv", PV = D.pv || {};
-    var pv = F.filter(function(x){ return x.pv; }), it = PV.items || [];
-    var h = '<div class="mg-kv"><div><small>🔒 사모펀드 (금투협 공시)</small><b>' + (PV.n || 0).toLocaleString() + '개</b><em>' + e(PV.asof || "") + ' 기준가 · 운용사 ' + Object.keys(it.reduce(function(o, x){ o[x.co] = 1; return o; }, {})).length + '곳</em></div>' +
-      '<div><small>미래에셋에서 살 수 있는 사모(재간접)</small><b>' + pv.length + '개</b><em>공모펀드 ' + F.length.toLocaleString() + '개 중</em></div></div>';
-    h += seg("pdseg", [["pv", "🔒 사모펀드 전체"], ["mir", "🟠 미래에셋 사모(재간접)"], ["all", "🏆 공모 TOP 20"], ["type", "유형별 TOP"]], k) + '<div id="pdbody">' + fundBody(D, k) + '</div>';
-    return doc("fund") + h + WARN;
+  /* 🔒 사모 라인업 — 10/16 사용자 「사모펀드 다 빼고 이 리스트(미래에셋 사모 주요펀드 라인업)에 있는것만 · 수익률 top30 위주 · 나머지는 펼치기 접기」
+     사내용 자료라 평문은 저장소에 없음: archive/x/pv_lineup.enc (AES-256-GCM · PBKDF2) 를 비밀번호로 이 기기에서만 풂 */
+  var PVL = null, PVERR = "", PVBUSY = false;
+  function b64u(s){ var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function pvUnlock(pw){
+    if (!(window.crypto && crypto.subtle)) return Promise.reject(new Error("이 브라우저는 암호 풀기를 지원하지 않아요"));
+    return getJSON("archive/x/pv_lineup.enc?" + Math.floor(Date.now() / 3600000), {ttl: 3600000}).then(function(E){
+      return crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]).then(function(k){
+        return crypto.subtle.deriveKey({name: "PBKDF2", salt: b64u(E.s), iterations: E.it, hash: "SHA-256"}, k, {name: "AES-GCM", length: 256}, false, ["decrypt"]);
+      }).then(function(key){ return crypto.subtle.decrypt({name: "AES-GCM", iv: b64u(E.i)}, key, b64u(E.c)); });
+    }).then(function(buf){ PVL = JSON.parse(new TextDecoder().decode(buf)); return PVL; });
   }
-  function pvrow(x, i, per){
-    var v = per === "m0" ? x.m0 : x[per];
-    return '<div class="pd-it pd-p pd-tap"' + reg("pv", Object.assign({per: per}, x)) + '><div class="pd-h"><span class="rk">' + (i + 1) + '</span><div class="pd-n"><b>' + e(x.n) + '</b><small>' + e(x.co) + ' · ' + e(x.t) + ' · 설정 ' + e((x.est || "").slice(0, 4)) + '년' + (x.tr ? ' · <span class="chip2 hot" style="margin:0">후순위·손익차등</span>' : '') + '</small></div>' +
-      '<div class="pd-v">' + (v == null ? '<b class="mut">–</b>' : sg(v)) + '<small>' + PVN[per] + '</small></div></div>' +
-      '<div class="pd-row"><span>1개월 ' + sg(x.m1) + '</span><span>3개월 ' + sg(x.m3) + '</span><span>6개월 ' + sg(x.m6) + '</span><span>1년 ' + sg(x.y1) + '</span><span>설정액 <b>' + fmt(x.amt) + '억</b></span><span>기준가 <b>' + fmt(x.nav) + '</b></span></div></div>';
+  var PVP = [["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"], ["ytd", "올해"]], PVPN = {d1: "1일", w1: "1주", m1: "1개월", m3: "3개월", m6: "6개월", y1: "1년", ytd: "올해(2026)"};
+  var SG = [["", "전체"], ["Long", "롱"], ["Long/Short", "롱숏"], ["Multi", "멀티전략"], ["Fund of Fund", "재간접"], ["Pre-IPO", "Pre-IPO"], ["Mezzanine", "메자닌"], ["하이일드", "공모주하이일드"], ["코스닥벤처", "코스닥벤처"], ["PE", "PE·VC·사모대출"], ["USD", "💵 달러"]];
+  var SSHORT = {"Equity Hedge (Long)": "롱", "Equity Hedge (Long · USD)": "롱·달러", "Equity Hedge (Long/Short)": "롱숏", "Equity Hedge (Multi-Strategy)": "멀티전략", "Equity Hedge (Fund of Fund)": "헤지 재간접", "Event-Driven (Pre-IPO)": "Pre-IPO·공모주", "Event-Driven (Mezzanine)": "메자닌", "Event-Driven (공모주 하이일드)": "공모주 하이일드", "Event-Driven (코스닥벤처)": "코스닥벤처", "국내형 PE": "국내 PE", "Global VC": "해외 VC", "Global PE (원화)": "해외 PE(원화)", "Global PE (USD)": "해외 PE(달러)", "Global PD (USD)": "해외 사모대출(달러)"};
+  function sgOk(x, f){
+    if (!f) return true;
+    if (f === "USD") return x.usd;
+    if (f === "Long") return x.s === "Equity Hedge (Long)" || x.s === "Equity Hedge (Long · USD)";
+    if (f === "PE") return /PE|VC|PD/.test(x.s);
+    return x.s.indexOf(f) >= 0;
+  }
+  function pvv(x, p){ return p === "ytd" ? (x.y || {})["2026"] : x[p]; }
+  function pvname(n){ return String(n).replace(/\s*(일반\s*사모\s*(증권|혼합자산)?\s*투자\s*신탁|전문투자형\s*사모\s*투자\s*신탁|사모\s*증권\s*투자\s*신탁|일반\s*사모)\s*/g, " ").replace(/\s+/g, " ").trim(); }
+  function pvlrow(x, i, p){
+    var v = pvv(x, p), cur = x.usd ? "$" : "";
+    return '<div class="pd-it pd-p pd-tap"' + reg("pvl", Object.assign({per: p}, x)) + '><div class="pd-h">' + (i != null ? '<span class="rk">' + (i + 1) + '</span>' : '') + '<div class="pd-n"><b>' + e(pvname(x.n)) + '</b><small>' + e(SSHORT[x.s] || x.s) + (x.d ? ' · 설정 ' + e(x.d.slice(0, 7).replace("-", ".")) : '') + (x.nav != null ? ' · 기준가 ' + cur + fmt(x.nav) : '') + (/손익차등/.test(x.n) ? ' · <span class="chip2 hot" style="margin:0">손익차등</span>' : '') + '</small></div>' +
+      '<div class="pd-v">' + (v == null ? '<b class="mut">–</b>' : sg(v)) + '<small>' + PVPN[p] + '</small></div></div>' +
+      '<div class="pd-row"><span>1개월 ' + sg(x.m1) + '</span><span>3개월 ' + sg(x.m3) + '</span><span>6개월 ' + sg(x.m6) + '</span><span>1년 ' + sg(x.y1) + '</span><span>올해 ' + sg((x.y || {})["2026"]) + '</span></div></div>';
+  }
+  function pvBody(){
+    if (!PVL){
+      var saved = ""; try { saved = localStorage.getItem("pvk") || ""; } catch(z) {}
+      return card("🔒 미래에셋 사모 라인업 <span class='mut'>잠김</span>",
+        (saved && !PVERR ? '<div class="loading">여는 중…</div>' :
+        '<p class="note" style="margin:0 0 10px">미래에셋증권 사내용 「사모 주요펀드 라인업 및 성과현황」을 옮긴 자료라 비밀번호로 잠가 두었어요. 한 번 열면 이 기기에서는 다음부터 자동으로 열려요.</p>' +
+        '<div class="pd-pw"><input id="pvpw" type="password" autocomplete="current-password" placeholder="비밀번호" class="pd-q" style="margin:0"><button id="pvgo">열기</button></div>' +
+        (PVERR ? '<div class="pd-err">⚠️ ' + e(PVERR) + '</div>' : '')));
+    }
+    var p = SEL.pvp || "y1", f = SEL.pvs || "", L = PVL.rows.filter(function(x){ return sgOk(x, f); });
+    var has = L.filter(function(x){ return pvv(x, p) != null; }).sort(function(a, b){ return pvv(b, p) - pvv(a, p); }), none = L.filter(function(x){ return pvv(x, p) == null; });
+    var top = has.slice(0, 30), rest = has.slice(30), med = has.length ? pvv(has[Math.floor(has.length / 2)], p) : null;
+    var bm = (PVL.bm || []).map(function(b){ var v = pvv(b, p); return v == null ? "" : '<span>' + e(b.n) + ' ' + sg(v) + '</span>'; }).join("");
+    return card("🔒 미래에셋 사모 라인업 수익률 TOP 30 <span class='mut'>" + PVPN[p] + " · " + has.length + "개 중</span>",
+      seg("pdpvp", PVP, p) + '<div class="seg2 wrap" id="pdpvs">' + SG.map(function(x){ var n = PVL.rows.filter(function(r){ return sgOk(r, x[0]); }).length; return '<button' + (x[0] === f ? ' class="on"' : '') + ' data-k="' + x[0] + '">' + x[1] + ' <span class="mut">' + n + '</span></button>'; }).join("") + '</div>' +
+      '<div class="pd-row" style="margin:0 0 10px">비교 기준선 ' + (bm || '–') + (med != null ? '<span>라인업 가운데 ' + sg(med) + '</span>' : '') + '</div>' +
+      (top.length ? '<div class="pd-list">' + top.map(function(x, i){ return pvlrow(x, i, p); }).join("") + '</div>' : '<div class="empty">이 조건에 수익률이 있는 펀드가 없어요.</div>')) +
+      (rest.length ? '<details class="card cpx-d"><summary>나머지 ' + rest.length + '개 펼치기 <span class="mut">31위~</span></summary><div class="pd-list">' + rest.map(function(x, i){ return pvlrow(x, i + 30, p); }).join("") + '</div></details>' : '') +
+      (none.length ? '<details class="card cpx-d"><summary>' + PVPN[p] + ' 수익률 없음 ' + none.length + '개 <span class="mut">새로 만든 펀드 등</span></summary><div class="pd-list">' + none.map(function(x){ return pvlrow(x, null, p); }).join("") + '</div></details>' : '') +
+      '<p class="note">' + e(PVL.src) + '. 수익률은 운용사 기준가 기준(세전·보수 차감 후), 달러 펀드는 달러 기준이에요. 새 화면 사진을 주시면 갱신돼요 — 매일 자동으로 바뀌지 않아요. 펀드를 누르면 전략 설명·연도별 성적·모의 계산이 펼쳐져요. <a href="#" id="pvlock">이 기기에서 잠그기</a></p>';
+  }
+  function fundView(D){
+    var F = (D.funds || []).filter(function(x){ return x.t; }), k = SEL.fund || "pv";
+    if (k === "mir") k = SEL.fund = "pv";
+    var h = '<div class="mg-kv"><div><small>🔒 미래에셋 사모 라인업</small><b>' + (PVL ? PVL.rows.length + '개' : '잠김') + '</b><em>' + (PVL ? e(PVL.asof) + ' 사내 화면' : '비밀번호로 열기') + '</em></div>' +
+      '<div><small>공모펀드 (미래에셋 펀드검색)</small><b>' + F.length.toLocaleString() + '개</b><em>순자산 10억↑ 수익률 순위</em></div></div>';
+    h += seg("pdseg", [["pv", "🔒 사모 라인업"], ["all", "🏆 공모 TOP 20"], ["type", "유형별 TOP"]], k) + '<div id="pdbody">' + fundBody(D, k) + '</div>';
+    return doc("fund") + h + WARN;
   }
   function fundBody(D, k){
     var F = (D.funds || []).filter(function(x){ return x.t; }), per = PER;
     var by = function(a, p){ p = p || per; return a.filter(function(x){ return x[p] != null; }).sort(function(x, y){ return y[p] - x[p]; }); };
-    if (k === "pv"){
-      var PV = D.pv || {}, it = PV.items || [], pp = SEL.pvper || "m3", tf = SEL.pvt || "", q = (SEL.pvq || "").trim();
-      // 분배금·결산 의심: 한 달 기준가 변화가 금투협 「월초 대비」와 15%p 넘게 어긋나면 순위에서 뺌
-      var sus = function(x){
-        if (x.m1 != null && x.m0 != null && Math.abs(x.m1 - x.m0) > 15) return true;
-        if (/주식/.test(x.t || "")) return false;                       // 주식형은 진짜 크게 움직일 수 있음
-        var pts = [x.y1, x.m6, x.m3, x.m1, 0].filter(function(v){ return v != null; }).map(function(r){ return x.nav / (1 + r / 100); });
-        for (var i = 1; i < pts.length; i++) if (Math.abs(pts[i] / pts[i - 1] - 1) > 0.25) return true;   // 두 시점 사이 25% 넘게 튐 = 분배·결산
-        return false;
-      };
-      var base = it.filter(function(x){ return (x.amt || 0) >= 10 && x.nav > 0 && !x.tr && !sus(x) && (!tf || (x.t || "").indexOf(tf) >= 0) && (!q || (x.n + x.co).indexOf(q) >= 0); });
-      var nsus = it.filter(sus).length;
-      var lst = by(base, pp), top = lst.slice(0, 30), bot = lst.slice(-10).reverse();
-      var med = lst.length ? lst[Math.floor(lst.length / 2)][pp] : null;
-      return card("🔒 사모펀드 수익률 순위 <span class='mut'>" + PVN[pp] + " · " + lst.length + "개 (설정액 10억↑ · 후순위 제외)</span>",
-        '<input class="pd-q" id="pdq" placeholder="펀드명·운용사 검색" value="' + e(q) + '">' +
-        seg("pdpvper", PVPER, pp) + seg("pdpvt", PV_T, tf) +
-        '<p class="note" style="margin:0 0 10px">금융투자협회에 기준가를 공시하는 사모펀드 전부(' + (PV.n || 0).toLocaleString() + '개)예요. 수익률은 기준가를 ' + e((PV.dates || {})[pp] || "") + ' 과 비교한 값이라 <b>분배금·결산(기준가 리셋)은 반영 못 해요</b> — 부동산·특별자산은 특히 틀릴 수 있어요. 유명 주식형 헤지펀드는 공시를 안 해서 없어요. 기준가가 분배·결산으로 튄 것 같은 ' + nsus + '개는 순위에서 뺐어요. 가운데 펀드 ' + (med != null ? '<b>' + V.sgn(med) + '%</b>' : '–') + '.</p>' +
-        (top.length ? '<div class="pd-list">' + top.map(function(x, i){ return pvrow(x, i, pp); }).join("") + '</div>' : '<div class="empty">조건에 맞는 펀드가 없어요.</div>')) +
-        (bot.length ? '<details class="card cpx-d"><summary>📉 ' + PVN[pp] + ' 가장 많이 빠진 10개</summary><div class="pd-list">' + bot.map(function(x, i){ return pvrow(x, i, pp); }).join("") + '</div></details>' : '') +
-        (function(){ var tr = by(it.filter(function(x){ return x.tr && (x.amt || 0) >= 10 && x.nav > 0; }), pp); return tr.length ? '<details class="card cpx-d"><summary>⚠️ 후순위·손익차등형 ' + tr.length + '개 <span class="mut">레버리지 — 따로</span></summary><p class="note" style="margin:0 0 8px">「손익차등형」은 1종(선순위)이 먼저 손실을 막아 주고 2종(후순위)이 나머지 손익을 몇 배로 떠안는 구조라 등락이 큽니다.</p><div class="pd-list">' + tr.slice(0, 10).map(function(x, i){ return pvrow(x, i, pp); }).join("") + '</div></details>' : ""; })();
-    }
-    if (k === "mir"){
-      var pv = by(F.filter(function(x){ return x.pv; }));
-      return card("🟠 미래에셋에서 살 수 있는 사모펀드 <span class='mut'>사모투자재간접형 · " + PN[per] + "</span>",
-        seg("pdper", PERS, per) +
-        '<p class="note" style="margin:0 0 10px">미래에셋증권이 일반 고객에게 파는 <b>사모투자재간접형</b> 공모펀드 — 안에 사모(헤지)펀드를 여러 개 담아요. 500만원부터, 일반 계좌로. 직접 사모펀드 가입은 영업점·PB 상담(최소 3억·전문투자자 요건).</p>' +
-        (pv.length ? '<div class="pd-list">' + pv.map(function(x, i){ return frow(x, i, per); }).join("") + '</div>' : '<div class="empty">이 기간 수익률이 있는 펀드가 없어요.</div>'));
-    }
+    if (k === "pv" || k === "mir") return pvBody();
     if (k === "all"){
       var big = by(F.filter(function(x){ return (x.aum || 0) >= 10; })), top = big.slice(0, 20), bot = big.slice(-10).reverse();
       return card("🏆 공모펀드 수익률 TOP 20 <span class='mut'>" + PN[per] + " · 순자산 10억 이상 " + big.length + "개 중</span>", seg("pdper", PERS, per) + '<div class="pd-list">' + top.map(function(x, i){ return frow(x, i, per); }).join("") + '</div>') +
@@ -281,7 +320,8 @@
   function ymd(d){ return d.toISOString().slice(0, 10); }
   function sched(mat, freq){   // 만기에서 거꾸로 freq 개월씩 → 오늘 이후 지급일
     var m = new Date(mat + "T00:00:00Z"), now = new Date(), out = [];
-    for (var k = 0; k < 400; k++){ var d = addM(m, -freq * k); if (d <= now) break; out.unshift(d); }
+    var eom = new Date(Date.UTC(m.getUTCFullYear(), m.getUTCMonth() + 1, 0)).getUTCDate() === m.getUTCDate();   // 말일 만기(9/30 등)면 이자일도 말일
+    for (var k = 0; k < 400; k++){ var d = addM(m, -freq * k); if (eom) d = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)); if (d <= now) break; out.unshift(d); }
     return out;
   }
   function cfTable(rows, cur, fx, note){
@@ -321,7 +361,12 @@
       }
       h += cfTable(rows, "", null, e(ct) + ' · 이자 ' + fq + '개월마다 · 표면금리 ' + b.c.toFixed(3) + '% · ' + e(o.redeem || "만기일시상환") + '. 첫 이자는 실제로는 산 날부터 보유한 기간만큼만 과세(보유기간 과세)라 세금이 조금 다를 수 있어요. 매수 단위·수수료는 매매 화면 기준.');
     }
+    else if (k === "ust" && (o.frn || o.ytm == null)){
+      h += '<p><b>변동금리채(FRN)</b> — 이자가 매주 13주 T-Bill 금리 + 고정 가산(스프레드)으로 바뀌고 3개월마다 들어와요. 금리가 올라도 값이 거의 안 흔들려 사실상 「달러 예금 + 미국 정부 신용」이에요. 만기 ' + e(o.mat) + '. 수익은 단기 금리와 환율에 달려 있어 고정 계산서는 만들지 않았어요.</p>';
+    }
     else if (k === "ust" || k === "aud"){
+      if (o.tips) h += '<p><b>물가연동국채(TIPS)</b> — 원금이 미국 소비자물가(CPI)만큼 불어나고, 그 불어난 원금에 표면금리 이자를 줘요. 아래 수익률은 <b>물가를 뺀 실질 수익률</b>이라 실제 달러 수익은 「실질 수익률 + 물가상승률」이에요(계산서는 물가 0% 가정 — 실제로는 그만큼 더).</p>';
+      if (o.est) h += '<p class="note">이 종목 수익률은 재무부 수익률 곡선으로 추정한 값이에요(실제 호가와 0.1~0.5%p 다를 수 있음). 아래 계산서도 그 추정치 기준.</p>';
       var cur = k === "ust" ? "달러" : "호주달러", fx = o.fx || 1, n = Math.max(0.1, (new Date(o.mat) - Date.now()) / 365.25 / 864e5), yy = o.ytm / 100, c = o.cpn || 0, P = pvf(yy, n, c);
       var A_f = A / fx, face = A_f / P * 100, cpnAll = face * c / 100 * n, tax = cpnAll * 0.154, tot = face + cpnAll - tax;
       var D = dur(yy, n, c);
@@ -397,7 +442,23 @@
       }
       h += '<p class="note">평가일은 청약 마감 뒤 ' + cycm + '개월 간격으로 잡은 예상일이라 실제 날짜는 투자설명서 기준. 이자 15.4% 과세(금융소득종합과세 대상). 중도 해지는 평가금액의 95% 안팎. 배정은 청약 경쟁에 따라 줄 수 있어요.</p>';
     }
-    return h;
+    else if (k === "pvl"){
+      var S = (PVL && PVL.S || {})[o.s] || [o.s, "", "", ""], usd = o.usd, bm = (PVL && PVL.bm) || [], kospi = bm[0] || {}, kosdaq = bm[1] || {};
+      h += '<div class="sub2">📘 ' + e(S[0]) + ' <span class="mut">' + e(o.s) + '</span></div><p>' + e(S[1]) + '</p><p>🧺 <b>' + e(S[2].split(" — ")[0]) + '</b> — ' + e(S[2].split(" — ").slice(1).join(" — ")) + '</p><p>👀 ' + e(S[3]) + '</p>';
+      if (o.m) h += '<div class="sub2">🏢 운용사</div><p>' + e(o.m) + '</p>';
+      if (o.h && o.h.length) h += '<div style="margin:2px 0 8px">' + o.h.map(function(t){ return '<span class="chip2">' + e(t) + '</span>'; }).join("") + '</div>';
+      h += '<p class="note">사모펀드는 보유 종목을 공개하지 않아요 — 위 「담는 것」은 이 전략이 보통 담는 자산이에요. 실제 종목은 가입자에게 분기마다 오는 자산운용보고서로 확인해요. 가입은 미래에셋 PB·영업점(일반투자자 최소 3억, 전문투자자 요건)이에요.</p>';
+      h += '<div class="sub2">📊 기간 수익률 <span class="mut">' + (usd ? '달러 기준 · ' : '') + '옆은 KOSPI / KOSDAQ</span></div>' + tbl([["d1", "1일"], ["w1", "1주"], ["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"]].map(function(p){
+        var v = o[p[0]]; return [p[1] + ' <span class="mut">' + (kospi[p[0]] != null ? V.sgn(kospi[p[0]]) + '%' : '–') + ' / ' + (kosdaq[p[0]] != null ? V.sgn(kosdaq[p[0]]) + '%' : '–') + '</span>', v == null ? '–' : V.sgn(v) + '%', v == null ? '' : v >= 0 ? 'up' : 'dn']; }));
+      var ys = ["2020", "2021", "2022", "2023", "2024", "2025", "2026"].filter(function(y){ return (o.y || {})[y] != null; });
+      if (ys.length) h += '<div class="sub2">📅 연도별 수익률 <span class="mut">2026은 10/15까지 · 첫해는 설정일부터</span></div>' + V.dbars(ys.map(function(y){ return {label: y + '년', v: o.y[y]}; })) + (kospi.y ? '<p class="pd-bm">같은 해 코스피 ' + ys.filter(function(y){ return kospi.y[y] != null; }).map(function(y){ return y + ' <b class="' + cls(kospi.y[y]) + '">' + V.sgn(kospi.y[y], 1) + '%</b>'; }).join(' · ') + '</p>' : '');
+      var pers = [["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"]].filter(function(p){ return o[p[0]] != null; });
+      var chain = null, y0 = ys[0]; if (ys.length >= 2){ chain = 1; ys.forEach(function(y){ chain *= 1 + o.y[y] / 100; }); }
+      h += '<div class="sub2">🧾 모의 계산 <span class="mut">「그때 넣었다면 지금」 · 과거 성적 그대로</span></div>' + amtBar() + tbl([["넣은 돈", W(A) + (usd ? ' <span class="mut">(달러로 바꿔 넣는 펀드 · 환율 변화 제외)</span>' : '')]].concat(pers.map(function(p){
+        var v = A * (1 + o[p[0]] / 100); return [p[1] + " 전에 넣었다면", W(v) + " <span class='mut'>" + V.sgn(o[p[0]]) + "%</span>", v >= A ? "up" : "dn"]; })).concat(chain ? [[y0 + "년부터 연도별 성적 이어 붙이면", W(A * chain) + " <span class='mut'>" + V.sgn((chain - 1) * 100, 0) + "%</span>", chain >= 1 ? "up" : "dn"]] : []));
+      h += '<p class="note">수익률은 보수를 뗀 기준가 기준(세전)이에요. 이익에는 배당소득세 15.4%(국내 상장주식 매매차익은 비과세)가 붙고, 사모펀드는 환매 주기(월·분기)나 폐쇄형 만기가 있어 바로 못 뺄 수 있어요. 과거 성적이 앞으로도 같다는 뜻은 아니에요.</p>';
+    }
+    return h + '<button class="pd-close" data-close>닫기 ▲</button>';
   }
 
   /* 🧺 펀드 구성 — archive/x/fund_hold.json (미래에셋 펀드 상세 「보유 상위 종목」) 을 누를 때만 받음 */
@@ -420,26 +481,56 @@
     }).catch(function(){ box.innerHTML = '<div class="sub2">🧺 펀드 구성</div><p class="note">구성 자료를 못 불러왔어요.</p>'; });
   }
 
+
+  /* 💼 포트 「🙋 내 포트」에 상품을 넣을 수 있게 (10/16 사용자 「포트에 주식 부분에 상품 부분을 더한 포트 · 비교 방식, 넣는 방식 등은 같게」)
+     port.js 가 부름 — 채권·ELS 는 연 수익률(y)로 날마다 쌓고, 펀드는 기간 수익률(per)을 이어 붙여 길을 만든다 */
+  window.prodCatalog = function(){
+    var sv = ""; try { sv = localStorage.getItem("pvk") || ""; } catch(z) {}
+    var pv = PVL ? Promise.resolve(PVL) : sv ? pvUnlock(sv).catch(function(){ return null; }) : Promise.resolve(null);
+    return Promise.all([P(), pv]).then(function(a){
+      var D = a[0], L = a[1], out = [], ds = function(d){ return d && d.length === 8 ? d.slice(0, 4) + "-" + d.slice(4, 6) + "-" + d.slice(6, 8) : d; };
+      (D.krw || []).forEach(function(r){ if (r.after != null) out.push({id: "krw:" + r.name, g: "krw", name: r.name, sub: (r.kind || "") + " · 세후 " + pc(r.after) + " · 만기 " + r.mat, y: r.after, cur: "원"}); });
+      var U = D.ust || {}, mq = {}; (U.items || []).forEach(function(x){ mq[(+x.cpn).toFixed(3) + x.mat] = x.ytm; });
+      ((D.ust_all || {}).items || []).forEach(function(x){ if (x.k === "FRN" || x.k === "TIPS" || x.y == null) return; var q = mq[(+(x.cpn || 0)).toFixed(3) + x.mat];
+        out.push({id: "ust:" + x.cu, g: "ust", name: x.nm + (x.mir ? " ★" : ""), sub: "만기 " + x.mat + " · " + (q != null ? "미래에셋 시세 " + pc(q) : "추정 " + pc(x.y)) + " · 달러", y: q != null ? q : x.y, cur: "달러", mir: !!x.mir}); });
+      (D.anb || []).forEach(function(x){ if (x.code !== "NTN-F" || x.r == null) return; out.push({id: "brl:" + x.mat, g: "brl", name: "브라질 NTN-F " + x.mat.slice(0, 7), sub: "연 " + x.r.toFixed(2) + "% · 헤알 · 비과세", y: x.r, cur: "헤알"}); });
+      (D.funds || []).forEach(function(x){ if (!x.t || (x.aum || 0) < 10 || x.y1 == null) return; out.push({id: "fund:" + x.c, g: "fund", name: fname(x.n), sub: (x.co || "") + " · 1년 " + V.sgn(x.y1) + "% · 순자산 " + fmt(x.aum) + "억", per: {w1: x.w1, m1: x.m1, m3: x.m3, m6: x.m6, y1: x.y1}, asof: ds(x.d), cur: "원", rank: x.y1}); });
+      if (L) L.rows.forEach(function(x, i){ out.push({id: "pvl:" + i + ":" + x.n.slice(0, 12), g: "pvl", name: pvname(x.n), sub: (SSHORT[x.s] || x.s) + " · 1년 " + (x.y1 != null ? V.sgn(x.y1) + "%" : "–") + (x.usd ? " · 달러" : ""), per: {d1: x.d1, w1: x.w1, m1: x.m1, m3: x.m3, m6: x.m6, y1: x.y1}, asof: L.asof, cur: x.usd ? "달러" : "원", rank: x.y1}); });
+      (D.els || []).forEach(function(x){ if (x.cpn == null) return; out.push({id: "els:" + x.n, g: "els", name: x.n, sub: (x.ua || "") + " · 연 " + pc(x.cpn) + ((x.pp || 0) >= 100 ? " · 원금지급" : " · 원금 비보장"), y: x.cpn, cur: "원"}); });
+      return {items: out, pvl: !!L};
+    });
+  };
+
   /* ───────── 공통 ───────── */
   var VIEW = {bond: bondView, fund: fundView, els: elsView}, BODY = {bond: bondBody, fund: fundBody, els: elsBody};
   window.prodView = function(key){ return '<div id="pdroot" data-k="' + key + '"><div class="loading">미래에셋 상품 자료 불러오는 중…</div></div>'; };
   window.prodInit = function(key){
     P().then(function(D){
       var root = document.getElementById("pdroot"); if (!root || root.dataset.k !== key) return;
-      root.innerHTML = (D.errors && D.errors.length ? '<p class="note" style="margin:0 0 8px">⚠️ 일부 자료를 못 받았어요: ' + e(D.errors.join(" · ").slice(0, 200)) + ' — 지난 값을 보여 줘요.</p>' : '') + VIEW[key](D);
-      var redraw = function(){ var b = document.getElementById("pdbody"); if (!b) return; var y = b.getBoundingClientRect().top; b.innerHTML = BODY[key](D, SEL[key]); holdAt("#pdbody", y); bindInner(); };
+      var full = function(){ var r = document.getElementById("pdroot"); if (!r || r.dataset.k !== key) return;
+        r.innerHTML = (D.errors && D.errors.length ? '<p class="note" style="margin:0 0 8px">⚠️ 일부 자료를 못 받았어요: ' + e(D.errors.join(" · ").slice(0, 200)) + ' — 지난 값을 보여 줘요.</p>' : '') + VIEW[key](D);
+        bindSeg("pdseg", function(k){ SEL[key] = k; keep(); redraw(); }); bindInner(); };
+      var redraw = function(){ var b = document.getElementById("pdbody"); if (!b) return; var y = b.getBoundingClientRect().top; b.innerHTML = BODY[key](D, SEL[key] || {bond: "gov", fund: "pv", els: "open"}[key]); holdAt("#pdbody", y); bindInner(); };
       var bindInner = function(){
         bindSeg("pdper", function(k){ PER = k; keep(); redraw(); });
-        bindSeg("pdpvper", function(k){ SEL.pvper = k; keep(); redraw(); });
-        bindSeg("pdpvt", function(k){ SEL.pvt = k; keep(); redraw(); });
-        var q = document.getElementById("pdq"); if (q){ var t; q.oninput = function(){ clearTimeout(t); t = setTimeout(function(){ SEL.pvq = q.value; keep(); var y = q.getBoundingClientRect().top; redraw(); var n = document.getElementById("pdq"); if (n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); holdAt("#pdq", y); } }, 350); }; }
+        bindSeg("pdustk", function(k){ SEL.ustk = k; keep(); redraw(); });
+        bindSeg("pdpvp", function(k){ SEL.pvp = k; keep(); redraw(); });
+        bindSeg("pdpvs", function(k){ SEL.pvs = k; keep(); redraw(); });
+        var go = document.getElementById("pvgo"), pw = document.getElementById("pvpw");
+        var tryOpen = function(v, quiet){ if (PVBUSY || !v) return; PVBUSY = true; if (go) go.textContent = "여는 중…";
+          pvUnlock(v).then(function(){ PVERR = ""; try { localStorage.setItem("pvk", v); } catch(z) {} PVBUSY = false; full(); })
+            .catch(function(err){ PVBUSY = false; PVERR = quiet ? "" : (err && err.message && /브라우저/.test(err.message) ? err.message : "비밀번호가 맞지 않아요."); try { if (quiet && err && err.name === "OperationError") localStorage.removeItem("pvk"); } catch(z) {} redraw(); }); };
+        if (go && pw){ go.onclick = function(){ tryOpen(pw.value.trim()); }; pw.onkeydown = function(ev){ if (ev.key === "Enter") tryOpen(pw.value.trim()); }; }
+        if (!PVL && !PVBUSY && document.querySelector("#pdbody .loading")){ var sv = ""; try { sv = localStorage.getItem("pvk") || ""; } catch(z) {} if (sv) tryOpen(sv, true); }
+        var lk = document.getElementById("pvlock"); if (lk) lk.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); PVL = null; try { localStorage.removeItem("pvk"); } catch(z) {} full(); };
       };
-      bindSeg("pdseg", function(k){ SEL[key] = k; keep(); redraw(); });
-      bindInner();
+      full();
       root.addEventListener("click", function(ev){
         var amt = ev.target.closest && ev.target.closest("[data-amt]");
         if (amt){ ev.stopPropagation(); AMT = +amt.dataset.amt; try { localStorage.setItem("prodamt", AMT); } catch(z) {}
           var row = amt.closest(".pd-tap"), pnl = row && row.querySelector(":scope > .pd-x"); if (pnl){ var y = row.getBoundingClientRect().top; pnl.innerHTML = xpanel(OBJ[row.dataset.x]); fillHold(pnl); holdAt('[data-x="' + row.dataset.x + '"]', y); } return; }
+        var cl = ev.target.closest && ev.target.closest("[data-close]");
+        if (cl){ ev.stopPropagation(); var r0 = cl.closest(".pd-tap"), p0 = r0 && r0.querySelector(":scope > .pd-x"); if (p0){ p0.remove(); r0.classList.remove("on"); var t0 = r0.getBoundingClientRect().top; if (t0 < 60) window.scrollTo({top: window.scrollY + t0 - 70, behavior: "smooth"}); } return; }
         if (ev.target.closest("a[href]")) return;
         var row = ev.target.closest && ev.target.closest(".pd-tap"); if (!row || !OBJ[row.dataset.x]) return;
         var pnl = row.querySelector(":scope > .pd-x");
@@ -468,6 +559,6 @@
     ".pd-cf td{padding:6px 5px;border-top:1px solid var(--line);text-align:right;vertical-align:top}.pd-cf td:nth-child(1){text-align:left;color:var(--sub);font-size:11px;word-break:break-all}.pd-cf td:nth-child(2){text-align:left;word-break:keep-all}.pd-cf td:nth-child(3){white-space:nowrap}.pd-cf .mut{font-size:10.5px}.pd-cf td.dn{color:var(--down)}.pd-cf tr.sum td{background:var(--panel);font-weight:700}" +
     ".pd-stack{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px;margin:4px 0 6px}.pd-leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--sub);margin-bottom:8px}.pd-leg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}" +
     ".pd-hl div{display:grid;grid-template-columns:minmax(0,1fr) 56px 44px;gap:8px;align-items:center;font-size:12px;padding:4px 0;border-bottom:1px solid var(--line)}.pd-hl .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pd-hl em{font-style:normal;color:var(--dim);font-size:10.5px}.pd-hl b{text-align:right}" +
-    ".pd-q{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px 12px;font:inherit;font-size:14px;margin:0 0 10px}";
+    ".pd-grp{border-top:1px solid var(--line);padding:6px 0}.pd-grp>summary{cursor:pointer;padding:6px 2px;font-size:14px}.pd-grp>.pd-list{margin:4px 0 6px}.seg2.wrap{flex-wrap:wrap;overflow:visible}.pd-pw{display:flex;gap:8px}.pd-pw button{flex:none;border:0;border-radius:12px;padding:0 16px;background:var(--c);color:#fff;font:inherit;font-weight:700}.pd-close{display:block;width:100%;margin:10px 0 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--sub);font:inherit;font-size:13px}.pd-q{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px 12px;font:inherit;font-size:14px;margin:0 0 10px}";
   document.head.appendChild(css);
 })();

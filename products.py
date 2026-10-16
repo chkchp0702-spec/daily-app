@@ -422,6 +422,104 @@ def fund_holdings(funds, old):
     return {"asof": datetime.datetime.now(KST).strftime("%Y-%m-%d"), "n": len(items), "items": items}
 
 
+# ───────── ②b 미국채 전 종목 (10/16 사용자 「미국채 종류 훨씬 더 많을껴 다 찾고」) ─────────
+# 미국 재무부 공개 자료만: ① Fiscal Data MSPD 표3(시장성 국채 전 종목 · 월말) ② 재무부 일일 수익률 곡선(명목·실질 par yield)
+# 개별 종목 시세(FedInvest)는 클라우드에서 막혀 있어서, 수익률은 그날 곡선을 만기에 맞춰 끼워 넣은 「추정」 — 화면에 그렇게 표시.
+FD = "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/debt/mspd/mspd_table_3_market"
+TEN = {"1 Mo": 1/12, "1.5 Month": 1.5/12, "2 Mo": 2/12, "3 Mo": .25, "4 Mo": 4/12, "6 Mo": .5, "1 Yr": 1, "2 Yr": 2, "3 Yr": 3, "5 Yr": 5, "7 Yr": 7, "10 Yr": 10, "20 Yr": 20, "30 Yr": 30,
+       "5 YR": 5, "7 YR": 7, "10 YR": 10, "20 YR": 20, "30 YR": 30}
+
+
+def tcurve(kind):
+    y = datetime.date.today().year
+    u = f"https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/{y}/all?type={kind}&field_tdr_date_value={y}&page&_format=csv"
+    t = get_url(u).text.strip().splitlines()
+    hd = [h.strip('"') for h in t[0].split(",")]
+    for ln in t[1:]:
+        c = ln.split(",")
+        pts = sorted((TEN[h], float(v)) for h, v in zip(hd[1:], c[1:]) if h in TEN and v.strip() not in ("", "N/A"))
+        if len(pts) >= 4:
+            m, d, yy = c[0].split("/")
+            return f"{yy}-{m}-{d}", pts
+    raise RuntimeError(kind + " 곡선 없음")
+
+
+def interp(pts, t):
+    if t <= pts[0][0]: return pts[0][1]
+    if t >= pts[-1][0]: return pts[-1][1]
+    for (a, ya), (b, yb) in zip(pts, pts[1:]):
+        if a <= t <= b: return ya + (yb - ya) * (t - a) / (b - a)
+
+
+def frac(c):
+    w = int(c); f = round((c - w) * 8)
+    if abs(c - w - f / 8) > 1e-6: return f"{c:g}"
+    return f"{w}" + ({0: "", 1: " 1/8", 2: " 1/4", 3: " 3/8", 4: " 1/2", 5: " 5/8", 6: " 3/4", 7: " 7/8"}[f])
+
+
+def clean_px(c, y, mat, today):
+    """반년 이표 c%, 수익률 y%(반년 복리) → 깔끔한 가격(액면 100). 만기에서 6개월씩 거꾸로 이표일."""
+    md = datetime.date.fromisoformat(mat); ds = []; k = 0
+    while True:
+        mm = md.month - 6 * k; yy = md.year + (mm - 1) // 12; mm = (mm - 1) % 12 + 1
+        try: d = md.replace(year=yy, month=mm)
+        except ValueError: d = md.replace(year=yy, month=mm, day=28)
+        if d <= today: prev = d; break
+        ds.append(d); k += 1
+    ds.reverse(); per = (ds[0] - prev).days or 182; f = (ds[0] - today).days / per
+    dirty = sum((c / 2 + (100 if i == len(ds) - 1 else 0)) / (1 + y / 200) ** (i + f) for i in range(len(ds)))
+    return dirty - c / 2 * (1 - f)
+
+
+def ust_all(mirae):
+    today = datetime.date.today()
+    rd = get_url(FD + "?sort=-record_date&page[size]=1").json()["data"][0]["record_date"]
+    rows, p = [], 1
+    while True:
+        j = get_url(FD + f"?filter=record_date:eq:{rd}&page[size]=1000&page[number]={p}").json()
+        rows += j["data"]
+        if p >= j["meta"]["total-pages"]: break
+        p += 1
+    cd, nom = tcurve("daily_treasury_yield_curve")
+    try: rd2, real = tcurve("daily_treasury_real_yield_curve")
+    except Exception: real = None
+    sold = {(round(x.get("cpn") or 0, 3), x.get("mat")) for x in ((mirae or {}).get("items") or [])}
+    K = {"Notes": "N", "Bonds": "B", "Inflation-Protected Securities": "TIPS", "Bills Maturity Value": "Bill", "Floating Rate Notes": "FRN"}
+    by = {}
+    for r in rows:
+        k = K.get(r["security_class1_desc"]); cu = r["security_class2_desc"]
+        if not k or not cu or cu == "null" or r["maturity_date"] in (None, "null") or r["maturity_date"] <= today.isoformat(): continue
+        o = by.get(cu)
+        amt = None if r["outstanding_amt"] in (None, "null") else float(r["outstanding_amt"])
+        if o is None:
+            by[cu] = {"cu": cu, "k": k, "cpn": None if r["interest_rate_pct"] in (None, "null") else float(r["interest_rate_pct"]),
+                      "mat": r["maturity_date"], "iss": r["issue_date"], "out": amt}
+        else:
+            if amt and not o["out"]: o["out"] = amt
+            if r["issue_date"] < o["iss"]: o["iss"] = r["issue_date"]
+    out = []
+    for o in by.values():
+        t = (datetime.date.fromisoformat(o["mat"]) - today).days / 365.25
+        c = o["cpn"] or 0
+        if o["k"] in ("N", "B"):
+            y = interp(nom, t); px = clean_px(c, y, o["mat"], today)
+        elif o["k"] == "Bill":
+            y = interp(nom, t); px = 100 / (1 + y / 100 * t)
+        elif o["k"] == "TIPS" and real:
+            y = interp(real, max(t, real[0][0])); px = None     # 실질 수익률(물가 뺀 것) — 5년 미만은 5년 값으로
+        else:
+            y = px = None
+        o["out"] = round(o["out"] / 1000, 1) if o["out"] else None     # 백만 달러 → 십억 달러
+        o["y"] = round(y, 3) if y is not None else None
+        o["px"] = round(px, 2) if px else None
+        o["nm"] = ("T " + frac(c) + " " + o["mat"][5:7] + "/" + o["mat"][8:10] + "/" + o["mat"][2:4]) if o["k"] in ("N", "B", "TIPS") else ("T-Bill " + o["mat"][5:7] + "/" + o["mat"][8:10] + "/" + o["mat"][2:4]) if o["k"] == "Bill" else ("FRN " + o["mat"][5:7] + "/" + o["mat"][8:10] + "/" + o["mat"][2:4])
+        if o["k"] == "TIPS": o["nm"] = "TII" + o["nm"][1:]
+        if (round(c, 3), o["mat"]) in sold and o["k"] in ("N", "B"): o["mir"] = 1
+        out.append(o)
+    out.sort(key=lambda x: x["mat"])
+    return {"mspd": rd, "curve": cd, "n": len(out), "items": out}
+
+
 def main():
     old = {}
     try:
@@ -451,8 +549,10 @@ def main():
     run("els_done", els, "02")
     run("td", tesouro)
     run("td_hist", tesouro_hist)
-    run("pv", private_funds)
+    # 10/16 사용자 「사모펀드 다 빼고 이 리스트에 있는것만」 — 금투협 사모 전체 목록은 더 안 받음 (사모 라인업은 앱에서 암호문으로)
+    P.pop("pv", None)
     run("anb", anbima)
+    run("ust_all", ust_all, P.get("ust"))
     if isinstance(P.get("krw"), list):
         try:
             P["krw"] = bond_terms(P["krw"])
