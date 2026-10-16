@@ -103,8 +103,20 @@
 
   // 📅 10/15: 지수는 오늘 장중(5,693 −5.3%)인데 머리말은 「10/14 마감」 — 지수 날짜·장중 여부를 같이 적기
   function md(d){ return d ? (+d.slice(5, 7)) + "/" + (+d.slice(8, 10)) : ""; }
+  /* 10/17 사용자 화면: 미국 장이 끝났는데(05:00 KST) 마지막 장중 값(04:59)이 「장중」으로 남음 → 장 끝난 시각이 지났으면 「마감」 */
+  function liveDone(m){
+    if (!m.live || !m.live.date) return false;
+    var d = m.live.date, mo = +d.slice(5, 7), k = m.code || m.mk || "";
+    var nm = String(m.name || "");
+    var hhmm = /미국/.test(nm) ? null : /홍콩/.test(nm) ? "17:10" : /중국/.test(nm) ? "16:00" : "15:30";
+    var close;
+    if (hhmm == null){ var x = new Date(Date.parse(d + "T00:00:00+09:00") + 864e5); close = Date.parse(x.toISOString().slice(0, 10) + "T" + (mo > 3 && mo < 11 ? "05:00" : "06:00") + ":00+09:00"); }
+    else close = Date.parse(d + "T" + hhmm + ":00+09:00");
+    return Date.now() > close + 3 * 60e3;
+  }
+  window.cpLiveDone = liveDone;
   function hdDate(m, ix){
-    if (m.live) return e(md(m.live.date)) + " " + e(m.live.t || "") + " 장중";
+    if (m.live) return e(md(m.live.date)) + " " + (liveDone(m) ? "마감" : e(m.live.t || "") + " 장중");
     if (!ix || !ix.date || ix.date <= m.date) return e(m.date) + " 마감";
     return "지수 " + e(ix.date.slice(5).replace("-", "/")) + (ix.live ? " 장중" : " 마감") + " · 종목 " + e(m.date.slice(5).replace("-", "/")) + " 마감";
   }
@@ -126,7 +138,7 @@
       '<p class="note">오늘 하루 종목들의 등락·신고가·지수 위치로 잰 「체감 온도」예요. CNN 방식의 <b>공포·탐욕</b>(심리 지표, 미국 심리 + 자기 시장)은 🎲 시장확률 탭에 5개 시장이 같이 있어요.</p>');
     // 2) 등락 종목 수
     var t = Math.max(1, m.up + m.flat + m.down);
-    h += card("오늘 오른 종목 · 내린 종목 <span class='mut'>" + (m.live ? e(m.live.t || "") + " 장중 · " + (m.live.note && /큰/.test(m.live.note) ? "큰 회사 " : "") : "") + num(m.total) + "종목</span>",
+    h += card("오늘 오른 종목 · 내린 종목 <span class='mut'>" + (m.live ? (liveDone(m) ? e(md(m.live.date)) + " 마감 · " : e(m.live.t || "") + " 장중 · ") + (m.live.note && /큰/.test(m.live.note) ? "큰 회사 " : "") : "") + num(m.total) + "종목</span>",
       '<div class="cp-3"><div><small>상승</small><b class="up">' + num(m.up) + '</b><em>' + (m.up / t * 100).toFixed(0) + '%</em></div>' +
       '<div><small>보합</small><b>' + num(m.flat) + '</b><em>' + (m.flat / t * 100).toFixed(0) + '%</em></div>' +
       '<div><small>하락</small><b class="dn">' + num(m.down) + '</b><em>' + (m.down / t * 100).toFixed(0) + '%</em></div></div>' +

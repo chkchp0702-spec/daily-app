@@ -115,7 +115,7 @@
       '<p class="note">교과서의 경기 순환처럼 섹터는 보통 🌱 새로 뜸(9~12시) → 🔥 강함(12~3시) → 🍂 힘 빠짐(3~6시) → 🧊 약함(6~9시) 순으로 돌아요. 화살표 = 지난 5일 이동. 9~12시 쪽에 있는 섹터가 다음 주인공 후보예요. 점을 누르면 종목.</p>');
   }
   window.CPX2 = function(m, k, C){
-    return '<section class="card sentc"><div class="sentc-k">🗣️ ' + (m.live ? "지금" : (m.index || [])[0] && m.index[0].date > m.date ? e(m.date.slice(5).replace("-", "/")) + " 마감" : "오늘") + ' ' + e(m.name) + ' 한 문장' + (m.live ? ' <span class="mut">' + e(m.live.t || "") + ' 장중</span>' : '') + '</div><p>' + sentence(m) + '</p></section>' + forecast(m) + clock(m);
+    return '<section class="card sentc"><div class="sentc-k">🗣️ ' + (m.live ? (window.cpLiveDone && cpLiveDone(m) ? e(md(m.live.date)) + " 마감" : "지금") : (m.index || [])[0] && m.index[0].date > m.date ? e(m.date.slice(5).replace("-", "/")) + " 마감" : "오늘") + ' ' + e(m.name) + ' 한 문장' + (m.live ? ' <span class="mut">' + (window.cpLiveDone && cpLiveDone(m) ? '장 마감 · 마지막 ' + e(m.live.t || "") + ' 값' : e(m.live.t || "") + ' 장중') + '</span>' : '') + '</div><p>' + sentence(m) + '</p></section>' + forecast(m) + clock(m);
   };
 
   /* ======================= 🤫 조용한 매집 ======================= */
