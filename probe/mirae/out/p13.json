@@ -1,0 +1,19 @@
+{
+ "opts": [
+  "compCd_input_0",
+  [
+   "미래에셋증권=미래에셋증권",
+   "미래에셋생명=미래에셋생명",
+   "미래에셋자산운용=미래에셋자산운용"
+  ]
+ ],
+ "set": "ok 미래에셋증권",
+ "text": "검색결과:0건\n\n\n회사\n\t\n펀드명\n\t\n\t\n펀드\n유형\n\t\n설정일\n\t\n설정원본\n(백만원)\n\t\n기준가격\n(원)\n\t\n월초대비(또는 전월대비)\n\t\n표준코드\n\n\n등락폭\n\t\n등락율\n\t\n데이터가 없음\n오늘본메뉴\n위로\n아래로\n용어사전\n개인정보처리방침|이메일무단수집거부\n유관기관바로가기\n\t\n이동\nFamily Site\n\t\n이동\n서울시 영등포구 의사당대로 143 금투센터 | TEL 02-2003-9000 | Copyright＠2008 KOFIA 업무서비스. All right reserved.\n금융투자협회에서 제공하는 정보는 참고용이며 이용자의 판단에 따른 투자수익 및 정보의 오류등에 따른 손익에 대해서는 책임지지 않습니다.",
+ "xhr": [
+  {
+   "post": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<message>\n  <proframeHeader>\n    <pfmAppName>FS-DIS2</pfmAppName>\n    <pfmSvcName>DISFundSaleStdPrcRateSO</pfmSvcName>\n    <pfmFnName>select</pfmFnName>\n  </proframeHeader>\n  <systemHeader></systemHeader>\n    <DISCondFuncDTO>\n    <tmpV30>20260831</tmpV30>\n    <tmpV22>20260831</tmpV22>\n    <tmpV3></tmpV3>\n    <tmpV4></tmpV4>\n    <tmpV5></tmpV5>\n    <tmpV7>2</tmpV7>\n    <tmpV11>A02027</tmpV11>\n    <tmpV12></tmpV12>\n    <tmpV50></tmpV50>\n    <tmpV51></tmpV51>\n</DISCondFuncDTO>\n</message>\n",
+   "status": 200,
+   "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root><message><proframeHeader>\n<pfmAppName>FS-DIS2</pfmAppName>\n<pfmSvcName>DISFundSaleStdPrcRateSO</pfmSvcName>\n<pfmFnName>select</pfmFnName>\n<pfmGlobalNo>428187e90afe009769e55aeef6d6e837</pfmGlobalNo>\n<pfmTrDate>20261016</pfmTrDate>\n<pfmTrTime>20261016111907625</pfmTrTime>\n<pfmClntIp>130.131.231.233</pfmClntIp>\n<pfmResponseDtal></pfmResponseDtal>\n</proframeHeader>\n<systemHeader>\n</systemHeader>\n<DISCondFuncListDTO>\n<dbio_total_count_>0</dbio_total_count_>\n<dbio_fetch_seq_>0</dbio_fetch_seq_>\n<dbio_fetch_size_>0</dbio_fetch_size_>\n<dbio_affected_count_>0</dbio_affected_count_>\n</DISCondFuncListDTO></message></root>"
+  }
+ ]
+}
