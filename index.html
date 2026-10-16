@@ -909,9 +909,14 @@ function pdfBarFrame(box, fr, name, sym){
   pdfIdx().then(function(I){
     var it = I && I[sym];
     if (it){
-      var a = document.createElement("a"); a.className = "pdfb ready"; a.href = pdfUrl(sym, it); a.target = "_blank"; a.rel = "noopener";
+      /* 10/16 사용자 화면: 아이폰 홈 화면 앱에서 누르면 앱 안 작은 브라우저(SFSafariViewController)가 열리고 하얀 화면만 나옴
+         — GitHub 파일 서버가 PDF 를 「내려받기 전용(octet-stream)」으로 보내서 그 창은 보여 주지도 받지도 못함.
+         → 아이폰 홈 화면 앱이면 진짜 Safari 로 열기(x-safari-https://, iOS 17+) — Safari 는 「다운로드」를 띄워 '파일'에 저장됨 */
+      var url_ = pdfUrl(sym, it), iosApp = /iP(hone|ad|od)/.test(navigator.userAgent) && (navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches));
+      var a = document.createElement("a"); a.className = "pdfb ready"; a.href = iosApp ? "x-safari-" + url_ : url_; a.target = "_blank"; a.rel = "noopener";
       a.innerHTML = "📄 PDF 바로 받기<small>앱 화면 그대로 · " + String(it[0]).slice(5).replace("-", "/") + " 기준" + (it[1] ? " · " + (it[1] / 1024).toFixed(1) + "MB" : "") + " · 누르면 바로 내려받아요</small>";
       bar.insertBefore(a, bar.firstChild);
+      if (iosApp){ var nt = document.createElement("p"); nt.className = "note pdfn"; nt.innerHTML = "아이폰: 누르면 Safari 가 열리고 「다운로드」를 누르면 '파일' 앱에 저장돼요. 하얀 화면만 나오면 <a href=\"" + url_ + "\" target=\"_blank\" rel=\"noopener\">여기</a>를 길게 눌러 「Safari로 열기」, 또는 아래 「지금 화면으로 새로 만들기」."; bar.appendChild(nt); }
       var b = bar.querySelector("button.pdfb"); if (b){ b.classList.add("pdfb2"); b.innerHTML = "지금 화면으로 새로 만들기<small>오늘 가격까지 반영 · 10초쯤 걸려요</small>"; }
     } else {
       pdfRequest(sym);
@@ -1451,7 +1456,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261016q";
+var APPV = "20261016r";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
