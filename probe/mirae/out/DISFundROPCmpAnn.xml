@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+    	<title>금융투자협회 전자공시 - 펀드공시검색</title>
+        <w2:buildDate/>
+        <xf:model>
+	   		<xf:instance>
+	   			<data xmlns=""></data>
+	   		</xf:instance>
+   		</xf:model>
+        <script type="javascript"><![CDATA[
+        	var vDivisionId = WebSquare.net.getParameter( "divisionId" );  // 메뉴아이디
+    		var vServiceId = WebSquare.net.getParameter( "serviceId" );  // 서비스아이디
+    		if (vDivisionId == "")
+    			vDivisionId = 'MDIS01008000000000';
+    		
+    		
+         ]]></script>
+    </head>
+    <body>
+    	<xf:group id="wrap">
+    		<w2:wframe id="header" style="" src="/wq/com/gnb.xml"></w2:wframe>
+    		<xf:group id="container">
+    			<xf:group id="content_section" style="" class="content_section">
+    				<w2:wframe id="snb" style="display:none" class="snb" src="/wq/com/snb.xml"></w2:wframe>
+    				<xf:group id="content" style="position:relative;" class="">
+    					<w2:wframe id="subTit_1" style="" src="/wq/com/subTit.xml"></w2:wframe>
+    					<w2:wframe id="common_sera_table1" style="" src="/wq/fundann/inc/DISFundROPCmpAnn.xml"></w2:wframe>
+    					
+    					<xf:group class="pt20" id="12monthLt" style="">
+   							<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox1__" label="운용실적 분류선택" style=""></w2:textbox>
+	   						<xf:group class="common_table1" id="tblList4Group" style="" tagname="table">
+    							<w2:attributes>
+    								<w2:summary>운용실적을 선택해주세요</w2:summary>
+    								<w2:cellspacing>0</w2:cellspacing>
+    								<w2:collpadding>0</w2:collpadding>
+    							</w2:attributes>
+    							<w2:textbox id="textbox9" label="운용실적 1차분류" style="" tagname="caption"></w2:textbox>
+    							<xf:group class="" id="group35" style="" tagname="colgroup">
+    								<xf:group class="" id="group36" style="" tagname="col">
+    									<w2:attributes>
+    										<w2:width>180</w2:width>
+    									</w2:attributes>
+    								</xf:group>
+    								<xf:group class="" id="group37" style="" tagname="col">
+    									<w2:attributes>
+    										<w2:width>*</w2:width>
+    									</w2:attributes>
+    								</xf:group>
+    							</xf:group>
+    							<xf:group class="" id="group102" style="" tagname="tr">
+    								<xf:group class="table1_th" id="group103" style="" tagname="th">
+    									<w2:textbox for="report_select_input_0" id="textbox35" label="운용실적 1차분류" style="" tagname="label"></w2:textbox>
+    								</xf:group>
+    								<xf:group class="table1_td" id="tblList4" style="height:22px" tagname="td">
+    									<xf:select1 appearance="full" class="common_table_ipt_ul" cols="" id="radioBtn" itemTagname="li"
+    										renderType="radiogroup" rows="" selectedIndex="-1" style="" tagname="ul">
+    										<script ev:event="onradioclick(index,value)" type="javascript"><![CDATA[ 
+    											var sel7Value = radioBtn.getValue();
+    											var sel7Nm = radioBtn.getText();
+    											changeSel7(sel7Value, sel7Nm);
+    										]]></script>
+    										<script type="javascript" ev:event="onchange"><![CDATA[
+    											var sel7Value = radioBtn.getValue();
+    											var sel7Nm = radioBtn.getText();
+    											changeSel7(sel7Value, sel7Nm);
+    										 ]]></script>
+    									</xf:select1>
+    								</xf:group>
+    							</xf:group>
+    							
+    						</xf:group>
+    						<xf:group class="pt20 overflow" id="group145" style="">
+    							<xf:group class="fl248 mr10" id="fl250_1" style="">
+    								<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox56" label="운용실적 2차분류" style=""></w2:textbox>
+    								<xf:group class="select_cont_box" id="group148" style="height:365px;">
+    									<!-- 운용실적 2차분류 -->
+    									<xf:group id="tblList5" style="" tagname="ul" class="ROPCmpAnn_list"></xf:group>
+    									<!-- 운용실적 2차분류 -->
+    								</xf:group>
+    							</xf:group>
+    							<xf:group class="fl248 mr10" id="fl250_2" style="">
+    								<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox60" label="운용실적 3차분류" style=""
+    									localeRef="">
+    								</w2:textbox>
+    								<xf:group class="select_cont_box" id="group163" style="height:365px;">
+    									<!-- 운용실적 3차분류 -->
+    									<xf:group id="tblList6" style="" tagname="ul" class="ROPCmpAnn_list"></xf:group>
+    									<!-- 운용실적 3차분류 -->
+    								</xf:group>
+    							</xf:group>
+    							<xf:group class="fl248" id="fl250_3" style="">
+    								<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox61" label="분류설정" style=""></w2:textbox>
+    								<xf:group class="select_cont_box" id="group165" style="height:365px;">
+    									<xf:group id="ROPCmpAnn_ex_ul1" style="" tagname="ul" class="ROPCmpAnn_ex_ul">
+    										<xf:group id="group168" style="" tagname="li" class="mb15">
+    											<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList4tit" label="" style="" tagname="p"></w2:textbox>
+    											<w2:textbox class="" id="tblList4Desc" label="" style="" tagname="p"></w2:textbox>
+    										</xf:group>
+    										<xf:group id="group169" style="" tagname="li" class="mb15">
+    											<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList5tit" label="" style=""
+    												tagname="p">
+    											</w2:textbox>
+    											<w2:textbox class="" id="tblList5Desc" label="" style=""
+    												tagname="p">
+    											</w2:textbox>
+    										</xf:group>
+    										<xf:group id="group170" style="" tagname="li">
+    											<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList6tit" label="" style="" tagname="p">
+    											</w2:textbox>
+    											<w2:textbox class="" id="tblList6Desc" label="" style=""
+    												tagname="p">
+    											</w2:textbox>
+    										</xf:group>
+    									</xf:group>
+    								</xf:group>
+    							</xf:group>
+    						</xf:group>
+    					</xf:group>
+    					
+    					<!--  -->
+    					<!-- 2009년 12월 이전 -->
+						<xf:group class="pt20 overflow" id="11monthBf" style="">
+							<xf:group class="fl183 mr10" id="group225" style="">
+								<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox95a_" label="운용실적 1차분류" style=""></w2:textbox>
+								<xf:group class="select_cont_box" id="group226" style="height:365px;">
+									<!-- 운용실적 1차 -->
+									<xf:group class="ROPCmpAnn_list" id="tblList1" style="" tagname="ul"></xf:group>
+									<!-- 운용실적 1차 -->
+								</xf:group>
+								</xf:group><xf:group class="fl183 mr10" id="group209" style="">
+									<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox82" label="운용실적 2차분류" style=""></w2:textbox>
+									<xf:group class="select_cont_box" id="group210" style="height:365px;">
+										<!-- 운용실적 2차 -->
+										<xf:group class="ROPCmpAnn_list" id="tblList2" style="" tagname="ul"></xf:group>
+									</xf:group>
+								</xf:group><xf:group class="fl183 mr10" id="group214" style="">
+									<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox85" label="운용실적 3차분류" localeRef="" style="">
+									</w2:textbox>
+									<xf:group class="select_cont_box" id="group215" style="height:365px;">
+										<!-- 운용실적 3차 -->
+										<xf:group class="ROPCmpAnn_list" id="tblList3" style="" tagname="ul"></xf:group>
+									</xf:group>
+								</xf:group><xf:group class="fl183" id="group219" style="">
+									<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox88" label="분류설정" style=""></w2:textbox>
+									<xf:group class="select_cont_box" id="group220" style="height:365px;">
+										<xf:group class="ROPCmpAnn_ex_ul" id="group221" style="" tagname="ul">
+											<xf:group class="mb15" id="group222" style="" tagname="li">
+												<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList1tit" label="" style="" tagname="p"></w2:textbox>
+												<w2:textbox class="" id="tblList1Desc" label="" style="" tagname="p"></w2:textbox>
+											</xf:group>
+											<xf:group class="mb15" id="group223" style="" tagname="li">
+												<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList2tit" label="" style="" tagname="p">
+												</w2:textbox>
+												<w2:textbox class="" id="tblList2Desc" label="" style="" tagname="p">
+												</w2:textbox>
+											</xf:group>
+											<xf:group id="group224" style="" tagname="li">
+												<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList3tit" label="" style="" tagname="p"></w2:textbox>
+												<w2:textbox class="" id="tblList3Desc" label="" style="" tagname="p">
+												</w2:textbox>
+											</xf:group>
+										</xf:group>
+									</xf:group>
+								</xf:group>
+							</xf:group>
+							<!-- //4개짜리 -->
+    						
+    					<!--  -->
+    					<w2:wframe id="subTip_1" class="mt20" style="" src="/wq/com/subTip.xml"></w2:wframe>
+
+
+    					
+    				</xf:group>
+    				<w2:wframe id="quick_section" style="" class="quick_section" src="/wq/com/quick.xml"></w2:wframe>
+    			</xf:group>
+    		</xf:group>
+    		<w2:wframe id="footer" src="/wq/com/footer.xml"></w2:wframe>
+    	</xf:group>
+    </body>
+</html>
