@@ -1,0 +1,26 @@
+name: els_dart
+# 🎯 ELS 타사 비교 — 모든 증권사 ELS·ELB 공모 조건(DART 일괄신고추가서류) → archive/x/els_all.json
+on:
+  schedule:
+    - cron: "23 23 * * 0-4"   # KST 08:23 평일
+    - cron: "53 5 * * 1-5"    # KST 14:53 평일 (오후에 새로 낸 서류)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: els_dart
+  cancel-in-progress: false
+jobs:
+  els:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q playwright && python -m playwright install --with-deps chromium >/dev/null
+      - name: DART ELS
+        run: python els_dart.py
+      - name: 저장
+        run: bash scripts/push.sh "els_dart $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/els_all.json
