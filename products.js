@@ -72,11 +72,15 @@
       D.notice.map(function(n){ return '<a class="pd-nt" href="' + e(n.url) + '" target="_blank" rel="noopener"><span class="mut">' + e(n.date || "") + '</span>' + e(n.title) + '</a>'; }).join("") + '</details>';
     return h + WARN;
   }
+  /* 🧾 10/16 사용자: 「펀드나 채권 누르면 각각에 대한 설명 혹은 모의 투자계산서 나오게 탭 접기」 — 행을 누르면 그 밑에 설명 + 계산서가 펼쳐짐 */
+  var OBJ = {}, OBN = 0, AMT = 1000;
+  try { AMT = +localStorage.getItem("prodamt") || 1000; } catch(x) {}
+  function reg(kind, o){ var id = "x" + (++OBN); OBJ[id] = {k: kind, o: o}; return ' data-x="' + id + '"'; }
   function bondRows(rows, hi){
     if (!rows.length) return '<div class="empty">지금 파는 상품이 없어요.</div>';
     var mx = Math.max.apply(null, rows.map(function(r){ return r.after || 0; }).concat([0.1]));
     return '<div class="pd-list">' + rows.map(function(r, i){
-      return '<div class="pd-it"><div class="pd-h"><span class="rk">' + (i + 1) + '</span><div class="pd-n"><b>' + e(r.name) + '</b><small>' + e(r.risk) + ' · 잔존 ' + yrs(r) + ' · ' + (/^9999/.test(r.mat) ? '영구채(콜 가능)' : '만기 ' + e(r.mat)) + '</small></div>' +
+      return '<div class="pd-it pd-tap"' + reg("krw", r) + '><div class="pd-h"><span class="rk">' + (i + 1) + '</span><div class="pd-n"><b>' + e(r.name) + '</b><small>' + e(r.risk) + ' · 잔존 ' + yrs(r) + ' · ' + (/^9999/.test(r.mat) ? '영구채(콜 가능)' : '만기 ' + e(r.mat)) + '</small></div>' +
         '<div class="pd-v"><b class="up">' + pc(r.after) + '</b><small>세후 수익률</small></div></div>' +
         '<div class="pd-bar"><i style="width:' + ((r.after || 0) / mx * 100).toFixed(0) + '%"></i></div>' +
         '<div class="pd-row"><span>매수금리 <b>' + pc(r.buy, 3) + '</b></span><span>은행 예금으로 치면 <b>' + pc(r.bank) + '</b></span><span>단가 <b>' + fmt(r.px) + '</b></span></div></div>';
@@ -94,7 +98,7 @@
       var h = doc("ust") + card("🇺🇸 미래에셋이 파는 미국채 <span class='mut'>" + e(U.date ? md(U.date) + " 판매정보" : "") + "</span>",
         (items.length ? '<div class="pd-list">' + items.map(function(r){
           var yr = Math.max(0, (new Date(r.mat) - Date.now()) / 365.25 / 864e5);
-          return '<div class="pd-it"><div class="pd-h"><div class="pd-n"><b>' + e(r.name) + '</b><small>만기 ' + e(r.mat) + ' (약 ' + yr.toFixed(1) + '년) · 표면금리 ' + pc(r.cpn, 3) + ' · ' + e(r.cur) + '</small></div>' +
+          return '<div class="pd-it pd-tap"' + reg("ust", Object.assign({fx: U.fx}, r)) + '><div class="pd-h"><div class="pd-n"><b>' + e(r.name) + '</b><small>만기 ' + e(r.mat) + ' (약 ' + yr.toFixed(1) + '년) · 표면금리 ' + pc(r.cpn, 3) + ' · ' + e(r.cur) + '</small></div>' +
             '<div class="pd-v"><b class="up">' + pc(r.ytm) + '</b><small>시세 수익률(세전)</small></div></div></div>'; }).join("") + '</div>' : '<div class="empty">오늘 판매정보가 아직 없어요.</div>') +
         '<p class="note">미국채는 달러로 사요 — 수익률은 달러 기준이고, 원화로 바꾸면 환율만큼 더해지거나 빠져요. 이자는 과세(15.4%), 표면금리가 낮은 채권은 이자 대신 싸게 사서 만기에 액면을 받는 몫이 커요. 매일 아침 미래에셋이 올리는 「미국채 시장동향·판매정보」 글에서 가져왔어요' + (U.url ? ' (<a href="' + e(U.url) + '" target="_blank" rel="noopener">원문</a>)' : '') + '.</p>');
       h += card("미국 10년 국채 금리 <span class='mut'>1년 · 야후</span>", (y.length > 5 ? line1(vals(y), lbl(y), {name: "10년", color: "#e66767", h: 150}) : '<div class="spark-empty">자료 준비 중</div>') +
@@ -102,7 +106,7 @@
       h += card("원/달러 환율 <span class='mut'>1년</span>", (fx.length > 5 ? line1(vals(fx), lbl(fx), {name: "원/달러", color: "#7c9cff", h: 130}) : '<div class="spark-empty">자료 준비 중</div>') +
         '<p class="note">미래에셋 기준 ' + (U.fx != null ? '<b>' + fmt(U.fx) + '원</b> (전일 ' + fmt(U.fx_prev) + ')' : '–') + '. 달러가 싸질 때 사 두면 환차익, 비쌀 때 사면 환손실이 더해져요.</p>');
       if (A.items && A.items.length) h += '<details class="card cpx-d"><summary>🇦🇺 호주국채도 팔아요 <span class="mut">' + A.items.length + '개 · 10년 ' + pc(A.y10) + '</span></summary><div class="pd-list">' + A.items.map(function(r){
-        return '<div class="pd-it"><div class="pd-h"><div class="pd-n"><b>' + e(r.name) + '</b><small>만기 ' + e(r.mat) + ' · 표면 ' + pc(r.cpn) + ' · AUD</small></div><div class="pd-v"><b class="up">' + pc(r.ytm) + '</b><small>수익률</small></div></div></div>'; }).join("") +
+        return '<div class="pd-it pd-tap"' + reg("aud", Object.assign({fx: A.fx}, r)) + '><div class="pd-h"><div class="pd-n"><b>' + e(r.name) + '</b><small>만기 ' + e(r.mat) + ' · 표면 ' + pc(r.cpn) + ' · AUD</small></div><div class="pd-v"><b class="up">' + pc(r.ytm) + '</b><small>수익률</small></div></div></div>'; }).join("") +
         '</div><p class="note">호주달러 환율 ' + fmt(A.fx) + '원 · 신용등급 AAA · 이자 과세.</p></details>';
       return h;
     }
@@ -118,7 +122,7 @@
         h += card("만기별 브라질 국채 <span class='mut'>" + T.length + "개 · 브라질 재무부 " + e((T[0].asof || "").slice(0, 10)) + "</span>",
           Object.keys(grp).map(function(kind){ return '<div class="sub2">' + e(kind) + ' <span class="mut">' + e(grp[kind][0].code) + '</span></div><div class="pd-list">' + grp[kind].map(function(x){
             var yr = Math.max(0, (new Date(x.mat) - Date.now()) / 365.25 / 864e5);
-            return '<div class="pd-it"><div class="pd-h"><div class="pd-n"><b>' + e(x.n) + '</b><small>만기 ' + e(x.mat) + ' (약 ' + yr.toFixed(1) + '년) · 단가 R$ ' + fmt(x.px) + (x.semi ? ' · 6개월 이자' : '') + '</small></div>' +
+            return '<div class="pd-it pd-tap"' + reg("brl", Object.assign({fx: last ? last[1] : null}, x)) + '><div class="pd-h"><div class="pd-n"><b>' + e(x.n) + '</b><small>만기 ' + e(x.mat) + ' (약 ' + yr.toFixed(1) + '년) · 단가 R$ ' + fmt(x.px) + (x.semi ? ' · 6개월 이자' : '') + '</small></div>' +
               '<div class="pd-v"><b class="up">' + e(String(x.rate).replace(/,/g, ".")) + '</b><small>' + (/IPCA/.test(x.rate) ? "물가 + 연" : "연 금리(헤알)") + '</small></div></div></div>'; }).join("") + '</div>'; }).join("") +
           '<p class="note">「IPCA + 6.8%」는 브라질 물가상승률(최근 연 4~5%)에 6.8%를 더 준다는 뜻이라 실제론 연 11% 안팎. 할인채·이표채 12%대는 고정. 모두 헤알 기준 — 원화 수익은 환율 변화를 더해야 해요.</p>');
       }
@@ -140,9 +144,9 @@
   function fname(n){ return String(n || "").replace(/\s*\((?:수수료|운용|보수)[^)]*\)\s*/g, "").replace(/\s*(종류|클래스|Class|class|CLASS)\s*[A-Za-z][-A-Za-z0-9]*\s*(\([^)]*\))?\s*$/, ""); }
   function frow(x, i, per){
     var v = x[per];
-    return '<a class="pd-it pd-f" href="javascript:void(0)" data-fc="' + e(x.c) + '"><div class="pd-h"><span class="rk">' + (i + 1) + '</span><div class="pd-n"><b>' + e(fname(x.n)) + '</b><small>' + e(x.co || "") + ' · ' + e(x.t || "") + (x.st ? ' · ' + e(x.st) : '') + (x.rk ? ' · 위험 ' + x.rk + '등급' : '') + '</small></div>' +
+    return '<div class="pd-it pd-f pd-tap"' + reg("fund", Object.assign({per: per}, x)) + '><div class="pd-h"><span class="rk">' + (i + 1) + '</span><div class="pd-n"><b>' + e(fname(x.n)) + '</b><small>' + e(x.co || "") + ' · ' + e(x.t || "") + (x.st ? ' · ' + e(x.st) : '') + (x.rk ? ' · 위험 ' + x.rk + '등급' : '') + '</small></div>' +
       '<div class="pd-v">' + (v == null ? '<b class="mut">–</b>' : sg(v)) + '<small>' + PN[per] + '</small></div></div>' +
-      '<div class="pd-row"><span>3개월 ' + sg(x.m3) + '</span><span>1년 ' + sg(x.y1) + '</span><span>3년 ' + sg(x.y3) + '</span><span>순자산 <b>' + (x.aum != null ? fmt(x.aum) + '억' : '–') + '</b></span></div></a>';
+      '<div class="pd-row"><span>3개월 ' + sg(x.m3) + '</span><span>1년 ' + sg(x.y1) + '</span><span>3년 ' + sg(x.y3) + '</span><span>순자산 <b>' + (x.aum != null ? fmt(x.aum) + '억' : '–') + '</b></span></div></div>';
   }
   var PV_T = [["", "전체"], ["주식", "주식형"], ["혼합", "혼합"], ["채권", "채권형"], ["부동산", "부동산"], ["특별자산", "특별자산"], ["재간접", "재간접"]];
   var PVPER = [["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"]], PVN = {m0: "월초 대비", m1: "1개월", m3: "3개월", m6: "6개월", y1: "1년"};
@@ -156,7 +160,7 @@
   }
   function pvrow(x, i, per){
     var v = per === "m0" ? x.m0 : x[per];
-    return '<div class="pd-it pd-p"><div class="pd-h"><span class="rk">' + (i + 1) + '</span><div class="pd-n"><b>' + e(x.n) + '</b><small>' + e(x.co) + ' · ' + e(x.t) + ' · 설정 ' + e((x.est || "").slice(0, 4)) + '년' + (x.tr ? ' · <span class="chip2 hot" style="margin:0">후순위·손익차등</span>' : '') + '</small></div>' +
+    return '<div class="pd-it pd-p pd-tap"' + reg("pv", Object.assign({per: per}, x)) + '><div class="pd-h"><span class="rk">' + (i + 1) + '</span><div class="pd-n"><b>' + e(x.n) + '</b><small>' + e(x.co) + ' · ' + e(x.t) + ' · 설정 ' + e((x.est || "").slice(0, 4)) + '년' + (x.tr ? ' · <span class="chip2 hot" style="margin:0">후순위·손익차등</span>' : '') + '</small></div>' +
       '<div class="pd-v">' + (v == null ? '<b class="mut">–</b>' : sg(v)) + '<small>' + PVN[per] + '</small></div></div>' +
       '<div class="pd-row"><span>1개월 ' + sg(x.m1) + '</span><span>3개월 ' + sg(x.m3) + '</span><span>6개월 ' + sg(x.m6) + '</span><span>1년 ' + sg(x.y1) + '</span><span>설정액 <b>' + fmt(x.amt) + '억</b></span><span>기준가 <b>' + fmt(x.nav) + '</b></span></div></div>';
   }
@@ -223,7 +227,7 @@
   function dday(d){ if (!d) return ""; var n = Math.round((new Date(d + "T23:59:59+09:00") - Date.now()) / 864e5); return n < 0 ? "마감" : n === 0 ? "오늘 마감" : "D-" + n; }
   function elsRow(x, done){
     var t = x.t, pp = (x.pp || 0) >= 100;
-    return '<div class="pd-it pd-e"><div class="pd-h"><div class="pd-n"><b>' + e(x.n) + '</b><small><span class="chip2 ' + (pp ? "cool" : "hot") + '">' + e(t) + (pp ? " · 원금지급" : " · 원금 비보장") + '</span>' + (x.hi ? '<span class="chip2">고난도</span>' : '') + (x.monthly ? '<span class="chip2">월지급</span>' : '') + (x.dl_e ? '<span class="chip2">숙려 ' + e(md(x.dl_e)) + '까지</span>' : '') + '</small></div>' +
+    return '<div class="pd-it pd-e pd-tap"' + reg("els", x) + '><div class="pd-h"><div class="pd-n"><b>' + e(x.n) + '</b><small><span class="chip2 ' + (pp ? "cool" : "hot") + '">' + e(t) + (pp ? " · 원금지급" : " · 원금 비보장") + '</span>' + (x.hi ? '<span class="chip2">고난도</span>' : '') + (x.monthly ? '<span class="chip2">월지급</span>' : '') + (x.dl_e ? '<span class="chip2">숙려 ' + e(md(x.dl_e)) + '까지</span>' : '') + '</small></div>' +
       '<div class="pd-v"><b class="up">' + pc(x.cpn) + '</b><small>연 수익률(세전)</small></div></div>' +
       '<div class="pd-row"><span>기초자산 <b>' + e(x.ua || "–") + '</b></span></div>' +
       '<div class="pd-row"><span>구조 <b>' + e(x.kind || "") + '</b> ' + e(x.desc || "") + '</span></div>' +
@@ -253,6 +257,82 @@
       (!L.length ? '<div class="empty">지금 청약 중인 상품이 없어요.</div>' : '');
   }
 
+  /* ───────── 🧾 누르면 펼쳐지는 설명·모의 투자계산서 ───────── */
+  function W(v){ if (v == null || isNaN(v)) return "–"; var a = Math.abs(v), s = v < 0 ? "−" : ""; return a >= 1e8 ? s + (a / 1e8).toFixed(2).replace(/\.?0+$/, "") + "억원" : s + Math.round(a / 1e4).toLocaleString() + "만원"; }
+  function amtBar(){ return '<div class="pd-amt"><span class="mut">투자금</span>' + [500, 1000, 3000, 5000, 10000].map(function(a){ return '<button data-amt="' + a + '"' + (a === AMT ? ' class="on"' : '') + '>' + (a >= 10000 ? (a / 10000) + "억" : a.toLocaleString() + "만") + '</button>'; }).join("") + '</div>'; }
+  function tbl(rows){ return '<table class="pd-tb">' + rows.map(function(r){ return '<tr><td>' + r[0] + '</td><td class="' + (r[2] || "") + '">' + r[1] + '</td></tr>'; }).join("") + '</table>'; }
+  function pvf(y, n, c){ return c / y * (1 - Math.pow(1 + y, -n)) + 100 / Math.pow(1 + y, n); }       // 연 이표 c(%), 수익률 y, n년 → 액면 100 당 값
+  function dur(y, n, c){ var P = pvf(y, n, c), d = 0; for (var t = 1; t <= Math.ceil(n); t++){ var cf = (t <= n ? c : 0) + (t === Math.ceil(n) ? 100 : 0); d += t * cf / Math.pow(1 + y, t); } return d / P / (1 + y); }   // 수정 듀레이션(근사)
+  function bondCalc(A, px, y, n, cpnKnown, taxFree){
+    // A 원, 단가 px(액면 10,000 당), 세전 수익률 y(%), 잔존 n 년. 이표 c 는 이름에서 알면 그것, 아니면 단가·수익률로 역산
+    var yy = y / 100, c = cpnKnown != null ? cpnKnown : Math.max(0, (px / 100 - 100 / Math.pow(1 + yy, n)) * yy / (1 - Math.pow(1 + yy, -n)));
+    var face = A / px * 10000, cpnY = face * c / 100, cpnAll = cpnY * n, tax = taxFree ? 0 : cpnAll * 0.154, gain = face - A;
+    var tot = face + cpnAll - tax, cagr = n > 0 ? (Math.pow(tot / A, 1 / n) - 1) * 100 : 0, D = dur(yy, n, c);
+    return {c: c, face: face, cpnY: cpnY, cpnAll: cpnAll, tax: tax, gain: gain, tot: tot, cagr: cagr, D: D};
+  }
+  function xpanel(R){
+    var k = R.k, o = R.o, A = AMT * 1e4, h = "";
+    if (k === "krw"){
+      var m = /(\d{5})-/.exec(o.name), cpn = m ? +m[1] / 1000 : null, n = o.yrs + o.days / 365, b = bondCalc(A, o.px, o.pre, n, cpn, false);
+      var why = o.kind === "국채" ? "대한민국 정부가 갚는 채권이라 부도 걱정은 거의 없어요." : o.kind === "공사채·지방채" ? "공기업·지자체가 발행 — 사실상 정부가 뒤에 있어 국채 다음으로 안전해요." : o.kind === "신종·후순위" ? "은행·금융지주의 만기 없는 채권 — 금리가 높은 대신 은행이 부실해지면 원금이 0이 될 수 있고(상각), 콜(보통 5년)을 안 할 수도 있어요." : "일반 회사가 발행 — 신용등급이 낮을수록 금리가 높고 부도 위험이 있어요.";
+      h += '<p>' + why + ' ' + (cpn != null ? '표면금리 ' + cpn.toFixed(3) + '%로 ' + e(o.issue.slice(0, 7)) + '에 발행, ' : '') + (o.px < 9000 ? '액면 10,000원짜리를 <b>' + fmt(o.px) + '원</b>에 싸게 사서 만기에 10,000원을 받는 몫이 커요 — 그 차익은 개인 비과세라 세후 수익률이 좋아요. ' : '단가가 액면(10,000원)에 가까워 수익 대부분이 이자(과세)예요. ') +
+        (n >= 10 ? '잔존 ' + n.toFixed(1) + '년으로 길어서 시장 금리가 1%p 움직이면 값이 약 <b>' + (b.D).toFixed(0) + '%</b> 움직여요(중간에 팔 때 얘기 · 만기까지 들면 상관없음).' : '잔존 ' + n.toFixed(1) + '년 — 금리가 1%p 움직여도 값은 약 ' + b.D.toFixed(1) + '% 정도만 흔들려요.') + '</p>';
+      h += '<div class="sub2">🧾 모의 투자계산서 <span class="mut">만기까지 들고 있을 때</span></div>' + amtBar() + tbl([
+        ["산 금액", W(A)], ["받는 액면(만기 원금)", W(b.face) + ' <span class="mut">(' + fmt(o.px) + '원에 ' + Math.round(b.face / 1e4).toLocaleString() + '만원어치)</span>'],
+        ["이자 (연 " + b.c.toFixed(2) + "% × " + n.toFixed(1) + "년)", W(b.cpnAll)], ["이자 세금 15.4%", "−" + W(b.tax), "dn"], ["만기 차익 (액면 − 산 금액 · 비과세)", (b.gain >= 0 ? "+" : "") + W(b.gain), b.gain >= 0 ? "up" : "dn"],
+        ["<b>만기에 손에 쥐는 돈</b> <span class='mut'>이자 재투자 없이 합산</span>", "<b>" + W(b.tot) + "</b> <span class='mut'>" + V.sgn((b.tot / A - 1) * 100, 0) + "%</span>", "up"], ["미래에셋 표기 세후 수익률(연·복리)", pc(o.after)],
+        ["1년 뒤 금리 +1%p 때 팔면", "약 " + W(A * (1 - b.D / 100) + b.cpnY * 0.846), "dn"], ["1년 뒤 금리 −1%p 때 팔면", "약 " + W(A * (1 + b.D / 100) + b.cpnY * 0.846), "up"]]);
+      h += '<p class="note">이자는 보통 3개월(국고채 6개월)마다 나눠 받고, 매수 단위·수수료는 매매 화면 기준. 중도 매도 값은 듀레이션 근사치예요.</p>';
+    }
+    else if (k === "ust" || k === "aud"){
+      var cur = k === "ust" ? "달러" : "호주달러", fx = o.fx || 1, n = Math.max(0.1, (new Date(o.mat) - Date.now()) / 365.25 / 864e5), yy = o.ytm / 100, c = o.cpn || 0, P = pvf(yy, n, c);
+      var A_f = A / fx, face = A_f / P * 100, cpnAll = face * c / 100 * n, tax = cpnAll * 0.154, tot = face + cpnAll - tax;
+      var D = dur(yy, n, c);
+      h += '<p>' + (k === "ust" ? "미국 정부가 갚는 달러 채권이에요. " : "호주 정부(AAA)가 갚는 호주달러 채권이에요. ") + '표면금리 ' + pc(c, 3) + ', 지금 가격에 사면 연 <b>' + pc(o.ytm) + '</b>(' + cur + ' 기준·세전). ' + (c < 2 ? '표면금리가 낮아 이자 대신 싸게 사서(100당 약 ' + P.toFixed(1) + ') 만기에 액면을 받는 몫이 커요 — 그 차익은 비과세라 세금 면에서 좋아요. ' : '') +
+        (n >= 8 ? '만기가 ' + n.toFixed(1) + '년 남아 금리가 1%p 내리면 값이 약 ' + D.toFixed(0) + '% 오르고, 오르면 그만큼 빠져요(금리 하락에 거는 투자). ' : '만기가 ' + n.toFixed(1) + '년으로 짧아 금리보다 환율이 수익을 좌우해요. ') + '환차익은 비과세, 이자는 15.4%.</p>';
+      h += '<div class="sub2">🧾 모의 투자계산서 <span class="mut">환율 ' + fmt(fx) + '원 기준 · 만기 보유</span></div>' + amtBar() + tbl([
+        ["산 금액", W(A) + ' <span class="mut">= ' + Math.round(A_f).toLocaleString() + ' ' + cur + '</span>'], ["만기 원금 (액면)", Math.round(face).toLocaleString() + " " + cur], ["이자 합계 (" + n.toFixed(1) + "년)", Math.round(cpnAll).toLocaleString() + " " + cur], ["이자 세금 15.4%", "−" + Math.round(tax).toLocaleString() + " " + cur, "dn"],
+        ["<b>만기에 받는 " + cur + "</b>", "<b>" + Math.round(tot).toLocaleString() + " " + cur + "</b>"],
+        ["환율 그대로 (" + fmt(fx) + ")", W(tot * fx) + " <span class='mut'>" + V.sgn((tot * fx / A - 1) * 100) + "%</span>", "up"],
+        ["환율 10% 하락 (" + fmt(fx * 0.9) + ")", W(tot * fx * 0.9) + " <span class='mut'>" + V.sgn((tot * fx * 0.9 / A - 1) * 100) + "%</span>", tot * 0.9 >= A / fx ? "" : "dn"],
+        ["환율 10% 상승 (" + fmt(fx * 1.1) + ")", W(tot * fx * 1.1) + " <span class='mut'>" + V.sgn((tot * fx * 1.1 / A - 1) * 100) + "%</span>", "up"],
+        ["1년 뒤 금리 ±1%p 때 값", "약 " + V.sgn(-D) + "% / " + V.sgn(D) + "%"]]);
+      h += '<p class="note">이자는 6개월마다 ' + cur + '로 들어와요. 환전 수수료·매매 수수료는 뺐어요.</p>';
+    }
+    else if (k === "brl"){
+      var fx = o.fx || 1, n = Math.max(0.1, (new Date(o.mat) - Date.now()) / 365.25 / 864e5), r = o.r || 0, ipca = /IPCA/.test(o.rate), eff = ipca ? r + 4.5 : r;
+      var A_b = A / fx, tot = A_b * Math.pow(1 + eff / 100, n);
+      h += '<p>' + (o.code === "LTN" ? "이자 없이 싸게 사서 만기에 액면(R$1,000)을 받는 <b>할인채</b>예요. " : o.code === "NTN-F" ? "6개월마다 이자(연 10%)를 주는 <b>이표채</b>예요. " : "<b>물가채</b> — 브라질 물가상승률(IPCA)에 " + r + "%를 더해 줘요. 물가가 오르면 같이 올라요. ") +
+        '연 <b>' + e(String(o.rate).replace(/,/g, ".")) + '</b>' + (ipca ? ' (IPCA 4.5% 가정 → 연 약 ' + eff.toFixed(1) + '%)' : '') + ', 만기 ' + n.toFixed(1) + '년. 개인은 이자·차익·환차익 모두 <b>비과세</b>. 대신 헤알 환율이 수익을 다 바꿔요 — 아래 환율 세 가지로 보세요.</p>';
+      h += '<div class="sub2">🧾 모의 투자계산서 <span class="mut">헤알/원 ' + fmt(fx) + ' 기준 · 만기 보유 · 세금 0</span></div>' + amtBar() + tbl([
+        ["산 금액", W(A) + ' <span class="mut">= R$ ' + Math.round(A_b).toLocaleString() + '</span>'], ["만기에 받는 헤알 (연 " + eff.toFixed(1) + "% 복리 " + n.toFixed(1) + "년)", "R$ " + Math.round(tot).toLocaleString()],
+        ["환율 그대로 (" + fmt(fx) + "원)", W(tot * fx) + " <span class='mut'>" + V.sgn((tot * fx / A - 1) * 100) + "%</span>", "up"],
+        ["헤알 20% 약세 (" + fmt(fx * 0.8) + "원)", W(tot * fx * 0.8) + " <span class='mut'>" + V.sgn((tot * fx * 0.8 / A - 1) * 100) + "%</span>", tot * 0.8 >= A_b ? "" : "dn"],
+        ["헤알 40% 약세 (" + fmt(fx * 0.6) + "원)", W(tot * fx * 0.6) + " <span class='mut'>" + V.sgn((tot * fx * 0.6 / A - 1) * 100) + "%</span>", tot * 0.6 >= A_b ? "" : "dn"],
+        ["헤알 20% 강세 (" + fmt(fx * 1.2) + "원)", W(tot * fx * 1.2) + " <span class='mut'>" + V.sgn((tot * fx * 1.2 / A - 1) * 100) + "%</span>", "up"]]);
+      h += '<p class="note">브라질 재무부 공개 금리라 미래에셋 중개 금리·수수료(연 0.15~0.30%)에 따라 달라요. 헤알은 지난 15년 동안 700원→260원대로 내려온 통화예요.</p>';
+    }
+    else if (k === "fund" || k === "pv"){
+      var isPv = k === "pv", sfee = isPv ? 0 : (o.sfee || 0), fee = o.fee;
+      var pers = isPv ? [["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"]] : [["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"], ["y3", "3년"], ["y5", "5년"]];
+      var net = A * (1 - sfee / 100);
+      h += '<p>' + (isPv ? '<b>' + e(o.co) + '</b>의 ' + e(o.t) + ' 사모펀드 — 설정 ' + e((o.est || "").slice(0, 4)) + '년, 설정액 ' + fmt(o.amt) + '억, 기준가 ' + fmt(o.nav) + '. 49인 이하에게 비공개로 팔리는 펀드라 일반 창구에서는 못 사고 판매사·최소금액(보통 3억)이 따로 있어요. 수익률은 금투협 기준가 비교값이라 분배금·결산은 빠져 있어요.' :
+        '<b>' + e(o.co) + '</b>의 ' + e(o.t) + (o.st ? '(' + e(o.st) + ')' : '') + ' 공모펀드 — 순자산 ' + fmt(o.aum) + '억, 위험 ' + (o.rk || "–") + '등급(1 매우높음~6 매우낮음), 설정 ' + e((o.est || "").slice(0, 4)) + '년. ' + (o.cls ? '클래스 「' + e(o.cls) + '」: ' : '') + (sfee ? '살 때 <b>선취 ' + sfee + '%</b>를 떼고, ' : '선취 수수료 없이, ') + (fee != null ? '매년 총보수 <b>' + fee + '%</b>가 기준가에서 빠져요(아래 수익률엔 이미 반영).' : '')) + '</p>';
+      h += '<div class="sub2">🧾 모의 투자계산서 <span class="mut">「그때 샀다면 지금」 · 과거 수익률 그대로</span></div>' + amtBar() + tbl([["산 금액", W(A)]].concat(sfee ? [["선취 수수료 " + sfee + "%", "−" + W(A - net), "dn"]] : []).concat(pers.filter(function(p){ return o[p[0]] != null; }).map(function(p){
+        var v = net * (1 + o[p[0]] / 100); return [p[1] + " 전 샀다면 지금", W(v) + " <span class='mut'>" + V.sgn(o[p[0]]) + "%</span>", v >= A ? "up" : "dn"]; })).concat(fee != null && !isPv ? [["매년 나가는 보수 (" + fee + "%)", "약 " + W(A * fee / 100) + "/년"]] : []));
+      h += '<p class="note">이익에 15.4% 세금(국내 주식 매매차익은 비과세, 해외·채권·배당은 과세)이 붙고, 환매는 신청 뒤 2~10일 걸려요. 과거 수익률이 앞으로도 같다는 뜻은 아니에요.' + (!isPv ? ' <a href="https://securities.miraeasset.com/hks/hks4116/p11.do?fd_cd=' + encodeURIComponent(o.c) + '" target="_blank" rel="noopener">미래에셋 상품 상세 ↗</a>' : '') + '</p>';
+    }
+    else if (k === "els"){
+      var cpn = o.cpn || 0, pp = (o.pp || 0) >= 100, half = A * cpn / 100 / 2, t = 0.154;
+      h += '<p>' + (pp ? '<b>원금지급형(ELB)</b> — 조건이 안 맞아도 원금은 미래에셋증권이 줘요(증권사 신용 위험만). ' : '<b>원금 비보장</b> — ') + '기초자산 <b>' + e(o.ua) + '</b>' + (String(o.ua || "").split(",").length > 1 ? '(여럿이면 가장 못한 것 기준)' : '') + ', 「' + e(o.desc) + '」. ' + (o.ki ? 'KI ' + o.ki + ': 3년 중 한 번이라도 처음의 ' + o.ki + '% 아래로 가면 만기 때 떨어진 만큼 손실. ' : '') + (o.monthly ? '매달 이자를 주는 월지급식. ' : '') + (o.hi ? '고난도 상품이라 청약 뒤 숙려기간에 취소할 수 있어요.' : '') + '</p>';
+      h += '<div class="sub2">🧾 모의 투자계산서 <span class="mut">연 ' + pc(cpn) + ' · 세전/세후</span></div>' + amtBar() + tbl([["산 금액", W(A)],
+        ["6개월 만에 조기상환", W(A + half * (1 - t)) + " <span class='mut'>이자 " + W(half) + " − 세금</span>", "up"], ["1년 만에 조기상환", W(A + 2 * half * (1 - t)), "up"], ["만기(" + e(o.mat) + ")까지 가서 상환", W(A + 6 * half * (1 - t)) + " <span class='mut'>세전 " + W(A + 6 * half) + "</span>", "up"]].concat(pp ? [] : [
+        ["KI 뚫고 만기에 기초자산 −40%", W(A * 0.6), "dn"], ["KI 뚫고 만기에 기초자산 −60%", W(A * 0.4), "dn"]]));
+      h += '<p class="note">이자 15.4% 과세(금융소득종합과세 대상). 중도 해지는 평가금액의 95% 안팎. 배정은 청약 경쟁에 따라 줄 수 있어요.</p>';
+    }
+    return h;
+  }
+
   /* ───────── 공통 ───────── */
   var VIEW = {bond: bondView, fund: fundView, els: elsView}, BODY = {bond: bondBody, fund: fundBody, els: elsBody};
   window.prodView = function(key){ return '<div id="pdroot" data-k="' + key + '"><div class="loading">미래에셋 상품 자료 불러오는 중…</div></div>'; };
@@ -269,8 +349,17 @@
       };
       bindSeg("pdseg", function(k){ SEL[key] = k; keep(); redraw(); });
       bindInner();
-      root.addEventListener("click", function(ev){ var a = ev.target.closest && ev.target.closest("[data-fc]"); if (!a) return; ev.preventDefault();
-        var x = (D.funds || []).filter(function(f){ return f.c === a.dataset.fc; })[0]; fundSheet(x); });
+      root.addEventListener("click", function(ev){
+        var amt = ev.target.closest && ev.target.closest("[data-amt]");
+        if (amt){ ev.stopPropagation(); AMT = +amt.dataset.amt; try { localStorage.setItem("prodamt", AMT); } catch(z) {}
+          var row = amt.closest(".pd-tap"), pnl = row && row.querySelector(":scope > .pd-x"); if (pnl){ var y = row.getBoundingClientRect().top; pnl.innerHTML = xpanel(OBJ[row.dataset.x]); holdAt('[data-x="' + row.dataset.x + '"]', y); } return; }
+        if (ev.target.closest("a[href]")) return;
+        var row = ev.target.closest && ev.target.closest(".pd-tap"); if (!row || !OBJ[row.dataset.x]) return;
+        var pnl = row.querySelector(":scope > .pd-x");
+        if (pnl){ pnl.remove(); row.classList.remove("on"); return; }
+        pnl = document.createElement("div"); pnl.className = "pd-x no-clp"; pnl.innerHTML = xpanel(OBJ[row.dataset.x]); row.appendChild(pnl); row.classList.add("on");
+        try { if (window.unclamp) unclamp(row); } catch(z) {}   // 긴 카드 접기(전체 보기)가 펼친 계산서를 가리지 않게
+      });
       var st = document.getElementById("pdstamp"); if (st) st.textContent = D.updated || "";
     }).catch(function(err){ console.error(err); var r = document.getElementById("pdroot"); if (r) r.innerHTML = '<div class="empty">상품 자료를 못 불러왔어요. 다음 수집 때 채워져요.</div>'; });
   };
@@ -284,6 +373,10 @@
     ".pd-e .chip2{margin:4px 4px 0 0}.pd-nt{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--text);text-decoration:none;font-size:13px;line-height:1.45}.pd-nt .mut{flex:none;width:78px}" +
     ".pd-brl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}.pd-brl div{background:var(--panel2);border-radius:12px;padding:10px 12px}.pd-brl small{display:block;color:var(--sub);font-size:11.5px}.pd-brl b{font-size:18px}.pd-brl em{display:block;font-style:normal;font-size:11px;color:var(--dim)}" +
     "#pdper{margin-top:-4px}.pd-doc p{margin:0;font-size:13.5px;line-height:1.7;color:var(--text);word-break:keep-all}.pd-doc summary{font-weight:700}" +
+    ".pd-tap{cursor:pointer}.pd-tap.on{background:color-mix(in srgb,var(--c) 10%,var(--panel2));outline:1px solid color-mix(in srgb,var(--c) 40%,transparent)}.pd-x{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}" +
+    ".pd-x p{margin:0 0 6px;font-size:13px;line-height:1.65;color:var(--text);word-break:keep-all}.pd-x .note{color:var(--sub);font-size:12px}.pd-x .sub2{margin:10px 0 6px}" +
+    ".pd-amt{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:0 0 8px}.pd-amt button{border:1px solid var(--line);background:transparent;color:var(--sub);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px}.pd-amt button.on{color:var(--text);border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}" +
+    ".pd-tb{width:100%;border-collapse:collapse;font-size:12.5px}.pd-tb td{padding:5px 0;border-bottom:1px solid var(--line);vertical-align:top}.pd-tb td:first-child{color:var(--sub);padding-right:8px;width:50%}.pd-tb td:last-child{text-align:right;font-weight:600}.pd-tb td.up{color:var(--up)}.pd-tb td.dn{color:var(--down)}" +
     ".pd-q{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px 12px;font:inherit;font-size:14px;margin:0 0 10px}";
   document.head.appendChild(css);
 })();
