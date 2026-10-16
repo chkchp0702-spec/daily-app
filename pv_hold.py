@@ -101,7 +101,9 @@ def price(res):
     try:
         import yfinance as yf
         tk = sorted(set(want.values()))
-        h = yf.download(tk, period="10d", interval="1d", progress=False, auto_adjust=False, group_by="column", threads=True)["Close"]
+        h = yf.download(tk, period="13mo", interval="1d", progress=False, auto_adjust=True, group_by="column", threads=True)["Close"]
+        global CLOSE
+        CLOSE = (h, want)
         for k6, t_ in want.items():
             try:
                 col = h[t_] if hasattr(h, "columns") and t_ in h.columns else h
@@ -121,6 +123,34 @@ def price(res):
         for it in L:
             if it.get("val") and tot: it["w"] = round(it["val"] / tot * 100, 1)
     print("가격", len(px))
+    basket(res)
+
+
+CLOSE = None
+
+
+def basket(res):
+    """🧮 운용사 바스켓 지수 — 5% 넘게 가진 종목을 지금 평가금액 비중으로 묶은 하루 수익률(수정주가) 누적.
+       금투협에 기준가가 없는 사모펀드의 「추정」 후보 중 하나 (앱이 과거 성적과 맞춰 보고 가장 잘 맞는 후보를 고름)"""
+    if CLOSE is None: return
+    h, want = CLOSE
+    out = {}
+    for nm, L in res.items():
+        ws = [(want[it["cd"]], it["val"]) for it in L if it.get("val") and it.get("cd") in want]
+        ws = [(t, v) for t, v in ws if hasattr(h, "columns") and t in h.columns]
+        if len(ws) < 2: continue
+        r = h[[t for t, _ in ws]].pct_change()
+        w = {t: v for t, v in ws}
+        idx, v, ds = 1.0, [], []
+        for d, row in r.iterrows():
+            ok = [(t, row[t]) for t in w if row[t] == row[t]]
+            if not ok: continue
+            tw = sum(w[t] for t, _ in ok)
+            idx *= 1 + sum(w[t] * x for t, x in ok) / tw
+            ds.append(d.strftime("%Y-%m-%d")); v.append(round(idx, 5))
+        out[nm] = {"d": ds, "v": v, "n": len(ws)}
+    json.dump(out, open(os.path.join("archive", "x", "pv_basket.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print("바스켓", len(out))
 
 
 def main():

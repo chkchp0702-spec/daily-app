@@ -322,10 +322,10 @@ def get_url(u):
 KOFIA = "https://dis.kofia.or.kr/proframeWeb/XMLSERVICES/"
 
 
-def kofia_q(d):
+def kofia_q(d, kind=2):
     body = ('<?xml version="1.0" encoding="utf-8"?><message><proframeHeader><pfmAppName>FS-DIS2</pfmAppName><pfmSvcName>DISFundStdPrcRateSO</pfmSvcName>'
             '<pfmFnName>select</pfmFnName></proframeHeader><systemHeader></systemHeader><DISCondFuncDTO>'
-            f'<tmpV30>{d}</tmpV30><tmpV3></tmpV3><tmpV4></tmpV4><tmpV5></tmpV5><tmpV7>2</tmpV7><tmpV11></tmpV11><tmpV12></tmpV12><tmpV50></tmpV50><tmpV51></tmpV51>'
+            f'<tmpV30>{d}</tmpV30><tmpV3></tmpV3><tmpV4></tmpV4><tmpV5></tmpV5><tmpV7>{kind}</tmpV7><tmpV11></tmpV11><tmpV12></tmpV12><tmpV50></tmpV50><tmpV51></tmpV51>'
             '</DISCondFuncDTO></message>')
     r = S.post(KOFIA, data=body.encode("utf-8"), headers={"Content-Type": "text/xml", "Accept": "text/xml", "Referer": "https://dis.kofia.or.kr/websquare/index.jsp"}, timeout=180)
     r.raise_for_status()
@@ -341,13 +341,13 @@ def kofia_q(d):
     return out
 
 
-def kofia_date(d0):
-    """그 날짜(또는 그 전 영업일) 중 자료가 있는 날"""
+def kofia_date(d0, kind=2):
+    """그 날짜(또는 그 전 영업일) 중 자료가 있는 날 (kind 2 = 사모, 1 = 공모)"""
     for k in range(7):
         d = d0 - datetime.timedelta(days=k)
         if d.weekday() >= 5:
             continue
-        rows = kofia_q(d.strftime("%Y%m%d"))
+        rows = kofia_q(d.strftime("%Y%m%d"), kind)
         if len(rows) > 100:
             return d, rows
     raise RuntimeError(f"금투협 사모 자료 없음 {d0}")
@@ -377,11 +377,11 @@ def private_funds():
     return {"asof": d0.isoformat(), "dates": {k: v[0] for k, v in snaps.items()}, "n": len(out), "items": out}
 
 
-def pv_nav_hist(now_d, now_rows):
+def pv_nav_hist(now_d, now_rows, name="pv_nav.json", kind=2, keep_code=None):
     """📡 10/16 사용자 「엑셀을 믿지 말고 네가 계산해 · 사모펀드 수익률 일주일 단위도 · 자동으로」
        금투협 사모 기준가를 날짜별로 쌓아 둠 → 앱이 1일·1주·1·3·6개월·1년·올해·주간 수익률을 기준가로 직접 계산.
        최근 10영업일은 매일, 그 전 1년은 주마다 하나(그 주 마지막 날). 처음엔 지난 53주를 거꾸로 채움(한 번에 10분까지, 나머지는 다음 회차)."""
-    PATH = os.path.join(os.path.dirname(OUT), "pv_nav.json")
+    PATH = os.path.join(os.path.dirname(OUT), name)
     try:
         H = json.load(open(PATH, encoding="utf-8"))
     except Exception:
@@ -389,7 +389,11 @@ def pv_nav_hist(now_d, now_rows):
     by = {}                                   # 날짜 → {코드: 기준가}
     for i, d in enumerate(H.get("d", [])):
         by[d] = {c: a[i] for c, a in H.get("v", {}).items() if i < len(a) and a[i] is not None}
-    by[now_d.isoformat()] = {c: x["nav"] for c, x in now_rows.items() if x.get("nav")}
+    kc = keep_code or (lambda c, x: True)
+    by[now_d.isoformat()] = {c: x["nav"] for c, x in now_rows.items() if x.get("nav") and kc(c, x)}
+    names = dict(H.get("n") or {})
+    for c, x in now_rows.items():
+        if x.get("nav") and kc(c, x) and kind == 1: names[c] = [x.get("n"), x.get("co")]
     wk = lambda d: datetime.date.fromisoformat(d).isocalendar()[:2]
     t0 = time.time(); fri = now_d - datetime.timedelta(days=(now_d.weekday() - 4) % 7)
     for k in range(1, 54):
@@ -399,8 +403,8 @@ def pv_nav_hist(now_d, now_rows):
         if time.time() - t0 > 600:
             break
         try:
-            d, rows = kofia_date(t)
-            by[d.isoformat()] = {c: x["nav"] for c, x in rows.items() if x.get("nav")}
+            d, rows = kofia_date(t, kind)
+            by[d.isoformat()] = {c: x["nav"] for c, x in rows.items() if x.get("nav") and kc(c, x)}
         except Exception as e:
             ERR.append(f"사모 기준가 기록 {t}: {str(e)[:60]}")
     ds = sorted(d for d in by if d >= (now_d - datetime.timedelta(days=400)).isoformat())
@@ -411,6 +415,7 @@ def pv_nav_hist(now_d, now_rows):
     ds = sorted(keep)
     codes = set(by[ds[-1]])
     H = {"d": ds, "v": {c: [round(by[d][c], 2) if c in by[d] else None for d in ds] for c in sorted(codes)}}
+    if kind == 1: H["n"] = {c: names.get(c) for c in codes}
     json.dump(H, open(PATH, "w", encoding="utf-8"), separators=(",", ":"))
     return len(ds)
 
@@ -629,6 +634,14 @@ def main():
                   open(os.path.join(os.path.dirname(OUT), "pv_kofia.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
         print("✓ pv_kofia", len(KP.get("items", [])))
         print("✓ pv_nav", pv_nav_hist(*PV_NOW))
+    except Exception as e:
+        ERR.append(f"금투협 사모 기준가: {str(e)[:120]}")
+    # 🧮 10/16 사용자 「어떻게 해서든 찾으라고 · 아니면 구성 종목으로 네가 계산해」 — 금투협에 기준가가 없는 사모펀드 추정용:
+    #    같은 운용사 공모펀드(사모재간접 = 그 운용사 사모펀드를 담은 공모펀드 포함)의 기준가 기록 → archive/x/pv_pub.json
+    try:
+        MGS = set(json.load(open(os.path.join(os.path.dirname(OUT), "pv_hold.json"), encoding="utf-8")).get("mg", {}).keys())
+        d_, rows_ = kofia_date(datetime.datetime.now(KST).date(), 1)
+        print("✓ pv_pub", pv_nav_hist(d_, rows_, "pv_pub.json", 1, lambda c, x: x.get("co") in MGS))
     except Exception as e:
         ERR.append(f"금투협 사모 기준가: {str(e)[:120]}")
     run("anb", anbima)

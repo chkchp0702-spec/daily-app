@@ -1,5 +1,5 @@
 name: pv_hold
-# 🧺 사모펀드 「구성 엿보기」 — 운용사별 DART 5% 대량보유 보고서 → archive/x/pv_hold.json (공개 자료만)
+# 🧺 사모펀드 「구성 엿보기」 — 운용사별 DART 5% 대량보유 보고서 → archive/x/pv_hold.json archive/x/pv_basket.json (공개 자료만)
 on:
   schedule:
     - cron: "47 21 * * 0-4"   # KST 06:47 평일
@@ -22,4 +22,4 @@ jobs:
       - name: DART 대량보유
         run: python pv_hold.py
       - name: 저장
-        run: bash scripts/push.sh "pv_hold $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/pv_hold.json
+        run: bash scripts/push.sh "pv_hold $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/pv_hold.json archive/x/pv_basket.json
