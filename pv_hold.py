@@ -52,7 +52,7 @@ def parse(x):
     num = lambda v: float(v.replace(",", "")) if v and re.match(r"^[\d,.]+$", v) else None
     nw = re.search(r"이번 보고서\s*([\d,]+)\s*([\d.]+)", x); pv = re.search(r"직전 보고서\s*([\d,\-]+)\s*([\d.\-]+)", x)
     return {"co": (g(r"발행회사명\s*(.+?)\s*발행회사와의") or "").strip(), "d": g(r"보고서작성기준일\s*:\s*(\d{4}년 \d{2}월 \d{2}일)"),
-            "r": num(nw.group(2)) if nw else None, "r0": num(pv.group(2)) if pv else None,
+            "r": num(nw.group(2)) if nw else None, "r0": num(pv.group(2)) if pv else None, "sh": num(nw.group(1)) if nw else None,
             "why": (g(r"보고사유\s*(.+?)\s*보유목적") or "").strip()[:60], "purp": (g(r"보유목적\s*(\S+)") or "").strip()}
 
 
@@ -78,6 +78,51 @@ async def details(rcs):
     return out
 
 
+def price(res):
+    """🧮 10/16 사용자 「구성종목 비율도!」 — 보유 주식 수 × 최근 종가 = 평가금액 → 운용사가 5% 넘게 가진 종목들 안에서의 비중(%)
+       종목코드: 한국거래소 KIND 상장회사 목록(회사명 → 코드) · 종가: 야후(.KS/.KQ)"""
+    try:
+        t = S.get("https://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13", timeout=60)
+        t.encoding = "euc-kr"
+        code = {}
+        for tr in re.findall(r"<tr>(.*?)</tr>", t.text, re.S):
+            td = [html.unescape(re.sub(r"<[^>]+>", "", x)).strip() for x in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]
+            if len(td) >= 3 and re.match(r"^[0-9A-Z]{6}$", td[2]): code[re.sub(r"\s+", "", td[0])] = (td[2], td[1])
+        print("kind", len(code))
+    except Exception as e:
+        print("✗ kind", e); return
+    want = {}
+    for L in res.values():
+        for it in L:
+            c = code.get(re.sub(r"\s+", "", it["nm"]).replace("(주)", ""))
+            if c:
+                it["cd"] = c[0]; want[c[0]] = c[0] + (".KQ" if "코스닥" in c[1] or it.get("mk") == "코" else ".KS")
+    px = {}
+    try:
+        import yfinance as yf
+        tk = sorted(set(want.values()))
+        h = yf.download(tk, period="10d", interval="1d", progress=False, auto_adjust=False, group_by="column", threads=True)["Close"]
+        for k6, t_ in want.items():
+            try:
+                col = h[t_] if hasattr(h, "columns") and t_ in h.columns else h
+                v = col.dropna()
+                if len(v): px[k6] = float(v.iloc[-1])
+            except Exception:
+                pass
+    except Exception as e:
+        print("✗ 가격", e)
+    for L in res.values():
+        tot = 0
+        for it in L:
+            if it.get("cd") in px and it.get("sh") and (it.get("r") or 0) >= 5:
+                it["px"] = round(px[it["cd"]], 2); it["val"] = round(it["sh"] * px[it["cd"]] / 1e8, 1); tot += it["val"]
+            else:
+                it.pop("val", None)
+        for it in L:
+            if it.get("val") and tot: it["w"] = round(it["val"] / tot * 100, 1)
+    print("가격", len(px))
+
+
 def main():
     try: old = json.load(open(OUT, encoding="utf-8"))
     except Exception: old = {}
@@ -93,7 +138,7 @@ def main():
             co = re.sub(r"^(유|코|넥|기)\s+", "", r[1]).replace(" IR", "").strip()
             if co in seen: continue
             seen.add(co)
-            if r[-1] not in cache or cache[r[-1]].get("r") is None: need.append(r[-1])
+            if r[-1] not in cache or cache[r[-1]].get("sh") is None: need.append(r[-1])
     D = asyncio.run(details(need[:600])) if need else {}
     for nm, rows in L.items():
         if rows is None: res[nm] = (old.get("mg") or {}).get(nm, []); err.append(nm); continue
@@ -108,6 +153,7 @@ def main():
             it.update({k: v for k, v in (D.get(rc) or {}).items() if v not in (None, "")})
             items.append(it)
         res[nm] = items
+    price(res)
     json.dump({"updated": datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M"), "src": "금융감독원 DART 주식등의 대량보유상황보고서(최종보고서)", "mg": res, "errors": err},
               open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("done", sum(len(v) for v in res.values()))

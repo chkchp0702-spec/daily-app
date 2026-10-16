@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -q requests playwright && python -m playwright install --with-deps chromium >/dev/null
+      - run: pip install -q requests playwright yfinance pandas && python -m playwright install --with-deps chromium >/dev/null
       - name: DART 대량보유
         run: python pv_hold.py
       - name: 저장
