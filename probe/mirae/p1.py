@@ -25,9 +25,14 @@ async def main():
             except Exception as e:
                 print("goto", u, e)
             await pg.wait_for_timeout(4000)
-            links = await pg.evaluate("""[...document.querySelectorAll('a')].map(a=>[(a.innerText||'').trim().replace(/\\s+/g,' ').slice(0,40), a.getAttribute('href')||'', a.getAttribute('onclick')||''])""")
-            txt = await pg.evaluate("document.body ? document.body.innerText.slice(0, 20000) : ''")
-            html = await pg.content()
+            links, txt, html = [], "", ""
+            for fr in pg.frames:
+                try:
+                    links += await fr.evaluate("""[...document.querySelectorAll('a')].map(a=>[(a.textContent||'').trim().replace(/\\s+/g,' ').slice(0,40), a.getAttribute('href')||'', a.getAttribute('onclick')||''])""")
+                    txt += "\n=== " + fr.url + "\n" + await fr.evaluate("document.body ? document.body.innerText.slice(0, 30000) : ''")
+                    html += "\n<!-- FRAME " + fr.url + " -->\n" + await fr.content()
+                except Exception as e:
+                    print("frame", fr.url, e)
             open(f"{OUT}/p{i}.html", "w").write(html[:600000])
             res[u] = {"final": pg.url, "title": await pg.title(), "links": links, "xhr": xhr, "text": txt}
             await pg.screenshot(path=f"{OUT}/p{i}.png", full_page=False)
