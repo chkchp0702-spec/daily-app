@@ -148,6 +148,8 @@ def bm_index():
         h = yf.download(sym, period="8y", interval="1d", progress=False, auto_adjust=False)
         c = h["Close"].dropna()
         if hasattr(c, "columns"): c = c.iloc[:, 0]
+        # 펀드 기준가(D일)는 전날(D−1) 종가로 계산됨 → 비교선도 「오늘 전 마지막 종가」까지만 (오늘 장중 값 제외)
+        c = c[[x.date() < datetime.datetime.now(KST).date() for x in c.index]]
         if len(c) < 300: continue
         last, d = float(c.iloc[-1]), c.index[-1]
         def ago(days):
