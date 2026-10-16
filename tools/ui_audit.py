@@ -52,8 +52,13 @@ async def main():
                     await pg.evaluate(JS_LIST, SEL)
                 elif abs(aft[0]-info[0])>150:
                     bad.append({"btn":info[1],"before":info[0],"after":aft[0],"scrollY":aft[1]})
-            out[tab]={"buttons":n,"jumps":bad,"errors":sorted(set(errs))[:8]}
-            print(tab, n, "jumps", len(bad), "errors", len(set(errs)), flush=True)
+            # 10/16 사용자 「저 숫자들 안 겹치게 해」 — 글이 화면 밖으로 나가거나 이름이 오른쪽 숫자와 겹치는지
+            ovf=await pg.evaluate("""(()=>{var W=document.documentElement.clientWidth,b=[];document.querySelectorAll('#main *').forEach(function(el){var r=el.getBoundingClientRect();if(!r.width||el.closest('.seg2,.pd-cfw,.tabs,.dates,[style*="overflow"]'))return;
+              if(r.right>W+1&&!el.children.length)b.push('밖 '+(el.innerText||'').slice(0,24));
+              var cs=getComputedStyle(el);if(cs.overflowX==='visible'&&cs.textOverflow!=='ellipsis'&&el.scrollWidth>el.clientWidth+2&&el.clientWidth>0&&(el.innerText||'').trim())b.push('넘침 '+(el.innerText||'').slice(0,24));});return b.slice(0,8);})()""")
+            out[tab]={"buttons":n,"jumps":bad,"errors":sorted(set(errs))[:8],"overflow":ovf}
+            print(tab, n, "jumps", len(bad), "errors", len(set(errs)), "overflow", len(ovf), flush=True)
+            for o in ovf: print("   ", o)
             for x in bad[:12]: print("   ", x)
             for e in sorted(set(errs))[:5]: print("   ERR", e)
             await ctx.close()
