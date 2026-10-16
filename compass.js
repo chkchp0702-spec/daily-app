@@ -2,7 +2,24 @@
 (function(){
   var e = V.e, sgn = V.sgn, cls = V.cls;
   var ORDER = ["US", "KR", "JP", "CN", "HK"];
-  var REG = {"상승장": {c:"up", i:"▲"}, "하락장": {c:"dn", i:"▼"}, "횡보장": {c:"fl", i:"◆"}};
+  var REG = {"상승장": {c:"up", i:"▲"}, "하락장": {c:"dn", i:"▼"}, "횡보장": {c:"fl", i:"◆"}, "하락장 속 반등": {c:"up", i:"↗"}, "상승장 속 급락": {c:"dn", i:"↘"}};
+  /* 10/16 사용자: 「너 어제부터 이거 자꾸 틀리더라」 — 코스피 +3.8%·오른 종목 89% 인데 「▼ 하락장」.
+     선(20·60일) 판정은 며칠 늦게 따라와서, 오늘 크게 반대로 움직인 날은 그걸 앞에 내세움:
+     하락장인데 오늘 +2% 이상(또는 +1.2% 이상 + 오른 종목 70%↑) → 「하락장 속 반등」 · 상승장인데 오늘 −2% 이하(또는 −1.2% + 내린 종목 70%↑) → 「상승장 속 급락」 */
+  function rd(m){
+    var ix = (m && m.index || [])[0], lab = m && m.regime; if (!ix || ix.chg1 == null) return lab;
+    var t = (m.up || 0) + (m.down || 0), ur = t ? m.up / t : 0.5, c = ix.chg1;
+    if (lab === "하락장" && (c >= 2 || (c >= 1.2 && ur >= 0.7))) return "하락장 속 반등";
+    if (lab === "상승장" && (c <= -2 || (c <= -1.2 && ur <= 0.3))) return "상승장 속 급락";
+    return lab;
+  }
+  function rdWhy(m){
+    var ix = (m && m.index || [])[0], d = rd(m); if (!ix || d === m.regime) return ix ? ix.why : "";
+    var m20 = (ix.ma20 || []).slice(-1)[0], gap = m20 ? (m20 / ix.last - 1) * 100 : null;
+    if (d === "하락장 속 반등") return "오늘 " + sgn(ix.chg1) + "% 크게 반등 중이지만 아직 20일선(" + V.fmt(m20) + ") 아래 — " + (gap != null && gap > 0 ? gap.toFixed(1) + "% 더 올라 20일선을 넘어야 하락장이 풀려요" : "20일선을 넘어서 버티면 하락장이 풀려요") + ". 선 기준 판정: " + ix.why;
+    return "오늘 " + sgn(ix.chg1) + "% 크게 빠졌지만 선(20·60일) 기준은 아직 상승장 — 이틀 이상 이어지면 판정이 바뀔 수 있어요. 선 기준 판정: " + ix.why;
+  }
+  window.regDisp = rd;
   var CPSEL = null;
 
   function card(title, body, extra){ return '<section class="card">' + (title ? '<h3>' + title + (extra || "") + '</h3>' : '') + body + '</section>'; }
@@ -27,7 +44,7 @@
       '<div class="cp-ov">' + ORDER.filter(function(k){ return C.markets[k]; }).map(function(k){
         var m = C.markets[k], ix = m.index[0], r = m.up / Math.max(1, m.up + m.down) * 100;
         return '<button class="cp-row' + (k === CPSEL ? " on" : "") + '" data-m="' + k + '">' +
-          '<div class="cp-h"><span class="cp-f">' + m.flag + '</span><b>' + e(m.name) + '</b>' + regChip(m.regime) +
+          '<div class="cp-h"><span class="cp-f">' + m.flag + '</span><b>' + e(m.name) + '</b>' + regChip(rd(m)) +
           '<span class="cp-ix">' + (ix ? e(ix.name) + ' <b class="' + cls(ix.chg1) + '">' + pct(ix.chg1) + '</b>' : '') + '</span></div>' +
           bbar(m) +
           '<div class="cp-n"><span class="up">▲ ' + num(m.up) + '</span><span class="mut">상승 비율 ' + r.toFixed(0) + '%</span><span class="dn">▼ ' + num(m.down) + '</span></div></button>';
@@ -53,7 +70,7 @@
       var sc = m.fg ? m.fg.score : (m.breadth10 || 50);
       return {k: k, m: m, sc: sc, c20: ix.chg20}; }).sort(function(a, b){ return b.sc - a.sc; });
     return card("🏁 지금 어느 시장이 제일 강할까 <span class='mut'>체감 온도 순</span>", rows.map(function(r, i){
-      return '<div class="xr"><span class="rk">' + (i + 1) + '</span><b>' + r.m.flag + " " + e(r.m.name) + '</b>' + regChip(r.m.regime) +
+      return '<div class="xr"><span class="rk">' + (i + 1) + '</span><b>' + r.m.flag + " " + e(r.m.name) + '</b>' + regChip(rd(r.m)) +
         '<span class="xbar" style="flex:1"><i style="width:' + r.sc + '%;background:' + (r.sc >= 60 ? V.UP : r.sc <= 40 ? V.DN : "#6b7385") + '"></i></span><b>' + r.sc + '</b><span class="mut">20일 ' + pct(r.c20) + '</span></div>'; }).join("") +
       '<p class="note">점수 = 오른 종목 비율·신고가 비율·지수 위치·20일 수익률(미국은 VIX까지) 평균. 높을수록 사람들이 사고 싶어 하는 시장.</p>');
   }
@@ -98,11 +115,11 @@
     var hiTxt = (PD ? '<span class="mut" style="margin-right:6px">' + PD + ' 마감</span>' : '') + '<span class="chip2 hot">52주 신고가 ' + num(m.highs) + '</span><span class="chip2 cool">52주 신저가 ' + num(m.lows) + '</span>' +
       (m.limit_up != null ? '<span class="chip2 c">' + (k === "KR" ? "상한가" : "상한가(+10%)") + ' ' + num(m.limit_up) + '</span>' : '');
     // 1) 국면 히어로
-    h += '<section class="card cp-hero h-' + ((REG[m.regime] || REG["횡보장"]).c) + '">' +
+    h += '<section class="card cp-hero h-' + ((REG[rd(m)] || REG["횡보장"]).c) + '">' +
       '<div class="row"><div><div class="mut">' + m.flag + " " + e(m.name) + " · " + hdDate(m, ix) + '</div>' +
-      '<div class="cp-big">' + regChip(m.regime, true) + '</div></div>' +
+      '<div class="cp-big">' + regChip(rd(m), true) + '</div></div>' +
       (ix ? '<div class="cp-ixb"><small>' + e(ix.name) + '</small><b>' + V.fmt(ix.last) + '</b><span class="' + cls(ix.chg1) + '">' + pct(ix.chg1) + '</span></div>' : '') + '</div>' +
-      (ix ? '<p class="note">📐 ' + e(ix.why) + '</p>' : '') +
+      (ix ? '<p class="note">📐 ' + e(rdWhy(m)) + '</p>' : '') +
       '<p class="cp-sum">' + (m.live ? '<span class="mut">' + e(m.live.t || "") + ' 지금 · </span>' : ix && ix.date > m.date ? '<span class="mut">' + e(m.date.slice(5).replace("-", "/")) + ' 종목 · </span>' : '') + e(m.summary) + '</p></section>';
     h += watchCard(m, k);
     if (m.fg) h += card("🌡️ 오늘 시장 체감 온도 <span class='mut'>" + e(m.name) + " · 종목 등락으로</span>", fgGauge(m.fg) +

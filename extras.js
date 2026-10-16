@@ -135,7 +135,7 @@
       var dual = all.filter(function(c){ return gapSet[c.code]; });
       var h = "";
       if (C && C.markets) h += '<div class="xreg">' + ["US", "KR", "JP", "CN", "HK"].filter(function(k){ return C.markets[k]; }).map(function(k){ var m = C.markets[k];
-        return '<span class="xrg ' + (m.regime === "상승장" ? "u" : m.regime === "하락장" ? "d" : "") + '">' + m.flag + " " + RG[m.regime] + " " + e(m.regime) + '</span>'; }).join("") + '</div>' +
+        var lb = window.regDisp ? regDisp(m) : m.regime; return '<span class="xrg ' + (/반등|상승장$/.test(lb) ? "u" : /급락|하락장$/.test(lb) ? "d" : "") + '">' + m.flag + " " + (RG[lb] || (/반등/.test(lb) ? "↗" : "↘")) + " " + e(lb) + '</span>'; }).join("") + '</div>' +
         '<p class="note" style="margin:0 2px 10px">🧭 나침반 국면 — <b>상승장</b>인 시장의 신호를 먼저, ★로 표시해요.</p>';
       // 📱 A12-1·A12-3 (10/15): 한글 짧은 이름 · 장중·시간외엔 지금 값으로 돌파선 거리 다시 (archive/x/cup_live.json, 10분마다)
       if (near.length) h += card("🎯 돌파 임박 <span class='mut'>돌파선까지 3% 이내</span>", '<div class="xt" id="xnear">' + near.slice(0, 12).map(function(c){
