@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="UTF-8"?><root><message><proframeHeader>
+<pfmAppName>FS-DIS2</pfmAppName>
+<pfmSvcName>DISComOutputMetaSO</pfmSvcName>
+<pfmFnName>selectMetaInfo</pfmFnName>
+<pfmGlobalNo>42800cca0afe00976f9d1e108d56afff</pfmGlobalNo>
+<pfmTrDate>20261016</pfmTrDate>
+<pfmTrTime>20261016111730570</pfmTrTime>
+<pfmClntIp>20.168.124.221</pfmClntIp>
+<pfmResponseDtal></pfmResponseDtal>
+</proframeHeader>
+<systemHeader>
+</systemHeader>
+<DISComMetaDataDTO>
+<divisionId />
+<serviceId />
+<DISComStatisticsLinkListDTO>
+<dbio_affected_count_>0</dbio_affected_count_>
+<dbio_total_count_>1</dbio_total_count_>
+<DISComStatisticsLinkDTO>
+<divisionId>MDIS01004003000000</divisionId>
+<divisionNm>기준가격등락률</divisionNm>
+<serviceId>SDIS01004003000</serviceId>
+<serviceNm>기준가격등락률 서비스</serviceNm>
+<serviceDesc>특정일 기준으로 펀드의 &lt;SPAN>기준가격 등락률&lt;/SPAN>을 조회하실 수 있습니다. &lt;span style="color:#e63b3b; font-weight:bold;">※ 검색결과에서 제목 셀 클릭 시 정렬 가능&lt;/span></serviceDesc>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<relateSrvcId />
+<labelNm />
+<orderSeq />
+</DISComStatisticsLinkDTO>
+</DISComStatisticsLinkListDTO>
+<DISComOutFormListDTO>
+<dbio_affected_count_>0</dbio_affected_count_>
+<dbio_fetch_size_>0</dbio_fetch_size_>
+<dbio_fetch_seq_>0</dbio_fetch_seq_>
+<dbio_total_count_>1</dbio_total_count_>
+<DISComOutFormDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<formNm>기준가격등락율 서비스</formNm>
+<fixFormYN>N</fixFormYN>
+<displayUnitCd />
+<displayUnitNm />
+<chartTyp />
+<chartTtlNm />
+<chartSubttlNm />
+<chartDesc />
+<chartWid />
+<chartHgt />
+<chartDspYn />
+<xaxsLblNm />
+<y1AxsLblNm />
+<y2AxsLblNm />
+<processSrtDt>19000101</processSrtDt>
+<outputPrcGb>02</outputPrcGb>
+<objNm>FS-DIS2^DISFundStdPrcRateSO^select</objNm>
+<inquiryCondDspPathNm />
+<descreptionDspPathNm />
+<userDspPathNm />
+<summaryRowCnt>0</summaryRowCnt>
+<excelExportYN>Y</excelExportYN>
+</DISComOutFormDTO>
+</DISComOutFormListDTO>
+<DISComOutColHdrListDTO>
+<dbio_affected_count_>0</dbio_affected_count_>
+<dbio_fetch_size_>0</dbio_fetch_size_>
+<dbio_fetch_seq_>0</dbio_fetch_seq_>
+<dbio_total_count_>17</dbio_total_count_>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H001</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>100</orderSeq>
+<headerNm>회사</headerNm>
+<headerTyp>T</headerTyp>
+<maximumDatLen>100</maximumDatLen>
+<columnWId>120</columnWId>
+<columnFormat />
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>L</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>2</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H002</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>200</orderSeq>
+<headerNm>펀드명</headerNm>
+<headerTyp>T</headerTyp>
+<maximumDatLen>100</maximumDatLen>
+<columnWId>140</columnWId>
+<columnFormat />
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>L</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>2</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H003</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>300</orderSeq>
+<headerNm> </headerNm>
+<headerTyp>G</headerTyp>
+<maximumDatLen>100</maximumDatLen>
+<columnWId>25</columnWId>
+<columnFormat />
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>C</alignCd>
+<linkUrl>F^goComFundSmryInfoPop</linkUrl>
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl>/img/sub/ico_glass.png</imageUrl>
+<mergeTgtRowCnt>2</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H004</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>400</orderSeq>
+<headerNm>펀드&lt;br/>유형</headerNm>
+<headerTyp>T</headerTyp>
+<maximumDatLen>100</maximumDatLen>
+<columnWId>80</columnWId>
+<columnFormat />
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>Y</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>L</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>2</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H005</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>500</orderSeq>
+<headerNm>설정일</headerNm>
+<headerTyp>T</headerTyp>
+<maximumDatLen>100</maximumDatLen>
+<columnWId>70</columnWId>
+<columnFormat />
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>C</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>2</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H006</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>600</orderSeq>
+<headerNm>설정원본&lt;br/>(백만원)</headerNm>
+<headerTyp>N</headerTyp>
+<maximumDatLen>30.9</maximumDatLen>
+<columnWId>80</columnWId>
+<columnFormat>#,###</columnFormat>
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>R</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>2</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H007</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>700</orderSeq>
+<headerNm>기준가격&lt;br/>(원)</headerNm>
+<headerTyp>N</headerTyp>
+<maximumDatLen>30.9</maximumDatLen>
+<columnWId>80</columnWId>
+<columnFormat>#,###.00</columnFormat>
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>R</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>2</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>G001</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>800</orderSeq>
+<headerNm>전일대비</headerNm>
+<headerTyp>T</headerTyp>
+<maximumDatLen>100</maximumDatLen>
+<columnWId>100</columnWId>
+<columnFormat />
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>R</columnHdrgb>
+<alignCd>C</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>1</mergeTgtRowCnt>
+<mergeCol>2</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>G002</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>900</orderSeq>
+<headerNm>전주대비</headerNm>
+<headerTyp>T</headerTyp>
+<maximumDatLen>100</maximumDatLen>
+<columnWId>100</columnWId>
+<columnFormat />
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>R</columnHdrgb>
+<alignCd>C</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>1</mergeTgtRowCnt>
+<mergeCol>2</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>G003</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>1000</orderSeq>
+<headerNm>월초대비</headerNm>
+<headerTyp>T</headerTyp>
+<maximumDatLen>100</maximumDatLen>
+<columnWId>100</columnWId>
+<columnFormat />
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>R</columnHdrgb>
+<alignCd>C</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>1</mergeTgtRowCnt>
+<mergeCol>2</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H008</headerId>
+<parentHdrId>1</parentHdrId>
+<orderSeq>1100</orderSeq>
+<headerNm>표준코드</headerNm>
+<headerTyp>T</headerTyp>
+<maximumDatLen>100</maximumDatLen>
+<columnWId>80</columnWId>
+<columnFormat />
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>C</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>2</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H009</headerId>
+<parentHdrId>2</parentHdrId>
+<orderSeq>1200</orderSeq>
+<headerNm>등락폭</headerNm>
+<headerTyp>N</headerTyp>
+<maximumDatLen>30.9</maximumDatLen>
+<columnWId>70</columnWId>
+<columnFormat>#,##0.00</columnFormat>
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>R</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>1</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H010</headerId>
+<parentHdrId>2</parentHdrId>
+<orderSeq>1300</orderSeq>
+<headerNm>등락율</headerNm>
+<headerTyp>N</headerTyp>
+<maximumDatLen>30.9</maximumDatLen>
+<columnWId>70</columnWId>
+<columnFormat>#,##0.00</columnFormat>
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>R</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>1</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H011</headerId>
+<parentHdrId>2</parentHdrId>
+<orderSeq>1400</orderSeq>
+<headerNm>등락폭</headerNm>
+<headerTyp>N</headerTyp>
+<maximumDatLen>30.9</maximumDatLen>
+<columnWId>70</columnWId>
+<columnFormat>#,##0.00</columnFormat>
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>R</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>1</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H012</headerId>
+<parentHdrId>2</parentHdrId>
+<orderSeq>1500</orderSeq>
+<headerNm>등락율</headerNm>
+<headerTyp>N</headerTyp>
+<maximumDatLen>30.9</maximumDatLen>
+<columnWId>70</columnWId>
+<columnFormat>#,##0.00</columnFormat>
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>R</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>1</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H013</headerId>
+<parentHdrId>2</parentHdrId>
+<orderSeq>1600</orderSeq>
+<headerNm>등락폭</headerNm>
+<headerTyp>N</headerTyp>
+<maximumDatLen>30.9</maximumDatLen>
+<columnWId>70</columnWId>
+<columnFormat>#,##0.00</columnFormat>
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>R</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>1</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+<DISComOutColHdrDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt />
+<headerId>H014</headerId>
+<parentHdrId>2</parentHdrId>
+<orderSeq>1700</orderSeq>
+<headerNm>등락율</headerNm>
+<headerTyp>N</headerTyp>
+<maximumDatLen>30.9</maximumDatLen>
+<columnWId>70</columnWId>
+<columnFormat>#,##0.00</columnFormat>
+<groupMergeYN>N</groupMergeYN>
+<columnFixYN>N</columnFixYN>
+<treeColYN>N</treeColYN>
+<hideYN>N</hideYN>
+<columnHdrgb>C</columnHdrgb>
+<alignCd>R</alignCd>
+<linkUrl />
+<dynamicHdrUseYN>N</dynamicHdrUseYN>
+<chartDatGb />
+<chartUseaxsGb />
+<drillingSmrycolYN>N</drillingSmrycolYN>
+<drillingSmryFunc />
+<imageUrl />
+<mergeTgtRowCnt>1</mergeTgtRowCnt>
+<mergeCol>1</mergeCol>
+<linkPagePopYn />
+<linkModalWid />
+<linkModalHgt />
+</DISComOutColHdrDTO>
+</DISComOutColHdrListDTO>
+<DISComOutDataColListDTO>
+<dbio_affected_count_>0</dbio_affected_count_>
+<dbio_fetch_size_>0</dbio_fetch_size_>
+<dbio_fetch_seq_>0</dbio_fetch_seq_>
+<dbio_total_count_>14</dbio_total_count_>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV1</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV2</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>vGridBtn1</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV3</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV4</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV5</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV6</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV7</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV8</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV9</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV10</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV11</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV12</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+<DISComOutDataColDTO>
+<outputFormNo>DIS0010</outputFormNo>
+<formSrtDt>19000101</formSrtDt>
+<processSrtDt>19000101</processSrtDt>
+<outputColCd>tmpV13</outputColCd>
+<outputCdGb />
+<groupCd />
+</DISComOutDataColDTO>
+</DISComOutDataColListDTO>
+<DISComOutUrlParamListDTO>
+<dbio_affected_count_>0</dbio_affected_count_>
+<dbio_fetch_size_>0</dbio_fetch_size_>
+<dbio_fetch_seq_>0</dbio_fetch_seq_>
+<dbio_total_count_>0</dbio_total_count_>
+</DISComOutUrlParamListDTO>
+</DISComMetaDataDTO></message></root>
