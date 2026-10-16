@@ -162,6 +162,8 @@ def bm_index():
         for x, v in c.items(): wl[tuple(x.isocalendar()[:2])] = (x.strftime("%Y-%m-%d"), float(v))
         wv = list(wl.values())
         o["wk"] = [[wv[i][0], round((wv[i][1] / wv[i - 1][1] - 1) * 100, 2)] for i in range(max(1, len(wv) - 26), len(wv))]
+        cs = c[c.index >= d - datetime.timedelta(days=400)]          # 사모 추정 후보(지수)용 종가 줄
+        o["s"] = {"d": [x.strftime("%Y-%m-%d") for x in cs.index], "v": [round(float(v), 2) for v in cs.values]}
         for y in range(2020, d.year + 1):
             e_ = c[c.index.year == y]; p_ = c[c.index.year == y - 1]
             if len(e_) and len(p_): o["y"][str(y)] = round((float(e_.iloc[-1]) / float(p_.iloc[-1]) - 1) * 100, 2)
