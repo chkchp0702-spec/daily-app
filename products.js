@@ -440,9 +440,14 @@
      archive/x/els_all.json ← els_dart.yml(평일 08:23·14:53): 모든 증권사가 DART 에 낸 ELS·ELB 공모 서류의 회차별 조건 */
   var ELSALL = null, ELSWAIT = null;
   var UAN = [[/코스피\s*200|KOSPI\s*200/i, "KOSPI200"], [/S&P\s*500/i, "S&P500"], [/유로\s*스탁스\s*50|EURO\s*STOXX\s*50/i, "EUROSTOXX50"], [/니(케|께)이\s*225|NIKKEI\s*225/i, "NIKKEI225"],
-             [/항셍\s*중국|HSCEI/i, "HSCEI"], [/항셍\s*(지수)?$|HSI$/i, "HSI"], [/나스닥\s*100|NASDAQ\s*100/i, "NASDAQ100"], [/코스닥\s*150|KOSDAQ\s*150/i, "KOSDAQ150"]];
-  function uaKey(s){ return String(s || "").split(/,|\/|·|및|\n/).map(function(x){ x = x.replace(/\([^)]*\)|\[[^\]]*\]|보통주|지수|주식/g, "").replace(/\s+/g, " ").trim();
-      for (var i = 0; i < UAN.length; i++) if (UAN[i][0].test(x)) return UAN[i][1]; return x.replace(/\s/g, ""); }).filter(function(x){ return x; }).sort().join(" + "); }
+             [/항셍\s*중국(\s*기업)?|HSCEI|H-?지수/i, "HSCEI"], [/항셍\s*(지수)?$|HSI$/i, "HSI"], [/나스닥\s*100|NASDAQ\s*100/i, "NASDAQ100"], [/코스닥\s*150|KOSDAQ\s*150/i, "KOSDAQ150"], [/테슬라|Tesla/i, "테슬라"], [/마이크론|Micron/i, "마이크론"], [/팔란티어|Palantir/i, "팔란티어"], [/엔비디아|NVIDIA/i, "엔비디아"], [/애플|Apple/i, "애플"], [/아마존|Amazon/i, "아마존"], [/마이크로소프트|Microsoft/i, "마이크로소프트"], [/알파벳|Alphabet|구글/i, "알파벳"], [/메타\s*플랫폼|Meta\s*Platforms/i, "메타"], [/브로드컴|Broadcom/i, "브로드컴"], [/어드밴스드\s*마이크로|Advanced\s*Micro|\bAMD\b/i, "AMD"], [/TSMC|Taiwan\s*Semiconductor/i, "TSMC"], [/코인베이스|Coinbase/i, "코인베이스"], [/넷플릭스|Netflix/i, "넷플릭스"], [/일라이\s*릴리|Eli\s*Lilly/i, "일라이릴리"]];
+  function uaKey(s){
+    var t = String(s || ""), out = [];
+    UAN.forEach(function(u){ var re = new RegExp(u[0].source, "gi"); if (re.test(t)){ out.push(u[1]); t = t.replace(new RegExp(u[0].source, "gi"), " "); } });
+    t.replace(/\([^)]*\)|\[[^\]]*\]|지수/g, " ").split(/보통주|우선주|,|\/|·|및|\n|\s{2,}/).forEach(function(x){ x = x.replace(/\s+/g, "").trim(); var x2 = x.replace(/Technolog(y|ies)|Inc\.?|Corp(oration)?\.?|Ltd\.?|Co\.|Class[A-Z]?|Platforms|Holdings|테크놀로지|테크놀러지|테크/gi, ""); if (x2.length >= 2) out.push(x); });
+    return out.filter(function(x, i){ return out.indexOf(x) === i; }).sort().join(" + ");
+  }
+  function barSeq(a){ a = a || []; for (var L = 1; L <= a.length / 2; L++){ if (a.length % L) continue; var ok = true; for (var i = L; i < a.length; i++) if (a[i] !== a[i % L]){ ok = false; break; } if (ok) return a.slice(0, L); } return a; }
   function elsCmp(D){
     if (!ELSALL){ if (!ELSWAIT) ELSWAIT = getJSON("archive/x/els_all.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).then(function(j){ ELSALL = j; if (window.__pdRedraw) window.__pdRedraw(); }).catch(function(){ ELSALL = {items: [], err: 1}; if (window.__pdRedraw) window.__pdRedraw(); });
       return '<div class="loading">전체 증권사 ELS 불러오는 중…</div>'; }
@@ -456,7 +461,7 @@
     var isl = Object.keys(iss).map(function(k){ var a = iss[k]; return [k, a.length, a.reduce(function(p, c){ return p + c; }, 0) / a.length, Math.max.apply(null, a)]; }).sort(function(a, b){ return b[2] - a[2]; });
     var row = function(x, hi){ return '<tr class="' + (mir(x) ? 'me' : '') + '"><td><b>' + e((x.iss || "").replace(/주식회사|\(주\)/g, "").trim()) + '</b><br><span class="mut">' + e((x.nm.match(/제\s*\[?\d+\]?\s*회/) || [""])[0].replace(/[\[\]\s]/g, "")) + (x.risk ? ' · ' + e(x.risk.replace(/\(.*$/, "")) : '') + '</span></td>' +
       '<td><b class="up">' + pc(x.cpn) + '</b><br><span class="mut">' + (x.kind === "ELB" || x.nolos ? '원금지급' : x.loss != null ? '최대 ' + x.loss + '%' : '원금 비보장') + '</span></td>' +
-      '<td>' + (x.bars && x.bars.length ? e(x.bars.join("-")) : '–') + (x.ki ? '<br><span class="mut">KI ' + x.ki + '</span>' : '') + '</td>' +
+      '<td>' + (x.bars && x.bars.length ? e(barSeq(x.bars).join("-")) : '–') + (x.ki ? '<br><span class="mut">KI ' + x.ki + '</span>' : '') + '</td>' +
       '<td>' + e(md(x.mat || "")) + '<br><span class="mut">마감 ' + e(md(x.e || "")) + '</span></td></tr>'; };
     var tblh = '<table class="pd-ec"><tr><th>발행사</th><th>연 수익률</th><th>배리어 · KI</th><th>만기 · 청약</th></tr>';
     var h = '<div class="mg-kv"><div><small>청약 중 전체 (DART)</small><b>' + L.length + '개</b><em>발행사 ' + isl.length + '곳 · ' + e(ELSALL.updated || "") + '</em></div>' +

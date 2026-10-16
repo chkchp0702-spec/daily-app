@@ -27,8 +27,8 @@ def parse(ov, rt):
     o["amt"] = round(int(amt.replace(",", "")) / 1e8, 1) if amt else None
     d = re.findall(r"(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일", g(r"청약기간(.{0,120})") or "")
     if d: o["s"] = "%s-%02d-%02d" % (d[0][0], int(d[0][1]), int(d[0][2])); o["e"] = "%s-%02d-%02d" % (d[-1][0], int(d[-1][1]), int(d[-1][2]))
-    m = re.findall(r"(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일", g(r"만\s*기\s*일[^\n]*\s*(.{0,40})") or "")
-    if m: o["mat"] = "%s-%02d-%02d" % (m[0][0], int(m[0][1]), int(m[0][2]))
+    m = re.search(r"만\s*기\s*일[^\n]{0,20}?\[?\s*(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일", ov)
+    if m: o["mat"] = "%s-%02d-%02d" % (m.group(1), int(m.group(2)), int(m.group(3)))
     # 권리내용: 연 수익률(최대), 최대손실, 배리어, KI
     yrs = [pct(x) for x in re.findall(r"연\s*([\d.]+)\s*%", rt)]
     yrs = [x for x in yrs if x is not None and 0 < x < 60]
@@ -37,11 +37,20 @@ def parse(ov, rt):
     o["nolos"] = bool(re.search(r"손실이 발생하지 않|원금.{0,6}(보장|지급)", ml))
     mlp = re.search(r"-\s*(\d{1,3}(?:\.\d+)?)\s*%", (g(r"최대손실액(.{0,300})", rt) or ""))
     o["loss"] = -pct(mlp.group(1)) if mlp else (0 if o["nolos"] else None)
-    bars = [int(x) for x in re.findall(r"최초기준가격의?\s*\[?\s*(\d{2,3})\s*\]?\s*%\s*(?:보다 크거나 같|이상)", rt)]
-    seq = []
-    for x in bars:
-        if not seq or seq[-1] != x: seq.append(x)
-    o["bars"] = seq[:12]
+    # 조기상환 배리어: 「N차 … 최초기준가격의 X%」 를 차수별로 (같은 값이 이어져도 그대로 — 85-85-85-80…), 차수가 없으면 나온 순서
+    by = {}
+    for ln in rt.split("\n"):
+        mm = re.search(r"(\d{1,2})\s*차", ln); bb = re.search(r"최초기준가격의?\s*\[?\s*(\d{2,3})\s*\]?\s*%\s*(?:보다 크거나 같|이상)", ln)
+        if mm and bb and int(mm.group(1)) not in by: by[int(mm.group(1))] = int(bb.group(1))
+    if len(by) >= 2:
+        seq = [by[k] for k in sorted(by)]
+        mm = re.search(r"최종기준가격[^\n]{0,40}최초기준가격의?\s*\[?\s*(\d{2,3})\s*\]?\s*%\s*(?:보다 크거나 같|이상)", rt)
+        if mm and len(seq) < 12: seq.append(int(mm.group(1)))
+    else:
+        seq = []
+        for x in [int(x) for x in re.findall(r"최초기준가격의?\s*\[?\s*(\d{2,3})\s*\]?\s*%\s*(?:보다 크거나 같|이상)", rt)]:
+            if not seq or seq[-1] != x: seq.append(x)
+    o["bars"] = seq[:12]; o["pv"] = 2
     ki = re.search(r"최초기준가격의?\s*\[?\s*(\d{2,3})\s*\]?\s*%\s*(?:보다 작은|미만)[^\n]{0,80}(?:하락한 적|하락한계|한 번이라도|한번이라도)", rt) or \
          re.search(r"(?:하락한계가격|낙인|Knock-?In)[^\n]{0,60}?(\d{2,3})\s*%", rt)
     o["ki"] = int(ki.group(1)) if ki else None
@@ -81,7 +90,9 @@ async def main():
             m = re.search(r"rcpNo=(\d+)", r[-1] or "")
             if not m: continue
             rc = m.group(1)
-            if any(x.startswith(rc + ":") for x in cache):
+            if any(x.startswith(rc + ":") and cache[x].get("pv") == 2 for x in cache):
+                items += [v for k_, v in cache.items() if k_.startswith(rc + ":")]; continue
+            if (datetime.datetime.now() - t0).seconds > 1800:          # 시간이 모자라면 옛 결과라도 유지
                 items += [v for k_, v in cache.items() if k_.startswith(rc + ":")]; continue
             if (datetime.datetime.now() - t0).seconds > 1800: err.append("시간 초과 — 나머지는 다음 회차"); break
             try:
