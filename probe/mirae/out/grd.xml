@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ev="http://www.w3.org/2001/xml-events"
+    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
+    <head>
+        <w2:buildDate/>
+        <xf:model>
+            <xf:instance>
+                <data xmlns=""/>
+            </xf:instance>
+        </xf:model>
+        <script type="javascript"><![CDATA[
+        
+        	function fnExcelDownBtn(){
+				if(grdMain.getRowCount()>0){
+					var vFileNm = WebSquare.ModelUtil.getInstanceValue( 'resService/root/message/DISComServiceDTO/divisionNm' );
+					gridExcelDown(grdMain, vFileNm);
+				}
+				else{
+					alert("데이터가 없습니다.");
+				}
+        	}
+        	document.getElementById("group43")
+        	if(vServiceId == 'SDIS03002002000' || vServiceId == 'SDIS03002001000'){
+				if (document.getElementById("group43"))
+				{
+        			group43.hide();
+				}
+        	}
+        	
+         ]]></script>
+    </head>
+    <body>
+    <xf:group id="group36" style="" class="pt10">
+		<xf:group id="group37" style="" class="grid_etc">
+			<xf:group id="group38" style="" class="fl">
+				<w2:textbox id="txtGridTitle" style="" label="검색결과:" tagname="span"></w2:textbox>
+				<w2:textbox id="txtGridCnt" style="" class="font_color_orange ml5" label="0" tagname="strong"></w2:textbox>
+				<w2:textbox id="txtGridCntType" style="" class="ml3" label="건" tagname="span"></w2:textbox>
+				<w2:textbox id="txtRemark" style="" class="ml3" label="" tagname="span"></w2:textbox><!--검색결과외에 추가 텍스트 표현 필요한 경우에 활용 -->
+			</xf:group>
+			<xf:group id="group39" style="" class="fr">
+				<w2:textbox id="txtUnit" style=""	label="" tagname="span" class="mr5 font_888"></w2:textbox>
+				<xf:group class="btn_gride_large" id="excelDownLoadGrp" style="display:none;" tagname="a">
+					<w2:attributes>
+						<w2:href>javascript:fnExcelDownBtn();</w2:href>
+					</w2:attributes>
+					<xf:image id="excelDownBtn" src="/img/com/btn_container_down.gif" style="cursor:pointer" class="middle" alt="엑셀 다운로드">
+					</xf:image>
+				</xf:group>
+				<xf:group id="btn_gride_large" style="" class="btn_gride_large" tagname="a">
+					<w2:attributes>
+						<w2:href>javascript:btnContainerResize('large');</w2:href>
+					</w2:attributes>
+					<xf:image id="btn_container_large" style="" src="/img/com/btn_container_large.gif" class="middle" alt="넓게보기"></xf:image>
+				</xf:group>
+				<xf:group id="btn_gride_return" style="display:none;" class="btn_gride_return" tagname="a">
+					<w2:attributes>
+						<w2:href>javascript:btnContainerResize('return');</w2:href>
+					</w2:attributes>
+					<xf:image id="image2" style="" src="/img/com/btn_container_return.gif" alt="되돌리기" class="middle"></xf:image>
+				</xf:group>
+			</xf:group>
+		</xf:group>
+		<w2:grid baseNode="list" noResultMessageVisible="true" summary="펀드공시검색 정보입니다." valueNode="value"
+				visibleRowNum="6" rowMouseOver="false" 
+				class="common_gride_section" wheelRows="1" id="grdMain" readOnly="true" style="position:relative;height:400px;" overflowX="auto"
+				overflowY="auto" repeatNode="vector" autoFit="allColumn">
+				<w2:caption id="caption2cccd1" style="" value="펀드공시 검색된 내용입니다."></w2:caption>
+				<w2:header id="header1" style="">
+					<w2:row id="row1" style="">
+						<w2:column id="h_01" inputType="text" width="52" value=""></w2:column>
+					</w2:row>
+				</w2:header>
+				<w2:gBody id="gBody1" style="">
+					<w2:row id="row2" style="">
+						<w2:column id="row_01" imageTabindex="1" inputType="text"></w2:column>
+					</w2:row>
+				</w2:gBody>
+		</w2:grid>
+	  </xf:group>
+	</body>
+</html>

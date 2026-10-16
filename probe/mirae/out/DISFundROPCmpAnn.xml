@@ -1,183 +1,1245 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml"
-    xmlns:ev="http://www.w3.org/2001/xml-events"
-    xmlns:w2="http://www.inswave.com/websquare" xmlns:xf="http://www.w3.org/2002/xforms">
-    <head>
-    	<title>금융투자협회 전자공시 - 펀드공시검색</title>
-        <w2:buildDate/>
-        <xf:model>
-	   		<xf:instance>
-	   			<data xmlns=""></data>
-	   		</xf:instance>
-   		</xf:model>
-        <script type="javascript"><![CDATA[
-        	var vDivisionId = WebSquare.net.getParameter( "divisionId" );  // 메뉴아이디
-    		var vServiceId = WebSquare.net.getParameter( "serviceId" );  // 서비스아이디
-    		if (vDivisionId == "")
-    			vDivisionId = 'MDIS01008000000000';
-    		
-    		
-         ]]></script>
-    </head>
-    <body>
-    	<xf:group id="wrap">
-    		<w2:wframe id="header" style="" src="/wq/com/gnb.xml"></w2:wframe>
-    		<xf:group id="container">
-    			<xf:group id="content_section" style="" class="content_section">
-    				<w2:wframe id="snb" style="display:none" class="snb" src="/wq/com/snb.xml"></w2:wframe>
-    				<xf:group id="content" style="position:relative;" class="">
-    					<w2:wframe id="subTit_1" style="" src="/wq/com/subTit.xml"></w2:wframe>
-    					<w2:wframe id="common_sera_table1" style="" src="/wq/fundann/inc/DISFundROPCmpAnn.xml"></w2:wframe>
-    					
-    					<xf:group class="pt20" id="12monthLt" style="">
-   							<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox1__" label="운용실적 분류선택" style=""></w2:textbox>
-	   						<xf:group class="common_table1" id="tblList4Group" style="" tagname="table">
-    							<w2:attributes>
-    								<w2:summary>운용실적을 선택해주세요</w2:summary>
-    								<w2:cellspacing>0</w2:cellspacing>
-    								<w2:collpadding>0</w2:collpadding>
-    							</w2:attributes>
-    							<w2:textbox id="textbox9" label="운용실적 1차분류" style="" tagname="caption"></w2:textbox>
-    							<xf:group class="" id="group35" style="" tagname="colgroup">
-    								<xf:group class="" id="group36" style="" tagname="col">
-    									<w2:attributes>
-    										<w2:width>180</w2:width>
-    									</w2:attributes>
-    								</xf:group>
-    								<xf:group class="" id="group37" style="" tagname="col">
-    									<w2:attributes>
-    										<w2:width>*</w2:width>
-    									</w2:attributes>
-    								</xf:group>
-    							</xf:group>
-    							<xf:group class="" id="group102" style="" tagname="tr">
-    								<xf:group class="table1_th" id="group103" style="" tagname="th">
-    									<w2:textbox for="report_select_input_0" id="textbox35" label="운용실적 1차분류" style="" tagname="label"></w2:textbox>
-    								</xf:group>
-    								<xf:group class="table1_td" id="tblList4" style="height:22px" tagname="td">
-    									<xf:select1 appearance="full" class="common_table_ipt_ul" cols="" id="radioBtn" itemTagname="li"
-    										renderType="radiogroup" rows="" selectedIndex="-1" style="" tagname="ul">
-    										<script ev:event="onradioclick(index,value)" type="javascript"><![CDATA[ 
-    											var sel7Value = radioBtn.getValue();
-    											var sel7Nm = radioBtn.getText();
-    											changeSel7(sel7Value, sel7Nm);
-    										]]></script>
-    										<script type="javascript" ev:event="onchange"><![CDATA[
-    											var sel7Value = radioBtn.getValue();
-    											var sel7Nm = radioBtn.getText();
-    											changeSel7(sel7Value, sel7Nm);
-    										 ]]></script>
-    									</xf:select1>
-    								</xf:group>
-    							</xf:group>
-    							
-    						</xf:group>
-    						<xf:group class="pt20 overflow" id="group145" style="">
-    							<xf:group class="fl248 mr10" id="fl250_1" style="">
-    								<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox56" label="운용실적 2차분류" style=""></w2:textbox>
-    								<xf:group class="select_cont_box" id="group148" style="height:365px;">
-    									<!-- 운용실적 2차분류 -->
-    									<xf:group id="tblList5" style="" tagname="ul" class="ROPCmpAnn_list"></xf:group>
-    									<!-- 운용실적 2차분류 -->
-    								</xf:group>
-    							</xf:group>
-    							<xf:group class="fl248 mr10" id="fl250_2" style="">
-    								<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox60" label="운용실적 3차분류" style=""
-    									localeRef="">
-    								</w2:textbox>
-    								<xf:group class="select_cont_box" id="group163" style="height:365px;">
-    									<!-- 운용실적 3차분류 -->
-    									<xf:group id="tblList6" style="" tagname="ul" class="ROPCmpAnn_list"></xf:group>
-    									<!-- 운용실적 3차분류 -->
-    								</xf:group>
-    							</xf:group>
-    							<xf:group class="fl248" id="fl250_3" style="">
-    								<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox61" label="분류설정" style=""></w2:textbox>
-    								<xf:group class="select_cont_box" id="group165" style="height:365px;">
-    									<xf:group id="ROPCmpAnn_ex_ul1" style="" tagname="ul" class="ROPCmpAnn_ex_ul">
-    										<xf:group id="group168" style="" tagname="li" class="mb15">
-    											<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList4tit" label="" style="" tagname="p"></w2:textbox>
-    											<w2:textbox class="" id="tblList4Desc" label="" style="" tagname="p"></w2:textbox>
-    										</xf:group>
-    										<xf:group id="group169" style="" tagname="li" class="mb15">
-    											<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList5tit" label="" style=""
-    												tagname="p">
-    											</w2:textbox>
-    											<w2:textbox class="" id="tblList5Desc" label="" style=""
-    												tagname="p">
-    											</w2:textbox>
-    										</xf:group>
-    										<xf:group id="group170" style="" tagname="li">
-    											<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList6tit" label="" style="" tagname="p">
-    											</w2:textbox>
-    											<w2:textbox class="" id="tblList6Desc" label="" style=""
-    												tagname="p">
-    											</w2:textbox>
-    										</xf:group>
-    									</xf:group>
-    								</xf:group>
-    							</xf:group>
-    						</xf:group>
-    					</xf:group>
-    					
-    					<!--  -->
-    					<!-- 2009년 12월 이전 -->
-						<xf:group class="pt20 overflow" id="11monthBf" style="">
-							<xf:group class="fl183 mr10" id="group225" style="">
-								<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox95a_" label="운용실적 1차분류" style=""></w2:textbox>
-								<xf:group class="select_cont_box" id="group226" style="height:365px;">
-									<!-- 운용실적 1차 -->
-									<xf:group class="ROPCmpAnn_list" id="tblList1" style="" tagname="ul"></xf:group>
-									<!-- 운용실적 1차 -->
-								</xf:group>
-								</xf:group><xf:group class="fl183 mr10" id="group209" style="">
-									<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox82" label="운용실적 2차분류" style=""></w2:textbox>
-									<xf:group class="select_cont_box" id="group210" style="height:365px;">
-										<!-- 운용실적 2차 -->
-										<xf:group class="ROPCmpAnn_list" id="tblList2" style="" tagname="ul"></xf:group>
-									</xf:group>
-								</xf:group><xf:group class="fl183 mr10" id="group214" style="">
-									<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox85" label="운용실적 3차분류" localeRef="" style="">
-									</w2:textbox>
-									<xf:group class="select_cont_box" id="group215" style="height:365px;">
-										<!-- 운용실적 3차 -->
-										<xf:group class="ROPCmpAnn_list" id="tblList3" style="" tagname="ul"></xf:group>
-									</xf:group>
-								</xf:group><xf:group class="fl183" id="group219" style="">
-									<w2:textbox class="txt_select_num sub_tit_top_bg" id="textbox88" label="분류설정" style=""></w2:textbox>
-									<xf:group class="select_cont_box" id="group220" style="height:365px;">
-										<xf:group class="ROPCmpAnn_ex_ul" id="group221" style="" tagname="ul">
-											<xf:group class="mb15" id="group222" style="" tagname="li">
-												<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList1tit" label="" style="" tagname="p"></w2:textbox>
-												<w2:textbox class="" id="tblList1Desc" label="" style="" tagname="p"></w2:textbox>
-											</xf:group>
-											<xf:group class="mb15" id="group223" style="" tagname="li">
-												<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList2tit" label="" style="" tagname="p">
-												</w2:textbox>
-												<w2:textbox class="" id="tblList2Desc" label="" style="" tagname="p">
-												</w2:textbox>
-											</xf:group>
-											<xf:group id="group224" style="" tagname="li">
-												<w2:textbox class="ROPCmpAnn_ex_tit" id="tblList3tit" label="" style="" tagname="p"></w2:textbox>
-												<w2:textbox class="" id="tblList3Desc" label="" style="" tagname="p">
-												</w2:textbox>
-											</xf:group>
-										</xf:group>
-									</xf:group>
-								</xf:group>
-							</xf:group>
-							<!-- //4개짜리 -->
-    						
-    					<!--  -->
-    					<w2:wframe id="subTip_1" class="mt20" style="" src="/wq/com/subTip.xml"></w2:wframe>
-
-
-    					
-    				</xf:group>
-    				<w2:wframe id="quick_section" style="" class="quick_section" src="/wq/com/quick.xml"></w2:wframe>
-    			</xf:group>
-    		</xf:group>
-    		<w2:wframe id="footer" src="/wq/com/footer.xml"></w2:wframe>
-    	</xf:group>
-    </body>
-</html>
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:w2="http://www.inswave.com/websquare"
+	xmlns:xf="http://www.w3.org/2002/xforms">
+	<head>
+		<w2:buildDate />
+		<xf:model>
+			<xf:instance>
+				<data xmlns="" />
+			</xf:instance>
+		</xf:model>
+		<script type="javascript"><![CDATA[ 
+        var tmpFundGb  =  '';
+		var tmpMngScl  =  '';
+		var tmpCdList    =  '';
+		var uDivisionId1 = '';
+		var uDivisionId2 = '';
+		var uDivisionId3 = '';
+        var now = getToday();
+        var codeDescNm = "";
+		var codeTitleNm = "";
+		var codeValueCh = "";
+		var pCd1,pCd2,pCd3,pCd2Idx=3;
+		
+        /**************************************************************************
+		 * function    : initRopCmpAnn
+		 * Description : 펀드수익률 비교공시 UI 생성 기본 함수
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+        function initRopCmpAnn() {
+        	centerContainer();
+			$(window).on('resize', function(){
+				btnContainerResize('return');
+				centerContainer();
+			});
+			
+			var inServiceId = vServiceId;
+			if (inServiceId == '')
+				inServiceId = 'SDIS01009001000';
+		
+			callGnb(vDivisionId);
+			callSnb(vDivisionId);
+			callDisService(vDivisionId);
+			
+			callUi();
+			
+			addDisUserLog(vDivisionId, inServiceId);
+			
+			pCd1 = WebSquare.net.getParameter( "pCd1");
+			pCd2 = WebSquare.net.getParameter( "pCd2");
+			pCd3 = WebSquare.net.getParameter( "pCd3");
+			
+			if (now.substring(0,4) > '2009')
+				initCond();
+        }
+        
+         /**************************************************************************
+		 * function    : initCond
+		 * Description : 조건부 setting
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+        function initCond() {
+			pCd2Idx = 3;
+
+        	setStandardDt("Y", returnStandardDt);
+        	
+        	function returnStandardDt() {
+        		setStandardDt("M",returnMonth);
+        		
+        		setCommonCd('fundType','T1100');
+        		initListCheck();
+        		changePcd2();
+        	}
+        	function returnMonth(){
+       			//alert(uMonth.getItemCount());
+       			var monLength = uMonth.getItemCount();
+       			uMonth.setSelectedIndex(monLength-1);
+				changePcd2();
+       		}
+       		
+         	setCommonCd('tblList4','T1204', setBranchNm);
+         	function setBranchNm() {
+         		changeSel7(vBranchCd1.getValue(), vBranchNm1.getValue()) ;
+				changePcd2();
+         	}
+
+			
+  	    }
+        
+		
+		function changePcd2() {
+			if (pCd2Idx == 0)
+			{
+				pCd2= "";
+			}
+
+			pCd2Idx--;
+		}
+
+        /**************************************************************************
+		 * function    : resetCond
+		 * Description : 조건부 초기화
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+        function resetCond() {
+        	radioBtnClear();
+        	initCond();
+        }
+        
+        /**************************************************************************
+		 * function    : setNewMngResBrn
+		 * Description : 운용실적2차조회 세팅
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+        function changeSel7(firstCode,firstNm){	
+			vBranchNm1.setValue( firstNm );
+			vBranchCd1.setValue( firstCode );
+
+			tblList4tit.setLabel('[' + firstNm + ']');
+			tblList4Desc.setValue(firstNm);
+			setNewMngResBrn("S","tblList5",firstCode, returnCallback);
+			
+			function returnCallback() {
+				setNewMngResBrn("T","tblList6",codeValueCh);
+			}
+			
+		}
+
+		var selId;
+		/**************************************************************************
+		 * function    : setNewMngResBrn
+		 * Description : 운용실적2차조회 세팅
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+        function setNewMngResBrn(option,id,codeValue, callback) {
+        	
+        	var inDTO  = {"DISMngResBrnListDTO":{}}
+        	
+        	CallProFrame.insertValue(inDTO,"option",option);	
+			CallProFrame.insertValue(inDTO,"code",codeValue);	
+ 			CallProFrame.callService("FS-DIS2", "DISMngResBrnSrchSO", "select", inDTO, null,{'success' : getNewMngResBrn});
+  			
+ 			function getNewMngResBrn(e) {
+ 				var text = "";
+ 				
+ 				var resArr = WebSquare.xml.findNodes(e.responseBody,'root/message/DISMngResBrnListDTO/list');
+ 				
+ 				if (resArr.length > 0) {
+ 					var innerValue = "";
+ 					var chkId = id;
+ 					
+	 				for (var i=0; i < resArr.length ; i++) {
+		 				var commonCd = WebSquare.xml.getValue(resArr[i], 'commonCd');
+						var codeNm = WebSquare.xml.getValue(resArr[i], 'codeNm');
+						var codeDesc = WebSquare.xml.getValue(resArr[i], 'codeDesc');
+						var classNm = '';
+						
+						if (chkId == 'tblList5') {
+							if (pCd2) {
+								if (pCd2==commonCd) {
+									
+									classNm = "on";
+									codeValueCh = commonCd;
+									codeDescNm = codeDesc;
+									codeTitleNm = codeNm;
+									
+									// 첫번째 ROW를 디폴트 선택값으로 셋팅
+									vBranchNm2.setValue(codeNm);
+									vBranchCd2.setValue(commonCd);
+									//pCd2 = "";
+								}
+							} else {
+								if (i==0) {
+									
+									classNm = "on";
+									codeValueCh = commonCd;
+									codeDescNm = codeDesc;
+									codeTitleNm = codeNm;
+									
+									// 첫번째 ROW를 디폴트 선택값으로 셋팅
+									vBranchNm2.setValue(codeNm);
+									vBranchCd2.setValue(commonCd);
+								}
+							}
+							
+							innerValue +="<li style=\"cursor:pointer;\"  class=''><a class='" + classNm + "' onClick='selectNextBrn(\"" + commonCd + "\",\"" + codeDesc + "\",\"" + chkId + "\",\"" + codeNm + "\"," + i + ")' >" + codeNm + "</a></li>";
+							
+							
+						} else if (chkId == 'tblList6') {
+							if (pCd3)
+							{
+								if (pCd3 == commonCd) {
+									classNm = "on";
+									codeValueCh = commonCd;
+									codeDescNm = codeDesc;
+									codeTitleNm = codeNm;
+									
+									vBranchNm3.setValue(codeNm);
+									vBranchCd3.setValue(commonCd);
+									pCd3 = "";
+								}
+							} else {
+								if (i == 0) {
+									classNm = "on";
+									codeValueCh = commonCd;
+									codeDescNm = codeDesc;
+									codeTitleNm = codeNm;
+									
+									vBranchNm3.setValue(codeNm);
+									vBranchCd3.setValue(commonCd);
+								}
+							}
+							
+							innerValue +="<li style=\"cursor:pointer;\" class=''><a class='" + classNm + "' onClick='selectNextBrn(\"" + commonCd + "\",\"" + codeDesc + "\",\"" + chkId + "\",\"" + codeNm + "\"," + i + ")' >" + codeNm + "</a></li>";
+						}
+	 				}
+	 				
+	 				if(chkId =="tblList5") {
+	 					document.getElementById("tblList5").innerHTML = innerValue;
+						tblList5tit.setLabel('[' + codeTitleNm + ']');
+						tblList5Desc.setLabel(codeDescNm);
+	 				
+	 				} else if (chkId =="tblList6") {
+	 					document.getElementById("tblList6").innerHTML = innerValue;
+	 					tblList6tit.setLabel('[' + codeTitleNm + ']');
+						tblList6Desc.setLabel(codeDescNm);
+	 				}
+	 			} else {
+	 				if (chkId =="tblList5") {
+	 					vBranchNm2.setValue('');
+						vBranchCd2.setValue('');
+	 				} else if (chkId =="tblList6") {
+	 					vBranchNm3.setValue('');
+						vBranchCd3.setValue('');
+	 				}
+	 			}
+	 			
+	 			if (callback)
+	 				callback();
+	 				
+        	}
+        }
+        
+        
+        
+         /**************************************************************************
+		 * function    : setCommonCd
+		 * Description : 공통코드 조회
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+        function setCommonCd(id,groupCd, callback){
+        	var inDTO  = {"DISCommonCdListDTO":{}}
+        	
+			selId = id;
+			
+			CallProFrame.insertValue(inDTO, "groupCd", groupCd);
+			CallProFrame.callService("FS-DIS2", "DISFundCmpFundComCdSO", "select", inDTO, null,{'success' : getCommonCd});
+			
+			function getCommonCd(e) {
+				var codeTitleNm = "";
+				var codeValue = "";
+				var chkMonth = uMonth.getValue();
+				var chkYear = uYear.getValue();
+				
+				if (id =="fundType" && (chkYear>2009 ||(chkYear==2009 && chkMonth=="12") ) ) {
+					fundType.addItem( 0 , '전체' , 0);
+				}	
+				
+				var commnArr = WebSquare.xml.findNodes(e.responseBody,'/root/message/DISCommonCdListDTO/list');
+				for (var i=0; i<commnArr.length; i++) {
+					var commonCd = WebSquare.xml.getValue(commnArr[i], 'commonCd');
+					var codeNm = WebSquare.xml.getValue(commnArr[i], 'codeNm');
+					
+					if (id == "fundType") {
+						if ( tmpFundGb == commonCd ) {
+							fundGb.setValue(tmpFundGb);
+						} 
+						
+						fundType.addItem( commonCd , codeNm , i+1);
+					} else if (id =="tblList4") {
+						if (i == 0) {
+							codeTitleNm = codeNm;
+							codeValue = commonCd;
+						}
+						
+						radioBtn.addItem( commonCd , codeNm , i );
+					}
+					if (id == "fundType") { // 디폴트 선택
+						if (fundType.getValue()=="")
+						{
+							fundType.setSelectedIndex(0);
+						}
+					}
+					
+				}
+				
+				if (id =="tblList4") {
+					if (pCd1) {
+						radioBtn.setValue(pCd1);
+					} else {
+						radioBtn.setSelectedIndex(0);	
+					}
+					tblList4tit.setLabel('[' + codeTitleNm + ']');
+					tblList4Desc.setLabel(codeTitleNm);
+					
+					vBranchNm1.setValue( codeTitleNm );
+					vBranchCd1.setValue( codeValue );
+				}
+				if (callback)
+					callback(); 
+			}
+		}	
+        
+		/**************************************************************************
+		 * function    : initListCheck
+		 * Description : 수익률구간 setting
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+		function initListCheck() {
+			listCheck.setValue("0 2 4 10");
+		}
+		
+		/**************************************************************************
+		 * function    : chgSrchArea
+		 * Description : 운영실적 분류 UI생성
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+		function chgSrchArea(callback) {
+			var reYearData = uYear.getValue();
+			var vMonthValue = uMonth.getValue();
+			reYearData = parseInt(reYearData,10)
+			//console.log('reYearData>>>>>>>>>>>>[' + typeof reYearData + '],data>>>>>' + reYearData);
+			
+			if(reYearData > 2009) {
+				$('#11monthBf').hide();
+				$('#12monthLt').show();
+				$('#11monthMenu').hide();
+				$('#12monthMenu').show();
+				$('#12monthTitle').show();
+
+				//radioBtnClear();
+			} else if(reYearData == 2009) {
+				if(vMonthValue == "12") {
+					$('#11monthBf').hide();
+					$('#12monthLt').show();
+					$('#11monthMenu').hide();
+					$('#12monthMenu').show();
+					$('#12monthTitle').show();
+					//radioBtnClear();
+				}else{
+					$('#11monthBf').show();
+					$('#12monthLt').hide();
+					$('#11monthMenu').show();
+					$('#12monthMenu').hide();
+					$('#12monthTitle').hide();
+					
+					//radioBtnClear();
+				}
+			} else {
+				$('#11monthBf').show();
+				$('#12monthLt').hide();
+				$('#11monthMenu').show();
+				$('#12monthMenu').hide();
+				$('#12monthTitle').hide();
+				
+				//radioBtnClear();
+				
+			}
+			
+			if (callback)
+				callback();
+		}
+		
+		
+	    /**************************************************************************
+		 * function    : setStandardDt
+		 * Description : 기준일자생성
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+	    function setStandardDt(uGb, callback) {
+	    	//vGb.setValue(uGb);
+			var inDTO  = {"DISComSetStdDtListDTO":{}};
+			if(uGb=="M"){
+				CallProFrame.insertValue(inDTO, "standardYm", uYear.getValue());
+			} 
+			
+			CallProFrame.insertValue(inDTO, "uGb", uGb);
+			CallProFrame.callService("FS-DIS2", "DISComSetStdDtSO", "select", inDTO, null,{'success' : getStandardDt});
+	    	
+	    	function getStandardDt(e){
+				
+				var thisYear = now.substring(0,4);
+				var thisMonth = now.substring(4,6);
+				
+				if(uGb =="Y"){
+					WebSquare.ModelUtil.setInstanceNode( e.responseBody , "resStdYY", null , "replace" );
+					WebSquare.util.getComponentById("uYear").setNodeSet( "resStdYY/root/message/DISComSetStdDtListDTO" , "list/standardDt" , "list/standardDt" );
+
+					var cYear = uYear.getValue();
+					var cYearIdx = uYear.getSelectedIndex();
+					
+					makeYear();
+					//setStandardDt('M');
+				}else if(uGb =="M"){
+					WebSquare.ModelUtil.setInstanceNode( e.responseBody , "resStdMM", null , "replace" );
+					WebSquare.util.getComponentById("uMonth").setNodeSet( "resStdMM/root/message/DISComSetStdDtListDTO" , "list/standardDt" , "list/standardDt" );
+					
+					var cMon = uMonth.getValue();
+					var cMonIdx = uMonth.getSelectedIndex();
+					
+					//uMonth.setSelectedIndex(0);
+					//uMonth.setValue(thisMonth);
+				}
+				
+				chgSrchArea();
+				
+				if (callback)
+					callback();
+			}
+	    }
+	    
+	    /**************************************************************************
+		 * function    : makeYear
+		 * Description : 2009년 이전 기준연도 생성
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+	    function makeYear(){
+			var y = getToday().substring(0,4);
+			for(var i=y;i>=1998;i--){
+				if(i >= 2009)
+				 continue;
+				
+				uYear.addItem( i , i , uYear.getItemCount());
+			}
+		}
+	    
+	    /**************************************************************************
+		 * function    : clearSel
+		 * Description : 기준월 초기화
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+	    function clearSel(objNm){
+	    	WebSquare.util.getComponentById(objNm).removeAll(true);
+		}
+	    
+	    /**************************************************************************
+		 * function    : radioBtnClear
+		 * Description : 라디오버튼 초기화
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+	    function radioBtnClear() {
+			var chkMonth = uMonth.getValue();
+			var chkYear = uYear.getValue();
+			
+			if( (chkYear==2009 && chkMonth==12) || chkYear > 2009) {
+				if ( tmpFundGb == "" || tmpFundGb == null || tmpFundGb == "undefined") {
+					//펀드유형초기화
+					fundType.removeAll();
+				}
+			}else{
+				if ( tmpFundGb == "" || tmpFundGb == null || tmpFundGb == "undefined") {
+					fundType.removeAll();
+				}
+			}
+			
+			if ( tmpMngScl == "") {
+				//운용규모 초기화
+				Imgradio1.setSelectedIndex(0);
+			}
+			
+			//운용실적 1차분류 초기화
+			radioBtn.removeAll();	
+	    	
+	    }
+	    
+	    /**************************************************************************
+		 * function    : changeSel4
+		 * Description : 기준월 변경 이벤트 처리
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+	    function changeSel4(){
+	    	var chkMonth = uMonth.getValue();
+			var chkYear = uYear.getValue();
+				chkYear = parseInt(chkYear, 10);	
+				chkMonth = parseInt(chkMonth, 10);	
+				
+			chgSrchArea();
+			if(chkYear == 2009 || chkYear < 2009) {
+				if(chkMonth ==12) {
+					radioBtnClear();
+					setCommonCd('fundType','T1100');
+					setCommonCd('tblList4','T1204');
+					tmpFundGb = "";
+				} else {
+					radioBtnClear();
+					setCommonCd('fundType','T1100');
+					tmpFundGb = "";
+					setFundGbComp(fundCallBack);
+					function fundCallBack() {
+						setMngResDiv('tblList1');
+					}
+				}
+			} else {
+				radioBtnClear();
+				setCommonCd('fundType','T1100');
+				setCommonCd('tblList4','T1204');
+				tmpFundGb = "";
+			}
+		}
+	    
+	    
+	    /**************************************************************************
+		 * function    : changeSel5
+		 * Description : 기준연도 변경 이벤트 처리
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+	    function changeSel5(){
+	    	var uMonth = WebSquare.util.getComponentById("uMonth");
+			var yearChk = uYear.getValue();
+			var	monthChk = uMonth.getValue();
+				yearChk = parseInt(yearChk, 10);
+			
+			if( yearChk>2009) {
+				chgSrchArea();
+			    //2010년이후의 월 조회 조건 문제점 해결방안
+				
+				clearSel('uMonth'); 
+				tmpFundGb = "";
+				setStandardDt("M");
+				setCommonCd('fundType','T1100');
+				radioBtnClear();
+				setCommonCd('tblList4','T1204');
+				var firstCd = vBranchNm1.getValue();
+				var codeVal = vBranchCd1.getValue();
+				
+				setNewMngResBrn("S","tblList5",firstCd);
+				setNewMngResBrn("T","tblList6",codeVal);
+			} else {
+				//makeMonth();
+				chgSrchArea();
+				clearSel('uMonth'); 
+				radioBtnClear();
+				setStandardDt("M", innerCallBack);
+				
+				var firstCd = vBranchNm1.getValue();
+				var codeVal = vBranchCd1.getValue();
+				
+				function innerCallBack() {
+					setCommonCd('fundType','T1100');
+					tmpFundGb = "";
+					
+					var yChk = parseInt(yearChk, 10);
+					var mChk = parseInt(monthChk, 10);
+					
+					
+					if(yChk==2009 && mChk==12) {
+						setCommonCd('tblList4','T1204');
+						var firstCode = vBranchCd1.getValue();
+						
+						setNewMngResBrn("S","tblList5",firstCd);
+						setNewMngResBrn("T","tblList6",codeVal);
+					}else{
+						setFundGbComp(fundCallback);
+						function fundCallback() {
+							setMngResDiv('tblList1');
+						}
+					}
+				}
+			}
+			
+		}
+	    
+	    /**************************************************************************
+		 * function    : selectNextBrn
+		 * Description : 운용실적 분류 이벤트 처리
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+	    function selectNextBrn(vCodeVal,vCodeDesc,vSelId,vTitle,vCnt) {
+	    	if(vSelId=="tblList5") {
+				selChkViewOff(vSelId);
+				
+				$('#tblList5 a').eq(vCnt).addClass('on');
+				
+				document.getElementById("tblList5tit").innerHTML ="<b> ["+ vTitle + "]</b>";
+				document.getElementById("tblList5Desc").innerText = vCodeDesc;
+				document.getElementById("vBranchCd2").value = vCodeVal;
+				document.getElementById("vBranchNm2").value = vTitle;
+				setNewMngResBrn("T","tblList6",vCodeVal);
+			} else if(vSelId=="tblList6") {
+				selChkViewOff(vSelId);
+				
+				$('#tblList6 a').eq(vCnt).addClass('on');
+				
+				document.getElementById("tblList6tit").innerHTML ="<b> ["+ vTitle + "]</b>";
+				document.getElementById("tblList6Desc").innerText = vCodeDesc;
+				document.getElementById("vBranchCd3").value = vCodeVal;
+				document.getElementById("vBranchNm3").value = vTitle;
+			}
+	    	
+	    }
+	    
+	    /**************************************************************************
+		 * function    : selChkViewOff
+		 * Description : 운용실적 분류 체크 변경
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+	    function selChkViewOff(vSelIdNm) {
+			if(vSelIdNm =="tblList5") {
+				$('#tblList5 li a').removeClass('on');
+			} else {	
+				$('#tblList6 li a').removeClass('on');
+			}
+				
+		}
+	    
+	    /**************************************************************************
+		 * function    : changeSel6
+		 * Description : 집합투자업자 변경 이벤트
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+	    function changeSel6(){	
+			setMngResDiv('tblList1');
+		}
+	    
+	     /**************************************************************************
+		 * function    : setMngResDiv
+		 * Description : 2009년 12월 이전 운용실적 내용 생성
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+		var idDiv;
+		var vPriPubGb;
+		var dvId;
+		var MngResXml;
+	    function setMngResDiv(id,uDivCntGb,aDivisionId){
+			idDiv = id;
+			dvId = aDivisionId;
+			
+			var standardYm = uYear.getValue() +""+ uMonth.getValue();
+			var scompanyCd = companyCd.getValue();
+			var spriPubGb = priPubGb.getValue();
+			
+			vPriPubGb=priPubGb;
+
+			radioCheck();
+			var fundGb = ufundTyp.getValue();
+			var inDTO  = {"DISMngResDivInputDTO":{}}
+
+			CallProFrame.insertValue(inDTO, "standardYm", standardYm);
+			CallProFrame.insertValue(inDTO, "priPubGb", spriPubGb);
+			
+			if(companyCd !="" || companyCd != null ){		
+				CallProFrame.insertValue(inDTO, "companyCd", scompanyCd);
+			} 
+			
+			CallProFrame.insertValue(inDTO, "fundGb", fundGb);
+			CallProFrame.insertValue(inDTO, "uDivCntGb", uDivCntGb);
+			CallProFrame.insertValue(inDTO, "divisionId", aDivisionId);
+			CallProFrame.callService("FS-DIS2", "DISMngResBrnDivCmpTotSO", "divTotSrch", inDTO, null,{'success' : getMngResDiv});
+		
+			function getMngResDiv(e) {
+				var table1 = $('#' + idDiv);
+				var xNo="";
+				var cntNo=0;
+				var lNo=0;
+				var innerValue = "";
+				
+				var resArray = WebSquare.xml.findNodes(e.responseBody, "root/message/DISMngResDivOutputListDTO/mngResDivList");
+				MngResXml = resArray;
+				
+				if (resArray.length > 0) {
+					
+					var a,b,c,d,e;
+					
+					for(var i=0;i<resArray.length;i++){					
+						var hdLevel =  WebSquare.xml.getValue(resArray[i], "hdLevel");
+						var parentDivId =  WebSquare.xml.getValue(resArray[i], "parentDivId");
+						var divisionId =  WebSquare.xml.getValue(resArray[i], "divisionId");
+						var divisionNm =  WebSquare.xml.getValue(resArray[i], "divisionNm");
+						var uLastNodeYN =  WebSquare.xml.getValue(resArray[i], "uLastNodeYN");			
+						var serviceDesc =  WebSquare.xml.getValue(resArray[i], "serviceDesc");			
+						
+						var onClick=' onClick="selectTd2(this,\''+idDiv+'Obj\',\''+parentDivId+'\',\''+divisionId+'\',\''+uLastNodeYN+'\',\''+divisionNm+'\')"'
+						
+						if(vPriPubGb=="11"){}else{onClick='';}	
+											
+						if(idDiv.substring(idDiv.length-1) == hdLevel){								
+							if(hdLevel==1){
+								innerValue +="<li style='' class=''><a class='' " + onClick + ">" + divisionNm + "</a></li>";
+								
+								xNo +=  i+ "|";							
+								if(divisionId == uDivisionId1){									
+									lNo = cntNo;
+									uDivisionId1="";
+									
+									a = WebSquare.xml.getValue(resArray[i], "uLastNodeYN");		
+									b = WebSquare.xml.getValue(resArray[i], "divisionId");		
+									c = WebSquare.xml.getValue(resArray[i], "divisionNm");		
+									d = WebSquare.xml.getValue(resArray[i], "serviceDesc");		
+									e = parentDivId;
+								}
+								
+								cntNo++;
+							}
+							
+						}
+					}
+					
+					table1.innerHTML = innerValue;
+					
+					var xx= WebSquare.util.getComponentById('divisionNm' + idDiv.substring(7));
+					var yy= WebSquare.util.getComponentById('divisionId' + idDiv.substring(7));
+					xx.setValue(c);
+					yy.setValue(b);
+					
+					if(idDiv.substring(7)=="3"){
+						parentDivId.setValue(e);
+					}
+					
+					try {
+						document.getElementById(idDiv+'Desc').innerText = d;
+						document.getElementById(idDiv+'tit').innerHTML = "<b> ["+ c + "]</b>";	
+					} catch(e) {var msg = e.message;}
+					
+					var num = eval(idDiv.substring(7))+1;					
+					if(idDiv.substring(7)<3 && a =='N'){						
+						xmlMngResDiv('tblList'+num,num,b);
+					}	
+					
+				} else {
+					innerValue = "";
+										
+					table1.innerHTML = innerValue;
+					var table2 = document.getElementById("tblList2");
+					var table3 = document.getElementById("tblList3");
+					
+					divisionNm1.setValue('');
+					divisionNm2.setValue('');
+					divisionNm3.setValue('');
+					
+					divisionId1.setValue('');
+					divisionId2.setValue('');
+					divisionId3.setValue('');
+					
+									
+					document.getElementById("tblList1tit").innerHTML = "";
+					document.getElementById("tblList1Desc").innerText = "";
+					
+					document.getElementById("tblList2tit").innerHTML = "";
+					document.getElementById("tblList2Desc").innerText = "";
+					
+					document.getElementById("tblList3tit").innerHTML = "";
+					document.getElementById("tblList3Desc").innerText = "";
+					
+					if(idDiv =="tblList1"){						
+						table2.innerHTML = innerValue;						
+						table3.innerHTML = innerValue;					
+					}else if(idDiv=="tblList2"){						
+						table3.innerHTML = innerValue;
+					}		
+					
+				}
+			}
+		}
+	    
+	    function xmlMngResDiv(id,uDivCntGb,dvsId){	
+			var resArray = MngResXml ;
+			
+			var table1 = $('#' + id);
+			var innerValue='';
+			var xNo="";
+			var lNo=0;
+			var cntNo=0;
+			var a,b,c,d,e;
+			
+			if(resArray.length>0){				
+				for(var i=0;i<resArray.length;i++){		
+						var hdLevel =  WebSquare.xml.getValue(resArray[i], "hdLevel");
+						var parentDivId =  WebSquare.xml.getValue(resArray[i], "parentDivId");
+						var divisionId =  WebSquare.xml.getValue(resArray[i], "divisionId");
+						var divisionNm =  WebSquare.xml.getValue(resArray[i], "divisionNm");
+						var uLastNodeYN =  WebSquare.xml.getValue(resArray[i], "uLastNodeYN");			
+						var serviceDesc =  WebSquare.xml.getValue(resArray[i], "serviceDesc");			
+									
+						if(vPriPubGb=="11"){}else{onClick='';}						
+						if(uDivCntGb == hdLevel) {
+							if(dvsId == parentDivId){		
+								innerValue +="<li style='' class=''><a class='' " + onClick + ">" + divisionNm + "</a></li>";
+								
+								xNo+= i+"|";					
+								var newDivision = eval("uDivisionId"+uDivCntGb);								
+								if(divisionId == newDivision){									
+									lNo = cntNo;
+									newDivision="";
+									
+									a = WebSquare.xml.getValue(resArray[i], "uLastNodeYN");		
+									b = WebSquare.xml.getValue(resArray[i], "divisionId");		
+									c = WebSquare.xml.getValue(resArray[i], "divisionNm");		
+									d = WebSquare.xml.getValue(resArray[i], "serviceDesc");		
+									e = parentDivId;
+								}
+								cntNo++;
+							}
+						}
+					}
+					
+					table1.innerHTML = innerValue;					
+					
+					
+					var xx= WebSquare.util.getComponentById('divisionNm' + id.substring(7));
+					var yy= WebSquare.util.getComponentById('divisionId' + id.substring(7));
+					xx.setValue(c);
+					yy.setValue(b);
+					
+					if(idDiv.substring(7)=="3"){
+						parentDivId.setValue(e);
+					}
+					
+					try {
+						document.getElementById(idDiv+'Desc').innerText = d;
+						document.getElementById(idDiv+'tit').innerHTML = "<b> ["+ c + "]</b>";	
+					} catch(e) {var msg = e.message;}
+					
+					var num = eval(idDiv.substring(7))+1;					
+					if(idDiv.substring(7)<3 && a =='N'){						
+						xmlMngResDiv('tblList'+num,num,b);
+					}	
+			}else{
+					innerValue="";
+					table1.innerHTML = innerValue;
+					
+					var table2 = document.getElementById("tblList2");
+					var table3 = document.getElementById("tblList3");
+					
+					if(id =="tblList1"){						
+						table2.innerHTML = innerValue;						
+						table3.innerHTML = innerValue;					
+					}else if(id=="tblList2"){						
+						table3.innerHTML = innerValue;
+					}		
+					
+							
+			}
+		}
+	    
+	    
+	    function radioCheck(){
+			var year = uYear.getValue();
+			var month = uMonth.getValue();
+			
+			var fundTyp = fundType.getValue();
+			var amngScl = Imgradio1.getValue();
+			
+			ufundTyp.setValue(fundTyp);
+			mngScl.setValue(amngScl);
+			if( (year == 2009 && month ==12) || (year > 2009)) {
+				document.getElementById("vBranchNm1").value = vBranchCd1;
+				document.getElementById("vBranchCd1").value = vBranchNm1; 
+			}
+				
+		}
+	    
+	     /**************************************************************************
+		 * function    : setFundGbComp
+		 * Description : 집합투자업자 생성
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+	    function setFundGbComp(callback) {
+	    	var inDTO  = {"DISFundGbCompanyListDTO":{}}
+	    	
+			var standardYm = uYear.getValue() +""+ uMonth.getValue();
+			var fundGb = ufundTyp.getValue();
+			
+			if(fundGb==""||fundGb==null){}else{
+				CallProFrame.insertValue(inDTO, "fundGb", fundGb);
+			} 
+			
+			CallProFrame.insertValue(inDTO, "standardYm", standardYm);
+			CallProFrame.callService("FS-DIS2", "DISFundGbCompanySrchSO", "select", inDTO, null,{'success' : getFundGbComp});
+			
+			function getFundGbComp(e) {
+				var select = companyCd;
+				var gbCompArr = WebSquare.xml.findNodes(e.responseBody,'root/message/DISFundGbCompanyListDTO/list'); 
+				
+				for (var i=0; i < gbCompArr.length; i++) {
+					var koreanNm = WebSquare.xml.getValue(gbCompArr[i] , 'koreanNm');
+					var compCd = WebSquare.xml.getValue(gbCompArr[i] , 'companyCd');
+					
+					companyCd.addItem(compCd, koreanNm);
+				}
+				
+				companyCd.setSelectedIndex(0);
+				if (callback)
+					callback();
+			}
+	    }
+
+		/**************************************************************************
+		 * function    : sendResult
+		 * Description : 펀드수익률 비교공시 조건검색 실행
+		 * Parameter   : null
+		 * Return      : null
+		 **************************************************************************/
+		function sendResult(){
+			var standardYm = uYear.getValue() +""+ uMonth.getValue() ;
+			var vCompanyCd = companyCd.getValue();
+			var companyNm = companyCd.getText();
+			var vpriPubGb = priPubGb.getValue();
+			var vpriPubGbNm = priPubGbNm.getValue();
+			
+			
+			// 펀드유형
+			var fundGb = fundType.getValue();
+			// 운용규모 
+			var mngScl = Imgradio1.getValue();
+			//운용실적 1차 분류
+			var vBranchCd1 = "";
+			var vBranchNm1 = "";
+			//운용실적 2차 분류 
+			var vbranchNm2 = "";
+			var vbranchCd2 = "";
+			//운용실적 3차 분류
+			var vbranchNm3 = "";
+			var vbranchCd3 = "";
+				
+			var chkList = listCheck.getValue("|");
+			var rateArea = new Array();
+			rateArea = chkList.split("|");
+			
+			uCdList.setValue(chkList);
+			
+			var yearChkVal = uYear.getValue();
+			var monthChkVal = uMonth.getValue();
+			yearChkVal =  parseInt(yearChkVal, 10);
+			monthChkVal = parseInt(monthChkVal, 10);
+			
+			if (radioBtn.getItemCount()==0)
+			{
+				alert("해당하는 운용분류실적이 없습니다.");
+				return;
+			}
+			//운용실적 1차 분류
+			vBranchCd1 = radioBtn.getValue();
+			vBranchNm1 = radioBtn.getText();
+			//운용실적 2차 분류 
+			vbranchNm2 = vBranchNm2.getValue();
+			vbranchCd2 = vBranchCd2.getValue();
+			
+			//운용실적 3차 분류
+			vbranchNm3 = vBranchNm3.getValue();
+			vbranchCd3 = vBranchCd3.getValue();
+								
+			if(rateArea.length == 4) {
+				var postAct  = {};
+								
+				postAct.standardYm = standardYm;
+				postAct.companyCd = vCompanyCd;
+				postAct.priPubGb = vpriPubGb;
+				postAct.priPubGbNm = vpriPubGbNm;
+				postAct.fundGb = fundGb;
+				postAct.mngScl = mngScl;
+				postAct.uCdList = chkList;
+				
+				postAct.divisionId1 = vBranchCd1;
+				postAct.divisionId2 = vbranchCd2;
+				postAct.divisionId3 = vbranchCd3;
+				postAct.fundGbNm = fundGbNm.getValue();
+				postAct.divisionNm1 = vBranchNm1;
+				postAct.divisionNm2 = vbranchNm2;
+				postAct.divisionNm3 = vbranchNm3;
+				
+				
+				postAct.PageNum = PageNum.getValue();
+				postAct.parentDivId = parentDivId.getValue();
+				var jsonParam = WebSquare.text.BASE64URLEncoder(JSONtoString(postAct));
+	    	
+		    	$frm = $('<form></form>');
+				$frm.attr('action', menuLinkUrl + '?w2xPath=/wq/fundann/DISFundROPCmpAnnRes.xml' 
+							+ '&' + $.param({'divisionId' : vDivisionId}) 
+							+ '&' + $.param({'serviceId' : vServiceId}));
+							
+				$frm.attr('method', 'post');
+				
+				$frm.append('<input type="hidden" name="fundRopCmpAnnParams" id="fundRopCmpAnnParams" value="' + jsonParam + '" />');
+				$frm.appendTo('body');
+				$frm.submit();
+				
+			}else{
+				alert("수익률 구간은 4개를 선택해야 합니다.");
+			}
+			
+		}
+		
+        initRopCmpAnn();
+        ]]></script>
+	</head>
+	<body>
+		<xf:group class="" id="group280" name="searchForm" style="" tagname="form">
+			<w2:attributes>
+				<w2:name></w2:name>
+				<w2:action>DISFundAnnSrch.xml</w2:action>
+				<w2:method>post</w2:method>
+			</w2:attributes>
+			<xf:group class="common_table_section" id="group281" style="">
+				<xf:input id="targetGb" name="targetGb" type="hidden" value=""></xf:input>
+				<xf:input id="cycleGb" name="cycleGb" type="hidden" value=""></xf:input>
+				<xf:input id="searchOption" name="searchOption" type="hidden" value=""></xf:input>
+				<xf:input id="rptOption" name="rptOption" type="hidden" value=""></xf:input>
+				<xf:input id="ImgValue" name="ImgValue" type="hidden" value=""></xf:input>
+				<xf:input id="uRptAllYN" name="uRptAllYN" type="hidden" value=""></xf:input>
+				<xf:input id="uGb" name="uGb" type="hidden" value=""></xf:input>
+				<xf:input id="searchWord" name="searchWord" type="hidden" value=""></xf:input>
+				<xf:input id="searchWord1" name="searchWord1" type="hidden" value=""></xf:input>
+				<xf:input id="kwd" name="kwd" type="hidden" value=""></xf:input>
+				<xf:input type="hidden" name="root_division_id" id="root_division_id" value=""></xf:input><!-- 최상위분류ID rootDivisionID -->
+				<xf:input type="hidden" name="program_id" id="program_id" value=""></xf:input><!-- programId -->
+				<xf:input type="hidden" name="preprogram_id" id="preprogram_id" value=""></xf:input><!-- programId (한단계위-CSS필요) -->
+				<xf:input type="hidden" name="division_id" id="division_id" value=""></xf:input><!-- divisionId -->
+				<xf:input type="hidden" name="requested_url" id="requested_url" value=""></xf:input><!-- requestedUrl -->
+				<xf:input type="hidden" name="companyNm" id="companyNm" value="전체"></xf:input>
+				<xf:input type="hidden" name="priPubGbNm" id="priPubGbNm" value=""></xf:input>
+				<xf:input type="hidden" name="priPubGb" id="priPubGb" value=""></xf:input>
+				<xf:input type="hidden" name="fundGb" id="fundGb" value=""></xf:input>
+				<xf:input type="hidden" name="fundGbNm" id="fundGbNm" value=""></xf:input>
+				<xf:input type="hidden" name="mngScl" id="mngScl" value=""></xf:input>
+				<xf:input type="hidden" name="divisionNm1" id="divisionNm1" value=""></xf:input>
+				<xf:input type="hidden" name="divisionNm2" id="divisionNm2" value=""></xf:input>
+				<xf:input type="hidden" name="divisionNm3" id="divisionNm3" value=""></xf:input>
+				<xf:input type="hidden" name="divisionId1" id="divisionId1" value=""></xf:input>
+				<xf:input type="hidden" name="divisionId2" id="divisionId2" value=""></xf:input>
+				<xf:input type="hidden" name="divisionId3" id="divisionId3" value=""></xf:input>
+				<xf:input type="hidden" name="reset" id="reset" value=""></xf:input>
+				<xf:input type="hidden" name="PageNum" id="PageNum" value="030301"></xf:input>
+				<xf:input type="hidden" name="uCdList" id="uCdList" value=""></xf:input>
+				<xf:input type="hidden" name="vBranchNm1" id="vBranchNm1" value=""></xf:input>
+				<xf:input type="hidden" name="vBranchCd1" id="vBranchCd1" value=""></xf:input>
+				<xf:input type="hidden" name="vBranchNm2" id="vBranchNm2" value=""></xf:input>
+				<xf:input type="hidden" name="vBranchCd2" id="vBranchCd2" value=""></xf:input>
+				<xf:input type="hidden" name="vBranchNm3" id="vBranchNm3" value=""></xf:input>
+				<xf:input type="hidden" name="vBranchCd3" id="vBranchCd3" value=""></xf:input>
+				<xf:input type="hidden" name="ufundTyp" id="ufundTyp" value=""></xf:input>
+				<xf:input type="hidden" name="parentDivId" id="parentDivId" value=""></xf:input>
+
+				<xf:group class="common_table1" id="group282" style="" tagname="table">
+					<w2:attributes>
+						<w2:summary>펀드의 수익률을 기준년월(월초영업일)별,펀드유형별,수익률구간별,운용규모별로 제공합니다.</w2:summary>
+						<w2:cellspacing>0</w2:cellspacing>
+						<w2:collpadding>0</w2:collpadding>
+					</w2:attributes>
+					<w2:textbox id="textbox140" label="펀드수익률 비교공시의 검색조건을 선택합니다." style="" tagname="caption"></w2:textbox>
+					<xf:group class="" id="group283" style="" tagname="colgroup">
+						<xf:group class="" id="group284" style="" tagname="col">
+							<w2:attributes>
+								<w2:width>155</w2:width>
+							</w2:attributes>
+						</xf:group>
+						<xf:group class="" id="group285" style="" tagname="col">
+							<w2:attributes>
+								<w2:width>*</w2:width>
+							</w2:attributes>
+						</xf:group>
+					</xf:group>
+					<xf:group class="" id="group286" style="" tagname="tr">
+						<!-- 기준년월 -->
+						<xf:group class="table1_th" id="group287" style="" tagname="th">
+							<w2:textbox for="report_select_input_0" id="textbox141" label="기준년월(월초영업일)" style="" tagname="p"></w2:textbox>
+						</xf:group>
+						<xf:group class="table1_td" id="group288" style="height:42px;" tagname="td">
+							<xf:select1 allOption="" appearance="minimal" chooseOption="" class="common_table_select fl mr5" direction="auto"
+								disabled="false" disabledClass="w2selectbox_disabled" displayMode="label" id="uYear" renderType="native" style="position:relative;width:90px;"
+								submenuSize="auto">
+								<script type="javascript" ev:event="onchange"><![CDATA[
+    								changeSel5();
+  							 ]]></script>
+							</xf:select1>
+							<xf:select1 allOption="" appearance="minimal" chooseOption="" class="common_table_select fl" direction="auto" disabled="false"
+								disabledClass="w2selectbox_disabled" displayMode="label" id="uMonth" renderType="native" style="position:relative;width:60px;"
+								submenuSize="auto">
+								<script ev:event="onchange" type="javascript"><![CDATA[ 
+    								changeSel4();
+    							]]></script>
+							</xf:select1>
+						</xf:group>
+					</xf:group>
+
+					<!-- 펀드유형 -->
+					<xf:group class="" id="group289" style="" tagname="tr">
+						<xf:group class="table1_th" id="group290" style="" tagname="th">
+							<w2:textbox for="report_select_input_0" id="textbox142" label="펀드유형" style="" tagname="label"></w2:textbox>
+						</xf:group>
+						<xf:group class="table1_td" id="group291" style="height:50px;" tagname="td">
+							<xf:select1 appearance="full" class="common_table_ipt_ul" cols="" id="fundType" itemTagname="li" renderType="radiogroup"
+								rows="" selectedIndex="0" style="" tagname="ul">
+								<script ev:event="onradioclick(index,value)" type="javascript"><![CDATA[
+    								//changeSel8();
+    							 ]]></script>
+							</xf:select1>
+						</xf:group>
+					</xf:group>
+
+					<!-- 수익률구간 -->
+					<xf:group class="" id="12monthMenu" style="" tagname="tr">
+						<xf:group class="table1_th" id="group293" style="" tagname="th">
+							<w2:textbox for="report_select_input_0" id="textbox143" label="수익률구간" style="" tagname="p"></w2:textbox>
+						</xf:group>
+						<xf:group class="table1_td" id="group294" style="" tagname="td">
+							<xf:select appearance="full" class="common_table_ipt_ul" cols="" id="listCheck" itemTagname="li" renderType="checkboxgroup"
+								rows="" selectedindex="0" style="" tagname="ul">
+								<xf:choices>
+									<xf:item>
+										<xf:label>1개월</xf:label>
+										<xf:value>0</xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>3개월</xf:label>
+										<xf:value>1</xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>6개월</xf:label>
+										<xf:value>2</xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>9개월</xf:label>
+										<xf:value>3</xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>1년</xf:label>
+										<xf:value>4</xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>2년</xf:label>
+										<xf:value>5</xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>3년</xf:label>
+										<xf:value>6</xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>4년</xf:label>
+										<xf:value>7</xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>5년</xf:label>
+										<xf:value>8</xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>연초</xf:label>
+										<xf:value>9</xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>설정(전환)일</xf:label>
+										<xf:value>10</xf:value>
+									</xf:item>
+								</xf:choices>
+							</xf:select>
+						</xf:group>
+					</xf:group>
+					<xf:group class="" id="12monthTitle" style="dispaly:none" tagname="tr">
+						<xf:group class="table1_th" id="group296" style="" tagname="th">
+							<w2:textbox for="report_select_input_0" id="textbox144" label="운용규모" style="" tagname="label"></w2:textbox>
+						</xf:group>
+						<xf:group class="table1_td" id="group297" style="" tagname="td">
+							<xf:select1 appearance="full" class="common_table_ipt_ul" cols="" id="Imgradio1" itemTagname="li" renderType="radiogroup"
+								rows="" selectedIndex="0" style="" tagname="ul">
+								<xf:choices>
+									<xf:item>
+										<xf:label>전체</xf:label>
+										<xf:value></xf:value>
+									</xf:item>
+									<xf:item>
+										<xf:label>100억원 이상</xf:label>
+										<xf:value>Y</xf:value>
+									</xf:item>
+								</xf:choices>
+							</xf:select1>
+						</xf:group>
+					</xf:group>
+					<xf:group class="" id="11monthMenu" style="display:none" tagname="tr">
+						<xf:group class="table1_th" id="accondition_group8822" style="" tagname="th">
+							<w2:textbox for="report_select_input_0" id="companyTitle" label="집합투자업자" style="" tagname="label"></w2:textbox>
+						</xf:group>
+						<xf:group class="table1_td" id="accondition_group8833" style="" tagname="td">
+							<xf:select1 allOption="true" appearance="minimal" chooseOption="" chooseOptionLabel="" class="fl mr20 common_table_select"
+								direction="auto" disabled="false" disabledClass="w2selectbox_disabled" displayMode="label" id="companyCd" renderType="native"
+								style="position:relative;width:300px;" submenuSize="auto">
+								<script ev:event="onchange" type="javascript"><![CDATA[ 
+    								changeSel6();
+    							]]></script>
+							</xf:select1>
+						</xf:group>
+					</xf:group>
+					<xf:group class="" id="group298" style="" tagname="tr">
+						<xf:group class="table1_td" id="group299" style="" tagname="td">
+							<w2:attributes>
+								<w2:colspan>2</w2:colspan>
+							</w2:attributes>
+							<xf:group class="right mr40" id="group300" style="">
+								<xf:group class="mr5" id="group301" style="" tagname="a">
+									<w2:attributes>
+										<w2:href>javascript:sendResult();</w2:href>
+									</w2:attributes>
+									<xf:image id="image18" src="/img/com/btn_common_table_sear.gif" style=""></xf:image>
+								</xf:group>
+								<xf:group class="mr5" id="group302" style="" tagname="a">
+									<w2:attributes>
+										<w2:href>javascript:resetCond();</w2:href>
+									</w2:attributes>
+									<xf:image id="image19" src="/img/com/btn_common_table_reset.gif" style=""></xf:image>
+								</xf:group>
+							</xf:group>
+						</xf:group>
+					</xf:group>
+				</xf:group>
+
+
+				<xf:group class="sear_table_event" id="group303" style="">
+					<xf:group class="" id="group304" style="" tagname="a">
+						<w2:attributes>
+							<w2:href>#!</w2:href>
+							<w2:onclick>commonTableEvent(this);</w2:onclick>
+						</w2:attributes>
+						<xf:image id="image20" src="/img/com/btn_table_hide.gif" style=""></xf:image>
+					</xf:group>
+				</xf:group>
+			</xf:group>
+		</xf:group>
+	</body>
+</html>
