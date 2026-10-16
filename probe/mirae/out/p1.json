@@ -1,0 +1,80 @@
+{
+ "https://securities.miraeasset.com/": {
+  "final": "https://securities.miraeasset.com/",
+  "title": "미래에셋증권 - 글로벌 투자 파트너",
+  "links": [],
+  "xhr": [
+   {
+    "url": "https://www.google-analytics.com/j/collect?v=1&_v=j102&a=1170948621&t=pageview&_s=1&dl=https%3A%2F%2Fsecurities.miraeasset.com%2Fwtsform.jsp&ul=ko-kr&dt=%ED%8A%B8%EB%A0%88%EC%9D%B4%EB%94%A9%20%ED%8C%9D%EC%97%85%20%7C%20KDB%EB%8C%80%EC%9A%B0%EC%A6%9D%EA%B6%8C&sr=1280x720&vp=1280x24&_u=YADAAEABAAAAACAAI~&jid=835350809&gjid=1756271789&cid=966797541.1792114043&tid=UA-210099948-1&_gid=459192546.1792114043&_r=1&_slc=1&gtm=45He6ae1h1n81P38XR3Mv866468316za200zd866468316xf1&cd12=PC&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616985~115938465~115938468~118897920~118897930~120385423~120420414~120469145~120469153~121246026~121246034&z=1979820789",
+    "method": "POST",
+    "post": "",
+    "ct": "text/plain",
+    "body": "2,x"
+   },
+   {
+    "url": "https://analytics.google.com/g/collect?v=2&tid=G-EK6Y32KK40&gtm=45je6ae1h1v881882933za20ozb866468316zd866468316xf1&_p=1792114043127&_gaz=1&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAGA&cid=966797541.1792114043&frm=1&pscdl=noapi&rcb=10&sr=1280x720&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B8.0.0.0%7CChromium%3B156.0.8078.4%7CHeadlessChrome%3B156.0.8078.4&uam=&uamb=0&uap=Windows&uapv=10.0&uaw=0&ul=ko-kr&gaf=2&_s=1&tag_exp=115616986~115938465~115938469~118012009~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792114043&sct=1&seg=0&dl=https%3A%2F%2Fsecurities.miraeasset.com%2Fwtsform.jsp&dr=https%3A%2F%2Fsecurities.miraeasset.com%2F&dt=%ED%8A%B8%EB%A0%88%EC%9D%B4%EB%94%A9%20%ED%8C%9D%EC%97%85%20%7C%20KDB%EB%8C%80%EC%9A%B0%EC%A6%9D%EA%B6%8C&en=page_view&_fv=1&_nsi=1&_ss=1&ep.visit_ChannelType=PC&ep.screen_info=%ED%8A%B8%EB%A0%88%EC%9D%B4%EB%94%A9%20%ED%8C%9D%EC%97%85%20%7C%20KDB%EB%8C%80%EC%9A%B0%EC%A6%9D%EA%B6%8C&tfd=685",
+    "method": "POST",
+    "post": "",
+    "ct": "text/plain",
+    "body": ""
+   },
+   {
+    "url": "https://www.google-analytics.com/j/collect?v=1&_v=j102&a=774055938&t=pageview&_s=1&dl=https%3A%2F%2Fsecurities.miraeasset.com%2Fmain.do&ul=ko-kr&dt=%EB%AF%B8%EB%9E%98%EC%97%90%EC%85%8B%EC%A6%9D%EA%B6%8C%20-%20%EA%B8%80%EB%A1%9C%EB%B2%8C%20%ED%88%AC%EC%9E%90%20%ED%8C%8C%ED%8A%B8%EB%84%88&sr=1280x720&vp=1280x720&_u=QACAAEABAAAAACAAI~&jid=&gjid=&cid=966797541.1792114043&tid=UA-210099948-1&_gid=459192546.1792114043&_slc=1&gtm=45He6ae1h1n81P38XR3Mv866468316za200zd866468316xf1&cd1=966797541.1792114043&cd12=PC&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938469~118897920~118897930~120385422~120469145~120469153~121246026~121246034&z=395307158",
+    "method": "POST",
+    "post": "",
+    "ct": "text/plain",
+    "body": "2,x"
+   },
+   {
+    "url": "https://securities.miraeasset.com/public/banner/event.banner02.wjson",
+    "method": "POST",
+    "post": "",
+    "ct": "text/html",
+    "body": "[{\"REG_DT\":\"2026-10-01 09:56:40.0\",\"REG_MN_EMP_NO\":\"3345403\",\"DISP_YN\":\"Y\",\"START_TIME\":\"0000\",\"BNR_NM\":\"MAPS 초대장이 도착했습니다\",\"BNR_CD\":\"414\",\"LINK_URL\":\"https://securities.miraeasset.com/hki/hki7000/v05.do?cs_ecis_id=202609008&strEnd=S\",\"START_DT\":\"20261001\",\"CLK_CNT\":\"121\",\"END_TIME\":\"2359\",\"LINK_TYPE\":\"N\",\"CATEGORY\":\"null\",\"NOTE\":\"null\",\"SORT_ORDER\":\"1\",\"IMAGE_TXT\":\"MAPS 초대장이 도착했습니다  10.01~11.04 ※원금손실(0~100%)발생 가능 및 투자자귀속 ※투자 전 청취 및 상품설명서 약관 필독 ※이 금융상품은 예금자보호법에 따라 보호되지않습니다.\",\"CONTENT\":\"MAPS 초대장이 도착했습니다\",\"ING_CHK\":\"0\",\"END_DT\":\"20261104\",\"AREA_CD\":\"02\",\"IMAGE_URL\":\"1790841313415.png\"},{\"REG_DT\":\"2026-10-06 08:00:13.0\",\"REG_MN_EMP_NO\":\"3345403\",\"DISP_YN\":\"Y\",\"START_TIME\":\"0000\",\"BNR_NM\":\"㈜엘리스그룹 기업공개 공모 안내\",\"BNR_CD\":\"415\",\"LINK_URL\":\"https://securities.miraeasset.com/bbs/board/message/view.do?messageId=2343188&categoryId=66\",\"START_DT\":\"20261006\",\"CLK_CNT\":\"2\",\"END_TIME\":\"1600\",\"LINK_TYPE\":\"N\",\"CATEGORY\":\"null\",\"NOTE\":\"null\",\"SORT_ORDER\":\"2\",\"IMAGE_TXT\":\"진행중 (주) 엘리스 그룹  기업공개 공모안내 청약일 10.07(수)~ 10.08(목) ※투자 전 설명청취 및 상품설명서 등 필독 ※원금손실 크게 발생 가능 및 투자자귀속 ※청약의 권유는(예비,간이)설멸서에 따름\",\"CONTENT\":\"㈜엘리스그룹 기업공개 공모 안내\",\"ING_CHK\":\"0\",\"END_DT\":\"20261008\",\"AREA_CD\":\"02\",\"IMAGE_URL\":\"1791241213723.png\"},{\"REG_DT\":\"2026-09-10 14:07:40.0\",\"REG_MN_EMP_NO\":\"3345403\",\"DISP_YN\":\"Y\",\"START_TIME\":\"0000\",\"BNR_NM\":\"국내선물옵션 수수료할인 이벤트 시즌3\",\"BNR_CD\":\"411\",\"LINK_URL\":\"https://securities.miraeasset.com/hki/hki7000/v05.do?cs_ecis_id=202605010\",\"START_DT\":\"20260910\",\"CLK_CNT\":\"63\",\"END_TIME\":\"2359\",\"LINK_TYPE\":\"N\",\"CATEGORY\":\"null\",\"NOTE\":\"null\",\"SORT_ORDER\":\"3\",\"IMAGE_TXT\":\"국내 선물옵션 시즌 3 we go, be light 07.01~06.30 ※ 원금손실(0~100%)발생가능 및 투자자 귀속 ※ 투자 전 설명 청취 및 상품설명서 약관 필독 ※ 이 금융상품은 예금자보호법에 따라 보호되지않습니다.\",\"CONTENT\":\"국내선물옵션 수수료할인 이벤트 시즌3\",\"ING_CHK\":\"0\",\"END_DT\":\"20270630\",\"AREA_CD\":\"02\",\"IMAGE_URL\":\"1790898801214.png\"},{\"REG_DT\":\"2026-06-17 08:58:45.0\",\"REG_MN_EMP_NO\":\"3345403\",\"DISP_YN\":\"Y\",\"START_TIME\":\"0000\",\"BNR_NM\":\"2026 미래에셋증권 선물옵션 실전투자대회\",\"BNR_CD\":\"395\",\"LINK_URL\":\"https://securities.miraeasset.com/hki/hki7106/r01_0.do\",\"START_DT\":\"20260701\",\"CLK_CNT\":\"304\",\"END_TIME\":\"2359\",\"LINK_TYPE\":\"N\",\"CATEGORY\":\"null\",\"NOTE\":\"null\",\"SORT_ORDER\":\"4\",\"IMAGE_TXT\":\"2026 미래에셋증권 선물옵션 실전투자대회   07.01~12.31 ※ 투자 전 설명 청취 및 상품설명서 약관 필독 ※ 원금손실(0~100%)발생가능 및 투자자 귀속 ※ 이 금융상품은 예금자보호법에 따라 보호되지않습니다.\",\"CONTENT\":\"2026 미래에셋증권 선물옵션 실전투자대회   07.01~12.31 ※ 투자 전 설명 청취 및 상품설명서 약관 필독 ※ 원금손실(0~100%)발생가능 및 투자자 귀속 ※ 이 금융상품은 예금자보호법에 따라 보호되지않습니다.\",\"ING_CHK\":\"0\",\"END_DT\":\"20261231\",\"AREA_CD\":\"02\",\"IMAGE_URL\":\"1786401481892.png\"},{\"REG_DT\":\"2026-01-07 12:39:01.0\",\"REG_MN_EMP_NO\":\"3345403\",\"DISP_YN\":\"Y\",\"START_TIME\":\"0000\",\"BNR_NM\":\"다이렉트 연금저축계좌 온라인 매매수수료 우대혜택 안내\",\"BNR_CD\":\"369\",\"LINK_URL\":\"https://securities.miraeasset.com/hki/hki7000/v05.do?cs_ecis_id=202601004\",\"START_DT\":\"20260101\",\"CLK_CNT\":\"5101\",\"END_TIME\":\"2359\",\"LINK_TYPE\":\"N\",\"CATEGORY\":\"null\",\"NOTE\":\"null\",\"SORT_ORDER\":\"5\",\"IMAGE_TXT\":\"다이렉트 연금저축계좌 온라인 매매수수료 우대혜택 안내 01.01~12.31 ※원금손실(0~100%)발생 가능 및 투자자귀속 ※투자 전 청취 및 상품설명서 약관 필독 ※이 금융상품은 예금자보호법에 따라 보호되지않습니다.\",\"CONTENT\":\"다이렉트"
+   },
+   {
+    "url": "https://securities.miraeasset.com/public/main/home_main_jisu.wjson",
+    "method": "POST",
+    "post": "dumy=0",
+    "ct": "text/html",
+    "body": ""
+   },
+   {
+    "url": "https://securities.miraeasset.com/common/a02.json",
+    "method": "POST",
+    "post": "",
+    "ct": "application/json;charset=UTF-8",
+    "body": "{\"list\":[{\"CATEGORY_ID\":1535,\"GROUP_CATEGORY_ID\":1525,\"MESSAGE_ID\":2343411,\"PARENT_CATEGORY_ID\":1525,\"TITLE\":\"인도||단기 증시 조정에도 견조한 외국인 직접투자\"},{\"CATEGORY_ID\":1537,\"GROUP_CATEGORY_ID\":1526,\"MESSAGE_ID\":2343291,\"PARENT_CATEGORY_ID\":1526,\"TITLE\":\"이슈&ETF||한국 주식형 ETF 편출입 Weekly\"},{\"CATEGORY_ID\":1658,\"GROUP_CATEGORY_ID\":1527,\"MESSAGE_ID\":2343417,\"PARENT_CATEGORY_ID\":1579,\"TITLE\":\"마켓 뷰(10월 16일)||반등, 아직은 약한\"},{\"CATEGORY_ID\":1531,\"GROUP_CATEGORY_ID\":1531,\"MESSAGE_ID\":2343370,\"PARENT_CATEGORY_ID\":1800,\"TITLE\":\"유나이티드 헬스 그룹 (UNH US/Not Rated)||‘27년 수익성 회복을 향해 가는 중\"},{\"CATEGORY_ID\":1533,\"GROUP_CATEGORY_ID\":1533,\"MESSAGE_ID\":2343412,\"PARENT_CATEGORY_ID\":1800,\"TITLE\":\"대한항공 (003490/매수)||단가 상승이 연료비 증가를 상쇄\"}]}"
+   },
+   {
+    "url": "https://securities.miraeasset.com/public/banner/event.banner03.wjson",
+    "method": "POST",
+    "post": "",
+    "ct": "text/html",
+    "body": "[]\n"
+   },
+   {
+    "url": "https://securities.miraeasset.com/search/getTotalSearch.jsp",
+    "method": "POST",
+    "post": "query=KR5153450226%7CKR5181490175%7CKR5117490006%7CKR5153420015%7CKR5153430217&sort=M3_BNFR&sort_opt=DESC&linkType=smart",
+    "ct": "text/html;charset=euc-kr",
+    "body": "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n{\"SearchQueryResult\":{\"Collection\":[{\"Id\":\"FUND_INFO\",\"DocumentSet\":{\"Count\":4,\"TotalCount\":4,\"Document\":[{\"DuplicateDocumentCount\":\"8\",\"Field\":{\"DOCID\":\"KR5153430217\",\"Date\":\"20181123\",\"FDN\":\"미래에셋단기채알파증권자투자신탁(채권혼합) 종류Ae\",\"FD_KN\":\"F\",\"PD_TYP_CD\":\"03\",\"SLE_TYP_CD\":\"\",\"ADMIC_CD\":\"301       \",\"ADMICN\":\"미래에셋자산운용\",\"PD_CLSS\":\"15\",\"N_BY_YN\":\"1\",\"ITN_ADD_BY_ABL_YN\":\"0\",\"ENT_MTHD\":\"0\",\"CLCT_REV_YN\":\"0\",\"ONLINE_PRVT_YN\":\"1\",\"ONLINE_TYP\":\"\",\"N_YN\":\"0\",\"RCM_PD_YN\":\"0\",\"AREA_DVN\":\"\",\"AREA_DVN_RCH\":\"\",\"DMS_FO_DV_CD\":\"1\",\"M1_BNFR\":\"0.49\",\"M6_BNFR\":\"1.96\",\"M12_BNFR\":\"0.46\",\"ESTD_AF_BNFR\":\"21.58\",\"ESTP\":\"1038295057\",\"M1_PPR\":\"\",\"M12_PPR\":\"\",\"BSS_CURR_CD\":\"\",\"BSSP_ADPTD\":\"20261016\",\"BSSP\":\"1097.28\",\"NASST_SUM\":\"1139923377\",\"SLE_FEE\":\"0.15\",\"ADMI_FEE\":\"0.2\",\"TRST_FEE\":\"0.025\",\"OFW_TRST_FEE\":\"0.015\",\"RTNGP\":\"\",\"TFEE\":\"0.39\",\"FD_FEE_TYP\":\"\",\"RPC_FEE_EXP\":\"\",\"RPC_TGM_GIV\":\"17시 이전 T+2기준가적용 T+3지급, 17시 경과후 T+3기준가적용 T+4지급\",\"TAX_BNF_ABL_YN\":\"0\",\"LF_IMG\":\"\",\"LF_VLD_PRD_SD\":\"\",\"LF_VLD_PRD_CLSD\":\"\",\"CI_RLE_FILE_RTE\":\"\",\"INVST_EXP_DOC_FILE_RTE\":\"\",\"SMP_INVST_EXP_DOC_FILE_RTE\":\"\",\"SA_DTL\":\"\",\"LST_EXP\":\"\",\"PD_EXP\":\"\",\"PD_CHRTSC_IMG_RTE\":\"\",\"DLBRED\":\"\",\"RGD_ITM\":\"\",\"ADMI_RST_CCEP_BSSD\":\"\",\"ADMI_RST_CCEP\":\"\",\"ADMI_PLN_BSSD\":\"\",\"ADMI_PLN\":\"\",\"LST_IMG\":\"\",\"PD_DTL_IMG\":\"\",\"BLT_YN\":\"Y\",\"RGS_D_T\":\"\",\"RGSP_IP\":\"\",\"RGSP_ID\":\"\",\"PD_GRP\":\"\",\"RL_FD_CD1\":\"\",\"RL_FD_CD2\":\"\",\"RL_FD_CD3\":\"\",\"RL_FD_CD4\":\"\",\"RL_FD_CD5\":\"\",\"KWRD\":\"\",\"ONLINE_PRVT_BLT_YN\":\"\",\"DMS_PRVT_BLT_YN\":\"\",\"FO_PRVT_BLT_YN\":\"\",\"INVST_CLSS_PRVT_BLT_YN\":\"\",\"BF_FEE_EXP\":\"0.100\",\"INVST_WHT\":\"\",\"INVST_OB\":\"이 투자신탁은 채권에 주로 투자하며 일부 주식에 투자하는 모투자신탁을 법 시행령 제94조제2항제4호에서 규정하는 주된 투자대상자산으로 하여 수익을 추구하는 것을 목적으로 합니다.\",\"INVST_STRG\":\"①미래에셋단기채알파증권모투자신탁(채권혼합)에 80% 이상 투자합니다.②모투자신탁에의 투자비중은 시장상황에 따라 전략적으로 결정됩니다.\\u203B비교지수 : 없음[모투자신탁의 투자전략]①이 투자신탁은 국내 채권에 90% 이하로 투자하며 국내 주식에 30% 이하로 투자합니다.②국공채, 통안채 등의 잔존 만기가 1년 내외인 단기 국내 채권중심으로 운용하며, 다음과 같은 투자전략으로 주식에도 일부투자합니다.-페어트레이딩(Pair Trading) 전략: 계량 모델에 기반하여 동일기업의 우선주와 보통주간 롱숏(Long Short), 통계적으로 과거오랜 기간 유사한 주가흐름을 보인 종목간 롱숏 등의 전략-이벤트드리븐(Event Driven) 전략: 기업의 합병, 분할, 유상증자 등의 이벤트가 발생하여 차익거래 기회가 포착되는 경우 관련 종목간 롱숏 또는 공모주(IPO), 블록딜(Block Deal) 등에 투자하는 전략③투자전략 및 운용규모 등을 감안하여 집합투자규약에서 정한 범위 내에서 집합투자증권(ETF 포함), 파생상품 등에 일부투자할 수 있습니다.*비교지수: 없음\",\"MN_IMG\":\"\",\"MN_OVR_IMG\":\"\",\"RTMT_PS_DB_YN\":\"N\",\"RTMT_PS_DC_YN\":\"N\",\"RTMT_PS_DTL_TXT\":\"\",\"M3_BNFR\":\"1.48\",\"M6_PPR\":\"\",\"NTS_CD\":\"\",\"FD_CLSS\":\"\",\"M24_BNFR\":\"4.59\",\"M36_BNFR\":\"10.88\",\"FSTY_CNT_BNFR\":\"-0.06\",\"M18_BNFR\":\"0.0\",\"KR_FD_CD\":\"K55301CH3140\",\"ZRN_BTYPN\":\"채권혼합형\",\"ZRN_STYPN\":\"보수적자산배분\",\"FML_SUM_ESTP\":\"208891573527\",\"EXC_HDG_YN\":\"0\",\"PD_RSK_CLSS\":\"15\",\"PREOCU_FEE_YN\":\"1\",\"RPC_FEE_YN\":\"0\",\"FD_CLSS_1Y\":\"9\",\"FD_CLSS_3Y\":\"9\",\"FD_CLSS_5Y\":\"9\",\"WK1_BNFR\":\"-0.02\",\"M60_BNFR\":\"14.22\",\"BNFR_PRD_RK_1WK\":\"3\",\"BNFR_PRD_RK_1M\":\"2\",\"BNFR_PRD_RK_3M\":\"14\",\"BNFR_PRD_RK_6M\":\"34\",\"BNFR_PRD_RK_1Y\":\"96\",\"BNFR_PRD_RK_2Y\":\"96\",\"BNFR_PRD_RK_3Y\":\"86\",\"BNFR_PRD_RK_5Y\":\"0\",\"BNFR_PRD_RK_ESTD_AF\":\"95\",\"RT_RK_6M\":\"0\",\"RT_RK_1Y\":\"0\",\"RT_RK_2Y\":\"0\",\"RT_R"
+   },
+   {
+    "url": "https://securities.miraeasset.com/public/banner/event.banner04.wjson",
+    "method": "POST",
+    "post": "",
+    "ct": "text/html",
+    "body": "[]\n"
+   },
+   {
+    "url": "https://analytics.google.com/g/collect?v=2&tid=G-EK6Y32KK40&gtm=45je6ae1h1v881882933za20ozb866468316zd866468316xf1&_p=1792114045462&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAGQ&cid=966797541.1792114043&frm=1&pscdl=noapi&rcb=8&sr=1280x720&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B8.0.0.0%7CChromium%3B156.0.8078.4%7CHeadlessChrome%3B156.0.8078.4&uam=&uamb=0&uap=Windows&uapv=10.0&uaw=0&ul=ko-kr&gaf=2&_s=1&tag_exp=115938466~115938468~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792114043&sct=1&seg=1&dl=https%3A%2F%2Fsecurities.miraeasset.com%2Fmain.do&dr=https%3A%2F%2Fsecurities.miraeasset.com%2F&dt=%EB%AF%B8%EB%9E%98%EC%97%90%EC%85%8B%EC%A6%9D%EA%B6%8C%20-%20%EA%B8%80%EB%A1%9C%EB%B2%8C%20%ED%88%AC%EC%9E%90%20%ED%8C%8C%ED%8A%B8%EB%84%88&en=page_view&ep.visit_ChannelType=PC&ep.screen_info=%EB%AF%B8%EB%9E%98%EC%97%90%EC%85%8B%EC%A6%9D%EA%B6%8C%20-%20%EA%B8%80%EB%A1%9C%EB%B2%8C%20%ED%88%AC%EC%9E%90%20%ED%8C%8C%ED%8A%B8%EB%84%88&up.user_CID=966797541.1792114043&tfd=7842",
+    "method": "POST",
+    "post": "",
+    "ct": "text/plain",
+    "body": ""
+   }
+  ],
+  "text": ""
+ }
+}
