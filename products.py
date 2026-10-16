@@ -4,7 +4,10 @@
 자료 (모두 로그인 없이 보이는 미래에셋증권 홈페이지 공개 화면):
   ① 장외채권(원화)   /hks/hks4036/r01.do                      — 국고채·공사채·회사채·신종자본증권 매수금리·세후수익률
   ② 미국채·호주국채  게시판 categoryId=1282 / 2078 최신 「판매정보 안내」 — 판매 종목·시세(수익률), 10년 금리·환율
-  ③ 브라질국채      외화채권 안내(/hks/hks4054/v03.do) — 판매 목록 없이 「단순중개」(MAPS·영업점). 환율은 야후 BRLKRW=X
+  ③ 브라질국채      외화채권 안내(/hks/hks4054/v03.do) — 판매 목록 없이 「단순중개」(MAPS·영업점). 환율은 야후 (원/달러 ÷ 헤알/달러)
+     만기별 종목·금리: 브라질 재무부 Tesouro Direto 공개 JSON(/o/rentabilidade/investir) + Tesouro Transparente CSV(1년 금리)
+  ④b 사모펀드 전체   금융투자협회 전자공시 「기준가격등락률」(공모/사모=사모) XML 서비스 — 1,300여 개. 기준가 1·3·6·12개월 전과 비교해 등락 계산
+     (분배금·결산은 반영 못 함 → 화면에 그 설명). 판매사(미래에셋 여부)는 비공개.
   ④ 펀드            /search/getTotalSearch.jsp (펀드검색과 같은 검색) — 공모펀드 전부·기간 수익률·순자산
      사모펀드: 진짜 사모(전문투자자용)는 공개 화면에 없음 → 공개 판매되는 「사모투자재간접형」(사모펀드에 투자하는 공모펀드) 순위
   ⑤ ELS/DLS/ELB     /hks/hks4022/a01.json (청약중 · 최근 청약완료)
@@ -208,6 +211,139 @@ def indiv():
     return out
 
 
+# ───────── ③ 브라질국채 (브라질 재무부 Tesouro Direto — 공개 JSON·CSV) ─────────
+TD_KIND = {"Tesouro Prefixado com Juros Semestrais": ("NTN-F", "이표채(6개월마다 이자)"), "Tesouro Prefixado": ("LTN", "할인채(만기에 한 번)"),
+           "Tesouro IPCA+ com Juros Semestrais": ("NTN-B", "물가채(IPCA+ · 6개월 이자)"), "Tesouro IPCA+": ("NTN-B Principal", "물가채(IPCA+ · 만기 한 번)"),
+           "Tesouro Selic": ("LFT", "변동금리(Selic 연동)")}
+
+
+def tesouro():
+    r = get_url("https://www.tesourodireto.com.br/o/rentabilidade/investir")
+    j = r.json()
+    out = []
+    for grp, lst in j.items():
+        for b in lst or []:
+            nm = b.get("treasuryBondName") or ""
+            base = next((k for k in sorted(TD_KIND, key=len, reverse=True) if nm.startswith(k)), None)
+            if not base:
+                continue
+            rate = b.get("investmentProfitabilityIndexerName") or ""
+            m = re.search(r"([\d.,]+)\s*%", rate)
+            out.append({"n": nm, "code": TD_KIND[base][0], "kind": TD_KIND[base][1], "base": base, "mat": (b.get("maturityDate") or "")[:10],
+                        "rate": rate, "r": float(m.group(1).replace(".", "").replace(",", ".")) if m else None,
+                        "px": b.get("unitaryInvestmentValue"), "min": b.get("investmentBondMinimumValue"), "isin": b.get("isinCode"),
+                        "asof": (b.get("lastMarketPricingDate") or "")[:16].replace("T", " "), "semi": "Juros Semestrais" in nm})
+    if not out:
+        raise RuntimeError("Tesouro 목록 비어 있음")
+    out.sort(key=lambda x: x["mat"])
+    return out
+
+
+def tesouro_hist():
+    """1년 금리 흐름 — Tesouro Transparente CSV (최신이 위, 400일 안까지만 읽음)"""
+    import csv, io
+    r = S.get("https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/PrecoTaxaTesouroDireto.csv", timeout=180, stream=True)
+    r.raise_for_status()
+    lim = (datetime.date.today() - datetime.timedelta(days=400))
+    want = {"Tesouro Prefixado", "Tesouro Prefixado com Juros Semestrais", "Tesouro IPCA+ com Juros Semestrais"}
+    out = {}
+    buf = ""
+    for chunk in r.iter_content(65536, decode_unicode=False):
+        buf += chunk.decode("utf-8", "ignore")
+        lines = buf.split("\n"); buf = lines.pop()
+        stop = False
+        for ln in lines:
+            c = ln.strip().split(";")
+            if len(c) < 5 or c[0] == "Tipo Titulo":
+                continue
+            try:
+                d = datetime.datetime.strptime(c[2], "%d/%m/%Y").date()
+            except Exception:
+                continue
+            if d < lim:
+                stop = True; break
+            if c[0] in want:
+                key = c[0] + "|" + c[1][-4:]
+                out.setdefault(key, {})[d.isoformat()] = float(c[3].replace(",", "."))
+        if stop:
+            break
+    # 만기별로 가장 긴 것 하나씩만 (차트 3개): 할인채 · 이표채 · 물가채
+    pick = {}
+    for key, ser in out.items():
+        typ, yr = key.split("|")
+        if len(ser) < 100:
+            continue
+        if typ not in pick or yr > pick[typ][0]:
+            pick[typ] = (yr, ser)
+    return {TD_KIND[t][0] + " " + yr: [[d, v] for d, v in sorted(ser.items())] for t, (yr, ser) in pick.items()}
+
+
+def get_url(u):
+    for k in range(3):
+        try:
+            r = S.get(u, timeout=60); r.raise_for_status(); return r
+        except Exception as e:
+            last = e; time.sleep(3 + 3 * k)
+    raise last
+
+
+# ───────── ④b 사모펀드 전체 (금융투자협회 전자공시 — 기준가격등락률, 공모/사모 구분 = 사모) ─────────
+KOFIA = "https://dis.kofia.or.kr/proframeWeb/XMLSERVICES/"
+
+
+def kofia_q(d):
+    body = ('<?xml version="1.0" encoding="utf-8"?><message><proframeHeader><pfmAppName>FS-DIS2</pfmAppName><pfmSvcName>DISFundStdPrcRateSO</pfmSvcName>'
+            '<pfmFnName>select</pfmFnName></proframeHeader><systemHeader></systemHeader><DISCondFuncDTO>'
+            f'<tmpV30>{d}</tmpV30><tmpV3></tmpV3><tmpV4></tmpV4><tmpV5></tmpV5><tmpV7>2</tmpV7><tmpV11></tmpV11><tmpV12></tmpV12><tmpV50></tmpV50><tmpV51></tmpV51>'
+            '</DISCondFuncDTO></message>')
+    r = S.post(KOFIA, data=body.encode("utf-8"), headers={"Content-Type": "text/xml", "Accept": "text/xml", "Referer": "https://dis.kofia.or.kr/websquare/index.jsp"}, timeout=180)
+    r.raise_for_status()
+    t = r.text
+    g = lambda rec, k: (re.search(rf"<{k}>(.*?)</{k}>", rec) or [None, ""])[1]
+    out = {}
+    for rec in re.findall(r"<selectMeta>(.*?)</selectMeta>", t, re.S):
+        c = g(rec, "tmpV13")
+        if not c:
+            continue
+        out[c] = {"co": html.unescape(g(rec, "tmpV1")), "n": html.unescape(g(rec, "tmpV2")), "t": g(rec, "tmpV3"), "est": g(rec, "tmpV4"),
+                  "amt": num(g(rec, "tmpV5")), "nav": num(g(rec, "tmpV6")), "d1": num(g(rec, "tmpV8")), "w1": num(g(rec, "tmpV10")), "m0": num(g(rec, "tmpV12"))}
+    return out
+
+
+def kofia_date(d0):
+    """그 날짜(또는 그 전 영업일) 중 자료가 있는 날"""
+    for k in range(7):
+        d = d0 - datetime.timedelta(days=k)
+        if d.weekday() >= 5:
+            continue
+        rows = kofia_q(d.strftime("%Y%m%d"))
+        if len(rows) > 100:
+            return d, rows
+    raise RuntimeError(f"금투협 사모 자료 없음 {d0}")
+
+
+def private_funds():
+    S.get("https://dis.kofia.or.kr/", timeout=30)
+    today = datetime.datetime.now(KST).date()
+    d0, now = kofia_date(today)
+    snaps = {}
+    for key, back in (("m1", 31), ("m3", 92), ("m6", 183), ("y1", 365)):
+        try:
+            d, rows = kofia_date(d0 - datetime.timedelta(days=back))
+            snaps[key] = (d.isoformat(), rows)
+        except Exception as e:
+            ERR.append(f"사모 {key}: {e}")
+    out = []
+    for c, x in now.items():
+        row = {"c": c, "co": x["co"], "n": x["n"], "t": x["t"], "est": x["est"], "amt": round((x["amt"] or 0) / 100, 1), "nav": x["nav"], "d1": x["d1"], "w1": x["w1"], "m0": x["m0"]}
+        for key, (d, rows) in snaps.items():
+            p = rows.get(c)
+            row[key] = round((x["nav"] / p["nav"] - 1) * 100, 2) if p and p["nav"] and x["nav"] and p["nav"] > 0 and x["nav"] > 0 else None
+        row["tr"] = bool(re.search(r"2종|3종|손익차등", x["n"]))     # 손익차등형 후순위(2종)은 레버리지 — 순위에서 따로
+        out.append(row)
+    return {"asof": d0.isoformat(), "dates": {k: v[0] for k, v in snaps.items()}, "n": len(out), "items": out}
+
+
 def main():
     old = {}
     try:
@@ -235,6 +371,9 @@ def main():
     run("funds", funds)
     run("els", els, "01")
     run("els_done", els, "02")
+    run("td", tesouro)
+    run("td_hist", tesouro_hist)
+    run("pv", private_funds)
     if isinstance(P.get("els_done"), list):
         P["els_done"] = P["els_done"][:60]
     # 헤알/원 = (원/달러) ÷ (헤알/달러) — 야후 BRLKRW=X 는 하루치만 줘서 두 환율로 계산
