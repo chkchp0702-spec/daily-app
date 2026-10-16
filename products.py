@@ -344,6 +344,84 @@ def private_funds():
     return {"asof": d0.isoformat(), "dates": {k: v[0] for k, v in snaps.items()}, "n": len(out), "items": out}
 
 
+# ───────── 10/16 3차: 채권 발행 정보(이자 주기) · 브라질 전 종목(ANBIMA) · 펀드 구성(보유 상위) ─────────
+def bond_terms(rows):
+    """장외채권 상세(/hks/hks4036/v01.do) — 표면금리·이자유형(이표/복리/할인)·이자계산주기·상환방법 → 만기까지 현금흐름 계산용"""
+    from concurrent.futures import ThreadPoolExecutor
+    def one(r):
+        try:
+            t = strip(get(f"/hks/hks4036/v01.do?itemCode={r['code']}").text)
+            g = lambda lab: (re.search(lab + r"\s+([^\s]+(?:\s개월)?)", t) or [None, None])[1]
+            r["cpn"] = num(g("표면금리"))
+            r["ctype"] = g("이자유형")
+            pm = re.search(r"이자계산주기\s+(\d+)\s*개월", t)
+            r["freq"] = int(pm.group(1)) if pm else None
+            r["redeem"] = g("상환방법")
+            r["btype"] = g("채권종류")
+        except Exception as e:
+            ERR.append(f"채권상세 {r['code']}: {str(e)[:80]}")
+        return r
+    with ThreadPoolExecutor(4) as ex:
+        return list(ex.map(one, rows))
+
+
+ANB_KIND = {"LTN": "할인채(만기에 한 번)", "NTN-F": "이표채(연 10% · 6개월마다)", "NTN-B": "물가채(IPCA+ · 6개월마다)", "NTN-C": "물가채(IGP-M+ · 옛 종목)", "LFT": "변동금리(Selic 연동)"}
+
+
+def anbima():
+    """브라질 국채 전 종목 — ANBIMA 유통시장 지표금리 파일 (LTN·NTN-F·NTN-B·NTN-C·LFT). 최근 영업일 파일"""
+    for k in range(0, 8):
+        d = datetime.datetime.now(KST).date() - datetime.timedelta(days=k)
+        try:
+            r = S.get(f"https://www.anbima.com.br/informacoes/merc-sec/arqs/ms{d.strftime('%y%m%d')}.txt", timeout=60)
+        except Exception:
+            continue
+        if r.status_code != 200 or len(r.content) < 1000:
+            continue
+        out = []
+        for ln in r.content.decode("latin1").splitlines():
+            c = ln.split("@")
+            if len(c) < 9 or c[0] not in ANB_KIND:
+                continue
+            f = lambda v: float(v.replace(",", ".")) if v and v not in ("--", "N/D") else None
+            mat = f"{c[4][:4]}-{c[4][4:6]}-{c[4][6:8]}"
+            out.append({"code": c[0], "kind": ANB_KIND[c[0]], "mat": mat, "issue": f"{c[3][:4]}-{c[3][4:6]}-{c[3][6:8]}",
+                        "buy": f(c[5]), "sell": f(c[6]), "r": f(c[7]), "pu": f(c[8]), "asof": f"{c[1][:4]}-{c[1][4:6]}-{c[1][6:8]}"})
+        if out:
+            out.sort(key=lambda x: (list(ANB_KIND).index(x["code"]), x["mat"]))
+            return out
+    raise RuntimeError("ANBIMA 파일 없음 (최근 8일)")
+
+
+def fund_holdings(funds, old):
+    """펀드 구성 — 미래에셋 펀드 상세의 보유 상위 종목(/hks/hks4116/a09.json). 월 1회 바뀌는 자료라 하루 한 번(아침)만 새로, 나머지는 지난 값"""
+    from concurrent.futures import ThreadPoolExecutor
+    hh = datetime.datetime.now(KST).hour
+    if old and old.get("asof") == datetime.datetime.now(KST).strftime("%Y-%m-%d") or (old and not (6 <= hh <= 9) and old.get("items")):
+        return old
+    pick = [f["c"] for f in funds if (f.get("aum") or 0) >= 10 or f.get("pv")]
+    items, fails = {}, 0
+    def one(c):
+        try:
+            r = post("/hks/hks4116/a09.json", {"itm_no": c, "drvs_yn": "0", "stk_yn": "1", "liqt_yn": "1", "bd_yn": "1"}, headers={"X-Requested-With": "XMLHttpRequest", "Referer": B + "/hks/hks4116/p11.do?fd_cd=" + c})
+            j = r.json()
+            g = j.get("grid01") or []
+            if not g:
+                return c, None
+            return c, {"d": j.get("bas_dt"), "h": [[x.get("itm_bztp_nm", "").strip(), round(num(x.get("fd_wtrt")) or 0, 2), x.get("ast_tp_nm") or "", x.get("mkt_tcd_nm") or ""] for x in g[:15]]}
+        except Exception:
+            return c, False
+    with ThreadPoolExecutor(6) as ex:
+        for c, v in ex.map(one, pick):
+            if v is False:
+                fails += 1
+            elif v:
+                items[c] = v
+    if fails > len(pick) * 0.3 and old:
+        raise RuntimeError(f"펀드 구성 실패 {fails}/{len(pick)}")
+    return {"asof": datetime.datetime.now(KST).strftime("%Y-%m-%d"), "n": len(items), "items": items}
+
+
 def main():
     old = {}
     try:
@@ -374,6 +452,24 @@ def main():
     run("td", tesouro)
     run("td_hist", tesouro_hist)
     run("pv", private_funds)
+    run("anb", anbima)
+    if isinstance(P.get("krw"), list):
+        try:
+            P["krw"] = bond_terms(P["krw"])
+        except Exception as e:
+            ERR.append(f"채권상세: {e}")
+    # 펀드 구성은 따로 파일 (크기가 커서 누를 때만 받음)
+    HP = os.path.join(os.path.dirname(OUT), "fund_hold.json")
+    try:
+        oldh = json.load(open(HP, encoding="utf-8"))
+    except Exception:
+        oldh = {}
+    try:
+        H = fund_holdings(P.get("funds") or [], oldh)
+        json.dump(H, open(HP, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        print("✓ fund_hold", H.get("n"))
+    except Exception as e:
+        ERR.append(f"펀드 구성: {e}")
     if isinstance(P.get("els_done"), list):
         P["els_done"] = P["els_done"][:60]
     # 헤알/원 = (원/달러) ÷ (헤알/달러) — 야후 BRLKRW=X 는 하루치만 줘서 두 환율로 계산

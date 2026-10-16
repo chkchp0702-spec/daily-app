@@ -1,5 +1,5 @@
 name: products
-# 🛍️ 상품 — 미래에셋증권 판매 채권(원화·미국채·호주국채)·펀드·ELS 를 모아 archive/x/products.json
+# 🛍️ 상품 — 미래에셋증권 판매 채권(원화·미국채·호주국채)·펀드·ELS 를 모아 archive/x/products.json archive/x/fund_hold.json
 on:
   schedule:
     - cron: "41 22 * * 0-4"   # KST 07:41 (평일 아침)
@@ -14,7 +14,7 @@ concurrency:
 jobs:
   products:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,4 +24,4 @@ jobs:
       - name: 상품 모으기
         run: python products.py
       - name: 저장
-        run: bash scripts/push.sh "products $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/products.json
+        run: bash scripts/push.sh "products $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/products.json archive/x/fund_hold.json
