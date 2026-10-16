@@ -23,6 +23,7 @@ S = requests.Session()
 S.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128 Safari/537.36",
                   "Accept-Language": "ko-KR,ko;q=0.9"})
 ERR = []
+PV_NOW = None
 
 
 def get(path):
@@ -157,6 +158,10 @@ def bm_index():
             return round((last / float(x.iloc[-1]) - 1) * 100, 2) if len(x) else None
         o = {"n": nm, "nav": round(last, 2), "asof": d.strftime("%Y-%m-%d"), "d1": round((last / float(c.iloc[-2]) - 1) * 100, 2), "w1": round((last / float(c.iloc[-6]) - 1) * 100, 2),
              "m1": ago(30), "m3": ago(91), "m6": ago(182), "y1": ago(365), "y": {}}
+        wl = {}                                   # 주마다 마지막 종가
+        for x, v in c.items(): wl[tuple(x.isocalendar()[:2])] = (x.strftime("%Y-%m-%d"), float(v))
+        wv = list(wl.values())
+        o["wk"] = [[wv[i][0], round((wv[i][1] / wv[i - 1][1] - 1) * 100, 2)] for i in range(max(1, len(wv) - 26), len(wv))]
         for y in range(2020, d.year + 1):
             e_ = c[c.index.year == y]; p_ = c[c.index.year == y - 1]
             if len(e_) and len(p_): o["y"][str(y)] = round((float(e_.iloc[-1]) / float(p_.iloc[-1]) - 1) * 100, 2)
@@ -367,7 +372,47 @@ def private_funds():
             row[key] = round((x["nav"] / p["nav"] - 1) * 100, 2) if p and p["nav"] and x["nav"] and p["nav"] > 0 and x["nav"] > 0 else None
         row["tr"] = bool(re.search(r"2종|3종|손익차등", x["n"]))     # 손익차등형 후순위(2종)은 레버리지 — 순위에서 따로
         out.append(row)
+    global PV_NOW
+    PV_NOW = (d0, now)
     return {"asof": d0.isoformat(), "dates": {k: v[0] for k, v in snaps.items()}, "n": len(out), "items": out}
+
+
+def pv_nav_hist(now_d, now_rows):
+    """📡 10/16 사용자 「엑셀을 믿지 말고 네가 계산해 · 사모펀드 수익률 일주일 단위도 · 자동으로」
+       금투협 사모 기준가를 날짜별로 쌓아 둠 → 앱이 1일·1주·1·3·6개월·1년·올해·주간 수익률을 기준가로 직접 계산.
+       최근 10영업일은 매일, 그 전 1년은 주마다 하나(그 주 마지막 날). 처음엔 지난 53주를 거꾸로 채움(한 번에 10분까지, 나머지는 다음 회차)."""
+    PATH = os.path.join(os.path.dirname(OUT), "pv_nav.json")
+    try:
+        H = json.load(open(PATH, encoding="utf-8"))
+    except Exception:
+        H = {"d": [], "v": {}}
+    by = {}                                   # 날짜 → {코드: 기준가}
+    for i, d in enumerate(H.get("d", [])):
+        by[d] = {c: a[i] for c, a in H.get("v", {}).items() if i < len(a) and a[i] is not None}
+    by[now_d.isoformat()] = {c: x["nav"] for c, x in now_rows.items() if x.get("nav")}
+    wk = lambda d: datetime.date.fromisoformat(d).isocalendar()[:2]
+    t0 = time.time(); fri = now_d - datetime.timedelta(days=(now_d.weekday() - 4) % 7)
+    for k in range(1, 54):
+        t = fri - datetime.timedelta(weeks=k)
+        if any(wk(d) == t.isocalendar()[:2] for d in by):
+            continue
+        if time.time() - t0 > 600:
+            break
+        try:
+            d, rows = kofia_date(t)
+            by[d.isoformat()] = {c: x["nav"] for c, x in rows.items() if x.get("nav")}
+        except Exception as e:
+            ERR.append(f"사모 기준가 기록 {t}: {str(e)[:60]}")
+    ds = sorted(d for d in by if d >= (now_d - datetime.timedelta(days=400)).isoformat())
+    keep, seen = set(ds[-10:]), {}
+    for d in ds:                              # 주마다 마지막 날
+        seen[wk(d)] = d
+    keep |= set(seen.values())
+    ds = sorted(keep)
+    codes = set(by[ds[-1]])
+    H = {"d": ds, "v": {c: [round(by[d][c], 2) if c in by[d] else None for d in ds] for c in sorted(codes)}}
+    json.dump(H, open(PATH, "w", encoding="utf-8"), separators=(",", ":"))
+    return len(ds)
 
 
 # ───────── 10/16 3차: 채권 발행 정보(이자 주기) · 브라질 전 종목(ANBIMA) · 펀드 구성(보유 상위) ─────────
@@ -583,6 +628,7 @@ def main():
         json.dump({"asof": KP.get("asof"), "dates": KP.get("dates"), "i": {x["c"]: [x.get("nav"), x.get("d1"), x.get("w1"), x.get("m1"), x.get("m3")] for x in KP.get("items", []) if x.get("c")}},
                   open(os.path.join(os.path.dirname(OUT), "pv_kofia.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
         print("✓ pv_kofia", len(KP.get("items", [])))
+        print("✓ pv_nav", pv_nav_hist(*PV_NOW))
     except Exception as e:
         ERR.append(f"금투협 사모 기준가: {str(e)[:120]}")
     run("anb", anbima)

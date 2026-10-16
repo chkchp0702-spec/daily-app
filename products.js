@@ -194,23 +194,54 @@
      archive/x/pv_kofia.json(products.yml 하루 3번)의 최신 기준가 ÷ 10/15 기준가(kb) 비율로 이어 붙임:
      1일·1주·1개월·3개월 = 금투협 값 그대로 · 6개월·1년·올해 = 10/15 표 값 × 그 뒤 변화 (금투협 6개월·1년은 분배·결산으로 기준가가 리셋돼 틀림) */
   function pvLive(L){
-    // 비교 기준선 KOSPI·KOSDAQ 도 매일 (products.json bm — 야후 지수)
-    return P().then(function(D){ if (D && D.bm && D.bm.length){ L.bm = D.bm; L.bmasof = D.bm[0].asof; } }, function(){}).then(function(){ return getJSON("archive/x/pv_kofia.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).then(function(K){
-      var n = 0; L.kasof = K.asof;
+    return P().then(function(D){ L.bm = D && D.bm && D.bm.length ? D.bm : []; L.bmasof = L.bm.length ? L.bm[0].asof : null; }, function(){ L.bm = []; }).then(function(){
+      return Promise.all([getJSON("archive/x/pv_nav.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).catch(function(){ return null; }),
+                          getJSON("archive/x/pv_kofia.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).catch(function(){ return null; })]);
+    }).then(function(a){
+      var H = a[0], K = a[1], n = 0;
+      L.kasof = H && H.d ? H.d[H.d.length - 1] : K ? K.asof : null;
       L.rows.forEach(function(o){
-        var q = o.k && K.i ? K.i[o.k] : null; if (!q || !q[0] || !o.kb || !(K.asof > o.kd)) return;
-        var ra = q[0] / o.kb; if (!(ra > 0.7 && ra < 1.4)) return;            // 분배·결산으로 튄 것 = 건너뜀
-        var ch = function(v){ return v == null ? null : Math.round(((1 + v / 100) * ra - 1) * 10000) / 100; };
-        var m3c = ch(o.m3), useK = q[4] != null && (m3c == null || Math.abs(q[4] - m3c) < 15);
-        o.d1 = q[1]; o.w1 = q[2]; o.m1 = useK && q[3] != null ? q[3] : ch(o.m1); o.m3 = useK ? q[4] : m3c; o.m6 = ch(o.m6); o.y1 = ch(o.y1);
-        if (o.y && o.y["2026"] != null) o.y["2026"] = ch(o.y["2026"]);
-        if (o.nav != null) o.nav = Math.round(o.nav * ra * 100) / 100;
-        o.live = {asof: K.asof, ch: Math.round((ra - 1) * 10000) / 100}; n++;
+        if (!o.k || !o.kb) return;
+        var c = H && H.v && H.v[o.k] ? navCalc(H.d, H.v[o.k]) : null, q = K && K.i ? K.i[o.k] : null;
+        var lastNav = c ? c.last : q ? q[0] : null, asof = c ? c.asof : K ? K.asof : null;
+        if (!lastNav || !(asof > o.kd)) return;
+        var ra = lastNav / o.kb, chain = ra > 0.7 && ra < 1.4 ? function(v){ return v == null ? null : Math.round(((1 + v / 100) * ra - 1) * 10000) / 100; } : function(){ return null; };
+        var src = {};
+        ["d1", "w1", "m1", "m3", "m6", "y1"].forEach(function(p){
+          if (c && c[p] != null){ o[p] = c[p]; src[p] = "calc"; }
+          else if (q && (p === "d1" || p === "w1") && q[p === "d1" ? 1 : 2] != null){ o[p] = q[p === "d1" ? 1 : 2]; src[p] = "kofia"; }
+          else { o[p] = chain(o[p]); src[p] = "chain"; }
+        });
+        o.y = o.y || {};
+        if (c && c.ytd != null){ o.y["2026"] = c.ytd; src.ytd = "calc"; } else if (o.y["2026"] != null){ o.y["2026"] = chain(o.y["2026"]); src.ytd = "chain"; }
+        if (o.nav != null && ra > 0.7 && ra < 1.4) o.nav = Math.round(o.nav * ra * 100) / 100;
+        o.live = {asof: asof, ch: Math.round((ra - 1) * 10000) / 100, src: src, resets: c ? c.resets : []};
+        o.wk = c ? c.wk : null; n++;
       });
       L.nlive = n; return L;
-    }); }).catch(function(){ return L; });
+    }).catch(function(){ return L; });
   }
-  var PVP = [["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"], ["ytd", "올해"]], PVPN = {d1: "1일", w1: "1주", m1: "1개월", m3: "3개월", m6: "6개월", y1: "1년", ytd: "올해(2026)"};
+  /* 기준가 기록으로 직접 계산 — 결산(기준가가 1,000 근처로 리셋, 한 칸에 −15% 넘게)은 그 칸만 빼고 이어 붙임 */
+  function navCalc(ds, arr){
+    var pts = []; ds.forEach(function(d, i){ if (arr[i] != null && arr[i] > 0) pts.push([d, arr[i]]); });
+    if (pts.length < 2) return null;
+    var f = [1], resets = [];
+    for (var i = 1; i < pts.length; i++){ var r = pts[i][1] / pts[i - 1][1]; if (r < 0.85 && Math.abs(pts[i][1] - 1000) < 60){ r = 1; resets.push(pts[i][0]); } f.push(f[i - 1] * r); }
+    var L_ = pts.length - 1, T = function(d){ return Date.parse(d + "T00:00:00Z"); }, now = T(pts[L_][0]);
+    var at = function(days, slack){ var t = now - days * 864e5, j = -1; for (var i = 0; i < L_; i++) if (T(pts[i][0]) <= t) j = i; if (j < 0 || t - T(pts[j][0]) > (slack || 6) * 864e5) return null; return Math.round((f[L_] / f[j] - 1) * 10000) / 100; };
+    var out = {last: pts[L_][1], asof: pts[L_][0], resets: resets,
+      d1: now - T(pts[L_ - 1][0]) <= 4 * 864e5 ? Math.round((f[L_] / f[L_ - 1] - 1) * 10000) / 100 : null,
+      w1: at(7, 4), m1: at(30.4), m3: at(91.3), m6: at(182.6), y1: at(365.25)};
+    var y0 = pts[L_][0].slice(0, 4) + "-01-01", j = -1; for (var k = 0; k < L_; k++) if (pts[k][0] < y0) j = k;
+    out.ytd = j >= 0 && T(y0) - T(pts[j][0]) <= 10 * 864e5 ? Math.round((f[L_] / f[j] - 1) * 10000) / 100 : null;
+    var wk = {}, wl = [];                          // 주마다 마지막 점 → 주간 수익률
+    pts.forEach(function(p, i){ var dt = new Date(T(p[0])), th = new Date(dt); th.setUTCDate(dt.getUTCDate() + 3 - ((dt.getUTCDay() + 6) % 7)); var key = th.getUTCFullYear() + "-" + Math.ceil(((th - Date.UTC(th.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7); wk[key] = i; });
+    Object.keys(wk).forEach(function(kk){ wl.push(wk[kk]); }); wl.sort(function(a, b){ return a - b; });
+    out.wk = []; for (var w = 1; w < wl.length; w++){ var i0 = wl[w - 1], i1 = wl[w]; if (T(pts[i1][0]) - T(pts[i0][0]) <= 10 * 864e5) out.wk.push([pts[i1][0], Math.round((f[i1] / f[i0] - 1) * 10000) / 100]); }
+    out.wk = out.wk.slice(-13);
+    return out;
+  }
+  var PVP = [["w1", "1주"], ["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"], ["ytd", "올해"]], PVPN = {d1: "1일", w1: "1주", m1: "1개월", m3: "3개월", m6: "6개월", y1: "1년", ytd: "올해(2026)"};
   var SG = [["", "전체"], ["Long", "롱"], ["Long/Short", "롱숏"], ["Multi", "멀티전략"], ["Fund of Fund", "재간접"], ["Pre-IPO", "Pre-IPO"], ["Mezzanine", "메자닌"], ["하이일드", "공모주하이일드"], ["코스닥벤처", "코스닥벤처"], ["PE", "PE·VC·사모대출"], ["USD", "💵 달러"]];
   var SSHORT = {"Equity Hedge (Long)": "롱", "Equity Hedge (Long · USD)": "롱·달러", "Equity Hedge (Long/Short)": "롱숏", "Equity Hedge (Multi-Strategy)": "멀티전략", "Equity Hedge (Fund of Fund)": "헤지 재간접", "Event-Driven (Pre-IPO)": "Pre-IPO·공모주", "Event-Driven (Mezzanine)": "메자닌", "Event-Driven (공모주 하이일드)": "공모주 하이일드", "Event-Driven (코스닥벤처)": "코스닥벤처", "국내형 PE": "국내 PE", "Global VC": "해외 VC", "Global PE (원화)": "해외 PE(원화)", "Global PE (USD)": "해외 PE(달러)", "Global PD (USD)": "해외 사모대출(달러)"};
   function sgOk(x, f){
@@ -226,7 +257,7 @@
     var v = pvv(x, p), cur = x.usd ? "$" : "";
     return '<div class="pd-it pd-p pd-tap"' + reg("pvl", Object.assign({per: p}, x)) + '><div class="pd-h">' + (i != null ? '<span class="rk">' + (i + 1) + '</span>' : '') + '<div class="pd-n"><b>' + e(pvname(x.n)) + '</b><small>' + e(SSHORT[x.s] || x.s) + (x.d ? ' · 설정 ' + e(x.d.slice(0, 7).replace("-", ".")) : '') + (x.nav != null ? ' · 기준가 ' + cur + fmt(x.nav) : '') + (/손익차등/.test(x.n) ? ' · <span class="chip2 hot" style="margin:0">손익차등</span>' : '') + (x.live ? ' · <span class="pd-lv">📡 ' + e(md(x.live.asof)) + ' 갱신</span>' : '') + '</small></div>' +
       '<div class="pd-v">' + (v == null ? '<b class="mut">–</b>' : sg(v)) + '<small>' + PVPN[p] + '</small></div></div>' +
-      '<div class="pd-row"><span>1개월 ' + sg(x.m1) + '</span><span>3개월 ' + sg(x.m3) + '</span><span>6개월 ' + sg(x.m6) + '</span><span>1년 ' + sg(x.y1) + '</span><span>올해 ' + sg((x.y || {})["2026"]) + '</span></div></div>';
+      '<div class="pd-row"><span>1주 ' + sg(x.w1) + '</span><span>1개월 ' + sg(x.m1) + '</span><span>3개월 ' + sg(x.m3) + '</span><span>6개월 ' + sg(x.m6) + '</span><span>1년 ' + sg(x.y1) + '</span><span>올해 ' + sg((x.y || {})["2026"]) + '</span></div></div>';
   }
   function pvBody(){
     if (!PVL){
@@ -247,7 +278,7 @@
       (top.length ? '<div class="pd-list">' + top.map(function(x, i){ return pvlrow(x, i, p); }).join("") + '</div>' : '<div class="empty">이 조건에 수익률이 있는 펀드가 없어요.</div>')) +
       (rest.length ? '<details class="card cpx-d"><summary>나머지 ' + rest.length + '개 펼치기 <span class="mut">31위~</span></summary><div class="pd-list">' + rest.map(function(x, i){ return pvlrow(x, i + 30, p); }).join("") + '</div></details>' : '') +
       (none.length ? '<details class="card cpx-d"><summary>' + PVPN[p] + ' 수익률 없음 ' + none.length + '개 <span class="mut">새로 만든 펀드 등</span></summary><div class="pd-list">' + none.map(function(x){ return pvlrow(x, null, p); }).join("") + '</div></details>' : '') +
-      '<p class="note">' + e(PVL.src) + '. 수익률은 운용사 기준가 기준(세전·보수 차감 후), 달러 펀드는 달러 기준이에요. <b>📡 표시 ' + (PVL.nlive || 0) + '개</b>는 금융투자협회 공시 기준가로 매일 갱신(' + e(md(PVL.kasof || "")) + ') — 나머지는 금투협에 기준가를 안 올리는 펀드라 10/15 화면 값이에요(새 화면 사진·엑셀을 주시면 갱신). 펀드를 누르면 전략 설명·연도별 성적·모의 계산이 펼쳐져요. <a href="#" id="pvlock">이 기기에서 잠그기</a></p>';
+      '<p class="note">' + e(PVL.src) + '. 비교 기준선 KOSPI·KOSDAQ는 지수 종가로 직접 계산(엑셀 값 안 씀). 수익률은 기준가 기준(세전·보수 차감 후), 달러 펀드는 달러 기준이에요. <b>📡 표시 ' + (PVL.nlive || 0) + '개</b>는 금융투자협회 공시 기준가를 매일 쌓아 수익률을 직접 계산(' + e(md(PVL.kasof || "")) + ') — 나머지는 금투협에 기준가를 안 올리는 펀드라 10/15 화면 값이에요(새 화면 사진·엑셀을 주시면 갱신). 펀드를 누르면 전략 설명·연도별 성적·모의 계산이 펼쳐져요. <a href="#" id="pvlock">이 기기에서 잠그기</a></p>';
   }
   function fundView(D){
     var F = (D.funds || []).filter(function(x){ return x.t; }), k = SEL.fund || "pv";
@@ -465,7 +496,9 @@
     else if (k === "pvl"){
       var S = (PVL && PVL.S || {})[o.s] || [o.s, "", "", ""], usd = o.usd, bm = (PVL && PVL.bm) || [], kospi = bm[0] || {}, kosdaq = bm[1] || {};
       h += '<div class="sub2">📘 ' + e(S[0]) + ' <span class="mut">' + e(o.s) + '</span></div><p>' + e(S[1]) + '</p><p>🧺 <b>' + e(S[2].split(" — ")[0]) + '</b> — ' + e(S[2].split(" — ").slice(1).join(" — ")) + '</p><p>👀 ' + e(S[3]) + '</p>';
-      if (o.live) h += '<p class="pd-lvp">📡 금융투자협회 공시 기준가로 ' + e(o.live.asof) + '까지 갱신 — 10/15 뒤 ' + V.sgn(o.live.ch) + '%. 1일·1주·1개월·3개월은 금투협 값, 6개월·1년·올해는 10/15 값에 그 뒤 변화를 이어 붙였어요.</p>';
+      if (o.live){ var SN = {d1: "1일", w1: "1주", m1: "1개월", m3: "3개월", m6: "6개월", y1: "1년", ytd: "올해"}, cs = [], ch_ = [];
+        Object.keys(SN).forEach(function(k){ var v = o.live.src[k]; if (v === "calc" || v === "kofia") cs.push(SN[k]); else if (v === "chain") ch_.push(SN[k]); });
+        h += '<p class="pd-lvp">📡 금융투자협회 공시 기준가로 ' + e(o.live.asof) + '까지 <b>직접 계산</b> — ' + (cs.length ? cs.join("·") + '은 기준가 기록으로' : '') + (ch_.length ? (cs.length ? ', ' : '') + ch_.join("·") + '은 아직 기록이 짧아 10/15 값에 그 뒤 변화(' + V.sgn(o.live.ch) + '%)를 이어 붙였어요(기록이 쌓이면 자동으로 직접 계산)' : '') + '.' + (o.live.resets && o.live.resets.length ? ' 결산으로 기준가가 리셋된 날(' + o.live.resets.map(function(d){ return d.slice(5); }).join(", ") + ')은 빼고 이어 붙였어요.' : '') + '</p>'; }
       else h += '<p class="pd-lvp">📷 10/15 화면 값 — 이 펀드는 금융투자협회에 기준가를 공시하지 않아 매일 갱신이 안 돼요.</p>';
       if (o.m) h += '<div class="sub2">🏢 운용사</div><p>' + e(o.m) + '</p>';
       h += '<div class="pd-pvh" data-pvhold="' + e(o.mg || "") + '"><div class="sub2">🧺 구성 엿보기 <span class="mut">불러오는 중…</span></div></div>';
@@ -473,6 +506,11 @@
       h += '<p class="note">가입은 미래에셋 PB·영업점(일반투자자 최소 3억, 전문투자자 요건)이에요.</p>';
       h += '<div class="sub2">📊 기간 수익률 <span class="mut">' + (usd ? '달러 기준 · ' : '') + '옆은 ' + (PVL && PVL.bmasof ? e(PVL.bmasof.slice(5).replace('-', '/')) + ' 마감' : '10/15 화면의') + ' KOSPI / KOSDAQ</span></div>' + tbl([["d1", "1일"], ["w1", "1주"], ["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"]].map(function(p){
         var v = o[p[0]]; return [p[1] + ' <span class="mut">' + (kospi[p[0]] != null ? V.sgn(kospi[p[0]]) + '%' : '–') + ' / ' + (kosdaq[p[0]] != null ? V.sgn(kosdaq[p[0]]) + '%' : '–') + '</span>', v == null ? '–' : V.sgn(v) + '%', v == null ? '' : v >= 0 ? 'up' : 'dn']; }));
+      if (o.wk && o.wk.length){ var bw = {}; ((kospi.wk) || []).forEach(function(w){ bw[w[0].slice(0, 10)] = w[1]; });
+        var wkOf = function(d){ var t = Date.parse(d + "T00:00:00Z"); var best = null; Object.keys(bw).forEach(function(x){ var dd = Math.abs(Date.parse(x + "T00:00:00Z") - t); if (dd <= 4 * 864e5 && (best == null || dd < best[0])) best = [dd, x]; }); return best ? bw[best[1]] : null; };
+        h += '<div class="sub2">📆 주간 수익률 <span class="mut">기준가로 직접 계산 · 최근 ' + o.wk.length + '주 · 옆은 그 주 코스피</span></div>' + tbl(o.wk.slice().reverse().map(function(w){ var kb = wkOf(w[0]);
+          return [e(w[0].slice(5).replace("-", "/")) + ' 주 <span class="mut">' + (kb != null ? '코스피 ' + V.sgn(kb) + '%' : '') + '</span>', V.sgn(w[1]) + '%', w[1] >= 0 ? 'up' : 'dn']; })) +
+          '<p class="note" style="margin:4px 0 0">펀드 기준가는 전날 종가로 계산돼서 코스피보다 하루 늦게 움직여요.</p>'; }
       var ys = ["2020", "2021", "2022", "2023", "2024", "2025", "2026"].filter(function(y){ return (o.y || {})[y] != null; });
       if (ys.length) h += '<div class="sub2">📅 연도별 수익률 <span class="mut">2026은 ' + (o.live ? e(o.live.asof.slice(5).replace('-', '/')) : '10/15') + '까지 · 첫해는 설정일부터</span></div>' + V.dbars(ys.map(function(y){ return {label: y + '년', v: o.y[y]}; })) + (kospi.y ? '<p class="pd-bm">같은 해 코스피 ' + ys.filter(function(y){ return kospi.y[y] != null; }).map(function(y){ return y + ' <b class="' + cls(kospi.y[y]) + '">' + V.sgn(kospi.y[y], 1) + '%</b>'; }).join(' · ') + '</p>' : '');
       var pers = [["m1", "1개월"], ["m3", "3개월"], ["m6", "6개월"], ["y1", "1년"]].filter(function(p){ return o[p[0]] != null; });
