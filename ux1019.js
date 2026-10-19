@@ -10,7 +10,10 @@
   function pct(p){ return Math.round(p * 100); }
   function ten(p){ return Math.max(0, Math.min(10, Math.round(p * 10))); }
   /* 세게 말하기 — 확률 → 한 마디 (틀려도 좋다는 전제) */
-  function word(p){
+  // ⚡ 10/19: 장이 아직 많이 남았으면(남은 시간 40%↑) 「거의 확실히」라고 하지 않음 — 10:18 「12% 거의 확실히 내린다」 뒤 10:23 플러스 전환
+  function word(p, soft){
+    if (soft && p >= 0.70) return {t: "오른다 쪽에 세게", c: "up2"};
+    if (soft && p <= 0.30) return {t: "내린다 쪽에 세게", c: "dn2"};
     if (p >= 0.70) return {t: "거의 확실히 오른다", c: "up2"};
     if (p >= 0.60) return {t: "오른다 쪽에 세게", c: "up"};
     if (p >= 0.55) return {t: "오를 쪽", c: "up"};
@@ -33,15 +36,21 @@
     var ev = String(a.ev || "").split("→")[0].replace(/\(.*?\)/g, "").trim();
     return ev ? a.ic + " " + ev : "";
   }
-  function build(P, B, T){
+  function build(P, B, T, LV){
     var K = kst(), L = lead(P, K); if (!L) return "";
-    var mk = L.mk, p1 = mk.p1, p5 = mk.p5, w1 = word(p1), w5 = word(p5);
+    LV = LV || {};
+    // ⚡ 장중이면 장중 나침반(10분마다)의 지금 등락으로 확률을 다시 계산 (problive.js)
+    var lv = window.probLive ? probLive(L.mk, LV[L.mk.mk], P) : null;
+    if (lv) L.mk = Object.assign({}, L.mk, {p1: lv.p1, intra_chg: lv.chg});
+    if (L.other && window.probLive){ var lo = probLive(L.other, LV[L.other.mk], P); if (lo) L.other = Object.assign({}, L.other, {p1: lo.p1}); }
+    var soft = L.mk.open_now && (lv ? lv.rem > 0.4 : true);
+    var mk = L.mk, p1 = mk.p1, p5 = mk.p5, w1 = word(p1, soft), w5 = word(p5);
     var strong = p1 >= 0.6 || p1 <= 0.4;
     var head = e(mk.flag + " " + mk.ixn + " " + L.when) + " → <em>" + e(w1.t) + "</em>";
     var ten1 = ten(p1), ten5 = ten(p5);
     var nums = '<span class="pl-ten ' + w1.c + '" title="오를 확률 ' + pct(p1) + '%">' + "●".repeat(ten1) + "○".repeat(10 - ten1) + ' <b>10번 중 ' + ten1 + '번 오름</b> (' + pct(p1) + '%)</span>';
-    var anc = anchorLine(mk);
-    var band = mk.band1 && mk.band1.length === 2 ? "예상 폭 " + mk.band1[0] + "% ~ +" + mk.band1[1] + "%" : "";
+    var anc = lv ? "⚡ 지금 " + mk.ixn + " " + (lv.chg > 0 ? "+" : "") + lv.chg.toFixed(2) + "% (" + lv.t + " 장중 나침반) · 장 남은 시간 " + Math.round(lv.rem * 100) + "% · 남은 흔들림 " + Math.round(lv.vr * 100) + "% · 하루 흔들림 " + (lv.sig * 100).toFixed(1) + "%" : anchorLine(mk);
+    var band = !lv && mk.band1 && mk.band1.length === 2 ? "예상 폭 " + mk.band1[0] + "% ~ +" + mk.band1[1] + "%" : "";
     var wk5 = '<div class="pl-row"><span class="pl-k">일주일 뒤</span><b class="' + w5.c + '">' + e(w5.t) + '</b> <small>10번 중 ' + ten5 + '번 (' + pct(p5) + '%)</small></div>';
     var oth = L.other ? '<div class="pl-row"><span class="pl-k">' + e(L.otherWhen) + '</span><b class="' + word(L.other.p1).c + '">' + e(word(L.other.p1).t) + '</b> <small>' + pct(L.other.p1) + '%</small></div>' : "";
     // 🧠 두뇌 — 국면 + 가장 확신하는 논지 하나
@@ -51,16 +60,17 @@
     var sc = P.score && P.score.all && P.score.all.d1 || {}, hit = sc.n ? " · 지금까지 다음 날 방향 " + Math.round(sc.hit / 100 * sc.n) + "/" + sc.n + " 맞음" : "";
     var stale = P.date && P.date !== K.ymd && K.m >= 9 * 60 ? ' <span class="pl-old">(' + e(P.date.slice(5).replace("-", "/")) + ' 계산)</span>' : "";
     return '<section class="card pl ' + w1.c + (strong ? ' strong' : '') + '" data-goto="prob" role="button">' +
-      '<div class="pl-top"><span class="pl-ic">🎲</span><div class="pl-h"><small>오늘, 확률로 말하면 · 🎲 ' + e(P.t || "") + stale + '</small><div class="pl-head">' + head + '</div></div><span class="pl-go">🎲 ›</span></div>' +
+      '<div class="pl-top"><span class="pl-ic">🎲</span><div class="pl-h"><small>오늘, 확률로 말하면 · ' + (lv ? '⚡ ' + e(lv.t) + ' 지금 값' : '🎲 ' + e(P.t || "") + stale) + '</small><div class="pl-head">' + head + '</div></div><span class="pl-go">🎲 ›</span></div>' +
       '<div class="pl-nums">' + nums + '</div>' +
       (anc || band ? '<div class="pl-why">' + e(anc) + (anc && band ? ' · ' : '') + e(band) + '</div>' : '') +
       wk5 + oth + br +
-      '<div class="pl-foot">틀려도 좋다는 마음으로 세게 말해요' + hit + ' · 매시간 다시 계산 · 사라·팔라는 뜻 아님</div></section>';
+      '<div class="pl-foot">틀려도 좋다는 마음으로 세게 말해요' + hit + ' · 장중엔 10분마다 지금 등락으로 다시 계산 · 사라·팔라는 뜻 아님</div></section>';
   }
   function mount(){
     var body = document.getElementById("hmbody"); if (!body) return;
-    Promise.all([J("archive/x/prob.json"), J(RAWM + "market/home.json").catch(function(){ return null; }), J(RAWM + "brain/state.json").catch(function(){ return null; })]).then(function(a){
-      var html = build(a[0], a[1] && a[1].brain, a[2]); if (!html) return;
+    var LJ = function(k){ return J("archive/x/live_" + k + ".json").catch(function(){ return null; }); };
+    Promise.all([J("archive/x/prob.json"), J(RAWM + "market/home.json").catch(function(){ return null; }), J(RAWM + "brain/state.json").catch(function(){ return null; }), LJ("kr"), LJ("us")]).then(function(a){
+      var html = build(a[0], a[1] && a[1].brain, a[2], {KR: a[3], US: a[4]}); if (!html) return;
       var b2 = document.getElementById("hmbody"); if (!b2) return;
       var old = b2.querySelector(".pl"); if (old) old.remove();
       var anchor = b2.querySelector(".hm-live") || b2.querySelector(".hm-day");

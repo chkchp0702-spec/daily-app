@@ -582,10 +582,15 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
     INFO = {}
     ANCHOR = {}
     INTRA_CHG = [None]
+    IC = [None]
     # 🧭 닻 고르기 (내일=오늘 장 확률 p1 에만): ① 장중이면 지금 등락 + 남은 시간 ② 아니면 간밤 미국 / 선물 갭
     if partial is not None:
         from statistics import NormalDist
         sig_d = float(d["r"].tail(20).std()) or 0.01
+        # 🌪️ 10/19 코스피 −1.79%(10:18)에 「12% · 거의 확실히 내린다」 → 10:23 +0.54% 전환. 20일 표준편차(2.6%)가 이번 주 같은 폭풍(하루 ±5~8%)엔 너무 작았음
+        #   → 최근 5일 흔들림(RMS)과 반반 섞되 20일 값 밑으로는 안 내림 (미검증 — 주간 연구에서 60분봉으로 확인할 것)
+        rms5 = float((d["r"].tail(5) ** 2).mean() ** 0.5)
+        sig_d = max(sig_d, ((sig_d ** 2 + rms5 ** 2) / 2) ** 0.5)
         tot = (cfg["close"] // 100 * 60 + cfg["close"] % 100) - (cfg["open"] // 100 * 60 + cfg["open"] % 100)
         el = (loc.hour * 60 + loc.minute) - (cfg["open"] // 100 * 60 + cfg["open"] % 100)
         rem = max(0.02, 1 - el / tot)
@@ -597,6 +602,9 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
                      "ev": f"지금 {cfg['ixn']} {(partial / float(last['c']) - 1) * 100:+.2f}% · 장 남은 시간 {rem * 100:.0f}% · 남은 흔들림 {vr * 100:.0f}% · 하루 흔들림 {sig_d * 100:.1f}% → 종가가 어제보다 높을 확률 {pi * 100:.0f}% ({'시각별 실측 보정 · 60분봉 2년' if mk in INTRA_VH else '무작위 걸음 근사'})"})
         ANCHOR["p1"] = {"k": "intra", "p": pi}
         INTRA_CHG[0] = round((partial / float(last["c"]) - 1) * 100, 2)
+        # 📱 앱이 장중 나침반(10분마다)의 지금 등락으로 같은 식을 다시 계산하도록 재료를 넘김 (prob 은 매시간이라 그 사이 반전을 못 따라감)
+        IC[0] = {"sig": round(sig_d, 5), "vh": sorted(INTRA_VH[mk].items()) if mk in INTRA_VH else None, "tz": cfg["tz"],
+                 "open": cfg["open"], "close": cfg["close"], "prev": float(last["c"]), "pi": pi}
     else:
         la = next((x for x in M if x["k"] == "lead" and x.get("anchor") and x.get("p1") is not None), None)
         if la:
@@ -646,7 +654,9 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
         for k in ("p1", "p5"):
             x[k] = r2(x[k], 3)
         x.pop("sig1", None); x.pop("sig5", None); x.pop("q5", None); x.pop("auc_p1", None); x.pop("auc_p5", None)
-    return {"mk": mk, "name": cfg["name"], "flag": cfg["flag"], "ixn": ixn, "base_date": base_date, "open_now": open_now, "filled": PATCHED.get(mk), "intra_chg": INTRA_CHG[0],
+    if IC[0]:
+        IC[0]["dev"] = round(logit(min(0.99, max(0.01, p1))) - logit(IC[0].pop("pi")), 4)
+    return {"mk": mk, "name": cfg["name"], "flag": cfg["flag"], "ixn": ixn, "base_date": base_date, "open_now": open_now, "filled": PATCHED.get(mk), "intra_chg": INTRA_CHG[0], "ic": IC[0],
             "last": r2(last["c"]), "chg": r2(last["r"] * 100), "p1": r2(p1, 3), "p5": r2(p5, 3), "tone1": tone1, "tone5": tone5,
             "band1": band1, "band5": band5, "m5": r2(m5), "widen": widen, "state": state, "methods": M,
             "next_day": nxt.strftime("%Y-%m-%d"), "n_hist": int(len(d)),

@@ -30,7 +30,7 @@
   // ⏱ 10/19 사용자 「이거 한국시각 뭐니… 일일이 못 하니」 — 기준 시각을 오늘/날짜로 분명히, 늦어지면 스스로 「늦어짐」 표시
   function stamp(D){
     var age = D.at ? (Date.now() - D.at) / 60000 : null, day = D.date && D.date !== kd(0) ? md(D.date) + " " : "";
-    var s = "한국시각 " + day + e(D.t) + " 기준 · 매시간";
+    var s = "한국시각 " + day + e(D.t) + " 기준 · 매시간" + (D.lvT ? " · 열린 시장은 ⚡ " + e(D.lvT) + " 지금 등락으로 다시 계산" : "");
     if (age != null && age > 75) s += ' · <b class="dn">⏳ ' + Math.round(age / 60 * 10) / 10 + '시간째 안 바뀜 — 지킴이가 다시 돌려요</b>';
     return s;
   }
@@ -42,6 +42,21 @@
     if (S.last < kd(0) && mk !== "US" && wk) s += " · 오늘 장은 마감 뒤 " + NEXT[mk] + " 반영";
     else if (mk === "US" && wk) s += " · 미국 마감 뒤 06:40 반영";
     return s;
+  }
+
+  // ⚡ 10/19: 열린 시장은 장중 나침반(10분마다)의 지금 등락으로 오늘 확률(p1)을 다시 계산 (problive.js) — 🎲 계산(매시간) 사이의 반전을 따라감
+  function liveFix(D){
+    if (!window.probLive || !D || !D.markets) return D;
+    var ks = Object.keys(D.markets).filter(function(k){ return D.markets[k].open_now && D.markets[k].ic; });
+    return Promise.all(ks.map(function(k){ return P("live_" + k.toLowerCase() + ".json").catch(function(){ return null; }); })).then(function(R){
+      ks.forEach(function(k, i){ var lv = probLive(D.markets[k], R[i], D); if (!lv) return;
+        var m = D.markets[k], old = m.p1;
+        m.p1 = lv.p1; m.intra_chg = lv.chg; m.e1 = m.pb1 != null ? Math.round((lv.p1 - m.pb1) * 1000) / 10 : m.e1;
+        m.lv = lv; D.lvT = lv.t;
+        (m.methods || []).forEach(function(x){ if (x.k === "intra"){ x.ev = "⚡ " + lv.t + " 지금 " + m.ixn + " " + (lv.chg > 0 ? "+" : "") + lv.chg.toFixed(2) + "% · 장 남은 시간 " + Math.round(lv.rem * 100) + "% · 남은 흔들림 " + Math.round(lv.vr * 100) + "% · 하루 흔들림 " + (lv.sig * 100).toFixed(1) + "% → 다시 계산 " + Math.round(lv.p1 * 100) + "% (🎲 " + D.t + " 계산은 " + Math.round(old * 100) + "%)"; } });
+      });
+      return D;
+    });
   }
   function ep(v){ return v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1) + "%p"; }
   // 10/15 사용자 「확률에 마이너스가 말이 되니?」 — 큰 숫자는 확률 그대로(31%), 평소와의 차이는 말로(「평소 54%보다 23%p 낮음」)
@@ -223,7 +238,7 @@
   }
   window.probView = function(){ return '<div id="prbody"><div class="loading">확률 계산 자료 불러오는 중…</div></div>'; };
   window.probInit = function(){
-    P("prob_sec.json").then(function(j){ SECX = j; }).catch(function(){}).then(function(){ return P("prob.json"); }).then(draw).catch(function(){ var b = document.getElementById("prbody"); if (b) b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률이 아직 안 올라왔어요.<br>다음 시간 계산 때 채워져요.</div>'; });
+    P("prob_sec.json").then(function(j){ SECX = j; }).catch(function(){}).then(function(){ return P("prob.json"); }).then(liveFix).then(draw).catch(function(){ var b = document.getElementById("prbody"); if (b) b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률이 아직 안 올라왔어요.<br>다음 시간 계산 때 채워져요.</div>'; });
   };
   (function(){ var st = document.createElement("style"); st.textContent =
     ".pr5{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:2px 0 8px}" +
