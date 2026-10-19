@@ -400,6 +400,33 @@
     document.body.appendChild(sh); document.body.classList.add("sheet-open"); try { updBack(); } catch(z) {}
   }
 
+  /* 🎬 ELS 과거 재생 — 10/19 A10/19-1: els_replay.py(els_dart·products 작업)가 기초자산 일봉으로 「2006년부터 매 거래일 가입한 셈」 돌린 결과(archive/x/els_replay.json).
+     숫자가 없는 상품(개별주 이름 사전에 없음·조건을 못 읽음)은 띠를 안 그림. 과거 계산 · 미래 보장 아님 · 사라는 말 없음. */
+  var ELSREP = null, ELSREPW = null;
+  function elsRep(id){
+    if (!ELSREP){ if (!ELSREPW) ELSREPW = getJSON("archive/x/els_replay.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).then(function(j){ ELSREP = j && j.stats ? j : {stats: {}, by_id: {}}; if (window.__pdRedraw) window.__pdRedraw(); }).catch(function(){ ELSREP = {stats: {}, by_id: {}}; });
+      return null; }
+    var k = (ELSREP.by_id || {})[id]; return k ? (ELSREP.stats || {})[k] || null : null;
+  }
+  function repBand(st, full){
+    if (!st || !st.k || !st.k.length) return "";
+    var n = st.k.length, cyc = st.cyc || 6, mo = function(m){ return m % 12 === 0 ? (m / 12) + "년" : m + "개월"; };
+    var first = st.k[0], second = n > 1 ? st.k[1] : null, early = st.k[n - 2] != null ? st.k[n - 2] : st.k[0], all = st.k[n - 1];
+    var matOk = st.mat_ok || 0, loss = st.loss || 0;
+    var segs = [[all, "var(--up)", "상환"], [matOk, "#a3a3a3", "만기 원금"], [loss, "var(--dn)", "손실"]];
+    var bar = '<span class="pd-rpb">' + segs.map(function(sg){ return sg[0] > 0 ? '<i style="width:' + sg[0] + '%;background:' + sg[1] + '" title="' + sg[2] + ' ' + sg[0] + '%"></i>' : ''; }).join("") + '</span>';
+    var txt = '<b>' + mo(cyc) + ' 만에 끝 ' + first.toFixed(0) + '%</b>' + (second != null ? ' · ' + mo(cyc * 2) + ' 안 ' + second.toFixed(0) + '%' : '') + ' · 만기 평가 때 상환 ' + Math.max(0, all - early).toFixed(0) + '%' +
+      (matOk ? ' · 만기에 ' + (st.ki_touch != null ? '원금+이자(KI 안 닿음) ' : '원금만 ') + matOk.toFixed(0) + '%' : '') +
+      ' · <b class="' + (loss ? 'dn' : '') + '">손실로 끝 ' + loss.toFixed(0) + '%</b>' + (loss && st.loss_yrs && st.loss_yrs.length ? '(' + st.loss_yrs.join('·') + ' 가입분)' : '') +
+      (loss && st.loss_avg != null ? ' 평균 ' + st.loss_avg.toFixed(0) + '%' : '');
+    var wk = st.worst ? Object.keys(st.worst).sort(function(a, b){ return st.worst[b] - st.worst[a]; }) : [];
+    var tail = (st.ki_touch != null ? ' · KI 닿은 적 ' + st.ki_touch.toFixed(0) + '%' : '') + (wk.length ? ' · 1차에 발목 잡은 건 주로 <b>' + e(wk[0]) + '</b> ' + st.worst[wk[0]] + '%' : '');
+    return '<div class="pd-rep' + (full ? ' full' : '') + '"><div class="pd-rph">🎬 과거 재생 <span class="mut">' + e(st.from) + '~' + e(st.to) + ' 매 거래일 가입 ' + st.n.toLocaleString() + '회 · 기본 스텝다운 기준</span></div>' + bar + '<div class="pd-rpt">' + txt + tail + '</div>' +
+      (full ? '<p class="note" style="margin:4px 0 0">기초자산 일봉으로 이 조건(배리어·주기·KI)만 그대로 돌린 과거 계산 — 월지급·리자드·조기상환 뒤 재투자는 안 넣었고, 만기까지 결과가 난 가입일만 셌어요. 미래 보장이 아니고 사라는 뜻도 아니에요.</p>' : '') + '</div>';
+  }
+
+  function repMini(st){ if (!st || !st.k || !st.k.length) return ""; var cyc = st.cyc || 6, mo = cyc % 12 === 0 ? (cyc / 12) + "년" : cyc + "개월"; return '<br><span class="pd-rpm">🎬 ' + mo + ' 만에 끝 ' + st.k[0].toFixed(0) + '% · <b class="' + (st.loss ? 'dn' : '') + '">손실 ' + (st.loss || 0).toFixed(0) + '%</b></span>'; }
+
   /* ───────── 🎯 ELS ───────── */
   function dday(d){ if (!d) return ""; var n = Math.round((new Date(d + "T23:59:59+09:00") - Date.now()) / 864e5); return n < 0 ? "마감" : n === 0 ? "오늘 마감" : "D-" + n; }
   function elsRow(x, done){
@@ -407,7 +434,7 @@
     return '<div class="pd-it pd-e pd-tap"' + reg("els", x) + '><div class="pd-h"><div class="pd-n"><b>' + e(x.n) + '</b><small><span class="chip2 ' + (pp ? "cool" : "hot") + '">' + e(t) + (pp ? " · 원금지급" : " · 원금 비보장") + '</span>' + (x.hi ? '<span class="chip2">고난도</span>' : '') + (x.monthly ? '<span class="chip2">월지급</span>' : '') + (x.dl_e ? '<span class="chip2">숙려 ' + e(md(x.dl_e)) + '까지</span>' : '') + '</small></div>' +
       '<div class="pd-v"><b class="up">' + pc(x.cpn) + '</b><small>연 수익률(세전)</small></div></div>' +
       '<div class="pd-row"><span>기초자산 <b>' + e(x.ua || "–") + '</b></span></div>' +
-      '<div class="pd-row"><span>구조 <b>' + e(x.kind || "") + '</b> ' + e(x.desc || "") + '</span></div>' +
+      '<div class="pd-row"><span>구조 <b>' + e(x.kind || "") + '</b> ' + e(x.desc || "") + '</span></div>' + repBand(elsRep(x.isin)) +
       '<div class="pd-row"><span>만기 <b>' + e(x.mat || "–") + '</b> · ' + e(x.cyc || "") + '마다 상환 기회</span><span>최대 손실 <b class="' + ((x.loss || 0) < 0 ? "dn" : "") + '">' + (x.loss != null ? x.loss + "%" : "–") + '</b></span>' + (x.ki ? '<span>KI <b>' + x.ki + '</b></span>' : '') + '</div>' +
       '<div class="pd-row"><span>청약 ' + e(md(x.s)) + ' ~ ' + e(md(x.e)) + (done ? '' : ' <b class="' + (/오늘|D-[12]$/.test(dday(x.e)) ? "dn" : "") + '">' + dday(x.e) + '</b>') + '</span><span>모인 돈 <b>' + fmt(x.amt) + '억</b> / 한도 ' + fmt(x.lim) + '억' + (x.cr != null ? ' (' + (x.cr * 100).toFixed(1) + '%)' : '') + '</span></div></div>';
   }
@@ -461,7 +488,7 @@
     var isl = Object.keys(iss).map(function(k){ var a = iss[k]; return [k, a.length, a.reduce(function(p, c){ return p + c; }, 0) / a.length, Math.max.apply(null, a)]; }).sort(function(a, b){ return b[2] - a[2]; });
     var row = function(x, hi){ return '<tr class="' + (mir(x) ? 'me' : '') + '"><td><b>' + e((x.iss || "").replace(/주식회사|\(주\)/g, "").trim()) + '</b><br><span class="mut">' + e((x.nm.match(/제\s*\[?\d+\]?\s*회/) || [""])[0].replace(/[\[\]\s]/g, "")) + (x.risk ? ' · ' + e(x.risk.replace(/\(.*$/, "")) : '') + '</span></td>' +
       '<td><b class="up">' + pc(x.cpn) + '</b><br><span class="mut">' + (x.kind === "ELB" || x.nolos ? '원금지급' : x.loss != null ? '최대 ' + x.loss + '%' : '원금 비보장') + '</span></td>' +
-      '<td>' + (x.bars && x.bars.length ? e(barSeq(x.bars).join("-")) : '–') + (x.ki ? '<br><span class="mut">KI ' + x.ki + '</span>' : '') + '</td>' +
+      '<td>' + (x.bars && x.bars.length ? e(barSeq(x.bars).join("-")) : '–') + (x.ki ? '<br><span class="mut">KI ' + x.ki + '</span>' : '') + repMini(elsRep(x.id)) + '</td>' +
       '<td>' + e(md(x.mat || "")) + '<br><span class="mut">마감 ' + e(md(x.e || "")) + '</span></td></tr>'; };
     var tblh = '<table class="pd-ec"><tr><th>발행사</th><th>연 수익률</th><th>배리어 · KI</th><th>만기 · 청약</th></tr>';
     var h = '<div class="mg-kv"><div><small>청약 중 전체 (DART)</small><b>' + L.length + '개</b><em>발행사 ' + isl.length + '곳 · ' + e(ELSALL.updated || "") + '</em></div>' +
@@ -610,7 +637,7 @@
     }
     else if (k === "els"){
       var cpn = o.cpn || 0, pp = (o.pp || 0) >= 100, half = A * cpn / 100 / 2, t = 0.154;
-      h += '<p>' + (pp ? '<b>원금지급형(ELB)</b> — 조건이 안 맞아도 원금은 미래에셋증권이 줘요(증권사 신용 위험만). ' : '<b>원금 비보장</b> — ') + '기초자산 <b>' + e(o.ua) + '</b>' + (String(o.ua || "").split(",").length > 1 ? '(여럿이면 가장 못한 것 기준)' : '') + ', 「' + e(o.desc) + '」. ' + (o.ki ? 'KI ' + o.ki + ': 3년 중 한 번이라도 처음의 ' + o.ki + '% 아래로 가면 만기 때 떨어진 만큼 손실. ' : '') + (o.monthly ? '매달 이자를 주는 월지급식. ' : '') + (o.hi ? '고난도 상품이라 청약 뒤 숙려기간에 취소할 수 있어요.' : '') + '</p>';
+      h += '<p>' + (pp ? '<b>원금지급형(ELB)</b> — 조건이 안 맞아도 원금은 미래에셋증권이 줘요(증권사 신용 위험만). ' : '<b>원금 비보장</b> — ') + '기초자산 <b>' + e(o.ua) + '</b>' + (String(o.ua || "").split(",").length > 1 ? '(여럿이면 가장 못한 것 기준)' : '') + ', 「' + e(o.desc) + '」. ' + (o.ki ? 'KI ' + o.ki + ': 3년 중 한 번이라도 처음의 ' + o.ki + '% 아래로 가면 만기 때 떨어진 만큼 손실. ' : '') + (o.monthly ? '매달 이자를 주는 월지급식. ' : '') + (o.hi ? '고난도 상품이라 청약 뒤 숙려기간에 취소할 수 있어요.' : '') + '</p>' + repBand(elsRep(o.isin), true);
       h += '<div class="sub2">🧾 모의 투자계산서 <span class="mut">연 ' + pc(cpn) + ' · 세전/세후</span></div>' + amtBar() + tbl([["산 금액", W(A)],
         ["6개월 만에 조기상환", W(A + half * (1 - t)) + " <span class='mut'>이자 " + W(half) + " − 세금</span>", "up"], ["1년 만에 조기상환", W(A + 2 * half * (1 - t)), "up"], ["만기(" + e(o.mat) + ")까지 가서 상환", W(A + 6 * half * (1 - t)) + " <span class='mut'>세전 " + W(A + 6 * half) + "</span>", "up"]].concat(pp ? [] : [
         ["KI 뚫고 만기에 기초자산 −40%", W(A * 0.6), "dn"], ["KI 뚫고 만기에 기초자산 −60%", W(A * 0.4), "dn"]]));
@@ -780,6 +807,7 @@
     ".pd-it .rk{flex:none;width:22px;height:22px;border-radius:7px;background:var(--panel);color:var(--sub);font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}" +
     ".pd-bar{height:5px;border-radius:3px;background:var(--panel);margin:8px 0 6px;overflow:hidden}.pd-bar i{display:block;height:100%;background:var(--up);border-radius:3px}" +
     ".pd-row{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--sub);margin-top:6px;line-height:1.6}.pd-row b{color:var(--text)}" +
+    ".pd-rep{margin:7px 0 2px;padding:7px 9px;border-radius:10px;background:color-mix(in srgb,var(--panel) 60%,var(--bg))}.pd-rph{font-size:12px;font-weight:700;color:var(--text)}.pd-rph .mut{font-weight:400}.pd-rpb{display:flex;height:7px;border-radius:4px;overflow:hidden;background:color-mix(in srgb,var(--sub) 25%,transparent);margin:5px 0 4px}.pd-rpb i{display:block;height:100%}.pd-rpt{font-size:11.5px;color:var(--sub);line-height:1.55}.pd-rpt b{color:var(--text)}.pd-rpt b.dn,.pd-rpm b.dn{color:var(--dn)}.pd-rpm{font-size:10.5px;color:var(--sub);white-space:nowrap}.pd-ec td{vertical-align:top}" +
     ".pd-e .chip2{margin:4px 4px 0 0}.pd-nt{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--text);text-decoration:none;font-size:13px;line-height:1.45}.pd-nt .mut{flex:none;width:78px}" +
     ".pd-brl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}.pd-brl div{background:var(--panel2);border-radius:12px;padding:10px 12px}.pd-brl small{display:block;color:var(--sub);font-size:11.5px}.pd-brl b{font-size:18px}.pd-brl em{display:block;font-style:normal;font-size:11px;color:var(--dim)}" +
     "#pdper{margin-top:-4px}.pd-doc p{margin:0;font-size:13.5px;line-height:1.7;color:var(--text);word-break:keep-all}.pd-doc summary{font-weight:700}" +

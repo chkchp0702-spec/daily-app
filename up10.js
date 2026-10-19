@@ -187,7 +187,7 @@
         G.items.map(function(x, i){ var r = GV.rows[i] || {};
           return '<div class="hm-gr ' + e(x.cls || "") + '"><span>' + e(x.mark || "·") + '</span><div><b>' + e(x.t) +
             (r.v ? ' <span class="hm-me ' + (r.r === true ? "ok" : r.r === false ? "no" : "") + '">나 ' + (r.v > 0 ? "👍" : "👎") + (r.r === true ? " ✓" : r.r === false ? " ✗" : "") + '</span>' : '') +
-            '</b>' + trail(x.tr, true) + '<small>' + e(x.x) + '</small></div></div>'; }).join("") + cum +
+            '</b>' + trail(x.tr, true) + '<small>' + e(x.x) + '</small></div></div>'; }).join("") + cum + voices(G.voices) +
         ((G.next || []).length ? '<div class="hm-wn"><small>🔮 오늘의 예고 — 내일 아침 채점 · 👍👎 로 내 표도</small>' + G.next.map(function(x, i){
           return '<div class="hm-nx">' + (x.p != null ? '<span class="hm-pb" title="앱이 보는 확률 ' + Math.round(x.p * 100) + '%"><i style="width:' + Math.round(x.p * 100) + '%"></i><b>' + Math.round(x.p * 100) + '%</b></span>' : '') +
             '<span class="hm-nxt">' + e(x.t) + trail(x.tr, false) + '</span>' + (G.date ? voteBtns(G.date, i + 1) : '') + '</div>'; }).join("") + '</div>' : '') +
@@ -260,6 +260,21 @@
     return '<div class="hm-cb">' + (lab ? '<b>' + e(lab) + (note ? ' <small>(' + e(note) + ')</small>' : '') + '</b>' : '') +
       ('<div class="hm-ab"><span class="hm-a">' + mark(A, B) + '</span><span class="hm-to">→</span><span class="hm-b">' + mark(B, A) + '</span></div>') + '</div>';
   }
+  /* ---------- 🗣 10/19 A10/19-3 「엇갈린 날, 누가 맞았나」 — 코스피를 두고 🎲 시장확률 · 🧠 두뇌 · 💭 지금 생각(열쇠 적은 날만)을 매일 종가로 채점 (home.py voices · market/voices.json) ---------- */
+  function voices(V){
+    if (!V || !V.today) return "";
+    var W = {up: "오름", down: "내림", flat: "중립"}, tv = V.today.v || {}, keys = [["dice", "🎲 시장확률"], ["brain", "🧠 두뇌"], ["think", "💭 지금 생각"]];
+    var todayTxt = function(k){ var x = tv[k]; if (!x) return '<em class="mut">' + (k === "think" ? "열쇠 없음" : "—") + '</em>'; return '<em class="' + (x.d === "up" ? "up" : x.d === "down" ? "dn" : "") + '">' + e(k === "dice" && x.t ? x.t : (W[x.d] || x.d)) + (x.p != null ? ' ' + Math.round(x.p * 100) + '%' : '') + '</em>'; };
+    var ds = Object.keys(tv).map(function(k){ return tv[k].d; }), one = ds.length >= 2 && ds.every(function(d){ return d === ds[0]; });
+    var r = V.today.r, rTxt = r && r.chg != null ? ' · 코스피 종가 ' + (r.chg > 0 ? "+" : "") + r.chg.toFixed(2) + '%' : (V.today.at ? ' · ' + e(V.today.at) + ' 적어 둠, 마감 뒤 채점' : '');
+    var row = function(k, lab, S){ S = S || {}; var n = S.n || 0, w = S.win || 0;
+      return '<div class="hm-vr"><span>' + lab + '</span>' + (k ? todayTxt(k) : '<em class="mut">' + (one ? "오늘 한목소리 " + e(W[ds[0]]) : "오늘은 엇갈림") + '</em>') +
+        '<b>' + ((S.last10 || []).length ? dots(S.last10) : '') + (n ? ' ✓' + w + ' ✗' + (n - w) + (n >= 10 ? ' <i class="pc">' + Math.round(w / n * 100) + '%</i>' : '') : '<i class="mut">아직 0</i>') + '</b></div>'; };
+    return '<div class="hm-vc"><small>🗣 코스피를 두고 앱의 세 목소리 — 장 시작 무렵 적어 두고 매일 종가로 채점' + rTxt + '</small>' +
+      keys.map(function(z){ return row(z[0], z[1], V[z[0]]); }).join("") + row(null, "🎯 한목소리 날", V.chorus) +
+      '<div class="hm-vn">오름 = 종가 + · 내림 = − · 중립 = ±0.5% 안 · 💭 는 지금 생각에 방향 열쇠를 적은 날만 · ' + (V.days || 0) + '일 채점</div></div>';
+  }
+
   /* ---------- 🧵 10/15 A9-5 예고 실타래 — 같은 주제 최근 맞음(●)·빗나감(○) ---------- */
   function dots(L){ return (L || []).map(function(m){ var v = typeof m === "string" ? m : m.m; return '<i class="' + (v === "ok" ? "o" : "x") + '"></i>'; }).join(""); }
   function trail(tr, inGrade){
@@ -418,6 +433,7 @@
     ".hm-tr{display:inline-flex;align-items:center;gap:3px;margin:3px 0 1px;cursor:pointer;vertical-align:middle}.hm-tr em,.hm-l10{font-style:normal}.hm-tr em{font-size:11.5px;color:var(--sub);margin-left:4px;font-weight:700}.hm-tr em.no{color:#ff8a8a}.hm-tr em.ok{color:#4dd47a}" +
     ".hm-tr i,.hm-l10 i{display:inline-block;width:8px;height:8px;border-radius:50%}.hm-tr i.o,.hm-l10 i.o{background:#4dd47a}.hm-tr i.x,.hm-l10 i.x{border:1.5px solid #ff8a8a;box-sizing:border-box}" +
     ".hm-l10{display:inline-flex;gap:2px;vertical-align:middle;margin-left:2px}.hm-trd[hidden]{display:none!important}.hm-trd{display:block;font-size:11.5px;color:var(--sub);margin:2px 0 3px}.hm-nxt .hm-tr{display:flex}" +
+    ".hm-vc{margin-top:8px;background:var(--panel2);border-radius:10px;padding:7px 10px;font-size:12px}.hm-vc>small{display:block;color:var(--sub);margin-bottom:4px;line-height:1.4}.hm-vr{display:flex;align-items:center;gap:6px;margin:4px 0;white-space:nowrap}.hm-vr>span{width:84px;flex:none;font-weight:700}.hm-vr>em{flex:1;min-width:0;font-style:normal;font-weight:800;overflow:hidden;text-overflow:ellipsis}.hm-vr>em.up{color:var(--up)}.hm-vr>em.dn{color:var(--dn)}.hm-vr>em.mut{color:var(--dim);font-weight:500}.hm-vr>b{display:inline-flex;align-items:center;gap:2px;font-size:11.5px;color:var(--sub);font-weight:700}.hm-vr>b i{display:inline-block;width:8px;height:8px;border-radius:50%}.hm-vr>b i.o{background:#4dd47a}.hm-vr>b i.x{border:1.5px solid #ff8a8a;box-sizing:border-box}.hm-vr>b i.pc{width:auto;height:auto;border:0;border-radius:0;font-style:normal;color:var(--text);margin-left:2px}.hm-vr>b i.mut{width:auto;height:auto;border:0;border-radius:0;font-style:normal;color:var(--dim);font-weight:500}.hm-vn{font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.4}" +
     ".hm-chg{padding:12px 14px!important}.hm-cht{font-weight:800;font-size:14px;margin-bottom:6px}.hm-chi{display:flex;align-items:center;gap:8px;padding:8px 2px;border-top:1px solid var(--line);font-size:13.5px;cursor:pointer}.hm-chi:first-of-type{border-top:0}.hm-chi b{flex:1;font-weight:600}.hm-chi i{font-style:normal;color:var(--dim)}",
     ".hm-gr{display:flex;gap:9px;padding:7px 0;border-top:1px solid var(--line)}.hm-gr:first-of-type{border-top:0}.hm-gr>span{font-weight:900;font-size:16px;min-width:16px}.hm-gr.ok>span{color:#4dd47a}.hm-gr.no>span{color:#ff8a8a}.hm-gr.hold>span{color:var(--sub)}.hm-gr b{display:block;font-size:13.5px}.hm-gr small{display:block;font-size:12px;color:var(--sub);line-height:1.45}",
     ".hm-wn{margin-top:8px;background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:12.5px;line-height:1.5}.hm-wn small{display:block;color:var(--sub);font-weight:700;margin-bottom:2px}.hm-p{color:#ffb84d}",
