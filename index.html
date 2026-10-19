@@ -1459,7 +1459,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261019q";
+var APPV = "20261020a";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1475,7 +1475,10 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
   // 평일 장중엔 오늘 단타 칸을 미리 만들어 둠 (내용은 단타 프로그램 원본에서 바로 읽음)
   (function(){ var d = new Date(Date.now() + 9 * 3600e3), td = d.toISOString().slice(0, 10), L = M.cats.danta = M.cats.danta || [];
     if (d.getUTCDay() % 6 && d.getUTCHours() * 60 + d.getUTCMinutes() >= 540 && !L.some(function(x){ return x.id === td; })) L.unshift({id: td, files: [], live: true}); })();
-  $("stamp").innerHTML = "v" + APPV.slice(4);   // 10/15: 시각은 홈 ⟳ 칩이 맡고, 머리엔 버전만
+  /* 10/20 사용자 「어플 날짜가 왜 19일이니」 — 머리의 「v1019q」(앱 버전)가 날짜처럼 보였음 → 머리엔 오늘 한국 날짜, 버전은 ⚙️ 설정에만 */
+  (function stampDay(){ var d = new Date(Date.now() + 9 * 3600e3), w = "일월화수목금토"[d.getUTCDay()];
+    var el = $("stamp"); if (el){ el.textContent = (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + " (" + w + ")"; el.title = "앱 v" + APPV; }
+    setTimeout(stampDay, 60000); })();
   var hk = (location.hash || "").slice(1).split("~")[0];   // #port~pokick → 포트 탭의 킥 카드 (알림에서 바로)
   var first = CATS.some(function(c){ return c.key === hk; }) ? hk : "home";      // 10/10: 앱을 열면 🏠 오늘부터
   NAV.silent = true; go(first); NAV.silent = false;
@@ -1520,7 +1523,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="simple.js?v=17"></script>
 <script defer src="pdfx.js?v=7"></script>
 <script defer src="honest.js?v=1"></script>
-<script defer src="up10.js?v=19"></script>
+<script defer src="up10.js?v=20"></script>
 <script defer src="nav2.js?v=19"></script>
 <script defer src="clamp.js?v=4"></script>
 <script defer src="ticker.js?v=2"></script>

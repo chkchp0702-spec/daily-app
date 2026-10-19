@@ -211,7 +211,7 @@
     var chips = function(arr){ return (arr || []).map(function(o){ return '<span class="hm-chip" data-op="' + e(o.code) + '">' + e(o.tags || "") + ' ' + e(o.name) + ' <b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></span>'; }).join(""); };
     C.kick = card("port~pokick", "⚡", ev.length ? '<span class="hm-kt ' + (hasSell ? "sell" : "buy") + '">킥 — 오늘 할 일 ' + (hasBuy ? "🟢" : "") + (hasSell ? "🔴" : "") + '</span>' : '<span class="hm-kt rest">킥 — 오늘은 쉬는 날 ✓</span>', K.n + "종목 · 포트의 " + K.w + "%",
       (ev.length ? ev.map(function(x){ return '<div class="hm-ev ' + (x.k === "사기" ? "buy" : "sell") + '">' + (x.k === "사기" ? "🟢 사기" : x.k === "팔기" ? "🔴 팔기" : "🟡 절반") + ' <b data-op="' + e(x.code) + '">' + e(x.name) + ' ›</b>' + (x.r != null ? ' ' + sg(x.r, 1) : '') + (x.why ? ' <small>' + e(x.why) + '</small>' : '') + '</div>'; }).join("")
-        : '<div class="hm-l mut">' + md(K.asof) + ' 사고판 것 없음 — 들고 있는 그대로</div>') +
+        : '<div class="hm-l mut">' + md(K.asof) + ' 마감 기준 사고팔 것 없음 — 들고 있는 그대로</div>') +
       ((K.best || []).length ? '<div class="hm-chips"><small class="hm-cl">🔥 잘 가는</small>' + chips(K.best) + '</div>' : '') +
       ((K.worst || []).length ? '<div class="hm-chips"><small class="hm-cl">🧊 안 가는</small>' + chips(K.worst) + '</div>' : ''), "킥 보기");
     // 🎯 집중
