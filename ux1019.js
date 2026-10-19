@@ -54,10 +54,17 @@
   function pc2(v){ return (v > 0 ? "+" : "") + v.toFixed(1) + "%"; }
   function cl2(v){ return v > 0 ? "up" : v < 0 ? "dn" : ""; }
   function nowBlock(mk, L, lv, F, FL, CONC){
-    if (!L || !window.probAt) return "";
+    if (!L || !window.probAt || !mk) return "";
+    if (L.date && L.date !== kst().ymd) return "";                                          // 오늘 나침반만
+    var closed = false;
+    if (!lv){                                                                               // ⚡ 확률 재계산이 없어도 섹터·종목은 늘 보이게 (10/19 「섹터랑 종목 또 사라짐」)
+      var ix = L.index && L.index[0]; if (!ix || ix.chg == null || !L.t) return "";
+      var r0 = probAt(mk, ix.chg, L.t); closed = !r0 || /CLOSE/i.test(ix.status || "") || kst().m >= 15 * 60 + 30;
+      lv = {t: L.t, chg: ix.chg, p1: r0 ? r0.p1 : (ix.chg > 0 ? 0.99 : ix.chg < 0 ? 0.01 : 0.5)};
+    }
     var sn = (L.snaps || []).filter(function(x){ return x && x[3] != null; });
     var pts = sn.map(function(x){ var r = probAt(mk, x[3], x[0]); return r ? [x[0], r.p1] : null; }).filter(Boolean);
-    pts.push([lv.t, lv.p1]);
+    pts = pts.filter(function(x){ return x[0] < lv.t; }); pts.push([lv.t, lv.p1]);
     var nowM = (function(t){ var a = t.split(":"); return +a[0] * 60 + +a[1]; })(lv.t);
     var ago = pts.filter(function(x){ var a = x[0].split(":"); return nowM - (+a[0] * 60 + +a[1]) >= 50; }).slice(-1)[0] || pts[0];
     var d = lv.p1 - ago[1], first = pts[0];
@@ -67,7 +74,8 @@
       '<polyline fill="none" stroke="currentColor" stroke-width="2" points="' + pts.map(function(x, i){ return xs(i).toFixed(1) + "," + ys(x[1]).toFixed(1); }).join(" ") + '"/>' +
       '<circle cx="' + xs(n - 1).toFixed(1) + '" cy="' + ys(lv.p1).toFixed(1) + '" r="3" fill="currentColor"/></svg>';
     var chg = lv.chg, mood;
-    if (d >= 0.10 && lv.p1 >= 0.5) mood = "📈 반등이 붙는 중 — 종가 플러스 확률이 " + pct(ago[1]) + "% → " + pct(lv.p1) + "%로 올라가고 있어요";
+    if (closed) mood = "🔔 마감 — 코스피 " + pc2(chg) + " (장중 종가 플러스 확률 흐름)";
+    else if (d >= 0.10 && lv.p1 >= 0.5) mood = "📈 반등이 붙는 중 — 종가 플러스 확률이 " + pct(ago[1]) + "% → " + pct(lv.p1) + "%로 올라가고 있어요";
     else if (d >= 0.10) mood = "↗ 낙폭을 줄이는 중 — 종가 플러스 확률 " + pct(ago[1]) + "% → " + pct(lv.p1) + "% (아직 내릴 쪽)";
     else if (d <= -0.10 && lv.p1 <= 0.5) mood = "📉 계속 밀리는 중 — 종가 플러스 확률이 " + pct(ago[1]) + "% → " + pct(lv.p1) + "%로 내려가고 있어요";
     else if (d <= -0.10) mood = "↘ 오름폭을 반납하는 중 — " + pct(ago[1]) + "% → " + pct(lv.p1) + "% (아직 오를 쪽)";
@@ -87,16 +95,24 @@
     var foc = st.length ? '<div class="pl-nw"><span class="pl-k">🎯 집중 종목</span><div class="pl-sm">' + st.slice(0, 4).map(function(x){ return (x.star ? "★ " : "") + '<a data-op="' + e(x.t) + '">' + e(x.n) + ' <b class="' + cl2(x.r) + '">' + pc2(x.r) + '</b></a>'; }).join(" · ") + '</div></div>' : '';
     // 대응 — 규칙에 있는 것만
     var act = [];
-    if (chg <= -3) act.push("⛔ 코스피 −3%↓ — 우리 규칙: 오늘은 신규 진입 쉬기");
+    if (closed) {}
+    else if (chg <= -3) act.push("⛔ 코스피 −3%↓ — 우리 규칙: 오늘은 신규 진입 쉬기");
     else if (d <= -0.10 && chg < -1) act.push("🛑 밀리는 장 — " + (bad[0] ? e(bad[0].name) + "·" : "") + "약한 쪽은 비중 늘리지 않기");
     else if (d >= 0.10 && lv.p1 >= 0.55 && good[0]) act.push("👀 반등 주도 " + e(good[0].name) + (good[1] ? "·" + e(good[1].name) : "") + " 쪽을 먼저 본다 (추격보다 눌림)");
     var R = CONC && CONC.regime;
     if (R) act.push("💼 현금·단기채 선: " + (R.up ? "🟢 S&P 200일선 위(+" + R.gap + "%) → 규칙상 0% · 200일선 아래 3일이면 🔴 26%까지" : "🔴 S&P 200일선 아래(" + R.gap + "%) → 규칙상 26% 유지") +
       (R.kospi_gap != null ? " · 코스피는 200일선 " + (R.kospi_gap > 0 ? "+" : "") + R.kospi_gap + "%" : ""));
-    return '<div class="pl-now"><div class="pl-nh"><b>⚡ 지금 장 ' + e(lv.t) + '</b> <span class="pl-sm mut">코스피 <span class="' + cl2(chg) + '">' + pc2(chg) + '</span> · 오른 종목 ' + br + '%' + (br0 != null ? ' (개장 ' + br0 + '%)' : '') + '</span></div>' +
+    return '<div class="pl-now"><div class="pl-nh"><b>' + (closed ? '🇰🇷 오늘 장 마감 ' : '⚡ 지금 장 ') + e(lv.t) + '</b> <span class="pl-sm mut">코스피 <span class="' + cl2(chg) + '">' + pc2(chg) + '</span> · 오른 종목 ' + br + '%' + (br0 != null ? ' (개장 ' + br0 + '%)' : '') + '</span></div>' +
       '<div class="pl-tr ' + (lv.p1 >= 0.5 ? "up" : "dn") + '">' + svg + '<span>' + e(mood) + '</span></div>' +
       row("👀", "볼 곳", good, true) + row("⚠️", "조심", bad, false) + foc +
       (act.length ? '<div class="pl-act">' + act.map(function(x){ return '<div>' + x + '</div>'; }).join("") + '</div>' : '') + '</div>';
+  }
+  // ⚡ 섹터·대형주·집중 종목 칸은 확률 재계산 여부·주인공 시장(밤엔 🇺🇸)과 상관없이, 오늘 한국 나침반이 있으면 늘 붙임 · 오류가 나도 카드 전체는 살림
+  function safeNow(P, L, LV, lv){
+    try {
+      var kr = L.mk.mk === "KR" ? L.mk : (P.markets && P.markets.KR);
+      return nowBlock(kr, LV.KR, L.mk.mk === "KR" ? lv : null, LV.F, LV.FL, LV.CONC) || "";
+    } catch(x){ if (window.console) console.warn("nowBlock", x); return ""; }
   }
   function build(P, B, T, LV){
     var K = kst(), L = lead(P, K); if (!L) return "";
@@ -127,7 +143,7 @@
       '<div class="pl-nums">' + nums + '</div>' +
       (PROVEN ? '' : '<div class="pl-warn">⚠️ <b>아직 동전보다 못함</b> — 다음 날 방향 ' + (SC.n ? Math.round(SC.hit / 100 * SC.n) + '/' + SC.n + ' 맞음 (' + Math.round(SC.hit) + '%)' : '채점 전') + '. 이 숫자로 사고팔지 마세요 · 20번 넘게 채점해 55% 넘으면 그때 세게 말해요</div>') +
       (anc || band ? '<div class="pl-why">' + e(anc) + (anc && band ? ' · ' : '') + e(band) + '</div>' : '') +
-      (lv && L.mk.mk === "KR" ? nowBlock(L.mk, LV.KR, lv, LV.F, LV.FL, LV.CONC) : '') +
+      safeNow(P, L, LV, lv) +
       wk5 + oth + br +
       '<div class="pl-foot">' + (PROVEN ? '틀려도 좋다는 마음으로 세게 말해요' + hit + ' · ' : '검증될 때까지 약하게만 말해요 · ') + '장중엔 10분마다 지금 등락으로 다시 계산 · 사라·팔라는 뜻 아님</div></section>';
   }

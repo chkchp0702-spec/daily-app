@@ -34,10 +34,13 @@
     if (el < 0 || el > tot) return null;
     var K = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
     if (L.date && L.date !== K && L.date !== T.ymd) return null;                       // 오늘 나침반이 아님
-    if (P && P.date === K && P.t && L.t && L.t <= P.t) return null;                      // 🎲 계산이 나침반보다 새것이면 그대로
+    // 🎲 계산이 휴대폰에 받아 둔 나침반보다 새것이면 🎲 값을 그대로 쓰되 null 을 돌려주지 않음
+    // (10/19 12:24 — null 이면 오늘 확률 카드의 ⚡ 지금 장·섹터·집중 종목이 통째로 사라졌음)
+    var pNew = P && P.date === K && P.t && L.t && L.t <= P.t && m.p1 != null && m.intra_chg != null;
     var rem = Math.max(0.02, 1 - el / tot), vr = rem;
     if (c.vh){ var pts = [[0, 1]].concat(c.vh).concat([[tot, 0.003]]);
       for (var i = 0; i < pts.length - 1; i++) if (el >= pts[i][0] && el <= pts[i + 1][0]){ var a = pts[i], b = pts[i + 1]; vr = Math.max(0.003, a[1] + (b[1] - a[1]) * (el - a[0]) / ((b[0] - a[0]) || 1)); break; } }
+    if (pNew) return {p1: m.p1, chg: m.intra_chg, t: P.t, rem: rem, vr: vr, sig: c.sig, src: "prob"};
     var chg = L.index[0].chg, pi = cdf(Math.log(1 + chg / 100) / (c.sig * Math.sqrt(vr)));
     pi = Math.min(0.99, Math.max(0.01, pi));
     var p1 = Math.min(0.99, Math.max(0.01, sg(lg(pi) + (c.dev || 0))));
