@@ -1,0 +1,94 @@
+/* 🎲 10/19 「오늘, 확률로 말하면」 — 🏠 오늘 탭 맨 위 한 장
+   사용자 10/19: "시황두뇌랑 시장확률을 이렇게 열심히 돌리고 있는데 틀려도 좋으니 확률적으로 이렇다 라고
+   오늘 카테고리 처음에 좀 강하게 얘기를 해라 · 쉽고 직관적이게 · 그때 그때 바꿔서"
+   자료: archive/x/prob.json(🎲 매시간) · market/home.json brain(🧠 매시간) · brain/state.json theses
+   시간대에 따라 주인공 시장이 바뀐다: 한국 장 전·장중 = 🇰🇷 코스피 · 저녁·밤 = 🇺🇸 미국. 숫자는 prob.json 그대로(새 계산 없음). */
+(function(){
+  var RAWM = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/";
+  function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
+  function J(u){ return getJSON(u + "?" + Math.floor(Date.now() / 120000), {ttl: 120000}); }
+  function pct(p){ return Math.round(p * 100); }
+  function ten(p){ return Math.max(0, Math.min(10, Math.round(p * 10))); }
+  /* 세게 말하기 — 확률 → 한 마디 (틀려도 좋다는 전제) */
+  function word(p){
+    if (p >= 0.70) return {t: "거의 확실히 오른다", c: "up2"};
+    if (p >= 0.60) return {t: "오른다 쪽에 세게", c: "up"};
+    if (p >= 0.55) return {t: "오를 쪽", c: "up"};
+    if (p > 0.45)  return {t: "반반 — 동전 던지기", c: "flat"};
+    if (p > 0.40)  return {t: "내릴 쪽", c: "dn"};
+    if (p > 0.30)  return {t: "내린다 쪽에 세게", c: "dn"};
+    return {t: "거의 확실히 내린다", c: "dn2"};
+  }
+  function kst(){ var d = new Date(Date.now() + 9 * 3600e3); return {m: d.getUTCHours() * 60 + d.getUTCMinutes(), day: d.getUTCDay(), ymd: d.toISOString().slice(0, 10)}; }
+  /* 지금 시각의 주인공 — 한국 장 전·장중(06:00~15:30) 🇰🇷 · 그 뒤 🇺🇸 · 주말은 다음 주 월요일 이야기 */
+  function lead(P, K){
+    var M = P.markets || {}, kr = M.KR, us = M.US, wk = K.day === 0 || K.day === 6;
+    if (!wk && K.m >= 6 * 60 && K.m < 15 * 60 + 30 && kr) return {mk: kr, when: kr.open_now && kr.intra_chg != null ? "오늘 종가" : "오늘", other: us, otherWhen: "오늘 밤 미국"};
+    if (us) return {mk: us, when: wk ? "다음 미국 장" : (K.m >= 22 * 60 + 30 || K.m < 6 * 60 ? "지금 미국 장" : "오늘 밤 미국"), other: kr, otherWhen: wk ? "월요일 코스피" : "내일 코스피"};
+    return kr ? {mk: kr, when: "내일", other: null} : null;
+  }
+  function anchorLine(mk){
+    var a = (mk.methods || []).filter(function(x){ return x.anchor && x.p1 != null; })[0];
+    if (!a) return "";
+    var ev = String(a.ev || "").split("→")[0].replace(/\(.*?\)/g, "").trim();
+    return ev ? a.ic + " " + ev : "";
+  }
+  function build(P, B, T){
+    var K = kst(), L = lead(P, K); if (!L) return "";
+    var mk = L.mk, p1 = mk.p1, p5 = mk.p5, w1 = word(p1), w5 = word(p5);
+    var strong = p1 >= 0.6 || p1 <= 0.4;
+    var head = e(mk.flag + " " + mk.ixn + " " + L.when) + " → <em>" + e(w1.t) + "</em>";
+    var ten1 = ten(p1), ten5 = ten(p5);
+    var nums = '<span class="pl-ten ' + w1.c + '" title="오를 확률 ' + pct(p1) + '%">' + "●".repeat(ten1) + "○".repeat(10 - ten1) + ' <b>10번 중 ' + ten1 + '번 오름</b> (' + pct(p1) + '%)</span>';
+    var anc = anchorLine(mk);
+    var band = mk.band1 && mk.band1.length === 2 ? "예상 폭 " + mk.band1[0] + "% ~ +" + mk.band1[1] + "%" : "";
+    var wk5 = '<div class="pl-row"><span class="pl-k">일주일 뒤</span><b class="' + w5.c + '">' + e(w5.t) + '</b> <small>10번 중 ' + ten5 + '번 (' + pct(p5) + '%)</small></div>';
+    var oth = L.other ? '<div class="pl-row"><span class="pl-k">' + e(L.otherWhen) + '</span><b class="' + word(L.other.p1).c + '">' + e(word(L.other.p1).t) + '</b> <small>' + pct(L.other.p1) + '%</small></div>' : "";
+    // 🧠 두뇌 — 국면 + 가장 확신하는 논지 하나
+    var th = (T && T.theses || []).slice().sort(function(a, b){ return (b.conf || 0) - (a.conf || 0); })[0];
+    var br = (B && (B.regime || B.summary)) ? '<div class="pl-row pl-br"><span class="pl-k">🧠 두뇌</span><div><b>' + e(String(B.regime || "").split(" / ")[0]) + '</b>' +
+      (th ? '<small>「' + e(th.t) + '」 확신 ' + pct(th.conf || 0) + '%</small>' : (B.summary ? '<small>' + e(String(B.summary).split(" — ")[0]) + '</small>' : '')) + '</div></div>' : "";
+    var sc = P.score && P.score.all && P.score.all.d1 || {}, hit = sc.n ? " · 지금까지 다음 날 방향 " + Math.round(sc.hit / 100 * sc.n) + "/" + sc.n + " 맞음" : "";
+    var stale = P.date && P.date !== K.ymd && K.m >= 9 * 60 ? ' <span class="pl-old">(' + e(P.date.slice(5).replace("-", "/")) + ' 계산)</span>' : "";
+    return '<section class="card pl ' + w1.c + (strong ? ' strong' : '') + '" data-goto="prob" role="button">' +
+      '<div class="pl-top"><span class="pl-ic">🎲</span><div class="pl-h"><small>오늘, 확률로 말하면 · 🎲 ' + e(P.t || "") + stale + '</small><div class="pl-head">' + head + '</div></div><span class="pl-go">🎲 ›</span></div>' +
+      '<div class="pl-nums">' + nums + '</div>' +
+      (anc || band ? '<div class="pl-why">' + e(anc) + (anc && band ? ' · ' : '') + e(band) + '</div>' : '') +
+      wk5 + oth + br +
+      '<div class="pl-foot">틀려도 좋다는 마음으로 세게 말해요' + hit + ' · 매시간 다시 계산 · 사라·팔라는 뜻 아님</div></section>';
+  }
+  function mount(){
+    var body = document.getElementById("hmbody"); if (!body) return;
+    Promise.all([J("archive/x/prob.json"), J(RAWM + "market/home.json").catch(function(){ return null; }), J(RAWM + "brain/state.json").catch(function(){ return null; })]).then(function(a){
+      var html = build(a[0], a[1] && a[1].brain, a[2]); if (!html) return;
+      var b2 = document.getElementById("hmbody"); if (!b2) return;
+      var old = b2.querySelector(".pl"); if (old) old.remove();
+      var anchor = b2.querySelector(".hm-live") || b2.querySelector(".hm-day");
+      var box = document.createElement("div"); box.innerHTML = html; var el = box.firstChild;
+      if (anchor && anchor.nextSibling) b2.insertBefore(el, anchor.nextSibling); else b2.appendChild(el);
+    }).catch(function(x){ if (window.console) console.warn("probline", x); });
+  }
+  var prev = window.hmAfter;
+  window.hmAfter = function(H){ if (prev) try { prev(H); } catch(x){ if (window.console) console.warn("hmAfter", x); } mount(); };
+  var st = document.createElement("style");
+  st.textContent = [
+    ".pl{padding:12px 14px!important;cursor:pointer;border-width:1px;position:relative}",
+    ".pl.up,.pl.up2{background:color-mix(in srgb,#ff6b6b 10%,var(--panel));border-color:rgba(255,107,107,.45)}",
+    ".pl.dn,.pl.dn2{background:color-mix(in srgb,#3987e5 12%,var(--panel));border-color:rgba(57,135,229,.5)}",
+    ".pl.flat{background:var(--panel)}.pl.strong{border-width:2px}",
+    ".pl-top{display:flex;align-items:flex-start;gap:10px}.pl-ic{font-size:24px;width:38px;height:38px;border-radius:11px;background:var(--panel2);display:flex;align-items:center;justify-content:center;flex:none}",
+    ".pl-h{flex:1;min-width:0}.pl-h>small{display:block;font-size:11.5px;color:var(--sub);margin-bottom:2px}.pl-old{color:#ffb84d}",
+    ".pl-head{font-size:17px;font-weight:800;line-height:1.3;letter-spacing:-.3px}.pl-head em{font-style:normal;font-size:20px}",
+    ".pl.up .pl-head em,.pl.up2 .pl-head em{color:#ff8a8a}.pl.dn .pl-head em,.pl.dn2 .pl-head em{color:#7cb0ff}.pl.flat .pl-head em{color:var(--text)}",
+    ".pl-go{color:var(--sub);font-size:12px;white-space:nowrap;margin-top:4px}",
+    ".pl-nums{margin:8px 0 4px;font-size:13px}.pl-ten{letter-spacing:1px}.pl-ten b{letter-spacing:0;margin-left:4px}.pl-ten.up,.pl-ten.up2{color:#ff8a8a}.pl-ten.dn,.pl-ten.dn2{color:#7cb0ff}.pl-ten.flat{color:var(--sub)}",
+    ".pl-why{font-size:12px;color:var(--sub);line-height:1.45;margin-bottom:6px}",
+    ".pl-row{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-top:1px dashed var(--line);font-size:13.5px;line-height:1.4}.pl-row:first-of-type{border-top:0}",
+    ".pl-k{flex:none;width:92px;color:var(--sub);font-size:12.5px;font-weight:700;padding-top:1px}.pl-row b.up,.pl-row b.up2{color:#ff8a8a}.pl-row b.dn,.pl-row b.dn2{color:#7cb0ff}.pl-row small{color:var(--sub);font-size:12px}",
+    ".pl-br>div{flex:1;min-width:0}.pl-br small{display:block;line-height:1.4;margin-top:1px}",
+    ".pl-foot{margin-top:7px;font-size:11px;color:var(--dim);line-height:1.4}",
+    "html[data-ui=light] .pl.up .pl-head em,html[data-ui=light] .pl.up2 .pl-head em,html[data-ui=light] .pl-ten.up,html[data-ui=light] .pl-ten.up2,html[data-ui=light] .pl-row b.up,html[data-ui=light] .pl-row b.up2{color:#d6453d}",
+    "html[data-ui=light] .pl.dn .pl-head em,html[data-ui=light] .pl.dn2 .pl-head em,html[data-ui=light] .pl-ten.dn,html[data-ui=light] .pl-ten.dn2,html[data-ui=light] .pl-row b.dn,html[data-ui=light] .pl-row b.dn2{color:#2c6fd1}"
+  ].join("");
+  document.head.appendChild(st);
+})();
