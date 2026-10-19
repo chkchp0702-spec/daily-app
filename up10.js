@@ -85,6 +85,8 @@
     var op = ev.target.closest("[data-op]");
     if (op && window.openOP){ ev.preventDefault(); ev.stopPropagation(); openOP(op.getAttribute("data-op")); return; }
     var t = ev.target.closest("[data-goto]"); if (!t) return;
+    // 10/19: 카드 안의 단추·링크(접기·펼치기·전체 보기 등)를 누르면 카드 전체 이동(data-goto)을 하지 않음
+    var ctl = ev.target.closest("button,a,summary,input,select,label,.fold"); if (ctl && !ctl.hasAttribute("data-goto") && t !== ctl && t.contains(ctl)) return;
     ev.preventDefault(); var p = t.getAttribute("data-goto").split("~"); goTo(p[0], p[1]);
   });
 

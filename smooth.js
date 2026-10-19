@@ -87,6 +87,8 @@
     if (ev.defaultPrevented || !ev.target.closest) return;
     if (ev.target.closest("[data-op], a[href], input, select, label, textarea, [data-share], .hm-sh")) return;
     var t = ev.target.closest("[data-goto]"); if (!t) return;
+    // 10/19: 카드 안의 단추·링크(접기·펼치기·전체 보기 등)를 누르면 카드 전체 이동(data-goto)을 하지 않음
+    var ctl = ev.target.closest("button,a,summary,input,select,label,.fold"); if (ctl && !ctl.hasAttribute("data-goto") && t !== ctl && t.contains(ctl)) return;
     var btn = ev.target.closest("button");
     if (btn && btn !== t && !btn.hasAttribute("data-goto") && t.contains(btn)) return;     // 카드 안 자기 버튼(👍·공유 등)은 그대로
     var g = t.getAttribute("data-goto") || ""; var tab = g.split("~")[0];
