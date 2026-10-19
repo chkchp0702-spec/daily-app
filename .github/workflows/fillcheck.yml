@@ -1,0 +1,28 @@
+name: fillcheck
+# 📦 전 종목 채우기 확인 — 매일 06:07 KST (10/19: Claude 예약 작업 → 코드로 옮김, 사용량 줄이기)
+#    숫자만 기록하고, 완료된 날 한 번 · 지난밤 작업 실패 때만 알림 (tools/fill_check.py)
+on:
+  schedule:
+    - cron: "7 21 * * *"     # 06:07 KST
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: fillcheck
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: git fetch -q --depth 1 --filter=blob:none origin opdata:refs/remotes/origin/opdata
+      - run: python3 tools/fill_check.py
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: commit
+        run: |
+          git config user.name "fill-bot"
+          git config user.email "fill-bot@users.noreply.github.com"
+          bash scripts/push.sh "fillcheck $(TZ=Asia/Seoul date '+%m/%d %H:%M')" archive/x/fill_check.json
