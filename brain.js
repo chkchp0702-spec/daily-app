@@ -6,7 +6,7 @@
     if (!B || !B.last_review) return '<section class="card br"><div class="br-h">🧠 지금 생각 <small>매시간 검토 · 첫 검토 준비 중</small></div></section>';
     var th = (B.theses || []).slice().sort(function(a, b){ return (b.conf || 0) - (a.conf || 0); });
     var sc = B.scorecard || {};
-    var h = '<section class="card br"><div class="br-h">🧠 지금 생각 <small>' + e(B.last_review.slice(5).replace("-", "/")) + ' 검토' + (B.regime ? ' · ' + e(B.regime) : '') +
+    var h = '<section class="card br"><div class="br-h">🧠 지금 생각 <small>' + e(B.last_review.slice(5).replace("-", "/")) + ' 검토' + (function(){ var a = Math.round((Date.now() - Date.parse(String(B.last_review).replace(" ", "T") + ":00+09:00")) / 60000); return isNaN(a) || a < 0 ? '' : a < 60 ? ' · ' + a + '분 전' : ' · <b class="dn">⏳ ' + (a < 120 ? a + '분' : Math.round(a / 60) + '시간') + ' 전</b>'; })() + (B.regime ? ' · ' + e(B.regime) : '') +
       (sc.made ? ' · 논지 채점 ' + (sc.right || 0) + '/' + ((sc.right || 0) + (sc.wrong || 0)) : '') + '</small></div>' +
       '<div class="br-s">' + e(B.summary) + '</div>';
     if (th.length) h += '<div class="br-t">' + th.slice(0, full ? 5 : 3).map(function(t){

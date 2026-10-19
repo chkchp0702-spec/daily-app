@@ -219,7 +219,10 @@
     // ⚡ 단타
     // 10/12: ⚡ 단타 카드 뺌 — 단타는 알림(앱·텔레그램)으로만
     // 🧠 두뇌
-    if (Bn.summary) C.brain = card("feed~fdbrain", "🧠", "지금 생각", (Bn.regime || "") + " · " + md(Bn.at) + " " + String(Bn.at || "").slice(11, 16),
+    // ⏳ 10/19 사용자 「지금 생각 시각 좀 봐라…」(10:50 에 09:35 급락 개장 문장) → 몇 분 전 생각인지 붙이고, 60분 넘으면 「그 뒤 시장」 한 줄을 장중 나침반에서 바로 채움
+    var bnAge = Bn.at ? Math.round((Date.now() - Date.parse(String(Bn.at).replace(" ", "T") + ":00+09:00")) / 60000) : null;
+    if (Bn.summary) C.brain = card("feed~fdbrain", "🧠", "지금 생각", (Bn.regime || "") + " · " + md(Bn.at) + " " + String(Bn.at || "").slice(11, 16) + (bnAge != null && bnAge >= 0 ? (bnAge < 60 ? " · " + bnAge + "분 전" : ' · <b class="dn">⏳ ' + (bnAge < 120 ? bnAge + "분" : Math.round(bnAge / 60) + "시간") + ' 전 생각</b>') : ""),
+      (bnAge != null && bnAge >= 60 ? '<div class="hm-l" id="hmbrlive"><small class="mut">그 뒤 시장 불러오는 중…</small></div>' : '') +
       '<div class="hm-l">' + e(Bn.summary) + '</div>' + ((Bn.ideas || []).length ? '<div class="hm-chips">' + Bn.ideas.map(function(x){ var t = typeof x === "string" ? x : ((x["칸"] || x.box || "") + " " + (x["제안"] || x.idea || "")); return t.trim() ? '<span class="hm-chip" data-goto="port~poct">💡 ' + e(t) + '</span>' : ''; }).join("") + '</div>' : ''), "피드");
     // 📊 성적
     C.score = card("score", "📊", "성적 한 줄", "무엇이 이기고 지나",
@@ -227,6 +230,15 @@
     (useTime ? ED.order : FIXED).forEach(function(k){ if (C[k]) h += C[k]; });
     b.innerHTML = h;
     HSH = H;
+    if (document.getElementById("hmbrlive")) getJSON("archive/x/live_kr.json?" + Math.floor(Date.now() / 120000), {ttl: 120000}).then(function(L){
+      var el = document.getElementById("hmbrlive"); if (!el) return;
+      var ix = L && L.index || [], ok = L && L.date === new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+      if (!ok || !ix.length){ el.innerHTML = '<small class="mut">⏳ 아래 생각은 ' + e(String(Bn.at).slice(11, 16)) + ' 것 — 다음 검토 때 바뀌어요</small>'; return; }
+      var ss = (L.sectors || []).filter(function(x){ return x.r != null; }).sort(function(a, b2){ return b2.r - a.r; });
+      el.innerHTML = '<b>⚡ 그 뒤 ' + e(L.t) + ' 지금</b> ' + ix.map(function(x){ return e(x.name) + ' <b class="' + cls(x.chg) + '">' + sg(x.chg, 2) + '</b>'; }).join(" · ") +
+        (ss.length ? ' · 강한 ' + e(ss[0].name) + ' ' + sg(ss[0].r, 1) + ' · 약한 ' + e(ss[ss.length - 1].name) + ' ' + sg(ss[ss.length - 1].r, 1) : '') +
+        '<br><small class="mut">아래 생각은 ' + e(String(Bn.at).slice(11, 16)) + ' 것 — 그 사이 시장이 바뀌었을 수 있어요</small>';
+    }).catch(function(){});
     var edl = document.getElementById("hmed"); if (edl) edl.onclick = function(ev){ ev.stopPropagation(); if (window.P && window.P.toast) window.P.toast(ED.ic + " " + ED.t + " — " + ED.why + " · 순서는 ⚙️ 설정에서"); };
     var sb = document.getElementById("hmstory"); if (sb) sb.onclick = function(ev){ ev.stopPropagation(); if (window.hmStory) hmStory(); };
     if (window.hmAfter) try { hmAfter(H); } catch(x) { if (window.console) console.warn("hmAfter", x); }   // 10/15 A9-1·3·4 (ux1015.js)
