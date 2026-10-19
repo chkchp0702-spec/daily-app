@@ -58,6 +58,12 @@
       return D;
     });
   }
+  // 🔒 10/19 사용자 「확률이 개판」 → 실전 성적이 동전보다 확실히 낫기 전(20건↑·55%↑)엔 경고를 크게
+  function warn(D){
+    var d = D.score && D.score.all && D.score.all.d1 || {};
+    if ((d.n || 0) >= 20 && (d.hit || 0) >= 55) return "";
+    return '<div style="margin:8px 0 2px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,#ffb84d 22%,var(--panel));border:1px solid rgba(255,184,77,.6);font-size:13.5px;line-height:1.45">⚠️ <b>아직 동전보다 못함</b> — 실전 채점 다음 날 방향 ' + (d.n ? Math.round(d.hit / 100 * d.n) + '/' + d.n + ' 맞음 (' + Math.round(d.hit) + '%)' : '채점 전') + '. 아래 적중률(57~65%)은 과거 되짚기 성적이고 실전은 아직 못 따라와요 — 이 숫자로 사고팔지 마세요.</div>';
+  }
   function ep(v){ return v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1) + "%p"; }
   // 10/15 사용자 「확률에 마이너스가 말이 되니?」 — 큰 숫자는 확률 그대로(31%), 평소와의 차이는 말로(「평소 54%보다 23%p 낮음」)
   function gapTx(v, pb){ if (v == null) return ""; var a = Math.abs(v).toFixed(Math.abs(v) >= 10 ? 0 : 1); if (Math.abs(v) < 0.5) return "평소" + (pb != null ? "(" + pc(pb) + ")" : "") + "와 비슷"; return (pb != null ? "평소 " + pc(pb) + "보다 " : "평소보다 ") + a + "%p " + (v > 0 ? "높음 ▲" : "낮음 ▼"); }
@@ -225,7 +231,7 @@
     var ks = ORDER.filter(function(k){ return D.markets[k]; });
     if (!ks.length){ b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률 자료가 아직 없어요.</div>'; return; }
     if (!SEL || !D.markets[SEL]) SEL = ks[0];
-    var h = '<section class="card"><h3>🎲 다음 장 · 오를 확률 <span class="mut">' + stamp(D) + '</span></h3>' + strip(D) +
+    var h = '<section class="card"><h3>🎲 다음 장 · 오를 확률 <span class="mut">' + stamp(D) + '</span></h3>' + strip(D) + warn(D) +
       '<p class="note">큰 숫자 = 다음 장에서 그 시장이 어제보다 오를 확률. ▲▼ = 「평소」(2000년 이후 오른 날 비율)보다 얼마나 높고 낮은지. 🧭 10/15부터 <b>이미 아는 정보를 닻</b>으로 써요 — 아시아는 간밤 미국 장, 미국은 선물 갭, 장이 열려 있으면 지금 등락과 남은 시간. 2012년 이후 걸어가며 검증한 적중률: 한국 62% · 일본 65% · 홍콩 60% · 중국 57% · 미국 64% (예전 52~54%). 60% 넘거나 40% 밑인 날은 67~79% 맞았어요.</p></section>';
     h += mcard(D.markets[SEL], D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
     b.innerHTML = h;

@@ -11,7 +11,18 @@
   function ten(p){ return Math.max(0, Math.min(10, Math.round(p * 10))); }
   /* 세게 말하기 — 확률 → 한 마디 (틀려도 좋다는 전제) */
   // ⚡ 10/19: 장이 아직 많이 남았으면(남은 시간 40%↑) 「거의 확실히」라고 하지 않음 — 10:18 「12% 거의 확실히 내린다」 뒤 10:23 플러스 전환
+  /* 🔒 10/19 사용자 「너의 확률이 이리 개판」 → 「ㅇㅇ 적용해」: 다음 날 방향 성적이 동전보다 확실히 나아지기 전(20건↑ · 적중 55%↑)엔
+     세게 말하지 않는다 — 「반반」·「약간 ○○ 쪽」까지만. 성적은 prob.json score.all.d1 (매일 채점) */
+  var PROVEN = false;
+  function gate(P){ var d = P && P.score && P.score.all && P.score.all.d1 || {}; PROVEN = (d.n || 0) >= 20 && (d.hit || 0) >= 55; return d; }
   function word(p, soft){
+    if (!PROVEN){
+      if (p >= 0.60) return {t: "오를 쪽 (검증 전)", c: "up"};
+      if (p >= 0.55) return {t: "약간 오를 쪽", c: "up"};
+      if (p <= 0.40) return {t: "내릴 쪽 (검증 전)", c: "dn"};
+      if (p <= 0.45) return {t: "약간 내릴 쪽", c: "dn"};
+      return {t: "반반 — 동전 던지기", c: "flat"};
+    }
     if (soft && p >= 0.70) return {t: "오른다 쪽에 세게", c: "up2"};
     if (soft && p <= 0.30) return {t: "내린다 쪽에 세게", c: "dn2"};
     if (p >= 0.70) return {t: "거의 확실히 오른다", c: "up2"};
@@ -39,13 +50,14 @@
   function build(P, B, T, LV){
     var K = kst(), L = lead(P, K); if (!L) return "";
     LV = LV || {};
+    var SC = gate(P);
     // ⚡ 장중이면 장중 나침반(10분마다)의 지금 등락으로 확률을 다시 계산 (problive.js)
     var lv = window.probLive ? probLive(L.mk, LV[L.mk.mk], P) : null;
     if (lv) L.mk = Object.assign({}, L.mk, {p1: lv.p1, intra_chg: lv.chg});
     if (L.other && window.probLive){ var lo = probLive(L.other, LV[L.other.mk], P); if (lo) L.other = Object.assign({}, L.other, {p1: lo.p1}); }
     var soft = L.mk.open_now && (lv ? lv.rem > 0.4 : true);
     var mk = L.mk, p1 = mk.p1, p5 = mk.p5, w1 = word(p1, soft), w5 = word(p5);
-    var strong = p1 >= 0.6 || p1 <= 0.4;
+    var strong = PROVEN && (p1 >= 0.6 || p1 <= 0.4);
     var head = e(mk.flag + " " + mk.ixn + " " + L.when) + " → <em>" + e(w1.t) + "</em>";
     var ten1 = ten(p1), ten5 = ten(p5);
     var nums = '<span class="pl-ten ' + w1.c + '" title="오를 확률 ' + pct(p1) + '%">' + "●".repeat(ten1) + "○".repeat(10 - ten1) + ' <b>10번 중 ' + ten1 + '번 오름</b> (' + pct(p1) + '%)</span>';
@@ -62,9 +74,10 @@
     return '<section class="card pl ' + w1.c + (strong ? ' strong' : '') + '" data-goto="prob" role="button">' +
       '<div class="pl-top"><span class="pl-ic">🎲</span><div class="pl-h"><small>오늘, 확률로 말하면 · ' + (lv ? '⚡ ' + e(lv.t) + ' 지금 값' : '🎲 ' + e(P.t || "") + stale) + '</small><div class="pl-head">' + head + '</div></div><span class="pl-go">🎲 ›</span></div>' +
       '<div class="pl-nums">' + nums + '</div>' +
+      (PROVEN ? '' : '<div class="pl-warn">⚠️ <b>아직 동전보다 못함</b> — 다음 날 방향 ' + (SC.n ? Math.round(SC.hit / 100 * SC.n) + '/' + SC.n + ' 맞음 (' + Math.round(SC.hit) + '%)' : '채점 전') + '. 이 숫자로 사고팔지 마세요 · 20번 넘게 채점해 55% 넘으면 그때 세게 말해요</div>') +
       (anc || band ? '<div class="pl-why">' + e(anc) + (anc && band ? ' · ' : '') + e(band) + '</div>' : '') +
       wk5 + oth + br +
-      '<div class="pl-foot">틀려도 좋다는 마음으로 세게 말해요' + hit + ' · 장중엔 10분마다 지금 등락으로 다시 계산 · 사라·팔라는 뜻 아님</div></section>';
+      '<div class="pl-foot">' + (PROVEN ? '틀려도 좋다는 마음으로 세게 말해요' + hit + ' · ' : '검증될 때까지 약하게만 말해요 · ') + '장중엔 10분마다 지금 등락으로 다시 계산 · 사라·팔라는 뜻 아님</div></section>';
   }
   function mount(){
     var body = document.getElementById("hmbody"); if (!body) return;
@@ -86,6 +99,7 @@
   var st = document.createElement("style");
   st.textContent = [
     ".pl{padding:12px 14px!important;cursor:pointer;border-width:1px;position:relative}",
+    ".pl-warn{margin:8px 0 4px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,#ffb84d 22%,var(--panel));border:1px solid rgba(255,184,77,.6);font-size:13.5px;line-height:1.45}",
     ".pl.up,.pl.up2{background:color-mix(in srgb,#ff6b6b 10%,var(--panel));border-color:rgba(255,107,107,.45)}",
     ".pl.dn,.pl.dn2{background:color-mix(in srgb,#3987e5 12%,var(--panel));border-color:rgba(57,135,229,.5)}",
     ".pl.flat{background:var(--panel)}.pl.strong{border-width:2px}",
