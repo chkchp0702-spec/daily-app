@@ -133,9 +133,16 @@ def app_checks():
             try:
                 pg.goto(APP + "?h=" + str(int(time.time())) + "#" + start, wait_until="domcontentloaded", timeout=45000)
                 pg.wait_for_selector(sel, timeout=20000); pg.wait_for_timeout(800)
-                pg.click(sel); pg.wait_for_timeout(3500)
-                got = pg.evaluate("[window.cur, %s]" % ("!!document.getElementById('%s')" % want[1] if want[1] else "true"))
-                ok = (got[0] in want[0] if isinstance(want[0], tuple) else got[0] == want[0]) and got[1]
+                pg.click(sel)
+                # 10/19: 다른 탭 카드는 smooth.js 가 「창」(#peek iframe ?embed=1)으로 엶(10/15 사용자 「매끄럽게 열고 닫기」) — 창 속 화면도 정답으로 봄
+                JS = """(w)=>{var pk=document.getElementById('peek');
+                  if(pk){var f=pk.querySelector('iframe');try{var fw=f.contentWindow;return ['창:'+(fw.cur||''), w?!!fw.document.getElementById(w):true];}catch(e){return ['창?',false];}}
+                  return [window.cur, w?!!document.getElementById(w):true];}"""
+                for _ in range(16):
+                    pg.wait_for_timeout(500); got = pg.evaluate(JS, want[1])
+                    g0 = str(got[0]).replace("창:", "")
+                    ok = (g0 in want[0] if isinstance(want[0], tuple) else g0 == want[0]) and got[1]
+                    if ok: break
             except Exception as e:
                 got, ok = [str(e)[:60]], False
             wn = "/".join(want[0]) if isinstance(want[0], tuple) else want[0]   # 묶음 버튼은 그 묶음에서 마지막에 본 탭으로 감(의도)
