@@ -1,39 +1,36 @@
 {
- "at": "2026-10-19 16:59",
- "ok": false,
- "problems": [
-  "#whale 화면에 「열기 실패: Page.wait_for_selector: Timeout 30000ms exceeded.\nCall log:\n  - waiting for loca」",
-  "#whale 느림 (None초)"
- ],
+ "at": "2026-10-19 17:03",
+ "ok": true,
+ "problems": [],
  "data": [
   {
    "name": "💼 포트",
    "ok": true,
-   "age_h": 0.6,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "⚡ 킥",
    "ok": true,
-   "age_h": 0.6,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 0.6,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 0.6,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "🌏 동종주",
    "ok": true,
-   "age_h": 0.6,
+   "age_h": 0.7,
    "lim": 3
   },
   {
@@ -45,44 +42,44 @@
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.1,
+   "age_h": 0.2,
    "lim": 1.5
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.4,
+   "age_h": 0.5,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 1.9,
+   "age_h": 2.0,
    "lim": 30
   },
   {
    "name": "📱 앱 목록",
    "ok": true,
-   "age_h": 0.1,
+   "age_h": 0.2,
    "lim": 30
   },
   {
    "name": "🎲 시장확률",
    "ok": true,
-   "age_h": 0.2,
+   "age_h": 0.3,
    "lim": 2
   },
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 0.6,
+   "age_h": 0.7,
    "lim": 12
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 1.2,
+   "s": 0.7,
    "cards": 8,
    "len": 3092,
    "bad": [],
@@ -91,16 +88,16 @@
   },
   {
    "tab": "market",
-   "s": 0.6,
+   "s": 0.4,
    "cards": 29,
-   "len": 7637,
+   "len": 7700,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "port",
-   "s": 1.2,
+   "s": 0.4,
    "cards": 10,
    "len": 2870,
    "bad": [],
@@ -109,7 +106,7 @@
   },
   {
    "tab": "score",
-   "s": 0.2,
+   "s": 0.3,
    "cards": 9,
    "len": 2525,
    "bad": [],
@@ -118,18 +115,16 @@
   },
   {
    "tab": "whale",
-   "s": null,
-   "cards": 0,
-   "len": 0,
-   "bad": [
-    "열기 실패: Page.wait_for_selector: Timeout 30000ms exceeded.\nCall log:\n  - waiting for loca"
-   ],
+   "s": 0.4,
+   "cards": 21,
+   "len": 1777,
+   "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "cup",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 11,
    "len": 3222,
    "bad": [],
@@ -140,7 +135,7 @@
    "tab": "gap",
    "s": 0.3,
    "cards": 15,
-   "len": 2614,
+   "len": 2596,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -156,16 +151,16 @@
   },
   {
    "tab": "accum",
-   "s": 0.3,
+   "s": 0.4,
    "cards": 14,
-   "len": 2111,
+   "len": 2085,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "onepager",
-   "s": 0.1,
+   "s": 0.2,
    "cards": 1,
    "len": 577,
    "bad": [],
@@ -176,7 +171,7 @@
    "tab": "danta",
    "s": 0.3,
    "cards": 12,
-   "len": 2322,
+   "len": 2327,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -192,7 +187,7 @@
   },
   {
    "tab": "idea",
-   "s": 0.1,
+   "s": 0.2,
    "cards": 1,
    "len": 77,
    "bad": [],
@@ -201,7 +196,7 @@
   },
   {
    "tab": "feed",
-   "s": 0.2,
+   "s": 0.3,
    "cards": 1,
    "len": 5369,
    "bad": [],
@@ -270,7 +265,7 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-19T07:58"
+   "when": "2026-10-19T08:03"
   },
   {
    "repo": "daily-app",
@@ -336,7 +331,7 @@
    "repo": "daily-app",
    "job": "live",
    "ok": true,
-   "when": "2026-10-19T07:53"
+   "when": "2026-10-19T08:03"
   },
   {
    "repo": "daily-app",
@@ -378,7 +373,7 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-19T07:25"
+   "when": "2026-10-19T07:58"
   },
   {
    "repo": "daily-app",
