@@ -100,6 +100,68 @@ def _mood(up, dn):
             else "내린 종목이 더 많은" if r > .35 else "내린 종목이 압도적으로 많은")
 
 
+def _cards_live(m, j, log=print):
+    """🧭 10/19 사용자 「진짜 쫌…」 — 코스피 −3% 장중(10:11)인데 「오늘 이 업종·종목을 보자」·「섹터 등락」이 지난 금요일(10/16) 마감
+    (의료기기 +8.7% 등)을 그대로 보여 줌. live 가 더 새 장이면 섹터·강한/약한 업종·대형주 등락도 live 값으로 바꾼다.
+    지난 마감 값은 m.prev 에 한 번만 남기고(10분마다 다시 해도 같은 결과), 1주·1개월(r5·r20)·흐름(path·heat)은 지난 마감까지 값을 그대로 둔다."""
+    pv = m.setdefault("prev", {})
+    if "sectors" not in pv:
+        pv.update({k: m.get(k) for k in ("sectors", "strong", "weak", "leaders", "laggards", "top_cap")})
+    r5 = {}
+    for x in (pv.get("sectors") or []):
+        for t in (x.get("big") or []) + (x.get("hot") or []) + (x.get("top") or []):
+            if t.get("s"):
+                r5[t["s"]] = t.get("r5")
+    for t in (pv.get("leaders") or []) + (pv.get("laggards") or []) + (pv.get("top_cap") or []):
+        if t.get("s"):
+            r5.setdefault(t["s"], t.get("r5"))
+    st = lambda t: {"s": t.get("s"), "n": t.get("n"), "r1": t.get("r"), "r5": r5.get(t.get("s"))}
+    # 섹터: 오늘 등락·오른/내린 종목 수·대표 종목은 live, 1주·1개월·흐름은 지난 마감
+    old = {x.get("k"): x for x in (pv.get("sectors") or [])}
+    lv = {x.get("k"): x for x in (j.get("sectors") or []) if x.get("r") is not None}
+    secs = []
+    for k, o in old.items():
+        x = lv.get(k)
+        if not x:
+            continue                      # live 에 없는 섹터(일본 방산 등)는 오늘 칸에서 뺌 — 옛 값을 오늘처럼 보이지 않게
+        n = dict(o)
+        n.update({"r1": x["r"], "up": x.get("up", o.get("up")), "down": x.get("down", o.get("down")), "big": [st(t) for t in x.get("big") or []]})
+        n["hot"] = sorted(n["big"], key=lambda t: -(t["r1"] or 0))
+        secs.append(n)
+    if secs:
+        m["sectors"] = secs
+    # 강한·약한 업종
+    pr = {x.get("name"): x for x in (pv.get("strong") or []) + (pv.get("weak") or [])}
+    ind = lambda x: {"name": x["name"], "n": x.get("n"), "up": x.get("up"), "down": x.get("down"), "r1": x.get("r"),
+                     "r5": (pr.get(x["name"]) or {}).get("r5"), "lead": [st(t) for t in x.get("lead") or []], "big": []}
+    if j.get("strong"):
+        m["strong"] = [ind(x) for x in j["strong"] if x.get("r") is not None]
+    if j.get("weak"):
+        m["weak"] = [ind(x) for x in j["weak"] if x.get("r") is not None]
+    # 대형주: 섹터 대표 종목(큰 회사) + 거래대금 상위로 오늘 등락 지도
+    mp = {}
+    for x in (j.get("sectors") or []):
+        for t in x.get("big") or []:
+            if t.get("s") and t.get("r") is not None:
+                mp[t["s"]] = t
+    big = sorted(mp.values(), key=lambda t: -t["r"])     # 「많이 오른 대형주」는 섹터 대표(큰 회사)만
+    for t in (j.get("value") or []):                    # 시가총액 TOP 10 칸은 거래대금 상위로도 채움
+        if t.get("s") and t.get("r") is not None:
+            mp.setdefault(t["s"], t)
+    if len(big) >= 8:
+        m["leaders"] = [st(t) for t in big[:8] if t["r"] > 0] or [st(t) for t in big[:8]]
+        m["laggards"] = [st(t) for t in big[::-1][:5] if t["r"] < 0]
+    tc = []
+    for t in (pv.get("top_cap") or []):
+        x = mp.get(t.get("s"))
+        if x:
+            tc.append(dict(t, r1=x["r"]))
+    if tc:
+        m["top_cap"] = tc
+    m["live"]["cards"] = True
+    log(f"🧭 {m.get('name')} 카드(섹터 {len(secs)}·업종 {len(m.get('strong') or [])}·대형주 {len(big)}) → live {j.get('t')}")
+
+
 def _breadth_live(m, j, mk, log=print):
     """🧭 10/15 사용자: "오른 종목과 내린 종목이 같다라….. 장난하냐?" — 코스피 −7.9% 인데 머리말 요약이 어제(10/14) 종목 수(1,252 vs 1,189).
     live 가 더 새 장(오늘)이면 오른·내린 종목 수·중간값·요약을 live 로 바꾸고, 어제 것은 m.prev 에 남김 (10분마다 다시 해도 같은 결과)."""
@@ -133,6 +195,7 @@ def _breadth_live(m, j, mk, log=print):
     if worst:
         parts.append("·".join(reversed(worst)) + " 약세")
     m["summary"] = ", ".join(parts) + "."
+    _cards_live(m, j, log)
     # 체감 온도도 오늘 값으로 (미국 VIX 는 원래 계산 그대로 두려고 미국은 건너뜀 — 미국은 live 가 같은 장이라 여기 안 옴)
     try:
         import sys as _s

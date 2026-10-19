@@ -123,8 +123,11 @@
   function detail(k, C){
     var m = C.markets[k], ix = m.index[0], h = "";
     var PD = m.live ? md(m.date) : "";      // 🧭 10/15: 위 숫자는 오늘 장중(live), 아래 업종·종목 카드는 어제 마감 → 카드 제목에 날짜
-    var T = function(t){ return PD ? t.replace("오늘", PD + " 마감") : t; };
-    var hiTxt = (PD ? '<span class="mut" style="margin-right:6px">' + PD + ' 마감</span>' : '') + '<span class="chip2 hot">52주 신고가 ' + num(m.highs) + '</span><span class="chip2 cool">52주 신저가 ' + num(m.lows) + '</span>' +
+    // 🧭 10/19 사용자 「진짜 쫌…」: 서버(ixlive)가 섹터·업종·대형주도 live 로 바꿨으면(m.live.cards) 그 카드들은 「HH:MM 장중」, 52주 신고가만 지난 마감
+    var HPD = PD, LT = m.live && m.live.cards ? (liveDone(m) ? md(m.live.date) + " 마감" : (m.live.t || "") + " 장중") : "";
+    if (LT) PD = "";
+    var T = function(t){ return LT ? t.replace("오늘", "오늘 " + LT) : PD ? t.replace("오늘", PD + " 마감") : t; };
+    var hiTxt = (HPD ? '<span class="mut" style="margin-right:6px">' + HPD + ' 마감</span>' : '') + '<span class="chip2 hot">52주 신고가 ' + num(m.highs) + '</span><span class="chip2 cool">52주 신저가 ' + num(m.lows) + '</span>' +
       (m.limit_up != null ? '<span class="chip2 c">' + (k === "KR" ? "상한가" : "상한가(+10%)") + ' ' + num(m.limit_up) + '</span>' : '');
     // 1) 국면 히어로
     h += '<section class="card cp-hero h-' + ((REG[rd(m)] || REG["횡보장"]).c) + '">' +
@@ -163,7 +166,7 @@
     }
     // 5) 섹터
     if (m.sectors.length){
-      h += card("섹터 등락 <span class='mut'>" + (PD ? PD + " 마감 · " : "") + "시가총액 가중 · 섹터를 누르면 종목</span>",
+      h += card("섹터 등락 <span class='mut'>" + (LT ? e(LT) + " · 1주·1개월은 지난 마감까지 · " : PD ? PD + " 마감 · " : "") + "시가총액 가중 · 섹터를 누르면 종목</span>",
         '<div class="seg2" id="cpsk"><button class="on" data-k="r1">' + (PD || "오늘") + '</button><button data-k="r5">1주</button><button data-k="r20">1개월</button></div><div id="cpsb">' + secBars(m, "r1") + '</div>');
     }
     h += rotation(m) + highs(m);
@@ -182,7 +185,7 @@
       (m.laggards.length ? '<div class="sub2">많이 내린 대형주</div><div class="cp-sts">' + m.laggards.map(sChip).join("") + '</div>' : '') +
       '<div class="sub2">시가총액 TOP 10</div><div class="cp-sts">' + m.top_cap.map(sChip).join("") + '</div>');
     if (m.weak && m.weak.length){
-      h += card("🧊 " + (PD ? PD + " 마감 " : "") + "약한 업종", m.weak.map(function(x){ return '<div class="cp-wk"><b data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><div class="cp-sts">' + x.lead.slice(-2).map(sChip).join("") + '</div></div>'; }).join(""));
+      h += card("🧊 " + (LT ? "오늘 " + e(LT) + " " : PD ? PD + " 마감 " : "") + "약한 업종", m.weak.map(function(x){ return '<div class="cp-wk"><b data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><div class="cp-sts">' + x.lead.slice(-2).map(sChip).join("") + '</div></div>'; }).join(""));
     }
     if (window.CPX) try { h += window.CPX(m, k, C); } catch(err) { console.error(err); }
     if (window.CPX2) try { var cut = h.indexOf("</section>") + 10; h = h.slice(0, cut) + window.CPX2(m, k, C) + h.slice(cut); } catch(err) { console.error(err); }
@@ -195,7 +198,7 @@
     if (!L.length) return "";
     L = L.map(function(x){ var br = x.n ? x.up / x.n : .5; return {x: x, sc: x.r1 + (x.r5 || 0) * .5 + (br - .5) * 4}; })
          .sort(function(a, b){ return b.sc - a.sc; }).slice(0, 3);
-    return '<section class="card cp-watch"><h3>🎯 오늘 이 업종·종목을 보자 <span class="mut">' + m.flag + ' ' + e(m.name) + ' · ' + e(String(m.date || "").slice(5).replace("-", "/")) + (m.live ? ' 마감 기준' : '') + '</span></h3>' +
+    return '<section class="card cp-watch"><h3>🎯 오늘 이 업종·종목을 보자 <span class="mut">' + m.flag + ' ' + e(m.name) + ' · ' + (m.live && m.live.cards ? e(liveDone(m) ? md(m.live.date) + " 마감" : (m.live.t || "") + " 장중") + ' 기준' : e(String(m.date || "").slice(5).replace("-", "/")) + (m.live ? ' 마감 기준' : '')) + '</span></h3>' +
       L.map(function(o, i){ var x = o.x;
         return '<div class="cw-row"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n" data-ind="' + e(x.name) + '">' + e(x.name) + ' <span class="hgo">›</span></b></div>' +
           '<span><b class="' + cls(x.r1) + '">' + pct(x.r1) + '</b> <small class="mut">1주 ' + pct(x.r5) + '</small></span></div>' +

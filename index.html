@@ -1456,7 +1456,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261019c";
+var APPV = "20261019d";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1496,7 +1496,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <script defer src="views.js?v=33"></script>
 <script defer src="ixchart.js?v=7"></script>
-<script defer src="compass.js?v=24"></script>
+<script defer src="compass.js?v=25"></script>
 <script defer src="prob.js?v=17"></script>
 <script defer src="products.js?v=17"></script>
 <script defer src="extras.js?v=10"></script>
