@@ -151,6 +151,8 @@ def _cards_live(m, j, log=print):
     if len(big) >= 8:
         m["leaders"] = [st(t) for t in big[:8] if t["r"] > 0] or [st(t) for t in big[:8]]
         m["laggards"] = [st(t) for t in big[::-1][:5] if t["r"] < 0]
+    for n in secs:                          # 섹터 대장주 10개: 오늘 값을 아는 종목만 live, 모르는 종목은 비움(옛 값을 오늘처럼 안 보이게 — 앱이 줄마다 지금 시세를 따로 불러옴)
+        n["top"] = [dict(t, r1=(mp[t["s"]]["r"] if t.get("s") in mp else None)) for t in (old.get(n.get("k")) or {}).get("top") or []]
     tc = []
     for t in (pv.get("top_cap") or []):
         x = mp.get(t.get("s"))

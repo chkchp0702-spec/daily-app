@@ -301,7 +301,7 @@
     if (sx.hot && sx.hot.length) h += '<section class="card"><h3>🔥 오늘 많이 오른 종목 <span class="mut">큰 회사 중</span></h3><div class="ss">' + sx.hot.map(function(x){ return row(x.s, x.n, null, false, "오늘 " + pct(x.r1) + " · 1주 " + pct(x.r5)); }).join("") + '</div></section>';
     if (mk === "US" && CMP.markets.KR){ var kk = (CMP.markets.KR.sectors || []).filter(function(x){ return x.k === k; })[0];
       if (kk) h += '<section class="card"><h3>🇰🇷 한국 같은 섹터 <span class="mut">오늘 ' + pct(kk.r1) + ' · 1주 ' + pct(kk.r5) + '</span></h3><div class="ss">' + (kk.top || kk.big || []).slice(0, 5).map(function(x, i){ return row(x.s, x.n, null, i === 0, "오늘 " + pct(x.r1)); }).join("") + '</div></section>'; }
-    h += '<p class="note" style="padding:0 4px 90px">' + e(m.date) + ' 마감 기준. 종목을 누르면 종목리포트로 가요.' + (sx.top ? '' : ' (대장주 10개 목록은 다음 나침반 계산부터 나와요.)') + '</p>';
+    h += '<p class="note" style="padding:0 4px 90px">' + (m.live && m.live.cards ? '「오늘」은 ' + e(m.live.t || "") + ' 장중 값(– = 아직 모름, 오른쪽 숫자가 지금 시세) · 1주·1개월은 ' + e(m.date) + ' 마감까지.' : e(m.date) + ' 마감 기준.') + ' 종목을 누르면 종목리포트로 가요.' + (sx.top ? '' : ' (대장주 10개 목록은 다음 나침반 계산부터 나와요.)') + '</p>';
     body.innerHTML = h; fillPx(body);
   }
   // ② 섹터 히트맵 (한국 섹터 ETF 구성 종목)
