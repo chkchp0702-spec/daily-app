@@ -55,7 +55,60 @@ def load_ext(fake=False):
             print("CNN 공포·탐욕", len(s), s.index[0].date(), "→", s.index[-1].date(), "지금", s.iloc[-1])
     except Exception as e:
         print("CNN 공포·탐욕 실패", e)
+    try:
+        pc = load_pcr()
+        if len(pc) > 600:
+            out["pcr"] = pc
+    except Exception as e:
+        print("풋콜 비율 실패", e)
     return out
+
+
+PCR_FILE = "archive/x/pcr_total.csv"
+
+
+def load_pcr():
+    """CBOE 전체 풋콜 비율 일별 (10/19 #7b · probe/pcr_tail_bt.py)
+       처음 한 번: 옛 CSV cdn.cboe.com/resources/options/volume_and_call_put_ratios/totalpc.csv (2006-11~2019-10)
+       + 일별 JSON cdn.cboe.com/data/us/options/market_statistics/daily/YYYY-MM-DD_daily_options 로 빈 기간 채움 → archive/x/pcr_total.csv
+       그다음부터는 마지막 날 뒤 날짜만 일별 JSON 으로 붙임"""
+    import os, io, datetime as dt
+    from concurrent.futures import ThreadPoolExecutor
+    s = pd.Series(dtype=float)
+    if os.path.exists(PCR_FILE):
+        try:
+            s = pd.read_csv(PCR_FILE, index_col=0, parse_dates=True).iloc[:, 0].dropna()
+        except Exception:
+            s = pd.Series(dtype=float)
+    UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36"}
+    if len(s) < 1000:
+        b = urllib.request.urlopen(urllib.request.Request("https://cdn.cboe.com/resources/options/volume_and_call_put_ratios/totalpc.csv", headers=UA), timeout=30).read()
+        lines = b.decode("utf-8", "ignore").splitlines()
+        hi = next(i for i, l in enumerate(lines) if l.upper().startswith("DATE"))
+        df = pd.read_csv(io.StringIO("\n".join(lines[hi:])))
+        df.columns = [c.strip().upper() for c in df.columns]
+        s = pd.Series(pd.to_numeric(df["P/C RATIO"], errors="coerce").values, index=pd.to_datetime(df["DATE"], errors="coerce")).dropna()
+        s = s[~s.index.duplicated()].sort_index()
+    start = s.index[-1].date() + dt.timedelta(days=1)
+    days = [d.date() for d in pd.bdate_range(start, dt.date.today() - dt.timedelta(days=1))]
+
+    def one(day):
+        try:
+            u = f"https://cdn.cboe.com/data/us/options/market_statistics/daily/{day}_daily_options"
+            j = json.loads(urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=20).read())
+            v = {x["name"]: x["value"] for x in j.get("ratios", [])}
+            return pd.Timestamp(day), float(v["TOTAL PUT/CALL RATIO"])
+        except Exception:
+            return None
+    if days:
+        with ThreadPoolExecutor(16) as ex:
+            got = [g for g in ex.map(one, days) if g]
+        if got:
+            s = pd.concat([s, pd.Series(dict(got))]).sort_index()
+            s = s[~s.index.duplicated(keep="first")]
+    s.rename("pcr").to_csv(PCR_FILE)
+    print("CBOE 전체 풋콜", len(s), s.index[0].date(), "→", s.index[-1].date(), "지금", s.iloc[-1])
+    return s
 
 
 FR_FILE = "archive/x/foreign_hist.json"
@@ -307,6 +360,20 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
             m, tb = bucket_stats(d, cs, [-9, 0, 0.5, 1.5, 9], ["역전(<0)", "평평(0~0.5)", "보통(0.5~1.5)", "가파름(>1.5)"], cv, cond)
             research["curve"] = tb
             add("curve", "📐", "장단기 금리차", "자금", m, 0.4, f"미 10년 − 3개월 금리 {cv:+.2f}%p ({spd.index[-1].strftime('%m/%d')})")
+    # 🧮 풋콜 꼬리 (10/19 #7b · probe/pcr_tail_bt.py) — CBOE 전체 풋콜 5일 평균의 1년 백분위 ≥ 90%(극공포) 날만, 미국 「일주일」만
+    #   검증(2006-11~2026-10, 걸어가며 사전 150, 평가 기간 앞/뒤 절반): S&P 5일 뒤 오름 65.8% vs 평소 57.8% (n 281) · 66.0% vs 61.0% (n 306) · 최근 2년 69.1% vs 57.7% (n 55)
+    #   브라이어(5일) 0.2456→0.2450 · 0.2389→0.2384 · 최근 2년 0.2444→0.2437 — 세 기간 모두 개선 · 다음 날은 +3.4·+1.7%p 로 약해 안 씀
+    #   한국·일본·중국·홍콩 꼬리, 주식 풋콜, 70% 꼬리, 탐욕 꼬리는 두 기간 엇갈리거나 브라이어 개선 없음 ❌ (10/15 전체 5칸도 ❌)
+    pc = ext.get("pcr")
+    if us and pc is not None and len(pc) > 600:
+        rk = pc.rolling(5).mean().rolling(252, min_periods=120).rank(pct=True)
+        x = rk.reindex(idx).ffill(limit=3); cv = x.iloc[-1]
+        research["pcr"] = {"d": str(pc.index[-1].date()), "v": round(float(pc.iloc[-1]), 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+        if not pd.isna(cv) and cv >= 0.9:
+            m = cond(d, (x >= 0.9).fillna(False), "풋콜 극공포(1년 상위 10%)")
+            add("pcr", "🧮", "풋콜 극공포", "심리", m, 0.5, f"CBOE 전체 풋콜 5일 평균 1년 백분위 {cv*100:.0f}% — 옵션 시장 극공포 뒤 일주일은 평소보다 잘 오름(다음 날엔 안 씀)")
+            if M and M[-1]["k"] == "pcr":
+                M[-1]["p1"] = None
     # 🌏 외국인 수급 (한국) — 20일 누적 순매수의 2년 백분위 + 연속 순매도 일수
     fr = ext.get("foreign")
     if mk == "KR" and fr is not None and 0 < len(fr) <= 120:
