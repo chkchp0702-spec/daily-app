@@ -12,6 +12,21 @@
       f.forEach(function(x){ o[x.type] = x.value; });
       return {m: (+o.hour % 24) * 60 + (+o.minute), wd: o.weekday, ymd: o.year + "-" + o.month + "-" + o.day}; } catch(x) { return null; }
   }
+  // 같은 식으로 「그 시각·그 등락이었다면」 확률 (장중 흐름 그리기용) — el = 장 시작 뒤 분
+  function core(c, chg, el){
+    var o = Math.floor(c.open / 100) * 60 + c.open % 100, cl = Math.floor(c.close / 100) * 60 + c.close % 100, tot = cl - o;
+    if (el < 0 || el > tot) return null;
+    var rem = Math.max(0.02, 1 - el / tot), vr = rem;
+    if (c.vh){ var pts = [[0, 1]].concat(c.vh).concat([[tot, 0.003]]);
+      for (var i = 0; i < pts.length - 1; i++) if (el >= pts[i][0] && el <= pts[i + 1][0]){ var a = pts[i], b = pts[i + 1]; vr = Math.max(0.003, a[1] + (b[1] - a[1]) * (el - a[0]) / ((b[0] - a[0]) || 1)); break; } }
+    var pi = Math.min(0.99, Math.max(0.01, cdf(Math.log(1 + chg / 100) / (c.sig * Math.sqrt(vr)))));
+    return {p1: Math.round(Math.min(0.99, Math.max(0.01, sg(lg(pi) + (c.dev || 0)))) * 1000) / 1000, rem: rem, vr: vr};
+  }
+  window.probAt = function(m, chg, hhmm){
+    var c = m && m.ic; if (!c || chg == null || !hhmm) return null;
+    var o = Math.floor(c.open / 100) * 60 + c.open % 100, t = hhmm.split(":");
+    return core(c, chg, (+t[0]) * 60 + (+t[1]) - o);
+  };
   window.probLive = function(m, L, P){
     var c = m && m.ic; if (!c || !L || !L.index || !L.index[0] || L.index[0].chg == null) return null;
     var T = loc(c.tz); if (!T || T.wd === "Sat" || T.wd === "Sun") return null;

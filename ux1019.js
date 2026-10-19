@@ -47,6 +47,57 @@
     var ev = String(a.ev || "").split("→")[0].replace(/\(.*?\)/g, "").trim();
     return ev ? a.ic + " " + ev : "";
   }
+
+  /* ⚡ 10/19 사용자: 「두뇌가 확률을 얘기했으면 실시간으로 — 지금 반등이 나오고 있고 종가 플러스 확률이 올라가고 있고 어느 섹터가 강하니
+     이쪽을 보자 · 장이 계속 밀리니 어디 섹터는 특히 조심하고 현금 비중을 어느 선까지 — 확률적으로 직관적으로」
+     장중 나침반(10분마다) 흐름으로: ① 종가 플러스 확률이 어떻게 움직였나 ② 지금 볼 곳 / 조심할 곳(섹터·대형주) ③ 🎯 집중 ★종목 지금 ④ 규칙에 있는 대응만(현금 선 · 급락일 쉬기) */
+  function pc2(v){ return (v > 0 ? "+" : "") + v.toFixed(1) + "%"; }
+  function cl2(v){ return v > 0 ? "up" : v < 0 ? "dn" : ""; }
+  function nowBlock(mk, L, lv, F, FL, CONC){
+    if (!L || !window.probAt) return "";
+    var sn = (L.snaps || []).filter(function(x){ return x && x[3] != null; });
+    var pts = sn.map(function(x){ var r = probAt(mk, x[3], x[0]); return r ? [x[0], r.p1] : null; }).filter(Boolean);
+    pts.push([lv.t, lv.p1]);
+    var nowM = (function(t){ var a = t.split(":"); return +a[0] * 60 + +a[1]; })(lv.t);
+    var ago = pts.filter(function(x){ var a = x[0].split(":"); return nowM - (+a[0] * 60 + +a[1]) >= 50; }).slice(-1)[0] || pts[0];
+    var d = lv.p1 - ago[1], first = pts[0];
+    // 흐름 막대: 시각별 확률 (50% 선 위 빨강 · 아래 파랑)
+    var W = 150, H = 34, n = pts.length, xs = function(i){ return n > 1 ? 4 + i * (W - 8) / (n - 1) : W / 2; }, ys = function(p){ return 4 + (1 - p) * (H - 8); };
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" class="pl-spark"><line x1="0" x2="' + W + '" y1="' + ys(0.5) + '" y2="' + ys(0.5) + '" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 3"/>' +
+      '<polyline fill="none" stroke="currentColor" stroke-width="2" points="' + pts.map(function(x, i){ return xs(i).toFixed(1) + "," + ys(x[1]).toFixed(1); }).join(" ") + '"/>' +
+      '<circle cx="' + xs(n - 1).toFixed(1) + '" cy="' + ys(lv.p1).toFixed(1) + '" r="3" fill="currentColor"/></svg>';
+    var chg = lv.chg, mood;
+    if (d >= 0.10 && lv.p1 >= 0.5) mood = "📈 반등이 붙는 중 — 종가 플러스 확률이 " + pct(ago[1]) + "% → " + pct(lv.p1) + "%로 올라가고 있어요";
+    else if (d >= 0.10) mood = "↗ 낙폭을 줄이는 중 — 종가 플러스 확률 " + pct(ago[1]) + "% → " + pct(lv.p1) + "% (아직 내릴 쪽)";
+    else if (d <= -0.10 && lv.p1 <= 0.5) mood = "📉 계속 밀리는 중 — 종가 플러스 확률이 " + pct(ago[1]) + "% → " + pct(lv.p1) + "%로 내려가고 있어요";
+    else if (d <= -0.10) mood = "↘ 오름폭을 반납하는 중 — " + pct(ago[1]) + "% → " + pct(lv.p1) + "% (아직 오를 쪽)";
+    else mood = "↔ 큰 변화 없이 버티는 중 — 1시간 전 " + pct(ago[1]) + "% → 지금 " + pct(lv.p1) + "%";
+    var up = L.up || 0, dn = L.down || 0, br = Math.round(up / Math.max(1, up + dn) * 100), br0 = first && sn[0] ? Math.round(sn[0][1] / Math.max(1, sn[0][1] + sn[0][2]) * 100) : null;
+    var ss = (L.sectors || []).filter(function(x){ return x.r != null; }).sort(function(a, b){ return b.r - a.r; });
+    var bigs = function(x, best){ return (x.big || []).filter(function(t){ return t.r != null && (best ? t.r > 0 : t.r < 0); }).sort(function(a, b){ return best ? b.r - a.r : a.r - b.r; }).slice(0, 2)
+      .map(function(t){ return '<a data-op="' + e(t.s) + '">' + e(t.n) + ' <b class="' + cl2(t.r) + '">' + pc2(t.r) + '</b></a>'; }).join(" · "); };
+    var good = ss.filter(function(x){ return x.r >= 0.3 && (x.up || 0) >= (x.down || 0); }).slice(0, 2);
+    var bad = ss.slice().reverse().filter(function(x){ return x.r <= -0.3; }).slice(0, 2);
+    var row = function(ic, lab, list, best){ return list.length ? '<div class="pl-nw"><span class="pl-k">' + ic + ' ' + lab + '</span><div>' + list.map(function(x){ var b = bigs(x, best);
+      return '<div class="pl-sr"><b>' + e(x.name) + ' <span class="' + cl2(x.r) + '">' + pc2(x.r) + '</span></b> <span class="pl-sm mut">▲' + (x.up || 0) + ' ▼' + (x.down || 0) + '</span>' + (b ? '<div class="pl-sm">' + b + '</div>' : '') + '</div>'; }).join("") + '</div></div>' : ''; };
+    // 🎯 오늘 집중 ★·관심 국내 종목의 지금 값
+    var fl = FL && FL.px || {}, st = [];
+    ((F && F.themes) || []).forEach(function(t){ (t.kr || []).forEach(function(k){ var q = fl[k.t]; if (q && q.r != null) st.push({n: k.name, t: k.t, r: q.r, star: /★/.test(k.act || ""), th: t.name}); }); });
+    st.sort(function(a, b){ return b.r - a.r; });
+    var foc = st.length ? '<div class="pl-nw"><span class="pl-k">🎯 집중 종목</span><div class="pl-sm">' + st.slice(0, 4).map(function(x){ return (x.star ? "★ " : "") + '<a data-op="' + e(x.t) + '">' + e(x.n) + ' <b class="' + cl2(x.r) + '">' + pc2(x.r) + '</b></a>'; }).join(" · ") + '</div></div>' : '';
+    // 대응 — 규칙에 있는 것만
+    var act = [];
+    if (chg <= -3) act.push("⛔ 코스피 −3%↓ — 우리 규칙: 오늘은 신규 진입 쉬기");
+    else if (d <= -0.10 && chg < -1) act.push("🛑 밀리는 장 — " + (bad[0] ? e(bad[0].name) + "·" : "") + "약한 쪽은 비중 늘리지 않기");
+    else if (d >= 0.10 && lv.p1 >= 0.55 && good[0]) act.push("👀 반등 주도 " + e(good[0].name) + (good[1] ? "·" + e(good[1].name) : "") + " 쪽을 먼저 본다 (추격보다 눌림)");
+    var R = CONC && CONC.regime;
+    if (R) act.push("💼 현금·단기채 선: " + (R.up ? "🟢 S&P 200일선 위(+" + R.gap + "%) → 규칙상 0% · 200일선 아래 3일이면 🔴 26%까지" : "🔴 S&P 200일선 아래(" + R.gap + "%) → 규칙상 26% 유지") +
+      (R.kospi_gap != null ? " · 코스피는 200일선 " + (R.kospi_gap > 0 ? "+" : "") + R.kospi_gap + "%" : ""));
+    return '<div class="pl-now"><div class="pl-nh"><b>⚡ 지금 장 ' + e(lv.t) + '</b> <span class="pl-sm mut">코스피 <span class="' + cl2(chg) + '">' + pc2(chg) + '</span> · 오른 종목 ' + br + '%' + (br0 != null ? ' (개장 ' + br0 + '%)' : '') + '</span></div>' +
+      '<div class="pl-tr ' + (lv.p1 >= 0.5 ? "up" : "dn") + '">' + svg + '<span>' + e(mood) + '</span></div>' +
+      row("👀", "볼 곳", good, true) + row("⚠️", "조심", bad, false) + foc +
+      (act.length ? '<div class="pl-act">' + act.map(function(x){ return '<div>' + x + '</div>'; }).join("") + '</div>' : '') + '</div>';
+  }
   function build(P, B, T, LV){
     var K = kst(), L = lead(P, K); if (!L) return "";
     LV = LV || {};
@@ -76,14 +127,17 @@
       '<div class="pl-nums">' + nums + '</div>' +
       (PROVEN ? '' : '<div class="pl-warn">⚠️ <b>아직 동전보다 못함</b> — 다음 날 방향 ' + (SC.n ? Math.round(SC.hit / 100 * SC.n) + '/' + SC.n + ' 맞음 (' + Math.round(SC.hit) + '%)' : '채점 전') + '. 이 숫자로 사고팔지 마세요 · 20번 넘게 채점해 55% 넘으면 그때 세게 말해요</div>') +
       (anc || band ? '<div class="pl-why">' + e(anc) + (anc && band ? ' · ' : '') + e(band) + '</div>' : '') +
+      (lv && L.mk.mk === "KR" ? nowBlock(L.mk, LV.KR, lv, LV.F, LV.FL, LV.CONC) : '') +
       wk5 + oth + br +
       '<div class="pl-foot">' + (PROVEN ? '틀려도 좋다는 마음으로 세게 말해요' + hit + ' · ' : '검증될 때까지 약하게만 말해요 · ') + '장중엔 10분마다 지금 등락으로 다시 계산 · 사라·팔라는 뜻 아님</div></section>';
   }
   function mount(){
     var body = document.getElementById("hmbody"); if (!body) return;
     var LJ = function(k){ return J("archive/x/live_" + k + ".json").catch(function(){ return null; }); };
-    Promise.all([J("archive/x/prob.json"), J(RAWM + "market/home.json").catch(function(){ return null; }), J(RAWM + "brain/state.json").catch(function(){ return null; }), LJ("kr"), LJ("us")]).then(function(a){
-      var html = build(a[0], a[1] && a[1].brain, a[2], {KR: a[3], US: a[4]}); if (!html) return;
+    var NL = function(u){ return J(u).catch(function(){ return null; }); };
+    Promise.all([J("archive/x/prob.json"), J(RAWM + "market/home.json").catch(function(){ return null; }), J(RAWM + "brain/state.json").catch(function(){ return null; }), LJ("kr"), LJ("us"),
+                 NL(RAWM + "market/focus.json"), NL("archive/x/focus_live.json"), NL(RAWM + "market/conc.json")]).then(function(a){
+      var html = build(a[0], a[1] && a[1].brain, a[2], {KR: a[3], US: a[4], F: a[5], FL: a[6], CONC: a[7]}); if (!html) return;
       var b2 = document.getElementById("hmbody"); if (!b2) return;
       var old = b2.querySelector(".pl"); if (old) old.remove();
       var anchor = b2.querySelector(".hm-live") || b2.querySelector(".hm-day");
@@ -99,6 +153,11 @@
   var st = document.createElement("style");
   st.textContent = [
     ".pl{padding:12px 14px!important;cursor:pointer;border-width:1px;position:relative}",
+    ".pl-now{margin:10px 0 4px;padding:9px 10px;border-radius:12px;background:color-mix(in srgb,var(--text) 5%,var(--panel));border:1px solid var(--line)}",
+    ".pl-nh{margin-bottom:4px}.pl-tr{display:flex;gap:8px;align-items:center;font-size:13.5px;line-height:1.4;margin:2px 0 6px}.pl-tr.up{color:#e5484d}.pl-tr.dn{color:#3987e5}.pl-tr span{color:var(--text)}.pl-spark{flex:none}",
+    ".pl-nw{display:flex;gap:8px;font-size:13.5px;line-height:1.45;padding:4px 0;border-top:1px dashed var(--line)}.pl-nw .pl-k{flex:none;width:78px}.pl-nw a{color:inherit;text-decoration:none;cursor:pointer}",
+    ".pl-sm{font-size:12.5px;display:inline}.pl-sr .pl-sm+div.pl-sm,.pl-sr div.pl-sm{display:block}.pl-sr{margin-bottom:3px}",
+    ".pl-act{margin-top:6px;font-size:13px;line-height:1.5;border-top:1px dashed var(--line);padding-top:5px}",
     ".pl-warn{margin:8px 0 4px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,#ffb84d 22%,var(--panel));border:1px solid rgba(255,184,77,.6);font-size:13.5px;line-height:1.45}",
     ".pl.up,.pl.up2{background:color-mix(in srgb,#ff6b6b 10%,var(--panel));border-color:rgba(255,107,107,.45)}",
     ".pl.dn,.pl.dn2{background:color-mix(in srgb,#3987e5 12%,var(--panel));border-color:rgba(57,135,229,.5)}",
