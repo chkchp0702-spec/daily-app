@@ -417,15 +417,15 @@
     var bar = '<span class="pd-rpb">' + segs.map(function(sg){ return sg[0] > 0 ? '<i style="width:' + sg[0] + '%;background:' + sg[1] + '" title="' + sg[2] + ' ' + sg[0] + '%"></i>' : ''; }).join("") + '</span>';
     var txt = '<b>' + mo(cyc) + ' 만에 끝 ' + first.toFixed(0) + '%</b>' + (second != null ? ' · ' + mo(cyc * 2) + ' 안 ' + second.toFixed(0) + '%' : '') + ' · 만기 평가 때 상환 ' + Math.max(0, all - early).toFixed(0) + '%' +
       (matOk ? ' · 만기에 ' + (st.ki_touch != null ? '원금+이자(KI 안 닿음) ' : '원금만 ') + matOk.toFixed(0) + '%' : '') +
-      ' · <b class="' + (loss ? 'dn' : '') + '">손실로 끝 ' + loss.toFixed(0) + '%</b>' + (loss && st.loss_yrs && st.loss_yrs.length ? '(' + st.loss_yrs.join('·') + ' 가입분)' : '') +
-      (loss && st.loss_avg != null ? ' 평균 ' + st.loss_avg.toFixed(0) + '%' : '');
+      ' · <b class="' + (loss || st.loss_avg != null ? 'dn' : '') + '">손실로 끝 ' + (loss < 0.5 && st.loss_avg != null ? '1% 미만' : loss.toFixed(0) + '%') + '</b>' + ((loss || st.loss_avg != null) && st.loss_yrs && st.loss_yrs.length ? '(' + st.loss_yrs.join('·') + ' 가입분)' : '') +
+      (st.loss_avg != null ? ' 평균 ' + st.loss_avg.toFixed(0) + '%' : '');
     var wk = st.worst ? Object.keys(st.worst).sort(function(a, b){ return st.worst[b] - st.worst[a]; }) : [];
     var tail = (st.ki_touch != null ? ' · KI 닿은 적 ' + st.ki_touch.toFixed(0) + '%' : '') + (wk.length ? ' · 1차에 발목 잡은 건 주로 <b>' + e(wk[0]) + '</b> ' + st.worst[wk[0]] + '%' : '');
     return '<div class="pd-rep' + (full ? ' full' : '') + '"><div class="pd-rph">🎬 과거 재생 <span class="mut">' + e(st.from) + '~' + e(st.to) + ' 매 거래일 가입 ' + st.n.toLocaleString() + '회 · 기본 스텝다운 기준</span></div>' + bar + '<div class="pd-rpt">' + txt + tail + '</div>' +
       (full ? '<p class="note" style="margin:4px 0 0">기초자산 일봉으로 이 조건(배리어·주기·KI)만 그대로 돌린 과거 계산 — 월지급·리자드·조기상환 뒤 재투자는 안 넣었고, 만기까지 결과가 난 가입일만 셌어요. 미래 보장이 아니고 사라는 뜻도 아니에요.</p>' : '') + '</div>';
   }
 
-  function repMini(st){ if (!st || !st.k || !st.k.length) return ""; var cyc = st.cyc || 6, mo = cyc % 12 === 0 ? (cyc / 12) + "년" : cyc + "개월"; return '<br><span class="pd-rpm">🎬 ' + mo + ' 만에 끝 ' + st.k[0].toFixed(0) + '% · <b class="' + (st.loss ? 'dn' : '') + '">손실 ' + (st.loss || 0).toFixed(0) + '%</b></span>'; }
+  function repMini(st){ if (!st || !st.k || !st.k.length) return ""; var cyc = st.cyc || 6, mo = cyc % 12 === 0 ? (cyc / 12) + "년" : cyc + "개월"; return '<br><span class="pd-rpm">🎬 ' + mo + ' 만에 끝 ' + st.k[0].toFixed(0) + '% · <b class="' + (st.loss || st.loss_avg != null ? 'dn' : '') + '">손실 ' + ((st.loss || 0) < 0.5 && st.loss_avg != null ? '1% 미만' : (st.loss || 0).toFixed(0) + '%') + '</b></span>'; }
 
   /* ───────── 🎯 ELS ───────── */
   function dday(d){ if (!d) return ""; var n = Math.round((new Date(d + "T23:59:59+09:00") - Date.now()) / 864e5); return n < 0 ? "마감" : n === 0 ? "오늘 마감" : "D-" + n; }

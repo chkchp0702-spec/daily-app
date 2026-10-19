@@ -29,6 +29,7 @@ UAN = [(r"코스피\s*200|KOSPI\s*200", "KOSPI200", "^KS200"), (r"S&P\s*500", "S
        (r"한국전력", "한국전력", "015760.KS"), (r"KB\s*금융", "KB금융", "105560.KS"), (r"신한지주", "신한지주", "055550.KS"), (r"삼성바이오로직스", "삼성바이오로직스", "207940.KS"),
        (r"LG전자", "LG전자", "066570.KS"), (r"현대모비스", "현대모비스", "012330.KS"), (r"삼성전기", "삼성전기", "009150.KS"), (r"인텔|Intel", "인텔", "INTC"), (r"ARM\s*Holdings|\bARM\b", "ARM", "ARM")]
 TICK = {n: t for _, n, t in UAN}
+ALT = {"KOSPI200": ["069500.KS"], "HSCEI": ["2828.HK"], "EUROSTOXX50": ["FEZ"], "NIKKEI225": ["1321.T"], "S&P500": ["SPY"], "NASDAQ100": ["QQQ"]}   # 10/19: ^KS200 이 야후에서 빈 값 → KODEX 200 (같은 지수 · 분배금 빠진 종가라 거의 같음)
 
 
 def ua_keys(s):
@@ -92,12 +93,20 @@ def load_prices(names):
     import yfinance as yf
     P = {}
     for n in names:
-        t = TICK[n]
+        c = None
+        for t in [TICK[n]] + ALT.get(n, []):            # 야후 지수 코드가 비면 같은 지수를 따라가는 ETF 로
+            try:
+                h = yf.download(t, start=FROM, interval="1d", progress=False, auto_adjust=False, threads=False)
+                c = h["Close"].dropna()
+                if hasattr(c, "columns"):
+                    c = c.iloc[:, 0]
+            except Exception as e:
+                print("✗", n, t, e); c = None
+            if c is not None and len(c) >= 500:
+                break
         try:
-            h = yf.download(t, start=FROM, interval="1d", progress=False, auto_adjust=False, threads=False)
-            c = h["Close"].dropna()
-            if hasattr(c, "columns"):
-                c = c.iloc[:, 0]
+            if c is None:
+                continue
             if len(c) < 500:
                 print("✗ 짧음", n, len(c)); continue
             P[n] = {d.strftime("%Y-%m-%d"): float(v) for d, v in c.items() if float(v) > 0}
