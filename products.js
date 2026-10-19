@@ -425,7 +425,7 @@
       (full ? '<p class="note" style="margin:4px 0 0">기초자산 일봉으로 이 조건(배리어·주기·KI)만 그대로 돌린 과거 계산 — 월지급·리자드·조기상환 뒤 재투자는 안 넣었고, 만기까지 결과가 난 가입일만 셌어요. 미래 보장이 아니고 사라는 뜻도 아니에요.</p>' : '') + '</div>';
   }
 
-  function repMini(st){ if (!st || !st.k || !st.k.length) return ""; var cyc = st.cyc || 6, mo = cyc % 12 === 0 ? (cyc / 12) + "년" : cyc + "개월"; return '<br><span class="pd-rpm">🎬 ' + mo + ' 만에 끝 ' + st.k[0].toFixed(0) + '% · <b class="' + (st.loss || st.loss_avg != null ? 'dn' : '') + '">손실 ' + ((st.loss || 0) < 0.5 && st.loss_avg != null ? '1% 미만' : (st.loss || 0).toFixed(0) + '%') + '</b></span>'; }
+  function repMini(st){ if (!st || !st.k || !st.k.length) return ""; var cyc = st.cyc || 6, mo = cyc % 12 === 0 ? (cyc / 12) + "년" : cyc + "개월"; return '<span class="pd-rpm"><span>🎬 과거 ' + mo + ' 상환 ' + st.k[0].toFixed(0) + '%</span><b class="' + (st.loss || st.loss_avg != null ? 'dn' : '') + '">과거 손실 ' + ((st.loss || 0) < 0.5 && st.loss_avg != null ? '1% 미만' : (st.loss || 0).toFixed(0) + '%') + '</b></span>'; }
 
   /* ───────── 🎯 ELS ───────── */
   function dday(d){ if (!d) return ""; var n = Math.round((new Date(d + "T23:59:59+09:00") - Date.now()) / 864e5); return n < 0 ? "마감" : n === 0 ? "오늘 마감" : "D-" + n; }
@@ -489,7 +489,7 @@
     var row = function(x, hi){ return '<tr class="' + (mir(x) ? 'me' : '') + '"><td><b>' + e((x.iss || "").replace(/주식회사|\(주\)/g, "").trim()) + '</b><br><span class="mut">' + e((x.nm.match(/제\s*\[?\d+\]?\s*회/) || [""])[0].replace(/[\[\]\s]/g, "")) + (x.risk ? ' · ' + e(x.risk.replace(/\(.*$/, "")) : '') + '</span></td>' +
       '<td><b class="up">' + pc(x.cpn) + '</b><br><span class="mut">' + (x.kind === "ELB" || x.nolos ? '원금지급' : x.loss != null ? '최대 ' + x.loss + '%' : '원금 비보장') + '</span></td>' +
       '<td>' + (x.bars && x.bars.length ? e(barSeq(x.bars).join("-")) : '–') + (x.ki ? '<br><span class="mut">KI ' + x.ki + '</span>' : '') + repMini(elsRep(x.id)) + '</td>' +
-      '<td>' + e(md(x.mat || "")) + '<br><span class="mut">마감 ' + e(md(x.e || "")) + '</span></td></tr>'; };
+      '<td>' + e(/^\d{4}-/.test(x.mat || "") ? md(x.mat) : (x.mat || "")) + '<br><span class="mut">마감 ' + e(md(x.e || "")) + '</span></td></tr>'; };
     var tblh = '<table class="pd-ec"><tr><th>발행사</th><th>연 수익률</th><th>배리어 · KI</th><th>만기 · 청약</th></tr>';
     var h = '<div class="mg-kv"><div><small>청약 중 전체 (DART)</small><b>' + L.length + '개</b><em>발행사 ' + isl.length + '곳 · ' + e(ELSALL.updated || "") + '</em></div>' +
       '<div><small>가장 높은 연 수익률</small><b class="up">' + pc(Math.max.apply(null, L.map(function(x){ return x.cpn; }))) + '</b><em>' + e((L.slice().sort(function(a, b){ return b.cpn - a.cpn; })[0] || {}).iss || "") + '</em></div></div>' +
@@ -499,9 +499,16 @@
     if (M.length) h += card("🟠 미래에셋 청약 중 상품 vs 같은 기초자산 타사", M.map(function(m){
       var k = uaKey(m.ua), S = L.filter(function(x){ return x.uk === k && !mir(x); }).sort(function(a, b){ return b.cpn - a.cpn; });
       var better = S.filter(function(x){ return x.cpn > m.cpn; }).length;
+      var mr = elsRep(m.isin), lossOf = function(st){ return st ? (st.loss || 0) + (st.loss_avg != null && !(st.loss >= 0.5) ? 0.4 : 0) : null; };   // 🎬 10/19: 미래에셋도 같은 과거 재생 · 타사와 「손실로 끝」 비교
+      var SR = S.map(function(x){ return elsRep(x.id); }).filter(function(st){ return st; });
+      var safer = mr ? SR.filter(function(st){ return lossOf(st) < lossOf(mr) - 0.05; }).length : 0, riskier = mr ? SR.filter(function(st){ return lossOf(st) > lossOf(mr) + 0.05; }).length : 0;
+      var mrow = L.filter(function(x){ return mir(x) && x.uk === k && Math.abs(x.cpn - m.cpn) < 0.006; })[0] ||
+        {iss: "미래에셋증권", nm: (String(m.n).match(/\d+[a-z]?\)?$/) ? "제" + String(m.n).match(/(\d+)[a-z]?$/)[1] + "회" : ""), cpn: m.cpn, kind: (m.pp || 0) >= 100 ? "ELB" : "ELS", nolos: (m.pp || 0) >= 100, loss: m.loss,
+         bars: String(m.desc || "").split(",")[0].split("(")[0].split("-").map(function(b){ return parseFloat(b); }).filter(function(b){ return !isNaN(b); }), ki: m.ki, mat: m.mat, e: m.e, id: m.isin};   // DART 목록에 없는 회차 → 우리 상품 자료로 주황 줄
       return '<div class="pd-ecm"><div class="sub2">' + e(m.n) + ' <span class="mut">' + e(k) + '</span></div><p class="note" style="margin:0 0 6px">미래에셋 <b class="up">연 ' + pc(m.cpn) + '</b>' + (m.ki ? ' · KI ' + m.ki : '') + ' · 「' + e(m.desc || "") + '」 — ' +
         (S.length ? '같은 기초자산 타사 ' + S.length + '개 중 미래에셋보다 수익률 높은 곳 <b>' + better + '개</b>' + (better ? ' (최고 ' + pc(S[0].cpn) + ' ' + e(S[0].iss) + ')' : ' — 미래에셋이 가장 높거나 같아요') : '지금 같은 기초자산 조합의 타사 청약이 없어요') + '</p>' +
-        (S.length ? tblh + S.slice(0, 8).map(function(x){ return row(x); }).join("") + '</table>' : '') + '</div>'; }).join("") +
+        (mr ? repBand(mr) + (SR.length ? '<div class="pd-rcmp">🎬 과거 재생 숫자가 있는 같은 기초자산 타사 ' + SR.length + '개 중 「손실로 끝」 비율이 미래에셋보다 <b>낮은 곳 ' + safer + '개</b> · 높은 곳 ' + riskier + '개 · 같은 수준 ' + (SR.length - safer - riskier) + '개' + (S.length > SR.length ? ' <span class="mut">(나머지 ' + (S.length - SR.length) + '개는 서류에서 배리어·주기를 다 못 읽어 계산 안 함)</span>' : '') + '</div>' : '') : '<div class="pd-rcmp">🎬 과거 재생: 이 상품 기초자산 시세를 아직 못 받아 계산 전이에요(다음 자료 갱신 때 채워짐).</div>') +
+        (S.length ? tblh + (mrow ? row(mrow) : '') + S.slice(0, 8).map(function(x){ return row(x); }).join("") + '</table>' : '') + '</div>'; }).join("") +
       '<p class="note">수익률만 보지 말고 KI(낮을수록 안전)·첫 조기상환 배리어(높을수록 상환이 어려움)·만기를 같이 비교하세요. 같은 기초자산이라도 구조가 다르면 수익률이 달라요.</p>');
     // ② 발행사별 평균
     h += card("🏢 발행사별 평균 연 수익률 <span class='mut'>청약 중 · " + (f === "all" ? "전체" : f) + "</span>", '<div class="pd-hl">' + isl.map(function(r){ var mx = isl[0][2] || 1;
@@ -807,7 +814,7 @@
     ".pd-it .rk{flex:none;width:22px;height:22px;border-radius:7px;background:var(--panel);color:var(--sub);font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}" +
     ".pd-bar{height:5px;border-radius:3px;background:var(--panel);margin:8px 0 6px;overflow:hidden}.pd-bar i{display:block;height:100%;background:var(--up);border-radius:3px}" +
     ".pd-row{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--sub);margin-top:6px;line-height:1.6}.pd-row b{color:var(--text)}" +
-    ".pd-rep{margin:7px 0 2px;padding:7px 9px;border-radius:10px;background:color-mix(in srgb,var(--panel) 60%,var(--bg))}.pd-rph{font-size:12px;font-weight:700;color:var(--text)}.pd-rph .mut{font-weight:400}.pd-rpb{display:flex;height:7px;border-radius:4px;overflow:hidden;background:color-mix(in srgb,var(--sub) 25%,transparent);margin:5px 0 4px}.pd-rpb i{display:block;height:100%}.pd-rpt{font-size:11.5px;color:var(--sub);line-height:1.55}.pd-rpt b{color:var(--text)}.pd-rpt b.dn,.pd-rpm b.dn{color:var(--dn)}.pd-rpm{font-size:10.5px;color:var(--sub);white-space:nowrap}.pd-ec td{vertical-align:top}" +
+    ".pd-rep{margin:7px 0 2px;padding:7px 9px;border-radius:10px;background:color-mix(in srgb,var(--panel) 60%,var(--bg))}.pd-rph{font-size:12px;font-weight:700;color:var(--text)}.pd-rph .mut{font-weight:400}.pd-rpb{display:flex;height:7px;border-radius:4px;overflow:hidden;background:color-mix(in srgb,var(--sub) 25%,transparent);margin:5px 0 4px}.pd-rpb i{display:block;height:100%}.pd-rpt{font-size:11.5px;color:var(--sub);line-height:1.55}.pd-rpt b{color:var(--text)}.pd-rpt b.dn,.pd-rpm b.dn{color:var(--dn)}.pd-rpm{display:block;margin-top:3px;font-size:10.5px;color:var(--sub);line-height:1.35}.pd-rpm>span,.pd-rpm>b{display:block;word-break:keep-all;overflow-wrap:anywhere}.pd-ec td{vertical-align:top}.pd-rcmp{font-size:12px;color:var(--sub);line-height:1.5;margin:2px 0 8px}.pd-rcmp b{color:var(--text)}" +
     ".pd-e .chip2{margin:4px 4px 0 0}.pd-nt{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--text);text-decoration:none;font-size:13px;line-height:1.45}.pd-nt .mut{flex:none;width:78px}" +
     ".pd-brl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}.pd-brl div{background:var(--panel2);border-radius:12px;padding:10px 12px}.pd-brl small{display:block;color:var(--sub);font-size:11.5px}.pd-brl b{font-size:18px}.pd-brl em{display:block;font-style:normal;font-size:11px;color:var(--dim)}" +
     "#pdper{margin-top:-4px}.pd-doc p{margin:0;font-size:13.5px;line-height:1.7;color:var(--text);word-break:keep-all}.pd-doc summary{font-weight:700}" +
