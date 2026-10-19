@@ -26,6 +26,23 @@
     var x = Math.min(95, Math.max(5, p * 100));
     return '<div class="prb' + (big ? " big" : "") + '"><i class="pf ' + (p >= 0.5 ? "u" : "d") + '" style="left:' + Math.min(50, x) + '%;width:' + Math.abs(x - 50) + '%"></i><i class="pm" style="left:' + x + '%"></i></div>';
   }
+
+  // ⏱ 10/19 사용자 「이거 한국시각 뭐니… 일일이 못 하니」 — 기준 시각을 오늘/날짜로 분명히, 늦어지면 스스로 「늦어짐」 표시
+  function stamp(D){
+    var age = D.at ? (Date.now() - D.at) / 60000 : null, day = D.date && D.date !== kd(0) ? md(D.date) + " " : "";
+    var s = "한국시각 " + day + e(D.t) + " 기준 · 매시간";
+    if (age != null && age > 75) s += ' · <b class="dn">⏳ ' + Math.round(age / 60 * 10) / 10 + '시간째 안 바뀜 — 지킴이가 다시 돌려요</b>';
+    return s;
+  }
+  var NEXT = {KR: "16:20", JP: "16:20", CN: "16:20", HK: "17:40", US: "다음 날 06:40"};
+  function secStamp(mk, S){
+    var wd = ["일", "월", "화", "수", "목", "금", "토"][new Date(S.last + "T00:00:00Z").getUTCDay()];
+    var s = e(md(S.last)) + "(" + wd + ") 마감 기준";
+    var wk = new Date(Date.now() + 9 * 3600e3).getUTCDay(); wk = wk > 0 && wk < 6;
+    if (S.last < kd(0) && mk !== "US" && wk) s += " · 오늘 장은 마감 뒤 " + NEXT[mk] + " 반영";
+    else if (mk === "US" && wk) s += " · 미국 마감 뒤 06:40 반영";
+    return s;
+  }
   function ep(v){ return v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1) + "%p"; }
   // 10/15 사용자 「확률에 마이너스가 말이 되니?」 — 큰 숫자는 확률 그대로(31%), 평소와의 차이는 말로(「평소 54%보다 23%p 낮음」)
   function gapTx(v, pb){ if (v == null) return ""; var a = Math.abs(v).toFixed(Math.abs(v) >= 10 ? 0 : 1); if (Math.abs(v) < 0.5) return "평소" + (pb != null ? "(" + pc(pb) + ")" : "") + "와 비슷"; return (pb != null ? "평소 " + pc(pb) + "보다 " : "평소보다 ") + a + "%p " + (v > 0 ? "높음 ▲" : "낮음 ▼"); }
@@ -121,7 +138,7 @@
             '<span class="ps-tv"><b class="' + ecls(te) + '">' + pc(ab(t)) + '</b><small><span class="' + ecls(te) + '">' + arw(te) + '</span> · 시장보다 나을 <span class="' + ecls(tr) + '">' + pc(t.pr5) + '</span></small></span></a>'; }).join("") + '</div>' : '') + '</div>';
     };
     var RL = {"믿을 만": ["✅", "s3"], "약함": ["👀", "s2"], "동전 수준": ["💤", "s1"]}[S.rel] || ["", ""];
-    return '<section class="card"><h3>🧭 섹터·종목 확률 <span class="mut">일주일 · 평소보다 · ' + e(S.last.slice(5).replace("-", "/")) + ' 마감 기준</span></h3>' +
+    return '<section class="card"><h3>🧭 섹터·종목 확률 <span class="mut">일주일 · 평소보다 · ' + secStamp(mk, S) + '</span></h3>' +
       (S.rel ? '<div class="pr-sg"><span class="pr-bd ' + RL[1] + '">' + RL[0] + ' 모델 ' + e(S.rel) + '</span><small class="mut">검증 AUC ' + S.auc.y5 + (S.rel === "믿을 만" ? '' : ' — 확률을 평소 쪽으로 눌러 보여 줘요(순위는 그대로)') + '</small></div>' : '') +
       show.map(row).join("") +
       (secs.length > 9 ? '<button class="fold ps-all" data-mk="' + mk + '">' + (all ? "줄이기 ▴" : "섹터 " + secs.length + "개 모두 보기 ▾") + '</button>' : '') +
@@ -193,7 +210,7 @@
     var ks = ORDER.filter(function(k){ return D.markets[k]; });
     if (!ks.length){ b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률 자료가 아직 없어요.</div>'; return; }
     if (!SEL || !D.markets[SEL]) SEL = ks[0];
-    var h = '<section class="card"><h3>🎲 다음 장 · 오를 확률 <span class="mut">' + e(D.t) + ' 기준 · 매시간</span></h3>' + strip(D) +
+    var h = '<section class="card"><h3>🎲 다음 장 · 오를 확률 <span class="mut">' + stamp(D) + '</span></h3>' + strip(D) +
       '<p class="note">큰 숫자 = 다음 장에서 그 시장이 어제보다 오를 확률. ▲▼ = 「평소」(2000년 이후 오른 날 비율)보다 얼마나 높고 낮은지. 🧭 10/15부터 <b>이미 아는 정보를 닻</b>으로 써요 — 아시아는 간밤 미국 장, 미국은 선물 갭, 장이 열려 있으면 지금 등락과 남은 시간. 2012년 이후 걸어가며 검증한 적중률: 한국 62% · 일본 65% · 홍콩 60% · 중국 57% · 미국 64% (예전 52~54%). 60% 넘거나 40% 밑인 날은 67~79% 맞았어요.</p></section>';
     h += mcard(D.markets[SEL], D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
     b.innerHTML = h;

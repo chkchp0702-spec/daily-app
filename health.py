@@ -19,6 +19,7 @@ NOW = dt.datetime.now(KST)
 APP = "https://chkchp0702-spec.github.io/daily-app/"
 MSR = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/"
 SS = "https://raw.githubusercontent.com/chkchp0702-spec/stock-screener/main/"
+DA = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/main/"
 OUT = Path("archive/x/health.json")
 TABS = ["home", "market", "port", "score", "whale", "cup", "gap", "sector", "accum", "onepager", "danta", "alarm", "idea", "feed"]
 
@@ -35,6 +36,8 @@ def age_h(s):
     """'2026-10-10 15:44' 또는 ISO → 몇 시간 전"""
     if not s:
         return None
+    if isinstance(s, (int, float)):   # 밀리초(JS Date.now) 시각
+        return round((NOW.timestamp() - s / 1000) / 3600, 1)
     s = str(s).replace("T", " ")[:16]
     try:
         t = dt.datetime.strptime(s, "%Y-%m-%d %H:%M").replace(tzinfo=KST)
@@ -51,7 +54,8 @@ def data_checks():
         ("💼 포트", MSR + "market/port.json", "at", 3), ("⚡ 킥", MSR + "market/kick.json", "at", 3), ("🏠 홈", MSR + "market/home.json", "at", 3),
         ("📊 성적표", MSR + "market/scores.json", "at", 3), ("🌏 동종주", MSR + "market/peers.json", "at", 3), ("🎯 집중", MSR + "market/focus.json", "built_kst", 30 if not weekend else 80),
         ("📰 피드", MSR + "feeds/my_feed.json", "at", 1.5), ("🧠 두뇌", MSR + "brain/state.json", "last_review", 3),
-        ("🧪 단타 학습", SS + "data/learned.json", "at", 30 if not weekend else 80), ("📱 앱 목록", APP + "manifest.json", "updated", 30)]:
+        ("🧪 단타 학습", SS + "data/learned.json", "at", 30 if not weekend else 80), ("📱 앱 목록", APP + "manifest.json", "updated", 30),
+        ("🎲 시장확률", DA + "archive/x/prob.json", "at", 2), ("🧭 섹터·종목 확률", DA + "archive/x/prob_sec.json", "at", 12 if not weekend else 80)]:
         txt = web(url + ("?" + str(int(time.time())) if url.startswith(APP) else ""))
         if not txt:
             out.append({"name": name, "ok": False, "why": "못 받음"}); probs.append(f"{name} 자료를 못 받음"); continue

@@ -37,6 +37,12 @@ JOBS += [(f"{h:02d}:12", "feedback.yml", False, None, 30) for h in list(range(5,
 JOBS += [("16:25", "health.yml", False, None, 120)]
 # 🎲 시장확률: 매시 예약이 새벽에 자주 빠짐(10/15 05:12 뒤로 안 뜸) → 한국·아시아 장 열기 전 두 번 + 마감 직후 직접
 JOBS += [("07:42", "prob.yml", True, None, 25), ("08:38", "prob.yml", True, None, 25), ("15:52", "prob.yml", True, None, 15), ("17:22", "prob.yml", True, None, 15)]
+# 10/19 사용자 「08:38 기준이 장중 9:46까지 남아 있어 — 일일이 말 안 해도 되게」: 매시 12분 예약이 통째로 빠짐(09:12 안 뜸)
+#   → 🎲 시장확률은 매시 14분 직접(최근 45분 안에 돌았으면 건너뜀) · 개장 직후 09:06 한 번 더
+#   → 🧭 섹터·종목 확률(prob_sec)·🛍️ 상품도 예약 시각 2분 뒤 직접 (예약이 제때 돌면 건너뜀)
+JOBS += [(f"{h:02d}:14", "prob.yml", False, None, 45) for h in range(24)] + [("09:06", "prob.yml", True, None, 20)]
+JOBS += [("06:42", "prob_sec.yml", True, None, 40), ("09:52", "prob_sec.yml", True, None, 40), ("16:22", "prob_sec.yml", True, None, 40), ("17:42", "prob_sec.yml", True, None, 40)]
+JOBS += [("07:43", "products.yml", True, None, 30), ("09:49", "products.yml", True, None, 30), ("12:19", "products.yml", True, None, 30)]
 # 교대: [시작, 끝) KST 시
 SHIFTS = [(4, 10), (10, 16), (16, 22), (22, 28)]
 
