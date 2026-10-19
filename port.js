@@ -399,7 +399,9 @@
     var share = RB ? 1 - ((K.rules || {}).sleeve || 0) - ((K.rules || {}).whale_sleeve || 0) : 1;
     var spare = RB ? Math.max(0, (1 - share) * 100 - kw) : 0;
     out = P.hold.map(function(x, i){
-      var pct = RB ? (RB[x.name] != null ? RB[x.name] : x.pct) * share + (/현금/.test(x.name) ? spare : 0) : x.pct - (kw && /현금/.test(x.name) ? kw : 0);
+      // 🅿️ 10/19 Q10/19-1: 킥 빈 자리(spare)는 현금 대신 💼 기본 칸 비중 그대로 나눠 담음 (kick.json park.on)
+      var rb0 = RB ? (RB[x.name] != null ? RB[x.name] : x.pct) : 0, PK = K && K.park && K.park.on;
+      var pct = RB ? rb0 * share + (PK ? rb0 / 100 * spare : (/현금/.test(x.name) ? spare : 0)) : x.pct - (kw && /현금/.test(x.name) ? kw : 0);
       x = Object.assign({}, x, {pct: Math.round(pct * 10) / 10});
       var amt = S.amt * x.pct / 100, items = [];
       var kr = (x.kr || []).filter(function(k){ return k.etf; });
@@ -828,6 +830,7 @@
       return '<div class="po-kp" data-op="' + e(o.code) + '"><div><span class="po-tg">' + e(o.tags || "") + '</span> <b>' + e(nm(o.name)) + ' <i class="po-go">›</i></b> <small>' + e(o.code) + ' · ' + (Math.round(o.w * 10) / 10) + '%</small>' + (o.half ? ' <span class="po-sg w">절반 익절</span>' : '') +
         '<em>' + md(o.d0) + ' 진입 ' + pr(o.entry) + ' · ' + e(o.rule || "") + (o.by && o.by.length ? ' · ' + e(o.by.join(", ")) : '') + '</em></div><b class="' + cls(o.r) + '">' + sg(o.r, 1) + '<small class="po-cw">' + (o.r >= 0 ? "+" : "−") + won(Math.abs(S.amt * o.w / 100 * o.r / 100)) + '원</small></b></div>'; }).join("")
       : '<div class="po-itn">빈 자리 — 확인된 신호를 기다리는 중</div>');
+    if (K.park && K.park.on) h += '<div class="po-itn" style="padding-left:0">🅿️ 빈 자리 ' + (K.park.w != null ? '<b>' + (Math.round(K.park.w * 10) / 10) + '%</b> ' : '') + '는 현금 대신 💼 기본 칸과 똑같이(S&P·나스닥 비중 그대로) 담아 둬요 — 신호가 오면 그만큼 지수를 팔아 사요 (' + md(K.park.from) + '부터)</div>';
     if (K.tags) h += '<p class="po-itn" style="padding-left:0">' + Object.keys(K.tags).map(function(k){ return k + ' ' + e(K.tags[k]); }).join(" · ") + '</p>';
     if (K.closed.length) h += '<div class="po-kh">끝난 거래</div>' + K.closed.slice(0, 8).map(function(c){
       return '<div class="po-kp" data-op="' + e(c.code) + '"><div><b>' + e(nm(c.name)) + ' <i class="po-go">›</i></b> <small>' + e(c.code) + '</small><em>' + md(c.d0) + '→' + md(c.d1) + ' · ' + c.days + '일 · ' + e(c.why) + '</em></div><b class="' + cls(c.r) + '">' + sg(c.r, 1) + '</b></div>'; }).join("");
