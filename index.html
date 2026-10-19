@@ -620,7 +620,10 @@ function getText(u){ return fetch(u).then(function(r){ if (!r.ok) throw 0; retur
    부르는 곳마다 새 객체를 줌(글에서 다시 읽음) → 한쪽이 고쳐도 다른 쪽에 안 번짐 · 실패는 저장 안 함 */
 var JC = {};
 function getJSON(u, o){
-  var ttl = o && o.ttl != null ? o.ttl : 300000, now = Date.now(), c = JC[u];
+  var ttl = o && o.ttl != null ? o.ttl : 300000, now = Date.now();
+  // 🧭 10/19 「그대로잖아」: 나침반(compass.json)은 장중 10분마다 다시 쓰이는데 주소가 같아 휴대폰이 옛 파일(브라우저 캐시 10분 + 메모리 5분)을 보여 줌 → 2분 단위로 주소를 바꿔 늘 새로 받음
+  if (/compass\.json$/.test(u)){ u += "?m=" + Math.floor(now / 120000); ttl = Math.min(ttl, 120000); }
+  var c = JC[u];
   if (!c || (c.t && now - c.t > ttl)){
     for (var k in JC) if (JC[k].t && now - JC[k].t > 600000) delete JC[k];
     c = JC[u] = {t: 0, p: fetch(u).then(function(r){ if (!r.ok) throw 0; return r.text(); })};
@@ -1456,7 +1459,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261019e";
+var APPV = "20261019f";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
