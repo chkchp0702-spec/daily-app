@@ -35,12 +35,15 @@ async def main():
                 if not info: continue
                 await pg.wait_for_timeout(120)
                 info=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); var r=e.getBoundingClientRect(); return [Math.round(r.top),((e.innerText||'').trim().slice(0,22).replace(/\\s+/g,' '))||e.outerHTML.slice(0,140)]}})()""")
+                jumpby=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); return !!(e&&e.closest('[data-j]'))}})()""")   # 10/20 「숫자 누르면 그 종목으로」(ux1015c sigJump) — 옮겨 가는 게 정답
                 try:
                     await pg.evaluate(f"""document.querySelector('[data-au="{i}"]').click()""")
                 except Exception as ex:
                     continue
                 await pg.wait_for_timeout(700)
                 h1=await pg.evaluate("location.hash")
+                if jumpby:
+                    await pg.goto("http://app/index.html#"+tab); await pg.wait_for_timeout(2500); await pg.evaluate(JS_LIST, SEL); continue
                 if h1!=h0:      # 다른 화면으로 가는 버튼 — 되돌리고 계속
                     await pg.goto("http://app/index.html#"+tab); await pg.wait_for_timeout(2500); await pg.evaluate(JS_LIST, SEL); continue
                 aft=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); var H=document.documentElement.scrollHeight, y=scrollY; if(!e||!e.isConnected) return [null,y,H]; var r=e.getBoundingClientRect(); return [Math.round(r.top),y,H]}})()""")
