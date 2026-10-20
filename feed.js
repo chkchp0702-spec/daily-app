@@ -194,7 +194,7 @@
   function dots(arr){ return (arr || []).slice(0, 12).map(function(r){ var v = r.r5; return '<i class="' + (v == null ? "" : v > 0 ? "su" : "sd") + '" title="' + e(r.d.slice(5).replace("-", "/") + " " + r.n + (v != null ? " " + pct(v) : " 채점 전")) + '"></i>'; }).join(""); }
   function scoreView(){
     var sc = S.sc, ch = sc.ch, ks = Object.keys(ch);
-    var ord = SCORD || "hit";
+    var ord = SCORD || "ex";   // 시장 전체가 빠진 기간엔 「오른 비율」보다 「지수 대비」가 고르는 눈을 더 정직하게 보여 줌
     ks.sort(function(a, b){ var A = ch[a], B = ch[b], ra = (A.n5 || 0) >= MINN, rb = (B.n5 || 0) >= MINN;
       if (ord === "n") return (B.n || 0) - (A.n || 0);
       if (ra !== rb) return ra ? -1 : 1;
@@ -203,7 +203,7 @@
     var h = '<section class="card fd-scc" data-xc="1"><h3>📣 내 채널 성적표 <span class="mut">최근 ' + (sc.win_days || 90) + '일 언급 · ' + e(String(sc.updated || "").slice(5).replace("-", "/")) + '</span></h3>' +
       '<p class="note" style="margin:0 0 8px">채널 글이 이름을 부른 종목을 <b>글 날짜 뒤 첫 거래일 종가</b>로 잡고 <b>5거래일·20거래일 뒤</b> 값과 비교했어요. 「사라·팔아라」는 가리지 않고 <b>언급 뒤 올랐나</b>만 셌어요. 같은 채널·종목·날은 1번, 종목이 7개 넘게 나온 목록 글은 뺐어요.' +
       (bs.n5 ? ' 모든 채널 합쳐 5일 뒤 오른 비율 <b>' + bs.up5 + '%</b>(' + bs.n5 + '건) — 이 숫자보다 높아야 「고르는 눈」이 있는 셈.' : '') + '</p>' +
-      '<div class="fd-sord">' + [["hit", "적중순"], ["ex", "지수 대비순"], ["n", "언급 많은 순"]].map(function(x){ return '<button data-sord="' + x[0] + '"' + (ord === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join("") + '</div>';
+      '<div class="fd-sord">' + [["ex", "지수 대비순"], ["hit", "오른 비율순"], ["n", "언급 많은 순"]].map(function(x){ return '<button data-sord="' + x[0] + '"' + (ord === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join("") + '</div>';
     h += ks.map(function(k, i){ var g = ch[k], ok = (g.n5 || 0) >= MINN;
       var src = (S.d.sources || []).filter(function(s){ return s.id === k; })[0] || {};
       return '<div class="fd-scr" data-fk="' + e(k) + '"><div class="fd-scn"><b>' + (ok && ord !== "n" ? (i + 1) + ". " : "") + (IC[src.kind] || "") + " " + e(String(g.name || k).replace(/\s*\(.*\)/, "")) + '</b><span class="mut">언급 ' + g.n + (g.top && g.top.length ? ' · ' + g.top.slice(0, 3).map(e).join("·") : '') + '</span></div>' +
