@@ -25,4 +25,4 @@ jobs:
       - name: 🎬 ELS 과거 재생 (10/19 A10/19-1)
         run: pip install -q yfinance pandas numpy && python els_replay.py || echo "replay skipped"
       - name: 저장
-        run: bash scripts/push.sh "els_dart $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/els_all.json archive/x/els_replay.json
+        run: bash scripts/push.sh "els_dart $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/els_all.json archive/x/els_replay.json archive/x/els_px

@@ -425,6 +425,7 @@
       (full ? '<p class="note" style="margin:4px 0 0">기초자산 일봉으로 이 조건(배리어·주기·KI)만 그대로 돌린 과거 계산 — 월지급·리자드·조기상환 뒤 재투자는 안 넣었고, 만기까지 결과가 난 가입일만 셌어요. 미래 보장이 아니고 사라는 뜻도 아니에요.</p>' : '') + '</div>';
   }
 
+  window.__elsApi = {repBand: function(st, f){ return repBand(st, f); }, repMini: function(st){ return repMini(st); }, rep: function(){ return ELSREP; }, D: function(){ return DATA; }};   // 🎛 설계기(els_design.js)에서 씀
   function repMini(st){ if (!st || !st.k || !st.k.length) return ""; var cyc = st.cyc || 6, mo = cyc % 12 === 0 ? (cyc / 12) + "년" : cyc + "개월"; return '<span class="pd-rpm"><span>🎬 과거 ' + mo + ' 상환 ' + st.k[0].toFixed(0) + '%</span><b class="' + (st.loss || st.loss_avg != null ? 'dn' : '') + '">과거 손실 ' + ((st.loss || 0) < 0.5 && st.loss_avg != null ? '1% 미만' : (st.loss || 0).toFixed(0) + '%') + '</b></span>'; }
 
   /* ───────── 🎯 ELS ───────── */
@@ -444,13 +445,14 @@
     var ua = {}; L.forEach(function(x){ String(x.ua || "").split(/,\s*/).forEach(function(u){ if (u) ua[u] = (ua[u] || 0) + 1; }); });
     var h = '<div class="mg-kv"><div><small>지금 청약 중</small><b>' + L.length + '개</b><em>ELS ' + np.length + ' · ELB(원금지급) ' + pp.length + '</em></div><div><small>최고 연 수익률</small><b class="up">' + (L[0] ? pc(L[0].cpn) : "–") + '</b><em>' + (L[0] ? e(L[0].n) : "") + '</em></div>' +
       '<div><small>청약 마감</small><b>' + (L.length ? e(md(L.map(function(x){ return x.e; }).sort()[0])) : "–") + '</b><em>' + (L.length ? dday(L.map(function(x){ return x.e; }).sort()[0]) : "") + '</em></div><div><small>많이 쓰는 기초자산</small><b style="font-size:14px">' + Object.keys(ua).sort(function(a, b){ return ua[b] - ua[a]; }).slice(0, 3).map(e).join(", ") + '</b></div></div>';
-    h += seg("pdseg", [["open", "🟢 청약 중 " + L.length], ["cmp", "🏁 타사 비교"], ["done", "최근 청약 완료"]], k) + '<div id="pdbody">' + elsBody(D, k) + '</div>';
+    h += seg("pdseg", [["open", "🟢 청약 중 " + L.length], ["design", "🎛 설계"], ["cmp", "🏁 타사 비교"], ["done", "최근 청약 완료"]], k) + '<div id="pdbody">' + elsBody(D, k) + '</div>';
     h = doc("els") + h;
     h += '<details class="card cpx-d"><summary>📘 ELS 구조 빨리 읽기</summary><p class="note" style="margin:0">「85-85-85-80-75-70, KI 45」= 6개월마다 기초자산이 처음의 85%·85%·85%·80%·75%·70% 위에 있으면 그때 수익과 함께 끝. <b>KI 45</b>는 중간에 한 번이라도 45% 아래로 떨어지면 만기 때 떨어진 만큼 손실(최대 −100%). 기초자산이 여럿이면 <b>가장 못한 것</b> 기준. ELB는 원금을 증권사가 지급(증권사 신용 위험은 남음). 「고난도」 상품은 숙려기간이 있어 청약 뒤 하루 더 생각할 시간을 줘요.</p></details>';
     return h + WARN;
   }
   function elsBody(D, k){
     if (k === "cmp") return elsCmp(D);
+    if (k === "design"){ elsRep(""); return '<div id="elsdz"><div class="loading">설계기 준비 중…</div></div>'; }   // 🎛 10/20 A10/20-1 (els_design.js)
     if (k === "done"){
       var L = (D.els_done || []).slice(0, 40);
       return card("최근 청약 완료 <span class='mut'>" + L.length + "개 · 조건 참고용</span>", L.length ? '<div class="pd-list">' + L.map(function(x){ return elsRow(x, true); }).join("") + '</div>' : '<div class="empty">자료가 없어요.</div>');
@@ -776,6 +778,7 @@
       window.__pdRedraw = function(){ redraw(); };
       var redraw = function(){ var b = document.getElementById("pdbody"); if (!b) return; var y = b.getBoundingClientRect().top; b.innerHTML = BODY[key](D, SEL[key] || {bond: "gov", fund: "pv", els: "open"}[key]); holdAt("#pdbody", y); bindInner(); };
       var bindInner = function(){
+        var dz = document.getElementById("elsdz"); if (dz && window.elsDesign) elsDesign(dz);
         bindSeg("pdper", function(k){ PER = k; keep(); redraw(); });
         bindSeg("pdustk", function(k){ SEL.ustk = k; keep(); redraw(); });
         bindSeg("pdelsk", function(k){ SEL.elsk = k; keep(); redraw(); });

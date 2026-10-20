@@ -1,5 +1,5 @@
 /* 📰 내 피드 (10/9) — 매일 보는 네이버 블로그 + 텔레그램 채널을 한 곳에
-   자료: market-strategy-report/feeds/my_feed.json (매시간 :40 수집)
+   자료: market-strategy-report/feeds/my_feed.json (매시간 :40 수집) · feeds/feed_score.json (📣 채널 성적표, 10/20)
    · 위: 출처 칩(누르면 그 출처만) · 🎯 집중 연결 · 📌 모아 둔 글 · 검색
    · 🎯 = 오늘의 집중 테마·종목 이름이 들어간 글, 📝 = 아침 시황리포트가 인용한 글
    · 글을 누르면 펼침, 📌 로 모아 두기(이 기기에만), 「원문」으로 블로그·텔레그램 열기 */
@@ -32,8 +32,10 @@
     Promise.all([
       fetch(RAWF + "feeds/my_feed.json?" + t).then(function(r){ return r.json(); }),
       fetch(RAWF + "market/focus.json?" + t).then(function(r){ return r.json(); }).catch(function(){ return null; }),
-      fetch(RAWF + "feeds/used.json?" + t).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+      fetch(RAWF + "feeds/used.json?" + t).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+      fetch(RAWF + "feeds/feed_score.json?" + Math.floor(t / 600000)).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
     ]).then(function(a){
+      S.sc = a[3] && a[3].ch ? a[3] : null;
       S.d = a[0];
       S.kw = keywords(a[1]);
       S.used = {};
@@ -80,12 +82,13 @@
     if (nU) chips.push({k: "USED", t: "📝 리포트 인용 " + nU});
     chips.push({k: "FOCUS", t: "🎯 집중 연결 " + nF});
     chips.push({k: "PIN", t: "📌 " + nP});
+    if (S.sc) chips.push({k: "SCORE", t: "📣 채널 성적표"});
     var cnt = function(k){ return d.items.filter(function(i){ return K_OF(i) === k; }).length; };
     [["K:mine", "📝 블로그·텔레그램"], ["K:news", "🌐 뉴스"], ["K:ai", "🧠 AI가 찾은 글"]].forEach(function(x){ var n = cnt(x[0].slice(2)); if (n) chips.push({k: x[0], t: x[1] + " " + n}); });
     // 출처 칩: 고른 묶음(📝/🌐/🧠)의 출처만 (10/10 뉴스 50곳 — 한 줄에 다 늘어놓지 않게)
     var cur = S.f.indexOf("K:") === 0 ? S.f.slice(2) : (function(){ var x = d.sources.filter(function(s){ return s.id === S.f; })[0]; return x ? K_OF(x) : "mine"; })();
     var SRC = d.sources.filter(function(s){ return K_OF(s) === cur; }).sort(function(x, y){ return (y.n || 0) - (x.n || 0); });
-    SRC.forEach(function(s){ chips.push({k: s.id, t: IC[s.kind] + " " + s.name.replace(/\s*\(.*\)/, "") + " " + s.n, bad: !s.ok}); });
+    SRC.forEach(function(s){ var g = scOf(s.id); chips.push({k: s.id, t: IC[s.kind] + " " + s.name.replace(/\s*\(.*\)/, "") + " " + s.n + (g && g.n5 >= MINN ? " · 📣" + g.up5 + "%" : ""), bad: !s.ok}); });
     var chip = function(c){ return '<button class="fd-chip' + (S.f === c.k ? " on" : "") + (c.bad ? " bad" : "") + '" data-fk="' + e(c.k) + '">' + e(c.t) + '</button>'; };
     var nTop = chips.length - SRC.length;
     srcEl.innerHTML = '<div class="fd-row">' + chips.slice(0, nTop).map(chip).join("") + '</div><div class="fd-row">' + chips.slice(nTop).map(chip).join("") + '</div>' +
@@ -97,11 +100,12 @@
   }
 
   function pass(it){
+    if (S.f === "SCORE") return false;
     if (S.f === "FOCUS" && !it._h.length) return false;
     if (S.f === "PIN" && !PIN[it.id]) return false;
     if (S.f === "USED" && !S.used[it.id]) return false;
     if (/^K:/.test(S.f)){ if (K_OF(it) !== S.f.slice(2)) return false; }
-    else if (["ALL", "FOCUS", "PIN", "USED"].indexOf(S.f) < 0 && it.src !== S.f) return false;
+    else if (["ALL", "FOCUS", "PIN", "USED", "SCORE"].indexOf(S.f) < 0 && it.src !== S.f) return false;
     if (S.q && (it.title + " " + it.text + " " + it.name).toLowerCase().indexOf(S.q) < 0) return false;
     return true;
   }
@@ -112,11 +116,11 @@
       S.kw.length && it._h.forEach(function(w){ body = body.split(e(w)).join('<mark>' + e(w) + '</mark>'); });
       return '<div class="fd-it fd-' + (it.kind || "bl") + '" data-fid="' + e(it.id) + '">' +
         '<div class="fd-hd"><span class="fd-sn">' + (IC[it.kind] || "🅽") + " " + e(it.name.replace(/\s*\(.*\)/, "")) + (it.press ? ' <small class="fd-press">· ' + e(it.press) + '</small>' : '') + '</span>' +
-        '<span class="fd-tm">' + e((it.at || "").slice(11)) + '</span>' + (news[it.id] ? '<span class="fd-new">새 글</span>' : "") +
+        '<span class="fd-tm">' + e((it.at || "").slice(11)) + '</span>' + (news[it.id] ? '<span class="fd-new">새 글</span>' : "") + scTag(it) +
         '<button class="fd-pin' + (PIN[it.id] ? " on" : "") + '" data-pin="' + e(it.id) + '">📌</button></div>' +
         (it.kind !== "tg" ? '<div class="fd-ti">' + e(it.title) + '</div>' : "") +
         (S.used[it.id] ? '<div class="fd-used">📝 오늘 시황리포트: ' + e(S.used[it.id]) + '</div>' : "") +
-        (it._h.length ? '<div class="fd-hit">🎯 ' + it._h.map(e).join(" · ") + '</div>' : "") +
+        (it._h.length ? '<div class="fd-hit">🎯 ' + it._h.map(e).join(" · ") + '</div>' : "") + stkTags(it) +
         '<div class="fd-tx' + (long && !op ? " cl" : "") + '">' + body + '</div>' +
         (it.files && it.files.length ? '<div class="fd-fl">📎 ' + it.files.map(e).join("<br>📎 ") + '</div>' : "") +
         (it.imgs && it.imgs.length && op ? '<div class="fd-im">' + it.imgs.map(function(u){ return '<img loading="lazy" referrerpolicy="no-referrer" src="' + e(u) + '">'; }).join("") + '</div>' : "") +
@@ -160,7 +164,7 @@
     return '<div class="fd-grp fd-' + (a.kind || "bl") + (op ? " op" : "") + '">' +
       '<div class="fd-ghd" data-gid="' + e(gid) + '">' +
         '<div class="fd-hd"><span class="fd-sn">' + (IC[a.kind] || "🅽") + " " + e(a.name.replace(/\s*\(.*\)/, "")) + '</span>' +
-        '<span class="fd-gn">' + g.length + '개</span><span class="fd-tm">' + e(t1 === t2 ? t2 : t1 + "~" + t2) + '</span>' +
+        '<span class="fd-gn">' + g.length + '개</span><span class="fd-tm">' + e(t1 === t2 ? t2 : t1 + "~" + t2) + '</span>' + scTag(a) +
         (nNew ? '<span class="fd-new">새 글' + (nNew > 1 ? " " + nNew : "") + '</span>' : "") +
         (nPin ? '<span class="fd-gp">📌' + (nPin > 1 ? nPin : "") + '</span>' : "") + '</div>' +
         (nUsed ? '<div class="fd-used">📝 오늘 시황리포트 인용 ' + nUsed + '개</div>' : "") +
@@ -172,8 +176,53 @@
     '</div>';
   }
 
+  /* 🗣 A10/20-2 (10/20): 내 채널 성적표 — feeds/feed_score.json (market-strategy-report src/feed_score.py · 평일 07:25·16:10)
+     채널 글이 이름을 부른 종목을 「글 날짜 뒤 첫 거래일 종가 → 5·20거래일 뒤」로 채점. 사라/팔아라는 안 가림 — 「언급 뒤 올랐나」만.
+     5일 채점 MINN 개 전엔 % 대신 「쌓는 중」 · 매수 추천 아님 */
+  var MINN = 10;
+  function scOf(src){ return S.sc && S.sc.ch ? S.sc.ch[src] || null : null; }
+  function pct(v, d){ return v == null ? "–" : (v > 0 ? "+" : "") + (+v).toFixed(d == null ? 1 : d) + "%"; }
+  function scTag(it){
+    if (it.kind !== "tg" && it.kind !== "blog") return "";
+    var g = scOf(it.src); if (!g || !g.n5) return "";
+    return g.n5 >= MINN ? '<span class="fd-sc" title="이 채널이 부른 종목, 5거래일 뒤 오른 비율 (' + g.n5 + '건)">📣 5일 적중 ' + g.up5 + '%</span>' : '<span class="fd-sc mut">📣 채점 ' + g.n5 + '/' + MINN + '</span>';
+  }
+  function stkTags(it){
+    var L = S.sc && S.sc.post ? S.sc.post[it.id] : null; if (!L || !L.length) return "";
+    return '<div class="fd-stk">🏷 ' + L.map(function(x){ return '<span data-fop="' + e(x[1]) + '">' + e(x[0]) + '</span>'; }).join("") + '</div>';
+  }
+  function dots(arr){ return (arr || []).slice(0, 12).map(function(r){ var v = r.r5; return '<i class="' + (v == null ? "" : v > 0 ? "su" : "sd") + '" title="' + e(r.d.slice(5).replace("-", "/") + " " + r.n + (v != null ? " " + pct(v) : " 채점 전")) + '"></i>'; }).join(""); }
+  function scoreView(){
+    var sc = S.sc, ch = sc.ch, ks = Object.keys(ch);
+    var ord = SCORD || "hit";
+    ks.sort(function(a, b){ var A = ch[a], B = ch[b], ra = (A.n5 || 0) >= MINN, rb = (B.n5 || 0) >= MINN;
+      if (ord === "n") return (B.n || 0) - (A.n || 0);
+      if (ra !== rb) return ra ? -1 : 1;
+      return ord === "ex" ? (B.ex5 == null ? -99 : B.ex5) - (A.ex5 == null ? -99 : A.ex5) : (B.up5 || 0) - (A.up5 || 0) || (B.avg5 || 0) - (A.avg5 || 0); });
+    var bs = sc.base || {};
+    var h = '<section class="card fd-scc" data-xc="1"><h3>📣 내 채널 성적표 <span class="mut">최근 ' + (sc.win_days || 90) + '일 언급 · ' + e(String(sc.updated || "").slice(5).replace("-", "/")) + '</span></h3>' +
+      '<p class="note" style="margin:0 0 8px">채널 글이 이름을 부른 종목을 <b>글 날짜 뒤 첫 거래일 종가</b>로 잡고 <b>5거래일·20거래일 뒤</b> 값과 비교했어요. 「사라·팔아라」는 가리지 않고 <b>언급 뒤 올랐나</b>만 셌어요. 같은 채널·종목·날은 1번, 종목이 7개 넘게 나온 목록 글은 뺐어요.' +
+      (bs.n5 ? ' 모든 채널 합쳐 5일 뒤 오른 비율 <b>' + bs.up5 + '%</b>(' + bs.n5 + '건) — 이 숫자보다 높아야 「고르는 눈」이 있는 셈.' : '') + '</p>' +
+      '<div class="fd-sord">' + [["hit", "적중순"], ["ex", "지수 대비순"], ["n", "언급 많은 순"]].map(function(x){ return '<button data-sord="' + x[0] + '"' + (ord === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join("") + '</div>';
+    h += ks.map(function(k, i){ var g = ch[k], ok = (g.n5 || 0) >= MINN;
+      var src = (S.d.sources || []).filter(function(s){ return s.id === k; })[0] || {};
+      return '<div class="fd-scr" data-fk="' + e(k) + '"><div class="fd-scn"><b>' + (ok && ord !== "n" ? (i + 1) + ". " : "") + (IC[src.kind] || "") + " " + e(String(g.name || k).replace(/\s*\(.*\)/, "")) + '</b><span class="mut">언급 ' + g.n + (g.top && g.top.length ? ' · ' + g.top.slice(0, 3).map(e).join("·") : '') + '</span></div>' +
+        '<div class="fd-scv">' + (ok ? '<span>5일 뒤 오름 <b class="' + (g.up5 >= (bs.up5 || 50) ? "up" : "dn") + '">' + g.up5 + '%</b></span><span>평균 <b class="' + (g.avg5 > 0 ? "up" : "dn") + '">' + pct(g.avg5) + '</b></span>' + (g.ex5 != null ? '<span>지수 대비 <b class="' + (g.ex5 > 0 ? "up" : "dn") + '">' + pct(g.ex5) + 'p</b></span>' : '') :
+          '<span class="mut">5일 채점 ' + (g.n5 || 0) + '/' + MINN + ' — 쌓는 중</span>') + (g.pend ? '<span class="mut">채점 기다림 ' + g.pend + '</span>' : '') +
+        ((g.n20 || 0) >= MINN ? '<span>20일 오름 <b>' + g.up20 + '%</b> ' + pct(g.avg20) + '</span>' : (g.n20 ? '<span class="mut">20일 ' + g.n20 + '건</span>' : '')) + '</div>' +
+        '<div class="fd-scd">' + dots(g.last) + '</div></div>'; }).join("");
+    h += '<p class="note" style="margin:8px 0 0">점 = 최근 채점된 언급 12개(빨강 5일 뒤 오름 · 파랑 내림) · 줄을 누르면 그 채널 글만 · 과거 기록일 뿐 앞으로를 보장하지 않고, 매수 추천도 아니에요.</p></section>';
+    return h;
+  }
+  var SCORD = null;
+  function bindScore(b){
+    [].forEach.call(b.querySelectorAll("[data-sord]"), function(x){ x.onclick = function(){ SCORD = x.getAttribute("data-sord"); list(); }; });
+    [].forEach.call(b.querySelectorAll(".fd-scr[data-fk]"), function(x){ x.onclick = function(){ S.f = x.getAttribute("data-fk"); S.lim = 40; draw(); window.scrollTo(0, 0); }; });
+  }
+
   function list(){
     var b = document.getElementById("fdbody"); if (!b || !S.d) return;
+    if (S.f === "SCORE"){ b.innerHTML = scoreView(); bindScore(b); return; }
     var its = S.d.items.filter(pass), news = {};
     (S.d.new || []).forEach(function(i){ news[i] = 1; });
     if (!its.length){ b.innerHTML = '<div class="empty">' + (S.f === "PIN" ? "📌 모아 둔 글이 없어요. 글 오른쪽 📌 를 눌러 모아 두세요." : "해당하는 글이 없어요.") + '</div>'; return; }
@@ -198,6 +247,8 @@
     [].forEach.call(b.querySelectorAll(".fd-it"), function(el){
       el.onclick = function(ev){
         if (ev.target.closest("a")) return;
+        var op = ev.target.closest("[data-fop]");
+        if (op){ ev.stopPropagation(); if (window.openOP) openOP(op.getAttribute("data-fop")); return; }
         var pin = ev.target.closest("[data-pin]");
         var id = el.getAttribute("data-fid");
         if (pin){ if (PIN[id]) delete PIN[id]; else PIN[id] = 1; savePin(); pin.classList.toggle("on", !!PIN[id]); return; }
@@ -243,6 +294,12 @@
     ".fd-gl li:before{content:'';position:absolute;left:2px;top:.75em;width:4px;height:4px;border-radius:50%;background:var(--sub)}" +
     ".fd-gl li+li{border-top:1px dashed var(--line)}" +
     ".fd-gin{padding:0 8px 2px}.fd-gin .fd-it{border-left-width:1px;margin-bottom:6px}" +
+    ".fd-sc{background:rgba(255,184,77,.16);color:#ffb84d;border-radius:6px;padding:1px 6px;font-size:10.5px;font-weight:700;white-space:nowrap}.fd-sc.mut{background:rgba(138,148,168,.15);color:var(--sub);font-weight:400}" +
+    ".fd-stk{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0 0;font-size:12px;color:var(--sub);align-items:center}.fd-stk span{border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--text);cursor:pointer}" +
+    ".fd-sord{display:flex;gap:6px;margin:0 0 6px}.fd-sord button{border:1px solid var(--line);background:var(--panel2);color:var(--sub);border-radius:999px;padding:4px 10px;font:inherit;font-size:12.5px;cursor:pointer}.fd-sord button.on{color:var(--text);border-color:#ffb84d;font-weight:700}" +
+    ".fd-scr{padding:9px 2px;border-top:1px solid var(--line);cursor:pointer}.fd-scn{display:flex;flex-direction:column;gap:1px}.fd-scn b{font-size:14.5px}.fd-scn .mut{font-size:11.5px}" +
+    ".fd-scv{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--sub);margin-top:3px}.fd-scv b.up{color:var(--up)}.fd-scv b.dn{color:var(--dn)}.fd-scv b{color:var(--text)}" +
+    ".fd-scd{display:flex;gap:3px;margin-top:5px}.fd-scd i{width:9px;height:9px;border-radius:50%;background:rgba(138,148,168,.4)}.fd-scd i.su{background:#ff5a5a}.fd-scd i.sd{background:#4d8dff}" +
     ".fd-more{color:var(--sub)}.fd-go{color:var(--c,#f4a261);text-decoration:none;font-weight:700}";
   document.head.appendChild(css);
 })();

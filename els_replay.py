@@ -15,6 +15,10 @@ import numpy as np
 X = os.path.join("archive", "x")
 OUT = os.path.join(X, "els_replay.json")
 FROM = "2006-01-01"
+PXD = os.path.join(X, "els_px")            # 🎛 10/20 A10/20-2 설계기: 기초자산 종가 일봉(앱이 휴대폰에서 직접 재생)
+PX_DAYS = 7                                # 일봉 파일은 7일에 한 번만 새로 씀(20년 과거 재생이라 일주일 늦어도 같음 · git 이 무거워지지 않게)
+DESIGN = ["KOSPI200", "S&P500", "EUROSTOXX50", "NIKKEI225", "HSCEI", "NASDAQ100", "삼성전자", "SK하이닉스", "현대차", "한국전력",
+          "테슬라", "엔비디아", "팔란티어", "마이크론", "인텔", "AMD", "애플", "브로드컴"]
 
 # 이름 → (조건키 이름, 야후 코드)  — products.js uaKey 의 UAN 과 같은 이름
 UAN = [(r"코스피\s*200|KOSPI\s*200", "KOSPI200", "^KS200"), (r"S&P\s*500", "S&P500", "^GSPC"), (r"유로\s*스탁스\s*50|EURO\s*STOXX\s*50", "EUROSTOXX50", "^STOXX50E"),
@@ -201,7 +205,14 @@ def main():
             conds[c[0]] = c; by_id[i] = c[0]
     names = sorted({k for c in conds.values() for k in c[1]})
     print("상품", len(items), "재생 조건", len(conds), "기초자산", names)
-    P = load_prices(names) if "--fake" not in sys.argv else fake_prices(names)
+    need_px = px_stale()
+    want = sorted(set(names) | (set(DESIGN) if need_px else set()))
+    P = load_prices(want) if "--fake" not in sys.argv else fake_prices(want)
+    if need_px:
+        try:
+            write_px(P)
+        except Exception as e:
+            print("✗ els_px", e)
     old = {}
     try:
         old = json.load(open(OUT, encoding="utf-8"))
@@ -225,6 +236,47 @@ def main():
         print("재생 결과 없음 — 옛 파일 유지"); return
     json.dump(R, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("✓ els_replay", len(stats), "조건 ·", len(R["by_id"]), "상품")
+
+
+def px_stale():
+    try:
+        j = json.load(open(os.path.join(PXD, "index.json"), encoding="utf-8"))
+        t = datetime.datetime.strptime(j["updated"][:10], "%Y-%m-%d").date()
+        miss = [n for n in DESIGN if n not in (j.get("assets") or {})]
+        return (datetime.date.today() - t).days >= PX_DAYS or bool(miss) or "--px" in sys.argv
+    except Exception:
+        return True
+
+
+def slug(n):
+    return re.sub(r"[^A-Za-z0-9]+", "_", TICK.get(n, n)).strip("_") or "x"
+
+
+def write_px(P):
+    """기초자산마다 종가 일봉 → els_px/<코드>.json {n, d0, dd:[날짜 간격(일)], c:[종가 유효숫자 5자리]} + index.json"""
+    os.makedirs(PXD, exist_ok=True)
+    idx = {"updated": (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)).strftime("%Y-%m-%d %H:%M"), "from": FROM, "assets": {}}
+    try:
+        old = json.load(open(os.path.join(PXD, "index.json"), encoding="utf-8")).get("assets") or {}
+    except Exception:
+        old = {}
+    for n in DESIGN:
+        if n not in P:
+            if n in old:
+                idx["assets"][n] = old[n]            # 이번에 못 받았으면 옛 파일 그대로
+            continue
+        ds = sorted(P[n])
+        d0 = datetime.date.fromisoformat(ds[0])
+        prev, dd, cc = d0, [], []
+        for d in ds:
+            x = datetime.date.fromisoformat(d)
+            dd.append((x - prev).days); prev = x
+            v = P[n][d]; cc.append(float("%.5g" % v))
+        f = slug(n) + ".json"
+        json.dump({"n": n, "d0": ds[0], "dd": dd, "c": [int(v) if v.is_integer() else v for v in cc]}, open(os.path.join(PXD, f), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        idx["assets"][n] = {"f": f, "from": ds[0], "to": ds[-1], "n": len(ds)}
+    json.dump(idx, open(os.path.join(PXD, "index.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print("✓ els_px", len(idx["assets"]), "자산")
 
 
 def fake_prices(names):

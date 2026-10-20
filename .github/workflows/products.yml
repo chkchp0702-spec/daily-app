@@ -25,7 +25,7 @@ jobs:
       - run: pip install -q requests yfinance pandas
       - name: 상품 모으기
         run: python products.py
-      - name: 🎬 ELS 과거 재생 (10/19 A10/19-1)
+      - name: 🎬 ELS 과거 재생 (10/19 A10/19-1) · 🎛 설계기 일봉 (10/20, 7일마다)
         run: pip install -q numpy && python els_replay.py || echo "replay skipped"
       - name: 저장
-        run: bash scripts/push.sh "products $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/products.json archive/x/fund_hold.json archive/x/pv_kofia.json archive/x/pv_nav.json archive/x/pv_pub.json archive/x/els_replay.json
+        run: bash scripts/push.sh "products $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/products.json archive/x/fund_hold.json archive/x/pv_kofia.json archive/x/pv_nav.json archive/x/pv_pub.json archive/x/els_replay.json archive/x/els_px
