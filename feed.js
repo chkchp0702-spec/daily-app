@@ -2,10 +2,11 @@
    자료: market-strategy-report/feeds/my_feed.json (매시간 :40 수집) · feeds/feed_score.json (📣 채널 성적표, 10/20)
    · 위: 출처 칩(누르면 그 출처만) · 🎯 집중 연결 · 📌 모아 둔 글 · 검색
    · 🎯 = 오늘의 집중 테마·종목 이름이 들어간 글, 📝 = 아침 시황리포트가 인용한 글
+   · ⭐ 10/21: 🔴 핵심·🟡 주목 = 🧠 두뇌가 매시간 고른 중요 글(feeds/hot.json) — 색 테두리·이유 한 줄·맨 위 「지금 꼭 볼 글」
    · 글을 누르면 펼침, 📌 로 모아 두기(이 기기에만), 「원문」으로 블로그·텔레그램 열기 */
 (function(){
   var RAWF = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/";
-  var S = {d: null, f: "ALL", q: "", kw: [], used: {}, open: {}, gopen: {}};
+  var S = {d: null, f: "ALL", q: "", kw: [], used: {}, open: {}, gopen: {}, hot: {}};
   var PIN = {};
   try { PIN = JSON.parse(localStorage.getItem("feedpin") || "{}"); } catch(e) {}
   function savePin(){ try { localStorage.setItem("feedpin", JSON.stringify(PIN)); } catch(e) {} }
@@ -33,8 +34,11 @@
       fetch(RAWF + "feeds/my_feed.json?" + t).then(function(r){ return r.json(); }),
       fetch(RAWF + "market/focus.json?" + t).then(function(r){ return r.json(); }).catch(function(){ return null; }),
       fetch(RAWF + "feeds/used.json?" + t).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
-      fetch(RAWF + "feeds/feed_score.json?" + Math.floor(t / 600000)).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+      fetch(RAWF + "feeds/feed_score.json?" + Math.floor(t / 600000)).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+      fetch(RAWF + "feeds/hot.json?" + t).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
     ]).then(function(a){
+      S.hot = a[4] && a[4].items ? a[4].items : {};
+      S.hotAt = a[4] && a[4].at;
       S.sc = a[3] && a[3].ch ? a[3] : null;
       S.d = a[0];
       S.kw = keywords(a[1]);
@@ -78,7 +82,10 @@
     var nF = d.items.filter(function(i){ return i._h.length; }).length;
     var nP = d.items.filter(function(i){ return PIN[i.id]; }).length;
     var nU = d.items.filter(function(i){ return S.used[i.id]; }).length;
+    var nH = d.items.filter(function(i){ return S.hot[i.id]; }).length;
+    var nH2 = d.items.filter(function(i){ return S.hot[i.id] && S.hot[i.id].lv >= 2; }).length;
     var chips = [{k: "ALL", t: "전체 " + d.items.length}];
+    if (nH) chips.push({k: "HOT", t: "⭐ 중요 " + nH + (nH2 ? " · 🔴" + nH2 : ""), hot: 1});
     if (nU) chips.push({k: "USED", t: "📝 리포트 인용 " + nU});
     chips.push({k: "FOCUS", t: "🎯 집중 연결 " + nF});
     chips.push({k: "PIN", t: "📌 " + nP});
@@ -89,7 +96,7 @@
     var cur = S.f.indexOf("K:") === 0 ? S.f.slice(2) : (function(){ var x = d.sources.filter(function(s){ return s.id === S.f; })[0]; return x ? K_OF(x) : "mine"; })();
     var SRC = d.sources.filter(function(s){ return K_OF(s) === cur; }).sort(function(x, y){ return (y.n || 0) - (x.n || 0); });
     SRC.forEach(function(s){ var g = scOf(s.id); chips.push({k: s.id, t: IC[s.kind] + " " + s.name.replace(/\s*\(.*\)/, "") + " " + s.n + (g && g.n5 >= MINN ? " · 📣" + g.up5 + "%" : ""), bad: !s.ok}); });
-    var chip = function(c){ return '<button class="fd-chip' + (S.f === c.k ? " on" : "") + (c.bad ? " bad" : "") + '" data-fk="' + e(c.k) + '">' + e(c.t) + '</button>'; };
+    var chip = function(c){ return '<button class="fd-chip' + (S.f === c.k ? " on" : "") + (c.bad ? " bad" : "") + (c.hot ? " hot" : "") + '" data-fk="' + e(c.k) + '">' + e(c.t) + '</button>'; };
     var nTop = chips.length - SRC.length;
     srcEl.innerHTML = '<div class="fd-row">' + chips.slice(0, nTop).map(chip).join("") + '</div><div class="fd-row">' + chips.slice(nTop).map(chip).join("") + '</div>' +
       '<div class="fd-meta">' + e(d.at.slice(5).replace("-", "/")) + ' 모음 · 매시간 :40 · 7일치</div>' +
@@ -102,10 +109,11 @@
   function pass(it){
     if (S.f === "SCORE") return false;
     if (S.f === "FOCUS" && !it._h.length) return false;
+    if (S.f === "HOT" && !S.hot[it.id]) return false;
     if (S.f === "PIN" && !PIN[it.id]) return false;
     if (S.f === "USED" && !S.used[it.id]) return false;
     if (/^K:/.test(S.f)){ if (K_OF(it) !== S.f.slice(2)) return false; }
-    else if (["ALL", "FOCUS", "PIN", "USED", "SCORE"].indexOf(S.f) < 0 && it.src !== S.f) return false;
+    else if (["ALL", "FOCUS", "PIN", "USED", "SCORE", "HOT"].indexOf(S.f) < 0 && it.src !== S.f) return false;
     if (S.q && (it.title + " " + it.text + " " + it.name).toLowerCase().indexOf(S.q) < 0) return false;
     return true;
   }
@@ -114,11 +122,13 @@
       var long = it.text.length > 150, op = S.open[it.id];
       var body = e(it.text).replace(/\n/g, "<br>");
       S.kw.length && it._h.forEach(function(w){ body = body.split(e(w)).join('<mark>' + e(w) + '</mark>'); });
-      return '<div class="fd-it fd-' + (it.kind || "bl") + '" data-fid="' + e(it.id) + '">' +
+      var hv = S.hot[it.id];
+      return '<div class="fd-it fd-' + (it.kind || "bl") + (hv ? " fd-h" + (hv.lv >= 2 ? 2 : 1) : "") + '" data-fid="' + e(it.id) + '">' +
         '<div class="fd-hd"><span class="fd-sn">' + (IC[it.kind] || "🅽") + " " + e(it.name.replace(/\s*\(.*\)/, "")) + (it.press ? ' <small class="fd-press">· ' + e(it.press) + '</small>' : '') + '</span>' +
-        '<span class="fd-tm">' + e((it.at || "").slice(11)) + '</span>' + (news[it.id] ? '<span class="fd-new">새 글</span>' : "") + scTag(it) +
+        hotTag(hv) + '<span class="fd-tm">' + e((it.at || "").slice(11)) + '</span>' + (news[it.id] ? '<span class="fd-new">새 글</span>' : "") + scTag(it) +
         '<button class="fd-pin' + (PIN[it.id] ? " on" : "") + '" data-pin="' + e(it.id) + '">📌</button></div>' +
         (it.kind !== "tg" ? '<div class="fd-ti">' + e(it.title) + '</div>' : "") +
+        (hv && hv.why ? '<div class="fd-why">' + (hv.lv >= 2 ? "🔴 " : "🟡 ") + e(hv.why) + '</div>' : "") +
         (S.used[it.id] ? '<div class="fd-used">📝 오늘 시황리포트: ' + e(S.used[it.id]) + '</div>' : "") +
         (it._h.length ? '<div class="fd-hit">🎯 ' + it._h.map(e).join(" · ") + '</div>' : "") + stkTags(it) +
         '<div class="fd-tx' + (long && !op ? " cl" : "") + '">' + body + '</div>' +
@@ -160,20 +170,34 @@
     var nNew = g.filter(function(i){ return news[i.id]; }).length;
     var nPin = g.filter(function(i){ return PIN[i.id]; }).length;
     var nUsed = g.filter(function(i){ return S.used[i.id]; }).length;
+    var gh = 0; g.forEach(function(i){ var v = S.hot[i.id]; if (v && v.lv > gh) gh = v.lv >= 2 ? 2 : 1; });
     var hit = []; g.forEach(function(i){ (i._h || []).forEach(function(w){ if (hit.indexOf(w) < 0) hit.push(w); }); });
-    return '<div class="fd-grp fd-' + (a.kind || "bl") + (op ? " op" : "") + '">' +
+    return '<div class="fd-grp fd-' + (a.kind || "bl") + (op ? " op" : "") + (gh ? " fd-h" + gh : "") + '">' +
       '<div class="fd-ghd" data-gid="' + e(gid) + '">' +
         '<div class="fd-hd"><span class="fd-sn">' + (IC[a.kind] || "🅽") + " " + e(a.name.replace(/\s*\(.*\)/, "")) + '</span>' +
-        '<span class="fd-gn">' + g.length + '개</span><span class="fd-tm">' + e(t1 === t2 ? t2 : t1 + "~" + t2) + '</span>' + scTag(a) +
+        hotTag(gh ? {lv: gh} : null) + '<span class="fd-gn">' + g.length + '개</span><span class="fd-tm">' + e(t1 === t2 ? t2 : t1 + "~" + t2) + '</span>' + scTag(a) +
         (nNew ? '<span class="fd-new">새 글' + (nNew > 1 ? " " + nNew : "") + '</span>' : "") +
         (nPin ? '<span class="fd-gp">📌' + (nPin > 1 ? nPin : "") + '</span>' : "") + '</div>' +
         (nUsed ? '<div class="fd-used">📝 오늘 시황리포트 인용 ' + nUsed + '개</div>' : "") +
         (hit.length ? '<div class="fd-hit">🎯 ' + hit.slice(0, 4).map(e).join(" · ") + '</div>' : "") +
-        (op ? "" : '<ul class="fd-gl">' + g.map(function(i){ return '<li>' + (S.used[i.id] ? "📝 " : "") + e(firstLine(i)) + '</li>'; }).join("") + '</ul>') +
+        (op ? "" : '<ul class="fd-gl">' + g.map(function(i){ var v = S.hot[i.id]; return '<li' + (v ? ' class="h' + (v.lv >= 2 ? 2 : 1) + '"' : '') + '>' + (v ? (v.lv >= 2 ? "🔴 " : "🟡 ") : "") + (S.used[i.id] ? "📝 " : "") + e(firstLine(i)) + '</li>'; }).join("") + '</ul>') +
         '<div class="fd-ft"><span class="fd-more">' + (op ? "묶음 접기 ▲" : "하나씩 보기 ▼") + '</span><span></span></div>' +
       '</div>' +
       (op ? '<div class="fd-gin">' + g.map(function(i){ return card(i, news); }).join("") + '</div>' : "") +
     '</div>';
+  }
+
+  /* ⭐ 10/21 중요 표시 — feeds/hot.json (🧠 두뇌가 매시간 새 글을 읽고 고름)
+     lv2 🔴 핵심 = 보유 칸·킥·bets·가설과 직결되거나 시장을 움직일 숫자 · lv1 🟡 주목 = 알아 둘 만한 것 · 나머지는 그대로 */
+  function hotTag(v){
+    if (!v) return "";
+    return v.lv >= 2 ? '<span class="fd-hb h2">🔴 핵심</span>' : '<span class="fd-hb h1">🟡 주목</span>';
+  }
+  function hotBox(){
+    var L = S.d.items.filter(function(i){ var v = S.hot[i.id]; return v && v.lv >= 2; }).slice(0, 6);
+    if (!L.length) return "";
+    return '<div class="fd-hbox"><div class="fd-hbt">🔴 지금 꼭 볼 글 <small>🧠 두뇌가 고름 · ' + e(String((S.hotAt || "")).slice(11, 16)) + '</small><button data-fk="HOT">⭐ 중요만 보기 ›</button></div>' +
+      L.map(function(i){ return '<div class="fd-hbi" data-hid="' + e(i.id) + '"><b>' + e(firstLine(i)) + '</b><small>' + e(S.hot[i.id].why || "") + '</small></div>'; }).join("") + '</div>';
   }
 
   /* 🗣 A10/20-2 (10/20): 내 채널 성적표 — feeds/feed_score.json (market-strategy-report src/feed_score.py · 평일 07:25·16:10)
@@ -227,6 +251,7 @@
     (S.d.new || []).forEach(function(i){ news[i] = 1; });
     if (!its.length){ b.innerHTML = '<div class="empty">' + (S.f === "PIN" ? "📌 모아 둔 글이 없어요. 글 오른쪽 📌 를 눌러 모아 두세요." : "해당하는 글이 없어요.") + '</div>'; return; }
     var h = "", day = "", all = its.length;
+    if (S.f === "ALL" && !S.q) h += hotBox();
     S.lim = S.lim || 40; its = its.slice(0, S.lim);          // 처음엔 40개만 — 끝없이 긴 화면 대신 「더 보기」
     grp(its).forEach(function(g){
       var dd = (g[0].at || g[0].first).slice(0, 10);
@@ -235,6 +260,10 @@
     });
     if (all > its.length) h += '<button class="fd-lim" id="fdlim">더 보기 ▾ <small>' + (all - its.length) + '개 남음</small></button>';
     b.innerHTML = h;
+    [].forEach.call(b.querySelectorAll(".fd-hbox [data-fk]"), function(x){ x.onclick = function(){ S.f = "HOT"; S.lim = 40; draw(); window.scrollTo(0, 0); }; });
+    [].forEach.call(b.querySelectorAll("[data-hid]"), function(x){ x.onclick = function(){
+      var id = x.getAttribute("data-hid"); S.f = "HOT"; S.open[id] = true; S.lim = 200; draw();
+      setTimeout(function(){ var el = document.querySelector('.fd-it[data-fid="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]'); if (el) el.scrollIntoView({block: "center"}); }, 30); }; });
     var lb = document.getElementById("fdlim"); if (lb) lb.onclick = function(){ var y = window.scrollY; S.lim += 60; list(); window.scrollTo(0, y); };
     [].forEach.call(b.querySelectorAll("[data-gid]"), function(el){
       el.onclick = function(ev){
@@ -300,6 +329,16 @@
     ".fd-scr{padding:9px 2px;border-top:1px solid var(--line);cursor:pointer}.fd-scn{display:flex;flex-direction:column;gap:1px}.fd-scn b{font-size:14.5px}.fd-scn .mut{font-size:11.5px}" +
     ".fd-scv{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--sub);margin-top:3px}.fd-scv b.up{color:var(--up)}.fd-scv b.dn{color:var(--dn)}.fd-scv b{color:var(--text)}" +
     ".fd-scd{display:flex;gap:3px;margin-top:5px}.fd-scd i{width:9px;height:9px;border-radius:50%;background:rgba(138,148,168,.4)}.fd-scd i.su{background:#ff5a5a}.fd-scd i.sd{background:#4d8dff}" +
+    ".fd-chip.hot{border-color:#ff5a5a;color:#ff7b7b;font-weight:700}.fd-chip.hot.on{background:#ff5a5a;color:#fff}" +
+    ".fd-it.fd-h2,.fd-grp.fd-h2{border-left:4px solid #ff4d4d;background:linear-gradient(160deg,rgba(255,77,77,.11),var(--panel) 55%);border-color:rgba(255,77,77,.45);border-left-color:#ff4d4d}" +
+    ".fd-it.fd-h1,.fd-grp.fd-h1{border-left:4px solid #ffb020;background:linear-gradient(160deg,rgba(255,176,32,.09),var(--panel) 55%);border-left-color:#ffb020}" +
+    ".fd-it.fd-h2 .fd-ti{font-size:16.5px}" +
+    ".fd-hb{border-radius:6px;padding:1px 6px;font-size:10.5px;font-weight:800;white-space:nowrap}.fd-hb.h2{background:#ff4d4d;color:#fff}.fd-hb.h1{background:rgba(255,176,32,.2);color:#ffb020}" +
+    ".fd-why{font-size:12.5px;font-weight:600;margin:4px 0 2px;padding:4px 8px;border-radius:8px;background:rgba(255,77,77,.1);color:var(--text)}.fd-h1 .fd-why{background:rgba(255,176,32,.1)}" +
+    ".fd-gl li.h2{font-weight:700}.fd-gl li.h2:before,.fd-gl li.h1:before{display:none}.fd-gl li.h1,.fd-gl li.h2{padding-left:2px}" +
+    ".fd-hbox{border:1px solid rgba(255,77,77,.45);border-radius:12px;padding:9px 11px 4px;margin:8px 0 4px;background:linear-gradient(160deg,rgba(255,77,77,.1),var(--panel) 70%)}" +
+    ".fd-hbt{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;font-weight:800;font-size:14px;margin-bottom:4px}.fd-hbt small{order:3;width:100%;font-weight:400;color:var(--sub);font-size:11.5px}.fd-hbt button{margin-left:auto;border:0;background:none;color:#ff7b7b;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}" +
+    ".fd-hbi{padding:6px 0;border-top:1px dashed var(--line);cursor:pointer}.fd-hbi b{display:block;font-size:14px;line-height:1.4}.fd-hbi small{display:block;color:var(--sub);font-size:12px;margin-top:1px}" +
     ".fd-more{color:var(--sub)}.fd-go{color:var(--c,#f4a261);text-decoration:none;font-weight:700}";
   document.head.appendChild(css);
 })();
