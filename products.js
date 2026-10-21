@@ -76,7 +76,7 @@
       '<div><small>🇺🇸 미국채 10년 금리</small><b>' + (U.y10 != null ? pc(U.y10) : "–") + '</b><em>' + (U.y10_prev != null ? "전일 " + pc(U.y10_prev) + " · 환율 " + fmt(U.fx) : "") + '</em></div>' +
       '<div><small>🇺🇸 판매 미국채 최고 수익률</small><b>' + (u1 ? pc(u1.ytm) : "–") + '</b><em>' + (u1 ? e(u1.name) + " · 만기 " + e(u1.mat) : "") + '</em></div>' +
       '<div><small>🇧🇷 헤알/원 환율</small><b>' + (brl ? fmt(brl[1]) : "–") + '</b><em>' + (brl && brl0 ? "하루 " + V.sgn((brl[1] / brl0[1] - 1) * 100, 2) + "% · " + md(brl[0]) : "") + '</em></div></div>';
-    h += seg("pdseg", [["gov", "🇰🇷 국채"], ["ust", "🇺🇸 미국채"], ["brl", "🇧🇷 브라질(헤알)"], ["bru", "🇧🇷 브라질(달러)"], ["oth", "공사채·회사채"]], k) + '<div id="pdbody">' + bondBody(D, k) + '</div>';
+    h += seg("pdseg", [["gov", "🇰🇷 국채"], ["ust", "🇺🇸 미국채"], ["brl", "🇧🇷 브라질(헤알)"], ["bru", "🇧🇷 브라질(달러)"], ["oth", "공사채·회사채"]], k) + sortBar() + '<div id="pdbody">' + bondBody(D, k) + '</div>';
     if (D.notice && D.notice.length) h += '<details class="card cpx-d"><summary>📢 채권 공지 <span class="mut">미래에셋 · 최근 ' + D.notice.length + '건</span></summary>' +
       D.notice.map(function(n){ return '<a class="pd-nt" href="' + e(n.url) + '" target="_blank" rel="noopener"><span class="mut">' + e(n.date || "") + '</span>' + e(n.title) + '</a>'; }).join("") + '</details>';
     return h + WARN;
@@ -85,6 +85,15 @@
   var OBJ = {}, OBN = 0, AMT = 1000;
   try { AMT = +localStorage.getItem("prodamt") || 1000; } catch(x) {}
   function reg(kind, o){ var id = "x" + (++OBN); OBJ[id] = {k: kind, o: o}; return ' data-x="' + id + '"'; }
+  /* 📅 10/21 사용자 「채권 솔팅할 때 만기순으로도 조회 가능하게 탭」 — 채권 모든 칸(국채·미국채·브라질 헤알/달러·공사채)에 같은 정렬 탭
+     y = 수익률 높은 순(기본) · m = 만기 빠른 순 · M = 만기 먼 순. 고른 값은 이 기기에 기억 */
+  var BSL = {y: "수익률 높은 순", m: "만기 빠른 순", M: "만기 먼 순"};
+  function bsk(){ return BSL[SEL.bsort] ? SEL.bsort : "y"; }
+  function bs(a, yk, mk){ var k = bsk(); mk = mk || "mat";
+    return a.slice().sort(function(x, y){
+      if (k === "y") return (y[yk] == null ? -1e9 : y[yk]) - (x[yk] == null ? -1e9 : x[yk]) || String(x[mk]).localeCompare(String(y[mk]));
+      var c = String(x[mk] || "").localeCompare(String(y[mk] || "")); return (k === "m" ? c : -c) || (y[yk] || 0) - (x[yk] || 0); }); }
+  function sortBar(){ return '<div class="pd-sort"><span class="mut">정렬</span>' + seg("pdbsort", [["y", "💰 수익률순"], ["m", "📅 만기 빠른순"], ["M", "📅 만기 먼순"]], bsk()) + '</div>'; }
   function bondRows(rows, hi){
     if (!rows.length) return '<div class="empty">지금 파는 상품이 없어요.</div>';
     var mx = Math.max.apply(null, rows.map(function(r){ return r.after || 0; }).concat([0.1]));
@@ -98,13 +107,13 @@
   function bondBody(D, k){
     var K = D.krw || [], U = D.ust || {}, A = D.aud || {}, B = D.brl || {}, H = D.ust_hist || {};
     if (k === "gov"){
-      var g = K.filter(function(r){ return r.kind === "국채"; }).sort(function(x, y){ return (y.after || 0) - (x.after || 0); });
-      return doc("gov") + card("🇰🇷 국고채·국민주택채권 <span class='mut'>장외채권 · 세후 수익률 높은 순 · " + g.length + "개</span>",
+      var g = bs(K.filter(function(r){ return r.kind === "국채"; }), "after");
+      return doc("gov") + card("🇰🇷 국고채·국민주택채권 <span class='mut'>장외채권 · " + (bsk() === "y" ? "세후 수익률 높은" : BSL[bsk()].replace(" 순", "")) + " 순 · " + g.length + "개</span>",
         '<p class="note" style="margin:0 0 10px">「세후 수익률」은 이자 세금(15.4%)을 뗀 뒤 1년에 실제로 손에 쥐는 비율, 「은행 예금으로 치면」은 같은 돈을 예금했을 때 필요한 세전 금리예요. 만기가 긴 국채는 중간에 팔면 값이 크게 움직여요.</p>' + bondRows(g));
     }
     if (k === "ust"){
-      var y = hist(H.y10, 260), fx = hist(H.usdkrw, 260), items = (U.items || []).slice().sort(function(a, b){ return a.mat < b.mat ? -1 : 1; });
-      var h = doc("ust") + card("🇺🇸 미래에셋이 파는 미국채 <span class='mut'>" + e(U.date ? md(U.date) + " 판매정보" : "") + "</span>",
+      var y = hist(H.y10, 260), fx = hist(H.usdkrw, 260), items = bs(U.items || [], "ytm");
+      var h = doc("ust") + card("🇺🇸 미래에셋이 파는 미국채 <span class='mut'>" + e(U.date ? md(U.date) + " 판매정보 · " : "") + BSL[bsk()] + "</span>",
         (items.length ? '<div class="pd-list">' + items.map(function(r){
           var yr = Math.max(0, (new Date(r.mat) - Date.now()) / 365.25 / 864e5);
           return '<div class="pd-it pd-tap"' + reg("ust", Object.assign({fx: U.fx}, r)) + '><div class="pd-h"><div class="pd-n"><b>' + e(r.name) + '</b><small>만기 ' + e(r.mat) + ' (약 ' + yr.toFixed(1) + '년) · 표면금리 ' + pc(r.cpn, 3) + ' · ' + e(r.cur) + '</small></div>' +
@@ -115,7 +124,7 @@
         '<p class="note">미래에셋 기준 10년 금리 ' + (U.y10 != null ? '<b>' + pc(U.y10) + '</b> (전일 ' + pc(U.y10_prev) + ')' : '–') + '. 금리가 오르면 이미 산 채권 값은 내려가고, 내리면 올라가요 — 만기가 길수록 더 크게.</p>');
       h += card("원/달러 환율 <span class='mut'>1년</span>", (fx.length > 5 ? line1(vals(fx), lbl(fx), {name: "원/달러", color: "#7c9cff", h: 130}) : '<div class="spark-empty">자료 준비 중</div>') +
         '<p class="note">미래에셋 기준 ' + (U.fx != null ? '<b>' + fmt(U.fx) + '원</b> (전일 ' + fmt(U.fx_prev) + ')' : '–') + '. 달러가 싸질 때 사 두면 환차익, 비쌀 때 사면 환손실이 더해져요.</p>');
-      if (A.items && A.items.length) h += '<details class="card cpx-d"><summary>🇦🇺 호주국채도 팔아요 <span class="mut">' + A.items.length + '개 · 10년 ' + pc(A.y10) + '</span></summary><div class="pd-list">' + A.items.map(function(r){
+      if (A.items && A.items.length) h += '<details class="card cpx-d"><summary>🇦🇺 호주국채도 팔아요 <span class="mut">' + A.items.length + '개 · 10년 ' + pc(A.y10) + '</span></summary><div class="pd-list">' + bs(A.items, "ytm").map(function(r){
         return '<div class="pd-it pd-tap"' + reg("aud", Object.assign({fx: A.fx}, r)) + '><div class="pd-h"><div class="pd-n"><b>' + e(r.name) + '</b><small>만기 ' + e(r.mat) + ' · 표면 ' + pc(r.cpn) + ' · AUD</small></div><div class="pd-v"><b class="up">' + pc(r.ytm) + '</b><small>수익률</small></div></div></div>'; }).join("") +
         '</div><p class="note">호주달러 환율 ' + fmt(A.fx) + '원 · 신용등급 AAA · 이자 과세.</p></details>';
       return h;
@@ -138,11 +147,11 @@
       if (AN.length){
         var ag = {}; AN.forEach(function(x){ (ag[x.code] = ag[x.code] || []).push(x); });
         h += card("브라질 이표채(NTN-F) 전 종목 <span class='mut'>" + AN.filter(function(x){ return x.code === "NTN-F"; }).length + "개 · ANBIMA " + e(AN[0].asof) + "</span>",
-          ["NTN-F"].filter(function(c){ return ag[c]; }).map(function(c){ return '<div class="sub2">' + e(c) + ' <span class="mut">' + e(ag[c][0].kind) + ' · ' + ag[c].length + '개</span></div><div class="pd-list">' + ag[c].map(brow).join("") + '</div>'; }).join("") +
+          ["NTN-F"].filter(function(c){ return ag[c]; }).map(function(c){ return '<div class="sub2">' + e(c) + ' <span class="mut">' + e(ag[c][0].kind) + ' · ' + ag[c].length + '개 · ' + BSL[bsk()] + '</span></div><div class="pd-list">' + bs(ag[c], "r").map(brow).join("") + '</div>'; }).join("") +
           '<p class="note">브라질 금융시장협회(ANBIMA)가 매일 내는 <b>유통시장 지표금리</b> — 시장에서 실제로 거래되는 고정금리 이표채(NTN-F) 전부예요 — 할인채(LTN)·물가채(NTN-B)는 뺐어요. 미래에셋 중개 호가는 이것과 조금 달라요. 종목을 누르면 만기까지 현금흐름이 나와요.</p>') +
-          (ag.LFT ? '<details class="card cpx-d"><summary>LFT (Selic 변동금리) ' + ag.LFT.length + '개 <span class="mut">한국 투자자는 거의 안 사요</span></summary><div class="pd-list">' + ag.LFT.map(brow).join("") + '</div></details>' : '');
+          (ag.LFT ? '<details class="card cpx-d"><summary>LFT (Selic 변동금리) ' + ag.LFT.length + '개 <span class="mut">한국 투자자는 거의 안 사요</span></summary><div class="pd-list">' + bs(ag.LFT, "r").map(brow).join("") + '</div></details>' : '');
       } else if (T.length){
-        h += card("만기별 브라질 국채 <span class='mut'>" + T.length + "개 · 브라질 재무부</span>", '<div class="pd-list">' + T.map(function(x){ return brow({code: x.code, kind: x.kind, mat: x.mat, pu: x.px, r: x.r, asof: x.asof}); }).join("") + '</div>');
+        h += card("만기별 브라질 국채 <span class='mut'>" + T.length + "개 · 브라질 재무부</span>", '<div class="pd-list">' + bs(T, "r").map(function(x){ return brow({code: x.code, kind: x.kind, mat: x.mat, pu: x.px, r: x.r, asof: x.asof}); }).join("") + '</div>');
       }
       Object.keys(TH).forEach(function(nm){ var hh = hist(TH[nm], 260); if (hh.length > 5) h += card("브라질 국채 금리 · " + e(nm) + " <span class='mut'>1년 · 연 %</span>", line1(vals(hh), lbl(hh), {name: nm, color: "#d95926", h: 130})); });
       h += card("헤알/원 환율 <span class='mut'>1년 · 원/달러 ÷ 헤알/달러</span>", (f.length > 5 ? line1(vals(f), lbl(f), {name: "헤알/원", color: "#199e70", h: 150}) : '<div class="spark-empty">자료 준비 중</div>') +
@@ -150,9 +159,9 @@
         card("헤알/달러 <span class='mut'>1년 · 숫자가 커지면 헤알 약세</span>", (ub.length > 5 ? line1(vals(ub), lbl(ub), {name: "헤알/달러", color: "#c98500", h: 120}) : '<div class="spark-empty">자료 준비 중</div>'));
       return h;
     }
-    var o = (D.krw || []).filter(function(r){ return r.kind !== "국채"; }).sort(function(x, y){ return (y.after || 0) - (x.after || 0); });
+    var o = bs((D.krw || []).filter(function(r){ return r.kind !== "국채"; }), "after");
     var kinds = {}; o.forEach(function(r){ kinds[r.kind] = (kinds[r.kind] || 0) + 1; });
-    return doc("oth") + card("공사채·회사채·신종자본증권 <span class='mut'>장외채권 · 세후 수익률 높은 순 · " + o.length + "개</span>",
+    return doc("oth") + card("공사채·회사채·신종자본증권 <span class='mut'>장외채권 · " + (bsk() === "y" ? "세후 수익률 높은" : BSL[bsk()].replace(" 순", "")) + " 순 · " + o.length + "개</span>",
       '<div style="margin-bottom:8px">' + Object.keys(kinds).map(function(x){ return '<span class="chip2">' + e(x) + ' ' + kinds[x] + '</span>'; }).join("") + '</div>' +
       '<p class="note" style="margin:0 0 10px">「매우높은위험」으로 표시된 조건부자본증권(신종·후순위)은 은행이 어려워지면 원금을 날릴 수 있어서 금리가 높아요. 위험 등급을 꼭 같이 보세요.</p>' + bondRows(o));
   }
@@ -170,7 +179,7 @@
       cell("헤알/원", L.brlkrw, null, "", "원/달러 ÷ 헤알/달러") + cell("원/달러", w.v, w.chg, "", "헤알/달러 " + (r.v != null ? (+r.v).toFixed(3) : "–")) + '</div></div>';
   }
   function bruBody(D){
-    var L = D.live || {}, A = (L.usd || []).slice(), w = qv(L.q, "KRW="), fx = w.v || (D.ust || {}).fx, now = Date.now();
+    var L = D.live || {}, A = bs(L.usd || [], "ytm"), w = qv(L.q, "KRW="), fx = w.v || (D.ust || {}).fx, now = Date.now();
     var h = doc("bru") + liveStrip(D);
     h += card("🇧🇷 달러표시 브라질국채 <span class='mut'>글로벌본드 · " + A.length + "개 · 달러</span>",
       '<div class="pd-brl"><div><small>통화</small><b>USD</b><em>이자·원금 모두 달러</em></div><div><small>신용등급</small><b>BB</b><em>투기등급 (국제)</em></div><div><small>이자</small><b>6개월마다</b><em>고정 표면금리</em></div><div><small>세금</small><b>확인 필요</b><em>헤알 국채 비과세와 같은지 창구 확인</em></div></div>' +
@@ -185,7 +194,7 @@
         '<div class="pd-v"><b class="up">' + pc(x.ytm) + '</b><small>' + (x.sp != null ? '미국채 +' + x.sp.toFixed(2) + '%p' : '시세 수익률') + '</small></div></div>' +
         '<div class="pd-bar"><i style="width:' + ((x.ytm || 0) / mx * 100).toFixed(0) + '%"></i></div>' +
         '<div class="pd-row"><span>같은 만기 미국채 <b>' + pc(x.ust) + '</b></span><span>' + e(x.src) + '</span><span class="mut">' + e(x.isin) + '</span></div></div>'; };
-    h += card("만기별 전 종목 <span class='mut'>짧은 만기부터 · 수익률 = 달러·세전</span>",
+    h += card("전 종목 <span class='mut'>" + BSL[bsk()] + " · 수익률 = 달러·세전</span>",
       '<div class="pd-list">' + A.map(row).join("") + '</div>' +
       '<p class="note">「미국채 +x%p」= 같은 만기 미국 국채(재무부 ' + e(md(L.curve)) + ' 곡선)보다 더 주는 금리, 곧 <b>브라질 위험값</b>이에요' + (avg != null ? ' — 지금 평균 <b>+' + avg.toFixed(2) + '%p</b>' : '') + '. 이 값이 벌어지면 브라질 달러채 값이 빠지고, 좁혀지면 올라요. 시세는 BONDS.com 실시간이 있으면 그 값, 없으면 유럽 거래소들(15분 지연)의 가운데 값 · ' + e(ago(L.usd_at || L.at)) + ' 받음. 종목을 누르면 모의 투자계산서가 나와요.</p>');
     var HH = Object.keys(L.hist || {}).sort().map(function(d){ return [d, L.hist[d]]; });
@@ -215,7 +224,8 @@
       var yr = Math.max(0, (new Date(x.mat) - now) / 365.25 / 864e5), mqy = mq[(+(x.cpn || 0)).toFixed(3) + x.mat];
       return '<div class="pd-it pd-tap"' + reg("ust", {fx: U.fx, name: x.nm, mat: x.mat, cpn: x.cpn || 0, ytm: mqy != null ? mqy : x.y, est: mqy == null, tips: x.k === "TIPS", frn: x.k === "FRN", cur: "USD"}) + '><div class="pd-h"><div class="pd-n"><b>' + e(x.nm) + (x.mir ? ' <span class="chip2 hot" style="margin:0">미래에셋 판매</span>' : '') + '</b><small>' + e(UKN[x.k]) + ' · 만기 ' + e(x.mat) + ' (약 ' + yr.toFixed(1) + '년)' + (x.cpn != null ? ' · 표면 ' + pc(x.cpn, 3) : '') + (x.px ? ' · 가격 약 ' + x.px.toFixed(1) : '') + (x.out ? ' · 잔액 $' + fmt(x.out) + 'B' : '') + '</small></div>' +
         '<div class="pd-v"><b class="up">' + (mqy != null ? pc(mqy) : x.y != null ? pc(x.y) : '변동') + '</b><small>' + (mqy != null ? '미래에셋 시세' : x.k === "TIPS" ? '실질(추정)' : x.y != null ? '추정 수익률' : '3개월물+α') + '</small></div></div></div>'; };
-    var groups = UBK.map(function(b){ var a = it.filter(function(x){ var t = (new Date(x.mat) - now) / 365.25 / 864e5; return t >= b[0] && t < b[1]; }); return [b, a]; }).filter(function(g){ return g[1].length; });
+    var groups = UBK.map(function(b){ var a = it.filter(function(x){ var t = (new Date(x.mat) - now) / 365.25 / 864e5; return t >= b[0] && t < b[1]; }); return [b, bs(a, "y")]; }).filter(function(g){ return g[1].length; });
+    if (bsk() === "M") groups.reverse();
     return card("🇺🇸 미국채 전 종목 <span class='mut'>" + UA.n + "개 · 미국 재무부</span>",
       '<div class="seg2 wrap" id="pdustk">' + UK.map(function(x){ var n = UA.items.filter(function(r){ return !x[0] || r.k === x[0]; }).length; return '<button' + (x[0] === f ? ' class="on"' : '') + ' data-k="' + x[0] + '">' + x[1] + ' <span class="mut">' + n + '</span></button>'; }).join("") + '</div>' +
       groups.map(function(g, i){ var ys = g[1].map(function(x){ return x.y; }).filter(function(v){ return v != null; }), nm = g[1].filter(function(x){ return x.mir; }).length;
@@ -836,6 +846,7 @@
         var dz = document.getElementById("elsdz"); if (dz && window.elsDesign) elsDesign(dz);
         bindSeg("pdper", function(k){ PER = k; keep(); redraw(); });
         bindSeg("pdustk", function(k){ SEL.ustk = k; keep(); redraw(); });
+        bindSeg("pdbsort", function(k){ SEL.bsort = k; keep(); redraw(); });
         bindSeg("pdelsk", function(k){ SEL.elsk = k; keep(); redraw(); });
         bindSeg("pdpvp", function(k){ SEL.pvp = k; keep(); redraw(); });
         bindSeg("pdpvs", function(k){ SEL.pvs = k; keep(); redraw(); });
@@ -874,6 +885,7 @@
     ".pd-row{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--sub);margin-top:6px;line-height:1.6}.pd-row b{color:var(--text)}" +
     ".pd-rep{margin:7px 0 2px;padding:7px 9px;border-radius:10px;background:color-mix(in srgb,var(--panel) 60%,var(--bg))}.pd-rph{font-size:12px;font-weight:700;color:var(--text)}.pd-rph .mut{font-weight:400}.pd-rpb{display:flex;height:7px;border-radius:4px;overflow:hidden;background:color-mix(in srgb,var(--sub) 25%,transparent);margin:5px 0 4px}.pd-rpb i{display:block;height:100%}.pd-rpt{font-size:11.5px;color:var(--sub);line-height:1.55}.pd-rpt b{color:var(--text)}.pd-rpt b.dn,.pd-rpm b.dn{color:var(--dn)}.pd-rpm{display:block;margin-top:3px;font-size:10.5px;color:var(--sub);line-height:1.35}.pd-rpm>span,.pd-rpm>b{display:block;word-break:keep-all;overflow-wrap:anywhere}.pd-ec td{vertical-align:top}.pd-rcmp{font-size:12px;color:var(--sub);line-height:1.5;margin:2px 0 8px}.pd-rcmp b{color:var(--text)}" +
     ".pd-e .chip2{margin:4px 4px 0 0}.pd-nt{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--text);text-decoration:none;font-size:13px;line-height:1.45}.pd-nt .mut{flex:none;width:78px}" +
+    ".pd-sort{display:flex;align-items:center;gap:8px;margin:-2px 0 10px}.pd-sort>.mut{flex:none;font-size:12px}.pd-sort .seg2{flex:1;margin:0}.pd-sort .seg2 button{font-size:12.5px;padding:6px 4px}" +
     ".pd-live{border:1px solid rgba(25,158,112,.35);border-radius:14px;padding:10px 10px 2px;margin:0 0 12px;background:linear-gradient(160deg,rgba(25,158,112,.08),transparent 70%)}.pd-lh{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13.5px;margin:0 2px 8px}.pd-lh .mut{font-weight:400;font-size:11.5px}" +
     ".pd-dot{width:8px;height:8px;border-radius:50%;background:#19c37d;box-shadow:0 0 0 0 rgba(25,195,125,.6);animation:pdpulse 1.8s infinite}@keyframes pdpulse{0%{box-shadow:0 0 0 0 rgba(25,195,125,.55)}70%{box-shadow:0 0 0 7px rgba(25,195,125,0)}100%{box-shadow:0 0 0 0 rgba(25,195,125,0)}}" +
     ".pd-brl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}.pd-brl div{background:var(--panel2);border-radius:12px;padding:10px 12px}.pd-brl small{display:block;color:var(--sub);font-size:11.5px}.pd-brl b{font-size:18px}.pd-brl em{display:block;font-style:normal;font-size:11px;color:var(--dim)}" +
