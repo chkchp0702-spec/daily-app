@@ -52,10 +52,8 @@
       c.dataset.cz = "done"; var key = tab + ":" + t.replace(EMO, "").slice(0, 24);
       var hd = document.createElement("div"); hd.className = "cz-h"; hd.innerHTML = '<span></span><i>펼치기 ▾</i>'; hd.firstChild.textContent = t;
       var ft = document.createElement("button"); ft.className = "cz-f"; ft.textContent = "접기 ▴";
-      c.insertBefore(hd, c.firstChild); c.appendChild(ft); c.classList.add("cz");
+      c.insertBefore(hd, c.firstChild); c.appendChild(ft); c.classList.add("cz"); c.dataset.czk = key;
       if (!OPEN[key]) c.classList.add("cz-on");
-      hd.addEventListener("click", function(ev){ ev.preventDefault(); ev.stopPropagation(); c.classList.remove("cz-on"); OPEN[key] = 1; keepOpen(); }, true);
-      ft.addEventListener("click", function(ev){ ev.preventDefault(); ev.stopPropagation(); c.classList.add("cz-on"); delete OPEN[key]; keepOpen(); var y = c.getBoundingClientRect().top; if (y < 0) window.scrollBy(0, y - 70); }, true);
     });
   }
   // 제목 줄(.sec) + 바로 다음 덩어리 모양(시황 「오늘의 숫자」 타일 묶음 등) — 덩어리만 접고 제목 줄에 펼치기
@@ -70,10 +68,18 @@
       sc.addEventListener("click", function(ev){ ev.preventDefault(); ev.stopPropagation(); var o = nx.style.display === "none"; set(o); if (o) OPEN[key] = 1; else delete OPEN[key]; keepOpen(); }, true);
     });
   }
-  // 접힌 카드 안 아무 데나 눌러도 펼침(카드 이동 대신)
+  // 펼치기·접기 — 한 곳에서만 받음(10/21: 예전엔 여기서 가로챈 뒤 제목 줄 click() 을 다시 불러 아무것도 안 열렸음)
+  function czOpen(c, o){
+    var key = c.dataset.czk; c.classList.toggle("cz-on", !o);
+    if (key){ if (o) OPEN[key] = 1; else delete OPEN[key]; keepOpen(); }
+    if (!o){ var y = c.getBoundingClientRect().top; if (y < 0) window.scrollBy(0, y - 80); }
+  }
   document.addEventListener("click", function(ev){
-    var c = ev.target.closest && ev.target.closest(".cz.cz-on"); if (!c) return;
-    ev.preventDefault(); ev.stopPropagation(); var h = c.querySelector(".cz-h"); if (h) h.click();
+    if (!ev.target.closest) return;
+    var f = ev.target.closest(".cz-f");
+    if (f){ var c1 = f.closest(".cz"); if (c1){ ev.preventDefault(); ev.stopPropagation(); czOpen(c1, false); } return; }
+    var c = ev.target.closest(".cz.cz-on"); if (!c) return;          // 접힌 카드는 어디를 눌러도 펼침(카드 이동 대신)
+    ev.preventDefault(); ev.stopPropagation(); czOpen(c, true);
   }, true);
   // 알림·링크로 접힌 카드 안을 찾아가면 펼쳐서 보여 줌
   var _goTo = window.goTo;
