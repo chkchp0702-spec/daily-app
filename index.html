@@ -538,9 +538,30 @@ function restoreView(st){
     if (Date.now() - t0 < 6000 && (!ok || Date.now() - ok < 3000)) setTimeout(tick, 120);
   })();
 }
+/* 🔙 10/22 사용자 「컵 종목 보다가 종목리포트 → 뒤로 했더니 컵 처음이야. 보던 스크롤로」
+   예전엔 뒤로 가면 그 화면을 새로 그려서, 펼쳐 둔 목록(더 보기·전체 보기)·접기가 다 닫히고 페이지가 짧아져 보던 자리까지 못 내려갔음.
+   이제 떠나기 직전 화면(#main 안의 것)을 그대로 들고 있다가, 뒤로 오면 새로 그리지 않고 그대로 다시 붙임 → 펼친 것·거름·위치 모두 그대로.
+   최근 4단계만 기억(휴대폰 메모리). 다른 탭으로 아예 옮겨 간 뒤엔 예전처럼 새로 그림. */
+var NAVKEEP = {};
+function navKeep(){
+  var m = $("main"); if (!m || !cur || !m.firstChild) return;
+  var d = navD(); NAVKEEP[d] = {key: cur, id: curDate || null, nodes: [].slice.call(m.childNodes)};
+  Object.keys(NAVKEEP).forEach(function(k){ if (+k > d || +k < d - 3) delete NAVKEEP[k]; });
+}
+function navReuse(st){
+  var K = NAVKEEP[st.d]; if (!K || st.t !== "go" || K.key !== st.key) return false;
+  if ((st.id || null) && K.id && st.id !== K.id) return false;
+  var c = CATS.filter(function(x){ return x.key === K.key; })[0]; if (!c) return false;
+  cur = K.key; store.tab = cur; save(); curDate = K.id;
+  document.documentElement.style.setProperty("--c", c.color); $("brandDot").style.color = c.color;
+  drawTabs();
+  var m = $("main"); m.textContent = ""; K.nodes.forEach(function(n){ m.appendChild(n); });
+  return true;
+}
 function navPush(st){
   if (NAV.restoring || NAV.silent) return;
   try {
+    navKeep();
     history.replaceState(Object.assign({}, history.state || {}, navSnap()), "");
     st.d = navD() + 1;
     history.pushState(st, "", location.pathname + (st.t === "go" ? "#" + st.key : st.t === "op" ? "#onepager" : "#whale"));
@@ -567,6 +588,8 @@ window.addEventListener("popstate", function(ev){
       [].forEach.call(document.querySelectorAll("#" + k + " button"), function(b){ b.classList.toggle("on", b.dataset.k === "ALL"); }); PAGERS[k].set("ALL"); } });
     restoreView(st); updBack(); return;
   }
+  // 떠날 때 들고 있던 그 화면이면 새로 그리지 않고 그대로 붙이고, 위치만 맞춤 (거름은 이미 그대로라 다시 안 건드림)
+  if (navReuse(st)){ restoreView({y: st.y}); updBack(); return; }
   NAV.restoring = true;
   try {
     if (st.t === "go") go(st.key, st.id);
@@ -1461,7 +1484,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261021i";
+var APPV = "20261022a";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
