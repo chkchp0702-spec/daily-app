@@ -74,12 +74,12 @@
       '<polyline fill="none" stroke="currentColor" stroke-width="2" points="' + pts.map(function(x, i){ return xs(i).toFixed(1) + "," + ys(x[1]).toFixed(1); }).join(" ") + '"/>' +
       '<circle cx="' + xs(n - 1).toFixed(1) + '" cy="' + ys(lv.p1).toFixed(1) + '" r="3" fill="currentColor"/></svg>';
     var chg = lv.chg, mood;
-    if (closed) mood = "🔔 마감 — 코스피 " + pc2(chg) + " (장중 종가 플러스 확률 흐름)";
-    else if (d >= 0.10 && lv.p1 >= 0.5) mood = "📈 반등이 붙는 중 — 종가 플러스 확률이 " + pct(ago[1]) + "% → " + pct(lv.p1) + "%로 올라가고 있어요";
-    else if (d >= 0.10) mood = "↗ 낙폭을 줄이는 중 — 종가 플러스 확률 " + pct(ago[1]) + "% → " + pct(lv.p1) + "% (아직 내릴 쪽)";
-    else if (d <= -0.10 && lv.p1 <= 0.5) mood = "📉 계속 밀리는 중 — 종가 플러스 확률이 " + pct(ago[1]) + "% → " + pct(lv.p1) + "%로 내려가고 있어요";
-    else if (d <= -0.10) mood = "↘ 오름폭을 반납하는 중 — " + pct(ago[1]) + "% → " + pct(lv.p1) + "% (아직 오를 쪽)";
-    else mood = "↔ 큰 변화 없이 버티는 중 — 1시간 전 " + pct(ago[1]) + "% → 지금 " + pct(lv.p1) + "%";
+    if (closed) mood = "🔔 마감 — 코스피 " + pc2(chg);
+    else if (d >= 0.10 && lv.p1 >= 0.5) mood = "📈 반등이 붙는 중 — 오를 쪽으로 기울고 있어요";
+    else if (d >= 0.10) mood = "↗ 낙폭을 줄이는 중 — 아직은 내릴 쪽";
+    else if (d <= -0.10 && lv.p1 <= 0.5) mood = "📉 계속 밀리는 중 — 내릴 쪽으로 기울고 있어요";
+    else if (d <= -0.10) mood = "↘ 오름폭을 반납하는 중 — 아직은 오를 쪽";
+    else mood = "↔ 1시간 전과 비슷 — 큰 변화 없이 버티는 중";
     var up = L.up || 0, dn = L.down || 0, br = Math.round(up / Math.max(1, up + dn) * 100), br0 = first && sn[0] ? Math.round(sn[0][1] / Math.max(1, sn[0][1] + sn[0][2]) * 100) : null;
     var ss = (L.sectors || []).filter(function(x){ return x.r != null; }).sort(function(a, b){ return b.r - a.r; });
     var bigs = function(x, best){ return (x.big || []).filter(function(t){ return t.r != null && (best ? t.r > 0 : t.r < 0); }).sort(function(a, b){ return best ? b.r - a.r : a.r - b.r; }).slice(0, 2)
@@ -100,8 +100,7 @@
     else if (d <= -0.10 && chg < -1) act.push("🛑 밀리는 장 — " + (bad[0] ? e(bad[0].name) + "·" : "") + "약한 쪽은 비중 늘리지 않기");
     else if (d >= 0.10 && lv.p1 >= 0.55 && good[0]) act.push("👀 반등 주도 " + e(good[0].name) + (good[1] ? "·" + e(good[1].name) : "") + " 쪽을 먼저 본다 (추격보다 눌림)");
     var R = CONC && CONC.regime;
-    if (R) act.push("💼 현금·단기채 선: " + (R.up ? "🟢 S&P 200일선 위(+" + R.gap + "%) → 규칙상 0% · 200일선 아래 3일이면 🔴 26%까지" : "🔴 S&P 200일선 아래(" + R.gap + "%) → 규칙상 26% 유지") +
-      (R.kospi_gap != null ? " · 코스피는 200일선 " + (R.kospi_gap > 0 ? "+" : "") + R.kospi_gap + "%" : ""));
+    if (R) act.push("💼 현금 규칙: " + (R.up ? "🟢 S&P 200일선 위 → 현금 0%" : "🔴 S&P 200일선 아래 → 현금 26%"));
     return '<div class="pl-now"><div class="pl-nh"><b>' + (closed ? '🇰🇷 오늘 장 마감 ' : '⚡ 지금 장 ') + e(lv.t) + '</b> <span class="pl-sm mut">코스피 <span class="' + cl2(chg) + '">' + pc2(chg) + '</span> · 오른 종목 ' + br + '%' + (br0 != null ? ' (개장 ' + br0 + '%)' : '') + '</span></div>' +
       '<div class="pl-tr ' + (lv.p1 >= 0.5 ? "up" : "dn") + '">' + svg + '<span>' + e(mood) + '</span></div>' +
       row("👀", "볼 곳", good, true) + row("⚠️", "조심", bad, false) + foc +
@@ -138,14 +137,23 @@
       (th ? '<small>「' + e(th.t) + '」 확신 ' + pct(th.conf || 0) + '%</small>' : (B.summary ? '<small>' + e(String(B.summary).split(" — ")[0]) + '</small>' : '')) + '</div></div>' : "";
     var sc = P.score && P.score.all && P.score.all.d1 || {}, hit = sc.n ? " · 지금까지 다음 날 방향 " + Math.round(sc.hit / 100 * sc.n) + "/" + sc.n + " 맞음" : "";
     var stale = P.date && P.date !== K.ymd && K.m >= 9 * 60 ? ' <span class="pl-old">(' + e(P.date.slice(5).replace("-", "/")) + ' 계산)</span>' : "";
-    return '<section class="card pl ' + w1.c + (strong ? ' strong' : '') + '" data-goto="prob" role="button">' +
-      '<div class="pl-top"><span class="pl-ic">🎲</span><div class="pl-h"><small>오늘, 확률로 말하면 · ' + (lv ? '⚡ ' + e(lv.t) + ' 지금 값' : '🎲 ' + e(P.t || "") + stale) + '</small><div class="pl-head">' + head + '</div></div><span class="pl-go">🎲 ›</span></div>' +
-      '<div class="pl-nums">' + nums + '</div>' +
-      (PROVEN ? '' : '<div class="pl-warn">⚠️ <b>아직 동전보다 못함</b> — 다음 날 방향 ' + (SC.n ? Math.round(SC.hit / 100 * SC.n) + '/' + SC.n + ' 맞음 (' + Math.round(SC.hit) + '%)' : '채점 전') + '. 이 숫자로 사고팔지 마세요 · 20번 넘게 채점해 55% 넘으면 그때 세게 말해요</div>') +
-      (anc || band ? '<div class="pl-why">' + e(anc) + (anc && band ? ' · ' : '') + e(band) + '</div>' : '') +
-      safeNow(P, L, LV, lv) +
-      wk5 + oth + br +
-      '<div class="pl-foot">' + (PROVEN ? '틀려도 좋다는 마음으로 세게 말해요' + hit + ' · ' : '검증될 때까지 약하게만 말해요 · ') + '장중엔 10분마다 지금 등락으로 다시 계산 · 사라·팔라는 뜻 아님</div></section>';
+    /* 🧹 10/21 「오늘 한 장」: 결론 한 줄 + 국면·한 문장 + 볼 곳 — 확률 숫자·10칸 점·검증 경고·일주일 뒤·다른 시장은 🎲 시장확률 탭·📊 성적표로 */
+    var reg = B && B.regime ? String(B.regime).split(" / ")[0] : "";
+    var one = th ? th.t : (B && B.summary ? String(B.summary).split(/ — |\. /)[0] : "");
+    if (one.length > 60) one = one.slice(0, 58) + "…";
+    var nowH = safeNow(P, L, LV, lv), look = nowH || focusBlock(LV.HF);
+    return '<section class="card pl ' + w1.c + '" data-goto="prob" role="button">' +
+      '<div class="pl-top"><span class="pl-ic">🎲</span><div class="pl-h"><small>오늘 한 줄 · ' + e(lv ? lv.t : (P.t || "")) + stale + '</small><div class="pl-head">' + head + '</div></div><span class="pl-go">자세히 ›</span></div>' +
+      (reg || one ? '<div class="pl-one">' + (reg ? '<span class="pl-reg">' + e(reg) + '</span>' : '') + e(one) + '</div>' : '') +
+      look +
+      '<div class="pl-foot">' + (PROVEN ? '' : '아직 검증 중이라 약하게만 말해요 · ') + '사라·팔라는 뜻 아님</div></section>';
+  }
+  /* 장 전·주말엔 장중 나침반이 없으니 「볼 곳」은 오늘 집중 테마(market/home.json focus)로 */
+  function focusBlock(F){
+    if (!F || !F.length) return "";
+    return '<div class="pl-now"><div class="pl-nh"><b>👀 오늘 볼 곳</b> <span class="pl-sm mut">돈이 몰리는 테마</span></div>' + F.slice(0, 2).map(function(t){
+      return '<div class="pl-nw"><span class="pl-k">' + e(t.name) + '</span><div class="pl-sm">' + e(t.stage || "") + (t.r5 != null ? ' · 5일 ' + pc2(t.r5) : '') +
+        ((t.stars || []).length ? '<div>' + t.stars.slice(0, 3).map(function(x){ return '★ <a data-op="' + e(x.t) + '">' + e(x.name) + '</a>'; }).join(" · ") + '</div>' : '') + '</div></div>'; }).join("") + '</div>';
   }
   function mount(){
     var body = document.getElementById("hmbody"); if (!body) return;
@@ -153,7 +161,7 @@
     var NL = function(u){ return J(u).catch(function(){ return null; }); };
     Promise.all([J("archive/x/prob.json"), J(RAWM + "market/home.json").catch(function(){ return null; }), J(RAWM + "brain/state.json").catch(function(){ return null; }), LJ("kr"), LJ("us"),
                  NL(RAWM + "market/focus.json"), NL("archive/x/focus_live.json"), NL(RAWM + "market/conc.json")]).then(function(a){
-      var html = build(a[0], a[1] && a[1].brain, a[2], {KR: a[3], US: a[4], F: a[5], FL: a[6], CONC: a[7]}); if (!html) return;
+      var html = build(a[0], a[1] && a[1].brain, a[2], {KR: a[3], US: a[4], F: a[5], FL: a[6], CONC: a[7], HF: a[1] && a[1].focus}); if (!html) return;
       var b2 = document.getElementById("hmbody"); if (!b2) return;
       var old = b2.querySelector(".pl"); if (old) old.remove();
       var anchor = b2.querySelector(".hm-live") || b2.querySelector(".hm-day");
@@ -189,6 +197,7 @@
     ".pl-k{flex:none;width:92px;color:var(--sub);font-size:12.5px;font-weight:700;padding-top:1px}.pl-row b.up,.pl-row b.up2{color:#ff8a8a}.pl-row b.dn,.pl-row b.dn2{color:#7cb0ff}.pl-row small{color:var(--sub);font-size:12px}",
     ".pl-br>div{flex:1;min-width:0}.pl-br small{display:block;line-height:1.4;margin-top:1px}",
     ".pl-foot{margin-top:7px;font-size:11px;color:var(--dim);line-height:1.4}",
+    ".pl-one{font-size:13.5px;line-height:1.5;margin:6px 0 2px;color:var(--text)}.pl-reg{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:9px;margin-right:6px;background:var(--panel2);color:var(--sub)}",
     "html[data-ui=light] .pl.up .pl-head em,html[data-ui=light] .pl.up2 .pl-head em,html[data-ui=light] .pl-ten.up,html[data-ui=light] .pl-ten.up2,html[data-ui=light] .pl-row b.up,html[data-ui=light] .pl-row b.up2{color:#d6453d}",
     "html[data-ui=light] .pl.dn .pl-head em,html[data-ui=light] .pl.dn2 .pl-head em,html[data-ui=light] .pl-ten.dn,html[data-ui=light] .pl-ten.dn2,html[data-ui=light] .pl-row b.dn,html[data-ui=light] .pl-row b.dn2{color:#2c6fd1}"
   ].join("");

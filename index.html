@@ -481,6 +481,7 @@ var CATS = [
   {key:"accum",  name:"조용한 매집", short:"매집", icon:"🤫", color:"#ff8fc7", desc:"거래량은 늘고 가격은 제자리인 종목"},
   {key:"screen", name:"아침 거르기", short:"거르기", icon:"🔎", color:"#7ee0b5", desc:"약 2만 7천 종목을 매일 아침 네 가지 거름망으로 — 살펴볼 후보 (사라는 뜻 아님)"},
   {key:"onepager", name:"종목리포트", short:"종목", icon:"📄", color:"#5ac8fa", desc:"약 2만 종목 + ETF 6천 개 · 검색하면 바로"},
+  {key:"sigmore", name:"더 보기", short:"더 보기", icon:"🗂️", color:"#a0a8b8", desc:"있으면 좋은 것 — 예고 채점 · 두뇌 논지 · 고래·컵·갭 상세 · 단타 통계"},
   {key:"danta",  name:"단타", short:"단타",     icon:"⚡", color:"#ff6b6b", desc:"장중 단타 알람 · 이후 수익률 추적 · 시험 중"},
   {key:"alarm",  name:"알림", short:"알림",     icon:"🔔", color:"#ffd166", desc:"이 휴대폰으로 알림 받을지 켜고 끄기"},
   {key:"idea",   name:"의견함", short:"의견",   icon:"💬", color:"#9ad0ff", desc:"앱에 바라는 점을 남겨 주세요 · 사진·파일 첨부 가능"},
@@ -586,14 +587,15 @@ function go(key, id){
   var items = (M.cats[key] || []);
   curDate = id || (items[0] && items[0].id);
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
-          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">켜기 · 끄기만</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "port" ? '<span class="chip">10/2부터 · 매일 갱신</span>' : key === "home" ? '<span class="chip">매시간 갱신</span><span class="chip">누르면 그 탭으로</span>' : key === "score" ? '<span class="chip">매시간 자동 채점</span>' : key === "prob" ? '<span class="chip">매시간 계산</span><span class="chip">마감 뒤 채점</span>' : (key === "bond" || key === "fund" || key === "els") ? '<span class="chip">미래에셋증권</span><span class="chip">하루 3번 갱신</span>' : key === "feed" ? '<span class="chip">블로그 5 · 텔레그램 8 · 뉴스 47</span><span class="chip">15분마다</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
-          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" && key !== "port" && key !== "home" && key !== "score" && key !== "prob" && key !== "bond" && key !== "fund" && key !== "els" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
+          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">켜기 · 끄기만</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "port" ? '<span class="chip">10/2부터 · 매일 갱신</span>' : key === "home" ? '<span class="chip">매시간 갱신</span><span class="chip">누르면 그 탭으로</span>' : key === "score" ? '<span class="chip">매시간 자동 채점</span>' : key === "sigmore" ? '<span class="chip">한 단계 아래 · 참고</span>' : key === "prob" ? '<span class="chip">매시간 계산</span><span class="chip">마감 뒤 채점</span>' : (key === "bond" || key === "fund" || key === "els") ? '<span class="chip">미래에셋증권</span><span class="chip">하루 3번 갱신</span>' : key === "feed" ? '<span class="chip">블로그 5 · 텔레그램 8 · 뉴스 47</span><span class="chip">15분마다</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
+          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" && key !== "port" && key !== "home" && key !== "score" && key !== "sigmore" && key !== "prob" && key !== "bond" && key !== "fund" && key !== "els" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
   if (key === "onepager") { $("main").innerHTML = h + opView(); opInit(id); window.scrollTo(0, 0); return; }
   if (key === "alarm") { $("main").innerHTML = h + alarmView(); alarmInit(); window.scrollTo(0, 0); return; }
   if (key === "idea") { $("main").innerHTML = h + ideaView(); ideaInit(); window.scrollTo(0, 0); return; }
   if (key === "port") { $("main").innerHTML = h + portView(); portInit(); window.scrollTo(0, 0); return; }
   if (key === "home") { $("main").innerHTML = h + homeView(); homeInit(); window.scrollTo(0, 0); return; }
   if (key === "score") { $("main").innerHTML = h + scoreView(); scoreInit(); window.scrollTo(0, 0); return; }
+  if (key === "sigmore") { $("main").innerHTML = h + sigmoreView(); sigmoreInit(); window.scrollTo(0, 0); return; }
   if (key === "feed") { $("main").innerHTML = h + feedView(); feedInit(); window.scrollTo(0, 0); return; }
   if (key === "prob") { $("main").innerHTML = h + probView(); probInit(); window.scrollTo(0, 0); return; }
   if (key === "bond" || key === "fund" || key === "els") { $("main").innerHTML = h + prodView(key); prodInit(key); window.scrollTo(0, 0); return; }
@@ -1459,7 +1461,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261021e";
+var APPV = "20261021f";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1524,8 +1526,8 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="simple.js?v=17"></script>
 <script defer src="pdfx.js?v=7"></script>
 <script defer src="honest.js?v=1"></script>
-<script defer src="up10.js?v=21"></script>
-<script defer src="nav2.js?v=19"></script>
+<script defer src="up10.js?v=22"></script>
+<script defer src="nav2.js?v=20"></script>
 <script defer src="clamp.js?v=4"></script>
 <script defer src="ticker.js?v=2"></script>
 <script defer src="ux1013.js?v=3"></script>
@@ -1536,13 +1538,14 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1015.js?v=2"></script>
 <script defer src="ux1015b.js?v=1"></script>
 <script defer src="ux1015c.js?v=2"></script>
-<script defer src="ux1019.js?v=6"></script>
+<script defer src="ux1019.js?v=7"></script>
 <script defer src="ux1019b.js?v=1"></script>
 <script defer src="port_design.js?v=2"></script>
 <script defer src="twin.js?v=1"></script>
 <script defer src="threeway.js?v=1"></script>
 <script defer src="tidy.js?v=4"></script>
 <script defer src="smooth.js?v=2"></script>
+<script defer src="calm.js?v=3"></script>
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
 </html>

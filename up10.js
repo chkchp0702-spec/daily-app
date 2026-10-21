@@ -38,11 +38,10 @@
       return '<button data-k="' + key + '" data-v="' + o[0] + '" class="' + (String(UI[key]) === String(o[0]) ? "on" : "") + '">' + o[1] + '</button>'; }).join("") + '</div></div>'; };
     d.innerHTML = '<b>⚙️ 보기 설정</b>' + row("화면", "theme", [["auto", "자동"], ["dark", "🌙 어둡게"], ["light", "☀️ 밝게"]]) +
       row("글자", "fs", [["auto", "📱 자동"], [0.88, "가"], [0.94, "가"], [1, "가"], [1.1, "가"], [1.22, "가"]]) +
-      row("🏠 홈 순서", "home", [["time", "🕘 시간대"], ["fixed", "고정"]]) +
       row("🌐 시황 순서", "mkt", [["time", "🕘 시간대"], ["fixed", "고정"]]) +
-      '<small>글자 「📱 자동」 = 아이폰 설정 › 디스플레이 › 텍스트 크기를 따라가요(가 다섯 개 = 아주 작게 ~ 아주 크게, 카드 모양은 그대로). 화면 자동 = 휴대폰 설정(다크 모드)을 따라가요. 홈·시황 「시간대」 = 아침·장중·저녁·밤마다 지금 볼 카드를 맨 위로.</small>' +
+      '<small>글자 「📱 자동」 = 아이폰 설정 › 디스플레이 › 텍스트 크기를 따라가요(가 다섯 개 = 아주 작게 ~ 아주 크게, 카드 모양은 그대로). 화면 자동 = 휴대폰 설정(다크 모드)을 따라가요. 시황 「시간대」 = 아침·장중·저녁·밤마다 지금 볼 카드를 맨 위로.</small>' +
       '<div class="us-ver">앱 버전 v' + e(window.APPV || "") + (window.M && M.updated ? ' · 자료 목록 ' + e(String(M.updated).slice(5)) : '') + '</div>' +
-      '<div class="us-go"><button data-go="alarm">🔔 알림 켜기·끄기</button><button data-go="idea">💬 의견함</button><button data-go="onepager">📄 종목리포트</button></div>';
+      '<div class="us-go"><button data-gloss="1">📖 용어 풀이</button><button data-go="score">📊 성적표</button><button data-go="alarm">🔔 알림 켜기·끄기</button><button data-go="idea">💬 의견함</button><button data-go="onepager">📄 종목리포트</button></div>';
     document.body.appendChild(d);
     [].forEach.call(d.querySelectorAll("[data-go]"), function(b){ b.onclick = function(){ d.remove(); go(b.dataset.go); }; });
     [].forEach.call(d.querySelectorAll("button[data-k]"), function(b){ b.onclick = function(){ var k = b.dataset.k, v = b.dataset.v; UI[k] = k === "fs" && v !== "auto" ? +v : v; keepUI(); applyUI(); d.remove(); settings();
@@ -157,63 +156,41 @@
     // 10/15 A9-3: 「08:56 기준」 글자 → ⟳ 신선도 칩(ux1015.js 가 「N분 전」·색을 채움) · 가운뎃점 대신 간격
     var h = '<div class="hm-day"><span class="hm-date">' + (now.getUTCMonth() + 1) + '/' + now.getUTCDate() + ' (' + wd + ')</span>' +
       '<span class="hm-fresh" id="hmfresh" role="button" data-at="' + e(H.at || "") + '">⟳ ' + e(String(H.at || "").slice(11, 16)) + '</span>' +
-      (useTime ? '<span class="hm-ed" id="hmed" title="' + e(ED.why) + '">' + ED.ic + ' ' + e(ED.t) + '</span>' : '') +
-      '<button class="hm-story" id="hmstory" aria-label="30초로 보기">▶ 30초</button></div>' +
+      '</div>' +
       '<div class="hm-live" id="hmlive" data-ed="' + ED.k + '" role="button" hidden></div>';   // 10/15 A9-1 🌞 장중 띠 (ux1015.js)
     // 10/13 「더 자주 열게」 ③ 어제보다 바뀐 것 · ⑦ 이번 주 복기(주말) · ⑥ 어제 예고 → 오늘 결과
     var CH = (H.chg && H.chg.items) || [];
-    if (CH.length) h += '<section class="card hm-chg" data-strip="home"><div class="hm-h"><span class="hm-i">🆕</span><div><b>바뀐 것</b><small>' + (H.chg.since ? md(H.chg.since) + ' 이후 · ' : '') + CH.length + '가지</small></div></div>' +
-      CH.map(function(x){ return '<div class="hm-chi" data-goto="' + e(x.go || "home") + '"><span>' + e(x.ic) + '</span>' + chgBody(x) + '<i>›</i></div>'; }).join("") + '</section>';
-    var Wk = H.week || {}, dw = now.getUTCDay();
+    /* 🧹 10/21 사용자 「앱이 복잡하고 산만하다 — 다 진행해」: 홈 = 오늘 한 장(① 오늘 한 줄+볼 곳 ux1019.js · ② 내 포트 · ③ 바뀐 것 3줄) — 나머지는 각 탭·🗂 신호 › 더 보기·📊 성적표로 */
+    var chgH = "";
+    if (CH.length) chgH = '<section class="card hm-chg" data-strip="home"><div class="hm-h"><span class="hm-i">🆕</span><div><b>바뀐 것</b><small>' + (H.chg.since ? md(H.chg.since) + ' 이후' : '') + (CH.length > 3 ? ' · 중요한 3가지' : '') + '</small></div></div>' +
+      CH.slice(0, 3).map(function(x){ return '<div class="hm-chi" data-goto="' + e(x.go || "home") + '"><span>' + e(x.ic) + '</span>' + chgBody(x) + '<i>›</i></div>'; }).join("") + '</section>';
+    var Wk = H.week || {}, dw = now.getUTCDay(), wkH = "";
     if ((dw === 6 || dw === 0) && Wk.days){
       var wb = [["💼 기본", Wk.base], ["⚡ 킥", Wk.kick], ["🎯 집중", Wk.conc]].filter(function(x){ return x[1] != null; });
-      h += card("port", "📅", "이번 주 복기", md(Wk.from) + "부터 " + Wk.days + "거래일 (미국 날짜)",
+      var wkH = card("port", "📅", "이번 주 복기", md(Wk.from) + "부터 " + Wk.days + "거래일 (미국 날짜)",
         '<div class="hm-big">' + wb.map(function(x){ return '<div><small>' + x[0] + '</small><b class="' + cls(x[1]) + '">' + sg(x[1]) + '</b></div>'; }).join("") + '</div>' +
         '<div class="hm-l">S&amp;P500 <b class="' + cls(Wk.spy) + '">' + sg(Wk.spy) + '</b> · 코스피 <b class="' + cls(Wk.kospi) + '">' + sg(Wk.kospi) + '</b>' +
         (Wk.rep && Wk.rep.n ? ' · 시황 예고 ✓' + Wk.rep.win + ' ✗' + Wk.rep.loss : '') +
         (Wk.kick_ev && (Wk.kick_ev.buy || Wk.kick_ev.sell) ? ' · 킥 사기 ' + Wk.kick_ev.buy + ' · 팔기 ' + Wk.kick_ev.sell : '') + '</div>' +
         ((Wk.next || []).length ? '<div class="hm-wn"><small>앞으로 볼 일정</small>' + Wk.next.map(function(x){ return '<div><b>' + e(x.when) + '</b> ' + e(x.what) + '</div>'; }).join("") + '</div>' : '') +
-        '<button class="hm-sh" data-share="week">📤 카톡으로 공유</button>', "포트");
+        '', "포트");
     }
-    var C = {};   // 카드 조각 — 시간대별 순서로 붙임 (A9-1)
-    var G = H.grade;
-    if (G && (G.items || []).length){
-      var ok = G.items.filter(function(x){ return x.cls === "ok"; }).length, no = G.items.filter(function(x){ return x.cls === "no"; }).length;
-      var GV = gradeVotes(G), meTxt = GV.me_n ? ' · 나 ✓' + GV.me_ok + ' ✗' + (GV.me_n - GV.me_ok) : '';
-      var tot = GV.tot, cum = (tot.me_n >= 1 && tot.app_n >= 1) ? '<div class="hm-vs"><span>🗳 나 vs 앱 적중률</span>' +
-        '<div><small>나</small><i><b style="width:' + Math.round(tot.me_ok / tot.me_n * 100) + '%"></b></i><em>' + Math.round(tot.me_ok / tot.me_n * 100) + '% <span class="mut">(' + tot.me_n + '건)</span></em></div>' +
-        '<div><small>앱</small><i><b style="width:' + Math.round(tot.app_ok / tot.app_n * 100) + '%"></b></i><em>' + Math.round(tot.app_ok / tot.app_n * 100) + '% <span class="mut">(' + tot.app_n + '건)</span></em></div></div>' : '';
-      C.grade = card("market", "🎯", "어제 예고 → 오늘 결과", md(G.date) + " " + e(G.label || "") + " 채점 · 앱 ✓" + ok + " ✗" + no + meTxt + (G.rate != null ? ' · 누적 적중 <span data-num="' + G.rate + '" data-k="rate" data-d="0" data-u="%" data-nosign="1">' + G.rate + '%</span>' : "") + ((G.last10 || []).length ? ' <span class="hm-l10" title="최근 ' + G.last10.length + '번 채점 (왼쪽이 옛날)">' + dots(G.last10) + '</span>' : ""),
-        G.items.map(function(x, i){ var r = GV.rows[i] || {};
-          return '<div class="hm-gr ' + e(x.cls || "") + '"><span>' + e(x.mark || "·") + '</span><div><b>' + e(x.t) +
-            (r.v ? ' <span class="hm-me ' + (r.r === true ? "ok" : r.r === false ? "no" : "") + '">나 ' + (r.v > 0 ? "👍" : "👎") + (r.r === true ? " ✓" : r.r === false ? " ✗" : "") + '</span>' : '') +
-            '</b>' + trail(x.tr, true) + '<small>' + e(x.x) + '</small></div></div>'; }).join("") + cum + voices(G.voices) +
-        ((G.next || []).length ? '<div class="hm-wn"><small>🔮 오늘의 예고 — 내일 아침 채점 · 👍👎 로 내 표도</small>' + G.next.map(function(x, i){
-          return '<div class="hm-nx">' + (x.p != null ? '<span class="hm-pb" title="앱이 보는 확률 ' + Math.round(x.p * 100) + '%"><i style="width:' + Math.round(x.p * 100) + '%"></i><b>' + Math.round(x.p * 100) + '%</b></span>' : '') +
-            '<span class="hm-nxt">' + e(x.t) + trail(x.tr, false) + '</span>' + (G.date ? voteBtns(G.date, i + 1) : '') + '</div>'; }).join("") + '</div>' : '') +
-        '<button class="hm-sh" data-share="grade">📤 카톡으로 공유</button>', "시황");
-    }
+    var C = {};
     // 💼 포트 (A9-2: 선 끝에 값 · 범례 없음)
     var ex = (P.kick || 0) - (P.spy || 0);
-    var spark = (window.V && P.nav && P.nav.length > 1) ? V.lines([{name: "⚡ 킥", short: "⚡", color: "#ff6b6b", vals: P.kick_line}].concat((function(){ var c = (P.conc_line || []).slice(), n = (P.nav || []).length; while (c.length && c.length < n) c.unshift(0); return c.length === n ? [{name: "🎯 집중", short: "🎯", color: "#4dd47a", vals: c}] : []; })()).concat([{name: "💼 기본", short: "💼", color: "#e9c46a", vals: P.nav}, {name: "S&P", short: "S&P", color: "#7c9cff", vals: P.spy_line, dash: 1}]),
+    var spark = (window.V && P.nav && P.nav.length > 1) ? V.lines([{name: "공격(킥)", short: "공격", color: "#ff6b6b", vals: P.kick_line}].concat((function(){ var c = (P.conc_line || []).slice(), n = (P.nav || []).length; while (c.length && c.length < n) c.unshift(0); return c.length === n ? [{name: "집중", short: "집중", color: "#4dd47a", vals: c}] : []; })()).concat([{name: "기본", short: "기본", color: "#e9c46a", vals: P.nav}, {name: "S&P", short: "S&P", color: "#7c9cff", vals: P.spy_line, dash: 1}]),
       (P.nav || []).map(function(_, i){ return i ? "" : md(P.start); }), {h: 96, unit: "%", zero: 1, nodots: 1, endLabels: 1, nolegend: 1}) : "";
-    C.port = card("port~pohero", "💼", "포트", md(P.start) + "부터 · " + md(P.asof) + " 미국 종가",
-      // 10/12 정리: 큰 숫자 3개(집중·킥·기본) + 한 줄(S&P·몇 곳 앞섬) + 그래프 + 바뀜 알림 한 줄. 정직 계산·강약 칩은 포트 탭에서
-      '<div class="hm-big">' + (P.conc != null ? '<div data-goto="port~poconc"><small>🎯 집중</small><b class="' + cls(P.conc) + '" data-num="' + P.conc + '" data-k="conc">' + sg(P.conc) + '</b></div>' : '') +
-        '<div data-goto="port~pokick"><small>⚡ 킥</small><b class="' + cls(P.kick) + '" data-num="' + P.kick + '" data-k="kick">' + sg(P.kick) + '</b></div><div data-goto="port~pohero"><small>💼 기본</small><b class="' + cls(P.base) + '" data-num="' + P.base + '" data-k="base">' + sg(P.base) + '</b></div></div>' +
-      '<div class="hm-l">S&amp;P500 <b class="' + cls(P.spy) + '">' + sg(P.spy) + '</b> · <a data-goto="port~pocmp" class="hm-nw">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a>' + (P.conc != null ?  ' <span class="hm-nw">' + (P.conc_up ? "🟢 상승장" : "🔴 상승장 아님") + '</span>' : '') + '</div>' +
-      '<div class="hm-sp">' + spark + '</div>' +
-      (P.change ? '<div class="hm-alert" data-goto="port~pofollow">🔁 ' + md(P.change.date) + ' 비중·상품 바뀜 — <b>따라하기에서 맞추기 ›</b></div>' : '') +
-      '<button class="hm-sh" data-share="port">📤 카톡으로 공유</button>');
-    // ⚡ 킥 (A9-3: 할 일 없는 날은 「쉬는 날」 · 잘 가는/안 가는 두 줄)
+    // ⚡ 공격(킥) 오늘 할 일 — 포트 카드 안 한 줄로 합침 (10/21)
     var ev = K.events || [];
-    var hasBuy = ev.some(function(x){ return x.k === "사기"; }), hasSell = ev.some(function(x){ return x.k !== "사기"; });
-    var chips = function(arr){ return (arr || []).map(function(o){ return '<span class="hm-chip" data-op="' + e(o.code) + '">' + e(o.tags || "") + ' ' + e(o.name) + ' <b class="' + cls(o.r) + '">' + sg(o.r, 1) + '</b></span>'; }).join(""); };
-    C.kick = card("port~pokick", "⚡", ev.length ? '<span class="hm-kt ' + (hasSell ? "sell" : "buy") + '">킥 — 오늘 할 일 ' + (hasBuy ? "🟢" : "") + (hasSell ? "🔴" : "") + '</span>' : '<span class="hm-kt rest">킥 — 오늘은 쉬는 날 ✓</span>', K.n + "종목 · 포트의 " + K.w + "%",
-      (ev.length ? ev.map(function(x){ return '<div class="hm-ev ' + (x.k === "사기" ? "buy" : "sell") + '">' + (x.k === "사기" ? "🟢 사기" : x.k === "팔기" ? "🔴 팔기" : "🟡 절반") + ' <b data-op="' + e(x.code) + '">' + e(x.name) + ' ›</b>' + (x.r != null ? ' ' + sg(x.r, 1) : '') + (x.why ? ' <small>' + e(x.why) + '</small>' : '') + '</div>'; }).join("")
-        : '<div class="hm-l mut">' + md(K.asof) + ' 마감 기준 사고팔 것 없음 — 들고 있는 그대로</div>') +
-      ((K.best || []).length ? '<div class="hm-chips"><small class="hm-cl">🔥 잘 가는</small>' + chips(K.best) + '</div>' : '') +
-      ((K.worst || []).length ? '<div class="hm-chips"><small class="hm-cl">🧊 안 가는</small>' + chips(K.worst) + '</div>' : ''), "킥 보기");
+    var kickLine = ev.length ? ev.map(function(x){ return '<div class="hm-ev ' + (x.k === "사기" ? "buy" : "sell") + '">' + (x.k === "사기" ? "🟢 사기" : x.k === "팔기" ? "🔴 팔기" : "🟡 절반") + ' <b data-op="' + e(x.code) + '">' + e(x.name) + ' ›</b>' + (x.r != null ? ' ' + sg(x.r, 1) : '') + (x.why ? ' <small>' + e(x.why) + '</small>' : '') + '</div>'; }).join("")
+      : '<div class="hm-l mut">공격(킥) 오늘 할 일 없음 — ' + md(K.asof) + ' 마감 기준 그대로</div>';
+    C.port = card("port~pohero", "💼", "내 포트", md(P.start) + "부터 · " + md(P.asof) + " 미국 종가",
+      '<div class="hm-big"><div data-goto="port~pohero"><small>기본</small><b class="' + cls(P.base) + '" data-num="' + P.base + '" data-k="base">' + sg(P.base, 1) + '</b></div>' +
+        '<div data-goto="port~pokick"><small>공격(킥)</small><b class="' + cls(P.kick) + '" data-num="' + P.kick + '" data-k="kick">' + sg(P.kick, 1) + '</b></div>' +
+        (P.conc != null ? '<div data-goto="port~poconc"><small>집중</small><b class="' + cls(P.conc) + '" data-num="' + P.conc + '" data-k="conc">' + sg(P.conc, 1) + '</b></div>' : '') + '</div>' +
+      '<div class="hm-l">S&amp;P500 <b class="' + cls(P.spy) + '">' + sg(P.spy, 1) + '</b> · <a data-goto="port~pocmp" class="hm-nw">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a></div>' +
+      '<div class="hm-sp">' + spark + '</div>' +
+      (P.change ? '<div class="hm-alert" data-goto="port~pofollow">🔁 ' + md(P.change.date) + ' 비중·상품 바뀜 — <b>따라하기에서 맞추기 ›</b></div>' : '') + kickLine, "포트");
     // 🎯 집중
     if ((H.focus || []).length) C.focus = card("market~mkfo", "🎯", "오늘 집중", "돈이 몰리는 테마",
       H.focus.map(function(t){ return '<div class="hm-f"><b>' + e(t.name) + '</b> <span class="hm-chip ' + (t.stage === "과열" ? "b" : "g") + '">' + e(t.stage || "") + '</span> <small>5일 ' + sg(t.r5, 1) + ' · S&P 대비 20일 ' + sg(t.rs20, 1) + 'p</small>' +
@@ -229,7 +206,8 @@
     // 📊 성적
     C.score = card("score", "📊", "성적 한 줄", "무엇이 이기고 지나",
       '<div class="hm-l">' + ((S.good || []).length ? '✅ ' + e(S.good.join(" · ")) : '') + ((S.bad || []).length ? '<br>❌ ' + e(S.bad.join(" · ")) : '') + (!(S.good || []).length && !(S.bad || []).length ? '표본이 쌓이는 중' : '') + '</div>', "성적표");
-    (useTime ? ED.order : FIXED).forEach(function(k){ if (C[k]) h += C[k]; });
+    h += (C.port || "") + chgH + (wkH || "") +
+      '<div class="hm-more"><a data-goto="sector">🧭 나침반</a><a data-goto="sigmore">🗂 예고 채점·두뇌 논지</a><a data-goto="score">📊 성적표</a><a data-goto="feed~fdbrain">🧠 지금 생각</a><a data-gloss="1">📖 용어 풀이</a></div>';
     b.innerHTML = h;
     HSH = H;
     if (document.getElementById("hmbrlive")) getJSON("archive/x/live_kr.json?" + Math.floor(Date.now() / 120000), {ttl: 120000}).then(function(L){
@@ -245,6 +223,25 @@
     var sb = document.getElementById("hmstory"); if (sb) sb.onclick = function(ev){ ev.stopPropagation(); if (window.hmStory) hmStory(); };
     if (window.hmAfter) try { hmAfter(H); } catch(x) { if (window.console) console.warn("hmAfter", x); }   // 10/15 A9-1·3·4 (ux1015.js)
   }
+  /* 🎯 어제 예고 → 오늘 결과 — 10/21부터 홈이 아니라 🎯 신호 › 🗂 더 보기(sigmore)에 */
+  function gradeCard(H){
+    var G = H && H.grade; if (!G || !(G.items || []).length) return "";
+      var ok = G.items.filter(function(x){ return x.cls === "ok"; }).length, no = G.items.filter(function(x){ return x.cls === "no"; }).length;
+      var GV = gradeVotes(G), meTxt = GV.me_n ? ' · 나 ✓' + GV.me_ok + ' ✗' + (GV.me_n - GV.me_ok) : '';
+      var tot = GV.tot, cum = (tot.me_n >= 1 && tot.app_n >= 1) ? '<div class="hm-vs"><span>🗳 나 vs 앱 적중률</span>' +
+        '<div><small>나</small><i><b style="width:' + Math.round(tot.me_ok / tot.me_n * 100) + '%"></b></i><em>' + Math.round(tot.me_ok / tot.me_n * 100) + '% <span class="mut">(' + tot.me_n + '건)</span></em></div>' +
+        '<div><small>앱</small><i><b style="width:' + Math.round(tot.app_ok / tot.app_n * 100) + '%"></b></i><em>' + Math.round(tot.app_ok / tot.app_n * 100) + '% <span class="mut">(' + tot.app_n + '건)</span></em></div></div>' : '';
+      return card("market", "🎯", "어제 예고 → 오늘 결과", md(G.date) + " " + e(G.label || "") + " 채점 · 앱 ✓" + ok + " ✗" + no + meTxt + (G.rate != null ? ' · 누적 적중 <span data-num="' + G.rate + '" data-k="rate" data-d="0" data-u="%" data-nosign="1">' + G.rate + '%</span>' : "") + ((G.last10 || []).length ? ' <span class="hm-l10" title="최근 ' + G.last10.length + '번 채점 (왼쪽이 옛날)">' + dots(G.last10) + '</span>' : ""),
+        G.items.map(function(x, i){ var r = GV.rows[i] || {};
+          return '<div class="hm-gr ' + e(x.cls || "") + '"><span>' + e(x.mark || "·") + '</span><div><b>' + e(x.t) +
+            (r.v ? ' <span class="hm-me ' + (r.r === true ? "ok" : r.r === false ? "no" : "") + '">나 ' + (r.v > 0 ? "👍" : "👎") + (r.r === true ? " ✓" : r.r === false ? " ✗" : "") + '</span>' : '') +
+            '</b>' + trail(x.tr, true) + '<small>' + e(x.x) + '</small></div></div>'; }).join("") + cum + voices(G.voices) +
+        ((G.next || []).length ? '<div class="hm-wn"><small>🔮 오늘의 예고 — 내일 아침 채점 · 👍👎 로 내 표도</small>' + G.next.map(function(x, i){
+          return '<div class="hm-nx">' + (x.p != null ? '<span class="hm-pb" title="앱이 보는 확률 ' + Math.round(x.p * 100) + '%"><i style="width:' + Math.round(x.p * 100) + '%"></i><b>' + Math.round(x.p * 100) + '%</b></span>' : '') +
+            '<span class="hm-nxt">' + e(x.t) + trail(x.tr, false) + '</span>' + (G.date ? voteBtns(G.date, i + 1) : '') + '</div>'; }).join("") + '</div>' : '') +
+        '<button class="hm-sh" data-share="grade">📤 카톡으로 공유</button>', "시황");
+  }
+  window.gradeCard = gradeCard;
   window.hmEdition = edition;
   /* ---------- 🔀 10/15 A9-2 「바뀐 것」 전 → 후 두 토막 · 같은 말은 흐리게 ---------- */
   function chgBody(x){
@@ -302,15 +299,40 @@
     if (window.chShare) chShare("CH Investing", txt + "\n\n※ 투자 참고용 · 매수 추천 아님", hash);
   }, true);
 
+  /* ---------- 🗂 10/21 신호 › 더 보기 — 「있으면 좋은 것」 한 단계 아래 (사용자: 「6번은 신호 탭 안에서 한 단계 내리는 걸로」)
+     ① 어제 예고 → 오늘 결과(예고 채점 · 내 표) ② 두뇌 논지 목록 ③ 고래·컵·갭 상세 · 단타 통계 · 조용한 매집 바로가기 ---------- */
+  window.sigmoreView = function(){ return '<div id="smbody"><div class="loading">모으는 중…</div></div>'; };
+  window.sigmoreInit = function(){
+    Promise.all([J("home.json").catch(function(){ return null; }), getJSON("https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/brain/state.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).catch(function(){ return null; })]).then(function(a){
+      var b = document.getElementById("smbody"); if (!b) return;
+      var H = a[0] || {}, T = a[1] || {}; HSH = H;
+      var h = gradeCard(H) || '<section class="card"><h3>🎯 예고 채점</h3><div class="empty">오늘 채점이 아직 없어요.</div></section>';
+      var th = (T.theses || []).slice().sort(function(x, y){ return (y.conf || 0) - (x.conf || 0); });
+      if (th.length) h += '<section class="card sm-th"><h3>🧠 두뇌 논지 <span class="mut">' + th.length + '개 · 확신 높은 순 · 매시간 점검</span></h3>' + th.map(function(x){
+        var c = Math.round((x.conf || 0) * 100);
+        return '<div class="sm-t"><div class="sm-tb"><b>' + e(x.t) + '</b><span class="sm-c"><i style="width:' + c + '%"></i><em>' + c + '%</em></span></div>' +
+          (x.breaks ? '<small>이러면 틀림 — ' + e(x.breaks) + '</small>' : '') + (x.since ? '<small class="mut">' + md(x.since) + '부터</small>' : '') + '</div>'; }).join("") + '</section>';
+      var L = [["whale", "🐋", "고래 상세", "고래별 성적·합의 매수·매도 경보 등 17가지"], ["cup", "☕", "컵 상세", "돌파 후 추적·주봉 컵·신호 성적표"], ["gap", "📈", "갭 상세", "갭 메움·미국 밤 갭·실적 갭"],
+               ["danta", "⚡", "단타 통계", "전광판·날짜별 성적 (알림으로 받는 것)"], ["accum", "🤫", "조용한 매집", "거래량 이상·박스 돌파 (참고용)"]];
+      h += '<section class="card"><h3>📂 신호 상세 <span class="mut">각 화면 맨 아래 「더 보기」</span></h3>' + L.map(function(x){
+        return '<div class="sm-go" data-goto="' + x[0] + '"><span>' + x[1] + '</span><div><b>' + x[2] + '</b><small>' + x[3] + '</small></div><i>›</i></div>'; }).join("") + '</section>';
+      b.innerHTML = h;
+    });
+  };
   /* ---------- ③ 📊 성적표 ---------- */
   window.scoreView = function(){ return '<div id="scbody"><div class="loading">채점 모으는 중…</div></div>'; };
   window.scoreInit = function(){
-    J("scores.json").then(drawScore).catch(function(){ var b = document.getElementById("scbody"); if (b) b.innerHTML = '<div class="empty"><div class="big">📊</div>성적표가 아직 안 올라왔어요.</div>'; });
+    Promise.all([J("scores.json"), getJSON("archive/x/prob.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).catch(function(){ return null; })]).then(function(a){ drawScore(a[0], a[1]); }).catch(function(){ var b = document.getElementById("scbody"); if (b) b.innerHTML = '<div class="empty"><div class="big">📊</div>성적표가 아직 안 올라왔어요.</div>'; });
   };
   function bar(w, l){ var n = (w || 0) + (l || 0); if (!n) return ''; return '<div class="sc-bar"><span class="w" style="flex:' + w + '">' + (w ? w : "") + '</span><span class="l" style="flex:' + l + '">' + (l ? l : "") + '</span></div>'; }
-  function drawScore(S){
+  function drawScore(S, PB){
     var b = document.getElementById("scbody"); if (!b) return;
-    var h = '<section class="card sc-top sc-c" data-goto="port~pokick"><div class="sc-gb"><div><b>✅ 이기는 것</b>' + ((S.good || []).length ? S.good.map(function(x){ return '<span>' + e(x) + '</span>'; }).join("") : '<span class="mut">표본 쌓는 중</span>') + '</div>' +
+    /* 🎲 10/21: 홈 첫 카드의 「아직 동전보다 못함」 경고·적중률은 여기로 (전면엔 말로만) */
+    var d1 = PB && PB.score && PB.score.all && PB.score.all.d1 || {}, okN = d1.n ? Math.round(d1.hit / 100 * d1.n) : 0, proven = (d1.n || 0) >= 20 && (d1.hit || 0) >= 55;
+    var pcard = d1.n ? '<section class="card sc-c" data-goto="prob"><div class="sc-h"><span class="hm-i">🎲</span><div><b>시장확률 — 다음 날 방향</b><small>홈 「오늘 한 줄」이 얼마나 맞나 · 5개 시장 합산</small></div>' +
+      '<div class="sc-rate ' + (d1.hit >= 55 ? "up" : d1.hit < 45 ? "dn" : "") + '">' + Math.round(d1.hit) + '%<small>맞음</small></div><span class="hm-go">보기 ›</span></div>' + bar(okN, d1.n - okN) +
+      '<p class="note">' + d1.n + '번 중 ' + okN + '번 맞음. ' + (proven ? '20번 넘게 채점해 55%를 넘어서, 홈에서 「세게」 말해요.' : '<b>아직 동전보다 확실히 낫지 않아요</b> — 20번 넘게 채점해 55%를 넘기 전까지 홈에서는 「약간 오를 쪽」처럼 약하게만 말해요. 이 숫자로 사고팔지 마세요.') + '</p></section>' : '';
+    var h = pcard + '<section class="card sc-top sc-c" data-goto="port~pokick"><div class="sc-gb"><div><b>✅ 이기는 것</b>' + ((S.good || []).length ? S.good.map(function(x){ return '<span>' + e(x) + '</span>'; }).join("") : '<span class="mut">표본 쌓는 중</span>') + '</div>' +
       '<div><b>❌ 지는 것</b>' + ((S.bad || []).length ? S.bad.map(function(x){ return '<span>' + e(x) + '</span>'; }).join("") : '<span class="mut">없음</span>') + '</div></div>' +
       '<p class="note">매시간 자동 채점 · ' + e(String(S.at || "").slice(5)) + ' · 매일 저녁 자가 업그레이드가 이 숫자로 규칙을 고쳐요(지는 건 줄이고 이기는 건 늘림).</p></section>';
     (S.rows || []).forEach(function(r){
@@ -345,7 +367,8 @@
   /* ---------- ⑤ 접히는 카드 + 바로가기 칩 (💼 포트) ---------- */
   var FOLD = {};
   try { FOLD = JSON.parse(localStorage.getItem("fold") || "{}"); } catch(x) {}
-  var FMAP = [[/시장 .*비교/, "pocmp", "🏁 비교", 1], [/집중 포트/, "poconc", "🎯 집중", 1], [/섹터 의견/, "poviews", "🧭 섹터", 0], [/킥 칸 속/, "pokick", "⚡ 킥", 1], [/이렇게 담으면/, "pofollow", "📋 따라하기", 1], [/비중 바뀐 날/, "potl", "🔁 바뀐 날", 0],
+  // 10/21 「결론 → 근거」: 포트 탭 묶음은 처음엔 모두 접힘(맨 위 「부터 성적」이 결론) — 한 번 펼치면 기억
+  var FMAP = [[/시장 .*비교/, "pocmp", "🏁 비교", 0], [/집중 포트/, "poconc", "🎯 집중", 0], [/섹터 의견/, "poviews", "🧭 섹터", 0], [/킥 칸 속/, "pokick", "⚡ 킥", 0], [/이렇게 담으면/, "pofollow", "📋 따라하기", 0], [/비중 바뀐 날/, "potl", "🔁 바뀐 날", 0],
               [/해외 동종주/, "popeers", "🌏 동종주", 0], [/벌고 잃었나/, "poct", "🧩 칸별", 0], [/날짜별/, "podt", "📅 날짜별", 0]];
   window.foldify = function(root){
     if (!root) return;
