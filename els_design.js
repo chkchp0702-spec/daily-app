@@ -40,7 +40,7 @@
   function bars(){ var n = Math.round(ST.mat * 12 / ST.cyc), h = Math.ceil(n / 2), out = [];
     for (var i = 0; i < n; i++) out.push(i < h ? ST.f : Math.round((ST.f - (ST.f - ST.l) * (i - h + 1) / (n - h)) / 5) * 5);
     return out; }
-  function replay(series, names, br, cyc, ki){
+  function replay(series, names, br, cyc, ki, raw){
     // 공통 거래일
     var base = series[0], m = series.length, D = [], C = names.map(function(){ return []; });
     var ptr = series.map(function(){ return 0; });
@@ -82,6 +82,7 @@
       loss_avg: nLoss ? Math.round(lossSum / nLoss * 10) / 10 : null, loss_worst: nLoss ? Math.round(lossMin * 10) / 10 : null,
       loss_yrs: Object.keys(yrs).sort(function(a, b){ return yrs[b] - yrs[a]; }).slice(0, 4)};
     if (ki != null) out.ki_touch = Math.round(kiT / Ns * 1000) / 10;
+    if (raw) out.raw = {done: done, last: lastRatio, ki: kiFlag, hasKi: ki != null};   // ⚖️ 10/21 A10/21-3 세 갈래 길: 가입일마다 결과
     if (m > 1){ var f1 = 0, cnt = names.map(function(){ return 0; }); for (var j4 = 0; j4 < Ns; j4++) if (firstArg[j4] >= 0){ f1++; cnt[firstArg[j4]]++; }
       if (f1){ out.worst = {}; names.forEach(function(nm, i){ if (cnt[i]) out.worst[lab(nm)] = Math.round(cnt[i] / f1 * 100); }); } }
     return out;
@@ -177,6 +178,7 @@
     });
   }
   function paint(){
+    if (window.__tw3) try { __tw3(); } catch(x) {}   // ⚖️ 세 갈래 길도 같이
     var r = document.getElementById("dzres"); if (r) r.innerHTML = result();
     var n = document.getElementById("dznear"); if (n) n.innerHTML = nearHtml();
     var l = document.getElementById("dzlad"); if (l) l.innerHTML = ladder(bars());
@@ -198,6 +200,13 @@
       x.addEventListener("click", function(ev){ ev.stopPropagation(); }); });
   }
   window.elsDesign = function(box){ draw(box); };
+  // ⚖️ 10/21 A10/21-3 세 갈래 길(threeway.js)이 같은 조건·같은 엔진을 씀
+  window.__elsDz = {
+    ready: function(){ return idx().then(function(){ return all(); }); },
+    st: function(){ return ST; }, bars: bars, lab: lab, near: function(){ return near(); },
+    run: function(){ var names = ST.ua.slice(); if (!names.length) return Promise.resolve(null);
+      return Promise.all(names.map(px)).then(function(ss){ if (ss.some(function(x){ return !x; })) return null; try { return replay(ss, names, bars(), ST.cyc, ST.ki, true); } catch(x) { return null; } }); }
+  };
 
   var css = document.createElement("style");
   css.textContent =

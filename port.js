@@ -186,6 +186,7 @@
         '<div class="po-scro" id="poscro">' + scrubOut(WB) + '</div></div>' : '') + '</section>';
     if (S.pf === "mine") h += myHtml(MW);   // 🙋 고르는 칸은 성적 바로 아래 (바꾸면 위 숫자가 바로 바뀌는 게 보이게)
     h += cmpH;   // 10/12: 위 바로가기 칩 순서(💼 성적 → 🏁 비교)와 맞춤
+    h += '<div id="podz"></div>';   // 🎛 10/21 A10/21-1 포트 설계기 (port_design.js)
 
     if (CN && CN.regime) h += concHtml();
     if (K && S.pf === "kick") h += kickHtml();
@@ -262,6 +263,7 @@
     [].forEach.call(b.querySelectorAll(".po-mode button[data-p]"), function(y){ y.classList.toggle("on", y === x); }); rows(); }; });
     document.getElementById("pocopy").onclick = copy;
     myBind(b);
+    if (window.portDesign) try { portDesign(document.getElementById("podz"), {spx: +MW.spx || 0, ndx: +MW.ndx || 0, gold: +MW.gold || 0}); } catch(x) {}   // 🎛 A10/21-1
     var inf = b.querySelector(".po-inf"); if (inf) inf.addEventListener("toggle", function(){ S.inf = inf.open ? 1 : 0; keep(); });
     var hvt = document.getElementById("pohvt"); if (hvt) hvt.onclick = function(){ S.hv = S.hv ? 0 : 1; keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); };   // A11-4
     if (window.foldify) foldify(b);

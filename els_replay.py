@@ -114,6 +114,8 @@ def load_prices(names):
             if len(c) < 500:
                 print("✗ 짧음", n, len(c)); continue
             P[n] = {d.strftime("%Y-%m-%d"): float(v) for d, v in c.items() if float(v) > 0}
+            if n in FILL:
+                P[n] = fill_gaps(P[n], FILL[n], yf)
             print("✓", n, len(P[n]), min(P[n]), max(P[n]))
         except Exception as e:
             print("✗", n, e)
@@ -181,6 +183,36 @@ def replay(P, ks, bars, cyc, ki, pp):
     return out
 
 
+FILL = {"KOSPI200": "^KS11"}   # 10/21: 야후 KODEX 200(069500) 일봉이 2007-02~2009-04 통째로 빔 → 2008 폭락이 재생에서 빠져 ELS 가 실제보다 안전해 보였음.
+                               # 30일 넘게 빈 구간만 코스피 지수(^KS11) 등락률로 이어 붙임(코스피200 과 하루 등락 상관 0.99 남짓) · 앞뒤 값에 맞춰 비율 조정.
+
+
+def fill_gaps(px, alt, yf):
+    ds = sorted(px)
+    gaps = [(ds[i - 1], ds[i]) for i in range(1, len(ds)) if (datetime.date.fromisoformat(ds[i]) - datetime.date.fromisoformat(ds[i - 1])).days > 30]
+    if not gaps:
+        return px
+    try:
+        h = yf.download(alt, start=FROM, interval="1d", progress=False, auto_adjust=False, threads=False)
+        c = h["Close"].dropna()
+        if hasattr(c, "columns"):
+            c = c.iloc[:, 0]
+        A = {d.strftime("%Y-%m-%d"): float(v) for d, v in c.items() if float(v) > 0}
+    except Exception as e:
+        print("✗ 빈 구간 채우기", alt, e); return px
+    out = dict(px)
+    for a, b in gaps:
+        if a not in A or b not in A:
+            print("✗ 빈 구간 끝 값 없음", a, b); continue
+        k = px[a] / A[a]                       # 앞 끝에 맞춤
+        drift = (px[b] / (A[b] * k)) ** (1 / max(1, len([d for d in A if a < d <= b])))   # 뒤 끝도 맞도록 하루 몫씩 고르게 나눔
+        m = 1.0
+        for d in sorted(x for x in A if a < x < b):
+            m *= drift; out[d] = A[d] * k * m
+        print("✓ 빈 구간 채움", a, "~", b, len([x for x in A if a < x < b]), "일 ·", alt, "· 끝 맞춤", round(drift ** len([d for d in A if a < d <= b]), 4))
+    return out
+
+
 def main():
     items = []
     try:
@@ -243,7 +275,7 @@ def px_stale():
         j = json.load(open(os.path.join(PXD, "index.json"), encoding="utf-8"))
         t = datetime.datetime.strptime(j["updated"][:10], "%Y-%m-%d").date()
         miss = [n for n in DESIGN if n not in (j.get("assets") or {})]
-        return (datetime.date.today() - t).days >= PX_DAYS or bool(miss) or "--px" in sys.argv
+        return (datetime.date.today() - t).days >= PX_DAYS or bool(miss) or "--px" in sys.argv or j.get("fill_v") != 1   # 10/21 빈 구간 채움 뒤 한 번 새로
     except Exception:
         return True
 
@@ -255,7 +287,7 @@ def slug(n):
 def write_px(P):
     """기초자산마다 종가 일봉 → els_px/<코드>.json {n, d0, dd:[날짜 간격(일)], c:[종가 유효숫자 5자리]} + index.json"""
     os.makedirs(PXD, exist_ok=True)
-    idx = {"updated": (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)).strftime("%Y-%m-%d %H:%M"), "from": FROM, "assets": {}}
+    idx = {"updated": (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)).strftime("%Y-%m-%d %H:%M"), "from": FROM, "assets": {}, "fill_v": 1}
     try:
         old = json.load(open(os.path.join(PXD, "index.json"), encoding="utf-8")).get("assets") or {}
     except Exception:

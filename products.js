@@ -489,7 +489,7 @@
       (full ? '<p class="note" style="margin:4px 0 0">기초자산 일봉으로 이 조건(배리어·주기·KI)만 그대로 돌린 과거 계산 — 월지급·리자드·조기상환 뒤 재투자는 안 넣었고, 만기까지 결과가 난 가입일만 셌어요. 미래 보장이 아니고 사라는 뜻도 아니에요.</p>' : '') + '</div>';
   }
 
-  window.__elsApi = {repBand: function(st, f){ return repBand(st, f); }, repMini: function(st){ return repMini(st); }, rep: function(){ return ELSREP; }, D: function(){ return DATA; }};   // 🎛 설계기(els_design.js)에서 씀
+  window.__elsApi = {repBand: function(st, f){ return repBand(st, f); }, repMini: function(st){ return repMini(st); }, rep: function(){ return ELSREP; }, D: function(){ return DATA; }, load: function(){ elsRep(""); return ELSREPW || Promise.resolve(); }};   // 🎛 설계기(els_design.js)에서 씀
   function repMini(st){ if (!st || !st.k || !st.k.length) return ""; var cyc = st.cyc || 6, mo = cyc % 12 === 0 ? (cyc / 12) + "년" : cyc + "개월"; return '<span class="pd-rpm"><span>🎬 과거 ' + mo + ' 상환 ' + st.k[0].toFixed(0) + '%</span><b class="' + (st.loss || st.loss_avg != null ? 'dn' : '') + '">과거 손실 ' + ((st.loss || 0) < 0.5 && st.loss_avg != null ? '1% 미만' : (st.loss || 0).toFixed(0) + '%') + '</b></span>'; }
 
   /* ───────── 🎯 ELS ───────── */
@@ -838,7 +838,8 @@
     P().then(function(D){
       var root = document.getElementById("pdroot"); if (!root || root.dataset.k !== key) return; DATA = D;
       var full = function(){ var r = document.getElementById("pdroot"); if (!r || r.dataset.k !== key) return;
-        r.innerHTML = (D.errors && D.errors.length ? '<p class="note" style="margin:0 0 8px">⚠️ 일부 자료를 못 받았어요: ' + e(D.errors.join(" · ").slice(0, 200)) + ' — 지난 값을 보여 줘요.</p>' : '') + VIEW[key](D);
+        r.innerHTML = (D.errors && D.errors.length ? '<p class="note" style="margin:0 0 8px">⚠️ 일부 자료를 못 받았어요: ' + e(D.errors.join(" · ").slice(0, 200)) + ' — 지난 값을 보여 줘요.</p>' : '') + (window.threeWay ? '<div id="pd3w"></div>' : '') + VIEW[key](D);
+        if (window.threeWay) try { threeWay(document.getElementById("pd3w"), D); } catch(x) {}   // ⚖️ 10/21 A10/21-3 세 갈래 길
         bindSeg("pdseg", function(k){ SEL[key] = k; keep(); redraw(); }); bindInner(); };
       window.__pdRedraw = function(){ redraw(); };
       var redraw = function(){ var b = document.getElementById("pdbody"); if (!b) return; var y = b.getBoundingClientRect().top; b.innerHTML = BODY[key](D, SEL[key] || {bond: "gov", fund: "pv", els: "open"}[key]); holdAt("#pdbody", y); bindInner(); };

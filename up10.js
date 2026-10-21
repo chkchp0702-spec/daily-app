@@ -355,7 +355,7 @@
         var t = k.textContent, m = FMAP.filter(function(x){ return x[0].test(t); })[0];
         g = m ? {sec: k, m: m, body: []} : null; if (g) groups.push(g); return;
       }
-      if (g && !k.classList.contains("po-mode") && !k.classList.contains("po-hero")) g.body.push(k); else g = null;
+      if (g && !k.classList.contains("po-mode") && !k.classList.contains("po-hero") && k.id !== "podz") g.body.push(k); else g = null;
     });
     if (!groups.length) return;
     groups.forEach(function(x){
