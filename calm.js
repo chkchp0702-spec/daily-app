@@ -178,6 +178,8 @@
     // 포트 탭 묶음(.fold)이 다른 「.fold」 단추 모양을 물려받아 상자 안 상자로 보이던 것 정리
     ".cz-st{float:right;font-style:normal;font-weight:400;font-size:12px;color:var(--sub);margin-left:8px}",
     "#pobody>.fold{padding:0;border:0;background:none;margin:0 0 8px}#pobody>.fold.open{margin-bottom:14px}#pobody>.fold:not(.open) .fold-h{margin:0}",
+    // 홈: 큰 「🏠 오늘」 머리·날짜(위 머리에 이미 있음) 숨김 → 첫 화면에 오늘 한 줄이 바로
+    "html[data-tab=home] #main>.hero{display:none}html[data-tab=home] .hm-day .hm-date{display:none}html[data-tab=home] .hm-day{margin-top:10px}",
     // ④ 정직 칩은 성적표에서만
     "html:not([data-tab=score]) .hon-chip,html:not([data-tab=score]) .hon-tag,html:not([data-tab=score]) .hon-line{display:none!important}",
     // 홈 아래 바로가기 줄
