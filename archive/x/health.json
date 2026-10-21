@@ -1,91 +1,85 @@
 {
- "at": "2026-10-21 16:25",
- "ok": false,
- "problems": [
-  "#whale 화면에 「열기 실패: Page.wait_for_selector: Timeout 30000ms exceeded.\nCall log:\n  - waiting for loca」",
-  "#whale 느림 (None초)",
-  "클릭 연동 실패: #home 「.hm-c[data-goto=\"port~pokick\"] .hm-h b」 → port 기대, 실제 ['Page.wait_for_selector: Timeout 20000ms exceeded.\\nCall log:\\n']",
-  "클릭 연동 실패: #home 「.hm-c[data-goto=\"score\"] .hm-h b」 → score 기대, 실제 ['Page.wait_for_selector: Timeout 20000ms exceeded.\\nCall log:\\n']",
-  "클릭 연동 실패: #home 「.hm-chip[data-op]」 → onepager 기대, 실제 ['Page.wait_for_selector: Timeout 20000ms exceeded.\\nCall log:\\n']"
- ],
+ "at": "2026-10-21 17:00",
+ "ok": true,
+ "problems": [],
  "data": [
   {
    "name": "💼 포트",
    "ok": true,
-   "age_h": 1.1,
+   "age_h": 0.6,
    "lim": 3
   },
   {
    "name": "⚡ 킥",
    "ok": true,
-   "age_h": 1.1,
+   "age_h": 0.6,
    "lim": 3
   },
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 1.1,
+   "age_h": 0.6,
    "lim": 3
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 1.1,
+   "age_h": 0.6,
    "lim": 3
   },
   {
    "name": "🌏 동종주",
    "ok": true,
-   "age_h": 1.1,
+   "age_h": 0.6,
    "lim": 3
   },
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 7.6,
+   "age_h": 8.1,
    "lim": 30
   },
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.3,
+   "age_h": 0.1,
    "lim": 1.5
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.4,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 1.3,
+   "age_h": 1.9,
    "lim": 30
   },
   {
    "name": "📱 앱 목록",
    "ok": true,
-   "age_h": 0.9,
+   "age_h": 0.1,
    "lim": 30
   },
   {
    "name": "🎲 시장확률",
    "ok": true,
-   "age_h": 0.6,
+   "age_h": 1.1,
    "lim": 2
   },
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 0.0,
+   "age_h": 0.6,
    "lim": 12
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 0.8,
+   "s": 0.6,
    "cards": 3,
    "len": 776,
    "bad": [],
@@ -94,16 +88,16 @@
   },
   {
    "tab": "market",
-   "s": 0.2,
+   "s": 0.5,
    "cards": 29,
-   "len": 1522,
+   "len": 1585,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "port",
-   "s": 0.2,
+   "s": 0.1,
    "cards": 11,
    "len": 758,
    "bad": [],
@@ -114,36 +108,34 @@
    "tab": "score",
    "s": 0.2,
    "cards": 10,
-   "len": 2588,
+   "len": 2589,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "whale",
-   "s": null,
-   "cards": 0,
-   "len": 0,
-   "bad": [
-    "열기 실패: Page.wait_for_selector: Timeout 30000ms exceeded.\nCall log:\n  - waiting for loca"
-   ],
+   "s": 0.5,
+   "cards": 21,
+   "len": 1319,
+   "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "cup",
-   "s": 0.4,
+   "s": 0.3,
    "cards": 11,
-   "len": 3016,
+   "len": 3015,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "gap",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 16,
-   "len": 2451,
+   "len": 2456,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -151,8 +143,8 @@
   {
    "tab": "sector",
    "s": 0.2,
-   "cards": 40,
-   "len": 3043,
+   "cards": 39,
+   "len": 2924,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -168,7 +160,7 @@
   },
   {
    "tab": "onepager",
-   "s": 0.1,
+   "s": 1.3,
    "cards": 1,
    "len": 521,
    "bad": [],
@@ -179,7 +171,7 @@
    "tab": "danta",
    "s": 0.3,
    "cards": 12,
-   "len": 1987,
+   "len": 1982,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -206,30 +198,33 @@
    "tab": "feed",
    "s": 0.2,
    "cards": 1,
-   "len": 5475,
+   "len": 5993,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "클릭 home → port",
-   "ok": false,
+   "ok": true,
    "got": [
-    "Page.wait_for_selector: Timeout 20000ms exceeded.\nCall log:\n"
+    "창:port",
+    true
    ]
   },
   {
    "tab": "클릭 home → score",
-   "ok": false,
+   "ok": true,
    "got": [
-    "Page.wait_for_selector: Timeout 20000ms exceeded.\nCall log:\n"
+    "창:score",
+    true
    ]
   },
   {
    "tab": "클릭 home → onepager",
-   "ok": false,
+   "ok": true,
    "got": [
-    "Page.wait_for_selector: Timeout 20000ms exceeded.\nCall log:\n"
+    "onepager",
+    true
    ]
   },
   {
@@ -263,6 +258,12 @@
     "창:port",
     true
    ]
+  },
+  {
+   "tab": "재시도로 열림",
+   "tabs": [
+    "whale"
+   ]
   }
  ],
  "jobs": [
@@ -270,13 +271,13 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-21T07:23"
+   "when": "2026-10-21T07:59"
   },
   {
    "repo": "daily-app",
    "job": "collect",
    "ok": true,
-   "when": "2026-10-21T06:32"
+   "when": "2026-10-21T07:58"
   },
   {
    "repo": "daily-app",
@@ -288,7 +289,7 @@
    "repo": "daily-app",
    "job": "opprice",
    "ok": true,
-   "when": "2026-10-21T00:54"
+   "when": "2026-10-21T07:20"
   },
   {
    "repo": "daily-app",
@@ -336,7 +337,7 @@
    "repo": "daily-app",
    "job": "live",
    "ok": true,
-   "when": "2026-10-21T07:23"
+   "when": "2026-10-21T07:53"
   },
   {
    "repo": "daily-app",
@@ -348,13 +349,13 @@
    "repo": "daily-app",
    "job": "keeper",
    "ok": true,
-   "when": "2026-10-21T05:47"
+   "when": "2026-10-21T07:31"
   },
   {
    "repo": "daily-app",
    "job": "feedback",
    "ok": true,
-   "when": "2026-10-21T07:12"
+   "when": "2026-10-21T07:33"
   },
   {
    "repo": "daily-app",
@@ -378,7 +379,7 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-20T12:49"
+   "when": "2026-10-21T07:25"
   },
   {
    "repo": "daily-app",
@@ -598,6 +599,7 @@
   }
  ],
  "week_fixed": [
+  "10/21 🩺 건강검진 홈 클릭 검사 3개를 오늘 정리된 홈 칸(킥 숫자·📊 성적표 링크·종목 이름)에 맞춤 · 탭 열",
   "10/20 📰 피드·🧠 두뇌 「지금 생각」 줄의 긴 글(주소 등)이 390px 화면 오른쪽 밖으로 나가던 것 고침(br",
   "10/19 🩺 건강검진 클릭 검사를 🪟 「창」(smooth.js, 10/15 사용자 「매끄럽게 열고 닫기」)에 맞춤 —"
  ],
