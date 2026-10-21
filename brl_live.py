@@ -112,6 +112,8 @@ def main():
         for x in D["usd"]:
             t = max(0.05, (datetime.date.fromisoformat(x["mat"]) - now.date()).days / 365.25)
             u = interp(pts, t); x["ust"] = round(u, 3); x["sp"] = round(x["ytm"] - u, 3)
+        # 헤알 표시 글로벌본드(예: 10.25% 2028 — 헤알로 정해지고 달러로 지급)는 금리가 헤알 수준이라 달러채에서 뺀다
+        D["usd"] = [x for x in D["usd"] if x.get("sp") is None or x["sp"] < 4]
     except Exception as e:
         ERR.append(f"미국채 곡선: {str(e)[:100]}")
     try:
