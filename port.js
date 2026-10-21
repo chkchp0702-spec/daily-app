@@ -367,6 +367,8 @@
       // 다시 그린 뒤 1초 동안은 긴 글 접기·그림이 자리를 바꿔도 누른 버튼을 같은 자리에 붙잡아 둠 (손으로 스크롤하면 멈춤)
       var t0 = Date.now(), stop = false, quit = function(){ stop = true; };
       window.addEventListener("touchstart", quit, {once: true, passive: true}); window.addEventListener("wheel", quit, {once: true, passive: true});
+      // 10/21: 붙잡는 1.2초 안에 다른 것(ⓘ 등)을 누르면 멈춤 — 안 멈추면 그 위에 설명 칸이 열릴 때 화면이 끌려가 누른 ⓘ 가 화면 밖으로 튐(화면 점검 port ⓘ 313→−14px)
+      setTimeout(function(){ window.addEventListener("click", quit, {once: true, capture: true}); window.addEventListener("pointerdown", quit, {once: true, passive: true}); }, 0);
       (function hold(){ if (stop || !n.isConnected) return; var d = n.getBoundingClientRect().top - top; if (Math.abs(d) > 1) window.scrollTo({top: window.scrollY + d, behavior: "instant"});
         if (Date.now() - t0 < 1200) requestAnimationFrame(hold); })(); }
     else window.scrollTo(0, y0);

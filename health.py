@@ -95,6 +95,7 @@ def app_checks():
         ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2)
         ctx.add_init_script("try{localStorage.setItem('userName','건강검진')}catch(e){}")
         ctx.route(re.compile(r"https://ntfy\.sh/.*"), lambda r: r.abort())      # 검사 중 알림·사용 기록 안 보냄
+        retried = []
         for tab in TABS:
             pg = ctx.new_page()
             errs = []
@@ -102,8 +103,15 @@ def app_checks():
             pg.on("dialog", lambda d: d.dismiss())
             t0 = time.time()
             try:
-                pg.goto(APP + "#" + tab, wait_until="domcontentloaded", timeout=45000)
-                pg.wait_for_selector("#main .card, #main .empty", timeout=30000)
+                try:
+                    pg.goto(APP + "#" + tab, wait_until="domcontentloaded", timeout=45000)
+                    pg.wait_for_selector("#main .card, #main .empty", timeout=30000)
+                except Exception:
+                    # 10/21: 한 번 시간초과(10/19·10/21 #whale — 배포·네트워크 순간 끊김)는 새로 열어 한 번만 더 봄. 두 번 다 안 열리면 문제로 셈
+                    t0 = time.time()
+                    pg.goto(APP + "?r=" + str(int(t0)) + "#" + tab, wait_until="domcontentloaded", timeout=45000)
+                    pg.wait_for_selector("#main .card, #main .empty", timeout=30000)
+                    retried.append(tab)
                 first = round(time.time() - t0, 1)
                 pg.wait_for_timeout(4000)
                 info = pg.evaluate("""() => {
@@ -126,8 +134,9 @@ def app_checks():
                 probs.append(f"#{tab} 4초 뒤에도 「불러오는 중」 {info['loading']}곳")
             pg.close()
         # 🔗 누르면 제 화면으로 가나 (10/10: 클릭이 엉뚱한 곳으로 가로채이던 사고 뒤 추가)
-        for start, sel, want in [("home", '.hm-c[data-goto="port~pokick"] .hm-h b', ("port", "pokick")), ("home", '.hm-c[data-goto="score"] .hm-h b', ("score", None)),
-                                 ("home", '.hm-chip[data-op]', ("onepager", None)), ("score", '.sc-c[data-goto="market~mkfo"] .sc-h b', ("market", "mkfo")),
+        # 10/21: 홈 첫 화면 정리(673f9cd 「🧹 홈 더 줄임」)로 킥·성적표·종목 칸 모양이 바뀜 → 새 칸으로
+        for start, sel, want in [("home", '#hmbody [data-goto="port~pokick"]', ("port", "pokick")), ("home", '#hmbody a[data-goto="score"]', ("score", None)),
+                                 ("home", '#hmbody [data-op]', ("onepager", None)), ("score", '.sc-c[data-goto="market~mkfo"] .sc-h b', ("market", "mkfo")),
                                  ("home", '#bnav button[data-g="sig"]', (("whale", "cup", "gap", "accum", "danta"), None)), ("market", '#tabs .tab[data-k="sector"]', ("sector", None)), ("home", '.hm-big [data-goto="port~poconc"]', ("port", "poconc"))]:
             pg = ctx.new_page(); pg.on("dialog", lambda d: d.dismiss())
             try:
@@ -151,6 +160,7 @@ def app_checks():
                 probs.append(f"클릭 연동 실패: #{start} 「{sel}」 → {wn} 기대, 실제 {got}")
             pg.close()
         b.close()
+    if retried: res.append({"tab": "재시도로 열림", "tabs": retried})
     return res, probs
 
 
