@@ -1,0 +1,23 @@
+name: brl_live
+# 🇧🇷 브라질 국채 실시간 금리 (달러표시 글로벌본드 전 종목 · 헤알 10년 · 환율) → archive/x/brl_live.json — 평일 20분마다
+on:
+  schedule:
+    - cron: "*/20 * * * 1-5"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: brl_live
+  cancel-in-progress: false
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q requests
+      - run: python brl_live.py
+      - run: bash scripts/push.sh "brl_live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/brl_live.json
