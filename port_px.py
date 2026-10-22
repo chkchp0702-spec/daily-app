@@ -171,12 +171,12 @@ def main():
         P = dl(k, "2006-01-01", True)
         if P:
             idx["assets"][k] = write(k, P, 6); ch = True; print("✓", k, len(P))
-    # 코스피: 마지막 날이 바뀌었을 때만
+    # 코스피: 마지막 날이 바뀌었거나 그 날 값이 바뀌었을 때 (10/22 고침 — 장중 값이 낮 12시에 굳어 종가 −3.5% 가 안 들어갔음)
     P = dl("^KS11", "2000-01-01", False)
     if P:
         last = max(P); old = (idx["assets"].get("KOSPI") or {})
-        if old.get("to") != last or old.get("n") != len(P) or "--force" in sys.argv:
-            idx["assets"]["KOSPI"] = write("KOSPI", P, 7); ch = True; print("✓ KOSPI", len(P), last)
+        if old.get("to") != last or old.get("n") != len(P) or old.get("last") != round(P[last], 2) or "--force" in sys.argv:
+            idx["assets"]["KOSPI"] = write("KOSPI", P, 7); idx["assets"]["KOSPI"]["last"] = round(P[last], 2); ch = True; print("✓ KOSPI", len(P), last)
     if ch:
         idx["updated"] = now()
         json.dump(idx, open(os.path.join(D, "index.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))

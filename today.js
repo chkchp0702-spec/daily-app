@@ -298,7 +298,7 @@
     ".tz-comic{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 6px}" +
     ".tz-pan{border:2px solid var(--text);border-radius:14px;overflow:hidden;background:var(--panel2);display:flex;flex-direction:column;animation:tdPop .45s both}.tz-pan:nth-child(2){animation-delay:.15s}.tz-pan:nth-child(3){animation-delay:.3s}" +
     ".tz-pk{height:92px;background:#f3e6d6 center 12%/cover no-repeat;border-bottom:2px solid var(--text)}" +
-    ".tz-pt{padding:7px 8px 9px;min-width:0}.tz-pt small{display:block;font-size:11px;color:var(--sub);line-height:1.3}.tz-pt b{display:block;font-size:19px;font-weight:900;letter-spacing:-.5px;margin:2px 0}.tz-pt em{display:block;font-style:normal;font-size:10.5px;color:var(--sub);line-height:1.3}" +
+    ".tz-pt{padding:7px 8px 9px;min-width:0}.tz-pt small{display:block;font-size:11px;color:var(--sub);line-height:1.3}.tz-pt b{display:block;font-size:clamp(15px,4.6vw,19px);font-weight:900;letter-spacing:-.6px;margin:2px 0;white-space:nowrap}.tz-pt em{display:block;font-style:normal;font-size:10.5px;color:var(--sub);line-height:1.3}" +
     ".tz-raw summary{font-size:12.5px;color:var(--sub);text-decoration:underline;cursor:pointer;list-style:none;margin-top:4px}.tz-raw summary::-webkit-details-marker{display:none}" +
     // ⑤ 경주
     ".tz-race{margin:10px 0 4px;padding:10px 12px;border-radius:16px;background:var(--panel2)}" +
