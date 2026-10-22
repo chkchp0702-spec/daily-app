@@ -21,9 +21,8 @@ with sync_playwright() as p:
     pg.click("#gdq .gd-x")
     for k in ("prob", "els"):
         pg.evaluate(f"go('{k}')"); pg.wait_for_timeout(2500)
-        pg.click("#main > .hero h1"); pg.wait_for_timeout(600)
-        pg.screenshot(path=f"probe/shots/guide_hero_{k}.png", clip={"x": 0, "y": 0, "width": 390, "height": 260})
-        pg.click("#main > .hero .gd-hm"); pg.wait_for_timeout(5500)
+        pg.screenshot(path=f"probe/shots/guide_hero_{k}.png", clip={"x": 0, "y": 0, "width": 390, "height": 200})
+        pg.click("#main > .hero h1"); pg.wait_for_timeout(5500)
         pg.screenshot(path=f"probe/shots/guide_more_{k}.png")
         pg.click("#gdq .gd-x")
     b.close()

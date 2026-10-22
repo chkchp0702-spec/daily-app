@@ -65,9 +65,7 @@
     "#gdq .gd-ft button.on{color:var(--text);border-color:var(--acc)}" +
     "#gdq .gd-x{margin-left:auto;color:var(--text)!important}" +
     "#gdq .gd-more .gd-bub{max-height:52vh;overflow-y:auto;font-size:14.5px}#gdq .gd-more .gd-kid{width:84px;height:138px}" +
-    "#main > .hero .gd-hm{display:none}#main > .hero.show .gd-hm{display:flex}" +
-    ".gd-hm{align-items:center;gap:8px;margin-top:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:4px 12px 4px 4px;font:inherit;font-size:13px;cursor:pointer}" +
-    ".gd-hm i{width:24px;height:24px;border-radius:50%;background:#f3e6d6 url(" + IMG + ") center/cover no-repeat;flex:none}" +
+    "#main > .hero.gd-on h1:after{content:'';display:inline-block;width:22px;height:22px;margin-left:6px;vertical-align:-3px;border-radius:50%;border:1.5px solid var(--line);background:#f3e6d6 url(" + IMG + ") center/cover no-repeat}" +
     "@media (prefers-reduced-motion:reduce){#gdq .gd-kid,#gdbtn.new:after{animation:none}}";
   document.head.appendChild(css);
 
@@ -95,6 +93,12 @@
   }
   function close(){ if (timer) { clearInterval(timer); timer = null; } var q = document.getElementById("gdq"); if (q) q.remove(); }
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") close(); });
+  // 탭 머리(제목·꼬마 얼굴)를 누르면 소개 글 대신 바로 꼬마 설명 (nav2 의 소개 글 펼치기보다 먼저 잡음)
+  document.addEventListener("click", function(ev){
+    var h = ev.target.closest && ev.target.closest("#main > .hero.gd-on"); if (!h || ev.target.closest("button,a")) return;
+    var k = (typeof cur !== "undefined" && cur) || ""; if (!(MORE[k] || MORE_ALIAS[k])) return;
+    ev.stopImmediatePropagation(); ev.stopPropagation(); open("more:" + k);
+  }, true);
 
   function addBtn(){
     var brand = document.querySelector("header .top .brand"); if (!brand) return;
@@ -105,14 +109,9 @@
       brand.parentNode.insertBefore(b, brand.nextSibling);
     }
     b.classList.toggle("new", !seen()[curGrp()]);
-    // ⓘ 를 눌러 소개 글이 펼쳐질 때만 보이는 「꼬마에게 자세히 듣기」
+    // 10/22 사용자 「i 를 꼬마 얼굴로, 누르면 바로 꼬마 설명」 — 설명이 있는 탭은 머리에 표시만 달아 둠
     var h = document.querySelector("#main > .hero"), k = (typeof cur !== "undefined" && cur) || "";
-    if (h && !h.querySelector(".gd-hm") && (MORE[k] || MORE_ALIAS[k])){
-      var m = document.createElement("button"); m.className = "gd-hm"; m.type = "button";
-      m.innerHTML = '<i aria-hidden="true"></i>꼬마에게 자세히 듣기 ›';
-      m.onclick = function(e){ e.stopPropagation(); open("more:" + k); };
-      h.appendChild(m);
-    }
+    if (h) h.classList.toggle("gd-on", !!(MORE[k] || MORE_ALIAS[k]));
   }
   // 탭을 옮길 때마다 링 상태만 다시 (go 를 감쌈)
   function hook(){
