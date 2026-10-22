@@ -18,6 +18,27 @@
     prod: ["「상품」에서는 채권, 펀드, ELS를 한곳에서 비교해요.", "🏦 채권은 만기 순서로도 볼 수 있어요.", "하루 세 번 새 정보로 바뀌어요!"],
     feed: ["「피드」는 매일 읽는 블로그와 텔레그램 글을 모아 둔 곳이에요.", "주요 뉴스도 15분마다 들어와요.", "중요한 글은 시황 리포트에도 들어가요!"]
   };
+  // ⓘ 자세히 (10/22 사용자: 「작은 i 설명칸에도 캐릭터 얼굴 탭 — 확률은 이렇게 계산된다, 아직 그대로 따라하긴 무리, 컵은 매일 몇 종목 돌린다, 포트는 과거로 돌려 볼 수 있다, ELS는 직접 짜고 과거 확률도 본다 … 싹 다」)
+  //   숫자는 바뀌기 쉬운 것(오늘 성적)은 넣지 않고, 방법·규모·한계만. 오늘 성적은 「📊 성적표」로 보냄
+  var MORE = {
+    home: ["「오늘」은 앱 전체에서 오늘 꼭 볼 것만 뽑은 한 장이에요.", "포트 성적, 킥이 사고판 것, 오늘 집중할 곳, 알람, 두뇌 생각, 성적표가 한 줄씩 있어요.", "카드를 누르면 그 탭의 자세한 화면으로 바로 가요.", "매시간 새로 계산해요. 장중엔 한국 시장 숫자가 10분마다 바뀌어요."],
+    market: ["🌐 시황은 매일 아침 7시 20분쯤 만드는 시장 전략 리포트예요.", "미국·한국 전날 종가, 밤사이 뉴스, 전략가 의견, 매일 읽는 블로그·텔레그램 글을 다 읽고 써요.", "「어느 나라·어느 업종으로 돈이 몰리나 → 수혜 종목·ETF → 오늘 여기 집중」 순서예요.", "리포트가 한 예고는 다음 날 맞았는지 스스로 채점해요(확률로 적고 브라이어 점수로 쌓아요).", "⚠️ 리포트는 판단을 돕는 자료예요. 매수 추천이 아니에요."],
+    sector: ["🧭 나침반은 한국·미국·일본·중국·홍콩 5개 시장을 한 화면에 모은 거예요.", "오른 종목 수와 내린 종목 수, 지수 흐름, 강한 업종과 약한 업종을 보여 줘요.", "장중엔 10분마다 새 숫자로 바뀌어요.", "미국 장이 열리기 전엔 미국 지수 선물과 아시아·유럽 시장으로 미국을 미리 짐작해요."],
+    prob: ["🎲 시장확률은 내일과 일주일 뒤 시장이 오를 확률이에요.", "계산법: 평소 오르는 비율(기저율)에서 출발해요. 추세·변동성·심리(공포·탐욕)·자금(크레딧·환율)·시장 폭·외국인 수급·옵션 만기·전날 미국장 같은 근거 20가지 정도를 하나씩 더해요.", "근거끼리 비슷한 말을 하는 경우가 많아서, 근거가 많아도 「서로 다른 근거 2개 정도」 몫만 믿어요.", "과거에 잘 맞힌 방법은 가중치를 올리고, 못 맞힌 방법은 내려요(매일 자동 채점).", "그래서 숫자가 50% 근처에 자주 머물러요. 억지로 부풀리지 않으려는 거예요.", "⚠️ 실전 방향 성적이 20건 넘게 쌓이고 55%를 넘기 전까진 「약간 ○○ 쪽」까지만 말해요. 아직 그대로 따라 사고팔긴 무리예요."],
+    port: ["💼 포트는 「시황 리포트 배분표대로 투자했다면」을 매일 계산해요.", "💼 기본 = 뼈대(S&P500 반 + 나스닥 반, 시장이 200일선 아래면 현금·금을 늘림) · ⚡ 킥 = 기본에 확인된 신호(고래·컵·갭) 조금 · 🎯 집중 = 오르는 시장에 몰아서.", "시작일은 10/2가 기본이고, 날짜를 바꿔 다른 날부터 볼 수도 있어요.", "🎛 포트 설계기에서는 비중을 손가락으로 밀면 2008년부터 다시 굴려서 연 수익·최대 낙폭·최악의 해를 바로 보여 줘요.", "「정직」 숫자는 다음 날 진입·사고팔 때 비용까지 뺀 값이에요.", "⚠️ 실전 기록은 10/2부터라 아직 몇 주뿐이에요. 그대로 따라 하기엔 이르니, 위의 S&P500 비교 숫자와 성적표를 꼭 같이 보세요."],
+    score: ["📊 성적표는 앱이 한 말이 맞았는지 한곳에서 채점하는 곳이에요.", "시황 예고, 두뇌 생각, 킥 신호, 단타 알람, 해외 상품까지 다 매겨요.", "🧪 포트 규칙 검증은 규칙을 2008~2016년에서 고르고 2017년부터 시험한 결과예요.", "🧾 시도 장부는 지금까지 시험한 규칙 조합 수예요. 많이 시험할수록 1등은 운으로도 좋아 보여서, 과거 숫자는 절반쯤 깎아서 봐요."],
+    whale: ["🐋 고래는 미국 큰 펀드와 유명 투자자예요.", "SEC 13F 공시로 수익률 좋은 기관 20곳 + 유명 투자자 20곳, 모두 40곳을 매일 골라요(1년 복제 수익률 순위).", "그 40곳이 새로 사거나 크게 늘린 종목을 알려 줘요.", "🐋 원픽은 고래·차트·수급·흐름·뉴스를 100점으로 매겨 하나 뽑은 거예요.", "⚠️ 13F는 분기가 끝나고 45일 뒤에 공개돼요. 고래가 실제로 산 날보다 늦게 알게 돼요."],
+    cup: ["☕ 컵은 컵 모양(U자로 내렸다 회복) + 손잡이(살짝 쉬었다 가기) 차트예요.", "한국·미국·일본·중국·홍콩 약 2만 종목을 매일 다 훑어요.", "컵 깊이, 기간, 손잡이 거래량 감소, 사상최고가와의 거리, 주가 강도 같은 조건을 모두 통과한 것만 남겨요.", "봇이 눈으로 한 번 더 걸러요(👁 눈 검사).", "⚠️ 컵이 보인다고 다 오르진 않아요. 손잡이를 「돌파」한 뒤가 중요하고, 성적표의 정직 숫자를 같이 보세요."],
+    gap: ["📈 갭은 전날 종가보다 훌쩍 높게 시작해서 그 자리를 지키는 종목이에요.", "컵과 같은 5개 시장 약 2만 종목을 매일 훑어요.", "갭 직전에 평평하게 쉬던 박스, 신고가 돌파, 갭을 메우지 않고 지키는지로 모양 점수를 매겨요.", "우리 기록에선 4~8% 갭이 그보다 큰 갭보다 나았어요.", "⚠️ 비용과 다음 날 진입까지 뺀 「정직」 숫자가 기준(손익비 1.5)에 못 미치면 ⚠ 표시가 붙어요. 그땐 참고로만 보세요."],
+    screen: ["🔎 아침 거르기는 약 2만 7천 종목 중 하루 거래대금 10억 원 넘는 약 1만 2천 종목을 매일 아침 걸러요.", "거름망 네 개: 🤫 조용한 돈 유입 · 🏆 섹터 1등주 · 🌱 조용한 신고가 · 🐋 고래+임원 매수+차트(미국).", "👁 「볼 만함」을 눌러 두면, 다음 날 내 눈이 거름망보다 나았는지 채점해 줘요.", "⚠️ 살펴볼 후보일 뿐, 사라는 뜻이 아니에요."],
+    sigmore: ["🗂 더 보기는 있으면 좋은 자세한 자료를 모은 곳이에요.", "예고 채점, 두뇌 논지, 고래·컵·갭 상세, 단타 통계가 있어요.", "🤫 매집·⚡ 단타는 화면 대신 알림으로만 받아요. 단타는 아직 성적이 마이너스라 대부분 기록만 해요."],
+    bond: ["🏦 채권은 미래에셋증권이 지금 파는 국고채·미국채·브라질국채·공사채·회사채예요.", "세금 뗀 뒤 수익률 순으로 보여 주고, 만기 순서로도 정렬할 수 있어요.", "하루 세 번 새 정보로 바뀌어요.", "⚖️ 세 갈래 길에서는 같은 돈을 채권·ELS·포트에 넣었을 때 3년 뒤를 나란히 비교해요."],
+    fund: ["📦 펀드는 미래에셋이 파는 공모펀드 약 1,800개예요.", "사모펀드(재간접) 수익률 순위, 전체 순위, 유형별로 볼 수 있어요.", "⚠️ 과거 수익률은 앞으로를 보장하지 않아요. 보수(수수료)도 같이 보세요."],
+    els: ["🎯 ELS는 지금 청약 중인 ELS·ELB의 연 수익률·기초자산·구조·마감일을 모은 거예요.", "🎬 과거 재생: 이 조건으로 2006년부터 매일 가입했다면 몇 번이 일찍 끝나고 몇 번이 손실이었는지 보여 줘요.", "🎛 설계: 배리어·낙인·기초자산을 손가락으로 밀어 내 ELS를 직접 짜 보고, 과거 확률이 바로 바뀌어요.", "타사 비교, 📌 담아 두기(들고 있는 ELS가 지금 어디쯤인지)도 있어요.", "⚠️ 과거 계산이에요. 미래를 보장하지 않아요."],
+    feed: ["📰 피드는 매일 읽는 블로그·텔레그램 글과 주요 뉴스를 한곳에 모았어요.", "15분마다 새 글을 가져와요.", "📣 채널 성적표: 채널이 이름을 부른 종목을 5일·20일 뒤 채점해서, 어느 채널 말이 잘 맞는지 보여 줘요.", "중요한 글은 다음 날 시황 리포트 재료로 들어가요."]
+  };
+  var MORE_ALIAS = {accum: "sigmore", danta: "sigmore"};
+  var MORE_NAME = {home: "🏠 오늘", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", feed: "📰 피드"};
   function ls(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); } catch(x) { return null; } }
   function seen(){ return ls("gd_seen") || {}; }
   function mark(g){ var s = seen(); s[g] = 1; ls("gd_seen", s); }
@@ -43,6 +64,10 @@
     "#gdq .gd-ft button{border:1px solid var(--line);background:var(--panel2);color:var(--sub);border-radius:999px;padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer}" +
     "#gdq .gd-ft button.on{color:var(--text);border-color:var(--acc)}" +
     "#gdq .gd-x{margin-left:auto;color:var(--text)!important}" +
+    "#gdq .gd-more .gd-bub{max-height:52vh;overflow-y:auto;font-size:14.5px}#gdq .gd-more .gd-kid{width:84px;height:138px}" +
+    "#main > .hero .gd-hm{display:none}#main > .hero.show .gd-hm{display:flex}" +
+    ".gd-hm{align-items:center;gap:8px;margin-top:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:4px 12px 4px 4px;font:inherit;font-size:13px;cursor:pointer}" +
+    ".gd-hm i{width:24px;height:24px;border-radius:50%;background:#f3e6d6 url(" + IMG + ") center/cover no-repeat;flex:none}" +
     "@media (prefers-reduced-motion:reduce){#gdq .gd-kid,#gdbtn.new:after{animation:none}}";
   document.head.appendChild(css);
 
@@ -50,22 +75,23 @@
   function open(g){
     close();
     var q = document.createElement("div"); q.id = "gdq";
-    var L = SAY[g] || SAY.home;
-    q.innerHTML = '<div class="gd-sh" role="dialog" aria-label="꼬마 안내원"><div class="gd-row"><div class="gd-kid" aria-hidden="true"></div><div class="gd-bub"><div class="gd-t">' + NAME[g] + ' 설명</div>' +
+    var mk = g.indexOf("more:") === 0 ? g.slice(5) : null; if (mk) mk = MORE_ALIAS[mk] || mk;
+    var L = mk ? (MORE[mk] || SAY.home) : (SAY[g] || SAY.home);
+    q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + '" role="dialog" aria-label="꼬마 안내원"><div class="gd-row"><div class="gd-kid" aria-hidden="true"></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
       L.map(function(s){ return '<p class="gd-l">' + s + '</p>'; }).join("") + '</div></div><div class="gd-ft">' +
-      ["home", "mkt", "inv", "sig", "prod", "feed"].map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("") +
+      (mk ? '' : ["home", "mkt", "inv", "sig", "prod", "feed"].map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("")) +
       '<button class="gd-x">닫기</button></div></div>';
     document.body.appendChild(q);
     var ps = q.querySelectorAll(".gd-l"), i = 0;
     function next(){ if (i < ps.length) ps[i++].classList.add("on"); if (i >= ps.length) { clearInterval(timer); timer = null; } }
-    next(); timer = setInterval(next, 1100);
+    next(); timer = setInterval(next, mk ? 750 : 1100);
     q.onclick = function(e){
       var b = e.target.closest && e.target.closest("button");
       if (e.target === q || (b && b.classList.contains("gd-x"))) return close();
       if (b && b.dataset.g) return open(b.dataset.g);
       if (timer) { while (i < ps.length) next(); }      // 말풍선을 누르면 남은 줄을 한 번에
     };
-    if (g !== "intro") { mark(g); var bt = document.getElementById("gdbtn"); if (bt) bt.classList.remove("new"); }
+    if (g !== "intro" && !mk) { mark(g); var bt = document.getElementById("gdbtn"); if (bt) bt.classList.remove("new"); }
   }
   function close(){ if (timer) { clearInterval(timer); timer = null; } var q = document.getElementById("gdq"); if (q) q.remove(); }
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") close(); });
@@ -79,6 +105,14 @@
       brand.parentNode.insertBefore(b, brand.nextSibling);
     }
     b.classList.toggle("new", !seen()[curGrp()]);
+    // ⓘ 를 눌러 소개 글이 펼쳐질 때만 보이는 「꼬마에게 자세히 듣기」
+    var h = document.querySelector("#main > .hero"), k = (typeof cur !== "undefined" && cur) || "";
+    if (h && !h.querySelector(".gd-hm") && (MORE[k] || MORE_ALIAS[k])){
+      var m = document.createElement("button"); m.className = "gd-hm"; m.type = "button";
+      m.innerHTML = '<i aria-hidden="true"></i>꼬마에게 자세히 듣기 ›';
+      m.onclick = function(e){ e.stopPropagation(); open("more:" + k); };
+      h.appendChild(m);
+    }
   }
   // 탭을 옮길 때마다 링 상태만 다시 (go 를 감쌈)
   function hook(){
