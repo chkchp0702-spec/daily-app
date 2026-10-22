@@ -85,6 +85,7 @@
   var OBJ = {}, OBN = 0, AMT = 1000;
   try { AMT = +localStorage.getItem("prodamt") || 1000; } catch(x) {}
   function reg(kind, o){ var id = "x" + (++OBN); OBJ[id] = {k: kind, o: o}; return ' data-x="' + id + '"'; }
+  window.__pdObj = function(id){ return OBJ[id]; };   // 📌 10/22 A10/22-2 관제탑 「담아 두기」 단추(ux1022.js)
   /* 📅 10/21 사용자 「채권 솔팅할 때 만기순으로도 조회 가능하게 탭」 — 채권 모든 칸(국채·미국채·브라질 헤알/달러·공사채)에 같은 정렬 탭
      y = 수익률 높은 순(기본) · m = 만기 빠른 순 · M = 만기 먼 순. 고른 값은 이 기기에 기억 */
   var BSL = {y: "수익률 높은 순", m: "만기 빠른 순", M: "만기 먼 순"};

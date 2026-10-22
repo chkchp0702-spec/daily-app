@@ -93,23 +93,26 @@ def cond(x, src):
     return key, ks, bars, cyc, ki, pp
 
 
-def load_prices(names):
+def load_prices(names, start=FROM, short=False):
     import yfinance as yf
     P = {}
     for n in names:
         c = None
         for t in [TICK[n]] + ALT.get(n, []):            # 야후 지수 코드가 비면 같은 지수를 따라가는 ETF 로
             try:
-                h = yf.download(t, start=FROM, interval="1d", progress=False, auto_adjust=False, threads=False)
+                h = yf.download(t, start=start, interval="1d", progress=False, auto_adjust=False, threads=False)
                 c = h["Close"].dropna()
                 if hasattr(c, "columns"):
                     c = c.iloc[:, 0]
             except Exception as e:
                 print("✗", n, t, e); c = None
-            if c is not None and len(c) >= 500:
+            if c is not None and len(c) >= (10 if short else 500):
                 break
         try:
             if c is None:
+                continue
+            if short:
+                P[n] = {d.strftime("%Y-%m-%d"): float(v) for d, v in c.items() if float(v) > 0}
                 continue
             if len(c) < 500:
                 print("✗ 짧음", n, len(c)); continue
@@ -245,6 +248,16 @@ def main():
             write_px(P)
         except Exception as e:
             print("✗ els_px", e)
+    try:   # 📌 10/22 A10/22-2 내 ELS 관제탑: 18개 기초자산의 최근 종가(매 실행) — 7일마다 쓰는 일봉 파일 뒤에 이어 붙여 「지금 어디쯤」을 셈
+        if "--fake" in sys.argv:
+            Q = {n: P[n] for n in DESIGN if n in P}
+        else:
+            rest = [n for n in DESIGN if n not in P]
+            Q = {n: P[n] for n in DESIGN if n in P}
+            Q.update(load_prices(rest, start=(datetime.date.today() - datetime.timedelta(days=70)).isoformat(), short=True) if rest else {})
+        write_last(Q)
+    except Exception as e:
+        print("✗ els_px/last", e)
     old = {}
     try:
         old = json.load(open(OUT, encoding="utf-8"))
@@ -309,6 +322,18 @@ def write_px(P):
         idx["assets"][n] = {"f": f, "from": ds[0], "to": ds[-1], "n": len(ds)}
     json.dump(idx, open(os.path.join(PXD, "index.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("✓ els_px", len(idx["assets"]), "자산")
+
+
+def write_last(Q):
+    """els_px/last.json {updated, assets: {이름: [[날짜, 종가], …최근 30개]}}"""
+    out = {"updated": (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)).strftime("%Y-%m-%d %H:%M"), "assets": {}}
+    for n, ser in Q.items():
+        ds = sorted(ser)[-30:]
+        out["assets"][n] = [[d, float("%.6g" % ser[d])] for d in ds]
+    if out["assets"]:
+        os.makedirs(PXD, exist_ok=True)
+        json.dump(out, open(os.path.join(PXD, "last.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        print("✓ els_px/last", len(out["assets"]), "자산")
 
 
 def fake_prices(names):

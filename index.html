@@ -1484,7 +1484,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261022c";
+var APPV = "20261022d";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1530,7 +1530,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="compass.js?v=25"></script>
 <script defer src="problive.js?v=3"></script>
 <script defer src="prob.js?v=20"></script>
-<script defer src="products.js?v=24"></script>
+<script defer src="products.js?v=25"></script>
 <script defer src="els_design.js?v=2"></script>
 <script defer src="extras.js?v=10"></script>
 <script defer src="plus.js?v=2"></script>
@@ -1563,12 +1563,13 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1015c.js?v=2"></script>
 <script defer src="ux1019.js?v=8"></script>
 <script defer src="ux1019b.js?v=1"></script>
-<script defer src="port_design.js?v=2"></script>
+<script defer src="port_design.js?v=3"></script>
 <script defer src="twin.js?v=1"></script>
 <script defer src="threeway.js?v=1"></script>
 <script defer src="tidy.js?v=4"></script>
 <script defer src="smooth.js?v=2"></script>
 <script defer src="calm.js?v=5"></script>
+<script defer src="ux1022.js?v=1"></script>   <!-- 😱📌👁 10/22 A10/22-1·2·3 -->
 <script defer src="design.js?v=1"></script>   <!-- 🎨 10/22 디자인 한 벌 — 늘 맨 마지막 -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
