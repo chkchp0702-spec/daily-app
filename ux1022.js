@@ -39,9 +39,9 @@
       var t = s2day(j.d0), d = [], c = [];
       for (var i = 0; i < j.dd.length; i++){ t += j.dd[i]; d.push(day2s(t)); c.push(+j.c[i]); }
       KP = {d: d, c: c};
-      // 10/22 고침: 파일의 오늘 값은 장중에 굳은 것일 수 있음 → 한국 장 실시간(live_kr) 코스피로 오늘 칸을 맞춤
+      // 10/23 고침: 오늘뿐 아니라 파일에 아직 없는 최근 장(전날 종가)도 live_kr로 채움 · 10/22 고침: 파일의 오늘 값은 장중에 굳은 것일 수 있음 → 한국 장 실시간(live_kr) 코스피로 오늘 칸을 맞춤
       return getJSON("archive/x/live_kr.json?" + Math.floor(Date.now() / 120000), {ttl: 120000}).then(function(L){
-        var ix = L && L.date === kst() ? (L.index || []).filter(function(x){ return x.name === "코스피"; })[0] : null;
+        var ix = L && L.date && L.date <= kst() ? (L.index || []).filter(function(x){ return x.name === "코스피"; })[0] : null;
         if (ix && ix.last > 0){ var n = KP.d.length; if (KP.d[n - 1] === L.date) KP.c[n - 1] = +ix.last; else if (KP.d[n - 1] < L.date){ KP.d.push(L.date); KP.c.push(+ix.last); } }
         return KP;
       }, function(){ return KP; });
