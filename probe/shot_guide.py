@@ -5,23 +5,28 @@ APP = "https://chkchp0702-spec.github.io/daily-app/"
 os.makedirs("probe/shots", exist_ok=True)
 errs, log = [], []
 def tryclick(pg, sel, name):
+  try:
     el = pg.query_selector(sel)
     if not el:
         log.append(f"{name}: 없음 ({sel})"); return False
+    if not el.is_visible():
+        log.append(f"{name}: 안 보임"); return False
     el.scroll_into_view_if_needed(); pg.wait_for_timeout(300)
     el.click(); pg.wait_for_timeout(1800)
     ok = pg.query_selector("#gdq") is not None
     log.append(f"{name}: {'꼬마 뜸' if ok else '안 뜸'}")
     pg.screenshot(path=f"probe/shots/g_{name}.png")
-    if ok: pg.click("#gdq .gd-x"); pg.wait_for_timeout(300)
+    if ok: pg.evaluate("window.gdSay && document.getElementById('gdq') && document.getElementById('gdq').remove()")
     return ok
+  except Exception as e:
+    log.append(f"{name}: 오류 {str(e)[:160]}"); return False
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, color_scheme="light")
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.goto(APP + "?t=" + str(int(time.time())), wait_until="networkidle", timeout=90000)
     pg.wait_for_timeout(6000)
-    if pg.query_selector("#gdq"): pg.click("#gdq .gd-x")
+    pg.evaluate("document.getElementById('gdq') && document.getElementById('gdq').remove()")
     pg.evaluate("go('sector')"); pg.wait_for_timeout(5000)
     log.append("sector 얼굴 수 %d" % pg.eval_on_selector_all(".gd-i", "x => x.length"))
     tryclick(pg, ".nt-b", "sector_note")
