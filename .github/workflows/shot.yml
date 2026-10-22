@@ -1,0 +1,19 @@
+name: shot
+# 🧒 화면 확인용 스크린샷 (손으로만 실행)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  shot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -q playwright && python -m playwright install --with-deps chromium && sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji >/dev/null
+      - run: sleep 60 && python probe/shot_guide.py
+      - run: |
+          git config user.name "shot-bot"; git config user.email "shot-bot@users.noreply.github.com"
+          git add probe/shots && git commit -q -m "shot $(TZ=Asia/Seoul date '+%m/%d %H:%M')" && for i in 1 2 3; do git pull -q --rebase && git push -q && break; sleep 5; done || true
