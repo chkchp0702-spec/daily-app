@@ -410,14 +410,14 @@ em.tk{font-style:normal;font-size:11px;color:var(--dim);margin-left:4px;font-wei
 <link rel="stylesheet" href="plus.css?v=43">
 </head>
 <body>
-<!-- 🧒 10/22 사용자: 앱을 켜면 꼬마가 「오늘도 행복한 하루 되세요」 + 「늘 업데이트되니 껐다 다시 켜기 권해요」 2초 뒤 앱으로 -->
+<!-- 🧒 10/22 사용자: 앱을 켜면 꼬마가 「오늘도 행복한 하루 되세요」 + 「늘 업데이트되니 껐다 다시 켜기 권해요」 3초 뒤 앱으로 (10/22 2초→3초 · 두 줄 글씨 크기 같게) -->
 <div id="kidsplash" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;background:#f3e6d6;transition:opacity .45s ease;font-family:inherit">
   <img src="img/kid_hello.jpg?v=1" alt="" style="width:min(58vw,240px);height:auto;border-radius:28px;box-shadow:0 10px 30px rgba(80,50,20,.18);animation:kshop 1.6s ease-in-out infinite">
-  <div style="font-size:22px;font-weight:800;color:#2a1d10;letter-spacing:-.4px;text-align:center">오늘도 행복한 하루 되세요! ☀️</div>
-  <div style="font-size:13.5px;line-height:1.55;color:#6b5640;text-align:center;max-width:300px">이 앱은 늘 업데이트되니,<br>한 번 껐다가 다시 켜는 걸 늘 권해드려요</div>
+  <div style="font-size:19px;line-height:1.5;font-weight:800;color:#2a1d10;letter-spacing:-.4px;text-align:center">오늘도 행복한 하루 되세요! ☀️</div>
+  <div style="font-size:19px;line-height:1.5;font-weight:600;color:#6b5640;letter-spacing:-.4px;text-align:center;max-width:320px">이 앱은 늘 업데이트되니,<br>한 번 껐다가 다시 켜는 걸<br>늘 권해드려요</div>
 </div>
 <style>@keyframes kshop{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}@media (prefers-reduced-motion:reduce){#kidsplash img{animation:none}}</style>
-<script>(function(){var s=document.getElementById("kidsplash");if(!s)return;var done=false;function go(){if(done)return;done=true;s.style.opacity="0";setTimeout(function(){s.remove();},460);}setTimeout(go,2000);s.addEventListener("click",go);})();</script>
+<script>(function(){var s=document.getElementById("kidsplash");if(!s)return;var done=false;function go(){if(done)return;done=true;s.style.opacity="0";setTimeout(function(){s.remove();},460);}setTimeout(go,3000);s.addEventListener("click",go);})();</script>
 <header>
   <div class="top">
     <div class="brand"><span id="brandDot">CH</span> Investing</div>
@@ -1492,7 +1492,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261022i";
+var APPV = "20261022j";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1578,7 +1578,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="smooth.js?v=2"></script>
 <script defer src="calm.js?v=5"></script>
 <script defer src="ux1022.js?v=1"></script>   <!-- 😱📌👁 10/22 A10/22-1·2·3 -->
-<script defer src="guide.js?v=5"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
+<script defer src="guide.js?v=6"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
 <script defer src="design.js?v=1"></script>   <!-- 🎨 10/22 디자인 한 벌 — 늘 맨 마지막 -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>

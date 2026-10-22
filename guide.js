@@ -5,6 +5,8 @@
    · 대사는 아래 SAY 만 고치면 됨 (화면이 바뀌어도 다시 찍을 필요 없음) */
 (function(){
   var IMG = "img/guide.jpg?v=1", BODY = "img/guide_body.jpg?v=1";
+  // 🎨 10/22 Canva 로 만든 꼬마 자세 (나머지 묶음·자세히는 기본 그림) — 사용자 「일단 지금 있는 것만」
+  var POSE = {intro: "img/kid_wave.jpg?v=1", home: "img/kid_thumb.jpg?v=1", mkt: "img/kid_globe.jpg?v=1", inv: "img/kid_piggy.jpg?v=1"};
   var GRP = {home: "home", market: "mkt", sector: "mkt", prob: "mkt", port: "inv", score: "inv",
              whale: "sig", cup: "sig", gap: "sig", screen: "sig", sigmore: "sig", accum: "sig", danta: "sig",
              bond: "prod", fund: "prod", els: "prod", feed: "feed"};
@@ -78,7 +80,8 @@
     var q = document.createElement("div"); q.id = "gdq";
     var mk = g.indexOf("more:") === 0 ? g.slice(5) : null; if (mk) mk = MORE_ALIAS[mk] || mk;
     var L = mk ? (MORE[mk] || SAY.home) : (SAY[g] || SAY.home);
-    q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + '" role="dialog" aria-label="꼬마 안내원"><div class="gd-row"><div class="gd-kid" aria-hidden="true"></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
+    var pz = POSE[g] || (mk && POSE[GRP[mk] || ""]);
+    q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + '" role="dialog" aria-label="꼬마 안내원"><div class="gd-row"><div class="gd-kid" aria-hidden="true"' + (pz ? ' style="background-image:url(' + pz + ')"' : '') + '></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
       L.map(function(s){ return '<p class="gd-l">' + s + '</p>'; }).join("") + '</div></div><div class="gd-ft">' +
       (mk ? '' : ["home", "mkt", "inv", "sig", "prod", "feed"].map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("")) +
       '<button class="gd-x">닫기</button></div></div>';
@@ -215,7 +218,7 @@
   }
   function init(){
     addBtn(); hook();
-    if (!ls("gd_intro")) setTimeout(function(){ if (document.getElementById("gdq")) return; ls("gd_intro", 1); open("intro"); }, 2900);   // 인사 화면(2초) 뒤
+    if (!ls("gd_intro")) setTimeout(function(){ if (document.getElementById("gdq")) return; ls("gd_intro", 1); open("intro"); }, 3900);   // 인사 화면(3초) 뒤
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
   setTimeout(function(){ addBtn(); hook(); }, 900);
