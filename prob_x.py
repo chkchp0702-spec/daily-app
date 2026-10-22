@@ -56,12 +56,36 @@ def load_ext(fake=False):
     except Exception as e:
         print("CNN 공포·탐욕 실패", e)
     try:
+        kd = load_kofia()
+        if len(kd) > 1000:
+            out["kofia"] = kd
+    except Exception as e:
+        print("금투협 증시자금 실패", e)
+    try:
         pc = load_pcr()
         if len(pc) > 600:
             out["pcr"] = pc
     except Exception as e:
         print("풋콜 비율 실패", e)
     return out
+
+
+def load_kofia():
+    """금투협 freesis 증시자금추이 일별 (10/22 #9 · probe/credit_bt.py) — 투자자예탁금·미수금·반대매매(억원)
+       POST https://freesis.kofia.or.kr/meta/getMetaDataList.do  OBJ_NM STATSCU0100000060BO (1998~ 매일, 다음 날 발표)"""
+    body = json.dumps({"dmSearch": {"tmpV40": "100000000", "tmpV41": "1", "tmpV1": "D", "tmpV45": "19980101",
+                                    "tmpV46": dt.date.today().strftime("%Y%m%d"), "OBJ_NM": "STATSCU0100000060BO"}}).encode()
+    req = urllib.request.Request("https://freesis.kofia.or.kr/meta/getMetaDataList.do", data=body, method="POST",
+                                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+                                          "Content-Type": "application/json; charset=UTF-8", "Referer": "https://freesis.kofia.or.kr/"})
+    with urllib.request.urlopen(req, timeout=40) as r:
+        j = json.loads(r.read().decode("utf-8"))
+    x = pd.DataFrame(j["ds1"])
+    x.index = pd.to_datetime(x.pop("TMPV1"))
+    x = x.sort_index().apply(pd.to_numeric, errors="coerce")
+    k = pd.DataFrame({"dep": x["TMPV2"], "misu": x["TMPV5"], "bandae": x["TMPV6"], "bdr": x["TMPV7"]}).replace(0, np.nan)
+    print("금투협 증시자금", len(k), k.index[0].date(), "→", k.index[-1].date(), "예탁금", k["dep"].iloc[-1])
+    return k
 
 
 PCR_FILE = "archive/x/pcr_total.csv"
@@ -373,6 +397,25 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
             m = cond(d, (x >= 0.9).fillna(False), "풋콜 극공포(1년 상위 10%)")
             add("pcr", "🧮", "풋콜 극공포", "심리", m, 0.5, f"CBOE 전체 풋콜 5일 평균 1년 백분위 {cv*100:.0f}% — 옵션 시장 극공포 뒤 일주일은 평소보다 잘 오름(다음 날엔 안 씀)")
             if M and M[-1]["k"] == "pcr":
+                M[-1]["p1"] = None
+    # 🏦 투자자예탁금 급감 (10/22 #9 · probe/credit_bt.py) — 금투협 freesis 예탁금 20일 변화의 1년 백분위 ≤ 10% 날만, 한국 「일주일」만
+    #   발표가 다음 날이라 하루 늦춰 씀. 검증(2005~, 걸어가며 사전 150, 평가 기간 앞/뒤 절반): 코스피 5일 뒤 오름 −8.0%p (n 256) · −3.7%p (n 288) · 최근 2년 −5.3%p (n 64)
+    #   브라이어(5일) 0.24572→0.24507 · 0.24685→0.24678 · 최근 2년 0.24214→0.24171 — 세 기간 모두 개선 · 다음 날은 브라이어 엇갈려 안 씀
+    #   신용잔고(20일·5일 변화·250일 평균 대비·예탁금 대비)·반대매매 비중·금액·미수금은 앞/뒤 엇갈리거나 브라이어 개선 없음 ❌
+    #   「신용 급감·반대매매 많음 + 5일 −3%」 뒤 다음 날 +5~9%p 는 기간마다 n 51~123 · 최근 2년 반대 → ➖ 안 붙임
+    kd = ext.get("kofia")
+    if mk == "KR" and kd is not None and len(kd) > 1000:
+        k_ = kd.reindex(kd.index.union(idx)).ffill().reindex(idx).shift(1)
+        dch = k_["dep"].pct_change(20)
+        rk = dch.rolling(252, min_periods=120).rank(pct=True); cv = rk.iloc[-1]
+        research["kofia"] = {"d": str(kd.index[-1].date()), "dep": round(float(kd["dep"].iloc[-1]) / 10000, 1),
+                             "ch20": None if pd.isna(dch.iloc[-1]) else round(float(dch.iloc[-1]) * 100, 1),
+                             "rk": None if pd.isna(cv) else round(float(cv), 3),
+                             "bdr5": round(float(kd["bdr"].iloc[-5:].mean()), 1) if kd["bdr"].notna().any() else None}
+        if not pd.isna(cv) and cv <= 0.1:
+            m = cond(d, (rk <= 0.1).fillna(False), "예탁금 급감(1년 하위 10%)")
+            add("kofia", "🏦", "투자자예탁금 급감", "자금", m, 0.5, f"투자자예탁금 20일 {dch.iloc[-1]*100:+.1f}% (1년 백분위 {cv*100:.0f}%) — 개인 대기자금이 빠르게 빠질 때 코스피 일주일이 평소보다 약했음(다음 날엔 안 씀)")
+            if M and M[-1]["k"] == "kofia":
                 M[-1]["p1"] = None
     # 🌏 외국인 수급 (한국) — 20일 누적 순매수의 2년 백분위 + 연속 순매도 일수
     fr = ext.get("foreign")
