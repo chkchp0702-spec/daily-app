@@ -1,1 +1,9 @@
-오류 없음
+sector 얼굴 수 7
+sector_note: 꼬마 뜸
+sector_card: 꼬마 뜸
+port 얼굴 수 12
+port_note: 안 보임
+port_fold: 꼬마 뜸
+port_tip: 안 보임
+whale_card: 안 보임
+오류: 없음
