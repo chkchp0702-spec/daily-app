@@ -215,7 +215,7 @@
   }
   function init(){
     addBtn(); hook();
-    if (!ls("gd_intro")) setTimeout(function(){ if (document.getElementById("gdq")) return; ls("gd_intro", 1); open("intro"); }, 1500);
+    if (!ls("gd_intro")) setTimeout(function(){ if (document.getElementById("gdq")) return; ls("gd_intro", 1); open("intro"); }, 2900);   // 인사 화면(2초) 뒤
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
   setTimeout(function(){ addBtn(); hook(); }, 900);
