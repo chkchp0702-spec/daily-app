@@ -279,7 +279,7 @@
     [/비중 바뀐 날|날짜별 성적/, "🌐 시황 판단", "market"],
     [/날짜별 성적/, "📊 성적표", "score"]
   ];
-  function ttText(h){ var c = h.cloneNode(true); [].forEach.call(c.querySelectorAll(".mut,button,select,input,.fchev,.tt-i,a.btn"), function(x){ x.remove(); });
+  function ttText(h){ var c = h.cloneNode(true); [].forEach.call(c.querySelectorAll(".mut,button,select,input,.fchev,.tt-i,a.btn,.gd-b,.gd-i"), function(x){ x.remove(); });
     return c.textContent.replace(/\s+/g, " ").trim(); }
   var KEEPV = /추천 아님|변경 없음|종목은 없어요|넘은 비율|브라이어|보류 \d+건|도달은/;
   function titles(){

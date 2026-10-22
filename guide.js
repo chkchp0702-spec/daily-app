@@ -67,9 +67,14 @@
     "#gdq .gd-ft button.on{color:var(--text);border-color:var(--acc)}" +
     "#gdq .gd-x{margin-left:auto;color:var(--text)!important}" +
     "#gdq .gd-more .gd-bub{max-height:52vh;overflow-y:auto;font-size:14.5px}#gdq .gd-more .gd-kid{width:84px;height:138px}" +
-    "#main > .hero.gd-on h1:after{content:'';display:inline-block;width:22px;height:22px;margin-left:6px;vertical-align:-3px;border-radius:50%;border:1.5px solid var(--line);background:#f3e6d6 url(" + IMG + ") center/cover no-repeat}" +
+    "#main > .hero.gd-on h1:after{content:'';display:inline-block;width:28px;height:28px;margin-left:6px;vertical-align:-3px;border-radius:50%;border:1.5px solid var(--line);background:#f3e6d6 url(" + IMG + ") center/cover no-repeat}" +
     ".gd-i{display:inline-block;width:15px;height:15px;border-radius:50%;vertical-align:-2px;margin:0 1px;background:#f3e6d6 url(" + IMG + ") center/cover no-repeat;box-shadow:0 0 0 1px var(--line);font-style:normal}" +
-    "h3.tt-h:after,.mk-lab.tt-h:after,h3.tt-h.tt-on:after,.mk-lab.tt-h.tt-on:after{content:''!important;display:inline-block;width:16px;height:16px;margin-left:5px;border-radius:50%;vertical-align:-2px;background:#f3e6d6 url(" + IMG + ") center/cover no-repeat;box-shadow:0 0 0 1px var(--line)}" +
+    // 10/22 사용자 「작은 꼬마 잘 안 눌러져」 — 카드 머리 꼬마는 진짜 요소(.gd-b)로 크게(26px) + 보이지 않는 누르는 칸을 사방 12px 넓힘
+    "h3.tt-h:after,.mk-lab.tt-h:after,h3.tt-h.tt-on:after,.mk-lab.tt-h.tt-on:after{content:none!important;display:none!important}" +
+    ".gd-b{display:inline-block;flex:none;width:26px;height:26px;margin-left:6px;border-radius:50%;vertical-align:-6px;background:#f3e6d6 url(" + IMG + ") center/cover no-repeat;box-shadow:0 0 0 1.5px var(--line);position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}" +
+    ".gd-b:after,.gd-i:after{content:'';position:absolute;inset:-12px;border-radius:50%}" +
+    ".gd-i{position:relative;width:18px!important;height:18px!important;vertical-align:-4px!important}" +
+    ".gd-b:active,.gd-i:active{transform:scale(.9)}" +
     ":root:not(.td-off) .td-n::before{content:''!important;width:14px;height:14px;top:3px!important;border-radius:50%;background:#f3e6d6 url(" + IMG + ") center/cover no-repeat}" +
     "@media (prefers-reduced-motion:reduce){#gdq .gd-kid,#gdbtn.new:after{animation:none}}";
   document.head.appendChild(css);
@@ -175,6 +180,10 @@
   var swT = null;
   function swap(){
     swT = null;
+    [].forEach.call(document.querySelectorAll("h3.tt-h, .mk-lab.tt-h"), function(h){
+      if (h.querySelector(":scope > .gd-b")) return;
+      var b = document.createElement("i"); b.className = "gd-b"; b.setAttribute("aria-label", "꼬마 설명"); h.appendChild(b);
+    });
     [document.getElementById("main"), document.getElementById("sheet")].forEach(function(root){
       if (!root) return;
       var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {acceptNode: function(x){ var p = x.parentNode;
