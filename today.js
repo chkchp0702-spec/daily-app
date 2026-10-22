@@ -70,11 +70,11 @@
     var krp = PB && PB.markets && PB.markets.KR;
     var S = {slot: s, P: P, kr: kr, kq: kq, es: es};
     // 큰 숫자 하나
-    if (s === "day" && kr) S.big = {lab: "🇰🇷 지금 코스피", v: kr.chg, krx: 1, sub: (LK.up != null ? "오른 종목 " + Math.round(LK.up / Math.max(1, LK.total) * 100) + "%" : "") + " · " + e(LK.t) + " 기준"};
-    else if (s === "eve" && kr) S.big = {lab: "🇰🇷 오늘 코스피 마감", v: kr.chg, krx: 1, sub: kq ? "코스닥 " + sg(kq.chg, 1) + "%" : ""};
-    else if ((s === "night" || s === "eve") && es) S.big = {lab: "🇺🇸 S&P500 선물", v: es.chg, sub: "미국 장 열기 전 · " + e(US.t) + " 기준"};
-    else if (P.d1_spy != null) S.big = {lab: "🇺🇸 밤사이 S&P500", v: P.d1_spy, sub: md(P.d1_date) + " 미국 종가"};
-    else if (kr) S.big = {lab: "🇰🇷 코스피", v: kr.chg, krx: 1, sub: ""};
+    if (s === "day" && kr) S.big = {lab: "🇰🇷 지금 코스피", sh: "지금 코스피", v: kr.chg, krx: 1, sub: (LK.up != null ? "오른 종목 " + Math.round(LK.up / Math.max(1, LK.total) * 100) + "%" : "") + " · " + e(LK.t) + " 기준"};
+    else if (s === "eve" && kr) S.big = {lab: "🇰🇷 오늘 코스피 마감", sh: "코스피 마감", v: kr.chg, krx: 1, sub: kq ? "코스닥 " + sg(kq.chg, 1) + "%" : ""};
+    else if ((s === "night" || s === "eve") && es) S.big = {lab: "🇺🇸 S&P500 선물", sh: "S&P 선물", v: es.chg, sub: "미국 장 열기 전 · " + e(US.t) + " 기준"};
+    else if (P.d1_spy != null) S.big = {lab: "🇺🇸 밤사이 S&P500", sh: "밤사이 S&P", v: P.d1_spy, sub: md(P.d1_date) + " 미국 종가"};
+    else if (kr) S.big = {lab: "🇰🇷 코스피", sh: "코스피", v: kr.chg, krx: 1, sub: ""};
     S.wx = wxOf(S.big ? S.big.v : null);
     // 장중 선 (코스피 등락 % — snaps 네 번째 칸)
     S.line = LK && LK.date === td && (LK.snaps || []).length > 3 ? LK.snaps.map(function(x){ return +x[3]; }).filter(function(v){ return !isNaN(v); }) : null;
@@ -83,7 +83,7 @@
     // 꼬마 한마디
     var W = WX[S.wx], b = S.big;
     var lead = s === "morn" ? "좋은 아침이에요! " : s === "eve" ? "오늘 장 끝! " : s === "night" ? "밤이에요 🌙 " : s === "week" ? "주말이에요 🗓 " : "";
-    S.say = lead + (b ? b.lab.replace(/^\S+\s/, "") + " " + sg(b.v, 1) + "% — " : "") + W.say;
+    S.say = lead + (b ? b.sh + " " + sg(b.v, 1) + "% · " : "") + W.say;
     if (s === "morn" && (H.focus || []).length) S.say2 = "오늘 볼 곳: " + H.focus.map(function(t){ return t.name; }).slice(0, 2).join(" · ");
     else if (S.prob) S.say2 = "내일 코스피 오를 확률 " + S.prob.p + "% (" + S.prob.tone + " · 아직 검증 중)";
     return S;
@@ -175,8 +175,8 @@
     var neg1 = /^−|^-/.test(v1.trim());
     s.insertAdjacentHTML("afterbegin", '<div class="tz-ch"><b>🎞 ' + e(tt) + ' — 그날 팔았다면?</b><small>2000년 이후 같은 급락일로 되짚은 세 컷</small></div>' +
       '<div class="tz-comic">' +
-        pan("img/guide_src.jpg?v=1", "① 그날", e(tt.replace(/^\S+\s/, "")), "dn", "😱 깜짝 놀라 팔고 싶어져요") +
-        pan("img/kid_piggy.jpg?v=1", "② 팔고 " + e(lab1.replace(" 돌아옴", "")) + " 뒤 돌아왔다면", e(v1), neg1 ? "dn" : "up", e(n1) + (neg1 ? " — 놓친 몫" : "")) +
+        pan("img/guide_src.jpg?v=1", "① " + e(tt.replace(/\s*[−-][\d.]+%.*$/, "")), e((tt.match(/[−-][\d.]+%/) || [""])[0]), "dn", "😱 깜짝 놀라 팔고 싶어져요") +
+        pan("img/kid_piggy.jpg?v=1", "② 팔고 " + e(lab1.replace(/\s*뒤\s*돌아옴$/, "")) + " 뒤 돌아왔다면", e(v1), neg1 ? "dn" : "up", e(n1) + (neg1 ? " — 놓친 몫" : "")) +
         (vb ? pan("img/kid_thumb.jpg?v=1", "③ 반대로 " + e(lb.replace(/\s*\d+거래일 뒤$/, "")), e(vb), /^\+/.test(vb) ? "up" : "dn", "120거래일 뒤 평균") : "") +
       '</div>');
     s.appendChild(keep);
@@ -272,7 +272,7 @@
     ".tz-sky.cloud{background:linear-gradient(155deg,#94a3b8 0%,#5b6b80 100%)}" +
     ".tz-sky.rain{background:linear-gradient(160deg,#4b6cb7 0%,#1e2f5c 100%)}" +
     ".tz-sky.storm{background:linear-gradient(160deg,#3a3f5c 0%,#14172b 100%)}" +
-    ".tz-bg{position:absolute;left:0;right:0;bottom:0;width:100%;height:58%;z-index:-1;opacity:.9}" +
+    ".tz-bg{position:absolute;left:0;right:0;bottom:0;width:100%;height:42%;z-index:-1;opacity:.45}" +
     ".tz-bgl{stroke-dasharray:1200;stroke-dashoffset:1200;animation:tdDraw 1.6s ease-out .2s forwards}@keyframes tdDraw{to{stroke-dashoffset:0}}" +
     ".tz-rain{position:absolute;inset:-40px 0 0;z-index:-1;background:repeating-linear-gradient(105deg,rgba(255,255,255,.0) 0 14px,rgba(255,255,255,.16) 14px 15px);animation:tdRain .7s linear infinite;opacity:.8}" +
     "@keyframes tdRain{from{transform:translateY(-20px)}to{transform:translateY(20px)}}" +
