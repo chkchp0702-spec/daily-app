@@ -1,0 +1,12 @@
+{
+  "about": "조이(Joey) 표정 매일 채우기 — Canva generate-image(참조 그림 media MAHYtKjeWuk = 원본 조이)로 하루 크레딧만큼(보통 2장) 만들어 img/ 에 넣고, 적힌 자리에 연결. done 이 되면 날짜를 적는다.",
+  "style": "같은 아이: 3D 픽사풍, 짙은 갈색 더벅머리, 남색 카라 셔츠, 따뜻한 베이지 단색 배경, 상반신 세로(3:4), 글자·로고·워터마크 없음",
+  "todo": [
+    {"f": "kid_think.jpg", "pose": "턱에 손가락 대고 고개 갸웃하며 생각하는 표정", "use": "guide.js FACE.think — faceFor: '추정·검증 중·확률' 말 / 확률(prob) 설명 그룹 POSE", "done": null},
+    {"f": "kid_detect.jpg", "pose": "큰 돋보기를 눈앞에 들고 살펴보는 탐정 표정", "use": "신호 탭(컵·갭·아침 거르기·스캐너) 설명 POSE / 아이콘 풀이 🔎", "done": null},
+    {"f": "kid_night.jpg", "pose": "잠옷·수면모자, 하품하며 졸린 표정, 배경은 어두운 남색 밤하늘 톤", "use": "today.js 히어로 밤(night) 시간대 · 밤 연구 설명", "done": null},
+    {"f": "kid_worry.jpg", "pose": "두 손을 모으고 눈썹이 처진 걱정 표정", "use": "today.js WX.storm(폭풍) · 세 컷 만화 ① 급락 칸 · faceFor 큰 손실 말", "done": null},
+    {"f": "kid_tablet.jpg", "pose": "태블릿을 들고 화면을 가리키며 웃는 표정", "use": "피드(feed) 탭 설명 POSE · 아이콘 풀이 시트 머리", "done": null},
+    {"f": "kid_gift.jpg", "pose": "리본 달린 선물상자를 내밀며 활짝 웃는 표정", "use": "배지 팝업 · 새 업데이트 안내 · 상품(prod) 탭 POSE", "done": null}
+  ]
+}
