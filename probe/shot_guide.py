@@ -45,6 +45,13 @@ with sync_playwright() as p:
     pg.evaluate("go('home')"); pg.wait_for_timeout(7000)
     pg.evaluate("document.getElementById('gdq') && document.getElementById('gdq').remove()")
     pg.wait_for_timeout(3000)
+    try:
+        pg.evaluate("window.chIcons && chIcons()"); pg.wait_for_timeout(800)
+        pg.screenshot(path="probe/shots/icons.png")
+        pg.fill("#icz .icz-q", "고래"); pg.wait_for_timeout(400)
+        pg.screenshot(path="probe/shots/icons_q.png")
+        pg.evaluate("document.getElementById('icz') && document.getElementById('icz').remove()")
+    except Exception as ex: log.append("icons: " + str(ex)[:120])
     pg.screenshot(path="probe/shots/home_full.png", full_page=True)
     pg.set_viewport_size({"width": 390, "height": 844})
     pg.evaluate("window.scrollTo(0,0)"); pg.wait_for_timeout(500)
