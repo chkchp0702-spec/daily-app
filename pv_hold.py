@@ -25,7 +25,14 @@ async def lists():
     start = (datetime.date.today() - datetime.timedelta(days=730)).strftime("%Y%m%d"); end = datetime.date.today().strftime("%Y%m%d")
     async with async_playwright() as p:
         b = await p.chromium.launch(); pg = await b.new_page()
-        await pg.goto(B + "/dsab007/main.do", timeout=90000); await pg.wait_for_timeout(2000)
+        for k in range(3):   # 10/22 자가 업그레이드: DART 첫 화면 90초 멈춤으로 하루 실패 → 3번까지 다시 (load 대신 domcontentloaded)
+            try:
+                await pg.goto(B + "/dsab007/main.do", timeout=90000, wait_until="domcontentloaded"); await pg.wait_for_function("!!document.searchForm", timeout=30000); break
+            except Exception as e:
+                print(f"DART 첫 화면 {k+1}/3 실패:", str(e)[:80])
+                if k == 2: raise
+                await pg.wait_for_timeout(20000)
+        await pg.wait_for_timeout(2000)
         for nm in MG:
             try:
                 await pg.evaluate("""(a)=>{var f=document.searchForm; f.textPresenterNm.value=a[0]; f.startDate.value=a[1]; f.endDate.value=a[2];
