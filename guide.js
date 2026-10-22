@@ -92,7 +92,7 @@
     var mk = g.indexOf("more:") === 0 ? g.slice(5) : null; if (mk) mk = MORE_ALIAS[mk] || mk;
     var L = mk ? (MORE[mk] || SAY.home) : (SAY[g] || SAY.home);
     var pz = POSE[g] || (mk && (faceFor((MORE[MORE_ALIAS[mk] || mk] || []).slice(-1)) || POSE[GRP[mk] || ""]));
-    q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + '" role="dialog" aria-label="꼬마 안내원"><div class="gd-row"><div class="gd-kid" aria-hidden="true"' + (pz ? ' style="background-image:url(' + pz + ')"' : '') + '></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
+    q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + '" role="dialog" aria-label="안내자 조이"><div class="gd-row"><div class="gd-kid" aria-hidden="true"' + (pz ? ' style="background-image:url(' + pz + ')"' : '') + '></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
       L.map(function(s){ return '<p class="gd-l">' + s + '</p>'; }).join("") + '</div></div><div class="gd-ft">' +
       (mk ? '' : ["home", "mkt", "inv", "sig", "prod", "feed"].map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("")) +
       '<button class="gd-x">닫기</button></div></div>';
@@ -119,7 +119,7 @@
     if (!L || !L.length) return;
     close();
     var q = document.createElement("div"); q.id = "gdq";
-    q.innerHTML = '<div class="gd-sh gd-more" role="dialog" aria-label="꼬마 안내원"><div class="gd-row"><div class="gd-kid" aria-hidden="true" style="background-image:url(' + (face || faceFor(L) || BODY) + ')"></div><div class="gd-bub"><div class="gd-t">' + esc(title || "설명") + '</div>' +
+    q.innerHTML = '<div class="gd-sh gd-more" role="dialog" aria-label="안내자 조이"><div class="gd-row"><div class="gd-kid" aria-hidden="true" style="background-image:url(' + (face || faceFor(L) || BODY) + ')"></div><div class="gd-bub"><div class="gd-t">' + esc(title || "설명") + '</div>' +
       L.slice(0, 14).map(function(x){ return '<p class="gd-l">' + esc(x) + '</p>'; }).join("") + '</div></div><div class="gd-ft">' + (foot || "") + '<button class="gd-x">닫기</button></div></div>';
     document.body.appendChild(q);
     var ps = q.querySelectorAll(".gd-l"), i = 0;
@@ -188,7 +188,7 @@
     swT = null;
     [].forEach.call(document.querySelectorAll("h3.tt-h, .mk-lab.tt-h"), function(h){
       if (h.querySelector(":scope > .gd-b")) return;
-      var b = document.createElement("i"); b.className = "gd-b"; b.setAttribute("aria-label", "꼬마 설명"); h.appendChild(b);
+      var b = document.createElement("i"); b.className = "gd-b"; b.setAttribute("aria-label", "조이 설명"); h.appendChild(b);
     });
     [document.getElementById("main"), document.getElementById("sheet")].forEach(function(root){
       if (!root) return;
@@ -197,7 +197,7 @@
       while ((x = w.nextNode())) L.push(x);
       L.forEach(function(tn){
         var parts = tn.nodeValue.split("ⓘ"), f = document.createDocumentFragment();
-        parts.forEach(function(s, k){ if (k){ var i = document.createElement("i"); i.className = "gd-i"; i.setAttribute("aria-label", "꼬마 설명"); f.appendChild(i); } if (s) f.appendChild(document.createTextNode(s)); });
+        parts.forEach(function(s, k){ if (k){ var i = document.createElement("i"); i.className = "gd-i"; i.setAttribute("aria-label", "조이 설명"); f.appendChild(i); } if (s) f.appendChild(document.createTextNode(s)); });
         tn.parentNode.replaceChild(f, tn);
       });
     });

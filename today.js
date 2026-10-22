@@ -143,7 +143,7 @@
       '<div class="tz-say"><b>' + e(S.say) + '</b>' + (S.say2 ? '<small>' + e(S.say2) + '</small>' : '') + '</div>' +
       (mini.length ? '<div class="tz-mini">' + mini.map(function(m){ return '<div><small>' + m[0] + '</small><b class="tz-cnt" data-v="' + m[1] + '">' + sg(m[1], 2) + '%</b><em>' + e(m[2]) + '</em></div>'; }).join("") + '</div>' : '') +
       (BG.length ? '<div class="tz-bdg">' + BG.map(function(x){ return '<span title="' + e(x[2]) + '" data-why="' + e(x[2]) + '">' + x[0] + ' ' + e(x[1]) + '</span>'; }).join("") + '</div>' : '') +
-      '<div class="tz-hint">👆 카드를 길게 누르면 꼬마가 요약해 줘요</div>' +
+      '<div class="tz-hint">👆 카드를 길게 누르면 조이가 요약해 줘요</div>' +
     '</div>';
     return h;
   }
