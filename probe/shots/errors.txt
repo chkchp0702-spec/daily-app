@@ -1,4 +1,4 @@
-3.5초 뒤 인사 화면 사라짐
+3.5초 뒤 인사 화면 남아 있음
 sector 얼굴 수 7
 sector_note: 꼬마 뜸
 sector_card: 꼬마 뜸
