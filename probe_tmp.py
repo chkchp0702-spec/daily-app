@@ -10,38 +10,17 @@ def tryget(nm, url, **kw):
         return r
     except Exception as e:
         print("TRY", nm, "ERR", e); return None
-# --- 다른 주소 시험 ---
-for obj in ("STATSCU0100000060BO", "STATSCU0100000070BO", "STATSCU0100000080BO"):
-    tryget("freesis " + obj, "https://freesis.kofia.or.kr/meta/getMetaDataList.do",
-           json={"dmSearch": {"tmpV40": "100000000", "tmpV41": "1", "tmpV1": "D", "tmpV45": "20261001", "tmpV46": "20261021", "OBJ_NM": obj}},
-           h={"Content-Type": "application/json; charset=UTF-8", "Referer": "https://freesis.kofia.or.kr/"})
-tryget("daum deposit", "https://finance.daum.net/api/market_index/deposit?page=1&perPage=10", h={"Referer": "https://finance.daum.net/"})
-tryget("naver m deposit", "https://m.stock.naver.com/api/index/KOSPI/deposit")
-# --- 네이버 증시자금동향 (고객예탁금·신용잔고) ---
-rows = []; seen = set()
-for pg in range(1, 900):
-    try:
-        r = requests.get(f"https://finance.naver.com/sise/sise_deposit.naver?page={pg}", headers=UA, timeout=20)
-    except Exception as e:
-        print("page", pg, e); time.sleep(1); continue
-    t = r.content.decode("euc-kr", "ignore")
-    if pg == 1: print("NAVER p1", r.status_code, re.sub(r"\s+", " ", re.sub("<[^>]+>", " ", t))[:900])
-    new = 0
-    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", t, re.S):
-        tds = [re.sub(r"\s+", "", re.sub("<[^>]+>", "", x)) for x in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]
-        if tds and re.fullmatch(r"\d\d\.\d\d\.\d\d", tds[0]) and tds[0] not in seen:
-            seen.add(tds[0]); rows.append(tds); new += 1
-    if new == 0: print("끝 page", pg); break
-    time.sleep(0.05)
-print("행", len(rows), rows[:2], rows[-1:] if rows else None)
-def num(x):
-    x = x.replace(",", "")
-    try: return float(x)
-    except: return np.nan
-df = pd.DataFrame({"date": pd.to_datetime(["20" + r[0] for r in rows], format="%Y.%m.%d"),
-                   "dep": [num(r[1]) for r in rows], "cr": [num(r[3]) if len(r) > 3 else np.nan for r in rows]}).set_index("date").sort_index()
-os.makedirs("probe", exist_ok=True); df.to_csv("probe/credit_naver.csv")
-print(df.head(3)); print(df.tail(5)); print("신용잔고 있는 날", int(df.cr.notna().sum()))
+# --- 금투협 freesis (10/22 찾음: POST getMetaDataList.do) ---
+def fz(obj, a="19980101", b="20261231"):
+    r = requests.post("https://freesis.kofia.or.kr/meta/getMetaDataList.do",
+        json={"dmSearch": {"tmpV40": "100000000", "tmpV41": "1", "tmpV1": "D", "tmpV45": a, "tmpV46": b, "OBJ_NM": obj}},
+        headers={**UA, "Content-Type": "application/json; charset=UTF-8", "Referer": "https://freesis.kofia.or.kr/"}, timeout=60)
+    x = pd.DataFrame(r.json()["ds1"]); x.index = pd.to_datetime(x.pop("TMPV1")); return x.sort_index().astype(float)
+A = fz("STATSCU0100000060BO"); B = fz("STATSCU0100000070BO")
+print("060", len(A), A.index[0], A.tail(2).to_dict("records")); print("070", len(B), B.index[0], B.tail(2).to_dict("records"))
+df = pd.DataFrame({"dep": A["TMPV2"], "misu": A["TMPV5"], "bandae": A["TMPV6"], "bdr": A["TMPV7"], "cr": B["TMPV3"], "crq": B["TMPV4"], "crall": B["TMPV2"]})
+os.makedirs("probe", exist_ok=True); df.to_csv("probe/credit_freesis.csv")
+print(df.describe().T.to_string()); print("신용잔고 있는 날", int(df.cr.notna().sum()))
 if df.cr.notna().sum() < 800: sys.exit(0)
 # --- 검증 ---
 import yfinance as yf, prob
@@ -72,7 +51,8 @@ d = prob.feats(px)
 c = df.reindex(d.index, method="ffill").shift(1)
 cr, dep = c["cr"], c["dep"]
 F = {"신용20일변화": cr.pct_change(20), "신용5일변화": cr.pct_change(5), "신용/250일평균": cr / cr.rolling(250, min_periods=150).mean(),
-     "신용/예탁금": cr / dep, "예탁금20일변화": dep.pct_change(20)}
+     "신용/예탁금": cr / dep, "예탁금20일변화": dep.pct_change(20), "반대매매비중5일": c["bdr"].rolling(5).mean(),
+     "반대매매금액5일": c["bandae"].rolling(5).sum(), "미수금20일변화": c["misu"].pct_change(20)}
 out = {"now": {}}
 for nm, f in F.items():
     rk = f.rolling(252, min_periods=120).rank(pct=True)
@@ -80,8 +60,8 @@ for nm, f in F.items():
     labs = {"5칸": pd.cut(rk, [-0.01, .2, .4, .6, .8, 1.01], labels=["매우낮음", "낮음", "보통", "높음", "매우높음"]).astype(object).where(rk.notna()),
             "위꼬리≥90": pd.Series(np.where(rk >= .9, "위꼬리", "그외"), index=d.index).where(rk.notna()),
             "아래꼬리≤10": pd.Series(np.where(rk <= .1, "아래꼬리", "그외"), index=d.index).where(rk.notna())}
-    if nm == "신용5일변화":
-        labs["급감+5일↓3%(반대매매)"] = pd.Series(np.where((rk <= .1) & (d["r5"] < -.03), "반대매매", "그외"), index=d.index).where(rk.notna())
+    if nm in ("신용5일변화", "반대매매비중5일"):
+        labs["급감+5일↓3%(반대매매)"] = pd.Series(np.where(((rk <= .1) if nm == "신용5일변화" else (rk >= .9)) & (d["r5"] < -.03), "반대매매", "그외"), index=d.index).where(rk.notna())
     for ln, lab in labs.items():
         for yc in ("y1", "y5"):
             r = wf(d, lab, yc); out.setdefault(nm, {}).setdefault(ln, {})[yc] = r
