@@ -1,30 +1,38 @@
-"""🧒 꼬마 안내원 화면 확인용 스크린샷 (10/22) — 휴대폰 크기로 첫 방문 인사 카드 · 시장 탭 설명 카드를 찍어 probe/shots/ 에 남김"""
+"""🧒 꼬마 안내원 화면 확인 (10/22) — 휴대폰 크기 · 앱 곳곳의 ⓘ 가 꼬마 얼굴로 바뀌고 누르면 꼬마 말풍선이 뜨는지"""
 import os, time
 from playwright.sync_api import sync_playwright
 APP = "https://chkchp0702-spec.github.io/daily-app/"
 os.makedirs("probe/shots", exist_ok=True)
-errs = []
+errs, log = [], []
+def tryclick(pg, sel, name):
+    el = pg.query_selector(sel)
+    if not el:
+        log.append(f"{name}: 없음 ({sel})"); return False
+    el.scroll_into_view_if_needed(); pg.wait_for_timeout(300)
+    el.click(); pg.wait_for_timeout(1800)
+    ok = pg.query_selector("#gdq") is not None
+    log.append(f"{name}: {'꼬마 뜸' if ok else '안 뜸'}")
+    pg.screenshot(path=f"probe/shots/g_{name}.png")
+    if ok: pg.click("#gdq .gd-x"); pg.wait_for_timeout(300)
+    return ok
 with sync_playwright() as p:
     b = p.chromium.launch()
-    pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, color_scheme="dark")
+    pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, color_scheme="light")
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.goto(APP + "?t=" + str(int(time.time())), wait_until="networkidle", timeout=90000)
     pg.wait_for_timeout(6000)
-    pg.screenshot(path="probe/shots/guide_intro.png")
-    pg.click("#gdq .gd-x")
-    pg.evaluate("go('market')")
-    pg.wait_for_timeout(2500)
-    pg.screenshot(path="probe/shots/guide_btn.png", clip={"x": 0, "y": 0, "width": 390, "height": 140})
-    pg.click("#gdbtn")
-    pg.wait_for_timeout(5000)
-    pg.screenshot(path="probe/shots/guide_market.png")
-    pg.click("#gdq .gd-x")
-    for k in ("prob", "els"):
-        pg.evaluate(f"go('{k}')"); pg.wait_for_timeout(2500)
-        pg.screenshot(path=f"probe/shots/guide_hero_{k}.png", clip={"x": 0, "y": 0, "width": 390, "height": 200})
-        pg.click("#main > .hero h1"); pg.wait_for_timeout(5500)
-        pg.screenshot(path=f"probe/shots/guide_more_{k}.png")
-        pg.click("#gdq .gd-x")
+    if pg.query_selector("#gdq"): pg.click("#gdq .gd-x")
+    pg.evaluate("go('sector')"); pg.wait_for_timeout(5000)
+    log.append("sector 얼굴 수 %d" % pg.eval_on_selector_all(".gd-i", "x => x.length"))
+    tryclick(pg, ".nt-b", "sector_note")
+    tryclick(pg, "h3.tt-h", "sector_card")
+    pg.evaluate("go('port')"); pg.wait_for_timeout(6000)
+    log.append("port 얼굴 수 %d" % pg.eval_on_selector_all(".gd-i", "x => x.length"))
+    tryclick(pg, ".td-n", "port_note")
+    tryclick(pg, ".tt-i", "port_fold")
+    tryclick(pg, "[data-tip]:not(svg *)", "port_tip")
+    pg.evaluate("go('whale')"); pg.wait_for_timeout(5000)
+    tryclick(pg, "h3.tt-h", "whale_card")
     b.close()
-open("probe/shots/errors.txt", "w").write("\n".join(errs) or "오류 없음")
-print("errors:", errs)
+open("probe/shots/errors.txt", "w").write("\n".join(log + ["오류: " + (" | ".join(errs) or "없음")]))
+print(log, errs)

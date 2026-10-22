@@ -66,6 +66,9 @@
     "#gdq .gd-x{margin-left:auto;color:var(--text)!important}" +
     "#gdq .gd-more .gd-bub{max-height:52vh;overflow-y:auto;font-size:14.5px}#gdq .gd-more .gd-kid{width:84px;height:138px}" +
     "#main > .hero.gd-on h1:after{content:'';display:inline-block;width:22px;height:22px;margin-left:6px;vertical-align:-3px;border-radius:50%;border:1.5px solid var(--line);background:#f3e6d6 url(" + IMG + ") center/cover no-repeat}" +
+    ".gd-i{display:inline-block;width:15px;height:15px;border-radius:50%;vertical-align:-2px;margin:0 1px;background:#f3e6d6 url(" + IMG + ") center/cover no-repeat;box-shadow:0 0 0 1px var(--line);font-style:normal}" +
+    "h3.tt-h:after,.mk-lab.tt-h:after,h3.tt-h.tt-on:after,.mk-lab.tt-h.tt-on:after{content:''!important;display:inline-block;width:16px;height:16px;margin-left:5px;border-radius:50%;vertical-align:-2px;background:#f3e6d6 url(" + IMG + ") center/cover no-repeat;box-shadow:0 0 0 1px var(--line)}" +
+    ":root:not(.td-off) .td-n::before{content:''!important;width:14px;height:14px;top:3px!important;border-radius:50%;background:#f3e6d6 url(" + IMG + ") center/cover no-repeat}" +
     "@media (prefers-reduced-motion:reduce){#gdq .gd-kid,#gdbtn.new:after{animation:none}}";
   document.head.appendChild(css);
 
@@ -93,6 +96,96 @@
   }
   function close(){ if (timer) { clearInterval(timer); timer = null; } var q = document.getElementById("gdq"); if (q) q.remove(); }
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") close(); });
+  // ── 10/22 사용자 「세세한 곳들도 다 꼬마 설명으로」 — 앱 곳곳의 ⓘ(카드 머리·회색 설명 줄·「ⓘ 설명」·정직 칩 같은 풍선 도움말·「ⓘ 이 화면은?」)
+  //    → 글자 ⓘ 는 꼬마 얼굴로 바꾸고, 누르면 그 설명을 꼬마 말풍선으로. 그래프 위 점 도움말(svg)은 손가락으로 훑는 것이라 그대로 둠
+  function esc(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
+  function plain(h){ var d = document.createElement("div"); d.innerHTML = String(h || "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n"); return d.textContent || ""; }
+  function paras(t){ return String(t || "").replace(/ⓘ/g, "").split(/\n+/).map(function(x){ return x.replace(/\s+/g, " ").trim(); }).filter(function(x){ return x; }); }
+  function say(title, L, foot){
+    if (!L || !L.length) return;
+    close();
+    var q = document.createElement("div"); q.id = "gdq";
+    q.innerHTML = '<div class="gd-sh gd-more" role="dialog" aria-label="꼬마 안내원"><div class="gd-row"><div class="gd-kid" aria-hidden="true"></div><div class="gd-bub"><div class="gd-t">' + esc(title || "설명") + '</div>' +
+      L.slice(0, 14).map(function(x){ return '<p class="gd-l">' + esc(x) + '</p>'; }).join("") + '</div></div><div class="gd-ft">' + (foot || "") + '<button class="gd-x">닫기</button></div></div>';
+    document.body.appendChild(q);
+    var ps = q.querySelectorAll(".gd-l"), i = 0;
+    function next(){ if (i < ps.length) ps[i++].classList.add("on"); if (i >= ps.length) { clearInterval(timer); timer = null; } }
+    next(); timer = setInterval(next, 450);
+    q.onclick = function(e){
+      var b = e.target.closest && e.target.closest("button");
+      if (b && b.dataset.goto){ setTimeout(close, 0); return; }          // 「관련 화면」 → 앱의 원래 이동 처리에 맡김
+      if (e.target === q || (b && b.classList.contains("gd-x"))) return close();
+      if (timer) { while (i < ps.length) next(); }
+    };
+  }
+  window.gdSay = say;
+  function titleOf(el){
+    var c = el.closest && (el.closest(".fold") || el.closest("section.card") || el.closest(".card"));
+    var h = c && c.querySelector("h3, .fold-h, .mk-lab, summary");
+    var t = h ? (h.innerText || h.textContent || "") : "";
+    return t.replace(/ⓘ|▴|▾|▸|▼|▲|접기|펼치기/g, "").replace(/\s+/g, " ").trim().slice(0, 40) || "설명";
+  }
+  function inGuide(t){ return t.closest && t.closest("#gdq"); }
+  // ① 풍선 도움말(data-tip) — 그래프(svg) 밖의 칩·줄만
+  function tipEl(t){ var x = t.closest && t.closest("[data-tip]"); return x && !x.closest("svg") && !inGuide(x) && x.getAttribute("data-tip") ? x : null; }
+  window.addEventListener("pointerdown", function(ev){ if (tipEl(ev.target)) ev.stopImmediatePropagation(); }, true);
+  window.addEventListener("click", function(ev){
+    var t = ev.target; if (!t.closest || inGuide(t)) return;
+    var x = tipEl(t);
+    if (x && !t.closest("a,input,select,textarea,[data-goto],[data-op]")){
+      ev.stopImmediatePropagation(); ev.preventDefault();
+      var lab = (x.innerText || x.textContent || "").replace(/ⓘ/g, "").replace(/\s+/g, " ").trim();
+      return say(lab && lab.length <= 30 ? lab : titleOf(x), paras(plain(x.getAttribute("data-tip"))));
+    }
+    // ② 회색 설명 줄(ⓘ 첫 마디…) — 펼치는 대신 꼬마가 읽어 줌
+    var n = t.closest(".td-n");
+    if (n && !document.documentElement.classList.contains("td-off") && !t.closest("a,button")){
+      ev.stopImmediatePropagation(); return say(titleOf(n), paras(n.innerText || n.textContent));
+    }
+    // ③ 「ⓘ 설명」 단추(나침반)
+    var nb = t.closest(".nt-b");
+    if (nb){ var nt = nb.nextElementSibling; ev.stopImmediatePropagation(); return say(titleOf(nb), paras(nt ? (nt.innerText || nt.textContent) : "")); }
+    // ④ 「ⓘ 이 화면은? / 포트 4개, 뭐가 달라요?」 같은 접는 칸
+    var sm = t.closest("summary");
+    if (sm && sm.querySelector(".gd-i") && !t.closest("a,button")){
+      var d = sm.parentNode; ev.preventDefault(); ev.stopImmediatePropagation();
+      var body = [].filter.call(d.children, function(c){ return c !== sm; }).map(function(c){ return c.innerText || c.textContent; }).join("\n");
+      return say((sm.innerText || sm.textContent).replace(/ⓘ|눌러서 열고 닫기/g, "").replace(/\s+/g, " ").trim(), paras(body));
+    }
+    // ⑤ 카드 머리 ⓘ(nav2 의 「이 카드는」 칸) — 칸이 만들어지면 그 내용을 꼬마 말풍선으로 옮기고 칸은 닫음
+    var hh = t.closest("h3.tt-h, .mk-lab.tt-h") || (t.closest(".tt-i") && t.closest(".fold-h"));
+    if (hh && !t.closest("a,input,select,label,textarea,[data-op],[data-goto]") && (t.closest(".tt-i") || !t.closest("button"))){
+      setTimeout(function(){
+        var bx = hh.nextElementSibling; if (!bx || !bx.classList.contains("tt-x")) return;
+        bx.hidden = true; hh.classList.remove("tt-on");
+        var L = [], w = bx.querySelector(".ttx-what"), em = bx.querySelector(".ttx-h em");
+        if (em && em.textContent.trim()) L.push(em.textContent.trim());
+        if (w && w.textContent.trim() && (!em || w.textContent.trim() !== em.textContent.trim())) L.push(w.textContent.trim());
+        [].forEach.call(bx.querySelectorAll(".ttx-n > :not(small)"), function(p){ L = L.concat(paras(p.innerText || p.textContent)); });
+        var go = [].map.call(bx.querySelectorAll(".ttx-l"), function(b){ return '<button data-goto="' + esc(b.dataset.goto) + '">' + esc(b.textContent) + '</button>'; }).join("");
+        var b0 = bx.querySelector(".ttx-h b");
+        say((b0 && b0.textContent.trim()) || titleOf(hh), L, go);
+      }, 0);
+    }
+  }, true);
+  // 글자 ⓘ → 꼬마 얼굴 (새로 그려질 때마다 · 잠깐 모았다가 한 번에)
+  var swT = null;
+  function swap(){
+    swT = null;
+    [document.getElementById("main"), document.getElementById("sheet")].forEach(function(root){
+      if (!root) return;
+      var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {acceptNode: function(x){ var p = x.parentNode;
+        return p && !/^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION)$/.test(p.nodeName) && x.nodeValue.indexOf("ⓘ") >= 0 && !(p.closest && (p.closest("svg") || p.closest("#gdq"))) ? 1 : 3; }}), L = [], x;
+      while ((x = w.nextNode())) L.push(x);
+      L.forEach(function(tn){
+        var parts = tn.nodeValue.split("ⓘ"), f = document.createDocumentFragment();
+        parts.forEach(function(s, k){ if (k){ var i = document.createElement("i"); i.className = "gd-i"; i.setAttribute("aria-label", "꼬마 설명"); f.appendChild(i); } if (s) f.appendChild(document.createTextNode(s)); });
+        tn.parentNode.replaceChild(f, tn);
+      });
+    });
+  }
+  new MutationObserver(function(){ if (!swT) swT = setTimeout(swap, 250); }).observe(document.documentElement, {childList: true, subtree: true, characterData: true});
+
   // 탭 머리(제목·꼬마 얼굴)를 누르면 소개 글 대신 바로 꼬마 설명 (nav2 의 소개 글 펼치기보다 먼저 잡음)
   document.addEventListener("click", function(ev){
     var h = ev.target.closest && ev.target.closest("#main > .hero.gd-on"); if (!h || ev.target.closest("button,a")) return;
