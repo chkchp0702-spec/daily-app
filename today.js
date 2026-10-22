@@ -34,10 +34,10 @@
 
   /* ── ① 날씨 ── */
   var WX = {
-    sun:   {ic: "☀️", w: "맑음",      kid: "img/kid_thumb.jpg?v=1", acc: "😎", say: "기분 좋은 날이에요"},
-    part:  {ic: "🌤", w: "구름 조금", kid: "img/kid_wave.jpg?v=1",  acc: "",   say: "살짝 맑아요"},
+    sun:   {ic: "☀️", w: "맑음",      kid: "img/kid_joy.jpg?v=1", acc: "", say: "기분 좋은 날이에요"},
+    part:  {ic: "🌤", w: "구름 조금", kid: "img/kid_thumb.jpg?v=1",  acc: "",   say: "살짝 맑아요"},
     cloud: {ic: "☁️", w: "흐림",      kid: "img/kid_globe.jpg?v=1", acc: "",   say: "큰 움직임 없이 흐려요"},
-    rain:  {ic: "🌧", w: "비",        kid: "img/guide_src.jpg?v=1", acc: "☂️", say: "비가 와요, 서두르지 말아요"},
+    rain:  {ic: "🌧", w: "비",        kid: "img/kid_umb.jpg?v=1", acc: "", say: "비가 와요, 서두르지 말아요"},
     storm: {ic: "⛈", w: "폭풍",      kid: "img/guide_src.jpg?v=1", acc: "⛈", say: "폭풍우예요 — 오늘은 숫자보다 마음을 지켜요"}
   };
   function wxOf(r){ return r == null ? "cloud" : r >= 1.5 ? "sun" : r >= 0.3 ? "part" : r > -0.3 ? "cloud" : r > -1.5 ? "rain" : "storm"; }
@@ -177,7 +177,7 @@
       '<div class="tz-comic">' +
         pan("img/guide_src.jpg?v=1", "① " + e(tt.replace(/\s*[−-][\d.]+%.*$/, "")), e((tt.match(/[−-][\d.]+%/) || [""])[0]), "dn", "😱 깜짝 놀라 팔고 싶어져요") +
         pan("img/kid_piggy.jpg?v=1", "② 팔고 " + e(lab1.replace(/\s*뒤\s*돌아옴$/, "")) + " 뒤 돌아왔다면", e(v1), neg1 ? "dn" : "up", e(n1) + (neg1 ? " — 놓친 몫" : "")) +
-        (vb ? pan("img/kid_thumb.jpg?v=1", "③ 반대로 " + e(lb.replace(/\s*\d+거래일 뒤$/, "")), e(vb), /^\+/.test(vb) ? "up" : "dn", "120거래일 뒤 평균") : "") +
+        (vb ? pan(/^\+/.test(vb) ? "img/kid_joy.jpg?v=1" : "img/kid_umb.jpg?v=1", "③ 반대로 " + e(lb.replace(/\s*\d+거래일 뒤$/, "")), e(vb), /^\+/.test(vb) ? "up" : "dn", "120거래일 뒤 평균") : "") +
       '</div>');
     s.appendChild(keep);
     keep.addEventListener("click", function(ev){ ev.stopPropagation(); }, true);
@@ -228,7 +228,7 @@
     var c = ev.target.closest && ev.target.closest("#hmbody section.card"); if (!c || ev.button > 0) return;
     LP.el = c; LP.x = ev.clientX; LP.y = ev.clientY; LP.fired = 0; clearTimeout(LP.t);
     LP.t = setTimeout(function(){ if (!LP.el) return; LP.fired = Date.now(); try { navigator.vibrate && navigator.vibrate(12); } catch(x) {}
-      var s = summary(LP.el); if (window.gdSay && s.lines.length) gdSay(s.title, s.lines); LP.el = null; }, 550);
+      var s = summary(LP.el); if (window.gdSay && s.lines.length) gdSay(s.title, s.lines, "", "img/kid_thumb.jpg?v=1"); LP.el = null; }, 550);
   }
   function lpCancel(ev){ if (!LP.el) return; if (ev && ev.type === "pointermove" && Math.abs(ev.clientX - LP.x) < 10 && Math.abs(ev.clientY - LP.y) < 10) return; clearTimeout(LP.t); LP.el = null; }
   document.addEventListener("pointerdown", lpStart, true);
@@ -252,7 +252,7 @@
       d.innerHTML = hero(a[0] || {}, a[1], a[2], a[3], a[4]);
       if (old) old.replaceWith(d); else b2.insertBefore(d, b2.firstChild);
       d.onclick = function(ev){ var bd = ev.target.closest && ev.target.closest(".tz-bdg span"); ev.stopPropagation();
-        if (bd){ if (window.gdSay) gdSay("🏆 오늘의 배지", [bd.textContent, bd.dataset.why]); return; }
+        if (bd){ if (window.gdSay) gdSay("🏆 오늘의 배지", [bd.textContent, bd.dataset.why], "", "img/kid_joy.jpg?v=1"); return; }
         if (window.goTo) goTo("market", "live"); else if (window.go) go("market"); };
       countUp(d); if (H0) race(H0);
     }, function(){ busy = 0; });

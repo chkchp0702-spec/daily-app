@@ -6,13 +6,19 @@
 (function(){
   var IMG = "img/guide.jpg?v=1", BODY = "img/guide_body.jpg?v=1";
   // 🎨 10/22 Canva 로 만든 꼬마 자세 (나머지 묶음·자세히는 기본 그림) — 사용자 「일단 지금 있는 것만」
-  var POSE = {intro: "img/kid_wave.jpg?v=1", home: "img/kid_thumb.jpg?v=1", mkt: "img/kid_globe.jpg?v=1", inv: "img/kid_piggy.jpg?v=1"};
+  var POSE = {intro: "img/kid_wave.jpg?v=1", home: "img/kid_thumb.jpg?v=1", mkt: "img/kid_globe.jpg?v=1", inv: "img/kid_piggy.jpg?v=1", prod: "img/kid_piggy.jpg?v=1"};
+  // 10/23 사용자 「꼬마 여러 표정을 적재적소에」 — 조이(Joey) 표정: 기쁨(kid_joy) · 우산(kid_umb, 조심·내림) · 엄지(kid_thumb) · 손인사(kid_wave) · 지구본(kid_globe) · 저금통(kid_piggy) · 놀람(guide_src)
+  var FACE = {joy: "img/kid_joy.jpg?v=1", umb: "img/kid_umb.jpg?v=1", thumb: "img/kid_thumb.jpg?v=1", wow: "img/guide_src.jpg?v=1"};
+  function faceFor(L){ var t = (L || []).join(" ");     // 말 내용으로 표정 고르기
+    if (/⚠️|주의|조심|못 미|미달|아직 검증|무리|이르|손실|내림|빠진|급락/.test(t)) return FACE.umb;
+    if (/🏆|이김|적중|확인됨|✅|앞섬/.test(t)) return FACE.joy;
+    return null; }
   var GRP = {home: "home", market: "mkt", sector: "mkt", prob: "mkt", port: "inv", score: "inv",
              whale: "sig", cup: "sig", gap: "sig", screen: "sig", sigmore: "sig", accum: "sig", danta: "sig",
              bond: "prod", fund: "prod", els: "prod", feed: "feed"};
   var NAME = {intro: "👋 인사", home: "🏠 오늘", mkt: "🌐 시장", inv: "💼 포트", sig: "🎯 신호", prod: "🛍️ 상품", feed: "📰 피드"};
   var SAY = {
-    intro: ["안녕하세요! 저는 CH 인베스팅 길잡이예요.", "어려운 투자 이야기, 제가 쉽게 알려 줄게요.", "궁금할 땐 위에 있는 제 얼굴을 눌러 주세요!"],
+    intro: ["안녕하세요! 저는 어플 안내자 조이(Joey)예요.", "어려운 투자 이야기, 제가 쉽게 알려 줄게요.", "궁금할 땐 위에 있는 제 얼굴을 눌러 주세요!"],
     home: ["여기는 「오늘」이에요.", "오늘 꼭 알아야 할 것만 한 장에 모았어요.", "카드를 누르면 그 탭으로 바로 가요.", "바쁠 땐 여기만 봐도 돼요!"],
     mkt: ["「시장」에서는 어느 나라, 어느 업종으로 돈이 몰리는지 봐요.", "🌐 시황은 매일 아침 시황 리포트예요.", "🧭 나침반은 한국·미국·일본·중국·홍콩을 한눈에 보여 줘요.", "🎲 시장확률은 오늘 장이 오를 확률이에요!"],
     inv: ["「포트」는 시황 리포트대로 투자했다면 얼마 벌었을지 보여 줘요.", "뭘 얼마나 사야 하는지도 바로 보여요.", "📊 성적표에서는 우리 신호들이 잘 맞았는지 매일 채점해요.", "시장보다 잘했는지 늘 정직하게 비교해요!"],
@@ -85,7 +91,7 @@
     var q = document.createElement("div"); q.id = "gdq";
     var mk = g.indexOf("more:") === 0 ? g.slice(5) : null; if (mk) mk = MORE_ALIAS[mk] || mk;
     var L = mk ? (MORE[mk] || SAY.home) : (SAY[g] || SAY.home);
-    var pz = POSE[g] || (mk && POSE[GRP[mk] || ""]);
+    var pz = POSE[g] || (mk && (faceFor((MORE[MORE_ALIAS[mk] || mk] || []).slice(-1)) || POSE[GRP[mk] || ""]));
     q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + '" role="dialog" aria-label="꼬마 안내원"><div class="gd-row"><div class="gd-kid" aria-hidden="true"' + (pz ? ' style="background-image:url(' + pz + ')"' : '') + '></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
       L.map(function(s){ return '<p class="gd-l">' + s + '</p>'; }).join("") + '</div></div><div class="gd-ft">' +
       (mk ? '' : ["home", "mkt", "inv", "sig", "prod", "feed"].map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("")) +
@@ -109,11 +115,11 @@
   function esc(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function plain(h){ var d = document.createElement("div"); d.innerHTML = String(h || "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li)>/gi, "\n"); return d.textContent || ""; }
   function paras(t){ return String(t || "").replace(/ⓘ/g, "").split(/\n+/).map(function(x){ return x.replace(/\s+/g, " ").trim(); }).filter(function(x){ return x; }); }
-  function say(title, L, foot){
+  function say(title, L, foot, face){
     if (!L || !L.length) return;
     close();
     var q = document.createElement("div"); q.id = "gdq";
-    q.innerHTML = '<div class="gd-sh gd-more" role="dialog" aria-label="꼬마 안내원"><div class="gd-row"><div class="gd-kid" aria-hidden="true"></div><div class="gd-bub"><div class="gd-t">' + esc(title || "설명") + '</div>' +
+    q.innerHTML = '<div class="gd-sh gd-more" role="dialog" aria-label="꼬마 안내원"><div class="gd-row"><div class="gd-kid" aria-hidden="true" style="background-image:url(' + (face || faceFor(L) || BODY) + ')"></div><div class="gd-bub"><div class="gd-t">' + esc(title || "설명") + '</div>' +
       L.slice(0, 14).map(function(x){ return '<p class="gd-l">' + esc(x) + '</p>'; }).join("") + '</div></div><div class="gd-ft">' + (foot || "") + '<button class="gd-x">닫기</button></div></div>';
     document.body.appendChild(q);
     var ps = q.querySelectorAll(".gd-l"), i = 0;
@@ -209,7 +215,7 @@
     var brand = document.querySelector("header .top .brand"); if (!brand) return;
     var b = document.getElementById("gdbtn");
     if (!b){
-      b = document.createElement("button"); b.id = "gdbtn"; b.setAttribute("aria-label", "꼬마 안내원 — 이 화면 설명");
+      b = document.createElement("button"); b.id = "gdbtn"; b.setAttribute("aria-label", "안내자 조이 — 이 화면 설명");
       b.onclick = function(e){ e.stopPropagation(); open(curGrp()); };
       brand.parentNode.insertBefore(b, brand.nextSibling);
     }
@@ -227,7 +233,7 @@
   }
   function init(){
     addBtn(); hook();
-    if (!ls("gd_intro")) setTimeout(function(){ if (document.getElementById("gdq")) return; ls("gd_intro", 1); open("intro"); }, 4900);   // 인사 화면(4초) 뒤
+    if (!ls("gd_intro")) setTimeout(function(){ if (document.getElementById("gdq")) return; ls("gd_intro", 1); open("intro"); }, 5900);   // 인사 화면(5초) 뒤
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
   setTimeout(function(){ addBtn(); hook(); }, 900);
