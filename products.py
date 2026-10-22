@@ -409,8 +409,25 @@ def pv_nav_hist(now_d, now_rows, name="pv_nav.json", kind=2, keep_code=None):
             by[d.isoformat()] = {c: x["nav"] for c, x in rows.items() if x.get("nav") and kc(c, x)}
         except Exception as e:
             ERR.append(f"사모 기준가 기록 {t}: {str(e)[:60]}")
+    # 10/22 학습: 최근 100일은 매일 기준가를 둠 — 주 1개만 있으면 1주·1개월 시작점이 며칠씩 어긋나
+    #   (10/9~10/15 빈칸 때문에 「1주」가 2주로 늘어 추정이 −10%p 넘게 틀렸고, 1·3개월도 사내 표와 3~6%p 차이)
+    have = {d for d in by}
+    for k in range(1, 101):
+        t = now_d - datetime.timedelta(days=k)
+        if t.weekday() >= 5 or t.isoformat() in have:
+            continue
+        if time.time() - t0 > 900:
+            break
+        try:
+            d, rows = kofia_date(t, kind)
+            if d.isoformat() not in by:
+                by[d.isoformat()] = {c: x["nav"] for c, x in rows.items() if x.get("nav") and kc(c, x)}
+            have.add(t.isoformat()); have.add(d.isoformat())
+        except Exception as e:
+            ERR.append(f"사모 기준가 매일 채우기 {t}: {str(e)[:60]}")
     ds = sorted(d for d in by if d >= (now_d - datetime.timedelta(days=400)).isoformat())
-    keep, seen = set(ds[-10:]), {}
+    recent = (now_d - datetime.timedelta(days=100)).isoformat()
+    keep, seen = {d for d in ds if d >= recent} | set(ds[-10:]), {}
     for d in ds:                              # 주마다 마지막 날
         seen[wk(d)] = d
     keep |= set(seen.values())
