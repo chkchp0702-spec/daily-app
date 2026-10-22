@@ -1,0 +1,23 @@
+name: fetchimg
+# 🧒 Canva 에서 만든 꼬마 그림을 받아 img/ 에 저장 (손으로만 실행 · 이 세션은 canva 주소를 못 받음)
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "이름=주소 줄들 (base64)"
+        required: true
+permissions:
+  contents: write
+jobs:
+  get:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          echo "${{ inputs.pairs }}" | base64 -d > /tmp/pairs.txt
+          mkdir -p img/raw
+          while IFS='=' read -r n u; do [ -z "$n" ] && continue; curl -sSL --fail -o "img/raw/$n" "$u" && echo "ok $n $(stat -c%s img/raw/$n)" || echo "fail $n"; done < /tmp/pairs.txt
+          file img/raw/* || true
+      - run: |
+          git config user.name "img-bot"; git config user.email "img-bot@users.noreply.github.com"
+          git add img/raw && git commit -q -m "img: canva 꼬마 원본" && for i in 1 2 3; do git pull -q --rebase && git push -q && break; sleep 5; done || true
