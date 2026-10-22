@@ -1,9 +1,7 @@
 {
- "at": "2026-10-22 17:05",
- "ok": false,
- "problems": [
-  "클릭 연동 실패: #home 「#bnav button[data-g=\"sig\"]」 → whale/cup/gap/accum/danta 기대, 실제 ['Page.wait_for_selector: Timeout 20000ms exceeded.\\nCall log:\\n']"
- ],
+ "at": "2026-10-22 17:09",
+ "ok": true,
+ "problems": [],
  "data": [
   {
    "name": "💼 포트",
@@ -38,25 +36,25 @@
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 10.2,
+   "age_h": 10.3,
    "lim": 30
   },
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.1,
+   "age_h": 0.2,
    "lim": 1.5
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.5,
+   "age_h": 0.6,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 2.0,
+   "age_h": 2.1,
    "lim": 30
   },
   {
@@ -68,20 +66,20 @@
   {
    "name": "🎲 시장확률",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.9,
    "lim": 2
   },
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 0.7,
+   "age_h": 0.8,
    "lim": 12
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 0.7,
+   "s": 0.6,
    "cards": 4,
    "len": 1264,
    "bad": [],
@@ -90,16 +88,16 @@
   },
   {
    "tab": "market",
-   "s": 0.3,
+   "s": 0.7,
    "cards": 29,
-   "len": 1535,
+   "len": 1582,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "port",
-   "s": 0.2,
+   "s": 0.4,
    "cards": 11,
    "len": 740,
    "bad": [],
@@ -110,16 +108,16 @@
    "tab": "score",
    "s": 0.3,
    "cards": 10,
-   "len": 2571,
+   "len": 2696,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "whale",
-   "s": 0.4,
+   "s": 0.5,
    "cards": 21,
-   "len": 1363,
+   "len": 1348,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -137,7 +135,7 @@
    "tab": "gap",
    "s": 0.4,
    "cards": 16,
-   "len": 2448,
+   "len": 2461,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -153,7 +151,7 @@
   },
   {
    "tab": "accum",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 12,
    "len": 1952,
    "bad": [],
@@ -162,7 +160,7 @@
   },
   {
    "tab": "onepager",
-   "s": 0.2,
+   "s": 0.5,
    "cards": 1,
    "len": 484,
    "bad": [],
@@ -173,7 +171,7 @@
    "tab": "danta",
    "s": 0.4,
    "cards": 12,
-   "len": 1973,
+   "len": 1978,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -239,9 +237,10 @@
   },
   {
    "tab": "클릭 home → whale/cup/gap/accum/danta",
-   "ok": false,
+   "ok": true,
    "got": [
-    "Page.wait_for_selector: Timeout 20000ms exceeded.\nCall log:\n"
+    "gap",
+    true
    ]
   },
   {
@@ -266,7 +265,7 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-22T08:03"
+   "when": "2026-10-22T08:08"
   },
   {
    "repo": "daily-app",
@@ -338,7 +337,7 @@
    "repo": "daily-app",
    "job": "regime",
    "ok": true,
-   "when": "2026-10-22T00:15"
+   "when": "2026-10-22T08:10"
   },
   {
    "repo": "daily-app",
@@ -374,7 +373,7 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-22T07:25"
+   "when": "2026-10-22T08:04"
   },
   {
    "repo": "daily-app",
