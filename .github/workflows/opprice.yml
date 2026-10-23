@@ -48,6 +48,9 @@ jobs:
         run: python opdb/merge_static.py --dest opdata
       - if: steps.chk.outputs.skip != '1'
         run: python opdb/build_prices.py --dest opdata
+      - name: 🧬 DNA 쌍둥이 점수 (10/23 A10/23-2)
+        if: steps.chk.outputs.skip != '1'
+        run: python opdb/dna.py --dest opdata || true
       - name: 저장
         if: steps.chk.outputs.skip != '1'
         run: |
