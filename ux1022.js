@@ -30,6 +30,7 @@
 
   /* ═════════ ① 😱 급락 뒤 「그날 팔았다면」 ═════════ */
   var KP = null, KW = null;
+  // 10/23: 파일(어제까지 종가)은 한 번만 받고, 실시간 코스피(live_kr, 장중 2분마다 갱신)는 부를 때마다 새로 얹음 → 장중 급락도 바로 반영
   function kospi(){
     if (!KW) KW = getJSON("archive/x/port_px/index.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).then(function(ix){
       var a = ix && ix.assets && ix.assets.KOSPI; if (!a) return null;
@@ -38,15 +39,18 @@
       if (!j || !j.dd) return null;
       var t = s2day(j.d0), d = [], c = [];
       for (var i = 0; i < j.dd.length; i++){ t += j.dd[i]; d.push(day2s(t)); c.push(+j.c[i]); }
-      KP = {d: d, c: c};
-      // 10/23 고침: 오늘뿐 아니라 파일에 아직 없는 최근 장(전날 종가)도 live_kr로 채움 · 10/22 고침: 파일의 오늘 값은 장중에 굳은 것일 수 있음 → 한국 장 실시간(live_kr) 코스피로 오늘 칸을 맞춤
-      return getJSON("archive/x/live_kr.json?" + Math.floor(Date.now() / 120000), {ttl: 120000}).then(function(L){
-        var ix = L && L.date && L.date <= kst() ? (L.index || []).filter(function(x){ return x.name === "코스피"; })[0] : null;
-        if (ix && ix.last > 0){ var n = KP.d.length; if (KP.d[n - 1] === L.date) KP.c[n - 1] = +ix.last; else if (KP.d[n - 1] < L.date){ KP.d.push(L.date); KP.c.push(+ix.last); } }
-        return KP;
-      }, function(){ return KP; });
+      KP = {d: d, c: c}; return KP;
     }).catch(function(){ KW = null; return null; });
-    return KW;
+    return KW.then(function(B){
+      if (!B) return null;
+      return getJSON("archive/x/live_kr.json?" + Math.floor(Date.now() / 60000), {ttl: 60000}).then(function(L){
+        var K = {d: B.d.slice(), c: B.c.slice(), live: null};
+        var ix = L && L.date && L.date <= kst() ? (L.index || []).filter(function(x){ return x.name === "코스피"; })[0] : null;
+        if (ix && ix.last > 0){ var n = K.d.length; if (K.d[n - 1] === L.date) K.c[n - 1] = +ix.last; else if (K.d[n - 1] < L.date){ K.d.push(L.date); K.c.push(+ix.last); }
+          if (L.date === kst() && ix.status !== "CLOSE") K.live = {t: L.t || "", d: L.date}; }
+        return K;
+      }, function(){ return {d: B.d, c: B.c, live: null}; });
+    });
   }
   var CUT = -3.5;
   function panicStats(K){
@@ -63,14 +67,25 @@
       var so = rs.slice().sort(function(a, b){ return a - b; });
       return {h: h, n: rs.length, avg: s / rs.length, med: so[Math.floor(so.length / 2)], up: up, worst: worst};
     });
-    return {trig: trig, drops: drops.length, H: H, from: d[0].slice(0, 4), today: d[n - 1] === kst()};
+    var now = null;   // 오늘 장중(또는 오늘 종가)인데 급락일이 오늘이 아닐 때 — 「오늘도 −x%」
+    if (d[n - 1] === kst() && trig && trig.d !== d[n - 1]){
+      var rn = (c[n - 1] / c[n - 2] - 1) * 100, r2 = (c[n - 1] / c[trig.i - 1] - 1) * 100;
+      if (rn <= -1.5){
+        var k = n - 1 - (trig.i - 1), cut2 = Math.ceil(r2), hs = [], seen = -999;   // 같은 날 수(k일) 동안 r2 만큼 빠진 날들 → 120거래일 뒤
+        for (var q = k; q < n - 1; q++){ var rr = (c[q] / c[q - k] - 1) * 100; if (rr <= cut2 && q - seen > k){ seen = q; if (q + 120 < n) hs.push((c[q + 120] / c[q] - 1) * 100); } }
+        var av = null, upn = 0; if (hs.length){ av = 0; hs.forEach(function(x){ av += x; if (x > 0) upn++; }); av /= hs.length; }
+        now = {r: rn, r2: r2, k: k, cut2: cut2, n: hs.length, avg: av, up: upn};
+      }
+    }
+    return {trig: trig, drops: drops.length, H: H, from: d[0].slice(0, 4), today: d[n - 1] === kst(), live: K.live, now: now};
   }
   function panicHome(S){
     var A = amt(), T = S.trig, h120 = S.H[2], h20 = S.H[0];
     var rows = S.H.filter(function(x){ return x.n; }).map(function(x){
       return '<div class="pnh-r"><span>' + x.h + '거래일 뒤 돌아옴</span><b class="' + cl(-x.avg) + '">' + sg(-x.avg, 1) + '%p</b><em>' + x.n + '번 중 <b>' + x.up + '</b>번 손해</em></div>'; }).join("");
     var add = h120 && h120.n ? A * 0.1 * h120.avg / 100 : null;
-    return '<div class="pnh-h"><b>😱 ' + (T.d === kst() ? "오늘" : md(T.d)) + ' 코스피 ' + sg(T.r, 1) + '% — 그날 팔았다면?</b><small>' + S.from + '년 이후 하루 ' + Math.abs(CUT) + '% 넘게 빠진 날 ' + S.drops + '번 · 그날 종가에 팔고 다시 샀을 때 지수를 그대로 들고 있던 것보다</small></div>' +
+    return '<div class="pnh-h"><b>😱 ' + (T.d === kst() ? (S.live ? "오늘(장중 " + S.live.t + ")" : "오늘") : md(T.d)) + ' 코스피 ' + sg(T.r, 1) + '% — 그날 팔았다면?</b><small>' + S.from + '년 이후 하루 ' + Math.abs(CUT) + '% 넘게 빠진 날 ' + S.drops + '번 · 그날 종가에 팔고 다시 샀을 때 지수를 그대로 들고 있던 것보다</small></div>' +
+      (S.now ? '<div class="pnh-r pnh-now"><span>🔴 오늘도 ' + (S.live ? '장중(' + S.live.t + ') ' : '') + sg(S.now.r, 1) + '% · ' + S.now.k + '일 합쳐 ' + sg(S.now.r2, 1) + '%</span>' + (S.now.n ? '<b class="' + cl(S.now.avg) + '">' + sg(S.now.avg, 1) + '%</b><em>' + S.now.k + '일 새 ' + Math.abs(S.now.cut2) + '% 넘게 빠진 ' + S.now.n + '번 · 120거래일 뒤 평균 · ' + S.now.up + '번 오름</em>' : '<em>같은 낙폭 과거 사례 부족</em>') + '</div>' : '') +
       rows +
       (add != null ? '<div class="pnh-r pnh-b"><span>↔ 반대로 그날 ' + won(A * 0.1) + '원(10%) 더 샀다면 120거래일 뒤</span><b class="' + cl(add) + '">' + (add >= 0 ? "+" : "−") + won(Math.abs(add)) + '원</b><em>평균 · 최악 ' + sg(h120.worst.r, 0) + '%(' + h120.worst.d.slice(0, 7).replace("-", ".") + ')</em></div>' : '') +
       '<div class="pnh-go">💼 내 포트 설계로 2008·2020·2022·2025 낙폭에서 보기 ›</div>' +
@@ -86,10 +101,22 @@
       var S = panicStats(K); if (!S) return;
       var b2 = document.getElementById("hmbody"), pl2 = b2 && b2.querySelector("section.card.pl"); if (!pl2 || document.getElementById("hmpanic")) return;
       var s = document.createElement("section"); s.className = "card hmpn"; s.id = "hmpanic"; s.setAttribute("role", "button");
-      s.innerHTML = panicHome(S); pl2.parentNode.insertBefore(s, pl2.nextSibling);
+      s.innerHTML = panicHome(S); s.dataset.sig = psig(S); pl2.parentNode.insertBefore(s, pl2.nextSibling);
       s.onclick = function(ev){ ev.stopPropagation(); if (window.__pdz && __pdz.panic) __pdz.panic(); goTab("port"); };
     }).catch(function(){ HPB = 0; });
   }
+  function psig(S){ return S.trig.d + "|" + S.trig.r.toFixed(1) + "|" + (S.now ? S.now.r.toFixed(1) : "") + "|" + (S.live ? S.live.t : ""); }
+  // 장중엔 2분마다 다시 계산 → 숫자가 바뀌면 카드를 새로 그림(급락이 새로 생기거나 사라져도)
+  setInterval(function(){
+    if (document.hidden || !document.getElementById("hmbody")) return;
+    var h = +new Date(Date.now() + 9 * 3600e3).toISOString().slice(11, 13); if (h < 9 || h > 16) return;
+    kospi().then(function(K){
+      if (!K) return; var S = panicStats(K), old = document.getElementById("hmpanic");
+      if (!S){ if (old) old.remove(); return; }
+      if (old && old.dataset.sig === psig(S)) return;
+      if (old) old.remove(); HPB = 0; homePanic();
+    }).catch(function(){});
+  }, 120000);
   window.__panicStats = function(){ return kospi().then(function(K){ return K && panicStats(K); }); };   // 검사용
 
   /* ═════════ ② 📌 내 ELS 관제탑 ═════════ */
@@ -404,7 +431,7 @@
     ".em-k{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}.em-k>div{background:var(--panel2);border-radius:10px;padding:7px 4px;text-align:center}.em-k small,.em-k em{display:block;font-size:11px;color:var(--sub);font-style:normal;word-break:keep-all}" +
     ".em-k b{display:block;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap;margin:1px 0}.em-k b.up,.em-ua b.up{color:var(--up)}.em-k b.dn,.em-ua b.dn{color:var(--down)}" +
     ".em-ua{display:grid;grid-template-columns:88px 1fr 58px;gap:8px;align-items:center;font-size:12.5px;margin:5px 0}.em-ua span i{font-style:normal;font-size:10px;color:#ff6b6b;display:block}.em-ua>b{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}" +
-    ".em-tr{position:relative;height:8px;border-radius:4px;background:var(--panel2)}.em-tr i{position:absolute;top:-3px;bottom:-3px;width:2px}.em-bar{background:#3fb950}.em-ki{background:#ff6b6b}.em-tr .em-dot{width:12px;height:12px;top:-2px;bottom:auto;border-radius:50%;margin-left:-6px;background:var(--text);border:2px solid var(--panel)}" +
+    ".pnh-now{background:rgba(255,80,80,.08);border-radius:8px;padding:6px 8px}.em-tr{position:relative;height:8px;border-radius:4px;background:var(--panel2)}.em-tr i{position:absolute;top:-3px;bottom:-3px;width:2px}.em-bar{background:#3fb950}.em-ki{background:#ff6b6b}.em-tr .em-dot{width:12px;height:12px;top:-2px;bottom:auto;border-radius:50%;margin-left:-6px;background:var(--text);border:2px solid var(--panel)}" +
     ".em-lg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--sub)}.em-lg i{display:inline-block;width:2px;height:10px;margin-right:4px;vertical-align:middle}" +
     ".em-hs{font-size:12.5px;margin:8px 0 0;word-break:keep-all}.em-hb{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px;margin:5px 0 3px}.em-hb .a,.em-hl i.a{background:#3fb950}.em-hb .b,.em-hl i.b{background:#8fd19e}.em-hb .c,.em-hl i.c{background:#8a94a8}.em-hb .d,.em-hl i.d{background:#ff6b6b}" +
     ".em-hl{display:flex;flex-wrap:wrap;gap:3px 10px;font-size:11.5px;color:var(--sub)}.em-hl b{color:var(--text)}.em-hl i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:3px}" +

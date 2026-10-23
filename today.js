@@ -163,7 +163,7 @@
   /* ── ④ 세 컷 만화 ── */
   function comic(){
     var s = document.getElementById("hmpanic"); if (!s || s.dataset.td) return;
-    var h = s.querySelector(".pnh-h b"), r1 = s.querySelector(".pnh-r:not(.pnh-b)"), rb = s.querySelector(".pnh-b"); if (!h || !r1) return;
+    var h = s.querySelector(".pnh-h b"), r1 = s.querySelector(".pnh-r:not(.pnh-b):not(.pnh-now)"), rn = s.querySelector(".pnh-now"), rb = s.querySelector(".pnh-b"); if (!h || !r1) return;
     s.dataset.td = "1";
     var tt = h.textContent.replace(/^😱\s*/, "").split(" — ")[0];
     var c1 = r1.children, lab1 = c1[0] ? c1[0].textContent : "", v1 = c1[1] ? c1[1].textContent : "", n1 = c1[2] ? c1[2].textContent : "";
@@ -178,7 +178,8 @@
         pan("img/guide_src.jpg?v=1", "① " + e(tt.replace(/\s*[−-][\d.]+%.*$/, "")), e((tt.match(/[−-][\d.]+%/) || [""])[0]), "dn", "😱 깜짝 놀라 팔고 싶어져요") +
         pan("img/kid_piggy.jpg?v=1", "② 팔고 " + e(lab1.replace(/\s*뒤\s*돌아옴$/, "")) + " 뒤 돌아왔다면", e(v1), neg1 ? "dn" : "up", e(n1) + (neg1 ? " — 놓친 몫" : "")) +
         (vb ? pan(/^\+/.test(vb) ? "img/kid_joy.jpg?v=1" : "img/kid_umb.jpg?v=1", "③ 반대로 " + e(lb.replace(/\s*\d+거래일 뒤$/, "")), e(vb), /^\+/.test(vb) ? "up" : "dn", "120거래일 뒤 평균") : "") +
-      '</div>');
+      '</div>' +
+      (rn ? '<div class="tz-now">' + e(rn.children[0] ? rn.children[0].textContent : "") + (rn.children[1] && rn.children[1].tagName === "B" ? ' → 과거엔 120거래일 뒤 평균 <b class="' + rn.children[1].className + '">' + e(rn.children[1].textContent) + '</b>' + (rn.children[2] ? '<small>' + e(rn.children[2].textContent.replace(/ · 120거래일 뒤 평균/, "")) + '</small>' : '') : '') + '</div>' : ''));
     s.appendChild(keep);
     keep.addEventListener("click", function(ev){ ev.stopPropagation(); }, true);
   }
@@ -295,6 +296,7 @@
     ".tz-hint{margin-top:9px;font-size:11.5px;opacity:.75;text-align:right}" +
     // ④ 세 컷
     ".tz-ch b{display:block;font-size:16px;font-weight:800}.tz-ch small{color:var(--sub);font-size:12px}" +
+    ".tz-now{margin:8px 0 4px;padding:9px 11px;border-radius:12px;background:rgba(255,80,80,.10);border:1px solid rgba(255,80,80,.35);font-size:14px;font-weight:700;line-height:1.45}.tz-now b{font-size:16px}.tz-now small{display:block;font-weight:500;opacity:.75;font-size:12px;margin-top:2px}" +
     ".tz-comic{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 6px}" +
     ".tz-pan{border:2px solid var(--text);border-radius:14px;overflow:hidden;background:var(--panel2);display:flex;flex-direction:column;animation:tdPop .45s both}.tz-pan:nth-child(2){animation-delay:.15s}.tz-pan:nth-child(3){animation-delay:.3s}" +
     ".tz-pk{height:92px;background:#f3e6d6 center 12%/cover no-repeat;border-bottom:2px solid var(--text)}" +
