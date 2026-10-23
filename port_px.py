@@ -174,6 +174,14 @@ def main():
     # 코스피: 마지막 날이 바뀌었거나 그 날 값이 바뀌었을 때 (10/22 고침 — 장중 값이 낮 12시에 굳어 종가 −3.5% 가 안 들어갔음)
     P = dl("^KS11", "2000-01-01", False)
     if P:
+        # 10/23: 야후 일봉이 하루 늦을 때 — 장 마감된 실시간 파일(live_kr.json)의 종가로 빈 날을 채움
+        try:
+            L = json.load(open(os.path.join(os.path.dirname(D), "live_kr.json"), encoding="utf-8"))
+            ix = [x for x in (L.get("index") or []) if x.get("name") == "코스피"]
+            if ix and ix[0].get("status") == "CLOSE" and ix[0].get("last") and L.get("date") and L["date"] not in P and L["date"] > max(P):
+                P[L["date"]] = float(ix[0]["last"]); print("＋ KOSPI live_kr 종가로 채움", L["date"], ix[0]["last"])
+        except Exception as x:
+            print("live_kr 못 읽음", x)
         last = max(P); old = (idx["assets"].get("KOSPI") or {})
         if old.get("to") != last or old.get("n") != len(P) or old.get("last") != round(P[last], 2) or "--force" in sys.argv:
             idx["assets"]["KOSPI"] = write("KOSPI", P, 7); idx["assets"]["KOSPI"]["last"] = round(P[last], 2); ch = True; print("✓ KOSPI", len(P), last)
