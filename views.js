@@ -64,8 +64,8 @@
     tail += '<button class="fold" id="dashbtn">📊 전략 대시보드 펼치기</button><div id="dash"></div>';
     el.innerHTML = '<div id="mhead"></div><div id="live"></div><div id="mbody"></div>' + tail;
     marketBoard($("live"));
-    if (txt) getText(file("market", it.id, txt)).then(function(t){ $("mtxt") && ($("mtxt").textContent = t); });
-    if (has("review.md")) getText(file("market", it.id, "review.md")).then(function(t){ mdInto($("mrev"), t); });
+    if (txt) getText(file("market", it.id, txt)).then(function(t){ $("mtxt") && ($("mtxt").textContent = t); }).catch(function(){ var x = $("mtxt"); if (x) x.innerHTML = '<span class="mut">잠깐 못 불러왔어요 — 새로고침하면 다시 받아요.</span>'; });
+    if (has("review.md")) getText(file("market", it.id, "review.md")).then(function(t){ mdInto($("mrev"), t); }).catch(function(){ var x = $("mrev"); if (x) x.innerHTML = '<span class="mut">잠깐 못 불러왔어요 — 새로고침하면 다시 받아요.</span>'; });
     $("dashbtn").onclick = function(){
       $("dashbtn").remove(); $("dash").innerHTML = '<div class="loading">여는 중…</div>';
       getText(RAW + "market-strategy-report/main/docs/index.html").then(function(t){

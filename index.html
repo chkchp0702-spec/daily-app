@@ -1013,11 +1013,11 @@ var RENDER = {
     pdfs.forEach(function(f){ h += pdfCard(/Summary/i.test(f) ? "요약본" : "전체 리포트", file("market", it.id, f)); });
     if (txt) {
       h = '<div class="card"><h3>한눈에 보기</h3><div class="txt" id="mtxt">…</div></div>' + h;
-      getText(file("market", it.id, txt)).then(function(t){ $("mtxt") && ($("mtxt").textContent = t); });
+      getText(file("market", it.id, txt)).then(function(t){ $("mtxt") && ($("mtxt").textContent = t); }).catch(function(){ var x = $("mtxt"); if (x) x.innerHTML = '<span class="mut">잠깐 못 불러왔어요 — 새로고침하면 다시 받아요.</span>'; });
     }
     if (files.indexOf("review.md") >= 0) {
       h = '<div class="card md" id="mrev">…</div>' + h;
-      getText(file("market", it.id, "review.md")).then(function(t){ mdInto($("mrev"), t); });
+      getText(file("market", it.id, "review.md")).then(function(t){ mdInto($("mrev"), t); }).catch(function(){ var x = $("mrev"); if (x) x.innerHTML = '<span class="mut">잠깐 못 불러왔어요 — 새로고침하면 다시 받아요.</span>'; });
     }
     el.innerHTML = '<div id="live"></div>' + h +
       '<div class="card"><h3>전략 대시보드 <button class="btn" id="dashbtn">열기</button></h3><div id="dash"></div></div>';
@@ -1082,8 +1082,8 @@ var RENDER = {
       var safe = esc(t.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">"))
         .replace(/&lt;(\/?)(b|i)&gt;/g, "<$1$2>");
       $("brf").innerHTML = safe.trim();
-    });
-    if ($("smd")) getText(file("sector", it.id, "sector.md")).then(function(t){ mdInto($("smd"), t); });
+    }).catch(function(){ var x = $("brf"); if (x) x.innerHTML = '<span class="mut">잠깐 못 불러왔어요 — 새로고침하면 다시 받아요.</span>'; });
+    if ($("smd")) getText(file("sector", it.id, "sector.md")).then(function(t){ mdInto($("smd"), t); }).catch(function(){ var x = $("smd"); if (x) x.innerHTML = '<span class="mut">잠깐 못 불러왔어요 — 새로고침하면 다시 받아요.</span>'; });
   },
 
   /* 🔎 아침 거르기 (10/14) — opdb/screens.py 가 만든 screens.json */
@@ -1493,7 +1493,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261023g";
+var APPV = "20261023h";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1534,7 +1534,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 })();
 </script>
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
-<script defer src="views.js?v=33"></script>
+<script defer src="views.js?v=34"></script>
 <script defer src="ixchart.js?v=7"></script>
 <script defer src="compass.js?v=25"></script>
 <script defer src="problive.js?v=3"></script>
