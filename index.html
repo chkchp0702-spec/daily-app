@@ -1493,7 +1493,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261023i";
+var APPV = "20261023j";
 fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
   if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
@@ -1582,7 +1582,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1023.js?v=1"></script>   <!-- 🐇🧬🔬🧯 10/23 A10/23-1·2·3 + 비상 훈련 -->
 <script defer src="iconz.js?v=2"></script>   <!-- 🔣 10/22 아이콘 풀이 -->
 <script defer src="today.js?v=7"></script>   <!-- 🏠 10/22 오늘 탭 10가지 -->
-<script defer src="guide.js?v=11"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
+<script defer src="guide.js?v=12"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
 <script defer src="design.js?v=1"></script>   <!-- 🎨 10/22 디자인 한 벌 — 늘 맨 마지막 -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>

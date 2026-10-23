@@ -93,7 +93,7 @@
     var q = document.createElement("div"); q.id = "gdq";
     var mk = g.indexOf("more:") === 0 ? g.slice(5) : null; if (mk) mk = MORE_ALIAS[mk] || mk;
     var L = mk ? (MORE[mk] || SAY.home) : (SAY[g] || SAY.home);
-    var pz = POSE[g] || (mk && (faceFor((MORE[MORE_ALIAS[mk] || mk] || []).slice(-1)) || MKPOSE[mk] || POSE[GRP[mk] || ""]));
+    var pz = POSE[g] || (mk && (MKPOSE[mk] || faceFor((MORE[MORE_ALIAS[mk] || mk] || []).slice(-1)) || POSE[GRP[mk] || ""]));
     q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + '" role="dialog" aria-label="안내자 조이"><div class="gd-row"><div class="gd-kid" aria-hidden="true"' + (pz ? ' style="background-image:url(' + pz + ')"' : '') + '></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
       L.map(function(s){ return '<p class="gd-l">' + s + '</p>'; }).join("") + '</div></div><div class="gd-ft">' +
       (mk ? '' : ["home", "mkt", "inv", "sig", "prod", "feed"].map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("")) +
