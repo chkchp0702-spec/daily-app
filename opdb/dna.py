@@ -11,6 +11,7 @@
    · 전문가 = 애널리스트 평균 목표가까지 up → clamp((up+10)/40*100)
    · 덩치 단계 = log10(시가총액 달러)*2 를 내림(약 3.2배마다 한 단계) — 앱은 ±1 단계 안에서만 찾음(애플 쌍둥이가 홍콩 소형주가 되지 않게)
      달러 환산은 대략 환율(KRW 1400 · JPY 150 · CNY 7.2 · HKD 7.8)로 — 단계를 나눌 때만 씀
+   · 같은 회사(우선주·ADR·두 종류 주식)는 앱이 웹사이트 주소(web)가 같으면 뺌
    다섯 축이 다 있는 종목만(재무·PER·가격·목표가) · 시총 1억 달러 미만은 뺌.
 
    사용: python opdb/dna.py --dest opdata
@@ -20,6 +21,7 @@ import glob
 import json
 import math
 import os
+import re
 import sys
 import time
 
@@ -102,11 +104,11 @@ def main():
         tier = int(math.floor(math.log10(mcu) * 2))
         sc = [round(clamp((g + 10) / 50 * 100)), round(clamp(om / 30 * 100)), round(val), round(clamp(pos)), round(clamp((up + 10) / 40 * 100))]
         nm = (d.get("ticker") or {}).get("name") or ""
-        rows.append([sym, sc[0], sc[1], sc[2], sc[3], sc[4], tier, (d.get("industry_ko") or "")[:14], nm[:24], round(pe_now, 1), float("%.3g" % mcu)])
+        rows.append([sym, sc[0], sc[1], sc[2], sc[3], sc[4], tier, (d.get("industry_ko") or "")[:14], nm[:24], round(pe_now, 1), float("%.3g" % mcu), re.sub(r"^https?://(www\.)?", "", str(d.get("website") or "")).split("/")[0].lower()[:30]])
         asof[d.get("as_of") or ""] = asof.get(d.get("as_of") or "", 0) + 1
     rows.sort(key=lambda r: r[0])
     out = {"updated": time.strftime("%Y-%m-%d %H:%M", time.gmtime(time.time() + 9 * 3600)),
-           "axes": ["성장", "수익성", "싸다", "주가 힘", "전문가"], "cols": ["sym", "g", "om", "val", "pos", "up", "tier", "ind", "name", "pe", "mcap_usd"],
+           "axes": ["성장", "수익성", "싸다", "주가 힘", "전문가"], "cols": ["sym", "g", "om", "val", "pos", "up", "tier", "ind", "name", "pe", "mcap_usd", "web"],
            "rule": "plus5.js DNA 레이더와 같은 식 · PER·시총은 오늘 종가로 맞춤 · 덩치 단계 = log10(시총 달러)×2 내림 · 다섯 축이 다 있고 시총 1억 달러 넘는 종목만",
            "n": len(rows), "skip": skip, "asof": dict(sorted(asof.items())[-5:]), "rows": rows}
     json.dump(out, open(os.path.join(D, "dna.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
