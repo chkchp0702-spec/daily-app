@@ -46,13 +46,16 @@
       return getJSON("archive/x/live_kr.json?" + Math.floor(Date.now() / 60000), {ttl: 60000}).then(function(L){
         var K = {d: B.d.slice(), c: B.c.slice(), live: null};
         var ix = L && L.date && L.date <= kst() ? (L.index || []).filter(function(x){ return x.name === "코스피"; })[0] : null;
-        if (ix && ix.last > 0){ var n = K.d.length; if (K.d[n - 1] === L.date) K.c[n - 1] = +ix.last; else if (K.d[n - 1] < L.date){
-          // 파일에 전날 종가가 아직 없으면(야후 늦음) 실시간 등락률로 전날 종가를 되살려 끼움 — 안 그러면 이틀치가 하루로 잡힘
-          var pv = ix.chg != null ? +ix.last / (1 + ix.chg / 100) : null, pd = new Date(L.date + "T00:00:00Z");
-          do { pd.setUTCDate(pd.getUTCDate() - 1); } while (pd.getUTCDay() === 0 || pd.getUTCDay() === 6);
-          var pds = pd.toISOString().slice(0, 10);
-          if (pv && pds > K.d[n - 1]){ K.d.push(pds); K.c.push(pv); }
-          K.d.push(L.date); K.c.push(+ix.last); }
+        if (ix && ix.last > 0){
+          // 오늘 칸을 실시간 값으로 · 10/23: 파일에 전날 종가가 빠져 있으면(야후가 10/22 를 건너뜀) 실시간 등락률로 되살려 끼움 — 안 그러면 이틀치가 하루로 잡힘
+          if (K.d[K.d.length - 1] === L.date){ K.d.pop(); K.c.pop(); }
+          if (K.d[K.d.length - 1] < L.date){
+            var pv = ix.chg != null ? +ix.last / (1 + ix.chg / 100) : null, pd = new Date(L.date + "T00:00:00Z");
+            do { pd.setUTCDate(pd.getUTCDate() - 1); } while (pd.getUTCDay() === 0 || pd.getUTCDay() === 6);
+            var pds = pd.toISOString().slice(0, 10), lc = K.c[K.c.length - 1];
+            if (pv && pds > K.d[K.d.length - 1] && Math.abs(pv / lc - 1) > 0.0005){ K.d.push(pds); K.c.push(pv); }   // 휴장일이면 값이 같아 넣지 않음
+            K.d.push(L.date); K.c.push(+ix.last);
+          }
           if (L.date === kst() && ix.status !== "CLOSE") K.live = {t: L.t || "", d: L.date}; }
         return K;
       }, function(){ return {d: B.d, c: B.c, live: null}; });
@@ -73,25 +76,28 @@
       var so = rs.slice().sort(function(a, b){ return a - b; });
       return {h: h, n: rs.length, avg: s / rs.length, med: so[Math.floor(so.length / 2)], up: up, worst: worst};
     });
-    var now = null;   // 오늘 장중(또는 오늘 종가)인데 급락일이 오늘이 아닐 때 — 「오늘도 −x%」
-    if (d[n - 1] === kst() && trig && trig.d !== d[n - 1]){
-      var rn = (c[n - 1] / c[n - 2] - 1) * 100, r2 = (c[n - 1] / c[trig.i - 1] - 1) * 100;
-      if (rn <= -1.5){
-        var k = n - 1 - (trig.i - 1), cut2 = Math.ceil(r2), hs = [], seen = -999;   // 같은 날 수(k일) 동안 r2 만큼 빠진 날들 → 120거래일 뒤
+    var now = null;   // 오늘이 며칠째 연속 하락인가(오늘 −1.5% 넘게 · 앞날들도 −1.5% 넘게, 최대 5일) → 「이틀 동안 −x%」
+    if (d[n - 1] === kst() && n > 2){
+      var st = n - 1;
+      while (st > n - 5 && (c[st - 1] / c[st - 2] - 1) * 100 <= -1.5) st--;
+      var k = n - st, rn = (c[n - 1] / c[n - 2] - 1) * 100;
+      if (k >= 2 && rn <= -1.5){
+        var r2 = (c[n - 1] / c[st - 1] - 1) * 100, cut2 = Math.ceil(r2), hs = [], seen = -999;   // 같은 날 수(k일) 동안 그만큼 빠진 날들 → 120거래일 뒤
         for (var q = k; q < n - 1; q++){ var rr = (c[q] / c[q - k] - 1) * 100; if (rr <= cut2 && q - seen > k){ seen = q; if (q + 120 < n) hs.push((c[q + 120] / c[q] - 1) * 100); } }
         var av = null, upn = 0; if (hs.length){ av = 0; hs.forEach(function(x){ av += x; if (x > 0) upn++; }); av /= hs.length; }
-        now = {r: rn, r2: r2, k: k, cut2: cut2, n: hs.length, avg: av, up: upn};
+        now = {r: rn, prev: (c[n - 2] / c[n - 3] - 1) * 100, r2: r2, k: k, cut2: cut2, n: hs.length, avg: av, up: upn};
       }
     }
     return {trig: trig, drops: drops.length, H: H, from: d[0].slice(0, 4), today: d[n - 1] === kst(), live: K.live, now: now};
   }
+  function kday(k){ return ({2: "이틀", 3: "사흘", 4: "나흘", 5: "닷새"})[k] || k + "일"; }
   function panicHome(S){
     var A = amt(), T = S.trig, h120 = S.H[2], h20 = S.H[0];
     var rows = S.H.filter(function(x){ return x.n; }).map(function(x){
       return '<div class="pnh-r"><span>' + x.h + '거래일 뒤 돌아옴</span><b class="' + cl(-x.avg) + '">' + sg(-x.avg, 1) + '%p</b><em>' + x.n + '번 중 <b>' + x.up + '</b>번 손해</em></div>'; }).join("");
     var add = h120 && h120.n ? A * 0.1 * h120.avg / 100 : null;
-    return '<div class="pnh-h"><b>😱 ' + (T.d === kst() ? (S.live ? "오늘(장중 " + S.live.t + ")" : "오늘") : md(T.d)) + ' 코스피 ' + sg(T.r, 1) + '% — 그날 팔았다면?</b><small>' + S.from + '년 이후 하루 ' + Math.abs(CUT) + '% 넘게 빠진 날 ' + S.drops + '번 · 그날 종가에 팔고 다시 샀을 때 지수를 그대로 들고 있던 것보다</small></div>' +
-      (S.now ? '<div class="pnh-r pnh-now"><span>🔴 오늘도 ' + (S.live ? '장중(' + S.live.t + ') ' : '') + sg(S.now.r, 1) + '% · ' + S.now.k + '일 합쳐 ' + sg(S.now.r2, 1) + '%</span>' + (S.now.n ? '<b class="' + cl(S.now.avg) + '">' + sg(S.now.avg, 1) + '%</b><em>' + S.now.k + '일 새 ' + Math.abs(S.now.cut2) + '% 넘게 빠진 ' + S.now.n + '번 · 120거래일 뒤 평균 · ' + S.now.up + '번 오름</em>' : '<em>같은 낙폭 과거 사례 부족</em>') + '</div>' : '') +
+    return '<div class="pnh-h"><b>😱 ' + (T.d === kst() ? (S.live ? "오늘(장중 " + S.live.t + ")" : "오늘") : md(T.d)) + ' 코스피 ' + sg(T.r, 1) + '%' + (S.now && T.d === kst() ? ' · ' + kday(S.now.k) + ' 동안 ' + sg(S.now.r2, 1) + '%' : '') + ' — 그날 팔았다면?</b><small>' + S.from + '년 이후 하루 ' + Math.abs(CUT) + '% 넘게 빠진 날 ' + S.drops + '번 · 그날 종가에 팔고 다시 샀을 때 지수를 그대로 들고 있던 것보다</small></div>' +
+      (S.now ? '<div class="pnh-r pnh-now"><span>🔴 ' + (S.now.k === 2 ? '어제 ' + sg(S.now.prev, 1) + '%에 이어 ' : S.now.k + '일째 하락 · ') + '오늘' + (S.live ? '(장중 ' + S.live.t + ')' : '') + ' ' + sg(S.now.r, 1) + '% → ' + kday(S.now.k) + ' 동안 ' + sg(S.now.r2, 1) + '%</span>' + (S.now.n ? '<b class="' + cl(S.now.avg) + '">' + sg(S.now.avg, 1) + '%</b><em>2000년 이후 ' + kday(S.now.k) + ' 새 ' + Math.abs(S.now.cut2) + '% 넘게 빠진 ' + S.now.n + '번 · 120거래일 뒤 평균 · ' + S.now.up + '번 오름</em>' : '<em>같은 낙폭 과거 사례 부족</em>') + '</div>' : '') +
       rows +
       (add != null ? '<div class="pnh-r pnh-b"><span>↔ 반대로 그날 ' + won(A * 0.1) + '원(10%) 더 샀다면 120거래일 뒤</span><b class="' + cl(add) + '">' + (add >= 0 ? "+" : "−") + won(Math.abs(add)) + '원</b><em>평균 · 최악 ' + sg(h120.worst.r, 0) + '%(' + h120.worst.d.slice(0, 7).replace("-", ".") + ')</em></div>' : '') +
       '<div class="pnh-go">💼 내 포트 설계로 2008·2020·2022·2025 낙폭에서 보기 ›</div>' +
@@ -111,7 +117,7 @@
       s.onclick = function(ev){ ev.stopPropagation(); if (window.__pdz && __pdz.panic) __pdz.panic(); goTab("port"); };
     }).catch(function(){ HPB = 0; });
   }
-  function psig(S){ return S.trig.d + "|" + S.trig.r.toFixed(1) + "|" + (S.now ? S.now.r.toFixed(1) : "") + "|" + (S.live ? S.live.t : ""); }
+  function psig(S){ return S.trig.d + "|" + S.trig.r.toFixed(1) + "|" + (S.now ? S.now.r.toFixed(1) + S.now.k : "") + "|" + (S.live ? S.live.t : ""); }
   // 장중엔 2분마다 다시 계산 → 숫자가 바뀌면 카드를 새로 그림(급락이 새로 생기거나 사라져도)
   setInterval(function(){
     if (document.hidden || !document.getElementById("hmbody")) return;

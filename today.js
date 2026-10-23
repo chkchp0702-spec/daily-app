@@ -179,7 +179,7 @@
         pan("img/kid_piggy.jpg?v=1", "② 팔고 " + e(lab1.replace(/\s*뒤\s*돌아옴$/, "")) + " 뒤 돌아왔다면", e(v1), neg1 ? "dn" : "up", e(n1) + (neg1 ? " — 놓친 몫" : "")) +
         (vb ? pan(/^\+/.test(vb) ? "img/kid_joy.jpg?v=1" : "img/kid_umb.jpg?v=1", "③ 반대로 " + e(lb.replace(/\s*\d+거래일 뒤$/, "")), e(vb), /^\+/.test(vb) ? "up" : "dn", "120거래일 뒤 평균") : "") +
       '</div>' +
-      (rn ? '<div class="tz-now">' + e(rn.children[0] ? rn.children[0].textContent : "") + (rn.children[1] && rn.children[1].tagName === "B" ? ' → 과거엔 120거래일 뒤 평균 <b class="' + rn.children[1].className + '">' + e(rn.children[1].textContent) + '</b>' + (rn.children[2] ? '<small>' + e(rn.children[2].textContent.replace(/ · 120거래일 뒤 평균/, "")) + '</small>' : '') : '') + '</div>' : ''));
+      (rn ? '<div class="tz-now">' + e(rn.children[0] ? rn.children[0].textContent : "") + (rn.children[1] && rn.children[1].tagName === "B" ? '<br>과거엔 120거래일 뒤 평균 <b class="' + rn.children[1].className + '">' + e(rn.children[1].textContent) + '</b>' + (rn.children[2] ? '<small>' + e(rn.children[2].textContent.replace(/ · 120거래일 뒤 평균/, "")) + '</small>' : '') : '') + '</div>' : ''));
     s.appendChild(keep);
     keep.addEventListener("click", function(ev){ ev.stopPropagation(); }, true);
   }

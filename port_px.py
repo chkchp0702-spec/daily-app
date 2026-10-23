@@ -180,6 +180,14 @@ def main():
             ix = [x for x in (L.get("index") or []) if x.get("name") == "코스피"]
             if ix and ix[0].get("status") == "CLOSE" and ix[0].get("last") and L.get("date") and L["date"] not in P and L["date"] > max(P):
                 P[L["date"]] = float(ix[0]["last"]); print("＋ KOSPI live_kr 종가로 채움", L["date"], ix[0]["last"])
+            # 10/23: 야후가 전날(10/22)을 건너뛰는 일이 있음 → 오늘 실시간 등락률로 전날 종가를 되살려 채움(휴장일이면 값이 같아 넣지 않음)
+            if ix and ix[0].get("chg") is not None and L.get("date") in P:
+                pd = datetime.date.fromisoformat(L["date"]) - datetime.timedelta(days=1)
+                while pd.weekday() >= 5: pd -= datetime.timedelta(days=1)
+                pds = str(pd); before = [k for k in P if k < L["date"]]
+                pv = float(ix[0]["last"]) / (1 + float(ix[0]["chg"]) / 100)
+                if pds not in P and before and max(before) < pds and abs(pv / P[max(before)] - 1) > 0.0005:
+                    P[pds] = round(pv, 2); print("＋ KOSPI 빠진 전날 채움", pds, round(pv, 2))
         except Exception as x:
             print("live_kr 못 읽음", x)
         last = max(P); old = (idx["assets"].get("KOSPI") or {})
