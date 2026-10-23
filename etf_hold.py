@@ -3,9 +3,9 @@
    (금(GLD)·현금(BIL)은 종목이 아니라 그대로 「금」「현금」)
 
    받는 곳 (앞에서 받으면 뒤는 안 감 · 숫자를 지어내지 않음 — 다 실패하면 옛 파일 그대로)
-   · SPY : SSGA 공식 일일 구성표(xlsx) → iShares IVV(같은 S&P500 지수) CSV → 야후 상위 10
+   · SPY : SSGA 공식 일일 구성표(xlsx) → iShares IVV(같은 S&P500 지수) CSV → slickcharts S&P500 표 → 야후 상위 10
    · QQQ : Invesco 공식 구성표(CSV) → slickcharts 나스닥100 표 → 야후 상위 10
-   종목마다 [티커, 이름, 비중%] · SPY 는 상위 120개 + 나머지 합, QQQ 는 전부(약 100개).
+   종목마다 [티커, 이름, 비중%] · SPY·QQQ 모두 전부(약 500·100개).
    하루 한 번이면 충분 — 파일 날짜가 오늘(KST)이면 건너뜀.
 """
 import csv
@@ -22,7 +22,7 @@ OUT = os.path.join("archive", "x", "etf_hold.json")
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
       "Accept": "*/*", "Accept-Language": "en-US,en;q=0.9"}
 KST = dt.timezone(dt.timedelta(hours=9))
-TOPN = {"SPY": 120, "QQQ": 150}
+TOPN = {"SPY": 600, "QQQ": 150}   # SPY 도 전부(약 500) — 「나스닥 몫 중 S&P 에도 든 종목」을 정확히 셈
 
 
 def clean(rows):
@@ -33,7 +33,7 @@ def clean(rows):
             w = float(str(w).replace("%", "").replace(",", ""))
         except Exception:
             continue
-        if w <= 0 or not t or t in ("CASH", "USD", "-", "") or "CASH" in str(n).upper() and w < 1:
+        if w != w or w <= 0 or not t or t in ("CASH", "USD", "-", "") or "CASH" in str(n).upper() and w < 1:
             continue
         if t in seen:
             continue
@@ -100,13 +100,21 @@ def qqq_invesco():
     return clean(rows), "Invesco 공식 구성표", asof
 
 
+def spy_slick():
+    return slick("sp500")
+
+
 def qqq_slick():
-    r = requests.get("https://www.slickcharts.com/nasdaq100", headers=UA, timeout=40)
+    return slick("nasdaq100")
+
+
+def slick(page):
+    r = requests.get("https://www.slickcharts.com/" + page, headers=UA, timeout=40)
     r.raise_for_status()
     rows = []
     for m in re.finditer(r"<tr>\s*<td>\d+</td>\s*<td[^>]*><a[^>]*>([^<]+)</a></td>\s*<td[^>]*><a[^>]*>([^<]+)</a></td>\s*<td[^>]*>([\d.]+)%?</td>", r.text):
         rows.append((m.group(2), m.group(1), m.group(3)))
-    return clean(rows), "slickcharts 나스닥100", ""
+    return clean(rows), "slickcharts " + ("S&P500" if page == "sp500" else "나스닥100"), ""
 
 
 def yahoo_top(sym):
@@ -137,10 +145,11 @@ def main():
         old = json.load(open(OUT, encoding="utf-8"))
     except Exception:
         pass
-    if old.get("date") == today and "--force" not in sys.argv:
+    E0 = old.get("etf") or {}
+    if old.get("date") == today and (E0.get("SPY") or {}).get("n", 0) >= 400 and (E0.get("QQQ") or {}).get("n", 0) >= 90 and "--force" not in sys.argv:
         print("오늘 이미 받음 — 건너뜀"); return 0
     out = {"date": today, "updated": dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M"), "etf": dict(old.get("etf") or {})}
-    for sym, fns in (("SPY", [spy_ssga, spy_ivv, lambda: yahoo_top("SPY")]), ("QQQ", [qqq_invesco, qqq_slick, lambda: yahoo_top("QQQ")])):
+    for sym, fns in (("SPY", [spy_ssga, spy_ivv, spy_slick, lambda: yahoo_top("SPY")]), ("QQQ", [qqq_invesco, qqq_slick, lambda: yahoo_top("QQQ")])):
         g = get(sym, fns)
         if not g:
             continue
