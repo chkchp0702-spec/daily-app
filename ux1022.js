@@ -46,7 +46,13 @@
       return getJSON("archive/x/live_kr.json?" + Math.floor(Date.now() / 60000), {ttl: 60000}).then(function(L){
         var K = {d: B.d.slice(), c: B.c.slice(), live: null};
         var ix = L && L.date && L.date <= kst() ? (L.index || []).filter(function(x){ return x.name === "코스피"; })[0] : null;
-        if (ix && ix.last > 0){ var n = K.d.length; if (K.d[n - 1] === L.date) K.c[n - 1] = +ix.last; else if (K.d[n - 1] < L.date){ K.d.push(L.date); K.c.push(+ix.last); }
+        if (ix && ix.last > 0){ var n = K.d.length; if (K.d[n - 1] === L.date) K.c[n - 1] = +ix.last; else if (K.d[n - 1] < L.date){
+          // 파일에 전날 종가가 아직 없으면(야후 늦음) 실시간 등락률로 전날 종가를 되살려 끼움 — 안 그러면 이틀치가 하루로 잡힘
+          var pv = ix.chg != null ? +ix.last / (1 + ix.chg / 100) : null, pd = new Date(L.date + "T00:00:00Z");
+          do { pd.setUTCDate(pd.getUTCDate() - 1); } while (pd.getUTCDay() === 0 || pd.getUTCDay() === 6);
+          var pds = pd.toISOString().slice(0, 10);
+          if (pv && pds > K.d[n - 1]){ K.d.push(pds); K.c.push(pv); }
+          K.d.push(L.date); K.c.push(+ix.last); }
           if (L.date === kst() && ix.status !== "CLOSE") K.live = {t: L.t || "", d: L.date}; }
         return K;
       }, function(){ return {d: B.d, c: B.c, live: null}; });
