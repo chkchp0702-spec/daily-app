@@ -50,6 +50,15 @@ MK = {
 ETF_X = {"KR": "EWY", "JP": "EWJ", "HK": "EWH"}
 ETF_B = 0.16
 ETF_CAP = 0.3
+# 🌅 10/24 #15 「먼저 열린 아시아」: 중국·홍콩 개장(09:30 = 한국·일본 10:30) 전에 한국·일본이 1시간 넘게 거래한 등락에서
+#   간밤 미국+선물이 이미 설명한 몫(0.79배)을 뺀 나머지로 중국·홍콩 닻을 기울임.
+#   검증(probe/early_bt.py · 야후 60분봉 2023-10~ 약 500일, 2025-08 기준 앞/뒤 절반): 로짓 브라이어
+#   중국 0.2435→0.2282 · 0.2499→0.2363 / 홍콩 0.2335→0.2267 · 0.2441→0.2388 (두 기간 모두 개선)
+#   나머지 +0.3%↑ 뒤 상해 오름 71%·66% (평소 57%·54%) · −0.3%↓ 뒤 49%·40% / 항셍 59%·65% vs 51%·50% · 45%·38%
+#   계수는 두 기간 적합값(중국 0.34~0.51 · 홍콩 0.20~0.29 /1%p)보다 낮게, 로그오즈 ±0.3 상한
+EARLY_B = {"CN": 0.3, "HK": 0.2}
+EARLY_BETA = 0.79
+EARLY_CAP = 0.3
 EXTRA = ["^VIX", "ES=F"] + list(ETF_X.values()) + prob_x.XSYMS
 # 2026 FOMC 결정일 (둘째 날) — 연준 공개 일정. 그 밖의 이벤트는 prob_events.json 에서
 FOMC_2026 = ["2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-09",
@@ -273,6 +282,38 @@ def auc(y, s):
     return float((r[y == 1].sum() - npos * (npos + 1) / 2) / (npos * nneg))
 
 
+def asia_early(mk, loc_mk):
+    """🌅 #15: 중국·홍콩 개장 전, 한국·일본이 연 지 60분 넘었으면 두 지수의 지금 등락 평균(live_*.json). 아니면 None."""
+    from zoneinfo import ZoneInfo
+    if FAKE:
+        return None
+    vals, names = [], []
+    for k in ("KR", "JP"):
+        try:
+            cfg = MK[k]; loc = NOW.astimezone(ZoneInfo(cfg["tz"]))
+            hm = loc.hour * 60 + loc.minute; op = cfg["open"] // 100 * 60 + cfg["open"] % 100
+            cl = cfg["close"] // 100 * 60 + cfg["close"] % 100
+            if loc.weekday() >= 5 or not (op + 60 <= hm < cl) or loc.strftime("%Y-%m-%d") != loc_mk.strftime("%Y-%m-%d"):
+                continue
+            f_, nm_ = LIVE_IX[k]
+            j = json.load(open(os.path.join("archive", "x", f"live_{f_}.json"), encoding="utf-8"))
+            d = j.get("sess") or j.get("date")
+            ix = next((x for x in j.get("index") or [] if x.get("name") == nm_ and x.get("chg") is not None), None)
+            t = str(j.get("t") or "")
+            if not ix or d != loc.strftime("%Y-%m-%d") or ix.get("status") == "CLOSE":
+                continue
+            if len(t) >= 5 and ":" in t:                    # 30분 넘게 묵은 값은 안 씀 (한국 시각 HH:MM)
+                kst = NOW.astimezone(ZoneInfo("Asia/Seoul")); tm = int(t[:2]) * 60 + int(t[3:5])
+                if abs(kst.hour * 60 + kst.minute - tm) > 30:
+                    continue
+            vals.append(float(ix["chg"]) / 100); names.append(cfg["ixn"])
+        except Exception as ex:
+            print("먼저 열린 아시아 읽기 실패", k, ex)
+    if not vals:
+        return None
+    return sum(vals) / len(vals), "·".join(names)
+
+
 def is_open_now(cfg):
     from zoneinfo import ZoneInfo
     loc = NOW.astimezone(ZoneInfo(cfg["tz"]))
@@ -419,6 +460,15 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
             except Exception as ex:
                 print("국가 ETF 실패", mk, ex)
             pt += et
+            try:
+                ea = asia_early(mk, loc) if (mk in EARLY_B and not open_now and post is not None) else None
+                if ea is not None:
+                    res_ = ea[0] - EARLY_BETA * cur_s
+                    adj = max(-EARLY_CAP, min(EARLY_CAP, EARLY_B[mk] * res_ * 100))
+                    pa0 = pa; pa = sigm(logit(pa) + adj)
+                    pt += f" · 🌅 먼저 열린 {ea[1]} {ea[0]*100:+.2f}%(간밤 미국이 설명한 몫 빼면 {res_*100:+.2f}%p) → 닻 {pa0*100:.0f}→{pa*100:.0f}%(60분봉 2년 검증)"
+            except Exception as ex:
+                print("먼저 열린 아시아 실패", mk, ex)
             M.append({"k": "lead", "ic": "🛰️", "name": "선행 시장 (간밤 미국" + (" + 선물" if post is not None else "") + ")", "p1": pa, "p5": m["p5"], "n": m["n"], "w": 0.9, "anchor": 1,
                       "ev": f"간밤 미국 S&P({us_d}) {cur_us*100:+.2f}%{pt} · 비슷한 간밤 뒤 {cfg['ixn']} {m['n']}번 → 다음 날 오름 {m['p1']*100:.0f}% · 5일 {m['p5']*100:.0f}% — 🧭 오늘 확률의 닻(2012~ 검증 적중 " + LEAD_HIT.get(mk, "") + ")"})
     elif cfg["lead"] == "fut":
@@ -804,7 +854,7 @@ def main():
                ["자금", "💳 크레딧", "하이일드(HYG)/투자등급(LQD) 채권 20일 — 회사채 시장이 주식보다 먼저 위험을 알아챔. 급히 나빠지면 주식 약세 확률↑"],
                ["자금", "💱 환율", "한국 원/달러 · 일본 엔/달러 · 중국·홍콩 위안/달러 · 미국 달러 인덱스 5일 — 달러 강세는 외국인 자금이 빠지는 쪽"],
                ["선행", "⏱️ 장중 닻", "장이 열려 있으면 「지금 등락 ÷ (하루 흔들림 × √남은 흔들림)」 → 종가가 어제보다 높을 확률. 남은 흔들림은 한국·일본·홍콩만 60분봉 2년 실측(시가 갭이 하루 흔들림의 큰 몫이라 장중엔 생각보다 덜 흔들림 · 두 기간 모두 브라이어 개선), 중국·미국은 남은 시간 비율 그대로"],
-               ["선행", "🛰️ 선행 시장", "아시아 = 직전 미국 S&P 등락 + 미국 마감(뉴욕 16:00) 뒤 개장 전까지 S&P 선물 등락(10/15 더함 · 60분봉 2년 두 기간 모두 브라이어 개선)이 비슷했던 날의 결과. 한국·일본·홍콩은 미국 상장 국가 ETF(EWY·EWJ·EWH)가 그 나라 지수 마감 뒤 더 움직인 몫으로 조금 더 기울임(10/15 · 2012~ 두 기간·최근 2년 모두 브라이어 개선, 로그오즈 ±0.3 상한) · 미국 = 선물이 가리키는 시가 갭이 비슷했던 날의 종가 방향"],
+               ["선행", "🛰️ 선행 시장", "아시아 = 직전 미국 S&P 등락 + 미국 마감(뉴욕 16:00) 뒤 개장 전까지 S&P 선물 등락(10/15 더함 · 60분봉 2년 두 기간 모두 브라이어 개선)이 비슷했던 날의 결과. 한국·일본·홍콩은 미국 상장 국가 ETF(EWY·EWJ·EWH)가 그 나라 지수 마감 뒤 더 움직인 몫으로 조금 더 기울임(10/15 · 2012~ 두 기간·최근 2년 모두 브라이어 개선, 로그오즈 ±0.3 상한) · 중국·홍콩은 개장(한국 10:30) 전 먼저 1시간 넘게 거래한 코스피·닛케이 등락 중 간밤 미국이 설명 못 한 몫으로도 기울임(10/24 · 60분봉 2년 두 기간 모두 브라이어 개선, ±0.3 상한) · 미국 = 선물이 가리키는 시가 갭이 비슷했던 날의 종가 방향"],
                ["자금", "📐 장단기 금리차(한국)", "미 10년 − 3개월 국채 금리차 구간(역전·평평·보통·가파름). 2000년 이후 「보통(0.5~1.5%p)」 구간 뒤 코스피 다음 날 오른 비율이 평소보다 약 2%p 높고 「가파름」 구간은 낮았음 — 앞/뒤 기간·최근 2년 모두 브라이어 개선(10/15). 일본·중국·홍콩·미국은 개선이 없어 안 씀"],
                ["자금", "🏦 투자자예탁금 급감(한국 일주일)", "금투협 투자자예탁금(증권사에 맡긴 개인 대기자금)이 20일 동안 1년 중 하위 10%만큼 줄었을 때만 켜짐(발표가 다음 날이라 하루 늦춰 씀). 2005년 이후 그런 날 뒤 코스피 5일 뒤 오른 비율이 평소보다 앞 기간 8%p·뒤 기간 4%p 낮았고 최근 2년도 5%p 낮음 — 세 기간 모두 브라이어 개선(10/22). 신용잔고·반대매매·미수금은 개선이 없어 안 씀"],
                ["심리", "🧮 풋콜 극공포(미국 일주일)", "CBOE 전체 풋콜 비율 5일 평균이 1년 중 상위 10%(옵션 시장 극공포)일 때만 켜짐. 2006년 이후 그런 날 뒤 S&P 5일 뒤 오른 비율 66%(평소 58~61%) — 앞/뒤 기간·최근 2년 모두 브라이어 개선(10/19). 다음 날 쪽은 약하고, 다른 시장·탐욕 쪽·전체 구간 나눔은 개선이 없어 안 씀"],
