@@ -56,10 +56,14 @@ async def main():
                 elif abs(aft[0]-info[0])>150:
                     bad.append({"btn":info[1],"before":info[0],"after":aft[0],"scrollY":aft[1]})
             # 10/16 사용자 「저 숫자들 안 겹치게 해」 — 글이 화면 밖으로 나가거나 이름이 오른쪽 숫자와 겹치는지
-            ovf=await pg.evaluate("""(()=>{var W=document.documentElement.clientWidth,b=[];document.querySelectorAll('#main *').forEach(function(el){var r=el.getBoundingClientRect();if(!r.width||el.closest('.seg2,.pd-cfw,.tabs,.dates,[style*="overflow"]'))return;
+            ovf=await pg.evaluate("""(()=>{var W=document.documentElement.clientWidth,b=[];
+              // 10/24: 넘침의 원인이 🧒 조이 단추(.gd-b·.gd-i 의 보이지 않는 누르는 칸 :after −12px)·화면 끝까지 펼친 띠(.po-stk)나 옆으로 미는 칩 줄(.fold-jump 등 overflow-x:auto)뿐이고 화면 안이면 정상 — 글자 넘침만 센다
+              if(!document.getElementById('au-st')){var st=document.createElement('style');st.id='au-st';st.textContent='.au-noaf .gd-b:after,.au-noaf .gd-i:after{display:none!important}';document.head.appendChild(st);}
+              function onlyOk(el,r){if(r.right>W+1)return false;el.classList.add('au-noaf');var sw=el.scrollWidth;el.classList.remove('au-noaf');if(sw<=el.clientWidth+2)return true;var R=r.right-(parseFloat(getComputedStyle(el).paddingRight)||0)+2,c=[].filter.call(el.querySelectorAll('*'),function(d){return d.getBoundingClientRect().right>R;});
+                if(!c.length)return false;return c.every(function(d){if(d.closest('.gd-b'))return true;var dr=d.getBoundingClientRect();if(dr.left<=1&&dr.right<=W+1&&dr.right>=W-1)return true;for(var q=d;q&&q!==el;q=q.parentElement){var ox=getComputedStyle(q).overflowX,qr=q.getBoundingClientRect();if(ox!=='visible'||(qr.left<=1&&qr.right>=W-1&&qr.right<=W+1))return true;}return false;});}document.querySelectorAll('#main *').forEach(function(el){var r=el.getBoundingClientRect();if(!r.width||el.closest('.seg2,.pd-cfw,.tabs,.dates,[style*="overflow"]'))return;
               for(var q=el.parentElement;q&&q.id!=='main';q=q.parentElement){var ox=getComputedStyle(q).overflowX;if(ox==='auto'||ox==='scroll')return;}
               if(r.right>W+1&&!el.children.length)b.push('밖 '+(el.innerText||'').slice(0,24));
-              var cs=getComputedStyle(el);if(cs.overflowX==='visible'&&cs.textOverflow!=='ellipsis'&&el.scrollWidth>el.clientWidth+2&&el.clientWidth>0&&(el.innerText||'').trim())b.push('넘침 '+(el.innerText||'').slice(0,24));});return b.slice(0,8);})()""")
+              var cs=getComputedStyle(el);if(cs.overflowX==='visible'&&cs.textOverflow!=='ellipsis'&&el.scrollWidth>el.clientWidth+2&&el.clientWidth>0&&(el.innerText||'').trim()&&!onlyOk(el,r))b.push('넘침 '+el.tagName.toLowerCase()+(el.className&&typeof el.className==='string'?'.'+el.className.trim().split(/ +/).join('.'):'')+' '+(el.innerText||'').slice(0,24)+' (+'+(el.scrollWidth-el.clientWidth)+'px)');});return b.slice(0,8);})()""")
             out[tab]={"buttons":n,"jumps":bad,"errors":sorted(set(errs))[:8],"overflow":ovf}
             print(tab, n, "jumps", len(bad), "errors", len(set(errs)), "overflow", len(ovf), flush=True)
             for o in ovf: print("   ", o)

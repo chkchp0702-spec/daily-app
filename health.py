@@ -50,9 +50,11 @@ def data_checks():
     out, probs = [], []
     # (이름, 주소, 시각 칸, 허용 시간) — 주말·휴장엔 자연히 늘어나는 것은 넉넉히
     weekend = NOW.weekday() >= 5
+    # 10/24: 시세 수집(fetch.yml)은 주말엔 하루 한 번(06:15 KST)뿐 → 토·일 포트·킥·홈·성적표·동종주는 27시간까지 정상 (10/24 토 16:25 「7.6시간째」 5개 가짜 경보)
+    mk = 3 if not weekend else 27
     for name, url, key, lim in [
-        ("💼 포트", MSR + "market/port.json", "at", 3), ("⚡ 킥", MSR + "market/kick.json", "at", 3), ("🏠 홈", MSR + "market/home.json", "at", 3),
-        ("📊 성적표", MSR + "market/scores.json", "at", 3), ("🌏 동종주", MSR + "market/peers.json", "at", 3), ("🎯 집중", MSR + "market/focus.json", "built_kst", 30 if not weekend else 80),
+        ("💼 포트", MSR + "market/port.json", "at", mk), ("⚡ 킥", MSR + "market/kick.json", "at", mk), ("🏠 홈", MSR + "market/home.json", "at", mk),
+        ("📊 성적표", MSR + "market/scores.json", "at", mk), ("🌏 동종주", MSR + "market/peers.json", "at", mk), ("🎯 집중", MSR + "market/focus.json", "built_kst", 30 if not weekend else 80),
         ("📰 피드", MSR + "feeds/my_feed.json", "at", 1.5), ("🧠 두뇌", MSR + "brain/state.json", "last_review", 3),
         ("🧪 단타 학습", SS + "data/learned.json", "at", 30 if not weekend else 80), ("📱 앱 목록", APP + "manifest.json", "updated", 30),
         ("🎲 시장확률", DA + "archive/x/prob.json", "at", 2), ("🧭 섹터·종목 확률", DA + "archive/x/prob_sec.json", "at", 12 if not weekend else 80)]:
