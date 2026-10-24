@@ -1,72 +1,66 @@
 {
- "at": "2026-10-24 16:25",
- "ok": false,
- "problems": [
-  "💼 포트 7.6시간째 안 바뀜(기준 3시간)",
-  "⚡ 킥 7.6시간째 안 바뀜(기준 3시간)",
-  "🏠 홈 7.5시간째 안 바뀜(기준 3시간)",
-  "📊 성적표 7.5시간째 안 바뀜(기준 3시간)",
-  "🌏 동종주 7.5시간째 안 바뀜(기준 3시간)"
- ],
+ "at": "2026-10-24 17:19",
+ "ok": true,
+ "problems": [],
  "data": [
   {
    "name": "💼 포트",
-   "ok": false,
-   "age_h": 7.6,
-   "lim": 3
+   "ok": true,
+   "age_h": 8.5,
+   "lim": 27
   },
   {
    "name": "⚡ 킥",
-   "ok": false,
-   "age_h": 7.6,
-   "lim": 3
+   "ok": true,
+   "age_h": 8.5,
+   "lim": 27
   },
   {
    "name": "🏠 홈",
-   "ok": false,
-   "age_h": 7.5,
-   "lim": 3
+   "ok": true,
+   "age_h": 8.4,
+   "lim": 27
   },
   {
    "name": "📊 성적표",
-   "ok": false,
-   "age_h": 7.5,
-   "lim": 3
+   "ok": true,
+   "age_h": 8.4,
+   "lim": 27
   },
   {
    "name": "🌏 동종주",
-   "ok": false,
-   "age_h": 7.5,
-   "lim": 3
+   "ok": true,
+   "age_h": 8.4,
+   "lim": 27
   },
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 7.6,
+   "age_h": 8.5,
    "lim": 80
   },
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.1,
+   "age_h": 0.2,
    "lim": 1.5
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 2.0,
+   "age_h": 2.9,
    "lim": 80
   },
   {
    "name": "📱 앱 목록",
    "ok": true,
-   "age_h": 1.2,
+   "age_h": 0.8,
    "lim": 30
   },
   {
@@ -78,14 +72,14 @@
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 17.6,
+   "age_h": 18.5,
    "lim": 80
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 0.8,
+   "s": 1.2,
    "cards": 5,
    "len": 1323,
    "bad": [],
@@ -94,9 +88,9 @@
   },
   {
    "tab": "market",
-   "s": 0.3,
+   "s": 1.0,
    "cards": 29,
-   "len": 1549,
+   "len": 1554,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -112,7 +106,7 @@
   },
   {
    "tab": "score",
-   "s": 0.4,
+   "s": 0.3,
    "cards": 10,
    "len": 2588,
    "bad": [],
@@ -121,16 +115,16 @@
   },
   {
    "tab": "whale",
-   "s": 0.5,
+   "s": 0.7,
    "cards": 21,
-   "len": 1345,
+   "len": 1322,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "cup",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 12,
    "len": 3441,
    "bad": [],
@@ -141,7 +135,7 @@
    "tab": "gap",
    "s": 0.4,
    "cards": 17,
-   "len": 2491,
+   "len": 2496,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -157,7 +151,7 @@
   },
   {
    "tab": "accum",
-   "s": 0.4,
+   "s": 0.3,
    "cards": 12,
    "len": 1062,
    "bad": [],
@@ -166,7 +160,7 @@
   },
   {
    "tab": "onepager",
-   "s": 0.2,
+   "s": 0.4,
    "cards": 1,
    "len": 280,
    "bad": [],
@@ -177,7 +171,7 @@
    "tab": "danta",
    "s": 0.5,
    "cards": 12,
-   "len": 1670,
+   "len": 1675,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -204,7 +198,7 @@
    "tab": "feed",
    "s": 0.3,
    "cards": 1,
-   "len": 5419,
+   "len": 5128,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -264,6 +258,12 @@
     "창:port",
     true
    ]
+  },
+  {
+   "tab": "재시도로 열림",
+   "tabs": [
+    "accum"
+   ]
   }
  ],
  "jobs": [
@@ -271,13 +271,13 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-24T07:17"
+   "when": "2026-10-24T08:18"
   },
   {
    "repo": "daily-app",
    "job": "collect",
    "ok": true,
-   "when": "2026-10-24T06:13"
+   "when": "2026-10-24T07:33"
   },
   {
    "repo": "daily-app",
@@ -355,13 +355,13 @@
    "repo": "daily-app",
    "job": "feedback",
    "ok": true,
-   "when": "2026-10-24T07:12"
+   "when": "2026-10-24T08:12"
   },
   {
    "repo": "daily-app",
    "job": "oppdf",
    "ok": true,
-   "when": "2026-10-24T01:59"
+   "when": "2026-10-24T07:36"
   },
   {
    "repo": "daily-app",
@@ -379,7 +379,7 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-23T12:42"
+   "when": "2026-10-24T07:25"
   },
   {
    "repo": "daily-app",
@@ -391,7 +391,7 @@
    "repo": "daily-app",
    "job": "prob",
    "ok": true,
-   "when": "2026-10-24T07:16"
+   "when": "2026-10-24T08:14"
   },
   {
    "repo": "daily-app",
@@ -611,6 +611,8 @@
   }
  ],
  "week_fixed": [
+  "10/24 🩺 건강검진: 토·일엔 💼 포트·⚡ 킥·🏠 홈·📊 성적표·🌏 동종주 「안 바뀜」 기준 3시간 → 27시간(d",
+  "10/24 🧪 화면 자동 점검 「넘침」이 🧒 조이 단추(.gd-b·.gd-i 의 보이지 않는 누르는 칸 :after −",
   "10/23 🩺 🌐 시황 탭 「한눈에 보기」·「리뷰」 글과 🗺 섹터 브리핑·sector.md 를 못 받으면 잡히지 않은 ",
   "10/23 📊 성적표 킥 줄 「S&P −0.00%」 → 「+0.00%」 (파이썬 −0.0 표시)",
   "10/22 🏗 build-report: 아침 세션이 이미 PDF·장부를 올린 날은 CI 가 리포트를 다시 만들지 않음(",
