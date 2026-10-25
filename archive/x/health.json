@@ -1,108 +1,103 @@
 {
- "at": "2026-10-25 16:25",
- "ok": false,
- "problems": [
-  "피드 0개·실패: Caixin Global"
- ],
+ "at": "2026-10-25 21:40",
+ "ok": true,
+ "problems": [],
  "data": [
   {
    "name": "💼 포트",
    "ok": true,
-   "age_h": 8.3,
+   "age_h": 13.5,
    "lim": 27
   },
   {
    "name": "⚡ 킥",
    "ok": true,
-   "age_h": 8.3,
+   "age_h": 13.5,
    "lim": 27
   },
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 8.3,
+   "age_h": 13.5,
    "lim": 27
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 8.3,
+   "age_h": 13.5,
    "lim": 27
   },
   {
    "name": "🌏 동종주",
    "ok": true,
-   "age_h": 8.3,
+   "age_h": 13.5,
    "lim": 27
   },
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 8.3,
+   "age_h": 13.5,
    "lim": 80
   },
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.0,
-   "lim": 1.5,
-   "zero": [
-    "Caixin Global"
-   ]
+   "age_h": 0.1,
+   "lim": 1.5
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.1,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 26.0,
+   "age_h": 31.3,
    "lim": 80
   },
   {
    "name": "📱 앱 목록",
    "ok": true,
-   "age_h": 1.2,
+   "age_h": 1.4,
    "lim": 30
   },
   {
    "name": "🎲 시장확률",
    "ok": true,
-   "age_h": 0.2,
+   "age_h": 1.2,
    "lim": 2
   },
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 41.6,
+   "age_h": 46.8,
    "lim": 80
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 0.5,
+   "s": 0.8,
    "cards": 5,
-   "len": 1307,
+   "len": 1308,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "market",
-   "s": 0.7,
+   "s": 0.3,
    "cards": 29,
-   "len": 1409,
+   "len": 1488,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "port",
-   "s": 0.4,
+   "s": 0.3,
    "cards": 13,
    "len": 740,
    "bad": [],
@@ -111,7 +106,7 @@
   },
   {
    "tab": "score",
-   "s": 0.3,
+   "s": 0.4,
    "cards": 10,
    "len": 2722,
    "bad": [],
@@ -120,27 +115,27 @@
   },
   {
    "tab": "whale",
-   "s": 0.6,
+   "s": 0.4,
    "cards": 21,
-   "len": 1335,
+   "len": 1351,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "cup",
-   "s": 0.6,
+   "s": 0.4,
    "cards": 12,
-   "len": 3452,
+   "len": 3447,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "gap",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 16,
-   "len": 2513,
+   "len": 2487,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -174,7 +169,7 @@
   },
   {
    "tab": "danta",
-   "s": 0.4,
+   "s": 0.5,
    "cards": 12,
    "len": 1675,
    "bad": [],
@@ -203,7 +198,7 @@
    "tab": "feed",
    "s": 0.3,
    "cards": 1,
-   "len": 5642,
+   "len": 5550,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -270,13 +265,13 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-25T07:14"
+   "when": "2026-10-25T12:12"
   },
   {
    "repo": "daily-app",
    "job": "collect",
    "ok": true,
-   "when": "2026-10-25T06:13"
+   "when": "2026-10-25T11:18"
   },
   {
    "repo": "daily-app",
@@ -312,7 +307,7 @@
    "repo": "daily-app",
    "job": "opextra",
    "ok": true,
-   "when": "2026-10-18T07:59"
+   "when": "2026-10-25T08:21"
   },
   {
    "repo": "daily-app",
@@ -330,7 +325,7 @@
    "repo": "daily-app",
    "job": "watch",
    "ok": true,
-   "when": "2026-10-24T14:35"
+   "when": "2026-10-25T11:17"
   },
   {
    "repo": "daily-app",
@@ -348,19 +343,19 @@
    "repo": "daily-app",
    "job": "keeper",
    "ok": true,
-   "when": "2026-10-25T05:48"
+   "when": "2026-10-25T12:29"
   },
   {
    "repo": "daily-app",
    "job": "feedback",
    "ok": true,
-   "when": "2026-10-25T07:12"
+   "when": "2026-10-25T12:12"
   },
   {
    "repo": "daily-app",
    "job": "oppdf",
    "ok": true,
-   "when": "2026-10-25T05:21"
+   "when": "2026-10-25T10:10"
   },
   {
    "repo": "daily-app",
@@ -378,7 +373,7 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-25T01:01"
+   "when": "2026-10-25T07:25"
   },
   {
    "repo": "daily-app",
@@ -390,7 +385,7 @@
    "repo": "daily-app",
    "job": "prob",
    "ok": true,
-   "when": "2026-10-25T07:14"
+   "when": "2026-10-25T11:29"
   },
   {
    "repo": "daily-app",
@@ -450,7 +445,7 @@
    "repo": "market-strategy-report",
    "job": "build-report",
    "ok": true,
-   "when": "2026-10-24T21:47"
+   "when": "2026-10-25T07:59"
   },
   {
    "repo": "market-strategy-report",
@@ -474,7 +469,7 @@
    "repo": "market-strategy-report",
    "job": "my-feed",
    "ok": true,
-   "when": "2026-10-24T23:37"
+   "when": "2026-10-25T04:40"
   },
   {
    "repo": "market-strategy-report",
@@ -564,7 +559,7 @@
    "repo": "stock-screener",
    "job": "push-relay",
    "ok": true,
-   "when": "2026-10-24T23:19"
+   "when": "2026-10-25T04:49"
   },
   {
    "repo": "stock-screener",
@@ -610,6 +605,7 @@
   }
  ],
  "week_fixed": [
+  "10/25 📰 Caixin Global 피드: 구글뉴스 받기 창 1일 → 3일 · 남기기 2일 → 7일(SLOW, 연준",
   "10/24 🩺 건강검진: 토·일엔 💼 포트·⚡ 킥·🏠 홈·📊 성적표·🌏 동종주 「안 바뀜」 기준 3시간 → 27시간(d",
   "10/24 🧪 화면 자동 점검 「넘침」이 🧒 조이 단추(.gd-b·.gd-i 의 보이지 않는 누르는 칸 :after −",
   "10/23 🩺 🌐 시황 탭 「한눈에 보기」·「리뷰」 글과 🗺 섹터 브리핑·sector.md 를 못 받으면 잡히지 않은 ",
