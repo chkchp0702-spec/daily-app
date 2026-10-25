@@ -8,7 +8,7 @@
   // 🎨 10/22 Canva 로 만든 꼬마 자세 (나머지 묶음·자세히는 기본 그림) — 사용자 「일단 지금 있는 것만」
   var POSE = {intro: "img/kid_wave.jpg?v=1", home: "img/kid_thumb.jpg?v=1", mkt: "img/kid_globe.jpg?v=1", inv: "img/kid_piggy.jpg?v=1", prod: "img/kid_piggy.jpg?v=1", sig: "img/kid_detect.jpg?v=1"};  // 10/25 신호 = 돋보기 조이
   // 10/23 사용자 「꼬마 여러 표정을 적재적소에」 — 조이(Joey) 표정: 기쁨(kid_joy) · 우산(kid_umb, 조심·내림) · 엄지(kid_thumb) · 손인사(kid_wave) · 지구본(kid_globe) · 저금통(kid_piggy) · 놀람(guide_src)
-  var FACE = {joy: "img/kid_joy.jpg?v=1", umb: "img/kid_umb.jpg?v=1", thumb: "img/kid_thumb.jpg?v=1", wow: "img/guide_src.jpg?v=1", think: "img/kid_think.jpg?v=1", detect: "img/kid_detect.jpg?v=1"};  // 10/24 +생각(kid_think) · 10/25 +돋보기(kid_detect)
+  var FACE = {joy: "img/kid_joy.jpg?v=1", umb: "img/kid_umb.jpg?v=1", thumb: "img/kid_thumb.jpg?v=1", wow: "img/guide_src.jpg?v=1", think: "img/kid_think.jpg?v=1", detect: "img/kid_detect.jpg?v=1", night: "img/kid_night.jpg?v=1"};  // 10/26 +졸린 밤(kid_night)  // 10/24 +생각(kid_think) · 10/25 +돋보기(kid_detect)
   function faceFor(L){ var t = (L || []).join(" ");     // 말 내용으로 표정 고르기
     if (/⚠️|주의|조심|못 미|미달|아직 검증|무리|이르|손실|내림|빠진|급락/.test(t)) return FACE.umb;
     if (/🏆|이김|적중|확인됨|✅|앞섬/.test(t)) return FACE.joy;

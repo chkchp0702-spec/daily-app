@@ -136,7 +136,7 @@
     var h = '<div class="tz-sky ' + S.wx + '">' + (S.wx === "rain" || S.wx === "storm" ? '<i class="tz-rain" aria-hidden="true"></i>' : S.wx === "sun" ? '<i class="tz-sun" aria-hidden="true"></i>' : '') + bgLine(S.line) +
       '<div class="tz-top"><span class="tz-wx">' + W.ic + ' <b>' + W.w + '</b></span><span class="tz-sl">' + sl[0] + ' ' + sl[1] + '</span></div>' +
       '<div class="tz-main">' +
-        '<div class="tz-kid" style="background-image:url(' + W.kid + ')"' + ' aria-hidden="true">' + (W.acc ? '<i>' + W.acc + '</i>' : '') + '</div>' +
+        '<div class="tz-kid" style="background-image:url(' + (S.slot === "night" && S.wx !== "storm" ? "img/kid_night.jpg?v=1" : W.kid) + ')"' + ' aria-hidden="true">' + (W.acc ? '<i>' + W.acc + '</i>' : '') + '</div>' +
         '<div class="tz-num">' + (b ? '<small>' + e(b.lab) + '</small><b class="tz-cnt" data-v="' + b.v + '">' + sg(b.v, 2) + '%</b><em>' + e(b.sub || "") + '</em>' : '<small>오늘</small><b>–</b>') + '</div>' +
       '</div>' +
       rankLine(S, K) +
