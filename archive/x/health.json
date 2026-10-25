@@ -1,103 +1,108 @@
 {
- "at": "2026-10-25 10:02",
- "ok": true,
- "problems": [],
+ "at": "2026-10-25 16:25",
+ "ok": false,
+ "problems": [
+  "피드 0개·실패: Caixin Global"
+ ],
  "data": [
   {
    "name": "💼 포트",
    "ok": true,
-   "age_h": 1.9,
+   "age_h": 8.3,
    "lim": 27
   },
   {
    "name": "⚡ 킥",
    "ok": true,
-   "age_h": 1.9,
+   "age_h": 8.3,
    "lim": 27
   },
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 1.9,
+   "age_h": 8.3,
    "lim": 27
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 1.9,
+   "age_h": 8.3,
    "lim": 27
   },
   {
    "name": "🌏 동종주",
    "ok": true,
-   "age_h": 1.9,
+   "age_h": 8.3,
    "lim": 27
   },
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 1.9,
+   "age_h": 8.3,
    "lim": 80
   },
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.1,
-   "lim": 1.5
+   "age_h": 0.0,
+   "lim": 1.5,
+   "zero": [
+    "Caixin Global"
+   ]
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.5,
+   "age_h": 0.8,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 19.6,
+   "age_h": 26.0,
    "lim": 80
   },
   {
    "name": "📱 앱 목록",
    "ok": true,
-   "age_h": 0.3,
+   "age_h": 1.2,
    "lim": 30
   },
   {
    "name": "🎲 시장확률",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.2,
    "lim": 2
   },
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 35.2,
+   "age_h": 41.6,
    "lim": 80
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 0.7,
+   "s": 0.5,
    "cards": 5,
-   "len": 1302,
+   "len": 1307,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "market",
-   "s": 0.3,
+   "s": 0.7,
    "cards": 29,
-   "len": 1391,
+   "len": 1409,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "port",
-   "s": 0.2,
+   "s": 0.4,
    "cards": 13,
    "len": 740,
    "bad": [],
@@ -108,14 +113,14 @@
    "tab": "score",
    "s": 0.3,
    "cards": 10,
-   "len": 2597,
+   "len": 2722,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "whale",
-   "s": 0.5,
+   "s": 0.6,
    "cards": 21,
    "len": 1335,
    "bad": [],
@@ -124,25 +129,25 @@
   },
   {
    "tab": "cup",
-   "s": 0.4,
+   "s": 0.6,
    "cards": 12,
-   "len": 3441,
+   "len": 3452,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "gap",
-   "s": 0.4,
+   "s": 0.5,
    "cards": 16,
-   "len": 2487,
+   "len": 2513,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "sector",
-   "s": 0.5,
+   "s": 0.6,
    "cards": 39,
    "len": 2810,
    "bad": [],
@@ -169,7 +174,7 @@
   },
   {
    "tab": "danta",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 12,
    "len": 1675,
    "bad": [],
@@ -198,7 +203,7 @@
    "tab": "feed",
    "s": 0.3,
    "cards": 1,
-   "len": 5547,
+   "len": 5642,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -265,13 +270,13 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-25T00:49"
+   "when": "2026-10-25T07:14"
   },
   {
    "repo": "daily-app",
    "job": "collect",
    "ok": true,
-   "when": "2026-10-25T01:02"
+   "when": "2026-10-25T06:13"
   },
   {
    "repo": "daily-app",
@@ -343,19 +348,19 @@
    "repo": "daily-app",
    "job": "keeper",
    "ok": true,
-   "when": "2026-10-24T22:26"
+   "when": "2026-10-25T05:48"
   },
   {
    "repo": "daily-app",
    "job": "feedback",
    "ok": true,
-   "when": "2026-10-25T00:12"
+   "when": "2026-10-25T07:12"
   },
   {
    "repo": "daily-app",
    "job": "oppdf",
    "ok": true,
-   "when": "2026-10-25T00:32"
+   "when": "2026-10-25T05:21"
   },
   {
    "repo": "daily-app",
@@ -373,7 +378,7 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-24T12:06"
+   "when": "2026-10-25T01:01"
   },
   {
    "repo": "daily-app",
@@ -385,7 +390,7 @@
    "repo": "daily-app",
    "job": "prob",
    "ok": true,
-   "when": "2026-10-25T00:14"
+   "when": "2026-10-25T07:14"
   },
   {
    "repo": "daily-app",
@@ -469,7 +474,7 @@
    "repo": "market-strategy-report",
    "job": "my-feed",
    "ok": true,
-   "when": "2026-10-24T16:47"
+   "when": "2026-10-24T23:37"
   },
   {
    "repo": "market-strategy-report",
@@ -559,7 +564,7 @@
    "repo": "stock-screener",
    "job": "push-relay",
    "ok": true,
-   "when": "2026-10-24T20:54"
+   "when": "2026-10-24T23:19"
   },
   {
    "repo": "stock-screener",
@@ -595,7 +600,7 @@
    "repo": "whale40",
    "job": "whale40 daily",
    "ok": true,
-   "when": "2026-10-25T00:19"
+   "when": "2026-10-25T04:36"
   },
   {
    "repo": "whale40",
