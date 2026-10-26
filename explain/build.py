@@ -144,8 +144,8 @@ def build(name):
     total = round(t + 1.2, 2)
 
     layers = {k: [] for k in screens}
-    js.append(f'tl.set("#layer{screens.index(scr[0])}", {{ y: {-stops[0][0] * S:.1f} }}, 0);')
     caps_html, js = [], []
+    js.append(f'tl.set("#layer{screens.index(scr[0])}", {{ y: {-stops[0][0] * S:.1f} }}, 0);')
     shown = screens[0]
     for i, s in enumerate(lines):
         st, d = starts[i], dur(s)
