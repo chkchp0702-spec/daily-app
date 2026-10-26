@@ -52,8 +52,12 @@
   //   t_<탭> = 탭 설명 · m_<자세히> = ⓘ 자세히. 영상이 없으면 지금처럼 글 말풍선
   var VID = {t_home: 1, t_mkt: 1, t_inv: 1, t_sig: 1, t_prod: 1, t_feed: 1, m_home: 1, m_market: 1, m_sector: 1, m_prob: 1, m_port: 1, m_score: 1,
              m_whale: 1, m_cup: 1, m_gap: 1, m_screen: 1, m_sigmore: 1, m_bond: 1, m_fund: 1, m_els: 1, m_feed: 1};
-  var VIDV = "1";
+  var VIDV = "2";
   function vidOf(g, mk){ var k = mk ? "m_" + mk : "t_" + g; return VID[k] ? "vid/" + k + ".mp4?v=" + VIDV : ""; }
+  // 10/26 사용자 「조이가 있는 모든 곳에 설명 영상」 — 카드 머리·접기 ⓘ·「ⓘ 설명」·「ⓘ …」 접는 칸: vidmap.js(window.VIDC, 자동 생성)에 「화면|제목」 → 파일
+  function vkey(t){ return String(t || "").replace(/[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()−▲▼△▽›‹]/g, "").toLowerCase().slice(0, 24); }
+  function vidFor(title){ var m = window.VIDC; if (!m) return ""; var k = ((typeof cur !== "undefined" && cur) || "") + "|" + vkey(title); return m[k] ? "vid/" + m[k] + ".mp4?v=" + (m._v || VIDV) : ""; }
+  function vidHtml(vs){ return vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted autoplay playsinline preload="auto" controls disablepictureinpicture></video></div>' : ""; }
   var MORE_NAME = {home: "🏠 오늘", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", feed: "📰 피드"};
   function ls(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); } catch(x) { return null; } }
   function seen(){ return ls("gd_seen") || {}; }
@@ -140,16 +144,24 @@
     if (!L || !L.length) return;
     close();
     var q = document.createElement("div"); q.id = "gdq";
-    q.innerHTML = '<div class="gd-sh gd-more" role="dialog" aria-label="안내자 조이"><div class="gd-row"><div class="gd-kid" aria-hidden="true" style="background-image:url(' + (face || faceFor(L) || BODY) + ')"></div><div class="gd-bub"><div class="gd-t">' + esc(title || "설명") + '</div>' +
-      L.slice(0, 14).map(function(x){ return '<p class="gd-l">' + esc(x) + '</p>'; }).join("") + '</div></div><div class="gd-ft">' + (foot || "") + '<button class="gd-x">닫기</button></div></div>';
+    var vs = vidFor(title);
+    q.innerHTML = '<div class="gd-sh gd-more' + (vs ? ' gd-hasv' : '') + '" role="dialog" aria-label="안내자 조이">' + vidHtml(vs) + '<div class="gd-row"><div class="gd-kid" aria-hidden="true" style="background-image:url(' + (face || faceFor(L) || BODY) + ')"></div><div class="gd-bub"><div class="gd-t">' + esc(title || "설명") + '</div>' +
+      L.slice(0, 14).map(function(x){ return '<p class="gd-l">' + esc(x) + '</p>'; }).join("") + '</div></div><div class="gd-ft">' + (foot || "") + (vs ? '<button class="gd-tx">📝 글로 보기</button>' : '') + '<button class="gd-x">닫기</button></div></div>';
     document.body.appendChild(q);
     var ps = q.querySelectorAll(".gd-l"), i = 0;
     function next(){ if (i < ps.length) ps[i++].classList.add("on"); if (i >= ps.length) { clearInterval(timer); timer = null; } }
-    next(); timer = setInterval(next, 450);
+    var sh = q.querySelector(".gd-sh"), vv = q.querySelector(".gd-v");
+    if (vv){ var pp = vv.play && vv.play(); if (pp && pp.catch) pp.catch(function(){}); vv.onerror = function(){ sh.classList.remove("gd-hasv"); var t = q.querySelector(".gd-tx"); if (t) t.remove(); if (!timer && i < ps.length){ next(); timer = setInterval(next, 450); } }; }
+    if (!vs) { next(); timer = setInterval(next, 450); }
     q.onclick = function(e){
       var b = e.target.closest && e.target.closest("button");
       if (b && b.dataset.goto){ setTimeout(close, 0); return; }          // 「관련 화면」 → 앱의 원래 이동 처리에 맡김
       if (e.target === q || (b && b.classList.contains("gd-x"))) return close();
+      if (b && b.classList.contains("gd-tx")){                                   // 영상 ↔ 글
+        var toTxt = sh.classList.toggle("gd-txt"); b.textContent = toTxt ? "▶ 영상으로 보기" : "📝 글로 보기";
+        if (toTxt){ if (vv) vv.pause(); while (i < ps.length) next(); } else if (vv){ var p2 = vv.play(); if (p2 && p2.catch) p2.catch(function(){}); }
+        return;
+      }
       if (timer) { while (i < ps.length) next(); }
     };
   }
