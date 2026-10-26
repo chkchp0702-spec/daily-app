@@ -1,7 +1,7 @@
 """🎬 조이 설명 영상용 실제 앱 화면 찍기 — 휴대폰 크기(390px, 2배)로 각 화면을 열고
 긴 세로 스크린샷 + 카드 위치 + 조이가 있는 자리(카드 머리·접기 ⓘ·「ⓘ 설명」·「ⓘ …」 접는 칸)의 설명 글을
 explain/cap/<key>.png / .json 에 저장."""
-import json, os, sys, time
+import json, os, re, sys, time
 from playwright.sync_api import sync_playwright
 
 APP = "https://chkchp0702-spec.github.io/daily-app/"
@@ -103,6 +103,8 @@ with sync_playwright() as p:
             spots = pg.evaluate(SPOTS)
             # 같은 화면에 같은 제목은 하나만(표 줄마다 같은 칩 등)
             seen = set(); spots = [x for x in spots if not (x["title"] in seen or seen.add(x["title"]))]
+            # 풍선 칩·회색 줄 중 제목에 숫자·%가 있는 것은 오늘 자료(종목 점수·등락)이지 설명이 아님 → 뺌
+            spots = [x for x in spots if not (x["kind"] in ("tip", "td") and re.search(r"[\d%]", x["title"]))]
             for s in spots:
                 try:
                     r = pg.evaluate(READ, [s["sel"], s["idx"], s["kind"]])

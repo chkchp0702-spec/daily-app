@@ -32,7 +32,7 @@ MARK = {"market": "🌐", "sector": "🧭", "prob": "🎲", "port": "💼", "sco
 
 def norm(t):
     """guide.js 의 vkey() 와 똑같이: 공백·숫자·기호를 빼고 소문자 24자"""
-    return re.sub(r"[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()]", "", t or "").lower()[:24]
+    return re.sub(r"[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()−▲▼△▽›‹]", "", t or "").lower()[:24]
 
 
 def spot_videos():
@@ -144,6 +144,7 @@ def build(name):
     total = round(t + 1.2, 2)
 
     layers = {k: [] for k in screens}
+    js.append(f'tl.set("#layer{screens.index(scr[0])}", {{ y: {-stops[0][0] * S:.1f} }}, 0);')
     caps_html, js = [], []
     shown = screens[0]
     for i, s in enumerate(lines):
