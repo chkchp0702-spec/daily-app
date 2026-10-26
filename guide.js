@@ -48,6 +48,12 @@
     feed: ["📰 피드는 매일 읽는 블로그·텔레그램 글과 주요 뉴스를 한곳에 모았어요.", "15분마다 새 글을 가져와요.", "📣 채널 성적표: 채널이 이름을 부른 종목을 5일·20일 뒤 채점해서, 어느 채널 말이 잘 맞는지 보여 줘요.", "중요한 글은 다음 날 시황 리포트 재료로 들어가요."]
   };
   var MORE_ALIAS = {accum: "sigmore", danta: "sigmore"};
+  // 10/26 사용자 「조이를 탭하면 그 화면과 기능을 영상으로 설명」 — 실제 앱 화면을 찍어 HyperFrames 로 만든 세로 영상(소리 없음, 자막)
+  //   t_<탭> = 탭 설명 · m_<자세히> = ⓘ 자세히. 영상이 없으면 지금처럼 글 말풍선
+  var VID = {t_home: 1, t_mkt: 1, t_inv: 1, t_sig: 1, t_prod: 1, t_feed: 1, m_home: 1, m_market: 1, m_sector: 1, m_prob: 1, m_port: 1, m_score: 1,
+             m_whale: 1, m_cup: 1, m_gap: 1, m_screen: 1, m_sigmore: 1, m_bond: 1, m_fund: 1, m_els: 1, m_feed: 1};
+  var VIDV = "1";
+  function vidOf(g, mk){ var k = mk ? "m_" + mk : "t_" + g; return VID[k] ? "vid/" + k + ".mp4?v=" + VIDV : ""; }
   var MORE_NAME = {home: "🏠 오늘", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", feed: "📰 피드"};
   function ls(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); } catch(x) { return null; } }
   function seen(){ return ls("gd_seen") || {}; }
@@ -74,6 +80,9 @@
     "#gdq .gd-ft button{border:1px solid var(--line);background:var(--panel2);color:var(--sub);border-radius:999px;padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer}" +
     "#gdq .gd-ft button.on{color:var(--text);border-color:var(--acc)}" +
     "#gdq .gd-x{margin-left:auto;color:var(--text)!important}" +
+    "#gdq .gd-vw{display:flex;justify-content:center}" +
+    "#gdq .gd-v{display:block;height:min(66vh,820px);max-width:100%;aspect-ratio:9/16;border-radius:16px;background:#e9eefb;object-fit:contain}" +
+    "#gdq .gd-hasv .gd-row{display:none}#gdq .gd-hasv.gd-txt .gd-row{display:flex}#gdq .gd-hasv.gd-txt .gd-vw{display:none}" +
     "#gdq .gd-more .gd-bub{max-height:52vh;overflow-y:auto;font-size:14.5px}#gdq .gd-more .gd-kid{width:84px;height:138px}" +
     "#main > .hero.gd-on h1:after{content:'';display:inline-block;width:28px;height:28px;margin-left:6px;vertical-align:-3px;border-radius:50%;border:1.5px solid var(--line);background:#f3e6d6 url(" + IMG + ") center/cover no-repeat}" +
     ".gd-i{display:inline-block;width:15px;height:15px;border-radius:50%;vertical-align:-2px;margin:0 1px;background:#f3e6d6 url(" + IMG + ") center/cover no-repeat;box-shadow:0 0 0 1px var(--line);font-style:normal}" +
@@ -94,23 +103,33 @@
     var mk = g.indexOf("more:") === 0 ? g.slice(5) : null; if (mk) mk = MORE_ALIAS[mk] || mk;
     var L = mk ? (MORE[mk] || SAY.home) : (SAY[g] || SAY.home);
     var pz = POSE[g] || (mk && (MKPOSE[mk] || faceFor((MORE[MORE_ALIAS[mk] || mk] || []).slice(-1)) || POSE[GRP[mk] || ""]));
-    q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + '" role="dialog" aria-label="안내자 조이"><div class="gd-row"><div class="gd-kid" aria-hidden="true"' + (pz ? ' style="background-image:url(' + pz + ')"' : '') + '></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
+    var vs = vidOf(g, mk);
+    q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + (vs ? ' gd-hasv' : '') + '" role="dialog" aria-label="안내자 조이">' +
+      (vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted autoplay playsinline preload="auto" controls disablepictureinpicture></video></div>' : '') +
+      '<div class="gd-row"><div class="gd-kid" aria-hidden="true"' + (pz ? ' style="background-image:url(' + pz + ')"' : '') + '></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
       L.map(function(s){ return '<p class="gd-l">' + s + '</p>'; }).join("") + '</div></div><div class="gd-ft">' +
       (mk ? '' : ["home", "mkt", "inv", "sig", "prod", "feed"].map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("")) +
-      '<button class="gd-x">닫기</button></div></div>';
+      (vs ? '<button class="gd-tx">📝 글로 보기</button>' : '') + '<button class="gd-x">닫기</button></div></div>';
     document.body.appendChild(q);
     var ps = q.querySelectorAll(".gd-l"), i = 0;
     function next(){ if (i < ps.length) ps[i++].classList.add("on"); if (i >= ps.length) { clearInterval(timer); timer = null; } }
-    next(); timer = setInterval(next, mk ? 750 : 1100);
+    var sh = q.querySelector(".gd-sh"), vv = q.querySelector(".gd-v");
+    if (vv){ var pp = vv.play && vv.play(); if (pp && pp.catch) pp.catch(function(){}); vv.onerror = function(){ sh.classList.remove("gd-hasv"); var t = q.querySelector(".gd-tx"); if (t) t.remove(); }; }
+    if (!vs) { next(); timer = setInterval(next, mk ? 750 : 1100); }
     q.onclick = function(e){
       var b = e.target.closest && e.target.closest("button");
       if (e.target === q || (b && b.classList.contains("gd-x"))) return close();
       if (b && b.dataset.g) return open(b.dataset.g);
+      if (b && b.classList.contains("gd-tx")){                                   // 영상 ↔ 글
+        var toTxt = sh.classList.toggle("gd-txt"); b.textContent = toTxt ? "▶ 영상으로 보기" : "📝 글로 보기";
+        if (toTxt){ if (vv) vv.pause(); while (i < ps.length) next(); } else if (vv){ var p2 = vv.play(); if (p2 && p2.catch) p2.catch(function(){}); }
+        return;
+      }
       if (timer) { while (i < ps.length) next(); }      // 말풍선을 누르면 남은 줄을 한 번에
     };
     if (g !== "intro" && !mk) { mark(g); var bt = document.getElementById("gdbtn"); if (bt) bt.classList.remove("new"); }
   }
-  function close(){ if (timer) { clearInterval(timer); timer = null; } var q = document.getElementById("gdq"); if (q) q.remove(); }
+  function close(){ if (timer) { clearInterval(timer); timer = null; } var q = document.getElementById("gdq"); if (q) { var v = q.querySelector("video"); if (v) { try { v.pause(); v.removeAttribute("src"); v.load(); } catch(x) {} } q.remove(); } }
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") close(); });
   // ── 10/22 사용자 「세세한 곳들도 다 꼬마 설명으로」 — 앱 곳곳의 ⓘ(카드 머리·회색 설명 줄·「ⓘ 설명」·정직 칩 같은 풍선 도움말·「ⓘ 이 화면은?」)
   //    → 글자 ⓘ 는 꼬마 얼굴로 바꾸고, 누르면 그 설명을 꼬마 말풍선으로. 그래프 위 점 도움말(svg)은 손가락으로 훑는 것이라 그대로 둠
