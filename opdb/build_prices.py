@@ -127,6 +127,11 @@ def main():
         import traceback
         traceback.print_exc()
         print("아침 거르기 실패", e, flush=True)
+    try:
+        from screens import screen_px
+        screen_px(px, a.dest)
+    except Exception as e:
+        print("거르기 지도 종가 실패", e, flush=True)
 
 
 if __name__ == "__main__":

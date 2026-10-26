@@ -30,6 +30,7 @@ jobs:
         run: |
           pip install -q yfinance pandas
           python watch.py || echo "watch 일부 실패"
+          python memo_px.py || echo "관심종목 일봉 일부 실패"   # 🎯 10/26 A10/26-1 목표·손절 어느 쪽 먼저
       - name: 저장
         run: |
           git config user.name "bot"

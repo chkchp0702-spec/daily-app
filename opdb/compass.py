@@ -493,6 +493,24 @@ def build(daily, hl, mkt_of, dest, hlh=None):
         # 52주 신고가 종목 (시가총액 큰 순) + 신고가가 많이 나온 업종
         spac = lambda x: ("스팩" in (x["ind"] or "")) or ("Shell" in (x["ind"] or "")) or ("Acquisition" in (x["n"] or ""))
         hi_rows = sorted([x for x in rows if hl.get(x["s"]) == 1 and not spac(x)], key=lambda x: -x["cap"])
+        # 📐 10/26 A10/26-2 「오늘 등락 세 조각」 — 업종(sec.json 업종 이름)마다 시총 가중 등락과 가중 합(W)을 남겨
+        #   앱이 「이 종목을 뺀 업종 평균」 = (업종×W − 종목×시총) / (W − 시총) 으로 계산하게. 지수도 같은 마감일 값으로 함께.
+        try:
+            ir = {}
+            for k_, items in ind.items():
+                v1 = [x for x in items if x["r1"] is not None and x["cap"] > 0]
+                if len(v1) < 3:
+                    continue
+                W1 = sum(x["cap"] for x in v1)
+                v20 = [x for x in v1 if x["r20"] is not None]
+                W20 = sum(x["cap"] for x in v20)
+                ir[k_] = [len(v1), float(f"{W1:.4g}"), _r(sum(x["r1"] * x["cap"] for x in v1) / W1 * 100, 3),
+                          float(f"{W20:.4g}") if W20 > 0 else None, _r(sum(x["r20"] * x["cap"] for x in v20) / W20 * 100, 3) if W20 > 0 else None]
+            mk["ind_r"] = {"d": last_day.strftime("%Y-%m-%d"),
+                           "ix": {x["sym"]: [x.get("chg1"), x.get("chg20"), x.get("date")] for x in (idx or [])},
+                           "i": ir}
+        except Exception as _e:
+            print("ind_r 실패", mkt, _e, flush=True)
         mk["high_list"] = [stock(x) for x in hi_rows[:15]]
         hic = defaultdict(int)
         for x in hi_rows:

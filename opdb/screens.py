@@ -304,6 +304,32 @@ def triple(dest):
     print("⑤ 고래+임원+차트", len(tr), flush=True)
 
 
+def screen_px(px, dest, root="archive/screen", days=40):
+    """🗺 10/26 A10/26-3 「거르기 한 장 지도」 — 지난 거르기에 나온 종목의 가장 최근 종가만 작게 (앱이 「그 뒤 지금까지」 색칠).
+    archive/screen/<날짜>/screens.json(main 체크아웃)에서 종목을 모아 px 의 마지막 종가 → <dest>/screen_px.json"""
+    syms = set()
+    for f in sorted(glob.glob(os.path.join(root, "*", "screens.json")))[-days:]:
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        for k in ("quiet", "lead", "hush", "triple"):
+            for x in d.get(k) or []:
+                if x.get("s"):
+                    syms.add(x["s"])
+    out = {}
+    for s in sorted(syms):
+        try:
+            c = px[s]["c"].dropna()
+            if len(c):
+                out[s] = [c.index[-1].strftime("%Y-%m-%d"), round(float(c.iloc[-1]), 4)]
+        except Exception:
+            continue
+    at = (dt.datetime.utcnow() + dt.timedelta(hours=9)).strftime("%Y-%m-%d %H:%M")
+    json.dump({"at": at, "px": out}, open(os.path.join(dest, "screen_px.json"), "w", encoding="utf-8"), separators=(",", ":"))
+    print("🗺 거르기 지도 종가", len(out), "/", len(syms), flush=True)
+
+
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(); ap.add_argument("--dest", required=True); ap.add_argument("--triple", action="store_true")
