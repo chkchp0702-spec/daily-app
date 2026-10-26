@@ -1,6 +1,6 @@
 """🎬 조이 설명 영상 만들기 — capture.py 가 찍은 실제 앱 화면 + guide.js 설명 글로
 HyperFrames 프로젝트를 만들고 렌더링한다. 결과: explain/out/<name>.mp4 (720×1280, 소리 없음)"""
-import html, json, os, shutil, subprocess, sys
+import html, json, os, re, shutil, subprocess, sys
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -30,8 +30,29 @@ MARK = {"market": "🌐", "sector": "🧭", "prob": "🎲", "port": "💼", "sco
         "gap": "📈", "bond": "🏦", "fund": "📦", "els": "🎯"}
 
 
+def norm(t):
+    """guide.js 의 vkey() 와 똑같이: 공백·숫자·기호를 빼고 소문자 24자"""
+    return re.sub(r"[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()]", "", t or "").lower()[:24]
+
+
+def spot_videos():
+    """cap/<screen>.json 의 spots → {name: (screen, spot)} · 같은 화면에 같은 제목이 둘이면 앞 것만"""
+    out, seen = {}, set()
+    for scr in sorted(os.listdir(CAP)):
+        if not scr.endswith(".json"):
+            continue
+        k = scr[:-5]
+        for sp in json.load(open(f"{CAP}/{scr}")).get("spots", []):
+            key = k + "|" + norm(sp["title"])
+            if key in seen or not sp.get("lines"):
+                continue
+            seen.add(key)
+            out[f"c_{k}_{len([x for x in out if x.startswith('c_' + k + '_')]) + 1}"] = (k, sp, key)
+    return out
+
+
 def dur(s):
-    return round(min(7.5, max(2.8, 1.3 + len(s) * 0.075)), 2)
+    return round(min(9.0, max(2.8, 1.3 + len(s) * 0.07)), 2)
 
 
 def stops_for(cap, n):
@@ -56,9 +77,16 @@ def stops_for(cap, n):
 
 def build(name):
     kind, key = name.split("_", 1)
-    lines = (T["SAY"] if kind == "t" else T["MORE"])[key]
-    title = (NAME if kind == "t" else MORE_NAME)[key]
-    screens = [k for k in VIDEOS[name] if os.path.exists(f"{CAP}/{k}.json")]
+    spot = None
+    if kind == "c":
+        scr, spot, _ = spot_videos()[name]
+        lines = spot["lines"][:8]
+        title = spot["title"][:22] or MORE_NAME.get(scr, scr)
+        screens, key = [scr], scr
+    else:
+        lines = (T["SAY"] if kind == "t" else T["MORE"])[key]
+        title = (NAME if kind == "t" else MORE_NAME)[key]
+        screens = [k for k in VIDEOS[name] if os.path.exists(f"{CAP}/{k}.json")]
     pdir = f"{BUILD}/{name}"
     shutil.rmtree(pdir, ignore_errors=True)
     os.makedirs(f"{pdir}/assets")
@@ -81,7 +109,13 @@ def build(name):
                 curk = k; break
         scr.append(curk)
     stops = {}
-    for k in screens:
+    if spot is not None:
+        pageH = caps[screens[0]]["h"]; maxY = max(0.0, pageH - WH)
+        y0 = min(maxY, max(0.0, spot["y"] - 24)); y1 = min(maxY, max(y0, spot["y"] + spot["h"] - WH + 24))
+        for i in range(n):                      # 카드가 창보다 크면 문장마다 조금씩 내려감
+            stops[i] = (y0 + (y1 - y0) * (i / max(n - 1, 1)), spot)
+    else:
+      for k in screens:
         idx = [i for i in range(n) if scr[i] == k]
         for i, st in zip(idx, stops_for(caps[k], len(idx))):
             stops[i] = st
@@ -99,8 +133,9 @@ def build(name):
         st, d = starts[i], dur(s)
         if i == n - 1:
             d = round(total - st, 2)
+        sz = " xs" if len(s) > 120 else " sm" if len(s) > 78 else ""
         caps_html.append(
-            f'<p id="cap{i}" class="clip cap" data-start="{st}" data-duration="{d}" data-track-index="{3 + i}">'
+            f'<p id="cap{i}" class="clip cap{sz}" data-start="{st}" data-duration="{d}" data-track-index="{3 + i}">'
             f'<span>{html.escape(s)}</span></p>')
         k = scr[i]
         lid = screens.index(k)
@@ -112,7 +147,7 @@ def build(name):
         js.append(f'tl.to("#layer{lid}", {{ y: {-y * S:.1f}, duration: 0.8, ease: "power2.inOut" }}, {max(0, st - 0.35):.2f});')
         js.append(f'tl.fromTo("#cap{i} span", {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }}, {st + 0.05:.2f});')
         if c is not None:
-            rx, ry, rw, rh = (c["x"] - 4) * S, (c["y"] - 4) * S, (c["w"] + 8) * S, min(c["h"] + 8, WH) * S
+            rx, ry, rw, rh = (c["x"] - 4) * S, (c["y"] - 4) * S, (c["w"] + 8) * S, (c["h"] + 8 if spot is not None else min(c["h"] + 8, WH)) * S
             rd = round(d - 0.45, 2)
             layers[k].append(
                 f'<div id="ring{i}" class="clip ring" data-start="{st + 0.45:.2f}" data-duration="{max(rd, 0.5)}" '
@@ -146,7 +181,7 @@ def build(name):
   #top {{ position: absolute; left: 40px; right: 40px; top: 40px; height: 84px; display: flex; align-items: center; gap: 18px; }}
   #face {{ width: 76px; height: 76px; border-radius: 50%; background: #f3e6d6 url("assets/kid_wave.jpg") center 22% / 140% no-repeat;
           border: 3px solid #fff; box-shadow: 0 6px 18px rgba(20,32,63,.18); flex: none; }}
-  #ttl {{ font-size: 42px; font-weight: 900; letter-spacing: -1px; }}
+  #ttl {{ font-size: {42 if len(title) <= 9 else 34 if len(title) <= 14 else 27}px; font-weight: 900; letter-spacing: -1px; }}
   #ttl small {{ display: block; font-size: 21px; font-weight: 700; color: #5b6787; letter-spacing: 0; margin-top: 2px; }}
   #phone {{ position: absolute; left: {PX - 10}px; top: {PY - 10}px; width: {PW + 20}px; height: {PH + 20}px; border-radius: 46px;
            background: #14203f; box-shadow: 0 30px 60px rgba(20,32,63,.28); }}
@@ -163,6 +198,7 @@ def build(name):
   .cap {{ position: absolute; left: 248px; right: 54px; top: 950px; height: 240px; display: flex; align-items: center;
          font-size: 29px; font-weight: 700; line-height: 1.42; letter-spacing: -0.3px; word-break: keep-all; }}
   .cap span {{ display: block; }}
+  .cap.sm {{ font-size: 24px; }} .cap.xs {{ font-size: 20px; line-height: 1.38; }}
   #dots {{ position: absolute; left: 0; right: 0; top: 1232px; display: flex; justify-content: center; gap: 12px; }}
   #dots b {{ width: 12px; height: 12px; border-radius: 6px; background: #c9d3ea; display: block; }}
 </style>
@@ -215,8 +251,11 @@ def render(name):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    names = [a for a in args if not a.startswith("--")] or list(VIDEOS)
-    names = [nm for nm in names if os.path.exists(f"{CAP}/{VIDEOS[nm][0]}.json")]
+    SV = spot_videos()
+    json.dump({nm: {"key": v[2], "title": v[1]["title"], "kind": v[1]["kind"], "n": len(v[1]["lines"])} for nm, v in SV.items()},
+              open(f"{OUT}/spots.json", "w"), ensure_ascii=False, indent=0)
+    names = [a for a in args if not a.startswith("--")] or (list(VIDEOS) + list(SV))
+    names = [nm for nm in names if nm in SV or all(os.path.exists(f"{CAP}/{k}.json") for k in VIDEOS[nm])]
     if "--build-only" in args:
         for nm in names: print(build(nm))
         sys.exit()

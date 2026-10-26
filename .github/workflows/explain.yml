@@ -1,6 +1,7 @@
 name: explain
 # 🎬 조이 설명 영상: 실제 앱 화면 찍기(Playwright) → HyperFrames 렌더 → video-out 브랜치에 결과
 # video 브랜치에 push 할 때만 돈다(앱 main 과 분리). 공식 npm 패키지(hyperframes)만 씀.
+# 화면을 4묶음으로 나눠 동시에 돌리고(각 탭 영상이 쓰는 화면은 같은 묶음에), 마지막에 모아 올림.
 on:
   push:
     branches: [video]
@@ -10,7 +11,15 @@ concurrency: { group: explain, cancel-in-progress: true }
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        group:
+          - { name: A, screens: "home market sector prob" }
+          - { name: B, screens: "port score" }
+          - { name: C, screens: "whale cup gap" }
+          - { name: D, screens: "screen sigmore feed bond fund els" }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,14 +32,34 @@ jobs:
           sudo apt-get install -y -qq ffmpeg fonts-noto-cjk fonts-noto-color-emoji > /dev/null
           npx --yes hyperframes@latest --version
       - name: 앱 화면 찍기
-        run: python explain/capture.py
+        run: python explain/capture.py ${{ matrix.group.screens }}
       - name: 영상 만들기
         run: python explain/build.py
-      - name: 결과 올리기 (video-out)
+      - name: 묶음 결과
         if: always()
         run: |
           mkdir -p pub && cp explain/out/* pub/ 2>/dev/null || true
-          cp explain/cap/log.txt pub/cap_log.txt 2>/dev/null || true
-          for f in explain/cap/*.png; do [ -f "$f" ] && python -c "from PIL import Image;import sys;im=Image.open('$f');im.thumbnail((390,99999));im.convert('RGB').save('pub/cap_'+'$f'.split('/')[-1][:-4]+'.jpg',quality=70)"; done
-          cd pub && git init -q -b video-out && git config user.name video-bot && git config user.email video-bot@users.noreply.github.com
+          cp explain/cap/log.txt pub/cap_log_${{ matrix.group.name }}.txt 2>/dev/null || true
+          cp explain/cap/*.json pub/ 2>/dev/null || true
+          mv pub/spots.json pub/spots_${{ matrix.group.name }}.json 2>/dev/null || true
+          for f in explain/cap/*.png; do [ -f "$f" ] && python -c "from PIL import Image;im=Image.open('$f');im.thumbnail((390,99999));im.convert('RGB').save('pub/cap_'+'$f'.split('/')[-1][:-4]+'.jpg',quality=70)"; done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "out-${{ matrix.group.name }}", path: pub, retention-days: 3 }
+  publish:
+    needs: render
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: parts, merge-multiple: true }
+      - name: 결과 올리기 (video-out)
+        run: |
+          cd parts && cat cap_log_*.txt > cap_log.txt 2>/dev/null || true
+          python3 -c "
+          import json,glob; d={}
+          for f in sorted(glob.glob('spots_*.json')): d.update(json.load(open(f)))
+          json.dump(d,open('spots.json','w'),ensure_ascii=False,indent=0); print(len(d),'spot videos')"
+          ls *.mp4 | wc -l
+          git init -q -b video-out && git config user.name video-bot && git config user.email video-bot@users.noreply.github.com
           git add -A && git commit -qm "explain out" && git push -f https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} video-out
