@@ -392,6 +392,39 @@ def whale_pick(H, cur, probs, mres, names):
 
 
 # ---------------- 실행 ----------------
+# 🔁 업종 모멘텀 (🎲 #13b, 10/26) — 미국 섹터 ETF 1998~ 12개월(최근 1달 뺌) 상대강도 순위
+#   probe/secetf_bt.py: 상위 2개 → 다음 5일 SPY 보다 나음 +2.0%p(1999~2013, n 1348) · +2.7%p(2013~, n 1348) · 최근 2년 +4.4%p
+#                       최하위 1개 → −4.8%p · −2.5%p (n 674씩)  ·  20·60·120일 상대강도는 앞/뒤 엇갈려 ❌
+ETF_SEC = {"XLK": ("semi", "soft", "hw"), "XLF": ("bank", "insure", "broker"), "XLE": ("energy",), "XLV": ("pharma", "bio", "medtech"),
+           "XLY": ("retail", "auto", "leisure"), "XLP": ("food",), "XLI": ("defense", "transport", "machine", "biz"), "XLB": ("chem", "steel"), "XLU": ("util",)}
+MOM_UP, MOM_DN = 0.06, -0.08   # 로그오즈 (측정값의 약 60% · ≈ +1.5%p / −2%p)
+
+
+def sec_mom():
+    """{앱 섹터 키: (로그오즈 기울기, 설명)} — 실패하면 빈 사전"""
+    try:
+        H = download(list(ETF_SEC) + ["SPY"])
+        if "SPY" not in H:
+            return {}
+        C = pd.DataFrame({k: v["Close"] for k, v in H.items()}).dropna()
+        if len(C) < 260:
+            return {}
+        r = C.shift(21).iloc[-1] / C.shift(250).iloc[-1] - 1
+        rs = (r.drop("SPY") - r["SPY"]).sort_values(ascending=False)
+        out = {}
+        for i, (e, v) in enumerate(rs.items()):
+            t = MOM_UP if i < 2 else MOM_DN if i == len(rs) - 1 else 0
+            if t:
+                lab = f"12개월 업종 {'강세' if t > 0 else '약세'} {i + 1}위/{len(rs)} ({e} {v * 100:+.0f}%p)"
+                for k in ETF_SEC.get(e, ()):
+                    out[k] = (t, lab)
+        print("업종 모멘텀", {e: round(v * 100, 1) for e, v in rs.items()})
+        return out
+    except Exception as e:
+        print("업종 모멘텀 실패", e)
+        return {}
+
+
 def main():
     t0 = time.time()
     if FAKE:
@@ -469,6 +502,12 @@ def main():
                 c = cur.loc[s]
                 st.append({"s": s, "n": names.get(s, s), "k": info[s]["sec"], "p1": r2(probs.loc[s, "y1"], 3), "p5": r2(probs.loc[s, "y5"], 3), "pr5": r2(probs.loc[s, "yr5"], 3),
                            "r1": r2(c["r1"] * 100), "r5": r2(c["r5"] * 100), "cap": info[s]["cap"]})
+            mom = sec_mom() if mk == "US" else {}
+            if mom:
+                for x in st:
+                    if x["k"] in mom and x["pr5"] is not None:
+                        q = min(1 - 1e-4, max(1e-4, x["pr5"]))
+                        x["pr5"] = r2(1 / (1 + math.exp(-(math.log(q / (1 - q)) + mom[x["k"]][0]))), 3)
             # 시장 방향 몫을 빼고(같은 날 모든 종목 평균과의 로그오즈 차이) 남는 「이 종목·섹터만의 기울기」 — 앱이 시장 카드 확률 위에 더함
             lg = lambda p: math.log(max(1e-4, min(1 - 1e-4, p)) / (1 - max(1e-4, min(1 - 1e-4, p))))
             for t in ("p1", "p5"):
@@ -488,7 +527,7 @@ def main():
                 xs.sort(key=lambda x: -(x["pr5"] or 0))
                 i0 = info[xs[0]["s"]]
                 secs.append({"k": k, "icon": i0["icon"], "name": i0["sname"], "n": len(xs), "p1": r2(wavg("p1"), 3), "p5": r2(wavg("p5"), 3), "pr5": r2(wavg("pr5"), 3),
-                             "d1": r2(wavg("d1"), 3), "d5": r2(wavg("d5"), 3),
+                             "d1": r2(wavg("d1"), 3), "d5": r2(wavg("d5"), 3), "mom": (mom.get(k) or (0, None))[1],
                              "r5": r2(wavg("r5"), 2), "up5": sum(1 for x in xs if (x["p5"] or 0) > mres["base"]["y5"]),
                              "st": [{kk: x[kk] for kk in ("s", "n", "p1", "p5", "pr5", "d1", "d5", "r1", "r5")} for x in xs]})
             secs.sort(key=lambda x: -(x["d5"] or 0))

@@ -153,7 +153,7 @@
       return '<div class="ps-r' + (op ? " open" : "") + '" data-sk="' + e(x.k) + '"><div class="ps-h"><span class="hm-i">' + x.icon + '</span><b>' + e(x.name) + '</b><small class="mut">' + x.n + '종목</small>' +
         '<span class="ps-v"><b class="' + ecls(e5) + '">' + pc(a5) + '</b><small class="' + ecls(e5) + '">' + arw(e5) + '</small></span><i class="fchev">▾</i></div>' +
         '<div class="ps-bar">' + zbar(a5, b5).split('<div class="zl">')[0] + '</div>' +
-        '<small class="ps-sub">시장보다 나을 확률 <b class="' + ecls(er) + '">' + pc(x.pr5) + '</b> (평소 ' + pc(br) + ') · 지난 5일 ' + sg(x.r5) + '</small>' +
+        '<small class="ps-sub">시장보다 나을 확률 <b class="' + ecls(er) + '">' + pc(x.pr5) + '</b> (평소 ' + pc(br) + ') · 지난 5일 ' + sg(x.r5) + (x.mom ? ' · 🔁 ' + e(x.mom) : '') + '</small>' +
         (op ? '<div class="ps-st">' + x.st.map(function(t, i){ var te = (ab(t) - b5) * 100, tr = (t.pr5 - br) * 100;
           return '<a class="ps-t" href="javascript:openOP(\'' + e(t.s).replace(/'/g, "") + '\')"><span class="ps-tn"><b>' + e(t.n) + '</b><em class="tk">' + e(V.cd ? V.cd(t.s) : t.s) + '</em></span>' +
             '<span class="ps-tv"><b class="' + ecls(te) + '">' + pc(ab(t)) + '</b><small><span class="' + ecls(te) + '">' + arw(te) + '</span> · 시장보다 나을 <span class="' + ecls(tr) + '">' + pc(t.pr5) + '</span></small></span></a>'; }).join("") + '</div>' : '') + '</div>';
