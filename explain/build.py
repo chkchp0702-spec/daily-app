@@ -47,8 +47,10 @@ def stops_for(cap, n):
         if i < len(cards):
             c = cards[i]; out.append((min(maxY, max(0.0, c["y"] - 28)), c))
         else:
+            # 카드가 더 없으면 화면 아래까지 고르게 내려가고, 끝에 닿으면 위로 되돌아옴(빈 회색 칸을 보여 주지 않음)
             base = out[-1][0] if out else 0.0
-            out.append((min(maxY, base + WH * 0.75), None))
+            nxt = base + WH * 0.6
+            out.append((nxt if nxt <= maxY else 0.0, None))
     return out
 
 
