@@ -1,76 +1,66 @@
 {
- "at": "2026-10-26 17:13",
+ "at": "2026-10-26 23:34",
  "ok": false,
  "problems": [
-  "피드 0개·실패: 뉴스 · 국내 증시, 뉴스 · 금리·환율·경제, 뉴스 · 반도체·AI·업종, 뉴스 · 증권사 전략·리포트, 뉴스 · 블룸버그 인용, 新聞 · 홍콩·중국 증시"
+  "피드 0개·실패: 인베스팅닷컴 뉴스",
+  "작업 실패: daily-app/explain (10-26T13:58 failure)"
  ],
  "data": [
   {
    "name": "💼 포트",
    "ok": true,
-   "age_h": 0.7,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "⚡ 킥",
    "ok": true,
-   "age_h": 0.7,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 0.7,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 0.7,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "🌏 동종주",
    "ok": true,
-   "age_h": 0.7,
+   "age_h": 0.2,
    "lim": 3
   },
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 9.0,
+   "age_h": 15.3,
    "lim": 30
   },
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.2,
+   "age_h": 0.3,
    "lim": 1.5,
    "zero": [
-    "뉴스 · 국내 증시",
-    "뉴스 · 금리·환율·경제",
-    "뉴스 · 반도체·AI·업종",
-    "뉴스 · 증권사 전략·리포트",
-    "뉴스 · 블룸버그 인용",
-    "新聞 · 홍콩·중국 증시",
-    "뉴스 · 한국은행·정부 경제 발표",
-    "연합인포맥스",
-    "머니투데이 증권",
-    "조선비즈 증권",
-    "뉴스핌",
-    "뉴스 · 해외 증시(한글)"
+    "인베스팅닷컴 뉴스"
    ]
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.6,
+   "age_h": 1.0,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 2.1,
+   "age_h": 8.5,
    "lim": 30
   },
   {
@@ -82,38 +72,38 @@
   {
    "name": "🎲 시장확률",
    "ok": true,
-   "age_h": 1.3,
+   "age_h": 0.3,
    "lim": 2
   },
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.2,
    "lim": 12
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 0.5,
+   "s": 0.7,
    "cards": 4,
-   "len": 1160,
+   "len": 1136,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "market",
-   "s": 0.7,
+   "s": 0.4,
    "cards": 29,
-   "len": 1608,
+   "len": 1564,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "port",
-   "s": 0.4,
+   "s": 0.3,
    "cards": 13,
    "len": 740,
    "bad": [],
@@ -124,16 +114,16 @@
    "tab": "score",
    "s": 0.3,
    "cards": 10,
-   "len": 2695,
+   "len": 2729,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "whale",
-   "s": 0.5,
+   "s": 0.6,
    "cards": 21,
-   "len": 1312,
+   "len": 1329,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -142,7 +132,7 @@
    "tab": "cup",
    "s": 0.5,
    "cards": 12,
-   "len": 3414,
+   "len": 3412,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -160,14 +150,14 @@
    "tab": "sector",
    "s": 0.4,
    "cards": 39,
-   "len": 2918,
+   "len": 3015,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "accum",
-   "s": 0.3,
+   "s": 0.4,
    "cards": 11,
    "len": 1099,
    "bad": [],
@@ -185,7 +175,7 @@
   },
   {
    "tab": "danta",
-   "s": 0.4,
+   "s": 0.5,
    "cards": 12,
    "len": 1578,
    "bad": [],
@@ -214,7 +204,7 @@
    "tab": "feed",
    "s": 0.3,
    "cards": 1,
-   "len": 6568,
+   "len": 6691,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -274,12 +264,6 @@
     "창:port",
     true
    ]
-  },
-  {
-   "tab": "재시도로 열림",
-   "tabs": [
-    "whale"
-   ]
   }
  ],
  "jobs": [
@@ -287,13 +271,13 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-26T08:14"
+   "when": "2026-10-26T14:34"
   },
   {
    "repo": "daily-app",
    "job": "collect",
    "ok": true,
-   "when": "2026-10-26T08:05"
+   "when": "2026-10-26T14:30"
   },
   {
    "repo": "daily-app",
@@ -347,13 +331,13 @@
    "repo": "daily-app",
    "job": "watch",
    "ok": true,
-   "when": "2026-10-26T06:35"
+   "when": "2026-10-26T13:47"
   },
   {
    "repo": "daily-app",
    "job": "live",
    "ok": true,
-   "when": "2026-10-26T08:13"
+   "when": "2026-10-26T14:33"
   },
   {
    "repo": "daily-app",
@@ -365,13 +349,13 @@
    "repo": "daily-app",
    "job": "keeper",
    "ok": true,
-   "when": "2026-10-26T07:44"
+   "when": "2026-10-26T14:06"
   },
   {
    "repo": "daily-app",
    "job": "feedback",
    "ok": true,
-   "when": "2026-10-26T08:12"
+   "when": "2026-10-26T14:12"
   },
   {
    "repo": "daily-app",
@@ -395,31 +379,31 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-26T07:25"
+   "when": "2026-10-26T08:12"
   },
   {
    "repo": "daily-app",
    "job": "uspre",
    "ok": true,
-   "when": "2026-10-26T04:29"
+   "when": "2026-10-26T10:26"
   },
   {
    "repo": "daily-app",
    "job": "prob",
    "ok": true,
-   "when": "2026-10-26T08:14"
+   "when": "2026-10-26T14:14"
   },
   {
    "repo": "daily-app",
    "job": "prob_sec",
    "ok": true,
-   "when": "2026-10-26T07:22"
+   "when": "2026-10-26T14:19"
   },
   {
    "repo": "daily-app",
    "job": "products",
    "ok": true,
-   "when": "2026-10-26T05:21"
+   "when": "2026-10-26T12:49"
   },
   {
    "repo": "daily-app",
@@ -431,7 +415,7 @@
    "repo": "daily-app",
    "job": "els_dart",
    "ok": true,
-   "when": "2026-10-26T01:20"
+   "when": "2026-10-26T11:45"
   },
   {
    "repo": "daily-app",
@@ -466,8 +450,8 @@
   {
    "repo": "daily-app",
    "job": "explain",
-   "ok": true,
-   "when": "2026-10-26T07:51"
+   "ok": false,
+   "when": "2026-10-26T13:58"
   },
   {
    "repo": "market-strategy-report",
@@ -497,19 +481,19 @@
    "repo": "market-strategy-report",
    "job": "feed-score",
    "ok": true,
-   "when": "2026-10-26T00:29"
+   "when": "2026-10-26T14:07"
   },
   {
    "repo": "market-strategy-report",
    "job": "my-feed",
    "ok": true,
-   "when": "2026-10-25T22:31"
+   "when": "2026-10-25T23:30"
   },
   {
    "repo": "market-strategy-report",
    "job": "fetch-market",
    "ok": true,
-   "when": "2026-10-26T07:28"
+   "when": "2026-10-26T14:20"
   },
   {
    "repo": "market-strategy-report",
@@ -551,7 +535,7 @@
    "repo": "market-strategy-report",
    "job": "sentiment",
    "ok": true,
-   "when": "2026-10-26T00:25"
+   "when": "2026-10-26T14:11"
   },
   {
    "repo": "market-strategy-report",
@@ -593,7 +577,7 @@
    "repo": "stock-screener",
    "job": "push-relay",
    "ok": true,
-   "when": "2026-10-25T23:18"
+   "when": "2026-10-26T04:54"
   },
   {
    "repo": "stock-screener",
@@ -605,7 +589,7 @@
    "repo": "stock-screener",
    "job": "screener",
    "ok": true,
-   "when": "2026-10-26T03:02"
+   "when": "2026-10-26T08:41"
   },
   {
    "repo": "stock-screener",
