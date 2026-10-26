@@ -51,6 +51,23 @@ def spot_videos():
     return out
 
 
+def split_lines(L, maxc=110, cap=10):
+    """긴 문단은 문장(…요. / …다. / …죠.)으로 나누고, 그래도 길면 쉼표·점에서 한 번 더"""
+    out = []
+    for t in L:
+        t = re.sub(r"\s+", " ", str(t)).strip()
+        parts = re.split(r"(?<=[.!?。])\s+(?=\S)", t)
+        for p in parts:
+            while len(p) > maxc:
+                cut = max(p.rfind(", ", 30, maxc), p.rfind(" · ", 30, maxc), p.rfind(" — ", 30, maxc), p.rfind(" ", 30, maxc))
+                if cut < 30:
+                    cut = maxc
+                out.append(p[:cut].strip()); p = p[cut:].strip(" ,·—")
+            if p:
+                out.append(p)
+    return [x for x in out if len(x) > 1][:cap]
+
+
 def dur(s):
     return round(min(9.0, max(2.8, 1.3 + len(s) * 0.07)), 2)
 
@@ -80,7 +97,7 @@ def build(name):
     spot = None
     if kind == "c":
         scr, spot, _ = spot_videos()[name]
-        lines = spot["lines"][:8]
+        lines = split_lines(spot["lines"])
         title = spot["title"][:22] or MORE_NAME.get(scr, scr)
         screens, key = [scr], scr
     else:

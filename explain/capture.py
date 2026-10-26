@@ -9,7 +9,7 @@ OUT = "explain/cap"
 os.makedirs(OUT, exist_ok=True)
 TARGETS = ["home", "market", "sector", "prob", "port", "score", "whale", "cup", "gap", "screen", "sigmore",
            "bond", "fund", "els", "feed"]
-MAXH = 4200  # 한 화면에서 찍는 최대 높이(css px)
+MAXH = 9000  # 한 화면에서 찍는 최대 높이(css px)
 
 CLEAN = """() => {
   for (const id of ['kidsplash','gdq','netbar','backbtn','sheet']) { const e = document.getElementById(id); if (e) e.remove(); }
@@ -55,6 +55,13 @@ SPOTS = """() => {
     out.push({kind: 'note', sel: '#main .nt-b', idx: i, title: clean((card(b).querySelector('h3,.fold-h,.mk-lab,summary') || {}).textContent) || '설명', ...box(card(b))}); });
   document.querySelectorAll('#main summary').forEach((s, i) => { if (!vis(s) || !s.querySelector('.gd-i')) return;
     out.push({kind: 'sum', sel: '#main summary', idx: i, title: clean(s.textContent), ...box(s.parentElement)}); });
+  // ① 풍선 도움말 칩(data-tip, 그래프 밖) · ② 회색 설명 줄(.td-n)
+  document.querySelectorAll('#main [data-tip]').forEach((x, i) => { if (!vis(x) || x.closest('svg') || !x.getAttribute('data-tip') || x.closest('a,input,select,textarea,[data-goto],[data-op]')) return;
+    const lab = clean(x.textContent); const c = card(x);
+    out.push({kind: 'tip', sel: '#main [data-tip]', idx: i, title: lab && lab.length <= 30 ? lab : clean((c.querySelector('h3,.fold-h,.mk-lab,summary') || {}).textContent) || '설명', ...box(c)}); });
+  document.querySelectorAll('#main .td-n').forEach((x, i) => { if (!vis(x) || document.documentElement.classList.contains('td-off')) return;
+    const c = card(x);
+    out.push({kind: 'td', sel: '#main .td-n', idx: i, title: clean((c.querySelector('h3,.fold-h,.mk-lab,summary') || {}).textContent) || '설명', ...box(c)}); });
   return out;
 }"""
 
@@ -70,7 +77,6 @@ READ = """([sel, idx, kind]) => new Promise(res => {
     const go = [...q.querySelectorAll('[data-goto]')].map(b => b.textContent.trim());
     q.remove();
     document.querySelectorAll('.tt-x').forEach(e => e.remove()); document.querySelectorAll('.tt-on').forEach(e => e.classList.remove('tt-on'));
-    if (kind === 'sum' && el.parentElement.open) el.parentElement.open = false;
     res({title: t ? t.textContent.trim() : '', lines: L, go});
   }, 700);
 })"""
@@ -91,7 +97,12 @@ with sync_playwright() as p:
             pg.evaluate(f"go('{key}')")
             pg.wait_for_timeout(7000)
             pg.evaluate("() => { for (const id of ['kidsplash','gdq']) { const e = document.getElementById(id); if (e) e.remove(); } }")
+            # 접힌 칸(.fold · details)을 다 펼쳐서 안쪽 조이 자리까지
+            pg.evaluate("() => { document.querySelectorAll('#main .fold:not(.open)').forEach(f => f.classList.add('open')); document.querySelectorAll('#main details:not([open])').forEach(d => { d.open = true; }); }")
+            pg.wait_for_timeout(2500)
             spots = pg.evaluate(SPOTS)
+            # 같은 화면에 같은 제목은 하나만(표 줄마다 같은 칩 등)
+            seen = set(); spots = [x for x in spots if not (x["title"] in seen or seen.add(x["title"]))]
             for s in spots:
                 try:
                     r = pg.evaluate(READ, [s["sel"], s["idx"], s["kind"]])
