@@ -9,8 +9,11 @@ fwd = (d.shift(-5) / d - 1)
 ex_f = fwd[S].sub(fwd["SPY"], axis=0)
 out = {}
 mid = idx[len(idx)//2]
-for L in (20, 60, 120, 250):
-    rs = (d / d.shift(L) - 1)[S].sub((d["SPY"] / d["SPY"].shift(L) - 1), axis=0)
+for L in (250, "250-21"):
+    if L == "250-21":
+        rs = (d.shift(21) / d.shift(250) - 1)[S].sub((d["SPY"].shift(21) / d["SPY"].shift(250) - 1), axis=0)
+    else:
+        rs = (d / d.shift(L) - 1)[S].sub((d["SPY"] / d["SPY"].shift(L) - 1), axis=0)
     rk = rs.rank(axis=1, ascending=False)  # 1 = 가장 강함
     rows = []
     for t in idx:
@@ -18,15 +21,11 @@ for L in (20, 60, 120, 250):
         for s in S:
             rows.append((t, int(rk.loc[t, s]), float(ex_f.loc[t, s] > 0), float(ex_f.loc[t, s])))
     R = pd.DataFrame(rows, columns=["t", "rk", "y", "ex"])
-    res = {}
-    for nm, m in (("앞", R.t < mid), ("뒤", R.t >= mid), ("최근5년", R.t >= R.t.max() - pd.Timedelta(days=1826)), ("최근2년", R.t >= R.t.max() - pd.Timedelta(days=730))):
-        X = R[m]; base = X.y.mean()
-        top = X[X.rk <= 2]; bot = X[X.rk >= 8]
-        res[nm] = {"평소": round(base*100,1), "상위2(n,%,차이)": [len(top), round(top.y.mean()*100,1), round((top.y.mean()-base)*100,1), round(top.ex.mean()*100,3)],
-                   "하위2(n,%,차이)": [len(bot), round(bot.y.mean()*100,1), round((bot.y.mean()-base)*100,1), round(bot.ex.mean()*100,3)],
-                   "상위-하위 초과%": round((top.ex.mean()-bot.ex.mean())*100,3)}
-    out[f"{L}일"] = res
-    # 지금 순위
-    out[f"{L}일"]["지금"] = {s: int(rk.iloc[-1][s]) for s in S}
+    for K in (1, 2, 3):
+        for nm, m in (("앞", R.t < mid), ("뒤", R.t >= mid), ("최근5년", R.t >= R.t.max() - pd.Timedelta(days=1826)), ("최근2년", R.t >= R.t.max() - pd.Timedelta(days=730))):
+            X = R[m]; base = X.y.mean()
+            top = X[X.rk <= K]; bot = X[X.rk >= 10 - K]
+            print(f"{L}일 K{K} {nm}: 평소 {base*100:.1f} | 상위 n{len(top)} {(top.y.mean()-base)*100:+.1f}%p 초과 {top.ex.mean()*100:+.3f}% | 하위 n{len(bot)} {(bot.y.mean()-base)*100:+.1f}%p 초과 {bot.ex.mean()*100:+.3f}%")
+    print(L, "지금 순위", {s: int(rk.iloc[-1][s]) for s in S})
 out["mid"] = str(mid.date())
-print(json.dumps(out, ensure_ascii=False, indent=1))
+print("mid", mid.date())
