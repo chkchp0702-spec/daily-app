@@ -22,37 +22,67 @@ S = PW / 390                                  # css px → 영상 px
 WH = PH / S                                   # 창에 보이는 css 높이
 
 
+VIDEOS = {"t_home": ["home"], "t_mkt": ["market", "sector", "prob"], "t_inv": ["port", "score"],
+          "t_sig": ["whale", "cup", "gap"], "t_prod": ["bond", "fund", "els"], "t_feed": ["feed"]}
+for _k in MORE_NAME:
+    VIDEOS["m_" + _k] = [_k]
+MARK = {"market": "🌐", "sector": "🧭", "prob": "🎲", "port": "💼", "score": "📊", "whale": "🐋", "cup": "☕",
+        "gap": "📈", "bond": "🏦", "fund": "📦", "els": "🎯"}
+
+
 def dur(s):
     return round(min(7.5, max(2.8, 1.3 + len(s) * 0.075)), 2)
+
+
+def stops_for(cap, n):
+    """한 화면에서 n 문장 동안 멈출 자리(css y)와 강조할 카드. 카드가 모자라면 고르게 내려감"""
+    pageH = cap["h"]
+    maxY = max(0.0, pageH - WH)
+    cards, last = [], -1e9
+    for r in sorted(cap["rects"], key=lambda r: r["y"]):
+        if r["y"] < pageH - 60 and r["y"] - last >= WH * 0.45:
+            cards.append(r); last = r["y"]
+    out = []
+    for i in range(n):
+        if i < len(cards):
+            c = cards[i]; out.append((min(maxY, max(0.0, c["y"] - 28)), c))
+        else:
+            base = out[-1][0] if out else 0.0
+            out.append((min(maxY, base + WH * 0.75), None))
+    return out
 
 
 def build(name):
     kind, key = name.split("_", 1)
     lines = (T["SAY"] if kind == "t" else T["MORE"])[key]
     title = (NAME if kind == "t" else MORE_NAME)[key]
-    cap = json.load(open(f"{CAP}/{name}.json"))
+    screens = [k for k in VIDEOS[name] if os.path.exists(f"{CAP}/{k}.json")]
     pdir = f"{BUILD}/{name}"
     shutil.rmtree(pdir, ignore_errors=True)
     os.makedirs(f"{pdir}/assets")
-    # 스크린샷: 780px 폭 → 영상 창 폭(500)에 맞게 줄여서 저장(파일 가볍게)
-    im = Image.open(f"{CAP}/{name}.png").convert("RGB")
-    ih = round(im.height * PW / im.width)
-    im.resize((PW, ih), Image.LANCZOS).save(f"{pdir}/assets/screen.jpg", quality=90)
     pose = POSE.get(key, "kid_thumb")
     for f in (f"{pose}.jpg", "kid_wave.jpg", "gsap-3.14.2.min.js"):
         shutil.copy(f"{ROOT}/assets/{f}", f"{pdir}/assets/{f}")
+    caps, ih = {}, {}
+    for k in screens:
+        caps[k] = json.load(open(f"{CAP}/{k}.json"))
+        im = Image.open(f"{CAP}/{k}.png").convert("RGB")
+        ih[k] = round(im.height * PW / im.width)
+        im.resize((PW, ih[k]), Image.LANCZOS).save(f"{pdir}/assets/{k}.jpg", quality=88)
 
-    pageH = cap["h"]
-    maxY = max(0.0, pageH - WH)
-    cards = sorted([r for r in cap["rects"] if r["y"] < pageH - 40], key=lambda r: r["y"])
+    # 문장 → 화면 (문장 속 표시 글자로, 없으면 앞 화면 그대로)
     n = len(lines)
-    m = min(len(cards), n + 1)
-    picks = []
-    for i in range(n):
-        if m == 0:
-            picks.append(None)
-        else:
-            picks.append(cards[round(i * (m - 1) / max(n - 1, 1))])
+    scr, curk = [], screens[0]
+    for s in lines:
+        for k in screens:
+            if MARK.get(k) and MARK[k] in s:
+                curk = k; break
+        scr.append(curk)
+    stops = {}
+    for k in screens:
+        idx = [i for i in range(n) if scr[i] == k]
+        for i, st in zip(idx, stops_for(caps[k], len(idx))):
+            stops[i] = st
 
     t0 = 0.9
     starts, t = [], t0
@@ -60,33 +90,43 @@ def build(name):
         starts.append(t); t += dur(s)
     total = round(t + 1.2, 2)
 
-    caps_html, rings_html, js = [], [], []
+    layers = {k: [] for k in screens}
+    caps_html, js = [], []
+    shown = screens[0]
     for i, s in enumerate(lines):
         st, d = starts[i], dur(s)
         if i == n - 1:
             d = round(total - st, 2)
         caps_html.append(
             f'<p id="cap{i}" class="clip cap" data-start="{st}" data-duration="{d}" data-track-index="{3 + i}">'
-            f'{html.escape(s)}</p>')
-        c = picks[i]
-        y = 0.0 if c is None else min(maxY, max(0.0, c["y"] - 28))
-        js.append(f'tl.to("#layer", {{ y: {-y * S:.1f}, duration: 0.8, ease: "power2.inOut" }}, {max(0, st - 0.35):.2f});')
+            f'<span>{html.escape(s)}</span></p>')
+        k = scr[i]
+        lid = screens.index(k)
+        if k != shown:
+            js.append(f'tl.to("#layer{screens.index(shown)}", {{ opacity: 0, duration: 0.4 }}, {max(0, st - 0.4):.2f});')
+            js.append(f'tl.fromTo("#layer{lid}", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.4 }}, {max(0, st - 0.4):.2f});')
+            shown = k
+        y, c = stops[i]
+        js.append(f'tl.to("#layer{lid}", {{ y: {-y * S:.1f}, duration: 0.8, ease: "power2.inOut" }}, {max(0, st - 0.35):.2f});')
         js.append(f'tl.fromTo("#cap{i} span", {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }}, {st + 0.05:.2f});')
         if c is not None:
             rx, ry, rw, rh = (c["x"] - 4) * S, (c["y"] - 4) * S, (c["w"] + 8) * S, min(c["h"] + 8, WH) * S
-            rd = round(min(d, total - st) - 0.45, 2)
-            rings_html.append(
+            rd = round(d - 0.45, 2)
+            layers[k].append(
                 f'<div id="ring{i}" class="clip ring" data-start="{st + 0.45:.2f}" data-duration="{max(rd, 0.5)}" '
                 f'data-track-index="{40 + i}" style="left:{rx:.0f}px;top:{ry:.0f}px;width:{rw:.0f}px;height:{rh:.0f}px">'
                 f'<i></i></div>')
             js.append(f'tl.fromTo("#ring{i} i", {{ opacity: 0, scale: 1.06 }}, {{ opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" }}, {st + 0.45:.2f});')
-    # 문장 안 글자를 span 으로 감싸서 GSAP 은 자식만 움직이게(계약 5번)
-    caps_html = [c.replace('">', '"><span>', 1).replace("</p>", "</span></p>") for c in caps_html]
     dots = "".join(f'<b id="dot{i}"></b>' for i in range(n))
     for i, st in enumerate(starts):
         js.append(f'tl.fromTo("#dot{i}", {{ backgroundColor: "#c9d3ea", scaleX: 1 }}, {{ backgroundColor: "#2f4ea8", scaleX: 2.2, duration: 0.3 }}, {st:.2f});')
         if i + 1 < n:
             js.append(f'tl.to("#dot{i}", {{ backgroundColor: "#8ea2d6", scaleX: 1, duration: 0.3 }}, {starts[i + 1]:.2f});')
+    first = screens.index(scr[0])
+    layer_html = "".join(
+        f'<div id="layer{j}" class="layer" style="height:{ih[k]}px;opacity:{1 if j == first else 0}">'
+        f'<div class="shot" style="height:{ih[k]}px;background-image:url(assets/{k}.jpg);background-size:{PW}px {ih[k]}px"></div>'
+        f'{"".join(layers[k])}</div>' for j, k in enumerate(screens))
 
     doc = f"""<!doctype html>
 <html lang="ko">
@@ -109,10 +149,10 @@ def build(name):
   #phone {{ position: absolute; left: {PX - 10}px; top: {PY - 10}px; width: {PW + 20}px; height: {PH + 20}px; border-radius: 46px;
            background: #14203f; box-shadow: 0 30px 60px rgba(20,32,63,.28); }}
   #win {{ position: absolute; left: {PX}px; top: {PY}px; width: {PW}px; height: {PH}px; border-radius: 34px; overflow: hidden; background: #fff; }}
-  #layer {{ position: absolute; left: 0; top: 0; width: {PW}px; height: {ih}px; }}
-  #shot {{ position: absolute; left: 0; top: 0; width: {PW}px; height: {ih}px; background: url("assets/screen.jpg") 0 0 / {PW}px {ih}px no-repeat; }}
+  .layer {{ position: absolute; left: 0; top: 0; width: {PW}px; }}
+  .shot {{ position: absolute; left: 0; top: 0; width: {PW}px; background-repeat: no-repeat; background-position: 0 0; }}
   .ring {{ position: absolute; }}
-  .ring i {{ position: absolute; inset: 0; border: 5px solid #ff7a1a; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(15,25,55,.28); }}
+  .ring i {{ position: absolute; inset: 0; border: 5px solid #ff7a1a; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(15,25,55,.22); }}
   #kid {{ position: absolute; left: 34px; top: 935px; width: 170px; height: 226px; border-radius: 28px; overflow: hidden;
          background: #f3e6d6 url("assets/{pose}.jpg") center / cover no-repeat; box-shadow: 0 14px 30px rgba(20,32,63,.22); }}
   #bub {{ position: absolute; left: 222px; right: 30px; top: 925px; height: 290px; border-radius: 30px; background: #fff;
@@ -130,9 +170,7 @@ def build(name):
   <div id="bg"></div>
   <div id="top"><div id="face"></div><div id="ttl">{html.escape(title)}<small>조이가 알려 주는 화면 안내</small></div></div>
   <div id="phone"></div>
-  <div id="win" data-layout-allow-overflow><div id="layer"><div id="shot"></div>
-    {"".join(rings_html)}
-  </div></div>
+  <div id="win" data-layout-allow-overflow>{layer_html}</div>
   <div id="kid"></div>
   <div id="bub"></div>
   {"".join(caps_html)}
@@ -144,7 +182,6 @@ def build(name):
   tl.fromTo("#phone, #win", {{ opacity: 0, y: 40 }}, {{ opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }}, 0);
   tl.fromTo("#kid", {{ opacity: 0, scale: 0.8 }}, {{ opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }}, 0.25);
   tl.fromTo("#bub", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.4 }}, 0.45);
-  tl.fromTo("#layer", {{ y: 0 }}, {{ y: 0, duration: 0.01 }}, 0);
   {chr(10).join("  " + x for x in js)}
   window.__timelines["main"] = tl;
 </script>
@@ -175,10 +212,11 @@ def render(name):
 
 
 if __name__ == "__main__":
-    names = sys.argv[1:] or sorted(f[:-5] for f in os.listdir(CAP) if f.endswith(".json"))
-    if names == ["--build-only"]:
-        names = sorted(f[:-5] for f in os.listdir(CAP) if f.endswith(".json"))
+    args = sys.argv[1:]
+    names = [a for a in args if not a.startswith("--")] or list(VIDEOS)
+    names = [nm for nm in names if os.path.exists(f"{CAP}/{VIDEOS[nm][0]}.json")]
+    if "--build-only" in args:
         for nm in names: print(build(nm))
         sys.exit()
-    ok = [nm for nm in names if os.path.exists(f"{CAP}/{nm}.png") and render(nm)]
+    ok = [nm for nm in names if render(nm)]
     print("완료", len(ok), "/", len(names))

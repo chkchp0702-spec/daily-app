@@ -6,18 +6,16 @@ from playwright.sync_api import sync_playwright
 APP = "https://chkchp0702-spec.github.io/daily-app/"
 OUT = "explain/cap"
 os.makedirs(OUT, exist_ok=True)
-# 영상 이름 → 열 화면(go 키)
-TARGETS = {
-    "t_home": "home", "t_mkt": "market", "t_inv": "port", "t_sig": "whale", "t_prod": "bond", "t_feed": "feed",
-    "m_home": "home", "m_market": "market", "m_sector": "sector", "m_prob": "prob", "m_port": "port", "m_score": "score",
-    "m_whale": "whale", "m_cup": "cup", "m_gap": "gap", "m_screen": "screen", "m_sigmore": "sigmore",
-    "m_bond": "bond", "m_fund": "fund", "m_els": "els", "m_feed": "feed",
-}
+# 찍을 화면(go 키) — 영상은 build.py 가 이 화면들을 골라 씀
+TARGETS = ["home", "market", "sector", "prob", "port", "score", "whale", "cup", "gap", "screen", "sigmore",
+           "bond", "fund", "els", "feed"]
 MAXH = 4200  # 한 화면에서 찍는 최대 높이(css px)
 
 CLEAN = """() => {
   for (const id of ['kidsplash','gdq','netbar','backbtn','sheet']) { const e = document.getElementById(id); if (e) e.remove(); }
   document.querySelectorAll('.toast,.vtip').forEach(e => e.remove());
+  // 비밀번호 칸이 있는 카드(사모 라인업 등)는 영상에 넣지 않음
+  document.querySelectorAll('input[type=password]').forEach(i => { const c = i.closest('section.card, .card, .fold, details') || i.parentElement; if (c) c.style.setProperty('display', 'none', 'important'); });
   for (const e of document.querySelectorAll('body *')) {
     const p = getComputedStyle(e).position;
     if (p === 'fixed') e.style.setProperty('display', 'none', 'important');
@@ -46,7 +44,8 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=2, color_scheme="light")
     pg.goto(APP + "?t=" + str(int(time.time())), wait_until="domcontentloaded", timeout=90000)
     pg.wait_for_timeout(12000)
-    for name, key in TARGETS.items():
+    for key in TARGETS:
+        name = key
         if only and name not in only:
             continue
         try:
