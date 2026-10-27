@@ -59,6 +59,15 @@ ETF_CAP = 0.3
 EARLY_B = {"CN": 0.3, "HK": 0.2}
 EARLY_BETA = 0.79
 EARLY_CAP = 0.3
+# 🗾 10/27 #12 「CME 닛케이 선물(NKD=F) 마감 뒤 등락」: 그 나라 지수 마감(15:30) → 개장 직전 NKD 등락 중
+#   간밤 미국+선물이 이미 설명한 몫(0.9배)을 뺀 나머지로 일본·한국 닻을 기울임.
+#   검증(probe/gap_bt.py · 야후 60분봉 2024-06~ 약 500일, 앞/뒤 절반 · 닻 = 간밤 미국+선물+국가 ETF 로짓):
+#   일본 브라이어 0.2120→0.1703 · 0.2076→0.1712 (1.0/1%p, ±1.0 상한) · 나머지 +0.3%↑ 뒤 닛케이 오름 74%·87% vs 평소 54% · −0.3%↓ 30%·28%
+#   한국 0.2166→0.2106 · 0.2132→0.2122 (0.5/1%p, ±0.3 상한 — 칸 비율이 앞 기간 거의 같아 작게) · 시가 갭 설명력 R² 일본 0.45→0.80 · 한국 0.42→0.62
+#   계수는 두 기간 적합값(일본 1.6~2.0 · 한국 0.46~0.71 /1%p)보다 낮게. 원달러·엔달러(KRW=X·JPY=X)는 브라이어 엇갈려 뺌
+NKD_B = {"JP": 1.0, "KR": 0.5}
+NKD_CAP = {"JP": 1.0, "KR": 0.3}
+NKD_BETA = 0.9
 EXTRA = ["^VIX", "ES=F"] + list(ETF_X.values()) + prob_x.XSYMS
 # 2026 FOMC 결정일 (둘째 날) — 연준 공개 일정. 그 밖의 이벤트는 prob_events.json 에서
 FOMC_2026 = ["2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-09",
@@ -366,6 +375,30 @@ def es_post(day):
     return None
 
 
+_NKD = {}
+def nkd_post(mk, day):
+    """🗾 #12: 시장 mk 의 마지막 마감일 day 15:30(현지) → 지금 CME 닛케이 선물(NKD=F 60분봉) 등락. 실패하면 None."""
+    if FAKE:
+        return None
+    try:
+        import yfinance as yf
+        if "s" not in _NKD:
+            b = yf.download("NKD=F", period="5d", interval="60m", progress=False, auto_adjust=False)["Close"].dropna()
+            b = b.iloc[:, 0] if hasattr(b, "columns") else b
+            i = pd.to_datetime(b.index); b.index = (i.tz_localize("UTC") if i.tz is None else i).tz_convert("UTC")
+            _NKD["s"] = b.sort_index()
+        s = _NKD["s"]; hr = pd.Timedelta(minutes=60)
+        cut = pd.Timestamp(day.strftime("%Y-%m-%d") + " 15:30", tz=MK[mk]["tz"]).tz_convert("UTC")
+        q = s[s.index + hr <= cut]
+        now = pd.Timestamp(NOW).tz_convert("UTC")
+        if not len(q) or cut - (q.index[-1] + hr) > pd.Timedelta(hours=3) or s.index[-1] <= q.index[-1] or now - s.index[-1] > pd.Timedelta(hours=3):
+            return None
+        return float(s.iloc[-1] / q.iloc[-1] - 1)
+    except Exception as ex:
+        print("닛케이 선물 실패", ex)
+    return None
+
+
 def market(mk, H, brain, events, G=None, ext=None, breadth=None):
     cfg = MK[mk]
     px = H.get(cfg["ix"])
@@ -460,6 +493,15 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
             except Exception as ex:
                 print("국가 ETF 실패", mk, ex)
             pt += et
+            try:
+                nk = nkd_post(mk, today) if (mk in NKD_B and not open_now and post is not None) else None
+                if nk is not None:
+                    res_ = nk - NKD_BETA * cur_s
+                    adj = max(-NKD_CAP[mk], min(NKD_CAP[mk], NKD_B[mk] * res_ * 100))
+                    pa0 = pa; pa = sigm(logit(pa) + adj)
+                    pt += f" · 🗾 닛케이 선물(CME) {cfg['ixn']} 마감 뒤 {nk*100:+.2f}%(간밤 미국이 설명한 몫 빼면 {res_*100:+.2f}%p) → 닻 {pa0*100:.0f}→{pa*100:.0f}%(60분봉 2년 검증)"
+            except Exception as ex:
+                print("닛케이 선물 닻 실패", mk, ex)
             try:
                 ea = asia_early(mk, loc) if (mk in EARLY_B and not open_now and post is not None) else None
                 if ea is not None:
@@ -854,7 +896,7 @@ def main():
                ["자금", "💳 크레딧", "하이일드(HYG)/투자등급(LQD) 채권 20일 — 회사채 시장이 주식보다 먼저 위험을 알아챔. 급히 나빠지면 주식 약세 확률↑"],
                ["자금", "💱 환율", "한국 원/달러 · 일본 엔/달러 · 중국·홍콩 위안/달러 · 미국 달러 인덱스 5일 — 달러 강세는 외국인 자금이 빠지는 쪽"],
                ["선행", "⏱️ 장중 닻", "장이 열려 있으면 「지금 등락 ÷ (하루 흔들림 × √남은 흔들림)」 → 종가가 어제보다 높을 확률. 남은 흔들림은 한국·일본·홍콩만 60분봉 2년 실측(시가 갭이 하루 흔들림의 큰 몫이라 장중엔 생각보다 덜 흔들림 · 두 기간 모두 브라이어 개선), 중국·미국은 남은 시간 비율 그대로"],
-               ["선행", "🛰️ 선행 시장", "아시아 = 직전 미국 S&P 등락 + 미국 마감(뉴욕 16:00) 뒤 개장 전까지 S&P 선물 등락(10/15 더함 · 60분봉 2년 두 기간 모두 브라이어 개선)이 비슷했던 날의 결과. 한국·일본·홍콩은 미국 상장 국가 ETF(EWY·EWJ·EWH)가 그 나라 지수 마감 뒤 더 움직인 몫으로 조금 더 기울임(10/15 · 2012~ 두 기간·최근 2년 모두 브라이어 개선, 로그오즈 ±0.3 상한) · 중국·홍콩은 개장(한국 10:30) 전 먼저 1시간 넘게 거래한 코스피·닛케이 등락 중 간밤 미국이 설명 못 한 몫으로도 기울임(10/24 · 60분봉 2년 두 기간 모두 브라이어 개선, ±0.3 상한) · 미국 = 선물이 가리키는 시가 갭이 비슷했던 날의 종가 방향"],
+               ["선행", "🛰️ 선행 시장", "아시아 = 직전 미국 S&P 등락 + 미국 마감(뉴욕 16:00) 뒤 개장 전까지 S&P 선물 등락(10/15 더함 · 60분봉 2년 두 기간 모두 브라이어 개선)이 비슷했던 날의 결과. 한국·일본·홍콩은 미국 상장 국가 ETF(EWY·EWJ·EWH)가 그 나라 지수 마감 뒤 더 움직인 몫으로 조금 더 기울임(10/15 · 2012~ 두 기간·최근 2년 모두 브라이어 개선, 로그오즈 ±0.3 상한) · 일본·한국은 그 나라 마감 뒤 CME 닛케이 선물(NKD=F) 등락 중 간밤 미국이 설명 못 한 몫으로도 기울임(10/27 · 60분봉 2년 두 기간 모두 브라이어 개선 — 일본 0.21→0.17, 한국은 작게 · 일본 ±1.0·한국 ±0.3 상한) · 중국·홍콩은 개장(한국 10:30) 전 먼저 1시간 넘게 거래한 코스피·닛케이 등락 중 간밤 미국이 설명 못 한 몫으로도 기울임(10/24 · 60분봉 2년 두 기간 모두 브라이어 개선, ±0.3 상한) · 미국 = 선물이 가리키는 시가 갭이 비슷했던 날의 종가 방향"],
                ["자금", "📐 장단기 금리차(한국)", "미 10년 − 3개월 국채 금리차 구간(역전·평평·보통·가파름). 2000년 이후 「보통(0.5~1.5%p)」 구간 뒤 코스피 다음 날 오른 비율이 평소보다 약 2%p 높고 「가파름」 구간은 낮았음 — 앞/뒤 기간·최근 2년 모두 브라이어 개선(10/15). 일본·중국·홍콩·미국은 개선이 없어 안 씀"],
                ["자금", "🏦 투자자예탁금 급감(한국 일주일)", "금투협 투자자예탁금(증권사에 맡긴 개인 대기자금)이 20일 동안 1년 중 하위 10%만큼 줄었을 때만 켜짐(발표가 다음 날이라 하루 늦춰 씀). 2005년 이후 그런 날 뒤 코스피 5일 뒤 오른 비율이 평소보다 앞 기간 8%p·뒤 기간 4%p 낮았고 최근 2년도 5%p 낮음 — 세 기간 모두 브라이어 개선(10/22). 신용잔고·반대매매·미수금은 개선이 없어 안 씀"],
                ["심리", "🧮 풋콜 극공포(미국 일주일)", "CBOE 전체 풋콜 비율 5일 평균이 1년 중 상위 10%(옵션 시장 극공포)일 때만 켜짐. 2006년 이후 그런 날 뒤 S&P 5일 뒤 오른 비율 66%(평소 58~61%) — 앞/뒤 기간·최근 2년 모두 브라이어 개선(10/19). 다음 날 쪽은 약하고, 다른 시장·탐욕 쪽·전체 구간 나눔은 개선이 없어 안 씀"],
