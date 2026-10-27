@@ -14,7 +14,8 @@ MORE_NAME = {"home": "🏠 오늘", "market": "🌐 시황", "sector": "🧭 나
 POSE = {"home": "kid_thumb", "mkt": "kid_globe", "inv": "kid_piggy", "sig": "kid_detect", "prod": "kid_piggy", "feed": "kid_wave",
         "market": "kid_globe", "sector": "kid_globe", "prob": "kid_think", "port": "kid_piggy", "score": "kid_joy",
         "whale": "kid_detect", "cup": "kid_detect", "gap": "kid_detect", "screen": "kid_detect", "sigmore": "kid_detect",
-        "bond": "kid_piggy", "fund": "kid_piggy", "els": "kid_think"}
+        "bond": "kid_piggy", "fund": "kid_piggy", "els": "kid_think",
+        "accum": "kid_detect", "danta": "kid_detect", "onepager": "kid_detect", "alarm": "kid_wave", "idea": "kid_think", "mgr": "kid_detect"}
 
 W, H = 720, 1280
 PX, PY, PW, PH = 70, 150, 580, 750          # 휴대폰 창
@@ -273,6 +274,8 @@ def build(name):
     shutil.rmtree(pdir, ignore_errors=True)
     os.makedirs(f"{pdir}/assets")
     pose = POSE.get(key, "kid_thumb")
+    if spot is not None and spot.get("kind") == "x":      # 오늘 탭 조이 그림 자리: 그 자리 표정
+        pose = "kid_wave" if "인사" in title else "kid_joy" if "배지" in title else "kid_umb" if "팔았다면" in title else "kid_thumb"
     for f in (f"{pose}.jpg", "kid_wave.jpg", "gsap-3.14.2.min.js"):
         shutil.copy(f"{ROOT}/assets/{f}", f"{pdir}/assets/{f}")
     caps, ih = {}, {}

@@ -20,6 +20,7 @@ jobs:
           - { name: B, screens: "port score" }
           - { name: C, screens: "whale cup gap" }
           - { name: D, screens: "screen sigmore feed bond fund els" }
+          - { name: E, screens: "accum danta onepager alarm idea mgr" }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
