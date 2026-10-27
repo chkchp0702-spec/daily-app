@@ -2,6 +2,8 @@ name: shot
 # 🧒 화면 확인용 스크린샷 (손으로만 실행)
 on:
   workflow_dispatch:
+  push:
+    branches: [shot-check-1027]
 permissions:
   contents: write
 jobs:
