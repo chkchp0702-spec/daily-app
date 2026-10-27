@@ -52,12 +52,16 @@
   //   t_<탭> = 탭 설명 · m_<자세히> = ⓘ 자세히. 영상이 없으면 지금처럼 글 말풍선
   var VID = {t_home: 1, t_mkt: 1, t_inv: 1, t_sig: 1, t_prod: 1, t_feed: 1, m_home: 1, m_market: 1, m_sector: 1, m_prob: 1, m_port: 1, m_score: 1,
              m_whale: 1, m_cup: 1, m_gap: 1, m_screen: 1, m_sigmore: 1, m_bond: 1, m_fund: 1, m_els: 1, m_feed: 1};
-  var VIDV = "2";
+  var VIDV = "3";
   function vidOf(g, mk){ var k = mk ? "m_" + mk : "t_" + g; return VID[k] ? "vid/" + k + ".mp4?v=" + VIDV : ""; }
   // 10/26 사용자 「조이가 있는 모든 곳에 설명 영상」 — 카드 머리·접기 ⓘ·「ⓘ 설명」·「ⓘ …」 접는 칸: vidmap.js(window.VIDC, 자동 생성)에 「화면|제목」 → 파일
   function vkey(t){ return String(t || "").replace(/[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()−▲▼△▽›‹]/g, "").toLowerCase().slice(0, 24); }
-  function vidFor(title){ var m = window.VIDC; if (!m) return ""; var k = ((typeof cur !== "undefined" && cur) || "") + "|" + vkey(title); return m[k] ? "vid/" + m[k] + ".mp4?v=" + (m._v || VIDV) : ""; }
-  function vidHtml(vs){ return vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted autoplay playsinline preload="auto" controls disablepictureinpicture></video></div>' : ""; }
+  // 10/27 사용자 「조이 사진 있는 곳은 다」 — ① 이 화면에서 같은 제목 ② 다른 화면(시트·종목리포트 등)에서 같은 제목 ③ 없으면 이 화면 설명 영상(글 먼저, ▶ 로 보기)
+  function vidFor(title){ var m = window.VIDC; if (!m) return ""; var vk = vkey(title), k = ((typeof cur !== "undefined" && cur) || "") + "|" + vk, f = m[k];
+    if (!f && vk) for (var x in m) if (x.slice(x.indexOf("|") + 1) === vk){ f = m[x]; break; }
+    return f ? "vid/" + f + ".mp4?v=" + (m._v || VIDV) : ""; }
+  function vidScreen(){ var c = (typeof cur !== "undefined" && cur) || "", k = VID["m_" + (MORE_ALIAS[c] || c)] ? "m_" + (MORE_ALIAS[c] || c) : "t_" + curGrp(); return VID[k] ? "vid/" + k + ".mp4?v=" + VIDV : ""; }
+  function vidHtml(vs, wait){ return vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted' + (wait ? '' : ' autoplay') + ' playsinline preload="' + (wait ? 'metadata' : 'auto') + '" controls disablepictureinpicture></video></div>' : ""; }
   var MORE_NAME = {home: "🏠 오늘", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", feed: "📰 피드"};
   function ls(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); } catch(x) { return null; } }
   function seen(){ return ls("gd_seen") || {}; }
@@ -85,6 +89,7 @@
     "#gdq .gd-ft button.on{color:var(--text);border-color:var(--acc)}" +
     "#gdq .gd-x{margin-left:auto;color:var(--text)!important}" +
     "#gdq .gd-vw{display:flex;justify-content:center}" +
+    ".tz-kid,.tz-pk{cursor:pointer;-webkit-tap-highlight-color:transparent}.tz-kid:active,.tz-pk:active{transform:scale(.96)}#gdq .gd-txt .gd-kid{cursor:pointer}" +
     "#gdq .gd-v{display:block;height:min(66vh,820px);max-width:100%;aspect-ratio:9/16;border-radius:16px;background:#e9eefb;object-fit:contain}" +
     "#gdq .gd-hasv .gd-row{display:none}#gdq .gd-hasv.gd-txt .gd-row{display:flex}#gdq .gd-hasv.gd-txt .gd-vw{display:none}" +
     "#gdq .gd-more .gd-bub{max-height:52vh;overflow-y:auto;font-size:14.5px}#gdq .gd-more .gd-kid{width:84px;height:138px}" +
@@ -107,23 +112,25 @@
     var mk = g.indexOf("more:") === 0 ? g.slice(5) : null; if (mk) mk = MORE_ALIAS[mk] || mk;
     var L = mk ? (MORE[mk] || SAY.home) : (SAY[g] || SAY.home);
     var pz = POSE[g] || (mk && (MKPOSE[mk] || faceFor((MORE[MORE_ALIAS[mk] || mk] || []).slice(-1)) || POSE[GRP[mk] || ""]));
-    var vs = vidOf(g, mk);
+    var vs = vidOf(g, mk) || (g === "intro" ? vidFor("👋 조이 인사") : "") || vidOf(curGrp()); var fb = "";
     q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + (vs ? ' gd-hasv' : '') + '" role="dialog" aria-label="안내자 조이">' +
       (vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted autoplay playsinline preload="auto" controls disablepictureinpicture></video></div>' : '') +
       '<div class="gd-row"><div class="gd-kid" aria-hidden="true"' + (pz ? ' style="background-image:url(' + pz + ')"' : '') + '></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
       L.map(function(s){ return '<p class="gd-l">' + s + '</p>'; }).join("") + '</div></div><div class="gd-ft">' +
       (mk ? '' : ["home", "mkt", "inv", "sig", "prod", "feed"].map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("")) +
-      (vs ? '<button class="gd-tx">📝 글로 보기</button>' : '') + '<button class="gd-x">닫기</button></div></div>';
+      (vs ? '<button class="gd-tx">📝 글로 보기</button>' : fb ? '<button class="gd-tx">▶ 이 화면 영상</button>' : '') + '<button class="gd-x">닫기</button></div></div>';
     document.body.appendChild(q);
     var ps = q.querySelectorAll(".gd-l"), i = 0;
     function next(){ if (i < ps.length) ps[i++].classList.add("on"); if (i >= ps.length) { clearInterval(timer); timer = null; } }
     var sh = q.querySelector(".gd-sh"), vv = q.querySelector(".gd-v");
-    if (vv){ var pp = vv.play && vv.play(); if (pp && pp.catch) pp.catch(function(){}); vv.onerror = function(){ sh.classList.remove("gd-hasv"); var t = q.querySelector(".gd-tx"); if (t) t.remove(); }; }
+    if (vv && fb){ vv.onerror = function(){ var t = q.querySelector(".gd-tx"); if (t) t.remove(); sh.classList.remove("gd-hasv", "gd-txt"); }; }
+    else if (vv){ var pp = vv.play && vv.play(); if (pp && pp.catch) pp.catch(function(){}); vv.onerror = function(){ sh.classList.remove("gd-hasv"); var t = q.querySelector(".gd-tx"); if (t) t.remove(); }; }
     if (!vs) { next(); timer = setInterval(next, mk ? 750 : 1100); }
     q.onclick = function(e){
       var b = e.target.closest && e.target.closest("button");
       if (e.target === q || (b && b.classList.contains("gd-x"))) return close();
       if (b && b.dataset.g) return open(b.dataset.g);
+      if (vv && e.target.closest && e.target.closest(".gd-kid") && sh.classList.contains("gd-txt")){ b = q.querySelector(".gd-tx"); }   // 말풍선 옆 조이 그림 → 영상으로
       if (b && b.classList.contains("gd-tx")){                                   // 영상 ↔ 글
         var toTxt = sh.classList.toggle("gd-txt"); b.textContent = toTxt ? "▶ 영상으로 보기" : "📝 글로 보기";
         if (toTxt){ if (vv) vv.pause(); while (i < ps.length) next(); } else if (vv){ var p2 = vv.play(); if (p2 && p2.catch) p2.catch(function(){}); }
@@ -144,17 +151,19 @@
     if (!L || !L.length) return;
     close();
     var q = document.createElement("div"); q.id = "gdq";
-    var vs = vidFor(title);
-    q.innerHTML = '<div class="gd-sh gd-more' + (vs ? ' gd-hasv' : '') + '" role="dialog" aria-label="안내자 조이">' + vidHtml(vs) + '<div class="gd-row"><div class="gd-kid" aria-hidden="true" style="background-image:url(' + (face || faceFor(L) || BODY) + ')"></div><div class="gd-bub"><div class="gd-t">' + esc(title || "설명") + '</div>' +
-      L.slice(0, 14).map(function(x){ return '<p class="gd-l">' + esc(x) + '</p>'; }).join("") + '</div></div><div class="gd-ft">' + (foot || "") + (vs ? '<button class="gd-tx">📝 글로 보기</button>' : '') + '<button class="gd-x">닫기</button></div></div>';
+    var vs = vidFor(title), fb = vs ? "" : vidScreen();
+    q.innerHTML = '<div class="gd-sh gd-more' + (vs || fb ? ' gd-hasv' : '') + (fb ? ' gd-txt' : '') + '" role="dialog" aria-label="안내자 조이">' + vidHtml(vs || fb, !!fb) + '<div class="gd-row"><div class="gd-kid" aria-hidden="true" style="background-image:url(' + (face || faceFor(L) || BODY) + ')"></div><div class="gd-bub"><div class="gd-t">' + esc(title || "설명") + '</div>' +
+      L.slice(0, 14).map(function(x){ return '<p class="gd-l">' + esc(x) + '</p>'; }).join("") + '</div></div><div class="gd-ft">' + (foot || "") + (vs ? '<button class="gd-tx">📝 글로 보기</button>' : fb ? '<button class="gd-tx">▶ 이 화면 영상</button>' : '') + '<button class="gd-x">닫기</button></div></div>';
     document.body.appendChild(q);
     var ps = q.querySelectorAll(".gd-l"), i = 0;
     function next(){ if (i < ps.length) ps[i++].classList.add("on"); if (i >= ps.length) { clearInterval(timer); timer = null; } }
     var sh = q.querySelector(".gd-sh"), vv = q.querySelector(".gd-v");
-    if (vv){ var pp = vv.play && vv.play(); if (pp && pp.catch) pp.catch(function(){}); vv.onerror = function(){ sh.classList.remove("gd-hasv"); var t = q.querySelector(".gd-tx"); if (t) t.remove(); if (!timer && i < ps.length){ next(); timer = setInterval(next, 450); } }; }
+    if (vv && fb){ vv.onerror = function(){ var t = q.querySelector(".gd-tx"); if (t) t.remove(); sh.classList.remove("gd-hasv", "gd-txt"); }; }
+    else if (vv){ var pp = vv.play && vv.play(); if (pp && pp.catch) pp.catch(function(){}); vv.onerror = function(){ sh.classList.remove("gd-hasv"); var t = q.querySelector(".gd-tx"); if (t) t.remove(); if (!timer && i < ps.length){ next(); timer = setInterval(next, 450); } }; }
     if (!vs) { next(); timer = setInterval(next, 450); }
     q.onclick = function(e){
       var b = e.target.closest && e.target.closest("button");
+      if (vv && e.target.closest && e.target.closest(".gd-kid") && sh.classList.contains("gd-txt")){ b = q.querySelector(".gd-tx"); }   // 말풍선 옆 조이 그림 → 영상으로
       if (b && b.dataset.goto){ setTimeout(close, 0); return; }          // 「관련 화면」 → 앱의 원래 이동 처리에 맡김
       if (e.target === q || (b && b.classList.contains("gd-x"))) return close();
       if (b && b.classList.contains("gd-tx")){                                   // 영상 ↔ 글
@@ -166,6 +175,19 @@
     };
   }
   window.gdSay = say;
+  // 10/27 사용자 「조이 사진 있는 곳은 다 탭하면 영상」 — 오늘 탭 날씨판 꼬마(.tz-kid) · 세 컷 만화 꼬마(.tz-pk) · 첫 화면 꼬마(#kidsplash)
+  var KIDX = {
+    hero: ["🌤 오늘 날씨판", ["맨 위 날씨판은 오늘 시장을 날씨로 보여 줘요.", "크게 오르면 ☀️ 맑음, 조금 오르면 🌤, 제자리면 ☁️ 흐림, 내리면 🌧 비, 크게 내리면 ⛈ 폭풍이에요.", "큰 숫자는 지금 가장 중요한 숫자 하나예요.", "날씨판을 누르면 시장 탭으로 가요. 카드를 길게 누르면 제가 한 줄씩 요약해 줘요!"]],
+    comic: ["🎞 그날 팔았다면?", ["2000년 이후 같은 급락일들을 되짚은 세 컷 만화예요.", "① 깜짝 놀라 팔고 싶어지는 순간 · ② 그날 팔았다면 놓친 몫 · ③ 반대로 더 샀다면 120거래일 뒤 평균.", "과거 평균일 뿐, 앞으로를 약속하지는 않아요."]]
+  };
+  window.addEventListener("click", function(ev){
+    var t = ev.target; if (!t.closest || t.closest("#gdq")) return;
+    var k = t.closest(".tz-kid") ? "hero" : t.closest(".tz-pk") ? "comic" : null; if (!k) return;
+    ev.stopImmediatePropagation(); ev.preventDefault();
+    say(KIDX[k][0], KIDX[k][1], "", k === "comic" ? "img/guide_src.jpg?v=1" : null);
+  }, true);
+  (function(){ var sp = document.getElementById("kidsplash"); if (!sp) return;
+    sp.addEventListener("click", function(){ setTimeout(function(){ if (!document.getElementById("gdq")) { ls("gd_intro", 1); open("intro"); } }, 480); }); })();
   function titleOf(el){
     var c = el.closest && (el.closest(".fold") || el.closest("section.card") || el.closest(".card"));
     var h = c && c.querySelector("h3, .fold-h, .mk-lab, summary");

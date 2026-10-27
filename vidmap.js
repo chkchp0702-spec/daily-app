@@ -1,9 +1,12 @@
-// 자동 생성(explain/vidmap.py) — 조이 설명 영상 목록: 「화면|제목키」 → vid/<파일>.mp4  (38개)
+// 자동 생성(explain/vidmap.py) — 조이 설명 영상 목록: 「화면|제목키」 → vid/<파일>.mp4  (57개)
 window.VIDC = {
-"els|🎛els내맘대로설계기": "d_els_dz",
-"home|숫자로자세히": "c_home_1",
+"home|🌤오늘날씨판": "c_home_1",
+"home|🎞그날팔았다면": "c_home_2",
+"home|🏆오늘의배지": "c_home_3",
+"home|👋조이인사": "c_home_4",
 "market|✅오늘할일": "c_market_1",
 "prob|🎲다음장오를확률": "c_prob_1",
+"prob|🧭섹터종목확률": "c_prob_2",
 "sector|🧭국면신호판": "c_sector_1",
 "sector|⚡장중나침반": "c_sector_2",
 "sector|🌍간밤글로벌": "c_sector_3",
@@ -38,5 +41,21 @@ window.VIDC = {
 "screen|설명": "c_screen_1",
 "sigmore|🧠두뇌논지": "c_sigmore_1",
 "sigmore|📂신호상세": "c_sigmore_2",
-"_v": "2"
+"els|🎛els내맘대로설계기": "d_els_dz",
+"accum|🚀박스돌파": "c_accum_1",
+"accum|거래량이상종목": "c_accum_2",
+"accum|이화면은🤫거래량이상종목참고용": "c_accum_3",
+"alarm|설명": "c_alarm_1",
+"danta|📺오늘알람실시간전광판": "c_danta_1",
+"danta|날짜별성적": "c_danta_2",
+"danta|이화면은⚡단타당일급등신호알람을모은화면": "c_danta_3",
+"danta|품질c": "c_danta_4",
+"idea|✍️의견남기기": "c_idea_1",
+"mgr|어디에돈을넣었나": "c_mgr_1",
+"mgr|보유종목top": "c_mgr_2",
+"mgr|이번분기에판종목": "c_mgr_3",
+"onepager|🧵이종목앱성적표": "c_onepager_1",
+"onepager|🐇🐢누가먼저말했나": "c_onepager_2",
+"onepager|설명": "c_onepager_3",
+"_v": "3"
 };
