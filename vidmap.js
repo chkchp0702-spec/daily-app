@@ -1,4 +1,4 @@
-// 자동 생성(explain/vidmap.py) — 조이 설명 영상 목록: 「화면|제목키」 → vid/<파일>.mp4  (57개)
+// 자동 생성(explain/vidmap.py) — 조이 설명 영상 목록: 「화면|제목키」 → vid/<파일>.mp4  (56개)
 window.VIDC = {
 "home|🌤오늘날씨판": "c_home_1",
 "home|🎞그날팔았다면": "c_home_2",
@@ -11,7 +11,6 @@ window.VIDC = {
 "sector|⚡장중나침반": "c_sector_2",
 "sector|🌍간밤글로벌": "c_sector_3",
 "sector|전일섹터등락": "c_sector_4",
-"sector|🧭국면신호판미국시장은어느국면인가": "c_sector_5",
 "port|🏁시장곳과비교": "c_port_1",
 "port|🎯집중포트": "c_port_2",
 "port|📋지금이렇게담으면돼요": "c_port_3",
@@ -57,5 +56,5 @@ window.VIDC = {
 "onepager|🧵이종목앱성적표": "c_onepager_1",
 "onepager|🐇🐢누가먼저말했나": "c_onepager_2",
 "onepager|설명": "c_onepager_3",
-"_v": "3"
+"_v": "4"
 };
