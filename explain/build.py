@@ -33,7 +33,23 @@ MARK = {"market": "🌐", "sector": "🧭", "prob": "🎲", "port": "💼", "sco
 
 def norm(t):
     """guide.js 의 vkey() 와 똑같이: 공백·숫자·기호를 빼고 소문자 24자"""
-    return re.sub(r"[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()−▲▼△▽›‹]", "", t or "").lower()[:24]
+    t = re.sub(r"[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()−▲▼△▽›‹]", "", t or "")
+    t = re.sub(r"(미국|한국|일본|중국|홍콩)시장은어느국면인가", "", t)      # 고른 나라에 따라 바뀌는 부제(10/27)
+    return t.lower()[:24]
+
+
+# 10/27 사용자 「한국 고르고 눌렀는데 미국 시장은~ 이라고 설명」 — 찍을 때 고른 나라·시각이 글에 박히는 줄은 어느 때나 맞는 글로
+LINE_FIX = [
+    (r"^(미국|한국|일본|중국|홍콩) 시장은 어느 국면인가$", "나라 칩(미국·한국·일본·중국·홍콩)을 누르면 그 나라 시장이 지금 어느 국면인지 보여 줘요."),
+    (r"한국시각 \d{1,2}:\d{2} 기준 · ", ""),
+    (r"열린 시장은 \d{1,2}:\d{2} 지금 등락으로", "열린 시장은 지금 등락으로"),
+]
+
+
+def fix_line(t):
+    for a, b in LINE_FIX:
+        t = re.sub(a, b, t)
+    return t.strip()
 
 
 def spot_videos():
@@ -56,7 +72,7 @@ def split_lines(L, maxc=110, cap=10):
     """긴 문단은 문장(…요. / …다. / …죠.)으로 나누고, 그래도 길면 쉼표·점에서 한 번 더"""
     out = []
     for t in L:
-        t = re.sub(r"\s+", " ", str(t)).strip()
+        t = fix_line(re.sub(r"\s+", " ", str(t)).strip())
         parts = re.split(r"(?<=[.!?。])\s+(?=\S)", t)
         for p in parts:
             while len(p) > maxc:

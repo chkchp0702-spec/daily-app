@@ -33,9 +33,13 @@ jobs:
           sudo apt-get install -y -qq ffmpeg fonts-noto-cjk fonts-noto-color-emoji > /dev/null
           npx --yes hyperframes@latest --version
       - name: 앱 화면 찍기
-        run: python explain/capture.py ${{ matrix.group.screens }}
+        run: |
+          if [ -f explain/only.txt ] && ! grep -qw "${{ matrix.group.name }}" explain/only.txt; then echo "이번엔 안 함"; exit 0; fi
+          python explain/capture.py ${{ matrix.group.screens }}
       - name: 영상 만들기
-        run: python explain/build.py
+        run: |
+          if [ -f explain/only.txt ] && ! grep -qw "${{ matrix.group.name }}" explain/only.txt; then exit 0; fi
+          python explain/build.py
       - name: 묶음 결과
         if: always()
         run: |
