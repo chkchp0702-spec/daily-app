@@ -4,7 +4,7 @@ explain/cap/<key>.png / .json 에 저장."""
 import json, os, re, sys, time
 from playwright.sync_api import sync_playwright
 
-APP = "https://chkchp0702-spec.github.io/daily-app/"
+APP = os.environ.get("APP_URL", "https://chkchp0702-spec.github.io/daily-app/")
 OUT = "explain/cap"
 os.makedirs(OUT, exist_ok=True)
 TARGETS = ["home", "market", "sector", "prob", "port", "score", "whale", "cup", "gap", "screen", "sigmore",
@@ -129,6 +129,14 @@ with sync_playwright() as p:
             log.append(f"{name}: 오류 {str(e)[:200]}")
         pg.goto(APP + "?t=" + str(int(time.time())), wait_until="domcontentloaded", timeout=90000)
         pg.wait_for_timeout(9000)
+    # 🎬 10/27 ELS 설계기 「직접 해 보는」 영상 장면 (demo_els.py)
+    if not only or "els" in only:
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import demo_els
+            log.append(demo_els.run(pg, CLEAN, OUT))
+        except Exception as e:
+            log.append(f"demo_els: 오류 {str(e)[:200]}")
     b.close()
 open(f"{OUT}/log.txt", "w").write("\n".join(log))
 print("\n".join(log))

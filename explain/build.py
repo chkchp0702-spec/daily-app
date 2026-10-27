@@ -92,7 +92,172 @@ def stops_for(cap, n):
     return out
 
 
+def page(title, pose, layer_html, caps_html, dots, js, total):
+    """영상 한 편의 HyperFrames 문서(배경·휴대폰 창·조이·말풍선 자막·점)"""
+    return f"""<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script src="assets/gsap-3.14.2.min.js"></script>
+<style>
+  @font-face {{ font-family: "KR"; font-weight: 700; src: local("Noto Sans CJK KR Bold"), local("NotoSansCJKkr-Bold"); }}
+  @font-face {{ font-family: "KR"; font-weight: 900; src: local("Noto Sans CJK KR Black"), local("NotoSansCJKkr-Black"); }}
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  html, body {{ width: {W}px; height: {H}px; overflow: hidden; background: #eef1f8; }}
+  body {{ font-family: "KR", sans-serif; color: #14203f; }}
+  #root {{ position: absolute; inset: 0; overflow: hidden; }}
+  #bg {{ position: absolute; inset: 0; background: linear-gradient(180deg, #e9eefb 0%, #f5f2ea 100%); }}
+  #top {{ position: absolute; left: 40px; right: 40px; top: 40px; height: 84px; display: flex; align-items: center; gap: 18px; }}
+  #face {{ width: 76px; height: 76px; border-radius: 50%; background: #f3e6d6 url("assets/kid_wave.jpg") center 22% / 140% no-repeat;
+          border: 3px solid #fff; box-shadow: 0 6px 18px rgba(20,32,63,.18); flex: none; }}
+  #ttl {{ font-size: {42 if len(title) <= 9 else 34 if len(title) <= 14 else 27}px; font-weight: 900; letter-spacing: -1px; }}
+  #ttl small {{ display: block; font-size: 21px; font-weight: 700; color: #5b6787; letter-spacing: 0; margin-top: 2px; }}
+  #phone {{ position: absolute; left: {PX - 10}px; top: {PY - 10}px; width: {PW + 20}px; height: {PH + 20}px; border-radius: 46px;
+           background: #14203f; box-shadow: 0 30px 60px rgba(20,32,63,.28); }}
+  #win {{ position: absolute; left: {PX}px; top: {PY}px; width: {PW}px; height: {PH}px; border-radius: 34px; overflow: hidden; background: #fff; }}
+  .layer {{ position: absolute; left: 0; top: 0; width: {PW}px; }}
+  .shot {{ position: absolute; left: 0; top: 0; width: {PW}px; background-repeat: no-repeat; background-position: 0 0; }}
+  .ring {{ position: absolute; }}
+  .tap {{ position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: rgba(255,122,26,.30);
+          border: 5px solid #ff7a1a; box-shadow: 0 6px 16px rgba(20,32,63,.25); opacity: 0; }}
+  .ring i {{ position: absolute; inset: 0; border: 5px solid #ff7a1a; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(15,25,55,.22); }}
+  #kid {{ position: absolute; left: 34px; top: 935px; width: 170px; height: 226px; border-radius: 28px; overflow: hidden;
+         background: #f3e6d6 url("assets/{pose}.jpg") center / cover no-repeat; box-shadow: 0 14px 30px rgba(20,32,63,.22); }}
+  #bub {{ position: absolute; left: 222px; right: 30px; top: 925px; height: 290px; border-radius: 30px; background: #fff;
+         box-shadow: 0 14px 30px rgba(20,32,63,.14); }}
+  #bub:before {{ content: ""; position: absolute; left: -16px; top: 70px; border: 16px solid transparent; border-right-color: #fff; border-left: 0; }}
+  .cap {{ position: absolute; left: 248px; right: 54px; top: 950px; height: 240px; display: flex; align-items: center;
+         font-size: 29px; font-weight: 700; line-height: 1.42; letter-spacing: -0.3px; word-break: keep-all; }}
+  .cap span {{ display: block; }}
+  .cap.sm {{ font-size: 24px; }} .cap.xs {{ font-size: 20px; line-height: 1.38; }}
+  #dots {{ position: absolute; left: 0; right: 0; top: 1232px; display: flex; justify-content: center; gap: 12px; }}
+  #dots b {{ width: 12px; height: 12px; border-radius: 6px; background: #c9d3ea; display: block; }}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="{total}" data-width="{W}" data-height="{H}">
+  <div id="bg"></div>
+  <div id="top"><div id="face"></div><div id="ttl">{html.escape(title)}<small>조이가 알려 주는 화면 안내</small></div></div>
+  <div id="phone"></div>
+  <div id="win" data-layout-allow-overflow>{layer_html}</div>
+  <div id="kid"></div>
+  <div id="bub"></div>
+  {"".join(caps_html)}
+  <div id="dots">{dots}</div>
+</div>
+<script>
+  window.__timelines = window.__timelines || {{}};
+  const tl = gsap.timeline({{ paused: true }});
+  tl.fromTo("#phone, #win", {{ opacity: 0, y: 40 }}, {{ opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }}, 0);
+  tl.fromTo("#kid", {{ opacity: 0, scale: 0.8 }}, {{ opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }}, 0.25);
+  tl.fromTo("#bub", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.4 }}, 0.45);
+  {chr(10).join("  " + x for x in js)}
+  window.__timelines["main"] = tl;
+</script>
+</body>
+</html>
+"""
+
+
+# 🎬 10/27 「직접 해 보는」 영상: capture 때 실제로 누르고 민 장면들(cap/<폴더>/scenes.json) → 손가락 표시 + 바뀐 화면
+DEMOS = {"d_els_dz": ("els", "demo_els_dz")}
+
+
+def demo_spots():
+    out = {}
+    for nm, (scr, fd) in DEMOS.items():
+        f = f"{CAP}/{fd}/scenes.json"
+        if os.path.exists(f):
+            d = json.load(open(f))
+            out[nm] = {"key": scr + "|" + norm(d["title"]), "title": d["title"], "kind": "demo", "n": len(d["scenes"])}
+    return out
+
+
+def build_demo(name):
+    scr, fd = DEMOS[name]
+    D = json.load(open(f"{CAP}/{fd}/scenes.json"))
+    sc = D["scenes"]
+    sx = PW / D["vw"]
+    pdir = f"{BUILD}/{name}"
+    shutil.rmtree(pdir, ignore_errors=True)
+    os.makedirs(f"{pdir}/assets")
+    pose = POSE.get(scr, "kid_thumb")
+    for f in (f"{pose}.jpg", "kid_wave.jpg", "gsap-3.14.2.min.js"):
+        shutil.copy(f"{ROOT}/assets/{f}", f"{pdir}/assets/{f}")
+    imgs = []
+    for s in sc:
+        for k in ("img", "post"):
+            if s.get(k) and s[k] not in imgs:
+                imgs.append(s[k])
+    for f in imgs:
+        Image.open(f"{CAP}/{fd}/{f}").convert("RGB").resize((PW, PH), Image.LANCZOS).save(f"{pdir}/assets/s{f[:-4]}.jpg", quality=88)
+    lid = {f: j for j, f in enumerate(imgs)}
+    js, caps_html, rings, taps = [], [], [], []
+    t, shown, starts = 0.9, lid[sc[0]["img"]], []
+    total_n = len(sc)
+
+    def show(j, at):
+        nonlocal shown
+        if j == shown:
+            return
+        js.append(f'tl.to("#layer{shown}", {{ opacity: 0, duration: 0.35 }}, {at:.2f});')
+        js.append(f'tl.fromTo("#layer{j}", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.35 }}, {at:.2f});')
+        shown = j
+    for i, s in enumerate(sc):
+        act = 1.5 if (s.get("tap") or s.get("drag")) else 0.0
+        d = round(dur(s["say"]) + act, 2)
+        st = t; starts.append(st)
+        if i == total_n - 1:
+            d = round(d + 1.2, 2)
+        show(lid[s["img"]], max(0, st - 0.35))
+        sz = " xs" if len(s["say"]) > 120 else " sm" if len(s["say"]) > 78 else ""
+        caps_html.append(f'<p id="cap{i}" class="clip cap{sz}" data-start="{st}" data-duration="{d}" data-track-index="{3 + i}"><span>{html.escape(s["say"])}</span></p>')
+        js.append(f'tl.fromTo("#cap{i} span", {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }}, {st + 0.05:.2f});')
+        ring_at = st + 0.45
+        if s.get("tap"):
+            x, y = s["tap"][0] * sx, s["tap"][1] * sx
+            taps.append(f'<div id="tap{i}" class="tap" style="left:{x:.0f}px;top:{y:.0f}px"></div>')
+            js.append(f'tl.fromTo("#tap{i}", {{ opacity: 0, scale: 1.6 }}, {{ opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" }}, {st + 0.5:.2f});')
+            js.append(f'tl.to("#tap{i}", {{ scale: 0.75, duration: 0.15, yoyo: true, repeat: 1 }}, {st + 0.95:.2f});')
+            js.append(f'tl.to("#tap{i}", {{ opacity: 0, duration: 0.3 }}, {st + 1.6:.2f});')
+            if s.get("post"):
+                show(lid[s["post"]], st + 1.15)
+            ring_at = st + 1.6
+        elif s.get("drag"):
+            x0, y, x1 = s["drag"][0] * sx, s["drag"][1] * sx, s["drag"][2] * sx
+            taps.append(f'<div id="tap{i}" class="tap" style="left:{x0:.0f}px;top:{y:.0f}px"></div>')
+            js.append(f'tl.fromTo("#tap{i}", {{ opacity: 0, x: 0 }}, {{ opacity: 1, duration: 0.3 }}, {st + 0.4:.2f});')
+            js.append(f'tl.to("#tap{i}", {{ x: {x1 - x0:.0f}, duration: 0.8, ease: "power1.inOut" }}, {st + 0.75:.2f});')
+            js.append(f'tl.to("#tap{i}", {{ opacity: 0, duration: 0.3 }}, {st + 1.75:.2f});')
+            if s.get("post"):
+                show(lid[s["post"]], st + 1.4)
+            ring_at = st + 1.75
+        c = s.get("ring")
+        if c:
+            rx, ry, rw, rh = (c["x"] - 5) * sx, (c["y"] - 5) * sx, (c["w"] + 10) * sx, (c["h"] + 10) * sx
+            rings.append(f'<div id="ring{i}" class="clip ring" data-start="{ring_at:.2f}" data-duration="{max(st + d - ring_at - 0.1, 0.5):.2f}" data-track-index="{40 + i}" '
+                         f'style="left:{rx:.0f}px;top:{ry:.0f}px;width:{rw:.0f}px;height:{rh:.0f}px"><i></i></div>')
+            js.append(f'tl.fromTo("#ring{i} i", {{ opacity: 0, scale: 1.06 }}, {{ opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" }}, {ring_at:.2f});')
+        t = st + d
+    total = round(t + 0.3, 2)
+    for i, st in enumerate(starts):
+        js.append(f'tl.fromTo("#dot{i}", {{ backgroundColor: "#c9d3ea", scaleX: 1 }}, {{ backgroundColor: "#2f4ea8", scaleX: 2.2, duration: 0.3 }}, {st:.2f});')
+        if i + 1 < len(starts):
+            js.append(f'tl.to("#dot{i}", {{ backgroundColor: "#8ea2d6", scaleX: 1, duration: 0.3 }}, {starts[i + 1]:.2f});')
+    first = lid[sc[0]["img"]]
+    layer_html = "".join(f'<div id="layer{j}" class="layer" style="height:{PH}px;opacity:{1 if j == first else 0}">'
+                         f'<div class="shot" style="height:{PH}px;background-image:url(assets/s{f[:-4]}.jpg);background-size:{PW}px {PH}px"></div></div>'
+                         for j, f in enumerate(imgs)) + "".join(rings) + "".join(taps)
+    dots = "".join(f'<b id="dot{i}"></b>' for i in range(total_n))
+    title = D["title"][:22]
+    doc = page(title, pose, layer_html, caps_html, dots, js, total)
+    open(f"{pdir}/index.html", "w").write(doc)
+    return pdir, total
+
+
 def build(name):
+    if name.startswith("d_"):
+        return build_demo(name)
     kind, key = name.split("_", 1)
     spot = None
     if kind == "c":
@@ -183,67 +348,7 @@ def build(name):
         f'<div class="shot" style="height:{ih[k]}px;background-image:url(assets/{k}.jpg);background-size:{PW}px {ih[k]}px"></div>'
         f'{"".join(layers[k])}</div>' for j, k in enumerate(screens))
 
-    doc = f"""<!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<script src="assets/gsap-3.14.2.min.js"></script>
-<style>
-  @font-face {{ font-family: "KR"; font-weight: 700; src: local("Noto Sans CJK KR Bold"), local("NotoSansCJKkr-Bold"); }}
-  @font-face {{ font-family: "KR"; font-weight: 900; src: local("Noto Sans CJK KR Black"), local("NotoSansCJKkr-Black"); }}
-  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  html, body {{ width: {W}px; height: {H}px; overflow: hidden; background: #eef1f8; }}
-  body {{ font-family: "KR", sans-serif; color: #14203f; }}
-  #root {{ position: absolute; inset: 0; overflow: hidden; }}
-  #bg {{ position: absolute; inset: 0; background: linear-gradient(180deg, #e9eefb 0%, #f5f2ea 100%); }}
-  #top {{ position: absolute; left: 40px; right: 40px; top: 40px; height: 84px; display: flex; align-items: center; gap: 18px; }}
-  #face {{ width: 76px; height: 76px; border-radius: 50%; background: #f3e6d6 url("assets/kid_wave.jpg") center 22% / 140% no-repeat;
-          border: 3px solid #fff; box-shadow: 0 6px 18px rgba(20,32,63,.18); flex: none; }}
-  #ttl {{ font-size: {42 if len(title) <= 9 else 34 if len(title) <= 14 else 27}px; font-weight: 900; letter-spacing: -1px; }}
-  #ttl small {{ display: block; font-size: 21px; font-weight: 700; color: #5b6787; letter-spacing: 0; margin-top: 2px; }}
-  #phone {{ position: absolute; left: {PX - 10}px; top: {PY - 10}px; width: {PW + 20}px; height: {PH + 20}px; border-radius: 46px;
-           background: #14203f; box-shadow: 0 30px 60px rgba(20,32,63,.28); }}
-  #win {{ position: absolute; left: {PX}px; top: {PY}px; width: {PW}px; height: {PH}px; border-radius: 34px; overflow: hidden; background: #fff; }}
-  .layer {{ position: absolute; left: 0; top: 0; width: {PW}px; }}
-  .shot {{ position: absolute; left: 0; top: 0; width: {PW}px; background-repeat: no-repeat; background-position: 0 0; }}
-  .ring {{ position: absolute; }}
-  .ring i {{ position: absolute; inset: 0; border: 5px solid #ff7a1a; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(15,25,55,.22); }}
-  #kid {{ position: absolute; left: 34px; top: 935px; width: 170px; height: 226px; border-radius: 28px; overflow: hidden;
-         background: #f3e6d6 url("assets/{pose}.jpg") center / cover no-repeat; box-shadow: 0 14px 30px rgba(20,32,63,.22); }}
-  #bub {{ position: absolute; left: 222px; right: 30px; top: 925px; height: 290px; border-radius: 30px; background: #fff;
-         box-shadow: 0 14px 30px rgba(20,32,63,.14); }}
-  #bub:before {{ content: ""; position: absolute; left: -16px; top: 70px; border: 16px solid transparent; border-right-color: #fff; border-left: 0; }}
-  .cap {{ position: absolute; left: 248px; right: 54px; top: 950px; height: 240px; display: flex; align-items: center;
-         font-size: 29px; font-weight: 700; line-height: 1.42; letter-spacing: -0.3px; word-break: keep-all; }}
-  .cap span {{ display: block; }}
-  .cap.sm {{ font-size: 24px; }} .cap.xs {{ font-size: 20px; line-height: 1.38; }}
-  #dots {{ position: absolute; left: 0; right: 0; top: 1232px; display: flex; justify-content: center; gap: 12px; }}
-  #dots b {{ width: 12px; height: 12px; border-radius: 6px; background: #c9d3ea; display: block; }}
-</style>
-</head>
-<body>
-<div id="root" data-composition-id="main" data-start="0" data-duration="{total}" data-width="{W}" data-height="{H}">
-  <div id="bg"></div>
-  <div id="top"><div id="face"></div><div id="ttl">{html.escape(title)}<small>조이가 알려 주는 화면 안내</small></div></div>
-  <div id="phone"></div>
-  <div id="win" data-layout-allow-overflow>{layer_html}</div>
-  <div id="kid"></div>
-  <div id="bub"></div>
-  {"".join(caps_html)}
-  <div id="dots">{dots}</div>
-</div>
-<script>
-  window.__timelines = window.__timelines || {{}};
-  const tl = gsap.timeline({{ paused: true }});
-  tl.fromTo("#phone, #win", {{ opacity: 0, y: 40 }}, {{ opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }}, 0);
-  tl.fromTo("#kid", {{ opacity: 0, scale: 0.8 }}, {{ opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }}, 0.25);
-  tl.fromTo("#bub", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.4 }}, 0.45);
-  {chr(10).join("  " + x for x in js)}
-  window.__timelines["main"] = tl;
-</script>
-</body>
-</html>
-"""
+    doc = page(title, pose, layer_html, caps_html, dots, js, total)
     open(f"{pdir}/index.html", "w").write(doc)
     return pdir, total
 
@@ -270,10 +375,11 @@ def render(name):
 if __name__ == "__main__":
     args = sys.argv[1:]
     SV = spot_videos()
-    json.dump({nm: {"key": v[2], "title": v[1]["title"], "kind": v[1]["kind"], "n": len(v[1]["lines"])} for nm, v in SV.items()},
-              open(f"{OUT}/spots.json", "w"), ensure_ascii=False, indent=0)
-    names = [a for a in args if not a.startswith("--")] or (list(VIDEOS) + list(SV))
-    names = [nm for nm in names if nm in SV or all(os.path.exists(f"{CAP}/{k}.json") for k in VIDEOS[nm])]
+    SPJ = {nm: {"key": v[2], "title": v[1]["title"], "kind": v[1]["kind"], "n": len(v[1]["lines"])} for nm, v in SV.items()}
+    DS = demo_spots(); SPJ.update(DS)
+    json.dump(SPJ, open(f"{OUT}/spots.json", "w"), ensure_ascii=False, indent=0)
+    names = [a for a in args if not a.startswith("--")] or (list(VIDEOS) + list(SV) + list(DS))
+    names = [nm for nm in names if nm in SV or nm in DS or all(os.path.exists(f"{CAP}/{k}.json") for k in VIDEOS[nm])]
     if "--build-only" in args:
         for nm in names: print(build(nm))
         sys.exit()
