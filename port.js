@@ -186,6 +186,9 @@
         '<div class="po-scro" id="poscro">' + scrubOut(WB) + '</div></div>' : '') + '</section>';
     if (S.pf === "mine") h += myHtml(MW);   // 🙋 고르는 칸은 성적 바로 아래 (바꾸면 위 숫자가 바로 바뀌는 게 보이게)
     h += cmpH;   // 10/12: 위 바로가기 칩 순서(💼 성적 → 🏁 비교)와 맞춤
+    // 🗣 10/27 A10/27-1 목소리 경주 (voices.js) — 포트 선은 여기서 넘겨 줌(🙋 내 포트는 휴대폰 계산)
+    try { window.__poLines = {dates: P.dates, base: FB && FB.line, mine: FM && FM.line, mineName: FM && FM.t}; } catch(x) {}
+    h += '<div class="sec">🗣 목소리 경주 <small class="mut">누구 말을 따랐어야 했나 · 같은 돈</small></div><section class="card vr-c"><div id="vrace" class="vr-w"><small class="mut">불러오는 중…</small></div></section>';
     h += '<div id="podz"></div>';   // 🎛 10/21 A10/21-1 포트 설계기 (port_design.js)
 
     if (CN && CN.regime) h += concHtml();

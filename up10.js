@@ -370,7 +370,7 @@
   var FOLD = {};
   try { FOLD = JSON.parse(localStorage.getItem("fold") || "{}"); } catch(x) {}
   // 10/21 「결론 → 근거」: 포트 탭 묶음은 처음엔 모두 접힘(맨 위 「부터 성적」이 결론) — 한 번 펼치면 기억
-  var FMAP = [[/시장 .*비교/, "pocmp", "🏁 비교", 0], [/집중 포트/, "poconc", "🎯 집중", 0], [/섹터 의견/, "poviews", "🧭 섹터", 0], [/킥 칸 속/, "pokick", "⚡ 킥", 0], [/이렇게 담으면/, "pofollow", "📋 따라하기", 0], [/비중 바뀐 날/, "potl", "🔁 바뀐 날", 0],
+  var FMAP = [[/시장 .*비교/, "pocmp", "🏁 비교", 0], [/목소리 경주/, "povoice", "🗣 목소리", 0], [/집중 포트/, "poconc", "🎯 집중", 0], [/섹터 의견/, "poviews", "🧭 섹터", 0], [/킥 칸 속/, "pokick", "⚡ 킥", 0], [/이렇게 담으면/, "pofollow", "📋 따라하기", 0], [/비중 바뀐 날/, "potl", "🔁 바뀐 날", 0],
               [/해외 동종주/, "popeers", "🌏 동종주", 0], [/벌고 잃었나/, "poct", "🧩 칸별", 0], [/날짜별/, "podt", "📅 날짜별", 0]];
   window.foldify = function(root){
     if (!root) return;
