@@ -80,6 +80,11 @@ for mk, (ix, etf, fxs, tz, cls) in CFG.items():
                               "+fx": ["anc", "etfx", "fx"], "+nkd+fx": ["anc", "etfx", "nkd", "fx"]}.items():
                 w = logit_fit(tr[cols].values * 100, tr["y"].values); q = lp(w, te[cols].values * 100)
                 r[lab] = round(brier(q, y), 4); r["w_" + lab] = [round(float(v), 3) for v in w]
+            w0 = logit_fit(tr[["anc", "etfx"]].values * 100, tr["y"].values); q0 = lp(w0, te[["anc", "etfx"]].values * 100)
+            L0 = np.log(q0 / (1 - q0))
+            for k in (0.5, 1.0, 1.5):
+                for c in (0.3, 0.6, 1.0):
+                    r[f"k{k}c{c}"] = round(brier(1 / (1 + np.exp(-(L0 + np.clip(k * te["nres"].values * 100, -c, c)))), y), 4)
             res[nm] = r
         OUT[mk] = res
     except Exception as e:
