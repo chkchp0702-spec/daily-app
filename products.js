@@ -361,7 +361,8 @@
       var best = null;
       C.forEach(function(c){ var ft = fitCand(o, c[0]); if (ft && (!best || ft.err < best.ft.err)) best = {c: c, ft: ft}; });
       if (!best || best.ft.err > 10) return;
-      var S = best.c[0], st = !S.nav, b = best.ft.b, z = sAt(S, ANCHOR, st, 4), lastD = S.d[S.d.length - 1], last = S.f[S.f.length - 1];
+      // 10/27 학습: 지수(ix)로 맞춘 추정은 실제보다 2배쯤 크게 움직였음(10/15→22·10/22→27 두 번 다) → 민감도 절반으로. 다른 후보는 그대로
+      var S = best.c[0], st = !S.nav, b = best.ft.b * (best.c[2] === "ix" ? 0.5 : 1), z = sAt(S, ANCHOR, st, 4), lastD = S.d[S.d.length - 1], last = S.f[S.f.length - 1];
       if (!z) return;
       var tf = function(r){ return r == null ? null : Math.round((Math.exp(b * Math.log(1 + r)) - 1) * 10000) / 100; };
       var since = last / z - 1, est = tf(since);
