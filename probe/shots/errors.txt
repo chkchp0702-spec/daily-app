@@ -7,4 +7,8 @@ port_note: 안 보임
 port_fold: 꼬마 뜸
 port_tip: 안 보임
 whale_card: 안 보임
+accum_card: Page.click: Element is not visible
+Call log:
+  - waiting for locator("h3.tt-h .g
+home_kid: vid/c_home_1.mp4?v=3 (재생)
 오류: 없음
