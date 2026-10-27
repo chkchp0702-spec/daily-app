@@ -1,5 +1,6 @@
-// 자동 생성(explain/vidmap.py) — 조이 설명 영상 목록: 「화면|제목키」 → vid/<파일>.mp4  (37개)
+// 자동 생성(explain/vidmap.py) — 조이 설명 영상 목록: 「화면|제목키」 → vid/<파일>.mp4  (38개)
 window.VIDC = {
+"els|🎛els내맘대로설계기": "d_els_dz",
 "home|숫자로자세히": "c_home_1",
 "market|✅오늘할일": "c_market_1",
 "prob|🎲다음장오를확률": "c_prob_1",
