@@ -1,111 +1,107 @@
 {
- "at": "2026-10-26 23:34",
+ "at": "2026-10-27 16:25",
  "ok": false,
  "problems": [
-  "피드 0개·실패: 인베스팅닷컴 뉴스",
-  "작업 실패: daily-app/explain (10-26T13:58 failure)"
+  "작업 실패: daily-app/opmedia (10-26T18:44 failure)"
  ],
  "data": [
   {
    "name": "💼 포트",
    "ok": true,
-   "age_h": 0.2,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "⚡ 킥",
    "ok": true,
-   "age_h": 0.2,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 0.2,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 0.2,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "🌏 동종주",
    "ok": true,
-   "age_h": 0.2,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 15.3,
+   "age_h": 8.1,
    "lim": 30
   },
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.3,
-   "lim": 1.5,
-   "zero": [
-    "인베스팅닷컴 뉴스"
-   ]
+   "age_h": 0.2,
+   "lim": 1.5
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 1.0,
+   "age_h": 0.8,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 8.5,
+   "age_h": 1.3,
    "lim": 30
   },
   {
    "name": "📱 앱 목록",
    "ok": true,
-   "age_h": 0.1,
+   "age_h": 0.6,
    "lim": 30
   },
   {
    "name": "🎲 시장확률",
    "ok": true,
-   "age_h": 0.3,
+   "age_h": 0.2,
    "lim": 2
   },
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 0.2,
+   "age_h": 0.0,
    "lim": 12
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 0.7,
-   "cards": 4,
-   "len": 1136,
+   "s": 0.6,
+   "cards": 3,
+   "len": 1106,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "market",
-   "s": 0.4,
+   "s": 0.6,
    "cards": 29,
-   "len": 1564,
+   "len": 1645,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "port",
-   "s": 0.3,
-   "cards": 13,
-   "len": 740,
+   "s": 0.2,
+   "cards": 14,
+   "len": 780,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -114,16 +110,16 @@
    "tab": "score",
    "s": 0.3,
    "cards": 10,
-   "len": 2729,
+   "len": 2680,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "whale",
-   "s": 0.6,
+   "s": 0.5,
    "cards": 21,
-   "len": 1329,
+   "len": 1314,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -131,26 +127,26 @@
   {
    "tab": "cup",
    "s": 0.5,
-   "cards": 12,
-   "len": 3412,
+   "cards": 11,
+   "len": 3328,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "gap",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 16,
-   "len": 2484,
+   "len": 2497,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "sector",
-   "s": 0.4,
-   "cards": 39,
-   "len": 3015,
+   "s": 0.8,
+   "cards": 40,
+   "len": 3448,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -159,25 +155,25 @@
    "tab": "accum",
    "s": 0.4,
    "cards": 11,
-   "len": 1099,
+   "len": 1046,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "onepager",
-   "s": 0.2,
+   "s": 0.5,
    "cards": 1,
-   "len": 276,
+   "len": 280,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "danta",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 12,
-   "len": 1578,
+   "len": 2042,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -202,9 +198,9 @@
   },
   {
    "tab": "feed",
-   "s": 0.3,
+   "s": 0.4,
    "cards": 1,
-   "len": 6691,
+   "len": 4988,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -271,25 +267,25 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-26T14:34"
+   "when": "2026-10-27T07:24"
   },
   {
    "repo": "daily-app",
    "job": "collect",
    "ok": true,
-   "when": "2026-10-26T14:30"
+   "when": "2026-10-27T06:48"
   },
   {
    "repo": "daily-app",
    "job": "opdb",
    "ok": true,
-   "when": "2026-10-25T16:12"
+   "when": "2026-10-26T18:40"
   },
   {
    "repo": "daily-app",
    "job": "opprice",
    "ok": true,
-   "when": "2026-10-26T07:20"
+   "when": "2026-10-27T01:36"
   },
   {
    "repo": "daily-app",
@@ -301,13 +297,13 @@
    "repo": "daily-app",
    "job": "opest",
    "ok": true,
-   "when": "2026-10-25T19:57"
+   "when": "2026-10-26T21:51"
   },
   {
    "repo": "daily-app",
    "job": "opnews",
    "ok": true,
-   "when": "2026-10-25T18:25"
+   "when": "2026-10-26T20:32"
   },
   {
    "repo": "daily-app",
@@ -319,55 +315,55 @@
    "repo": "daily-app",
    "job": "opfix",
    "ok": true,
-   "when": "2026-10-25T18:34"
+   "when": "2026-10-26T20:46"
   },
   {
    "repo": "daily-app",
    "job": "opmedia",
-   "ok": true,
-   "when": "2026-10-25T16:36"
+   "ok": false,
+   "when": "2026-10-26T18:44"
   },
   {
    "repo": "daily-app",
    "job": "watch",
    "ok": true,
-   "when": "2026-10-26T13:47"
+   "when": "2026-10-27T06:35"
   },
   {
    "repo": "daily-app",
    "job": "live",
    "ok": true,
-   "when": "2026-10-26T14:33"
+   "when": "2026-10-27T07:23"
   },
   {
    "repo": "daily-app",
    "job": "regime",
    "ok": true,
-   "when": "2026-10-26T08:10"
+   "when": "2026-10-27T00:51"
   },
   {
    "repo": "daily-app",
    "job": "keeper",
    "ok": true,
-   "when": "2026-10-26T14:06"
+   "when": "2026-10-27T06:03"
   },
   {
    "repo": "daily-app",
    "job": "feedback",
    "ok": true,
-   "when": "2026-10-26T14:12"
+   "when": "2026-10-27T07:12"
   },
   {
    "repo": "daily-app",
    "job": "oppdf",
    "ok": true,
-   "when": "2026-10-26T07:02"
+   "when": "2026-10-27T05:38"
   },
   {
    "repo": "daily-app",
    "job": "oppdf-all",
    "ok": true,
-   "when": "2026-10-25T18:21"
+   "when": "2026-10-26T20:26"
   },
   {
    "repo": "daily-app",
@@ -379,61 +375,61 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-26T08:12"
+   "when": "2026-10-26T14:25"
   },
   {
    "repo": "daily-app",
    "job": "uspre",
    "ok": true,
-   "when": "2026-10-26T10:26"
+   "when": "2026-10-27T04:48"
   },
   {
    "repo": "daily-app",
    "job": "prob",
    "ok": true,
-   "when": "2026-10-26T14:14"
+   "when": "2026-10-27T07:15"
   },
   {
    "repo": "daily-app",
    "job": "prob_sec",
    "ok": true,
-   "when": "2026-10-26T14:19"
+   "when": "2026-10-27T07:22"
   },
   {
    "repo": "daily-app",
    "job": "products",
    "ok": true,
-   "when": "2026-10-26T12:49"
+   "when": "2026-10-27T05:38"
   },
   {
    "repo": "daily-app",
    "job": "pv_hold",
    "ok": true,
-   "when": "2026-10-25T23:33"
+   "when": "2026-10-27T00:50"
   },
   {
    "repo": "daily-app",
    "job": "els_dart",
    "ok": true,
-   "when": "2026-10-26T11:45"
+   "when": "2026-10-27T02:09"
   },
   {
    "repo": "daily-app",
    "job": "fillcheck",
    "ok": true,
-   "when": "2026-10-25T23:09"
+   "when": "2026-10-27T00:21"
   },
   {
    "repo": "daily-app",
    "job": "brl_live",
    "ok": true,
-   "when": "2026-10-26T07:50"
+   "when": "2026-10-27T02:51"
   },
   {
    "repo": "daily-app",
    "job": "shot",
    "ok": true,
-   "when": "2026-10-26T08:07"
+   "when": "2026-10-27T01:48"
   },
   {
    "repo": "daily-app",
@@ -450,8 +446,8 @@
   {
    "repo": "daily-app",
    "job": "explain",
-   "ok": false,
-   "when": "2026-10-26T13:58"
+   "ok": true,
+   "when": "2026-10-27T04:20"
   },
   {
    "repo": "market-strategy-report",
@@ -463,7 +459,7 @@
    "repo": "market-strategy-report",
    "job": "build-report",
    "ok": true,
-   "when": "2026-10-26T08:12"
+   "when": "2026-10-27T02:21"
   },
   {
    "repo": "market-strategy-report",
@@ -481,19 +477,19 @@
    "repo": "market-strategy-report",
    "job": "feed-score",
    "ok": true,
-   "when": "2026-10-26T14:07"
+   "when": "2026-10-27T02:21"
   },
   {
    "repo": "market-strategy-report",
    "job": "my-feed",
    "ok": true,
-   "when": "2026-10-25T23:30"
+   "when": "2026-10-26T20:43"
   },
   {
    "repo": "market-strategy-report",
    "job": "fetch-market",
    "ok": true,
-   "when": "2026-10-26T14:20"
+   "when": "2026-10-27T06:41"
   },
   {
    "repo": "market-strategy-report",
@@ -505,19 +501,19 @@
    "repo": "market-strategy-report",
    "job": "kick-ideas-live",
    "ok": true,
-   "when": "2026-10-24T00:48"
+   "when": "2026-10-27T01:31"
   },
   {
    "repo": "market-strategy-report",
    "job": "lab",
    "ok": true,
-   "when": "2026-10-26T01:31"
+   "when": "2026-10-26T14:44"
   },
   {
    "repo": "market-strategy-report",
    "job": "q16-live",
    "ok": true,
-   "when": "2026-10-24T00:48"
+   "when": "2026-10-27T01:31"
   },
   {
    "repo": "market-strategy-report",
@@ -535,7 +531,7 @@
    "repo": "market-strategy-report",
    "job": "sentiment",
    "ok": true,
-   "when": "2026-10-26T14:11"
+   "when": "2026-10-27T01:30"
   },
   {
    "repo": "market-strategy-report",
@@ -547,7 +543,7 @@
    "repo": "market-strategy-report",
    "job": "skew-shadow",
    "ok": true,
-   "when": "2026-10-24T00:59"
+   "when": "2026-10-27T01:35"
   },
   {
    "repo": "market-strategy-report",
@@ -565,19 +561,19 @@
    "repo": "stock-screener",
    "job": "daily-briefing",
    "ok": true,
-   "when": "2026-10-26T01:14"
+   "when": "2026-10-27T02:07"
   },
   {
    "repo": "stock-screener",
    "job": "premarket",
    "ok": true,
-   "when": "2026-10-26T01:48"
+   "when": "2026-10-27T02:27"
   },
   {
    "repo": "stock-screener",
    "job": "push-relay",
    "ok": true,
-   "when": "2026-10-26T04:54"
+   "when": "2026-10-27T00:30"
   },
   {
    "repo": "stock-screener",
@@ -589,31 +585,31 @@
    "repo": "stock-screener",
    "job": "screener",
    "ok": true,
-   "when": "2026-10-26T08:41"
+   "when": "2026-10-27T03:02"
   },
   {
    "repo": "stock-screener",
    "job": "universe",
    "ok": true,
-   "when": "2026-10-26T01:07"
+   "when": "2026-10-27T02:01"
   },
   {
    "repo": "Cup",
    "job": "컵앤핸들 스캔 v2",
    "ok": true,
-   "when": "2026-10-25T23:20"
+   "when": "2026-10-27T00:34"
   },
   {
    "repo": "Gap",
    "job": "갭 돌파 스캔 v2",
    "ok": true,
-   "when": "2026-10-25T23:20"
+   "when": "2026-10-27T00:34"
   },
   {
    "repo": "whale40",
    "job": "whale40 daily",
    "ok": true,
-   "when": "2026-10-26T04:41"
+   "when": "2026-10-27T04:58"
   },
   {
    "repo": "whale40",
@@ -631,8 +627,7 @@
   "10/23 📊 성적표 킥 줄 「S&P −0.00%」 → 「+0.00%」 (파이썬 −0.0 표시)",
   "10/22 🏗 build-report: 아침 세션이 이미 PDF·장부를 올린 날은 CI 가 리포트를 다시 만들지 않음(",
   "10/22 🧺 pv_hold: DART 첫 화면 열기 3번까지 다시(load→domcontentloaded·검색칸 생길",
-  "10/21 🩺 건강검진 홈 클릭 검사 3개를 오늘 정리된 홈 칸(킥 숫자·📊 성적표 링크·종목 이름)에 맞춤 · 탭 열",
-  "10/20 📰 피드·🧠 두뇌 「지금 생각」 줄의 긴 글(주소 등)이 390px 화면 오른쪽 밖으로 나가던 것 고침(br"
+  "10/21 🩺 건강검진 홈 클릭 검사 3개를 오늘 정리된 홈 칸(킥 숫자·📊 성적표 링크·종목 이름)에 맞춤 · 탭 열"
  ],
  "note": "매일 16:30 자동 검사. 「자가 업그레이드」(16:47)가 problems 를 먼저 고친다."
 }
