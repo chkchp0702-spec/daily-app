@@ -290,27 +290,27 @@
     ".tz-rank{margin-top:10px;font-size:13px;background:rgba(0,0,0,.18);border-radius:12px;padding:7px 11px;display:inline-block}.tz-rank b{font-weight:900}" +
     ".tz-say{margin-top:10px;background:rgba(255,255,255,.95);color:#1d2433;border-radius:16px 16px 16px 4px;padding:10px 13px;font-size:15px;line-height:1.45;box-shadow:0 4px 14px rgba(0,0,0,.12)}.tz-say b{font-weight:800}.tz-say small{display:block;color:#5d667a;font-size:12.5px;margin-top:3px}" +
     ".tz-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.tz-mini div{background:rgba(255,255,255,.14);border-radius:14px;padding:8px 10px;min-width:0}" +
-    ".tz-mini small{display:block;font-size:11.5px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tz-mini b{display:block;font-size:20px;font-weight:900;color:#fff!important;font-variant-numeric:tabular-nums;letter-spacing:-.5px}.tz-mini em{font-style:normal;font-size:11px;opacity:.8}" +
+    ".tz-mini small{display:block;font-size:12.5px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tz-mini b{display:block;font-size:20px;font-weight:900;color:#fff!important;font-variant-numeric:tabular-nums;letter-spacing:-.5px}.tz-mini em{font-style:normal;font-size:12.5px;opacity:.8}" +
     ".tz-bdg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.tz-bdg span{background:rgba(255,255,255,.95);color:#1d2433;border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.12);animation:tdPop .5s cubic-bezier(.2,1.6,.4,1) both}" +
     ".tz-bdg span:nth-child(2){animation-delay:.12s}.tz-bdg span:nth-child(3){animation-delay:.24s}@keyframes tdPop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}" +
-    ".tz-hint{margin-top:9px;font-size:11.5px;opacity:.75;text-align:right}" +
+    ".tz-hint{margin-top:9px;font-size:12.5px;opacity:.75;text-align:right}" +
     // ④ 세 컷
-    ".tz-ch b{display:block;font-size:16px;font-weight:800}.tz-ch small{color:var(--sub);font-size:12px}" +
-    ".tz-now{margin:8px 0 4px;padding:9px 11px;border-radius:12px;background:rgba(255,80,80,.10);border:1px solid rgba(255,80,80,.35);font-size:14px;font-weight:700;line-height:1.45}.tz-now b{font-size:16px}.tz-now small{display:block;font-weight:500;opacity:.75;font-size:12px;margin-top:2px}" +
+    ".tz-ch b{display:block;font-size:16px;font-weight:800}.tz-ch small{color:var(--sub);font-size:12.5px}" +
+    ".tz-now{margin:8px 0 4px;padding:9px 11px;border-radius:12px;background:rgba(255,80,80,.10);border:1px solid rgba(255,80,80,.35);font-size:14px;font-weight:700;line-height:1.45}.tz-now b{font-size:16px}.tz-now small{display:block;font-weight:500;opacity:.75;font-size:12.5px;margin-top:2px}" +
     ".tz-comic{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 6px}" +
     ".tz-pan{border:2px solid var(--text);border-radius:14px;overflow:hidden;background:var(--panel2);display:flex;flex-direction:column;animation:tdPop .45s both}.tz-pan:nth-child(2){animation-delay:.15s}.tz-pan:nth-child(3){animation-delay:.3s}" +
     ".tz-pk{height:92px;background:#f3e6d6 center 12%/cover no-repeat;border-bottom:2px solid var(--text)}" +
-    ".tz-pt{padding:7px 8px 9px;min-width:0}.tz-pt small{display:block;font-size:11px;color:var(--sub);line-height:1.3}.tz-pt b{display:block;font-size:clamp(15px,4.6vw,19px);font-weight:900;letter-spacing:-.6px;margin:2px 0;white-space:nowrap}.tz-pt em{display:block;font-style:normal;font-size:10.5px;color:var(--sub);line-height:1.3}" +
+    ".tz-pt{padding:7px 8px 9px;min-width:0}.tz-pt small{display:block;font-size:12.5px;color:var(--sub);line-height:1.3}.tz-pt b{display:block;font-size:clamp(15px,4.6vw,19px);font-weight:900;letter-spacing:-.6px;margin:2px 0;white-space:nowrap}.tz-pt em{display:block;font-style:normal;font-size:12.5px;color:var(--sub);line-height:1.3}" +
     ".tz-raw summary{font-size:12.5px;color:var(--sub);text-decoration:underline;cursor:pointer;list-style:none;margin-top:4px}.tz-raw summary::-webkit-details-marker{display:none}" +
     // ⑤ 경주
     ".tz-race{margin:10px 0 4px;padding:10px 12px;border-radius:16px;background:var(--panel2)}" +
     ".tz-rh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;margin-bottom:6px}.tz-rh b{font-weight:800}.tz-rh span{font-weight:800}" +
-    ".tz-ln{display:grid;grid-template-columns:62px 1fr 64px;align-items:center;gap:8px;margin:7px 0}.tz-lb{font-size:12px;color:var(--sub);white-space:nowrap}.tz-ln>b{text-align:right;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}" +
+    ".tz-ln{display:grid;grid-template-columns:62px 1fr 64px;align-items:center;gap:8px;margin:7px 0}.tz-lb{font-size:12.5px;color:var(--sub);white-space:nowrap}.tz-ln>b{text-align:right;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}" +
     ".tz-tk{position:relative;height:14px;border-radius:999px;background:repeating-linear-gradient(90deg,var(--line) 0 6px,transparent 6px 12px);}" +
     ".tz-z{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--sub);opacity:.6;border-radius:2px}" +
-    ".tz-rn{position:absolute;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:var(--c);box-shadow:0 0 0 3px var(--panel2),0 2px 6px rgba(0,0,0,.25);transition:left 1.1s cubic-bezier(.2,.9,.25,1);font-style:normal;font-size:12px;line-height:18px;text-align:center}" +
+    ".tz-rn{position:absolute;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:var(--c);box-shadow:0 0 0 3px var(--panel2),0 2px 6px rgba(0,0,0,.25);transition:left 1.1s cubic-bezier(.2,.9,.25,1);font-style:normal;font-size:12.5px;line-height:18px;text-align:center}" +
     ".tz-rn:empty{font-size:0}.tz-rn:not(:empty){width:22px;height:22px;margin:-11px 0 0 -11px;line-height:22px;background:#fff;box-shadow:0 0 0 3px var(--c),0 2px 6px rgba(0,0,0,.25)}" +
-    ".tz-dw{margin-top:8px}.tz-dw small{font-size:12px;color:var(--sub)}.tz-dw small b{color:var(--text)}.tz-dw div{display:flex;gap:3px;margin-top:4px}.tz-dw i{flex:1;height:10px;border-radius:3px;background:#3987e5;opacity:.75}.tz-dw i.w{background:#e66767;opacity:1}" +
+    ".tz-dw{margin-top:8px}.tz-dw small{font-size:12.5px;color:var(--sub)}.tz-dw small b{color:var(--text)}.tz-dw div{display:flex;gap:3px;margin-top:4px}.tz-dw i{flex:1;height:10px;border-radius:3px;background:#3987e5;opacity:.75}.tz-dw i.w{background:#e66767;opacity:1}" +
     ".tz-tg{margin-top:6px;border:0;background:none;color:var(--sub);font:inherit;font-size:12.5px;text-decoration:underline;cursor:pointer;padding:2px 0}.hm-sp.tzx-hide{display:none}" +
     // ⑥ 타임라인
     ".hm-chg.tz-tl .hm-chi{position:relative;padding-left:4px;border-top:0!important}" +

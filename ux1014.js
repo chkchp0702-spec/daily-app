@@ -102,21 +102,21 @@
   st.textContent =
     /* A10-4 맨 위 띠 */
     ".hero2.mk-strip{padding:10px 14px;border-radius:14px;margin:0 0 10px}" +
-    ".mk-strip .hero2-k{font-size:11px;margin-bottom:3px}.mk-strip .hero2-k span{color:var(--dim,#8a94a8)}" +
+    ".mk-strip .hero2-k{font-size:12.5px;margin-bottom:3px}.mk-strip .hero2-k span{color:var(--dim,#8a94a8)}" +
     ".mk-strip .hero2-t{font-size:14.5px;line-height:1.5;font-weight:700}" +
     /* A10-1 지금 → */
-    ".kpis2 .kp .kp-now{display:block;font-size:11.5px;line-height:1.4;margin:4px 0 2px;color:var(--sub)}.kpis2 .kp .kp-now b,.kpis2 .kp .kp-now span{display:inline;font-size:inherit;font-weight:700;margin:0;padding:0;font-variant-numeric:tabular-nums}.kpis2 .kp .kp-now span.mut{font-weight:500}" +
+    ".kpis2 .kp .kp-now{display:block;font-size:12.5px;line-height:1.4;margin:4px 0 2px;color:var(--sub)}.kpis2 .kp .kp-now b,.kpis2 .kp .kp-now span{display:inline;font-size:inherit;font-weight:700;margin:0;padding:0;font-variant-numeric:tabular-nums}.kpis2 .kp .kp-now span.mut{font-weight:500}" +
     /* A10-2 칩 */
     ".mk-thr{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:5px;align-items:center;margin:0 -16px 9px;padding:0 16px}.mk-thr::-webkit-scrollbar{display:none}" +
-    ".mk-thr-k{flex:0 0 auto;white-space:nowrap;font-size:11px;color:var(--sub);font-weight:700;margin-right:2px}" +
-    ".mk-thr button{flex:0 0 auto;white-space:nowrap;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:3px 9px;font:inherit;font-size:11.5px;cursor:pointer;-webkit-tap-highlight-color:transparent}" +
-    ".mk-thr button b{color:#ff8a6a}.mk-thr button small{color:var(--dim,#8a94a8);font-size:10px}" +
+    ".mk-thr-k{flex:0 0 auto;white-space:nowrap;font-size:12.5px;color:var(--sub);font-weight:700;margin-right:2px}" +
+    ".mk-thr button{flex:0 0 auto;white-space:nowrap;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:3px 9px;font:inherit;font-size:12.5px;cursor:pointer;-webkit-tap-highlight-color:transparent}" +
+    ".mk-thr button b{color:#ff8a6a}.mk-thr button small{color:var(--dim,#8a94a8);font-size:12.5px}" +
     ".mk-thr button.nw{border-color:color-mix(in srgb,#24c08a 55%,var(--line));}" +
     /* A10-5 스위치: 목차 줄 오른쪽 끝에 붙어 있음 */
     ".mk-toc{overflow:visible!important;align-items:center}" +
     ".mk-tsc{display:flex;gap:5px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 22px),transparent);padding-right:14px}.mk-tsc::-webkit-scrollbar{display:none}" +
     ".mk-toc .mk-full{position:static;margin-left:4px;flex:0 0 auto;background:var(--panel)}" +
-    ".mk-toc .mk-full small{font-size:10px;color:var(--dim,#8a94a8);font-weight:600}.mk-toc .mk-full.on{border-color:var(--c)}";
+    ".mk-toc .mk-full small{font-size:12.5px;color:var(--dim,#8a94a8);font-weight:600}.mk-toc .mk-full.on{border-color:var(--c)}";
   document.head.appendChild(st);
 })();
 

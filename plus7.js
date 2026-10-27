@@ -130,7 +130,7 @@
       return;
     }
     if (!adminBox.shown){ box.innerHTML = ""; return; }
-    box.innerHTML = '<details class="id-adm" open><summary>🔐 운영자</summary><div class="id-adm-b"><input id="idpw" type="password" placeholder="운영자 비밀번호" autocomplete="current-password"><button class="btn" id="idpwb">열기</button></div><small id="idpwst" class="mut"></small></details>';
+    box.innerHTML = '<details class="id-adm" open><summary>🔐 운영자</summary><div class="id-adm-b"><input aria-label="운영자 비밀번호" id="idpw" type="password" placeholder="운영자 비밀번호" autocomplete="current-password"><button class="btn" id="idpwb">열기</button></div><small id="idpwst" class="mut"></small></details>';
     $("idpwb").onclick = function(){
       var pw = ($("idpw").value || "").trim(); if (!pw) return;
       $("idpwst").textContent = "확인 중…";
@@ -139,7 +139,7 @@
   }
   window.ideaView = function(){
     return '<section class="card id-form"><h3>✍️ 의견 남기기</h3>' +
-      '<label>이름<input id="idname" maxlength="40" placeholder="이름 또는 닉네임 (비워도 돼요)" value="' + e(store.idname || "") + '"></label>' +
+      '<label>이름<input aria-label="이름 또는 닉네임" id="idname" maxlength="40" placeholder="이름 또는 닉네임 (비워도 돼요)" value="' + e(store.idname || "") + '"></label>' +
       '<label>건의 내용<textarea id="idtext" rows="6" maxlength="4000" placeholder="앱에서 바뀌었으면 하는 점, 추가했으면 하는 기능, 오류 등 자유롭게"></textarea></label>' +
       '<div class="id-pick"><label class="btn" for="idfile">📎 사진·파일 첨부</label><input id="idfile" type="file" multiple accept="image/*,application/pdf,.pdf,.xlsx,.xls,.csv,.txt,.docx,.pptx,.zip"><small class="mut">최대 ' + MAXF + '개 · 사진은 자동으로 줄여서 보내요</small></div>' +
       '<div id="idfiles" class="id-files"></div>' +

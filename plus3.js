@@ -257,11 +257,11 @@
   (function(){ var st_ = document.createElement("style"); st_.textContent =
     ".lv5{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:2px 0 10px}" +
     ".lv5c{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:var(--panel2,var(--panel));color:var(--text);border-radius:10px;padding:6px 5px;font:inherit;cursor:pointer;min-width:0}" +
-    ".lv5c b{font-size:12px}.lv5c.on{outline:2px solid var(--acc,#7c9cff)}.lv5c.off{opacity:.5}.lv5c b{font-size:12px;white-space:nowrap}.lv5c small{font-size:10.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}" +
-    ".lv5s{font-size:10.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.lv5s i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px;vertical-align:0}" +
+    ".lv5c b{font-size:12.5px}.lv5c.on{outline:2px solid var(--acc,#7c9cff)}.lv5c.off{opacity:.5}.lv5c b{font-size:12.5px;white-space:nowrap}.lv5c small{font-size:12.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}" +
+    ".lv5s{font-size:12.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.lv5s i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px;vertical-align:0}" +
     ".lv5b{display:block;width:100%;height:5px;border-radius:3px;background:rgba(124,156,255,.35);overflow:hidden}.lv5b i{display:block;height:100%;background:#e66767}" +
     ".lvhd{margin:2px 0 4px;font-size:14px}.lvoff{margin:2px 0 6px}" +
-    ".pre-tone{font-size:16px;font-weight:700;margin:4px 2px 8px}.pre-tone .mut{font-size:11.5px;font-weight:400}" +
+    ".pre-tone{font-size:16px;font-weight:700;margin:4px 2px 8px}.pre-tone .mut{font-size:12.5px;font-weight:400}" +
     ".pdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4dd47a;margin-right:4px}" +
     ".pre-old{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}.pre-old summary{cursor:pointer;color:var(--sub);font-size:13px}";
     document.head.appendChild(st_); })();
@@ -273,7 +273,7 @@
     navPush({t: "go", key: cur, id: curDate});
     closeSheet();
     var sh = document.createElement("div"); sh.id = "sheet";
-    sh.innerHTML = '<div class="sh-top"><button class="sh-x" onclick="goBack()">✕</button><b>' + title + '</b></div><div class="sh-body"><div class="loading">불러오는 중…</div></div>';
+    sh.innerHTML = '<div class="sh-top"><button aria-label="닫기" class="sh-x" onclick="goBack()">✕</button><b>' + title + '</b></div><div class="sh-body"><div class="loading">불러오는 중…</div></div>';
     document.body.appendChild(sh); document.body.classList.add("sheet-open"); updBack();
     return sh.querySelector(".sh-body");
   }

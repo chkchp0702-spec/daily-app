@@ -197,7 +197,7 @@
       }
       h += '<div id="bt"></div>' + sec("알람 " + rows.length + "건");
       var qn = rows.filter(function(x){ return x.sent === false; }).length;
-      if (qn) h += '<div class="note mut" style="margin:4px 0 8px;font-size:12px">🙋 자신 있는 알람만 알림으로 가요 — 오늘 ' + qn + '건은 증거가 모자라 기록만 했어요(📝). 성적이 쌓여 이기는 자리로 확인되면 저절로 알림이 켜져요.</div>';
+      if (qn) h += '<div class="note mut" style="margin:4px 0 8px;font-size:12.5px">🙋 자신 있는 알람만 알림으로 가요 — 오늘 ' + qn + '건은 증거가 모자라 기록만 했어요(📝). 성적이 쌓여 이기는 자리로 확인되면 저절로 알림이 켜져요.</div>';
       if (!rows.length) h += '<div class="empty"><div class="big">⚡</div>오늘은 아직 알람이 없어요.<br><small class="mut">텔레그램으로 알람이 오면 1~5분 안에 여기에도 떠요. 새로고침 해보세요.</small></div>';
       h += '<div class="list">' + rows.map(function(x){
         var ex = x.exit ? chip(e(x.exit), /손절|이탈/.test(x.exit) ? "cool" : "hot") : "";
@@ -281,7 +281,7 @@
       var ST = sg.state || {}, stCls = {"매수 검토": "hot", "접근": "c", "보유 점검": "cool"};
       if (tops.length) h += card("오늘의 고래 TOP 10 <span class='mut'>점수 · 상태</span>", V.hbars(tops.map(function(t, i){
         var st = ST[t[0]];
-        return {label: '<span class="rk">' + (i + 1) + '</span>' + e(t[0]) + (st && st !== "관찰" ? ' <span class="chip2 ' + (stCls[st] || "") + '" style="font-size:10px;padding:1px 6px">' + e(st) + '</span>' : ''),
+        return {label: '<span class="rk">' + (i + 1) + '</span>' + e(t[0]) + (st && st !== "관찰" ? ' <span class="chip2 ' + (stCls[st] || "") + '" style="font-size:12.5px;padding:1px 6px">' + e(st) + '</span>' : ''),
                 v: t[1], text: t[1], attr: ' onclick="openOP(\'' + e(t[0]) + '\')"', tip: "<b>" + e(t[0]) + "</b> 점수 " + t[1] + (st ? " · " + e(st) : "") + "<br>누르면 종목리포트"}; }), {color: "#199e70"}) +
         '<p class="note">상태: 관찰 → 접근(고래 평단 근처) → <b>매수 검토</b>(여러 신호가 겹침)</p>');
       // 신호 묶음 — 📱 A12-2 (10/15): 종목 한 번만 + 묶음 배지 여러 개, 겹친 수 많은 순

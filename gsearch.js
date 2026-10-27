@@ -7,7 +7,7 @@
   function open(){
     if (document.getElementById("gsq")) return;
     var o = document.createElement("div"); o.id = "gsq";
-    o.innerHTML = '<div class="gs-box"><div class="gs-row"><input id="gsin" type="search" placeholder="종목명·코드 (예: 삼성전자, 엔비디아, 005930, TSLA)" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="gs-x" aria-label="닫기">✕</button></div>' +
+    o.innerHTML = '<div class="gs-box"><div class="gs-row"><input aria-label="종목명·코드" id="gsin" type="search" placeholder="종목명·코드 (예: 삼성전자, 엔비디아, 005930, TSLA)" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="gs-x" aria-label="닫기">✕</button></div>' +
       '<div id="gsres" class="gs-res"><div class="gs-hint">종목 목록 불러오는 중…</div></div></div>';
     document.body.appendChild(o); document.body.classList.add("gs-open");
     o.addEventListener("click", function(ev){ if (ev.target === o) close(); });
@@ -53,7 +53,7 @@
     "#gsin{flex:1;min-width:0;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;font-size:16px}" +
     ".gs-x{border:0;background:none;color:var(--sub);font-size:18px;padding:0 6px;cursor:pointer}" +
     ".gs-res{max-height:65vh;overflow-y:auto}.gs-res button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);padding:11px 14px;font:inherit;font-size:15px;cursor:pointer}" +
-    ".gs-res button:active{background:var(--panel2)}.gs-res small{display:block;color:var(--sub);font-size:12px;margin-top:1px}" +
-    ".gs-etf{font-size:10.5px;background:#5ac8fa;color:#111;border-radius:5px;padding:0 5px;font-weight:800}.gs-hint{padding:14px;color:var(--sub);font-size:13.5px}";
+    ".gs-res button:active{background:var(--panel2)}.gs-res small{display:block;color:var(--sub);font-size:12.5px;margin-top:1px}" +
+    ".gs-etf{font-size:12.5px;background:#5ac8fa;color:#111;border-radius:5px;padding:0 5px;font-weight:800}.gs-hint{padding:14px;color:var(--sub);font-size:13.5px}";
   document.head.appendChild(css);
 })();

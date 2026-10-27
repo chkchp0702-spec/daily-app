@@ -178,11 +178,11 @@
   var st = document.createElement("style");
   st.textContent = [
     // ② 접힌 카드
-    ".card.cz{position:relative}.cz-h{display:none}.cz-f{display:block;margin:10px auto 0;background:none;border:0;color:var(--sub);font-size:12px;padding:4px 10px;cursor:pointer}",
+    ".card.cz{position:relative}.cz-h{display:none}.cz-f{display:block;margin:10px auto 0;background:none;border:0;color:var(--sub);font-size:12.5px;padding:4px 10px;cursor:pointer}",
     ".cz.cz-on{padding:12px 14px!important;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:16px;margin-bottom:12px}.cz.cz-on>*{display:none!important}.cz.cz-on>.cz-h{display:flex!important}",
-    ".cz-h{align-items:center;gap:8px;font-weight:700;font-size:14.5px;line-height:1.35}.cz-h span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cz-h i{flex:none;font-style:normal;font-weight:400;font-size:12px;color:var(--sub)}",
+    ".cz-h{align-items:center;gap:8px;font-weight:700;font-size:14.5px;line-height:1.35}.cz-h span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cz-h i{flex:none;font-style:normal;font-weight:400;font-size:12.5px;color:var(--sub)}",
     // 포트 탭 묶음(.fold)이 다른 「.fold」 단추 모양을 물려받아 상자 안 상자로 보이던 것 정리
-    ".cz-st{float:right;font-style:normal;font-weight:400;font-size:12px;color:var(--sub);margin-left:8px}",
+    ".cz-st{float:right;font-style:normal;font-weight:400;font-size:12.5px;color:var(--sub);margin-left:8px}",
     "#pobody>.fold{padding:0;border:0;background:none;margin:0 0 8px}#pobody>.fold.open{margin-bottom:14px}#pobody>.fold:not(.open) .fold-h{margin:0}",
     // 홈: 큰 「🏠 오늘」 머리·날짜(위 머리에 이미 있음) 숨김 → 첫 화면에 오늘 한 줄이 바로
     "html[data-tab=home] #main>.hero{display:none}html[data-tab=home] .hm-day .hm-date{display:none}html[data-tab=home] .hm-day{margin-top:10px}",
@@ -191,9 +191,9 @@
     // 홈 아래 바로가기 줄
     ".hm-more{display:flex;flex-wrap:wrap;gap:8px;margin:4px 2px 18px}.hm-more a{flex:1 1 auto;text-align:center;font-size:12.5px;padding:9px 10px;border-radius:12px;background:var(--panel);border:1px solid var(--line);color:var(--sub);text-decoration:none;cursor:pointer;white-space:nowrap}",
     // 🗂 신호 › 더 보기
-    ".sm-t{padding:9px 0;border-top:1px dashed var(--line)}.sm-t:first-of-type{border-top:0}.sm-tb{display:flex;gap:10px;align-items:flex-start}.sm-tb b{flex:1;font-size:14px;line-height:1.45}.sm-t small{display:block;font-size:12px;color:var(--sub);line-height:1.45;margin-top:3px}",
-    ".sm-c{flex:none;width:64px;text-align:right}.sm-c i{display:block;height:5px;border-radius:3px;background:#7c9cff;margin:6px 0 2px auto;max-width:64px}.sm-c em{font-style:normal;font-size:12px;color:var(--sub)}",
-    ".sm-go{display:flex;align-items:center;gap:10px;padding:11px 2px;border-top:1px solid var(--line);cursor:pointer}.sm-go:first-of-type{border-top:0}.sm-go>span{font-size:20px;width:30px;text-align:center}.sm-go div{flex:1}.sm-go b{display:block;font-size:14.5px}.sm-go small{font-size:12px;color:var(--sub)}.sm-go i{font-style:normal;color:var(--sub)}",
+    ".sm-t{padding:9px 0;border-top:1px dashed var(--line)}.sm-t:first-of-type{border-top:0}.sm-tb{display:flex;gap:10px;align-items:flex-start}.sm-tb b{flex:1;font-size:14px;line-height:1.45}.sm-t small{display:block;font-size:12.5px;color:var(--sub);line-height:1.45;margin-top:3px}",
+    ".sm-c{flex:none;width:64px;text-align:right}.sm-c i{display:block;height:5px;border-radius:3px;background:#7c9cff;margin:6px 0 2px auto;max-width:64px}.sm-c em{font-style:normal;font-size:12.5px;color:var(--sub)}",
+    ".sm-go{display:flex;align-items:center;gap:10px;padding:11px 2px;border-top:1px solid var(--line);cursor:pointer}.sm-go:first-of-type{border-top:0}.sm-go>span{font-size:20px;width:30px;text-align:center}.sm-go div{flex:1}.sm-go b{display:block;font-size:14.5px}.sm-go small{font-size:12.5px;color:var(--sub)}.sm-go i{font-style:normal;color:var(--sub)}",
     // 📖 용어 풀이
     "#gloss{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}",
     ".gl-in{width:100%;max-width:560px;max-height:82vh;overflow:auto;background:var(--panel);border-radius:18px 18px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom))}",

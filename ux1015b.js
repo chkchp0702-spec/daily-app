@@ -21,11 +21,11 @@
   css.textContent =
     /* A10-1 */
     ".xtodo .xtd .a101{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}" +
-    ".a101-p{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--sub)}" +
+    ".a101-p{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--sub)}" +
     ".a101-p i{position:relative;display:inline-block;width:64px;height:6px;border-radius:3px;background:color-mix(in srgb,var(--line) 70%,transparent);overflow:hidden}" +
     ".a101-p i em{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--acc,#7c9cff)}" +
     ".a101-p b{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}" +
-    ".a101-c{display:inline-block;font-size:12px;line-height:1.35;padding:3px 9px;border-radius:999px;background:var(--panel2);color:var(--sub);white-space:nowrap}" +
+    ".a101-c{display:inline-block;font-size:12.5px;line-height:1.35;padding:3px 9px;border-radius:999px;background:var(--panel2);color:var(--sub);white-space:nowrap}" +
     ".a101-c b{color:var(--text);font-variant-numeric:tabular-nums}.a101-c.ok{background:rgba(77,212,122,.14)}.a101-c.no{background:rgba(255,107,107,.13)}" +
     ".a101-c .up{color:#ff6b6b}.a101-c .dn{color:#5aa9ff}" +
     /* A10-2 */
@@ -34,20 +34,20 @@
     /* A10-3 */
     ".mk-rows div span{min-width:0}.mk-rows div b{flex:none;white-space:nowrap;text-align:right}" +
     ".kpis2 .kp>span.a103{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}" +
-    ".kpis2 .kp>span.a103>span.a103c{display:inline-block;white-space:nowrap;font-size:11.5px;padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--line) 55%,transparent)}" +
+    ".kpis2 .kp>span.a103>span.a103c{display:inline-block;white-space:nowrap;font-size:12.5px;padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--line) 55%,transparent)}" +
     "#live .kv small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#live .kv b{display:block;white-space:nowrap}" +
     /* A10-4 */
     "#dates .date{position:relative;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}" +
     "#dates .date.a104:after{content:'';position:absolute;left:10px;right:10px;bottom:4px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--kr) 0 48%,transparent 48% 52%,var(--us) 52% 100%)}" +
     "#dates .date.on{border-width:2px}" +
     "#dates .date.a104-hol{opacity:.55;transform:scale(.92)}#dates .date.a104-hid{display:none}" +
-    "#dates .date .a104-rv{margin-left:4px;font-size:12px;padding:0 5px;border-radius:6px;background:color-mix(in srgb,var(--line) 60%,transparent)}" +
-    ".a104-lg{font-size:11.5px;color:var(--dim);margin:-8px 0 10px}" +
+    "#dates .date .a104-rv{margin-left:4px;font-size:12.5px;padding:0 5px;border-radius:6px;background:color-mix(in srgb,var(--line) 60%,transparent)}" +
+    ".a104-lg{font-size:12.5px;color:var(--dim);margin:-8px 0 10px}" +
     ".a104-tip{position:fixed;z-index:60;max-width:300px;padding:10px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:13.5px;line-height:1.5;color:var(--text)}" +
-    ".a104-tip small{display:block;color:var(--dim);font-size:11.5px;margin-bottom:3px}" +
+    ".a104-tip small{display:block;color:var(--dim);font-size:12.5px;margin-bottom:3px}" +
     /* A10-5 */
-    "#mknow{margin:0 0 4px}#mknow .mknow-h{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub);margin:2px 2px 6px}" +
-    "#mknow .mknow-h b{color:var(--text);font-weight:700}#mknow .mknow-h button{margin-left:auto;border:0;background:none;color:var(--dim);font:inherit;font-size:11.5px;cursor:pointer}";
+    "#mknow{margin:0 0 4px}#mknow .mknow-h{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--sub);margin:2px 2px 6px}" +
+    "#mknow .mknow-h b{color:var(--text);font-weight:700}#mknow .mknow-h button{margin-left:auto;border:0;background:none;color:var(--dim);font:inherit;font-size:12.5px;cursor:pointer}";
   document.head.appendChild(css);
 
   /* ---------- A10-1 할 일 확률 띠 + 지금 칩 ---------- */
@@ -93,7 +93,7 @@
         if (latest) h += liveChip(body.textContent, K, r[1], r[2], r[3]);
         if (h){ var w = document.createElement("div"); w.className = "a101"; w.innerHTML = h; body.appendChild(w); }
       });
-      if (latest && P.length){ var n = document.createElement("div"); n.className = "mut"; n.style.cssText = "font-size:11.5px;margin-top:6px";
+      if (latest && P.length){ var n = document.createElement("div"); n.className = "mut"; n.style.cssText = "font-size:12.5px;margin-top:6px";
         n.textContent = "막대 = 리포트가 아침에 매긴 확률 · 「지금 →」 = 장중 숫자로 본 방향(판정은 마감 합계로)"; box.appendChild(n); }
       placeNow();
     }, function(){ A101_BUSY = false; });

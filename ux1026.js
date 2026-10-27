@@ -254,30 +254,30 @@
   function soon(){ if (!T) T = setTimeout(tick, 250); }
   var css = document.createElement("style");
   css.textContent =
-    ".mfh{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--panel2)}.mfh-h{font-weight:800;font-size:14.5px}.mfh-h small{font-weight:400;font-size:11.5px;color:var(--sub);margin-left:4px}" +
-    ".mfh-q{font-size:12.5px;margin:5px 0 6px;word-break:keep-all}.mfh-x{color:var(--sub);font-size:11.5px}.mfh-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px;background:var(--line)}" +
+    ".mfh{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--panel2)}.mfh-h{font-weight:800;font-size:14.5px}.mfh-h small{font-weight:400;font-size:12.5px;color:var(--sub);margin-left:4px}" +
+    ".mfh-q{font-size:12.5px;margin:5px 0 6px;word-break:keep-all}.mfh-x{color:var(--sub);font-size:12.5px}.mfh-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px;background:var(--line)}" +
     ".mfh-bar .a{background:#3fb950}.mfh-bar .b{background:#ff6b6b}.mfh-bar .c{background:#6b7385}" +
-    ".mfh-k{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 4px}.mfh-k>div{background:var(--panel);border-radius:10px;padding:6px 4px;text-align:center}.mfh-k small{display:block;font-size:11px;color:var(--sub)}" +
+    ".mfh-k{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 4px}.mfh-k>div{background:var(--panel);border-radius:10px;padding:6px 4px;text-align:center}.mfh-k small{display:block;font-size:12.5px;color:var(--sub)}" +
     ".mfh-k b{display:block;font-size:19px;font-variant-numeric:tabular-nums;white-space:nowrap}.mfh-k b.g{color:#3fb950}.mfh-k b.r{color:#ff6b6b}" +
     ".mfh-l{font-size:12.5px;margin:4px 0 6px;word-break:keep-all}.mfh-s{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:4px 0}.mfh-s span{flex:none;width:108px;white-space:nowrap}.mfh-s input{flex:1;min-width:0}" +
-    ".mfh-c{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 2px}.mfh-c button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer}" +
-    ".mfh-c button.on{background:#f4a261;border-color:#f4a261;color:#111;font-weight:700}.mfh-n{font-size:11.5px;color:var(--sub);margin:6px 0 0;word-break:keep-all}" +
-    ".dcp{margin:10px 0 2px;padding:10px 12px;border-radius:12px;background:var(--panel2)}.dcp-h{font-weight:800;font-size:14px}.dcp-h small{font-weight:400;font-size:11px;color:var(--sub);margin-left:4px}" +
+    ".mfh-c{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 2px}.mfh-c button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:3px 10px;font:inherit;font-size:12.5px;cursor:pointer}" +
+    ".mfh-c button.on{background:#f4a261;border-color:#f4a261;color:#111;font-weight:700}.mfh-n{font-size:12.5px;color:var(--sub);margin:6px 0 0;word-break:keep-all}" +
+    ".dcp{margin:10px 0 2px;padding:10px 12px;border-radius:12px;background:var(--panel2)}.dcp-h{font-weight:800;font-size:14px}.dcp-h small{font-weight:400;font-size:12.5px;color:var(--sub);margin-left:4px}" +
     ".dcp-svg{display:block;width:100%;height:auto;margin:6px 0 2px}.dcp-z{stroke:var(--sub);stroke-width:1;stroke-dasharray:2 2}.dcp-k{stroke:var(--sub);stroke-width:1}" +
-    ".dcp-l{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:12px}.dcp-l span{white-space:nowrap}.dcp-l i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}" +
-    ".dcp-t{font-size:12.5px;margin:6px 0 0;word-break:keep-all}.dcp-n{font-size:11px;color:var(--sub);margin:5px 0 0;word-break:keep-all}" +
-    ".dcp-nw{margin:8px 0 0;padding-top:7px;border-top:1px solid var(--line)}.dcp-nw small{display:block;font-size:11.5px;color:var(--sub);margin-bottom:3px}" +
-    ".dcp-nw a{display:block;font-size:12.5px;padding:4px 0;color:var(--text);text-decoration:none;word-break:keep-all}.dcp-nw a em{font-style:normal;font-size:11px;color:var(--sub);margin-left:4px}" +
-    ".smap{margin:0 0 10px;padding:10px 12px;border-radius:14px;background:var(--panel)}.smap-h b{font-size:15px}.smap-h small{display:block;font-size:11.5px;color:var(--sub)}" +
+    ".dcp-l{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:12.5px}.dcp-l span{white-space:nowrap}.dcp-l i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}" +
+    ".dcp-t{font-size:12.5px;margin:6px 0 0;word-break:keep-all}.dcp-n{font-size:12.5px;color:var(--sub);margin:5px 0 0;word-break:keep-all}" +
+    ".dcp-nw{margin:8px 0 0;padding-top:7px;border-top:1px solid var(--line)}.dcp-nw small{display:block;font-size:12.5px;color:var(--sub);margin-bottom:3px}" +
+    ".dcp-nw a{display:block;font-size:12.5px;padding:4px 0;color:var(--text);text-decoration:none;word-break:keep-all}.dcp-nw a em{font-style:normal;font-size:12.5px;color:var(--sub);margin-left:4px}" +
+    ".smap{margin:0 0 10px;padding:10px 12px;border-radius:14px;background:var(--panel)}.smap-h b{font-size:15px}.smap-h small{display:block;font-size:12.5px;color:var(--sub)}" +
     ".smap-svg{display:block;width:100%;height:auto;margin:6px 0 4px;touch-action:manipulation}.smap-g{stroke:var(--line);stroke-width:1}.smap-g.z{stroke:var(--sub);stroke-dasharray:3 3}" +
     ".smap-t{fill:var(--sub);font-size:9.5px}.smap-p{fill:#6b7385;opacity:.55}.smap-p.u{fill:var(--up)}.smap-p.d{fill:var(--down)}" +
     ".smap-c{fill:color-mix(in srgb,var(--panel) 55%,transparent);stroke-width:2}.smap-c.on{stroke-width:3.5;fill:color-mix(in srgb,var(--text) 18%,transparent)}.smap-star{font-size:10px;fill:#ffd166;pointer-events:none}" +
-    ".smap-lg{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:11px;color:var(--sub)}.smap-lg i{display:inline-block;width:9px;height:9px;border-radius:50%;border:2px solid;margin-right:4px;vertical-align:-1px}" +
+    ".smap-lg{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:12.5px;color:var(--sub)}.smap-lg i{display:inline-block;width:9px;height:9px;border-radius:50%;border:2px solid;margin-right:4px;vertical-align:-1px}" +
     ".smap-lg i.p{border:0;width:6px;height:6px;margin-right:2px}.smap-lg i.p.u{background:var(--up)}.smap-lg i.p.d{background:var(--down);margin-right:4px}" +
-    ".smap-tg{display:flex;align-items:center;gap:8px;font-size:12px;margin:8px 0 0;word-break:keep-all}.smap-tg button{flex:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer}" +
-    ".smap-q{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:8px 0 0}.smap-q>div{background:var(--panel2);border-radius:9px;padding:5px 8px}.smap-q small{display:block;font-size:10.5px;color:var(--sub)}" +
-    ".smap-q b{font-size:16px;margin-right:5px;font-variant-numeric:tabular-nums}.smap-q em{font-style:normal;font-size:11px;color:var(--sub)}" +
-    ".smap-i{font-size:12.5px;margin:8px 0 0;min-height:18px;word-break:keep-all}.smap-i a{margin-left:6px;font-weight:700}.smap-n{font-size:11px;color:var(--sub);margin:6px 0 0;word-break:keep-all}" +
+    ".smap-tg{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:8px 0 0;word-break:keep-all}.smap-tg button{flex:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:3px 10px;font:inherit;font-size:12.5px;cursor:pointer}" +
+    ".smap-q{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:8px 0 0}.smap-q>div{background:var(--panel2);border-radius:9px;padding:5px 8px}.smap-q small{display:block;font-size:12.5px;color:var(--sub)}" +
+    ".smap-q b{font-size:16px;margin-right:5px;font-variant-numeric:tabular-nums}.smap-q em{font-style:normal;font-size:12.5px;color:var(--sub)}" +
+    ".smap-i{font-size:12.5px;margin:8px 0 0;min-height:18px;word-break:keep-all}.smap-i a{margin-left:6px;font-weight:700}.smap-n{font-size:12.5px;color:var(--sub);margin:6px 0 0;word-break:keep-all}" +
     ".smap-fl{outline:2px solid #f4a261;outline-offset:2px;transition:outline-color 1.5s}";
   document.head.appendChild(css);
   try { new MutationObserver(soon).observe(document.body, {childList: true, subtree: true}); } catch(x) { setInterval(tick, 1500); }

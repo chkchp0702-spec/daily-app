@@ -6,6 +6,10 @@
    D1 아래 탭 바·머리줄 단추: 이모지 → 같은 굵기 선 아이콘          D2 카드 = 면 한 장(색띠·번짐·테두리 없음 · 밝은 화면 회색 바탕+흰 카드)
    D3 글자 6단계(12·13.5·15·17·22·28) · 숫자 고정폭 · 낱말 안 끊기   D4 오늘 한 줄: 큰 제목이 주인공 · 「오늘 볼 곳」 상자 없는 줄 목록
    D5 내 포트: 숫자 상자 → 칸막이 한 줄 큰 숫자                     D6 맨 위 상태 줄 가볍게            D7 카드 머리 이모지 상자 빼기
+   ── 10/27 디자인 점검(Vercel 웹 화면 규칙) 뒤 정한 기준 · 모든 파일 공통 ──
+   · 글자: 화면 글자는 최소 12.5px(그림 안 SVG 글자만 예외). 새 글자 크기는 --fs-* 6단계만 쓸 것
+   · 색: --text·--sub·--dim 은 이 파일 맨 위 한 곳에서만 정함(흐린 글자도 바탕 대비 4.5:1 이상). 다른 파일에서 다시 정하지 말 것
+   · 팝업(#sheet·#peek 등) 스크롤은 뒤 화면으로 안 샘 · 누르는 것엔 포커스 테두리 · ✕ 같은 그림 단추엔 aria-label
    D8 바로가기 같은 폭 3칸                                          + 빼기표 「-1.7%」 → 진짜 마이너스 「−1.7%」(화면 글자만) */
 (function(){
   try { if (localStorage.getItem("ds") === "off") return; } catch(x) {}
@@ -13,8 +17,13 @@
   var R = "html[data-ds]";
   var css =
     /* 색·글자 변수 */
-    R + "{--bg:#0d1117;--panel:#161b24;--panel2:#1e2531;--line:#262e3b;--text:#eef1f6;--sub:#9aa4b6;--dim:#6b7486;--fs-cap:12px;--fs-s:13.5px;--fs-b:15px;--fs-h:17px;--fs-t:22px;--fs-d:28px}" +
-    R + "[data-ui=light]{--bg:#f2f4f6;--panel:#ffffff;--panel2:#f2f4f6;--line:#e8ebef;--text:#191f28;--sub:#6b7684;--dim:#8b95a1;--up:#f04452;--down:#3182f6}" +
+    R + "{--bg:#0d1117;--panel:#161b24;--panel2:#1e2531;--line:#262e3b;--text:#eef1f6;--sub:#a3acbd;--dim:#8a93a5;--fs-cap:12.5px;--fs-s:13.5px;--fs-b:15px;--fs-h:17px;--fs-t:22px;--fs-d:28px}" +
+    R + "[data-ui=light]{--bg:#f2f4f6;--panel:#ffffff;--panel2:#f2f4f6;--line:#e8ebef;--text:#191f28;--sub:#4e5968;--dim:#636d7b;--up:#f04452;--down:#3182f6}" +
+    ":where(html[data-ds]) :where(small){font-size:max(12.5px,.833em)}" +
+    /* 10/27 점검 — 팝업 스크롤이 뒤 화면으로 안 새게 · 누르는 곳 포커스 표시 · 두 번 탭 확대 지연 없애기 */
+    ":where(#sheet,#peek,#gdq,#gloss,#gsq,#hmst,#icz,#lpv,#shimg),:where(#sheet,#peek,#gdq,#gloss,#gsq,#hmst,#icz,#lpv,#shimg) *{overscroll-behavior:contain}" +
+    ":where(button,a,[role=button],summary,input,select,textarea,[tabindex]):focus-visible{outline:2px solid var(--acc,#3182f6);outline-offset:2px;border-radius:8px}" +
+    ":where(button,a,[role=button],summary,label,input,select){touch-action:manipulation}" +
     R + " body{letter-spacing:-.01em;font-feature-settings:'tnum' 1;word-break:keep-all;overflow-wrap:anywhere}" +
     R + " main{padding-top:12px}" +
     /* 머리줄 */
@@ -56,7 +65,7 @@
     R + " #hmbody .pl-nw .pl-sm{font-size:var(--fs-s)!important}" +
     R + " #hmbody .pl-tr{margin:4px 0 6px!important}" +
     R + " #hmbody .pl-act{border-top:1px solid var(--line)!important;padding-top:10px!important;margin-top:4px!important;font-size:var(--fs-s)!important}" +
-    R + " #hmbody .pl-foot{margin-top:12px;font-size:11.5px;color:var(--dim)}" +
+    R + " #hmbody .pl-foot{margin-top:12px;font-size:12.5px;color:var(--dim)}" +
     /* D7 카드 머리 */
     R + " #hmbody .hm-i{display:none!important}" +
     R + " #hmbody .hm-h{margin-bottom:12px!important}" +
@@ -79,7 +88,7 @@
     /* D1 아래 탭 바 */
     R + " #bnav{border-top:1px solid var(--line)!important}" +
     R + " #bnav::after{display:none!important}" +
-    R + " #bnav button{font-size:11px!important;font-weight:600!important;color:var(--dim)!important}" +
+    R + " #bnav button{font-size:12.5px!important;font-weight:600!important;color:var(--dim)!important}" +
     R + " #bnav button .i{filter:none!important;opacity:1!important;height:24px;display:flex;align-items:center;justify-content:center}" +
     R + " #bnav button .i svg{width:23px;height:23px}" +
     R + " #bnav button.on{color:var(--text)!important}" +

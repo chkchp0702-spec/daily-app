@@ -33,13 +33,13 @@
   var css = document.createElement("style");
   css.textContent =
     ".br{border:1px solid rgba(124,156,255,.35);background:linear-gradient(160deg,rgba(124,156,255,.12),rgba(18,24,38,.3) 70%);margin-bottom:10px}" +
-    ".br-h{font-weight:800;font-size:15px}.br-h small{font-weight:400;color:var(--sub);font-size:12px;margin-left:4px}" +
+    ".br-h{font-weight:800;font-size:15px}.br-h small{font-weight:400;color:var(--sub);font-size:12.5px;margin-left:4px}" +
     ".br-s{font-size:14px;line-height:1.55;margin:6px 0 4px}" +
-    ".br-ti{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:13px}.br-ti small{color:var(--sub)}.br-ti em{display:block;font-style:normal;font-size:11.5px;color:var(--sub)}.br-ti>div:last-child{flex:1;min-width:0}.br-ti b,.br-ti em{overflow-wrap:anywhere}" +
+    ".br-ti{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:13px}.br-ti small{color:var(--sub)}.br-ti em{display:block;font-style:normal;font-size:12.5px;color:var(--sub)}.br-ti>div:last-child{flex:1;min-width:0}.br-ti b,.br-ti em{overflow-wrap:anywhere}" +
     ".br-bar{flex:none;width:34px;height:6px;border-radius:3px;background:var(--panel2);margin-top:7px;overflow:hidden}.br-bar i{display:block;height:100%;background:#7c9cff}" +
     ".br-b{margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3)}.br-bh{font-size:13px;font-weight:800}.br-bh small{font-weight:400;color:var(--sub);margin-left:4px}" +
-    ".br-bi{font-size:13px;padding:4px 0}.br-bi[data-op]{cursor:pointer}.br-bi .po-go{font-style:normal;color:#ff6b6b;font-weight:800}.br-bi small{color:var(--sub)}.br-bi em{display:block;font-style:normal;font-size:11.5px;color:var(--sub)}" +
+    ".br-bi{font-size:13px;padding:4px 0}.br-bi[data-op]{cursor:pointer}.br-bi .po-go{font-style:normal;color:#ff6b6b;font-weight:800}.br-bi small{color:var(--sub)}.br-bi em{display:block;font-style:normal;font-size:12.5px;color:var(--sub)}" +
     ".br-p{font-size:12.5px;margin-top:6px;padding:7px 9px;border-radius:9px;background:rgba(233,196,106,.1)}.br-w{font-size:12.5px;color:var(--sub);margin-top:6px;line-height:1.6}" +
-    ".br-n{font-size:11px;color:var(--dim);margin-top:6px}";
+    ".br-n{font-size:12.5px;color:var(--dim);margin-top:6px}";
   document.head.appendChild(css);
 })();

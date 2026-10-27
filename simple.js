@@ -183,7 +183,7 @@
     if (window.closeSheet && document.getElementById("sheet")) closeSheet();
     var ph = document.createComment("xs"); c.parentNode.insertBefore(ph, c);
     var sh = document.createElement("div"); sh.id = "sheet";
-    sh.innerHTML = '<div class="sh-top"><button class="sh-x" onclick="goBack()">✕</button><b></b></div><div class="sh-body"></div>';
+    sh.innerHTML = '<div class="sh-top"><button aria-label="닫기" class="sh-x" onclick="goBack()">✕</button><b></b></div><div class="sh-body"></div>';
     sh.querySelector("b").textContent = t;
     document.body.appendChild(sh); document.body.classList.add("sheet-open");
     c.classList.remove("xs-hid"); sh.querySelector(".sh-body").appendChild(c);

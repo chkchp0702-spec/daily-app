@@ -130,14 +130,14 @@
     ":root[data-ui=light] #bnav{background-color:rgba(255,255,255,.98)!important}",
     "#bnav::after{content:'';position:absolute;left:0;right:0;top:-14px;height:14px;pointer-events:none;background:linear-gradient(to top,var(--bg),transparent)}",
     /* A15-2 */
-    ":root{--dim:#7a849a}",
-    ":root[data-ui=light]{--dim:#687184}",
+    ":root{--dim:#8a93a5}",
+    ":root[data-ui=light]{--dim:#636d7b}",
     ".stamp{white-space:nowrap}",
     "header .brand{position:relative;white-space:nowrap;margin-right:9px}",
     ":root[data-ui=light] #brandDot{filter:brightness(.62) saturate(1.5)}",
     /* A15-3 설정 줄: 글자 버튼 6개가 한 줄에 */
     "#uiset .us-seg button[data-k=fs]{padding:5px 7px}",
-    "#uiset .us-seg button[data-k=fs][data-v='0.88']{font-size:10.5px!important}#uiset .us-seg button[data-k=fs][data-v='0.94']{font-size:12px!important}",
+    "#uiset .us-seg button[data-k=fs][data-v='0.88']{font-size:12.5px!important}#uiset .us-seg button[data-k=fs][data-v='0.94']{font-size:12.5px!important}",
     "#uiset .us-seg button[data-k=fs][data-v='1']{font-size:13.5px!important}#uiset .us-seg button[data-k=fs][data-v='1.1']{font-size:15px!important}#uiset .us-seg button[data-k=fs][data-v='1.22']{font-size:17px!important}",
     "#uiset .us-r:has(button[data-k=fs]){flex-wrap:wrap}",
     /* A15-4 */
@@ -145,7 +145,7 @@
     "#moodDot{position:absolute;top:2px;right:-9px;width:8px;height:8px;padding:0;margin:0;border-radius:50%;border:0;background:var(--mood,#8a94a8);cursor:pointer;box-shadow:0 0 0 3px color-mix(in srgb,var(--mood,#8a94a8) 22%,transparent)}",
     ":root:not([data-mood]) #moodDot{display:none}",
     "#hmbody > .card.mood{background:radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--mood) 16%,transparent),transparent 60%),var(--panel)}",
-    ".hm-mood{display:inline-flex;align-items:center;gap:3px;margin-right:6px;padding:2px 9px;border-radius:999px;font-size:12px;cursor:pointer;background:color-mix(in srgb,var(--mood) 16%,transparent);color:var(--text)}",
+    ".hm-mood{display:inline-flex;align-items:center;gap:3px;margin-right:6px;padding:2px 9px;border-radius:999px;font-size:12.5px;cursor:pointer;background:color-mix(in srgb,var(--mood) 16%,transparent);color:var(--text)}",
     ".hm-mood b{color:var(--mood)}",
     /* A15-5 */
     ".hm-chg .hm-h{margin-bottom:4px}",

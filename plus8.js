@@ -34,7 +34,7 @@
         (h.lead || []).map(function(l){ return '<a href="javascript:openOP(\'' + e(l.s).replace(/'/g, "") + '\')">' + e(l.n || l.s) + ' ' + pc(l.r1) + '</a>'; }).join("") + '</div></div>'; }).join("");
     return '<div class="fo-cd"><div class="fo-dhd">' + c.flag + ' <b>' + e(c.name) + '</b> · ' + e(c.ix || "") + (c.date ? ' <small>' + e(c.date.slice(5)) + ' 기준</small>' : '') + '</div>' +
       '<div class="fo-dg">' + row("오늘", pc(c.chg1)) + row("1주", pc(c.chg5)) + row("1개월", pc(c.chg20)) + row("국면", e(c.regime || "—")) + row("10일선 위", c.breadth10 != null ? e(c.breadth10) + "%" : "—") + '</div>' +
-      (hot || '<div class="mut" style="font-size:12px">뜨는 업종 자료 없음</div>') + '<div class="mut" style="font-size:11px;margin-top:4px">종목 이름을 누르면 차트가 열려요</div></div>';
+      (hot || '<div class="mut" style="font-size:12.5px">뜨는 업종 자료 없음</div>') + '<div class="mut" style="font-size:12.5px;margin-top:4px">종목 이름을 누르면 차트가 열려요</div></div>';
   }
   window.foSel = function(i){
     FOSEL = FOSEL === i ? null : i;
@@ -75,8 +75,8 @@
     h += '<details class="fo-wk"><summary>📒 집중 성적 ' + (sc.n ? '<b>' + sc.hit + '/' + sc.n + '</b> · 평균 S&amp;P 대비 ' + pc(sc.avg_ex) : '— 10/7부터 기록, 5거래일 뒤 채점') + ' <span class="mut">· 눌러서 회고</span></summary>' +
       ((sc.week || []).length ? (sc.week || []).map(function(x){ var w = Math.min(100, Math.abs(x.ex || 0) * 8);
         return '<div class="fo-wr"><span>' + e(x.asof.slice(5)) + ' <b>' + e(x.name) + '</b></span><span class="fo-wb"><i style="width:' + w + '%;background:' + ((x.ex || 0) >= 0 ? "#e66767" : "#3987e5") + '"></i></span><span>' + pc(x.ex) + 'p</span>' + (x.lesson ? '<small>' + e(x.lesson) + '</small>' : '') + '</div>'; }).join("")
-        : '<div class="mut" style="font-size:12px;padding:6px 0">아직 채점된 집중이 없어요. 채점 대기: ' + (sc.open || []).map(function(x){ return e(x.asof.slice(5)) + " " + e(x.name); }).join(" · ") + '</div>') + '</details>';
-    h += '<div class="mut" style="font-size:11px;margin-top:6px">단계 🌱초입=모아가기 · 🚀주도=눌림 매수 · 🔥과열=추격 금지 · 🍂꺾임=끝났나? / 종목 ★관심 = 테마+차트 자리 · 눌림 대기 = 5일 +15%↑ · 추격 금지 = 하루 +8%↑. 매수 권유가 아니라 볼 곳을 좁히는 표예요.</div>';
+        : '<div class="mut" style="font-size:12.5px;padding:6px 0">아직 채점된 집중이 없어요. 채점 대기: ' + (sc.open || []).map(function(x){ return e(x.asof.slice(5)) + " " + e(x.name); }).join(" · ") + '</div>') + '</details>';
+    h += '<div class="mut" style="font-size:12.5px;margin-top:6px">단계 🌱초입=모아가기 · 🚀주도=눌림 매수 · 🔥과열=추격 금지 · 🍂꺾임=끝났나? / 종목 ★관심 = 테마+차트 자리 · 눌림 대기 = 5일 +15%↑ · 추격 금지 = 하루 +8%↑. 매수 권유가 아니라 볼 곳을 좁히는 표예요.</div>';
     return h;
   }
   // 테마 → 관련주 보조 창
@@ -84,7 +84,7 @@
     if (!r) return;
     if (window.closeSheet && document.getElementById("sheet")) closeSheet();
     var sh = document.createElement("div"); sh.id = "sheet";
-    sh.innerHTML = '<div class="sh-top"><button class="sh-x" onclick="goBack()">✕</button><b></b></div><div class="sh-body"><div class="empty">불러오는 중…</div></div>';
+    sh.innerHTML = '<div class="sh-top"><button aria-label="닫기" class="sh-x" onclick="goBack()">✕</button><b></b></div><div class="sh-body"><div class="empty">불러오는 중…</div></div>';
     sh.querySelector("b").textContent = "🔥 " + r.name + " 관련주";
     document.body.appendChild(sh); document.body.classList.add("sheet-open");
     try { history.pushState({t: "xs", d: navD() + 1}, "", location.pathname + "#" + cur); } catch(x) {}
@@ -102,11 +102,11 @@
       var h = '<section class="card"><div class="th-k">' +
         '<div><small>5일</small>' + pc(r.r5) + '</div><div><small>20일</small>' + pc(r.r20) + '</div><div><small>60일</small>' + pc(r.r60) + '</div>' +
         '<div><small>S&amp;P 대비 5일</small>' + pc(r.rs5) + '</div></div>' +
-        '<div class="mut" style="font-size:12px;margin-top:8px">' + e(r.sym) + ' · 순위 ' + (r.rank || "–") + '위' + (r.rank_chg ? ' (' + (r.rank_chg > 0 ? "▲" : "▼") + Math.abs(r.rank_chg) + ')' : '') +
+        '<div class="mut" style="font-size:12.5px;margin-top:8px">' + e(r.sym) + ' · 순위 ' + (r.rank || "–") + '위' + (r.rank_chg ? ' (' + (r.rank_chg > 0 ? "▲" : "▼") + Math.abs(r.rank_chg) + ')' : '') +
         (r.streak >= 3 ? ' · 🔥 S&amp;P보다 강한 날 ' + r.streak + '일 연속' : '') + (r.off_hi != null ? ' · 52주 고점 대비 ' + Number(r.off_hi).toFixed(1) + '%' : '') + ' · ' + e(String(S.asof || "").slice(5).replace("-", "/")) + ' 종가</div></section>' +
         '<section class="card"><h3>🇺🇸 미국 관련주 <span class="mut">5일 순</span></h3>' + list(mem.us) + '</section>' +
         '<section class="card"><h3>🇰🇷 한국 관련주 <span class="mut">5일 순</span></h3>' + list(mem.kr, true) + '</section>' +
-        '<div class="mut" style="font-size:11.5px;text-align:center;margin:6px 0 30px">이름을 누르면 종목리포트로 가요</div>';
+        '<div class="mut" style="font-size:12.5px;text-align:center;margin:6px 0 30px">이름을 누르면 종목리포트로 가요</div>';
       var b = sh.querySelector(".sh-body"); b.innerHTML = h;
       [].forEach.call(b.querySelectorAll("[data-op]"), function(el){ el.onclick = function(){ RET = {r: r, S: S}; openOP(el.dataset.op); }; });
     };
@@ -155,7 +155,7 @@
           var row = function(k){ var x = I[k]; if (!x) return ''; return '<div class="id-r"><b>' + e(x.state) + ' ' + e(x.name) + '</b> <span class="mut">' + e(x.state === "✅" ? "포트에 반영" : x.state === "🧪" ? "절반 크기로 시험" : x.state === "👻" ? "그림자 채점만" : "기각 · 채점만") + '</span>' +
             ((x.today || []).length ? '<div class="id-t">' + (k === "trend" ? "지금 들고 있음: " : e((x.today_d || "").slice(5)) + " 신호: ") + x.today.map(function(t){ return '<a href="javascript:openOP(\'' + e(t) + '\')">' + e(t) + '</a>'; }).join(" · ") + '</div>' : '<div class="id-t mut">오늘 신호 없음</div>') + '</div>'; };
           bx.innerHTML = row("trend") + row("pead") + row("nh52") + row("dip") +
-            '<div class="mut" style="font-size:11.5px;margin-top:6px">🧭 추세 = 금·원유·장기채·달러·지수 ETF 100일 고점 돌파에 사고 50일 저점 이탈에 팖 · 킥 포트의 5% 칸' + (T.from ? ' (' + e(T.from.slice(5)) + '부터)' : '') + ' · 📊 실적 표류 = 실적 철 미국 갭 +8%↑·거래량 3배↑ → 최대 40일. 매수 권유가 아니라 규칙 상태 표시예요.</div>';
+            '<div class="mut" style="font-size:12.5px;margin-top:6px">🧭 추세 = 금·원유·장기채·달러·지수 ETF 100일 고점 돌파에 사고 50일 저점 이탈에 팖 · 킥 포트의 5% 칸' + (T.from ? ' (' + e(T.from.slice(5)) + '부터)' : '') + ' · 📊 실적 표류 = 실적 철 미국 갭 +8%↑·거래량 3배↑ → 최대 40일. 매수 권유가 아니라 규칙 상태 표시예요.</div>';
         }).catch(function(){ var bx = document.querySelector("#mkid .id-b"); if (bx) bx.innerHTML = '<div class="mut">자료를 못 불러왔어요.</div>'; }); })();
         var box = document.querySelector("#mkfo .fo-b"); if (!box) return;
         if (!F || !F.themes || !F.themes.length){ box.innerHTML = '<div class="mut">오늘 집중 자료가 아직 없어요.</div>'; return; }

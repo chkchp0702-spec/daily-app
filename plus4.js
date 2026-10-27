@@ -5,7 +5,7 @@
   function sheet(title){
     navPush({t: "go", key: cur, id: curDate}); closeSheet();
     var sh = document.createElement("div"); sh.id = "sheet";
-    sh.innerHTML = '<div class="sh-top"><button class="sh-x" onclick="goBack()">✕</button><b>' + title + '</b></div><div class="sh-body"><div class="loading">불러오는 중…</div></div>';
+    sh.innerHTML = '<div class="sh-top"><button aria-label="닫기" class="sh-x" onclick="goBack()">✕</button><b>' + title + '</b></div><div class="sh-body"><div class="loading">불러오는 중…</div></div>';
     document.body.appendChild(sh); document.body.classList.add("sheet-open"); updBack();
     return sh.querySelector(".sh-body");
   }

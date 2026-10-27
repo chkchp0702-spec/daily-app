@@ -181,24 +181,24 @@
   css2.textContent =
     ".rb-tabs{display:flex;gap:6px;overflow-x:auto;margin:-2px -2px 10px;padding:2px;scrollbar-width:none}.rb-tabs::-webkit-scrollbar{display:none}" +
     ".rb-tab{flex:none;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:6px 10px;font:inherit;font-size:13px;font-weight:800;cursor:pointer;text-align:left;line-height:1.25}" +
-    ".rb-tab small{display:block;font-size:10.5px;font-weight:600;color:var(--sub)}.rb-tab.on{background:var(--text);color:var(--bg);border-color:var(--text)}.rb-tab.on small{color:var(--bg);opacity:.75}" +
+    ".rb-tab small{display:block;font-size:12.5px;font-weight:600;color:var(--sub)}.rb-tab.on{background:var(--text);color:var(--bg);border-color:var(--text)}.rb-tab.on small{color:var(--bg);opacity:.75}" +
     ".rb-mknote{margin:0 0 8px}" +
     ".rb-gc[data-gk]{cursor:pointer;border:1.5px solid transparent;transition:border-color .15s}.rb-gc.on{border-color:var(--text)}.rb-gc:active{transform:scale(.98)}" +
-    ".rb-tap{font-style:normal;font-size:11px;color:var(--sub);font-weight:400}" +
+    ".rb-tap{font-style:normal;font-size:12.5px;color:var(--sub);font-weight:400}" +
     ".rb-x{margin:4px 0 10px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);padding:12px 12px 10px;font-size:13px;line-height:1.55}" +
     ".rb-x.rbx-in{animation:rbxIn .2s ease-out}@keyframes rbxIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}" +
     ".rbx-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-left:4px solid var(--gc);padding-left:10px}" +
-    ".rbx-h small{display:block;color:var(--sub);font-size:12px}.rbx-h b{font-size:22px;font-weight:900;color:var(--gc)}.rbx-h b span{font-size:13px;color:var(--text);font-weight:700}" +
+    ".rbx-h small{display:block;color:var(--sub);font-size:12.5px}.rbx-h b{font-size:22px;font-weight:900;color:var(--gc)}.rbx-h b span{font-size:13px;color:var(--text);font-weight:700}" +
     ".rbx-x{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}" +
     ".rbx-what{margin:10px 0 8px;color:var(--text)}" +
-    ".rb-gwt{font-size:11.5px;color:var(--sub);margin-top:6px;line-height:1.45}.rb-gwt.warn{color:#ffb84d}.rb-gc.low .rb-gb{opacity:.5}" +
+    ".rb-gwt{font-size:12.5px;color:var(--sub);margin-top:6px;line-height:1.45}.rb-gwt.warn{color:#ffb84d}.rb-gc.low .rb-gb{opacity:.5}" +
     ".rbx-low{margin:8px 0;padding:8px 10px;border-radius:10px;background:rgba(255,184,77,.1);color:#ffb84d;font-size:12.5px}.rbx-r.w0{opacity:.55}" +
-    ".rbx-past{background:var(--panel);border-radius:10px;padding:8px 10px;margin-bottom:8px}.rbx-past small{color:var(--sub);font-size:11.5px}.rbx-past div{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:3px;font-size:12.5px}" +
+    ".rbx-past{background:var(--panel);border-radius:10px;padding:8px 10px;margin-bottom:8px}.rbx-past small{color:var(--sub);font-size:12.5px}.rbx-past div{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:3px;font-size:12.5px}" +
     ".rbx-sh{font-weight:800;font-size:12.5px;color:var(--sub);margin:6px 0 4px}" +
     ".rbx-list{display:flex;flex-direction:column;gap:4px}.rbx-r{display:flex;gap:8px;align-items:flex-start;background:var(--panel);border-radius:10px;padding:7px 9px}" +
-    ".rbx-r b{font-size:13px}.rbx-r b em{font-style:normal;font-size:10.5px;color:var(--sub);border:1px solid var(--line);border-radius:6px;padding:0 4px;margin-left:3px}" +
-    ".rbx-r small{display:block;color:var(--sub);font-size:11.5px;line-height:1.45}.rbx-d{flex:none;font-size:13px;line-height:1.5}" +
-    ".rbx-how{margin:8px 0 0;font-size:11.5px;color:var(--sub)}.rbx-x2{display:block;width:100%;margin-top:10px;padding:9px}";
+    ".rbx-r b{font-size:13px}.rbx-r b em{font-style:normal;font-size:12.5px;color:var(--sub);border:1px solid var(--line);border-radius:6px;padding:0 4px;margin-left:3px}" +
+    ".rbx-r small{display:block;color:var(--sub);font-size:12.5px;line-height:1.45}.rbx-d{flex:none;font-size:13px;line-height:1.5}" +
+    ".rbx-how{margin:8px 0 0;font-size:12.5px;color:var(--sub)}.rbx-x2{display:block;width:100%;margin-top:10px;padding:9px}";
   document.head.appendChild(css2);
   var MKD = null, ALLR = null, CEL = null;
   function pick(){ var k = null; try { k = localStorage.getItem("rbmk"); } catch (_){}

@@ -352,7 +352,7 @@
   // ⑨ 공유 (10/13 「더 자주 열게」 ⑧) — 휴대폰 공유창(카톡 등) · 안 되면 복사
   window.chShare = function(title, text, hash){
     var url = "https://chkchp0702-spec.github.io/daily-app/" + (hash ? "#" + hash : "");
-    var toast = function(m){ var d = document.createElement("div"); d.className = "ch-toast"; d.textContent = m; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2600); };
+    var toast = function(m){ var d = document.createElement("div"); d.className = "ch-toast"; d.setAttribute("role", "status"); d.setAttribute("aria-live", "polite"); d.textContent = m; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2600); };
     var copy = function(){ var all = text + "\n" + url;
       if (navigator.clipboard) navigator.clipboard.writeText(all).then(function(){ toast("복사했어요 — 카톡 대화창에 붙여넣기 하세요"); }, function(){ prompt("길게 눌러 복사하세요", all); });
       else prompt("길게 눌러 복사하세요", all); };
@@ -396,7 +396,7 @@
     // 아래 탭 바
     "#bnav{position:fixed;left:0;right:0;bottom:0;z-index:70;display:flex;background:rgba(11,15,23,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);" +
     "border-top:1px solid var(--line);padding:4px 4px calc(env(safe-area-inset-bottom) + 4px)}" +
-    "#bnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:0;color:var(--sub);font:inherit;font-size:11.5px;padding:5px 0 3px;cursor:pointer;position:relative}" +
+    "#bnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:0;color:var(--sub);font:inherit;font-size:12.5px;padding:5px 0 3px;cursor:pointer;position:relative}" +
     "#bnav button .i{font-size:21px;line-height:1.15;filter:grayscale(.6);opacity:.75}" +
     "#bnav button.on{color:var(--text);font-weight:800}#bnav button.on .i{filter:none;opacity:1}" +
     "#bnav button.on:before{content:'';position:absolute;top:-4px;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--c,#7c9cff)}" +
@@ -406,19 +406,19 @@
     "#main > .hero{background:none!important;border:0!important;box-shadow:none!important;padding:2px 4px 8px!important;margin:0 0 4px!important;cursor:pointer}" +
     "#main > .hero h1{display:inline;font-size:19px!important;letter-spacing:-.4px}" +
     "#main > .hero .meta{display:inline-flex!important;margin:0 0 0 8px!important;vertical-align:2px;gap:4px!important}" +
-    "#main > .hero .meta .chip{font-size:11px;padding:2px 7px}" +
+    "#main > .hero .meta .chip{font-size:12.5px;padding:2px 7px}" +
     "#main > .hero p{display:none}#main > .hero.show p{display:block;margin-top:6px}" +
-    "#main > .hero h1:after{content:' ⓘ';font-size:12px;color:var(--dim);font-weight:400}" +
+    "#main > .hero h1:after{content:' ⓘ';font-size:12.5px;color:var(--dim);font-weight:400}" +
     // 카드 제목 설명 칸
-    "h3.tt-h{justify-content:flex-start!important;gap:6px}h3.tt-h>.mut{margin-left:auto}h3.tt-h,.mk-lab.tt-h{cursor:pointer;-webkit-tap-highlight-color:transparent}h3.tt-h:after,.mk-lab.tt-h:after{content:'ⓘ';margin-left:4px;font-size:12px;color:var(--dim);font-weight:400;flex:none}" +
+    "h3.tt-h{justify-content:flex-start!important;gap:6px}h3.tt-h>.mut{margin-left:auto}h3.tt-h,.mk-lab.tt-h{cursor:pointer;-webkit-tap-highlight-color:transparent}h3.tt-h:after,.mk-lab.tt-h:after{content:'ⓘ';margin-left:4px;font-size:12.5px;color:var(--dim);font-weight:400;flex:none}" +
     "h3.tt-h.tt-on:after,.mk-lab.tt-h.tt-on:after{content:'ⓘ ▴';color:var(--text)}.tt-note{display:none!important}" +
     ".tt-i{flex:none;border:0;background:none;color:var(--dim);font:inherit;font-size:13px;padding:2px 6px;cursor:pointer}" +
     ".tt-x{margin:2px 0 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);padding:12px 12px 10px;font-size:13px;line-height:1.55;color:var(--text);font-weight:400;text-align:left}" +
     ".tt-x.ttx-in{animation:rbxIn .2s ease-out}@keyframes rbxIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}" +
     ".ttx-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-left:4px solid var(--c,#7c9cff);padding-left:10px}" +
-    ".ttx-h small{display:block;color:var(--sub);font-size:11.5px}.ttx-h b{display:block;font-size:15.5px;font-weight:800;color:var(--text)}.ttx-h em{display:block;font-style:normal;font-size:12px;color:var(--sub)}" +
+    ".ttx-h small{display:block;color:var(--sub);font-size:12.5px}.ttx-h b{display:block;font-size:15.5px;font-weight:800;color:var(--text)}.ttx-h em{display:block;font-style:normal;font-size:12.5px;color:var(--sub)}" +
     ".ttx-x{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}" +
-    ".ttx-what{margin:10px 0 6px}.ttx-n{background:var(--panel);border-radius:10px;padding:8px 10px;margin:6px 0}.ttx-n>small,.ttx-go>small{display:block;color:var(--sub);font-size:11.5px;font-weight:700;margin-bottom:2px}" +
+    ".ttx-what{margin:10px 0 6px}.ttx-n{background:var(--panel);border-radius:10px;padding:8px 10px;margin:6px 0}.ttx-n>small,.ttx-go>small{display:block;color:var(--sub);font-size:12.5px;font-weight:700;margin-bottom:2px}" +
     ".ttx-n p.note{margin:4px 0 0!important;font-size:12.5px;color:var(--text)}" +
     ".ttx-go{margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px}.ttx-go>small{flex-basis:100%}" +
     ".ttx-l{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}" +
@@ -426,14 +426,14 @@
     ".ch-toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);z-index:99;background:var(--text);color:var(--bg);border-radius:12px;padding:10px 14px;font-size:13.5px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center}" +
     ".ttx-x2{display:block;width:100%;margin-top:10px;padding:9px}" +
     // 나침반 접기·설명
-    ".nt-h{display:none!important}.nt-b{display:inline-block;border:0;background:none;color:var(--sub);font:inherit;font-size:12px;padding:4px 2px;margin:2px 0;cursor:pointer}" +
+    ".nt-h{display:none!important}.nt-b{display:inline-block;border:0;background:none;color:var(--sub);font:inherit;font-size:12.5px;padding:4px 2px;margin:2px 0;cursor:pointer}" +
     "details.cpx-d>summary,.rb-det>summary{cursor:pointer;font-weight:800;font-size:15px;list-style:none;padding:2px 0}details.cpx-d>summary::-webkit-details-marker,.rb-det>summary::-webkit-details-marker{display:none}" +
     "details.cpx-d>summary:after,.rb-det>summary:after{content:' ▾';color:var(--dim);font-weight:400}details.cpx-d[open]>summary:after,.rb-det[open]>summary:after{content:' ▴'}" +
-    "details.cpx-d>summary .mut{display:block;font-size:12px;font-weight:400;margin-top:2px}details.cpx-d[open]>summary{margin-bottom:10px}" +
+    "details.cpx-d>summary .mut{display:block;font-size:12.5px;font-weight:400;margin-top:2px}details.cpx-d[open]>summary{margin-bottom:10px}" +
     ".rb-det{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}.rb-det>summary{font-size:14px;color:var(--sub)}" +
     // 계열 고르기
     ".famc{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin:6px 0 2px;padding-bottom:2px}.famc::-webkit-scrollbar{display:none}" +
-    ".famc button{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}.famc button.on{background:var(--text);color:var(--bg);border-color:transparent}" +
+    ".famc button{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:4px 10px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}.famc button.on{background:var(--text);color:var(--bg);border-color:transparent}" +
     ".famw[data-ff=it] [data-fam]:not([data-fam=it]),.famw[data-ff=hc] [data-fam]:not([data-fam=hc]),.famw[data-ff=ind] [data-fam]:not([data-fam=ind]),.famw[data-ff=fin] [data-fam]:not([data-fam=fin])," +
     ".famw[data-ff=con] [data-fam]:not([data-fam=con]),.famw[data-ff=com] [data-fam]:not([data-fam=com]),.famw[data-ff=mat] [data-fam]:not([data-fam=mat]),.famw[data-ff=re] [data-fam]:not([data-fam=re]){display:none}" +
     ".famw[data-ff=''] [data-fam]:not([data-top]) .rotl,.famw:not([data-ff]) [data-fam]:not([data-top]) .rotl{display:none}" +   // 전체일 땐 움직임 큰 10곳만 이름
@@ -441,7 +441,7 @@
     "svg .dc-ln{stroke:var(--sub);stroke-width:.8;opacity:.6}" +
     ":root[data-ui=light] .sh-top{background:rgba(255,255,255,.94)!important}:root[data-ui=light] .sh-top b{color:#141a26}" +
     // 날짜 칩 한 줄로 작게
-    "#main .dates{margin-bottom:10px}#main .date{padding:5px 11px!important;border-radius:999px!important;font-size:11.5px!important;line-height:1.3}" +
+    "#main .dates{margin-bottom:10px}#main .date{padding:5px 11px!important;border-radius:999px!important;font-size:12.5px!important;line-height:1.3}" +
     "#main .date b{display:inline!important;font-size:13.5px!important;margin-right:3px}" +
     "#backbtn.root{display:none!important}#backbtn{padding:9px 14px!important;font-size:14px!important}" +
     "";

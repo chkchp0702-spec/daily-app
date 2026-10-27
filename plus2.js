@@ -155,7 +155,7 @@
         if (ks.length) h += card("🧑‍💼 내부자도 사는 중 <span class='mut'>최근 90일 임원·대주주 장내 매수</span>", ks.map(function(t){
           var rows = W.insider[t], tot = rows.reduce(function(a, x){ return a + (x.val || 0); }, 0);
           return '<div class="xfl"><div class="row">' + opA(t, '<b>' + e(t) + '</b>') + '<span>' + (cons[t] ? chip("고래 " + cons[t] + "명 + 내부자", "hot") : chip("내부자 " + rows.length + "건", "c")) + '<b class="up">$' + (tot >= 1e6 ? (tot / 1e6).toFixed(1) + "M" : Math.round(tot / 1e3) + "K") + '</b></span></div>' +
-            '<div class="mut" style="font-size:12px">' + rows.slice(0, 3).map(function(x){ return md(x.d) + " " + e(x.who) + (x.title ? " (" + e(x.title) + ")" : "") + " " + e(x.px); }).join("<br>") + '</div></div>'; }).join("") +
+            '<div class="mut" style="font-size:12.5px">' + rows.slice(0, 3).map(function(x){ return md(x.d) + " " + e(x.who) + (x.title ? " (" + e(x.title) + ")" : "") + " " + e(x.px); }).join("<br>") + '</div></div>'; }).join("") +
           '<p class="note">회사 사정을 가장 잘 아는 사람이 자기 돈으로 산 기록 (openinsider.com · SEC Form 4). ' + W.insider_checked + '종목 확인.</p>');
         else if (W.insider_checked) h += card("🧑‍💼 내부자 매수", '<p class="note" style="margin:0">고래가 산 종목 ' + W.insider_checked + '개를 확인했는데, 최근 90일 내부자 장내 매수는 없었어요.</p>');
       }

@@ -70,7 +70,7 @@
     wlToggle(b.getAttribute("data-star"), b.getAttribute("data-nm"));
   }, true);
   function toast(t){
-    var x = document.createElement("div"); x.className = "toast"; x.textContent = t; document.body.appendChild(x);
+    var x = document.createElement("div"); x.className = "toast"; x.setAttribute("role", "status"); x.setAttribute("aria-live", "polite"); x.textContent = t; document.body.appendChild(x);
     setTimeout(function(){ x.classList.add("on"); }, 10); setTimeout(function(){ x.classList.remove("on"); setTimeout(function(){ x.remove(); }, 300); }, 2200);
   }
 
@@ -98,7 +98,7 @@
     navPush({t: "go", key: cur, id: curDate});
     closeSheet();
     var sh = document.createElement("div"); sh.id = "sheet";
-    sh.innerHTML = '<div class="sh-top"><button class="sh-x" onclick="goBack()">✕</button><b>⭐ 내 관심종목</b></div><div class="sh-body" id="wlbody"><div class="loading">불러오는 중…</div></div>';
+    sh.innerHTML = '<div class="sh-top"><button aria-label="닫기" class="sh-x" onclick="goBack()">✕</button><b>⭐ 내 관심종목</b></div><div class="sh-body" id="wlbody"><div class="loading">불러오는 중…</div></div>';
     document.body.appendChild(sh); document.body.classList.add("sheet-open"); updBack();
     drawWL();
   }

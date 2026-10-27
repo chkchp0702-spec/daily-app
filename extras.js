@@ -325,7 +325,7 @@
       var chips = MX && MX.chips && MX.chips[it.id];
       if (chips && chips.length) h += card("🏷️ 오늘 리포트에 나온 종목 <span class='mut'>누르면 종목리포트</span>", '<div class="cp-sts" id="mchips">' + chips.map(function(c){
         return '<a class="cp-st" href="javascript:openOP(\'' + e(c[0]) + '\')" data-pc="' + e(c[0]) + '"><b>' + e(c[1].length > 12 ? c[1].slice(0, 11) + "…" : c[1]) + '</b><em class="tk">' + e(V.cd(c[0])) + '</em><span class="mut">…</span></a>'; }).join("") + '</div>');
-      h += '<details class="card xsrch"><summary>🔎 지난 시황 검색</summary><div class="reqrow" style="margin-top:10px"><input id="msq" placeholder="예: 삼성전자, 금리, 외국인" enterkeyhint="search"></div><div id="msr"></div></details>';
+      h += '<details class="card xsrch"><summary>🔎 지난 시황 검색</summary><div class="reqrow" style="margin-top:10px"><input aria-label="지난 시황 검색" id="msq" placeholder="예: 삼성전자, 금리, 외국인" enterkeyhint="search"></div><div id="msr"></div></details>';
       a.innerHTML = h;
       [].forEach.call(document.querySelectorAll("#mchips [data-pc]"), function(x){ V.price(x.getAttribute("data-pc")).then(function(p){
         var s = x.querySelector("span"); if (!p){ s.textContent = ""; return; } var c = (p[1] / p[2] - 1) * 100; s.className = cls(c); s.textContent = fmt(p[1]) + " " + sgn(c) + "%"; }); });

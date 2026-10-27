@@ -146,7 +146,7 @@
     var old = document.getElementById("icz"); if (old){ old.remove(); return; }
     var d = document.createElement("div"); d.id = "icz";
     d.innerHTML = '<div class="gl-in"><div class="gl-t"><b>🔣 아이콘 풀이</b><button class="icz-x" aria-label="닫기">✕</button></div>' +
-      '<input class="icz-q" type="search" placeholder="찾기 (예: 고래, 빨강, 🧪)">' +
+      '<input aria-label="찾기" class="icz-q" type="search" placeholder="찾기 (예: 고래, 빨강, 🧪)">' +
       G.map(function(g){ return '<div class="icz-g"><div class="icz-h">' + e(g[0]) + '</div>' + g[1].map(function(x){ var t = /[가-힣]/.test(x[0]), c = /빨강/.test(x[0]) ? " up" : /파랑/.test(x[0]) ? " dn" : /밑줄/.test(x[0]) ? " ul" : "";
         return '<div class="icz-r"><span class="' + (t ? "t" + c : "") + '">' + (t && c && c !== " ul" ? (c === " up" ? "+2.3%" : "−1.8%") : t && c === " ul" ? "포트 ›" : e(x[0])) + '</span><p>' + (t && c ? "<b>" + e(x[0]) + "</b> — " : "") + e(x[1]) + '</p></div>'; }).join("") + '</div>'; }).join("") +
       '<p class="icz-n">숫자·말은 「사라·팔라」는 뜻이 아니에요.</p></div>';
@@ -172,6 +172,6 @@
     ".icz-r{display:grid;grid-template-columns:76px 1fr;gap:10px;align-items:center;padding:8px 2px;border-bottom:1px dashed var(--line)}.icz-r:last-child{border-bottom:0}" +
     ".icz-r span{font-size:20px;text-align:center;line-height:1.2;word-break:keep-all}.icz-r p{margin:0;font-size:14px;line-height:1.5;color:var(--text)}" +
     ".icz-r span.t{font-size:15px;font-weight:800}.icz-r span.up{color:var(--up)}.icz-r span.dn{color:var(--down)}.icz-r span.ul{color:var(--sub);text-decoration:underline;text-underline-offset:3px;font-weight:600}" +
-    ".icz-n{font-size:12px;color:var(--sub);margin:12px 0 0;text-align:center}";
+    ".icz-n{font-size:12.5px;color:var(--sub);margin:12px 0 0;text-align:center}";
   document.head.appendChild(st);
 })();

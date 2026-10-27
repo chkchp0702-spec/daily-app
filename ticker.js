@@ -48,10 +48,10 @@
   var t = null;
   function later(){ if (t) return; t = setTimeout(function(){ t = null; try { scan(); } catch(e) {} }, 300); }
   var st = document.createElement("style");
-  st.textContent = ".tk2{display:block;font-size:11px;line-height:1.25;color:var(--sub);font-weight:500;letter-spacing:.2px;margin-top:1px}" +
-    ".tk2.in{display:inline;margin:0 0 0 5px;font-size:10.5px;opacity:.85}" +
-    ".cc .nm2{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.25}.cc .nm2 .cd{display:block;margin:1px 0 0;font-size:11.5px}" +
-    ".po-kc .tk2.in,.hm-chip .tk2.in{font-size:10px}";
+  st.textContent = ".tk2{display:block;font-size:12.5px;line-height:1.25;color:var(--sub);font-weight:500;letter-spacing:.2px;margin-top:1px}" +
+    ".tk2.in{display:inline;margin:0 0 0 5px;font-size:12.5px;opacity:.85}" +
+    ".cc .nm2{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.25}.cc .nm2 .cd{display:block;margin:1px 0 0;font-size:12.5px}" +
+    ".po-kc .tk2.in,.hm-chip .tk2.in{font-size:12.5px}";
   document.head.appendChild(st);
   new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) if (ms[i].addedNodes.length && !(ms[i].target.classList && ms[i].target.classList.contains("tk2"))) { later(); return; } })
     .observe(document.body || document.documentElement, {childList: true, subtree: true});

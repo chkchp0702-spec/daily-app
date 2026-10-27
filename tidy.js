@@ -116,8 +116,8 @@
     ":root:not(.td-off) .td-hide{display:none !important}" +
     ".td-off .td-more,.td-off .td-chipmore{display:none}" +
     ".td-more{display:block;width:100%;margin:6px 0 2px;padding:8px;border:1px dashed var(--line);border-radius:10px;background:transparent;color:var(--sub);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}" +
-    ".td-chipmore{display:inline-flex;align-items:center;padding:4px 10px;border:1px dashed var(--line);border-radius:999px;background:transparent;color:var(--sub);font:inherit;font-size:12px;font-weight:700;cursor:pointer}" +
-    ".td-sw{display:flex;align-items:center;gap:8px;padding:10px 4px;font-size:14px}.td-sw small{color:var(--sub);font-size:12px}" +
+    ".td-chipmore{display:inline-flex;align-items:center;padding:4px 10px;border:1px dashed var(--line);border-radius:999px;background:transparent;color:var(--sub);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}" +
+    ".td-sw{display:flex;align-items:center;gap:8px;padding:10px 4px;font-size:14px}.td-sw small{color:var(--sub);font-size:12.5px}" +
     // 숨 쉴 틈: 카드 안 설명과 다음 덩어리 사이 여백을 살짝 넓힘
     ":root:not(.td-off) .card .sub2{margin-top:16px}";
   document.head.appendChild(st);
