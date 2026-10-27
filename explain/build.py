@@ -68,21 +68,101 @@ def spot_videos():
     return out
 
 
-def split_lines(L, maxc=110, cap=10):
-    """긴 문단은 문장(…요. / …다. / …죠.)으로 나누고, 그래도 길면 쉼표·점에서 한 번 더"""
+def split_lines(L, maxc=44, cap=18):
+    """긴 문단은 문장(…요. / …다. / …죠.)으로 나누고, 44자가 넘으면 쉼표·가운뎃점·→ 에서 한 번 더(한 화면에 한 가지).
+    괄호 안은 자르지 않고, 남는 꼬리가 10자 이하면 앞에 붙여 둠"""
     out = []
     for t in L:
         t = fix_line(re.sub(r"\s+", " ", str(t)).strip())
         parts = re.split(r"(?<=[.!?。])\s+(?=\S)", t)
         for p in parts:
-            while len(p) > maxc:
-                cut = max(p.rfind(", ", 30, maxc), p.rfind(" · ", 30, maxc), p.rfind(" — ", 30, maxc), p.rfind(" ", 30, maxc))
-                if cut < 30:
+            while len(p) > maxc + 10:
+                cut = max(p.rfind(", ", 12, maxc), p.rfind(" · ", 12, maxc), p.rfind(" — ", 12, maxc), p.rfind(" → ", 12, maxc))
+                if cut < 12:
+                    cut = p.rfind(" ", 12, maxc)
+                if cut < 12:
                     cut = maxc
-                out.append(p[:cut].strip()); p = p[cut:].strip(" ,·—")
+                op = max(p.rfind("(", 0, cut), p.rfind("（", 0, cut))
+                if op > p.rfind(")", 0, cut):                  # 괄호 안: 닫는 괄호 뒤(가까우면) 또는 괄호 앞에서
+                    cl = p.find(")", cut)
+                    if 0 <= cl <= maxc + 26 and len(p) - cl > 10:
+                        cut = cl + 1
+                    elif cl < 0 or len(p) - cl <= 10:
+                        cut = len(p) if len(p) <= maxc + 30 else (op if op >= 12 else cut)
+                    elif op >= 12:
+                        cut = op
+                head = p[:cut].rstrip(" ,·—→")
+                if p[cut:].lstrip().startswith("→"):            # 화살표는 다음 줄 머리로
+                    head = p[:cut].rstrip()
+                out.append(head.strip()); p = p[cut:].strip(" ,·—")
             if p:
                 out.append(p)
     return [x for x in out if len(x) > 1][:cap]
+
+
+# ── 10/27 연출 보강 (HyperFrames 설명 영상 규칙): ① 동그라미 친 곳으로 확대 ② 핵심 숫자 올라가기 ③ 자막 짧게(split_lines 44자) ④ 효과음
+SFX = ("pop.mp3", "click-soft.mp3", "whoosh-short.mp3")   # HyperFrames 내장(Pixabay 라이선스, 출처 표기 없이 무료)
+NUM_RE = re.compile(r"(?<![\d/:.,])([+−-]?)(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?(%p|%|배|곳|번|개|점|거래일|일|만|억|명|건|종목|년)")
+
+
+def numify(i, text, st, js):
+    """자막 속 첫 핵심 숫자 하나를 굵게 + 0부터 올라가게. 연도(19xx·20xx년)·1 이하는 그대로"""
+    esc = html.escape(text)
+    for m in NUM_RE.finditer(esc):
+        sign, whole, dec, unit = m.group(1), m.group(2), m.group(3) or "", m.group(4)
+        v = float(whole.replace(",", "") + dec)
+        if (unit == "년" and 1900 <= v <= 2100) or v < 2:
+            continue
+        nd = len(dec) - 1 if dec else 0
+        start = sign + ("0." + "0" * nd if nd else "0") + unit
+        b = f'<b class="num" id="n{i}">{start}</b>'
+        js.append(f'(function(){{ const o = {{ v: 0 }}, e = document.getElementById("n{i}"); '
+                  f'tl.fromTo(o, {{ v: 0 }}, {{ v: {v}, duration: 0.9, ease: "power2.out", onUpdate: () => {{ '
+                  f'e.textContent = "{sign}" + o.v.toLocaleString("en-US", {{ minimumFractionDigits: {nd}, maximumFractionDigits: {nd}, useGrouping: {str("," in whole).lower()} }}) + "{unit}"; }} }}, {st + 0.35:.2f}); }})();')
+        return esc[:m.start()] + b + esc[m.end():]
+    return esc
+
+
+def zoom_js(js, cx, cy, rw, rh, t_in, t_out):
+    """동그라미 친 곳으로 카메라가 다가감 → 그 문장 끝에 원래대로.
+    작은 곳은 꽉 차게(최대 1.5배), 화면 폭 카드는 1.18배로 카드 윗부분(제목·첫 숫자)부터 크게"""
+    if t_out - t_in < 1.2:
+        return False
+    fit = min(PW * 0.92 / max(rw, 1), PH * 0.72 / max(rh, 1), 1.5)
+    z = max(fit, 1.18)
+    if fit < 1.18:                                   # 큰 카드: 카드 위쪽이 창 위에 오게
+        cy = min(cy, (cy - rh / 2) + PH / (2 * z) - 10)
+    x = min(0.0, max(PW - PW * z, PW / 2 - cx * z))
+    y = min(0.0, max(PH - PH * z, PH / 2 - cy * z))
+    js.append(f'tl.to("#cam", {{ scale: {z:.3f}, x: {x:.1f}, y: {y:.1f}, duration: 0.7, ease: "power2.inOut" }}, {t_in:.2f});')
+    js.append(f'tl.to("#cam", {{ scale: 1, x: 0, y: 0, duration: 0.5, ease: "power2.inOut" }}, {t_out:.2f});')
+    return True
+
+
+def zoom_groups(js, zq):
+    """같은 카드를 잇달아 설명하면 한 번만 다가가서 그대로 있다가 다른 곳으로 갈 때 물러남(문장마다 들락날락 안 함)"""
+    i = 0
+    while i < len(zq):
+        if zq[i][0] is None:
+            i += 1; continue
+        j = i
+        while j + 1 < len(zq) and zq[j + 1][0] == zq[i][0]:
+            j += 1
+        _, cx, cy, rw, rh, st, _d = zq[i]
+        end = zq[j][5] + zq[j][6]
+        zoom_js(js, cx, cy, rw, rh, st + 0.85, end - 0.6)
+        i = j + 1
+
+
+def sfx_html(hits, total):
+    """hits = [(초, 파일, 크기)] → <audio> 들. 0.25초 안에 겹치면 뒤 것 뺌, 같은 소리 두 번 연달아면 다른 테이크로"""
+    out, last = [], -9
+    for k, (t, f, vol) in enumerate(sorted(hits)):
+        if t - last < 0.25 or t > total - 0.3:
+            continue
+        last = t
+        out.append(f'<audio id="sx{k}" class="clip" data-start="{t:.2f}" data-track-index="{80 + k}" data-volume="{vol}" src="assets/{f}"></audio>')
+    return "".join(out)
 
 
 def dur(s):
@@ -109,7 +189,7 @@ def stops_for(cap, n):
     return out
 
 
-def page(title, pose, layer_html, caps_html, dots, js, total):
+def page(title, pose, layer_html, caps_html, dots, js, total, audio=""):
     """영상 한 편의 HyperFrames 문서(배경·휴대폰 창·조이·말풍선 자막·점)"""
     return f"""<!doctype html>
 <html lang="ko">
@@ -132,7 +212,9 @@ def page(title, pose, layer_html, caps_html, dots, js, total):
   #phone {{ position: absolute; left: {PX - 10}px; top: {PY - 10}px; width: {PW + 20}px; height: {PH + 20}px; border-radius: 46px;
            background: #14203f; box-shadow: 0 30px 60px rgba(20,32,63,.28); }}
   #win {{ position: absolute; left: {PX}px; top: {PY}px; width: {PW}px; height: {PH}px; border-radius: 34px; overflow: hidden; background: #fff; }}
+  #cam {{ position: absolute; left: 0; top: 0; width: {PW}px; height: {PH}px; }}
   .layer {{ position: absolute; left: 0; top: 0; width: {PW}px; }}
+  .num {{ color: #e8590c; font-weight: 900; font-size: 1.18em; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }}
   .shot {{ position: absolute; left: 0; top: 0; width: {PW}px; background-repeat: no-repeat; background-position: 0 0; }}
   .ring {{ position: absolute; }}
   .tap {{ position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: rgba(255,122,26,.30);
@@ -144,7 +226,7 @@ def page(title, pose, layer_html, caps_html, dots, js, total):
          box-shadow: 0 14px 30px rgba(20,32,63,.14); }}
   #bub:before {{ content: ""; position: absolute; left: -16px; top: 70px; border: 16px solid transparent; border-right-color: #fff; border-left: 0; }}
   .cap {{ position: absolute; left: 248px; right: 54px; top: 950px; height: 240px; display: flex; align-items: center;
-         font-size: 29px; font-weight: 700; line-height: 1.42; letter-spacing: -0.3px; word-break: keep-all; }}
+         font-size: 31px; font-weight: 700; line-height: 1.42; letter-spacing: -0.3px; word-break: keep-all; }}
   .cap span {{ display: block; }}
   .cap.sm {{ font-size: 24px; }} .cap.xs {{ font-size: 20px; line-height: 1.38; }}
   #dots {{ position: absolute; left: 0; right: 0; top: 1232px; display: flex; justify-content: center; gap: 12px; }}
@@ -156,15 +238,17 @@ def page(title, pose, layer_html, caps_html, dots, js, total):
   <div id="bg"></div>
   <div id="top"><div id="face"></div><div id="ttl">{html.escape(title)}<small>조이가 알려 주는 화면 안내</small></div></div>
   <div id="phone"></div>
-  <div id="win" data-layout-allow-overflow>{layer_html}</div>
+  <div id="win" data-layout-allow-overflow><div id="cam">{layer_html}</div></div>
   <div id="kid"></div>
   <div id="bub"></div>
   {"".join(caps_html)}
   <div id="dots">{dots}</div>
+  {audio}
 </div>
 <script>
   window.__timelines = window.__timelines || {{}};
   const tl = gsap.timeline({{ paused: true }});
+  tl.set("#cam", {{ transformOrigin: "0 0" }}, 0);
   tl.fromTo("#phone, #win", {{ opacity: 0, y: 40 }}, {{ opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }}, 0);
   tl.fromTo("#kid", {{ opacity: 0, scale: 0.8 }}, {{ opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }}, 0.25);
   tl.fromTo("#bub", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.4 }}, 0.45);
@@ -199,7 +283,7 @@ def build_demo(name):
     shutil.rmtree(pdir, ignore_errors=True)
     os.makedirs(f"{pdir}/assets")
     pose = POSE.get(scr, "kid_thumb")
-    for f in (f"{pose}.jpg", "kid_wave.jpg", "gsap-3.14.2.min.js"):
+    for f in (f"{pose}.jpg", "kid_wave.jpg", "gsap-3.14.2.min.js") + SFX:
         shutil.copy(f"{ROOT}/assets/{f}", f"{pdir}/assets/{f}")
     imgs = []
     for s in sc:
@@ -209,7 +293,7 @@ def build_demo(name):
     for f in imgs:
         Image.open(f"{CAP}/{fd}/{f}").convert("RGB").resize((PW, PH), Image.LANCZOS).save(f"{pdir}/assets/s{f[:-4]}.jpg", quality=88)
     lid = {f: j for j, f in enumerate(imgs)}
-    js, caps_html, rings, taps = [], [], [], []
+    js, caps_html, rings, taps, hits = [], [], [], [], []
     t, shown, starts = 0.9, lid[sc[0]["img"]], []
     total_n = len(sc)
 
@@ -228,7 +312,7 @@ def build_demo(name):
             d = round(d + 1.2, 2)
         show(lid[s["img"]], max(0, st - 0.35))
         sz = " xs" if len(s["say"]) > 120 else " sm" if len(s["say"]) > 78 else ""
-        caps_html.append(f'<p id="cap{i}" class="clip cap{sz}" data-start="{st}" data-duration="{d}" data-track-index="{3 + i}"><span>{html.escape(s["say"])}</span></p>')
+        caps_html.append(f'<p id="cap{i}" class="clip cap{sz}" data-start="{st}" data-duration="{d}" data-track-index="{3 + i}"><span>{numify(i, s["say"], st, js)}</span></p>')
         js.append(f'tl.fromTo("#cap{i} span", {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }}, {st + 0.05:.2f});')
         ring_at = st + 0.45
         if s.get("tap"):
@@ -236,6 +320,7 @@ def build_demo(name):
             taps.append(f'<div id="tap{i}" class="tap" style="left:{x:.0f}px;top:{y:.0f}px"></div>')
             js.append(f'tl.fromTo("#tap{i}", {{ opacity: 0, scale: 1.6 }}, {{ opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" }}, {st + 0.5:.2f});')
             js.append(f'tl.to("#tap{i}", {{ scale: 0.75, duration: 0.15, yoyo: true, repeat: 1 }}, {st + 0.95:.2f});')
+            hits.append((st + 0.98, "click-soft.mp3", 0.5))
             js.append(f'tl.to("#tap{i}", {{ opacity: 0, duration: 0.3 }}, {st + 1.6:.2f});')
             if s.get("post"):
                 show(lid[s["post"]], st + 1.15)
@@ -245,6 +330,7 @@ def build_demo(name):
             taps.append(f'<div id="tap{i}" class="tap" style="left:{x0:.0f}px;top:{y:.0f}px"></div>')
             js.append(f'tl.fromTo("#tap{i}", {{ opacity: 0, x: 0 }}, {{ opacity: 1, duration: 0.3 }}, {st + 0.4:.2f});')
             js.append(f'tl.to("#tap{i}", {{ x: {x1 - x0:.0f}, duration: 0.8, ease: "power1.inOut" }}, {st + 0.75:.2f});')
+            hits.append((st + 0.78, "click-soft.mp3", 0.4))
             js.append(f'tl.to("#tap{i}", {{ opacity: 0, duration: 0.3 }}, {st + 1.75:.2f});')
             if s.get("post"):
                 show(lid[s["post"]], st + 1.4)
@@ -255,6 +341,8 @@ def build_demo(name):
             rings.append(f'<div id="ring{i}" class="clip ring" data-start="{ring_at:.2f}" data-duration="{max(st + d - ring_at - 0.1, 0.5):.2f}" data-track-index="{40 + i}" '
                          f'style="left:{rx:.0f}px;top:{ry:.0f}px;width:{rw:.0f}px;height:{rh:.0f}px"><i></i></div>')
             js.append(f'tl.fromTo("#ring{i} i", {{ opacity: 0, scale: 1.06 }}, {{ opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" }}, {ring_at:.2f});')
+            hits.append((ring_at + 0.03, "pop.mp3", 0.45))
+            zoom_js(js, rx + rw / 2, ry + rh / 2, rw, rh, ring_at + 0.4, st + d - 0.6)
         t = st + d
     total = round(t + 0.3, 2)
     for i, st in enumerate(starts):
@@ -267,7 +355,7 @@ def build_demo(name):
                          for j, f in enumerate(imgs)) + "".join(rings) + "".join(taps)
     dots = "".join(f'<b id="dot{i}"></b>' for i in range(total_n))
     title = D["title"][:22]
-    doc = page(title, pose, layer_html, caps_html, dots, js, total)
+    doc = page(title, pose, layer_html, caps_html, dots, js, total, sfx_html(hits, total))
     open(f"{pdir}/index.html", "w").write(doc)
     return pdir, total
 
@@ -283,7 +371,7 @@ def build(name):
         title = spot["title"][:22] or MORE_NAME.get(scr, scr)
         screens, key = [scr], scr
     else:
-        lines = (T["SAY"] if kind == "t" else T["MORE"])[key]
+        lines = split_lines((T["SAY"] if kind == "t" else T["MORE"])[key])
         title = (NAME if kind == "t" else MORE_NAME)[key]
         screens = [k for k in VIDEOS[name] if os.path.exists(f"{CAP}/{k}.json")]
     pdir = f"{BUILD}/{name}"
@@ -292,7 +380,7 @@ def build(name):
     pose = POSE.get(key, "kid_thumb")
     if spot is not None and spot.get("kind") == "x":      # 오늘 탭 조이 그림 자리: 그 자리 표정
         pose = "kid_wave" if "인사" in title else "kid_joy" if "배지" in title else "kid_umb" if "팔았다면" in title else "kid_thumb"
-    for f in (f"{pose}.jpg", "kid_wave.jpg", "gsap-3.14.2.min.js"):
+    for f in (f"{pose}.jpg", "kid_wave.jpg", "gsap-3.14.2.min.js") + SFX:
         shutil.copy(f"{ROOT}/assets/{f}", f"{pdir}/assets/{f}")
     caps, ih = {}, {}
     for k in screens:
@@ -328,7 +416,7 @@ def build(name):
     total = round(t + 1.2, 2)
 
     layers = {k: [] for k in screens}
-    caps_html, js = [], []
+    caps_html, js, hits, zq = [], [], [], []
     js.append(f'tl.set("#layer{screens.index(scr[0])}", {{ y: {-stops[0][0] * S:.1f} }}, 0);')
     shown = screens[0]
     for i, s in enumerate(lines):
@@ -338,12 +426,13 @@ def build(name):
         sz = " xs" if len(s) > 120 else " sm" if len(s) > 78 else ""
         caps_html.append(
             f'<p id="cap{i}" class="clip cap{sz}" data-start="{st}" data-duration="{d}" data-track-index="{3 + i}">'
-            f'<span>{html.escape(s)}</span></p>')
+            f'<span>{numify(i, s, st, js)}</span></p>')
         k = scr[i]
         lid = screens.index(k)
         if k != shown:
             js.append(f'tl.to("#layer{screens.index(shown)}", {{ opacity: 0, duration: 0.4 }}, {max(0, st - 0.4):.2f});')
             js.append(f'tl.fromTo("#layer{lid}", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.4 }}, {max(0, st - 0.4):.2f});')
+            hits.append((max(0.0, st - 0.4), "whoosh-short.mp3", 0.35))
             shown = k
         y, c = stops[i]
         js.append(f'tl.to("#layer{lid}", {{ y: {-y * S:.1f}, duration: 0.8, ease: "power2.inOut" }}, {max(0, st - 0.35):.2f});')
@@ -356,6 +445,12 @@ def build(name):
                 f'data-track-index="{40 + i}" style="left:{rx:.0f}px;top:{ry:.0f}px;width:{rw:.0f}px;height:{rh:.0f}px">'
                 f'<i></i></div>')
             js.append(f'tl.fromTo("#ring{i} i", {{ opacity: 0, scale: 1.06 }}, {{ opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" }}, {st + 0.45:.2f});')
+            if not zq or zq[-1][0] != id(c):          # 새 카드에 동그라미 칠 때만 「톡」
+                hits.append((st + 0.48, "pop.mp3", 0.45))
+            zq.append((id(c), rx + rw / 2, ry + rh / 2 - y * S, rw, rh, st, d))
+        else:
+            zq.append((None,))
+    zoom_groups(js, zq)
     dots = "".join(f'<b id="dot{i}"></b>' for i in range(n))
     for i, st in enumerate(starts):
         js.append(f'tl.fromTo("#dot{i}", {{ backgroundColor: "#c9d3ea", scaleX: 1 }}, {{ backgroundColor: "#2f4ea8", scaleX: 2.2, duration: 0.3 }}, {st:.2f});')
@@ -367,7 +462,7 @@ def build(name):
         f'<div class="shot" style="height:{ih[k]}px;background-image:url(assets/{k}.jpg);background-size:{PW}px {ih[k]}px"></div>'
         f'{"".join(layers[k])}</div>' for j, k in enumerate(screens))
 
-    doc = page(title, pose, layer_html, caps_html, dots, js, total)
+    doc = page(title, pose, layer_html, caps_html, dots, js, total, sfx_html(hits, total))
     open(f"{pdir}/index.html", "w").write(doc)
     return pdir, total
 
@@ -381,7 +476,7 @@ def render(name):
     if not os.path.exists(raw):
         print(name, "렌더 실패"); return False
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw, "-c:v", "libx264", "-crf", "27", "-preset", "slow",
-                    "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", f"{OUT}/{name}.mp4"], check=True)
+                    "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-c:a", "aac", "-b:a", "64k", "-ac", "1", f"{OUT}/{name}.mp4"], check=True)
     # 눈 검사용 장면 모음(5장)
     n = 5
     sel = "+".join(f"eq(n\\,{int((k + 0.5) * total * 30 / n)})" for k in range(n))
