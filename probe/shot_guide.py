@@ -42,7 +42,19 @@ with sync_playwright() as p:
     tryclick(pg, "[data-tip]:not(svg *)", "port_tip")
     pg.evaluate("go('whale')"); pg.wait_for_timeout(5000)
     tryclick(pg, "h3.tt-h .gd-b", "whale_card")
+    # 10/27 조이 그림마다 영상: 날씨판 꼬마 · 매집 카드 · 종목리포트 카드
+    def vid(name):
+        try:
+            v = pg.evaluate("(() => { const v = document.querySelector('#gdq video'); return v ? v.getAttribute('src') + (v.paused ? ' (멈춤)' : ' (재생)') : '영상 없음'; })()")
+            log.append(f"{name}: {v}"); pg.screenshot(path=f"probe/shots/v_{name}.png")
+            pg.evaluate("document.getElementById('gdq') && document.getElementById('gdq').remove()")
+        except Exception as e: log.append(f"{name}: 오류 {str(e)[:100]}")
+    pg.evaluate("go('accum')"); pg.wait_for_timeout(5000)
+    try: pg.click("h3.tt-h .gd-b", timeout=5000, force=True); pg.wait_for_timeout(1500); vid("accum_card")
+    except Exception as e: log.append("accum_card: " + str(e)[:80])
     pg.evaluate("go('home')"); pg.wait_for_timeout(7000)
+    try: pg.click(".tz-kid", timeout=5000, force=True); pg.wait_for_timeout(1500); vid("home_kid")
+    except Exception as e: log.append("home_kid: " + str(e)[:80])
     pg.evaluate("document.getElementById('gdq') && document.getElementById('gdq').remove()")
     pg.wait_for_timeout(3000)
     try:
