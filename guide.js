@@ -120,7 +120,7 @@
       (vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted autoplay playsinline preload="auto" controls disablepictureinpicture></video></div>' : '') +
       '<div class="gd-row"><div class="gd-kid" aria-hidden="true"' + (pz ? ' style="background-image:url(' + pz + ')"' : '') + '></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
       L.map(function(s){ return '<p class="gd-l">' + s + '</p>'; }).join("") + '</div></div><div class="gd-ft">' +
-      (mk ? '' : (window.uiLab === false ? ["home", "mkt", "prod"] : ["home", "mkt", "inv", "sig", "prod", "feed"]).map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("")) +
+      (mk ? '' : ["home", "mkt", "inv", "sig", "prod", "feed"].map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("")) +
       (vs ? '<button class="gd-tx">📝 글로 보기</button>' : fb ? '<button class="gd-tx">▶ 이 화면 영상</button>' : '') + '<button class="gd-x">닫기</button></div></div>';
     document.body.appendChild(q);
     var ps = q.querySelectorAll(".gd-l"), i = 0;
