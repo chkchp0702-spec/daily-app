@@ -29,7 +29,7 @@
       if (hero && hero.nextSibling) b2.insertBefore(c, hero.nextSibling); else b2.insertBefore(c, b2.firstChild);
     });
   }
-  document.addEventListener("click", function(ev){ var t = ev.target.closest && ev.target.closest("[data-pbsend]"); if (!t) return; ev.stopPropagation(); if (window.__onepage) __onepage.go(null); }, true);
+  document.addEventListener("click", function(ev){ var t = ev.target.closest && ev.target.closest("[data-pbsend]"); if (!t) return; ev.stopPropagation(); if (window.__onepage) (__onepage.chooser || __onepage.go)(null); }, true);
   var css = document.createElement("style");
   css.textContent = ".pbc{border:1.5px solid rgba(124,156,255,.45)!important}.pb-reg{font-size:13px;color:var(--sub,#aab);margin:0 0 8px;line-height:1.45}" +
     ".pb-talk small{display:block;font-size:12px;color:var(--mut,#8a94a8);margin-bottom:4px}.pb-talk p{margin:0 0 6px;font-size:14.5px;line-height:1.5;word-break:keep-all}" +
