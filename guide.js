@@ -62,11 +62,14 @@
   // 10/26 사용자 「조이가 있는 모든 곳에 설명 영상」 — 카드 머리·접기 ⓘ·「ⓘ 설명」·「ⓘ …」 접는 칸: vidmap.js(window.VIDC, 자동 생성)에 「화면|제목」 → 파일
   function vkey(t){ return String(t || "").replace(/[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()−▲▼△▽›‹]/g, "").replace(/(미국|한국|일본|중국|홍콩)시장은어느국면인가/g, "").toLowerCase().slice(0, 24); }   // 10/27 고른 나라에 따라 바뀌는 부제는 빼고
   // 10/27 사용자 「조이 사진 있는 곳은 다」 — ① 이 화면에서 같은 제목 ② 다른 화면(시트·종목리포트 등)에서 같은 제목 ③ 없으면 이 화면 설명 영상(글 먼저, ▶ 로 보기)
-  function vidFor(title){ var m = window.VIDC; if (!m) return ""; var vk = vkey(window.easyBack ? easyBack(title) : title); if (!vk || vk === "설명") return "";   // 10/27: 제목 없는 회색 설명 줄(「설명」)이 엉뚱한 카드 영상(펀드 화면에서 ELS 설계 영상)에 붙던 것 → 화면 소개 영상으로
+  function vid1(title){ var m = window.VIDC; if (!m) return ""; var vk = vkey(title); if (!vk || vk === "설명") return "";   // 10/27: 제목 없는 회색 설명 줄(「설명」)이 엉뚱한 카드 영상(펀드 화면에서 ELS 설계 영상)에 붙던 것 → 화면 소개 영상으로
     var k = ((typeof cur !== "undefined" && cur) || "") + "|" + vk, f = m[k];
     if (!f && vk) for (var x in m) if (x.slice(x.indexOf("|") + 1) === vk){ f = m[x]; break; }
-    if (!f && window.easyBackTerms && !vidFor._b){ vidFor._b = 1; try { var r2 = vidFor(easyBackTerms(window.easyBack ? easyBack(title) : title)); if (r2) return r2; } finally { vidFor._b = 0; } }   // 🗣 쉬운 말 낱말 되돌려 한 번 더
     return f ? "vid/" + f + ".mp4?v=" + (m._v || VIDV) : ""; }
+  // 🗣 10/28 쉬운 말: 제목 그대로(새로 찍은 영상) → 바꾸기 전 글(easyBack) → 낱말 되돌림(easyBackTerms) 순서로 찾음
+  function vidFor(title){ var r = vid1(title); if (r) return r;
+    var b = window.easyBack ? easyBack(title) : title; if (b !== title && (r = vid1(b))) return r;
+    return window.easyBackTerms ? vid1(easyBackTerms(b)) : ""; }
   function vidScreen(){ var c = (typeof cur !== "undefined" && cur) || "", k = VID["m_" + (MORE_ALIAS[c] || c)] ? "m_" + (MORE_ALIAS[c] || c) : "t_" + curGrp(); return VID[k] ? "vid/" + k + ".mp4?v=" + VIDV : ""; }
   function vidHtml(vs, wait){ return vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted' + (wait ? '' : ' autoplay') + ' playsinline preload="' + (wait ? 'metadata' : 'auto') + '" controls disablepictureinpicture></video></div>' : ""; }
   var MORE_NAME = {home: "🏠 오늘", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", feed: "📰 피드", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트"};
