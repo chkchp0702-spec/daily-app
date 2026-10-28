@@ -387,7 +387,9 @@
     var KH = K ? kHold() : [], kw = KH.reduce(function(a, o){ return a + (o.w || 0); }, 0), share = (100 - kw) / 100;
     var out = CN.now.map(function(n, i){
       var pct = Math.round(n.pct * share * 10) / 10, amt = S.amt * pct / 100, items = [], kr = n.kr && px[n.kr.code];
-      if (S.mode === "kr" && n.kr){ var kp = kr && kr.px; items.push({nm: n.kr.name, code: n.kr.code, amt: amt, sh: kp ? Math.floor(amt / kp) : null, px: kp, cur: "원"}); }
+      if (n.items){ n.items.forEach(function(u){ var a3 = amt * (u.w || 0), usd3 = P.fx ? a3 / P.fx : null;    // 🧭 10/28 Q10/28-1: 현금 몫 → 자산 추세 칸(칸 안 비중대로)
+        items.push({nm: (u.name ? u.name + " " : "") + u.t, code: u.t, amt: a3, usd: usd3, sh: usd3 && u.px ? Math.floor(usd3 / u.px) : null, px: u.px, cur: "$"}); }); }
+      else if (S.mode === "kr" && n.kr){ var kp = kr && kr.px; items.push({nm: n.kr.name, code: n.kr.code, amt: amt, sh: kp ? Math.floor(amt / kp) : null, px: kp, cur: "원"}); }
       else { var u = px[n.t] || {}, usd = P.fx ? amt / P.fx : null; items.push({nm: n.t, code: n.t, amt: amt, usd: usd, sh: usd && u.px ? Math.floor(usd / u.px) : null, px: u.px, cur: "$"}); }
       return {x: {name: n.name, pct: pct}, i: i, amt: amt, items: items};
     });
@@ -407,7 +409,7 @@
     var spare = RB ? Math.max(0, (1 - share) * 100 - kw) : 0;
     out = P.hold.map(function(x, i){
       // 🅿️ 10/19 Q10/19-1: 킥 빈 자리(spare)는 현금 대신 💼 기본 칸 비중 그대로 나눠 담음 (kick.json park.on)
-      var rb0 = RB ? (RB[x.name] != null ? RB[x.name] : x.pct) : 0, PK = K && K.park && K.park.on;
+      var rb0 = RB ? (RB[x.name] != null ? RB[x.name] : x.trend ? 0 : x.pct) : 0, PK = K && K.park && K.park.on;   // 🧭 10/28: 추세 주차 칸은 💼 에만(킥 기본 칸은 규칙 비중 그대로)
       var pct = RB ? rb0 * share + (PK ? rb0 / 100 * spare : (/현금/.test(x.name) ? spare : 0)) : x.pct - (kw && /현금/.test(x.name) ? kw : 0);
       x = Object.assign({}, x, {pct: Math.round(pct * 10) / 10});
       var amt = S.amt * x.pct / 100, items = [];
@@ -418,6 +420,7 @@
       } else {
         var us = x.us.filter(function(u){ return u.px; }), each = us.length ? amt / us.length : 0;
         us.forEach(function(u){
+          if (u.w != null) each = amt * u.w;      // 🧭 자산 추세 칸: 칸 안 비중대로
           if (u.cur && u.cur !== "달러"){      // 🌏 미국 밖 종목: 원화 환산가(krw)로 주 수
             items.push({nm: u.name || u.t, code: u.t, amt: each, sh: u.krw ? Math.floor(each / u.krw) : null, px: u.px, cur: "원", fx: u.cur, r1: u.r1}); return; }
           var usd = P.fx ? each / P.fx : null;
