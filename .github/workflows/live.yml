@@ -35,6 +35,8 @@ jobs:
           if [ "$H" -lt 12 ] || [ -n "$FORCE" ]; then python live.py || echo "한국 실패"; fi
           pip install -q yfinance pandas
           python live_world.py || echo "일본·중국·홍콩·미국 실패"
+          # 🌏 10/28: 세계 지수·미국 선물·유가·금·환율(live_us_pre) — uspre.yml 예약이 실제론 5시간에 한 번꼴만 돌아 여기서 10분마다 같이
+          python live_us_pre.py || echo "🌙 세계·선물 실패"
           python focus_live.py || echo "🎯 집중 장중 실패"
           python cup_live.py || echo "☕ 돌파 임박 장중 실패"
           # 🧭 10/15: 나침반 지수·국면에 방금 값 덧입히기 (아침 한 번 받은 지수에 머물러 「−5% 횡보장」이 나왔음)
