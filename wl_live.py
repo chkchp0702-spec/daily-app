@@ -189,6 +189,33 @@ def main():
                 q["kr"] = {"c": twin[0], "n": twin[1], "p": k["p"], "chg": k["chg"], "t": k["t"]}
         out[code] = q
     fx = None
+    for u in ("https://api.stock.naver.com/marketindex/exchange/FX_USDKRW", "https://m.stock.naver.com/front-api/marketIndex/productDetail?category=exchange&reutersCode=FX_USDKRW"):
+        try:   # 💱 서울 외환시장(네이버) 먼저 — 야후 KRW=X 는 장중 값이 10원 넘게 어긋날 때가 있음
+            j = json.loads(http(u))
+            def find(o, keys):
+                if isinstance(o, dict):
+                    for k in keys:
+                        if k in o and o[k] not in (None, ""):
+                            return o[k]
+                    for v in o.values():
+                        r = find(v, keys)
+                        if r is not None:
+                            return r
+                return None
+            cp = find(j, ["closePrice", "nowValue"])
+            fl = find(j, ["fluctuations", "compareToPreviousClosePrice"])
+            ud = str(find(j, ["fluctuationsType", "compareToPreviousPrice"]) or "")
+            p_ = float(str(cp).replace(",", "")) if cp is not None else None
+            d_ = float(str(fl).replace(",", "")) if fl is not None else None
+            if d_ is not None and d_ > 0 and ("FALL" in ud.upper() or "하락" in ud or "5" == ud):
+                d_ = -d_
+            if p_ and 900 < p_ < 2500:
+                prev = p_ - d_ if d_ is not None else None
+                fx = {"p": round(p_, 2), "prev": round(prev, 2) if prev else None, "chg": round((p_ / prev - 1) * 100, 2) if prev else None, "t": NOW.strftime("%Y-%m-%d %H:%M"), "src": "naver"}
+                print("환율 네이버", fx, ud)
+                break
+        except Exception as e:
+            print("네이버 환율 실패", u, e)
     try:   # 💱 원/달러 지금 값 (10/28 「원달러 환율 저거 아니야」 — 아침 09:25 값이 그대로 쓰이던 것)
         import yfinance as yf
         d = yf.Ticker("KRW=X").history(period="5d", interval="1d")["Close"].dropna()
@@ -199,7 +226,8 @@ def main():
         prev = [v for di, v in dd if di < NOW.date()]
         prev = prev[-1] if prev else None
         t = (m.index[-1].tz_convert(KST) if len(m) else NOW).strftime("%Y-%m-%d %H:%M")
-        if 900 < last < 2500:
+        print("환율 야후", last, prev)
+        if not fx and 900 < last < 2500:
             fx = {"p": round(last, 2), "prev": round(prev, 2) if prev else None, "chg": round((last / prev - 1) * 100, 2) if prev else None, "t": t}
     except Exception as e:
         print("환율 실패", e)
