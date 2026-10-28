@@ -223,9 +223,20 @@ def sleeve():
     return out
 
 
-def themes_for(total, korean_only):
-    """total = 이 폼에서 테마 칸에 줄 비중(%) · korean_only = 국내 상장 ETF 있는 테마만(연금·퇴직연금·국내 주식)"""
+def themes_for(total, korean_only, us_first=False):
+    """total = 이 폼에서 테마 칸에 줄 비중(%) · korean_only = 국내 상장 ETF 있는 테마만(연금·퇴직연금·국내 주식·원화 투자)
+       us_first = 환전해서 투자 — 미국 상장 ETF가 있으면 그것을"""
     A = sleeve()
+    if us_first:
+        T = [t for t in A if t["us_etf"] or t["kr_etf"]]
+        s = sum(t["pct"] for t in A) or 1
+        out = []
+        for t in T:
+            x = dict(t)
+            x["w"] = round(total * t["pct"] / s, 1)
+            x["pick"] = {"code": t["us_etf"][0]["t"], "name": t["us_etf"][0]["name"], "where": "미국 상장 · 달러"} if t["us_etf"] else {"code": t["kr_etf"][0]["code"], "name": t["kr_etf"][0]["name"], "where": "국내 상장 · 원화"}
+            out.append(x)
+        return out
     T = [t for t in A if (t["kr_etf"] if korean_only else (t["kr_etf"] or t["us_etf"]))]
     s = sum(t["pct"] for t in A) or 1      # 전체 테마 기준 비율 — 담을 ETF 없는 테마 몫은 부풀리지 않고 코어로 돌림
     out = []
@@ -245,7 +256,7 @@ def theme_slot(pct, th):
 
 def theme_table(th):
     return {"title": "🧭 시황 테마 칸 — 무엇을 왜 담나", "cols": ["테마", "비중", "담을 ETF", "같은 테마 대표 종목(참고)", "최근 흐름"],
-            "rows": [[t["name"], f"{t['w']:g}%", f"{t['pick']['name']} ({t['pick']['code']})", " · ".join(t["stocks"][:3]) or "–", t["sig"]] for t in th]}
+            "rows": [[t["name"], f"{t['w']:g}%", (t['pick']['name'] if t['pick']['code'] in t['pick']['name'] else f"{t['pick']['name']} ({t['pick']['code']})"), " · ".join(t["stocks"][:3]) or "–", t["sig"]] for t in th]}
 
 
 # ───────── 1. 주식 — 국내만 ─────────
@@ -308,10 +319,15 @@ def views():
     return [{"name": r.get("name"), "pct": r.get("pct"), "t": ", ".join(r.get("t") or [])} for r in rows[:4]]
 
 
-def gl_alloc(korean_only=False):
-    """💼 기본 포트 그대로: S&P·나스닥 코어 + 🧭 시황 테마 칸 + 금 + 현금 · 한국 칸은 코어에서 떼어 줌"""
+USX = {"spx": {"code": "SPY", "name": "SPDR S&P500 ETF (SPY)", "us": "SPY"}, "ndx": {"code": "QQQ", "name": "인베스코 나스닥100 ETF (QQQ)", "us": "QQQ"},
+       "gold": {"code": "GLD", "name": "SPDR 금 ETF (GLD)", "us": "GLD"}, "cd": {"code": "SGOV", "name": "아이셰어즈 0~3개월 미국 국채 ETF (SGOV)", "us": "SGOV"}}
+
+
+def gl_alloc(korean_only=False, usd=False):
+    """💼 기본 포트 그대로: S&P·나스닥 코어 + 🧭 시황 테마 칸 + 금 + 현금 · 한국 칸은 코어에서 떼어 줌
+       usd = 환전해서 미국 상장 ETF로 (한국 칸은 원화 TIGER 200 그대로)"""
     spx, ndx, gold, cash, sl = base_now()
-    th = themes_for(sl, korean_only) if sl else []
+    th = themes_for(sl, korean_only, us_first=usd) if sl else []
     used = sum(t["w"] for t in th)
     spx, ndx = spx + (sl - used) / 2, ndx + (sl - used) / 2     # 국내 상장 ETF 없는 테마 몫은 코어로
     kr = 20 if KR_UP else 10
@@ -323,11 +339,18 @@ def gl_alloc(korean_only=False):
     al.append(slot("gold", gold, "금", "주식이 크게 빠질 때 버팀목이 되는 보험"))
     if cash:
         al.append(slot("cd", cash, "현금·단기채", "시장이 조심 구간이라 쉬어 가는 돈", "안전"))
+    if usd:
+        for a in al:
+            if a["k"] in USX:
+                a["code"], a["inst"], a["us"] = USX[a["k"]]["code"], USX[a["k"]]["name"], USX[a["k"]]["us"]
+        for a in al:
+            if a["k"] == "k200":
+                a["why"] += " · 한국 몫은 원화로 국내 계좌에서"
     return norm([a for a in al if a["pct"] > 0]), th
 
 
-def f_gl_stock():
-    al, th = gl_alloc(False)
+def f_gl_stock(usd=False):
+    al, th = gl_alloc(not usd, usd)
     gold = next((a["pct"] for a in al if a["k"] == "gold"), 0)
     cash = next((a["pct"] for a in al if a["k"] == "cd"), 0)
     tp = next((a["pct"] for a in al if a["k"] == "theme"), 0)
@@ -337,7 +360,7 @@ def f_gl_stock():
     nus = sum(1 for t in th if t["pick"]["where"].startswith("미국"))
     return {
         "key": "gl_stock", "icon": "🌏", "title": "국내 + 해외 주식 포트폴리오", "short": "국내+해외 주식", "color": "#2f6fdf",
-        "sub": "미국 지수 코어 + 한국 + 시황 테마 칸 + 금 — 매일 아침 시황 배분표 그대로",
+        "sub": ("💵 환전 투자 · 미국 상장 ETF" if usd else "💴 원화 투자 · 국내 상장 ETF") + " — 미국 지수 코어 + 한국 + 시황 테마 칸 + 금 (매일 아침 시황 배분표)",
         "fit": "한국·미국에 고루 나눠 투자하고 싶은 고객 · 장기 자산 증식",
         "headline": f"미국 지수 {us:g}% · 한국 {kr:g}%" + (f" · 🧭 시황 테마 {tp:g}%" if tp else "") + f" · 금 {gold:g}%" + (f" · 현금 {cash:g}%" if cash else "") + " 제안임",
         "points": [
@@ -345,16 +368,20 @@ def f_gl_stock():
             "뼈대 80%는 미국 두 지수(S&P500·나스닥100) + 한국 — 한 회사·한 업종에 몰리지 않게 함",
             (f"🧭 시황 테마 {tp:g}%는 매일 아침 리포트가 「돈이 몰리는 곳」으로 고른 {len(th)}개 테마를 ETF로 담음 — 리포트 의견이 바뀌면 비중도 같이 바뀜") if th else "오늘은 시황 테마 칸이 비어 있음",
             f"한국은 {'추세가 살아 있어' if KR_UP else '추세 회복 전이라'} {kr:g}%만 · 금 {gold:g}%로 큰 하락에 대비함",
-            ("대부분 국내 상장 ETF로 원화 매매 · " + (f"테마 {nus}개는 미국 상장 ETF라 해외주식 계좌가 필요함" if nus else "전부 원화로 바로 사고팔 수 있음")),
+            ("💵 환전해서 미국 상장 ETF로 직접 — 달러로 보유 · 매매차익은 양도소득세 22%(연 250만원 공제 · 분리과세)라 금융소득종합과세에 안 잡힘" if usd else
+             "💴 원화로 국내 상장 ETF만 — 환전 없이 원화로 바로 사고팖 · 매매차익·분배금은 배당소득세 15.4%(금융소득종합과세 대상)"),
         ],
         "alloc": al, "themes": th,
         "table": theme_table(th) if th else None,
         "chart": {"type": "donut"},
-        "risks": ["해외 ETF는 환율이 오르내리면 원화 수익도 같이 변함 (원화가 강해지면 손해)",
+        "risks": ["해외 자산은 환율이 오르내리면 원화 수익도 같이 변함 (원화가 강해지면 손해) — 원화 투자도 똑같음",
                   "주식 비중 " + f"{eq:g}%" + "는 공격적인 편임 — 1년에 −20% 이상도 가능",
                   "테마 칸은 업종이 몰려 있어 지수보다 크게 출렁임 · 8주마다 지수보다 나았는지 점검해 늘리거나 줄임",
                   "배분은 매일 시황 규칙으로 바뀔 수 있음 (S&P500 200일선 아래 3일이면 현금 확대)"],
-        "tags": ["시황 배분표", "코어 80 + 테마 20", "🟢 상승장" if US_UP else "🔴 조심"],
+        "tags": ["💵 환전 · 미국 상장" if usd else "💴 원화 · 국내 상장", "코어 80 + 테마 20", "🟢 상승장" if US_UP else "🔴 조심"],
+        "mode": "usd" if usd else "krw",
+        "taxbox": (["매매차익: 양도소득세 22% · 해마다 이익−손실 합산 250만원까지 공제 · 분리과세(금융소득종합과세 안 됨)", "배당: 미국에서 15% 떼고 들어옴", "환전 수수료가 들고, 미국 장 시간(한국 밤)에 거래", "달러로 들고 있어 원화로 바꿀 때를 고를 수 있음"] if usd else
+                   ["매매차익·분배금: 배당소득세 15.4% · 금융소득 연 2,000만원 넘으면 종합과세", "환전 없이 원화로 낮(한국 장)에 바로 거래", "연금저축·IRP에도 같은 상품을 담을 수 있음", "환율 영향은 똑같이 받음(환노출)"]),
     }
 
 
@@ -683,6 +710,9 @@ def main():
     for f in (f_kr_stock, f_gl_stock, f_pension, f_dc, f_irp, f_ktb, f_ust, f_brl, f_els):
         try:
             x = f()
+            if f is f_gl_stock:       # 10/29 사용자 「원화로 할지 환전해서 할지 물어보고 ETF·종목을 맞춰」
+                u = f_gl_stock(True)
+                x["alt"] = {"usd": {k2: u[k2] for k2 in ("sub", "headline", "points", "alloc", "themes", "table", "tags", "mode", "taxbox", "risks")}}
             if x and x.get("alloc"):
                 forms.append(x)
         except Exception as e:

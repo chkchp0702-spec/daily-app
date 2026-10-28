@@ -9,8 +9,34 @@
   var ST = {sel: [], amt: {}, cust: "", busy: false};
   var ME = {};
   try { ME = JSON.parse(localStorage.getItem("propme") || "{}") || {}; } catch(x) {}
-  try { var s0 = JSON.parse(localStorage.getItem("propsel") || "{}"); if (s0 && s0.sel) { ST.sel = s0.sel; ST.amt = s0.amt || {}; } } catch(x) {}
-  function keep(){ try { localStorage.setItem("propme", JSON.stringify(ME)); localStorage.setItem("propsel", JSON.stringify({sel: ST.sel, amt: ST.amt})); } catch(x) {} }
+  ST.opt = {};   // 10/29 사용자 — 종목마다 {mode: "krw"|"usd", must: [{name, code, mkt, etf, pct}]}
+  try { var s0 = JSON.parse(localStorage.getItem("propsel") || "{}"); if (s0 && s0.sel) { ST.sel = s0.sel; ST.amt = s0.amt || {}; ST.opt = s0.opt || {}; } } catch(x) {}
+  function keep(){ try { localStorage.setItem("propme", JSON.stringify(ME)); localStorage.setItem("propsel", JSON.stringify({sel: ST.sel, amt: ST.amt, opt: ST.opt})); } catch(x) {} }
+  var EQ = {kr_stock: 1, gl_stock: 1, pension: 1, dc: 1, irp: 1};
+  var MCOL = ["#c9962b", "#b5651d", "#8e44ad", "#16a085", "#c0392b", "#2c3e50"];
+  function opt(k){ ST.opt[k] = ST.opt[k] || {mode: "krw", must: []}; if (!ST.opt[k].must) ST.opt[k].must = []; return ST.opt[k]; }
+  // 고른 방식(원화/환전) + 꼭 넣을 종목을 기본폼에 덧입힌 「이 고객용」 폼
+  function formX(k){
+    var f0 = form(k); if (!f0) return null;
+    var o = ST.opt[k] || {}, f = JSON.parse(JSON.stringify(f0));
+    if (k === "gl_stock" && o.mode === "usd" && f.alt && f.alt.usd){ var u = f.alt.usd; for (var q in u) f[q] = u[q]; }
+    var must = (o.must || []).filter(function(m){ return m && m.name && +m.pct > 0; });
+    if (!must.length || !EQ[k]) return f;
+    var R0 = f.alloc.filter(function(a){ return a.kind === "위험"; }).reduce(function(s2, a){ return s2 + a.pct; }, 0) || 1;
+    var want = must.reduce(function(s2, m){ return s2 + (+m.pct); }, 0), M = Math.min(want, R0 * 0.6), sc = M / (want || 1), fac = (R0 - M) / R0;
+    f.alloc.forEach(function(a){ if (a.kind === "위험") a.pct = Math.round(a.pct * fac * 10) / 10; });
+    (f.themes || []).forEach(function(t){ t.w = Math.round(t.w * fac * 10) / 10; });
+    var ins = must.map(function(m, i){ return {k: "must", pct: Math.round(m.pct * sc * 10) / 10, name: "⭐ " + m.name, inst: m.name + (m.mkt ? " · " + m.mkt : ""), code: m.code || null, kind: "위험", color: MCOL[i % MCOL.length],
+      why: "고객님 요청으로 꼭 담는 " + (m.etf ? "ETF" : "종목") }; });
+    var diff = Math.round((100 - f.alloc.concat(ins).reduce(function(s2, a){ return s2 + a.pct; }, 0)) * 10) / 10;
+    var big = f.alloc.filter(function(a){ return a.kind === "위험"; }).sort(function(a, b){ return b.pct - a.pct; })[0]; if (big) big.pct = Math.round((big.pct + diff) * 10) / 10;
+    f.alloc = ins.concat(f.alloc);
+    var Mt = Math.round(ins.reduce(function(s2, a){ return s2 + a.pct; }, 0) * 10) / 10;
+    f.must = ins; f.headline = "⭐ 고객 지정 " + pc(Mt) + " + " + f.headline;
+    f.points = ["⭐ 고객님이 꼭 원하신 " + ins.map(function(a){ return a.inst.split(" · ")[0]; }).join(" · ") + "을(를) 먼저 " + pc(Mt) + " 담고, 나머지 주식 칸을 같은 비율로 줄여 맞춤"].concat(f.points || []);
+    if (f.sim && f.sim.note) f.sim.note += " · ⭐ 고객 지정 종목은 과거 계산에서 빼고 제안 배분 기준";
+    return f;
+  }
   var FONT = '"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR",sans-serif';
   var NAVY = "#14304f", INK = "#1d2533", SUB = "#5b6576", LINE = "#e3e7ee", BG = "#f5f7fb", UP = "#d6402f", DN = "#2a62c9";
 
@@ -192,7 +218,7 @@
     return null;
   }
   function model(){
-    var items = ST.sel.map(function(k){ var f = form(k); return f ? {f: f, amt: amtOf(k)} : null; }).filter(Boolean);
+    var items = ST.sel.map(function(k){ var f = formX(k); return f ? {f: f, amt: amtOf(k)} : null; }).filter(Boolean);
     return {cust: (ST.cust || "").trim(), pb: (ME.pb || "").trim(), org: (ME.org || "").trim(), date: dlabel(), items: items,
             total: items.reduce(function(s, x){ return s + x.amt; }, 0), notice: DATA.notice || [], basis: DATA.basis || ""};
   }
@@ -235,6 +261,9 @@
   function onePageExtra(f, amt, multi){
     var S = f.sim; if (!S || !amt || multi) return "";
     var o = "";
+    if (f.must && f.must.length) o += '<div style="margin:0 26px 16px;background:#fffaee;border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:8px">⭐ 고객님이 꼭 원하신 종목·ETF</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      f.must.map(function(a){ return '<span style="background:#fff;border:1px solid ' + LINE + ';border-left:6px solid ' + a.color + ';border-radius:12px;padding:8px 12px;font-size:22px"><b>' + e(a.inst.split(" · ")[0]) + '</b> ' + pc(a.pct) + ' <span style="color:' + NAVY + ';font-weight:800">' + man(amt * a.pct / 100) + '</span></span>'; }).join("") + '</div></div>';
+    if (f.mode) o += '<div style="margin:0 26px 16px;font-size:21px;color:' + INK + '">' + (f.mode === "usd" ? "💵 <b>환전해서</b> 미국 상장 ETF로 — 매매차익 분리과세 22%(250만원 공제)" : "💴 <b>원화로</b> 국내 상장 ETF로 — 환전 없이 바로 · 배당소득세 15.4%") + '</div>';
     if (f.themes && f.themes.length) o += '<div style="margin:0 26px 16px;background:#fff7ef;border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:8px">🧭 시황 테마 칸 — 리포트가 고른 「돈이 몰리는 곳」</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
       f.themes.map(function(t){ return '<span style="background:#fff;border:1px solid ' + LINE + ';border-left:6px solid ' + t.color + ';border-radius:12px;padding:8px 12px;font-size:21px"><b>' + e(t.name) + '</b> ' + pc(t.w) + ' <span style="color:' + NAVY + ';font-weight:800">' + man(amt * t.w / 100) + '</span><br><span style="font-size:17px;color:' + SUB + '">' + e(t.pick.name) + '</span></span>'; }).join("") + '</div></div>';
     if (S.kind === "equity"){
@@ -362,6 +391,25 @@
     if (!c.length) return "";
     return '<div style="display:flex;gap:10px">' + c.map(function(x){ return '<div style="flex:1;border:1.5px solid ' + LINE + ';border-top:4px solid ' + x[2] + ';border-radius:12px;padding:10px 13px;color:' + INK + '"><div style="font-size:12.5px;color:' + SUB + ';font-weight:700">' + e(x[0]) + '</div><div style="font-size:25px;font-weight:800;color:' + x[2] + ';letter-spacing:-0.6px">' + e(x[1]) + '</div><div style="font-size:11.5px;color:' + SUB + '">' + e(x[3]) + '</div></div>'; }).join("") + '</div>';
   }
+  function pkn(p){ return p.name.indexOf(p.code) >= 0 ? p.name : p.name + " (" + p.code + ")"; }
+  // ⭐ 고객 지정 · 💱 원화 vs 환전
+  function mustBlocks(f, x){
+    var B = [], A = x.amt;
+    if (f.must && f.must.length){ var Mt = Math.round(f.must.reduce(function(s2, a){ return s2 + a.pct; }, 0) * 10) / 10;
+      B.push('<!--K-->' + secT("⭐ 고객님이 꼭 원하신 종목·ETF " + pc(Mt) + (A ? " · " + man(A * Mt / 100) : ""), f.color) +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap">' + f.must.map(function(a){ return '<div style="flex:1 1 30%;min-width:180px;border:1px solid ' + LINE + ';border-top:5px solid ' + a.color + ';border-radius:12px;padding:10px 12px;color:' + INK + '"><div style="font-size:15px;font-weight:800">' + e(a.inst.split(" · ")[0]) + '</div>' +
+          '<div style="font-size:11.5px;color:' + SUB + '">' + e([a.code, a.inst.split(" · ")[1]].filter(Boolean).join(" · ") || "직접 입력") + '</div><div style="display:flex;justify-content:space-between;margin-top:6px"><b style="font-size:20px;color:' + a.color + '">' + pc(a.pct) + '</b>' + (A ? '<b style="font-size:15px;color:' + NAVY + '">' + man(A * a.pct / 100) + '</b>' : '') + '</div></div>'; }).join("") + '</div>' +
+        '<div style="font-size:12px;color:' + SUB + ';margin-top:6px;line-height:1.5">고객님 요청으로 먼저 담고 나머지 주식 칸을 같은 비율로 줄였음 · 개별 종목은 한 회사 소식에 크게 흔들리므로 비중을 너무 키우지 않는 것을 권함</div>');
+    }
+    if (f.taxbox && f.taxbox.length){ var usd = f.mode === "usd", f0 = form(f.key) || {}, other = usd ? f0 : (f0.alt || {}).usd || {};
+      B.push('<!--K-->' + secT("💱 " + (usd ? "💵 환전해서 투자" : "💴 원화로 투자") + "하는 방식 — 세금·거래", f.color) + '<div style="display:flex;gap:12px">' +
+        box('<div style="font-size:14px;font-weight:800;margin-bottom:4px;color:' + NAVY + '">✅ 이번 제안: ' + (usd ? "미국 상장 ETF (달러)" : "국내 상장 ETF (원화)") + '</div>' + f.taxbox.map(function(t){ return '<div style="font-size:12.5px;line-height:1.5;padding:3px 0">· ' + e(t) + '</div>'; }).join(""), "flex:1;background:#eef4ff") +
+        (other.taxbox ? box('<div style="font-size:14px;font-weight:800;margin-bottom:4px;color:' + SUB + '">다른 방식: ' + (usd ? "국내 상장 ETF (원화)" : "미국 상장 ETF (달러)") + '</div>' + other.taxbox.map(function(t){ return '<div style="font-size:12.5px;line-height:1.5;padding:3px 0;color:' + SUB + '">· ' + e(t) + '</div>'; }).join("") +
+          '<div style="font-size:12px;margin-top:6px;color:' + INK + '"><b>이렇게 고름</b> — 금융소득이 연 2,000만원 넘는 분·매매차익이 큰 분은 환전(분리과세 22%)이, 연금 계좌·소액·원화 편의는 원화(국내 상장)가 유리함</div>', "flex:1") : '') + '</div>' +
+        '<div style="font-size:11.5px;color:' + SUB + ';margin-top:5px">2026년 현행 세법 기준 · 개인 기준 · 바뀔 수 있음</div>');
+    }
+    return B;
+  }
   // 🧭 시황 테마 칸 — 테마마다 카드 (10/29 사용자 「지수 위주로만 단조롭지 않아?」)
   function themeBlocks(f, x){
     var th = f.themes || []; if (!th.length) return [];
@@ -373,7 +421,7 @@
         '<span style="margin-left:auto;font-size:17px;font-weight:900;color:' + t.color + '">' + pc(t.w) + '</span>' + (A ? '<span style="font-size:12.5px;font-weight:800;color:' + NAVY + '">' + man(A * t.w / 100) + '</span>' : '') + '</div>' +
         '<div style="font-size:12.5px;line-height:1.45;margin-top:3px">' + e(t.txt) + '</div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;font-size:11.5px">' +
-          '<span style="background:' + BG + ';border-radius:8px;padding:3px 8px"><b>담을 ETF</b> ' + e(t.pick.name) + ' (' + e(t.pick.code) + ') · <span style="color:' + SUB + '">' + e(t.pick.where) + '</span></span>' +
+          '<span style="background:' + BG + ';border-radius:8px;padding:3px 8px"><b>담을 ETF</b> ' + e(pkn(t.pick)) + ' · <span style="color:' + SUB + '">' + e(t.pick.where) + '</span></span>' +
           (t.stocks && t.stocks.length ? '<span style="background:' + BG + ';border-radius:8px;padding:3px 8px"><b>대표 종목</b> ' + e(t.stocks.slice(0, 3).join(" · ")) + '</span>' : '') + '</div>' +
         '<div style="font-size:11.5px;color:' + SUB + ';margin-top:5px">📈 ' + e(t.sig_txt) + (t.ret != null ? ' · 리포트 의견대로 ' + e(String(t.since || "").slice(5).replace("-", "/")) + '부터 ' + sgn(t.ret, 1) : '') + '</div></div>'; });
     var head = '<!--K-->' + secT("🧭 시황 테마 칸 " + pc(tp) + (A ? " · " + man(A * tp / 100) : "") + " — 매일 아침 리포트가 고른 「돈이 몰리는 곳」", f.color) +
@@ -577,7 +625,7 @@
     m.items.forEach(function(x){ var f = x.f;
       var mb = f.mkt ? mktBlocks(f) : [], sb = scenBlock(f);
       if (sb){ var oi = -1; mb.forEach(function(h2, i2){ if (h2.indexOf("🔭") >= 0 && oi < 0) oi = i2; }); if (oi < 0) mb.push(sb); else mb.splice(oi, 0, sb); }
-      groups.push({color: f.color, blocks: propBlocks(f, x).concat(themeBlocks(f, x)).concat(cardBlocks(f, x)).concat(mb).concat(simBlocks(f, x.amt)).concat(detailBlocks(f, x)).concat(careBlocks(f))}); });
+      groups.push({color: f.color, blocks: propBlocks(f, x).concat(mustBlocks(f, x)).concat(themeBlocks(f, x)).concat(cardBlocks(f, x)).concat(mb).concat(simBlocks(f, x.amt)).concat(detailBlocks(f, x)).concat(careBlocks(f))}); });
     groups.push({color: NAVY, blocks: noticeBlocks(m)});
     var pages = pack(groups), of = pages.length + 1;
     return [coverPage(m)].concat(pages.map(function(p, i){ return pageFrom(p, i + 2, of, m); }));
@@ -750,9 +798,14 @@
             colChart(s, "해마다 수익률 (%)", b.years.map(function(y){ return {l: String(y[0]).slice(2), v: y[1]}; }), 7.1, 4.75, 5.7, 2.1);
           }
         }
+        if ((f.must && f.must.length) || f.taxbox){ s = P.addSlide(); head(s, (f.must && f.must.length ? "⭐ 고객 지정 종목 · " : "") + "💱 " + (f.mode === "usd" ? "환전해서 투자 (미국 상장)" : "원화로 투자 (국내 상장)"), "세금·거래 방식", f.color);
+          var yy2 = 1.4;
+          if (f.must && f.must.length){ s.addTable([th(["종목·ETF", "코드 · 시장", "비중", "금액"])].concat(f.must.map(function(a){ return [{text: a.inst.split(" · ")[0], options: {bold: true, color: hx(a.color)}}, [a.code, a.inst.split(" · ")[1]].filter(Boolean).join(" · ") || "직접 입력", pc(a.pct), A ? man(A * a.pct / 100) : "–"]; })), {x: 0.6, y: yy2, w: 12.1, colW: [4.2, 3.5, 1.6, 2.8], fontFace: F, fontSize: 11, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"}); yy2 += 0.42 * (f.must.length + 1) + 0.3; }
+          if (f.taxbox){ rbox(s, 0.6, yy2, 12.1, Math.min(3.2, 6.9 - yy2), "#EEF4FF"); T(s, [{text: (f.mode === "usd" ? "환전해서 미국 상장 ETF로" : "원화로 국내 상장 ETF로"), options: {bold: true, breakLine: true, color: hx(NAVY)}}].concat(f.taxbox.map(function(t){ return {text: t, options: {bullet: true, breakLine: true}}; })).concat([{text: "금융소득 연 2,000만원 넘는 분·매매차익이 큰 분은 환전(분리과세)이, 연금 계좌·소액·원화 편의는 원화가 유리함", options: {color: "5B6576"}}]), {x: 0.8, y: yy2 + 0.15, w: 11.7, h: Math.min(3.2, 6.9 - yy2) - 0.3, fontSize: 12, paraSpaceAfter: 5}); }
+        }
         if (f.themes && f.themes.length){ s = P.addSlide(); var tpp = ((f.alloc || []).filter(function(a){ return a.k === "theme"; })[0] || {}).pct || 0;
           head(s, "🧭 시황 테마 칸 " + pc(tpp) + " — 리포트가 고른 「돈이 몰리는 곳」", "돈은 ETF로 · 대표 종목은 참고 · 리포트 의견이 바뀌면 비중도 바뀜", f.color);
-          s.addTable([th(["테마", "비중", "금액", "담을 ETF", "왜", "대표 종목(참고)", "흐름"])].concat(f.themes.map(function(t){ return [{text: t.name, options: {bold: true, color: hx(t.color)}}, pc(t.w), A ? man(A * t.w / 100) : "–", t.pick.name + " (" + t.pick.code + ")\n" + t.pick.where, t.txt, (t.stocks || []).slice(0, 3).join(" · "), t.sig]; })),
+          s.addTable([th(["테마", "비중", "금액", "담을 ETF", "왜", "대표 종목(참고)", "흐름"])].concat(f.themes.map(function(t){ return [{text: t.name, options: {bold: true, color: hx(t.color)}}, pc(t.w), A ? man(A * t.w / 100) : "–", pkn(t.pick) + "\n" + t.pick.where, t.txt, (t.stocks || []).slice(0, 3).join(" · "), t.sig]; })),
             {x: 0.6, y: 1.4, w: 12.1, colW: [1.4, 0.7, 1.1, 2.6, 3.4, 2.0, 0.9], fontFace: F, fontSize: 9.5, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"});
         }
         // 10/28 「우와」 — 주식: 비교·위기·속 들여다보기 / 외화채: 환율 × 금리 표
@@ -821,7 +874,7 @@
     h += '<section data-xc="1" class="card"><h3>💰 상품별 금액</h3>' + (ST.sel.length ? ST.sel.map(function(k){ var f = form(k), v = ST.amt[k] || "";
         return '<div class="pp-amt" style="--fc:' + f.color + '"><div class="pp-an"><span>' + e(f.icon) + '</span><b>' + e(f.short) + '</b><span class="pp-aw" id="ppw_' + k + '">' + (v ? man(v * 10000) : "") + '</span></div>' +
           '<div class="pp-ar"><input inputmode="numeric" data-ak="' + k + '" placeholder="금액 (만원)" value="' + e(v) + '"><span>만원</span></div>' +
-          '<div class="pp-q">' + AMTS.map(function(a){ return '<button type="button" data-qk="' + k + '" data-qv="' + a[0] + '"' + (+v === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div></div>'; }).join("") +
+          '<div class="pp-q">' + AMTS.map(function(a){ return '<button type="button" data-qk="' + k + '" data-qv="' + a[0] + '"' + (+v === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div>' + optUI(k, f) + '</div>'; }).join("") +
         '<div class="pp-tot">합계 <b id="pptot">' + (total() ? man(total()) : "–") + '</b></div>'
       : '<p class="mut">위에서 상품을 먼저 골라 주세요.</p>') + '</section>';
     h += '<section data-xc="1" class="card"><h3>📤 만들기</h3><p class="pp-tip" style="margin-top:-4px">휴대폰에서 바로 만듦 · 돈 안 듦</p><div class="pp-go">' +
@@ -833,6 +886,40 @@
     w.innerHTML = h;
     bind(); preview();
   }
+  var MKT = {KR: "한국", US: "미국", JP: "일본", CN: "중국", HK: "홍콩"};
+  function optUI(k, f){
+    if (!EQ[k]) return "";
+    var o = opt(k), h2 = "";
+    if (k === "gl_stock") h2 += '<div class="pp-ol">💱 해외 투자는 어떻게?</div><div class="pp-md">' +
+      [["krw", "💴 원화로", "국내 상장 ETF · 환전 없음"], ["usd", "💵 환전해서", "미국 상장 ETF · 달러로"]].map(function(x){ return '<button type="button" data-md="' + x[0] + '" data-mk2="' + k + '"' + (o.mode === x[0] ? ' class="on"' : '') + '><b>' + x[1] + '</b><small>' + x[2] + '</small></button>'; }).join("") + '</div>';
+    var only = {pension: 1, dc: 1, irp: 1}[k];
+    h2 += '<div class="pp-ol">⭐ 꼭 넣을 종목·ETF <span class="mut">(고객 요청 · 있으면)</span></div>' +
+      (o.must || []).map(function(m, i){ return '<div class="pp-mu"><span class="pp-mn"><b>' + e(m.name) + '</b>' + (m.code ? ' <small>' + e(m.code) + (m.mkt ? " · " + e(m.mkt) : "") + '</small>' : '') + '</span>' +
+        '<input inputmode="decimal" data-mp="' + k + '" data-mi="' + i + '" value="' + e(m.pct) + '"><span>%</span><button type="button" data-mx="' + k + '" data-mi="' + i + '" aria-label="빼기">✕</button></div>'; }).join("") +
+      '<div class="pp-ms"><input data-ms="' + k + '" placeholder="' + (only ? "예: KODEX 200, TIGER 미국배당다우존스" : k === "gl_stock" && o.mode === "usd" ? "예: 엔비디아, AAPL, SCHD" : "예: 삼성전자, SK하이닉스, KODEX 200") + '" autocomplete="off"><button type="button" data-ma="' + k + '">더하기</button></div><div class="pp-sg" id="ppsg_' + k + '"></div>' +
+      '<p class="pp-tip" style="margin:4px 0 0">' + (only ? "연금·퇴직연금 계좌는 국내 상장 ETF만 담을 수 있음 (개별 주식·해외 상장 불가)" : "넣은 만큼 나머지 주식 칸을 같은 비율로 줄여 맞춤 · 비중은 % (주식 칸의 60%까지)") + '</p>';
+    return '<div class="pp-op">' + h2 + '</div>';
+  }
+  var sgT = null;
+  function suggest(k, q){
+    var box3 = document.getElementById("ppsg_" + k); if (!box3) return;
+    if (!q || typeof opLoadIdx !== "function"){ box3.innerHTML = ""; box3._r = null; return; }
+    clearTimeout(sgT); sgT = setTimeout(function(){
+      opLoadIdx().then(function(){ var r = (typeof opSearch === "function" ? opSearch(q) : []).slice(0, 8), o = opt(k), krFirst = {pension: 1, dc: 1, irp: 1, kr_stock: 1}[k] || (k === "gl_stock" && o.mode !== "usd");
+        if (krFirst) r = r.filter(function(x){ return x.mkt === "KR"; }).concat(r.filter(function(x){ return x.mkt !== "KR"; }));
+        r = r.slice(0, 6);
+        box3.innerHTML = r.map(function(x, i){ return '<button type="button" data-sk="' + k + '" data-si="' + i + '"><b>' + e(x.name) + '</b> <small>' + e(x.sym.replace(/\.(KS|KQ)$/, "")) + ' · ' + (MKT[x.mkt] || x.mkt) + (x.etf ? " · ETF" : "") + '</small></button>'; }).join("");
+        box3._r = r;
+      }).catch(function(){ box3.innerHTML = ""; });
+    }, 180);
+  }
+  function addMust(k, m){
+    var o = opt(k); if (!m || !m.name) return;
+    if ({pension: 1, dc: 1, irp: 1}[k] && ((m.mkt && m.mkt !== "한국") || m.etf === false)) toast("연금·퇴직연금은 국내 상장 ETF만 담을 수 있어요 — 확인 후 쓰세요");
+    o.must = (o.must || []).concat([{name: m.name, code: m.code || "", mkt: m.mkt || "", etf: !!m.etf, pct: 10}]).slice(0, 6); keep(); resetBtns();
+    var y = window.scrollY; draw(); window.scrollTo(0, y);
+  }
+  function pickR(r){ return {name: r.name, code: r.sym.replace(/\.(KS|KQ)$/, ""), mkt: MKT[r.mkt] || r.mkt, etf: r.etf}; }
   var pvT = null;
   function preview(){
     clearTimeout(pvT); pvT = setTimeout(function(){
@@ -854,6 +941,16 @@
     [].forEach.call(w.querySelectorAll("[data-qk]"), function(b){ b.onclick = function(){ var k = b.dataset.qk; ST.amt[k] = +b.dataset.qv; keep(); var inp = w.querySelector('[data-ak="' + k + '"]'); if (inp) inp.value = ST.amt[k];
       [].forEach.call(b.parentNode.children, function(x){ x.classList.toggle("on", x === b); }); upAmt(k); }; });
     [].forEach.call(w.querySelectorAll("[data-mk]"), function(b){ b.onclick = function(){ make(b.dataset.mk, b); }; });
+    var redraw = function(){ var y = window.scrollY; draw(); window.scrollTo(0, y); };
+    [].forEach.call(w.querySelectorAll("[data-md]"), function(b){ b.onclick = function(){ opt(b.dataset.mk2).mode = b.dataset.md; keep(); resetBtns(); redraw(); }; });
+    [].forEach.call(w.querySelectorAll("[data-mx]"), function(b){ b.onclick = function(){ opt(b.dataset.mx).must.splice(+b.dataset.mi, 1); keep(); resetBtns(); redraw(); }; });
+    [].forEach.call(w.querySelectorAll("[data-mp]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d.]/g, ""); if (v !== inp.value) inp.value = v; opt(inp.dataset.mp).must[+inp.dataset.mi].pct = +v || 0; keep(); preview(); }; });
+    [].forEach.call(w.querySelectorAll("[data-ms]"), function(inp){ inp.oninput = function(){ suggest(inp.dataset.ms, inp.value.trim()); };
+      inp.onkeydown = function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); var b2 = w.querySelector('[data-ma="' + inp.dataset.ms + '"]'); if (b2) b2.click(); } }; });
+    [].forEach.call(w.querySelectorAll("[data-ma]"), function(b){ b.onclick = function(){ var k = b.dataset.ma, inp = w.querySelector('[data-ms="' + k + '"]'), v = inp && inp.value.trim(); if (!v) return;
+      var bx = document.getElementById("ppsg_" + k), r = bx && bx._r && bx._r[0];
+      addMust(k, r ? pickR(r) : {name: v}); }; });
+    [].forEach.call(w.querySelectorAll(".pp-sg"), function(bx){ bx.onclick = function(ev){ var t = ev.target.closest && ev.target.closest("[data-sk]"); if (!t || !bx._r) return; var r = bx._r[+t.dataset.si]; if (r) addMust(t.dataset.sk, pickR(r)); }; });
     var cp = document.getElementById("ppprc"); if (cp) cp.onclick = function(){ var t = PPT_PROMPT, ok = function(){ cp.textContent = "✓ 복사했어요"; setTimeout(function(){ cp.textContent = "📋 문구 복사"; }, 2000); };
       try { navigator.clipboard.writeText(t).then(ok, function(){ fallback(); }); } catch(x) { fallback(); }
       function fallback(){ var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch(y) {} ta.remove(); } };
@@ -886,7 +983,7 @@
   var READY = {};
   function make(kind, btn){
     if (!ST.sel.length){ toast("상품을 먼저 골라 주세요"); return; }
-    var m = model(), sig = JSON.stringify([kind, ST.sel, ST.amt, ST.cust, ME.pb, ME.org, DATA.at]);
+    var m = model(), sig = JSON.stringify([kind, ST.sel, ST.amt, ST.opt, ST.cust, ME.pb, ME.org, DATA.at]);
     if (READY[kind] && READY[kind].sig === sig){ var R = READY[kind]; shareBlob(R.blob, R.name, R.mime); return; }   // 두 번째 누름 = 저장·공유 (아이폰은 누른 순간에만 공유창이 열림)
     if (ST.busy) return; ST.busy = true;
     var st = document.getElementById("ppst"), old = btn.innerHTML;
@@ -910,7 +1007,7 @@
     b.innerHTML = BTNL[b.dataset.mk]; }); var st = document.getElementById("ppst"); if (st) st.textContent = ""; }
 
   // 시험·다른 화면에서 쓰도록
-  window.PROPOSE = {load: load, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; },
+  window.PROPOSE = {load: load, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.opt) ST.opt = o.opt; },
     png: function(){ return makePng(model()); }, pdf: function(){ return makePdf(model()); }, ppt: function(){ return makePpt(model()); }, pptimg: function(){ return makePptImg(model()); }, onePage: function(){ return onePage(model()); }, pages: function(){ return fullPages(model()); }};
 
   var css = document.createElement("style");
@@ -931,6 +1028,14 @@
     ".pp-go{display:grid;gap:8px}.pp-go button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit;font-size:15.5px;font-weight:800}" +
     ".pp-go button small{font-size:11.5px;color:var(--sub);font-weight:500}.pp-go button.main{background:var(--c,#7c9cff);color:#111;border-color:transparent}.pp-go button.main small{color:rgba(0,0,0,.65)}" +
     ".pp-go button.ready{background:#22a06b;color:#fff;border-color:transparent}.pp-go button.ready small{color:rgba(255,255,255,.85)}.pp-go button:disabled{opacity:.7}" +
+    ".pp-op{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.pp-ol{font-size:12.5px;font-weight:800;margin:8px 0 5px}" +
+    ".pp-md{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pp-md button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px 10px;font:inherit}" +
+    ".pp-md button small{font-size:11px;color:var(--sub)}.pp-md button.on{border-color:var(--fc);box-shadow:inset 0 0 0 1px var(--fc)}" +
+    ".pp-mu{display:flex;align-items:center;gap:6px;margin:5px 0}.pp-mn{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pp-mn small{color:var(--sub)}" +
+    ".pp-mu input{width:58px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;font-size:16px;padding:6px 8px;text-align:right}.pp-mu button{border:0;background:transparent;color:var(--sub);font-size:16px;padding:4px 6px}" +
+    ".pp-ms{display:flex;gap:6px}.pp-ms input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:12px;color:var(--text);font:inherit;font-size:16px;padding:9px 11px}" +
+    ".pp-ms button{flex:none;border:0;border-radius:12px;padding:0 14px;font:inherit;font-weight:800;background:var(--fc);color:#fff}" +
+    ".pp-sg{display:flex;flex-direction:column}.pp-sg button{text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:13.5px;padding:8px 4px}.pp-sg small{color:var(--sub)}" +
     ".pp-help{margin:10px 0 2px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font-size:13px}.pp-help summary{padding:10px 0;font-weight:800;cursor:pointer}" +
     ".pp-hb{padding:0 0 12px;line-height:1.55}.pp-hb ul{margin:4px 0 10px;padding-left:18px}.pp-hb li{margin:3px 0}" +
     ".pp-pr{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}.pp-pr pre{white-space:pre-wrap;margin:0 0 8px;font:inherit;font-size:12px;line-height:1.5}" +
