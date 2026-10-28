@@ -235,6 +235,8 @@
   function onePageExtra(f, amt, multi){
     var S = f.sim; if (!S || !amt || multi) return "";
     var o = "";
+    if (f.themes && f.themes.length) o += '<div style="margin:0 26px 16px;background:#fff7ef;border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:8px">🧭 시황 테마 칸 — 리포트가 고른 「돈이 몰리는 곳」</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      f.themes.map(function(t){ return '<span style="background:#fff;border:1px solid ' + LINE + ';border-left:6px solid ' + t.color + ';border-radius:12px;padding:8px 12px;font-size:21px"><b>' + e(t.name) + '</b> ' + pc(t.w) + ' <span style="color:' + NAVY + ';font-weight:800">' + man(amt * t.w / 100) + '</span><br><span style="font-size:17px;color:' + SUB + '">' + e(t.pick.name) + '</span></span>'; }).join("") + '</div></div>';
     if (S.kind === "equity"){
       if (S.look) o += '<div style="margin:0 26px 16px;background:' + BG + ';border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:8px">🔍 실제로 담기는 회사 TOP 5 (' + S.look.n + '개 회사에 나눠 담김)</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
         S.look.top.slice(0, 5).map(function(t){ return '<span style="background:#fff;border:1px solid ' + LINE + ';border-radius:12px;padding:8px 12px;font-size:21px"><b>' + e(t.n) + '</b> <span style="color:' + NAVY + ';font-weight:800">' + man(amt * t.w / 100) + '</span></span>'; }).join("") + '</div></div>';
@@ -359,6 +361,27 @@
       c = [[b.from.slice(0, 4) + "년부터 연평균", "연 " + b.cagr + "%", NAVY, "이 비중을 그대로 유지했다면"], ["1년 들고 있으면 이익 날 확률", b.y1.pos + "%", "#1a8a5a", "5년이면 " + (b.y5 ? b.y5.pos : "–") + "%"], ["최악일 때 하락", sgn(b.mdd, 1), UP, "2008년 금융위기 포함"]]; }
     if (!c.length) return "";
     return '<div style="display:flex;gap:10px">' + c.map(function(x){ return '<div style="flex:1;border:1.5px solid ' + LINE + ';border-top:4px solid ' + x[2] + ';border-radius:12px;padding:10px 13px;color:' + INK + '"><div style="font-size:12.5px;color:' + SUB + ';font-weight:700">' + e(x[0]) + '</div><div style="font-size:25px;font-weight:800;color:' + x[2] + ';letter-spacing:-0.6px">' + e(x[1]) + '</div><div style="font-size:11.5px;color:' + SUB + '">' + e(x[3]) + '</div></div>'; }).join("") + '</div>';
+  }
+  // 🧭 시황 테마 칸 — 테마마다 카드 (10/29 사용자 「지수 위주로만 단조롭지 않아?」)
+  function themeBlocks(f, x){
+    var th = f.themes || []; if (!th.length) return [];
+    var tp = ((f.alloc || []).filter(function(a){ return a.k === "theme"; })[0] || {}).pct || 0, A = x.amt;
+    var sc = {"강함": ["#1a8a5a", "#e7f6ee"], "보통": ["#5b6576", "#eef1f6"], "약함": [UP, "#fdecea"]};
+    var cards = th.map(function(t){ var c = sc[t.sig] || sc["보통"];
+      return '<div style="border:1px solid ' + LINE + ';border-left:6px solid ' + t.color + ';border-radius:12px;padding:10px 12px;color:' + INK + ';background:#fff">' +
+        '<div style="display:flex;align-items:baseline;gap:8px"><b style="font-size:15px">' + e(t.name) + '</b><span style="font-size:11px;font-weight:800;color:' + c[0] + ';background:' + c[1] + ';border-radius:99px;padding:1px 8px">' + e(t.sig) + '</span>' +
+        '<span style="margin-left:auto;font-size:17px;font-weight:900;color:' + t.color + '">' + pc(t.w) + '</span>' + (A ? '<span style="font-size:12.5px;font-weight:800;color:' + NAVY + '">' + man(A * t.w / 100) + '</span>' : '') + '</div>' +
+        '<div style="font-size:12.5px;line-height:1.45;margin-top:3px">' + e(t.txt) + '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;font-size:11.5px">' +
+          '<span style="background:' + BG + ';border-radius:8px;padding:3px 8px"><b>담을 ETF</b> ' + e(t.pick.name) + ' (' + e(t.pick.code) + ') · <span style="color:' + SUB + '">' + e(t.pick.where) + '</span></span>' +
+          (t.stocks && t.stocks.length ? '<span style="background:' + BG + ';border-radius:8px;padding:3px 8px"><b>대표 종목</b> ' + e(t.stocks.slice(0, 3).join(" · ")) + '</span>' : '') + '</div>' +
+        '<div style="font-size:11.5px;color:' + SUB + ';margin-top:5px">📈 ' + e(t.sig_txt) + (t.ret != null ? ' · 리포트 의견대로 ' + e(String(t.since || "").slice(5).replace("-", "/")) + '부터 ' + sgn(t.ret, 1) : '') + '</div></div>'; });
+    var head = '<!--K-->' + secT("🧭 시황 테마 칸 " + pc(tp) + (A ? " · " + man(A * tp / 100) : "") + " — 매일 아침 리포트가 고른 「돈이 몰리는 곳」", f.color) +
+      '<div style="display:flex;height:22px;border-radius:7px;overflow:hidden;margin-bottom:10px">' + th.map(function(t){ return '<div style="width:' + (t.w / tp * 100) + '%;background:' + t.color + ';color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden">' + (t.w / tp > 0.12 ? e(t.name) : "") + '</div>'; }).join("") + '</div>';
+    var out = [], half = Math.ceil(cards.length / 2);
+    for (var i = 0; i < cards.length; i += 2) out.push((i ? "" : head) + '<div style="display:flex;gap:10px"><div style="flex:1;min-width:0">' + cards[i] + '</div><div style="flex:1;min-width:0">' + (cards[i + 1] || "") + '</div></div>');
+    out[out.length - 1] += '<div style="font-size:11.5px;color:' + SUB + ';margin-top:8px;line-height:1.5">돈은 ETF로 담음 — 한 회사 소식에 덜 흔들리게. 대표 종목은 같은 테마의 대표 회사로, 직접 종목으로 담고 싶을 때 참고. 테마와 비중은 리포트 의견이 바뀌면 같이 바뀌고, 8주마다 지수보다 나았는지 점검해 늘리거나 줄임.</div>';
+    return out;
   }
   // 🪪 채권 명함 — 고른 채권마다 한 장
   function cardBlocks(f, x){
@@ -496,7 +519,7 @@
     var risk = box('<div style="font-size:14.5px;font-weight:800;margin-bottom:4px;color:#b3372a">⚠️ 꼭 알아 둘 점</div>' + (f.risks || []).map(function(r){ return '<div style="font-size:13px;line-height:1.55;padding:2px 0;color:' + INK + '">· ' + e(r) + '</div>'; }).join(""), "flex:1.3;background:#fff4f2");
     var side = tax || split;
     B.push(side ? '<div style="display:flex;gap:12px;align-items:stretch">' + side + risk + '</div>' : risk);
-    if (f.table && f.table.rows && f.table.rows.length && !/^(ktb|ust|brl|els)$/.test(f.key)) B.push(tbl({title: f.table.title, cols: f.table.cols, rows: f.table.rows.slice(0, 8)}, 12));
+    if (f.table && f.table.rows && f.table.rows.length && !/^(ktb|ust|brl|els)$/.test(f.key) && !(f.themes && f.themes.length)) B.push(tbl({title: f.table.title, cols: f.table.cols, rows: f.table.rows.slice(0, 8)}, 12));
     return B;
   }
   function coverPage(m){
@@ -554,7 +577,7 @@
     m.items.forEach(function(x){ var f = x.f;
       var mb = f.mkt ? mktBlocks(f) : [], sb = scenBlock(f);
       if (sb){ var oi = -1; mb.forEach(function(h2, i2){ if (h2.indexOf("🔭") >= 0 && oi < 0) oi = i2; }); if (oi < 0) mb.push(sb); else mb.splice(oi, 0, sb); }
-      groups.push({color: f.color, blocks: propBlocks(f, x).concat(cardBlocks(f, x)).concat(mb).concat(simBlocks(f, x.amt)).concat(detailBlocks(f, x)).concat(careBlocks(f))}); });
+      groups.push({color: f.color, blocks: propBlocks(f, x).concat(themeBlocks(f, x)).concat(cardBlocks(f, x)).concat(mb).concat(simBlocks(f, x.amt)).concat(detailBlocks(f, x)).concat(careBlocks(f))}); });
     groups.push({color: NAVY, blocks: noticeBlocks(m)});
     var pages = pack(groups), of = pages.length + 1;
     return [coverPage(m)].concat(pages.map(function(p, i){ return pageFrom(p, i + 2, of, m); }));
@@ -726,6 +749,11 @@
             colChart(s, "1년 뒤 이익 (원) — 나쁜·보통·좋은 해", Q.y1.map(function(q){ return {l: q.l.split(" ")[0] + " 해 " + sgn(q.r, 0), v: q.won - A}; }), 7.1, 2.55, 5.7, 2.1);
             colChart(s, "해마다 수익률 (%)", b.years.map(function(y){ return {l: String(y[0]).slice(2), v: y[1]}; }), 7.1, 4.75, 5.7, 2.1);
           }
+        }
+        if (f.themes && f.themes.length){ s = P.addSlide(); var tpp = ((f.alloc || []).filter(function(a){ return a.k === "theme"; })[0] || {}).pct || 0;
+          head(s, "🧭 시황 테마 칸 " + pc(tpp) + " — 리포트가 고른 「돈이 몰리는 곳」", "돈은 ETF로 · 대표 종목은 참고 · 리포트 의견이 바뀌면 비중도 바뀜", f.color);
+          s.addTable([th(["테마", "비중", "금액", "담을 ETF", "왜", "대표 종목(참고)", "흐름"])].concat(f.themes.map(function(t){ return [{text: t.name, options: {bold: true, color: hx(t.color)}}, pc(t.w), A ? man(A * t.w / 100) : "–", t.pick.name + " (" + t.pick.code + ")\n" + t.pick.where, t.txt, (t.stocks || []).slice(0, 3).join(" · "), t.sig]; })),
+            {x: 0.6, y: 1.4, w: 12.1, colW: [1.4, 0.7, 1.1, 2.6, 3.4, 2.0, 0.9], fontFace: F, fontSize: 9.5, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"});
         }
         // 10/28 「우와」 — 주식: 비교·위기·속 들여다보기 / 외화채: 환율 × 금리 표
         if (S && S.kind === "equity"){

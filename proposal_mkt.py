@@ -348,7 +348,7 @@ def mkt_korea(P, kospi):
     LK = P.LK or {}
     up, tot = LK.get("up"), LK.get("total")
     strong = [s.get("name") + f" {sg(s.get('r'))}" for s in (LK.get("strong") or [])[:3]]
-    secs, rel = P.kr_sectors(5)
+    hot = P.kr_hot()
     kp = [
         {"label": "코스피", "value": f"{v[-1]:,.0f}", "sub": f"오늘 {sg(chg(kospi, 1), 2)} · 1년 {sg(chg(kospi, 252))}", "tone": 1 if (chg(kospi, 1) or 0) > 0 else -1},
         {"label": "200일 평균선과 거리", "value": sg(gap), "sub": "위면 상승 추세 · 아래면 회복 확인 전", "tone": 1 if (gap or 0) > 0 else -1},
@@ -359,15 +359,14 @@ def mkt_korea(P, kospi):
         f"코스피는 200일 평균선보다 {sg(gap)} " + ("위 → 상승 추세가 살아 있음" if (gap or 0) > 0 else "아래 → 큰 흐름은 아직 회복 확인 전이라 나눠 사는 것이 안전함"),
         f"1달 {sg(chg(kospi, 21))} · 3달 {sg(chg(kospi, 63))} · 1년 {sg(chg(kospi, 252))} — 오르내림이 큰 구간임",
     ]
-    if strong:
-        view.append("오늘 강한 업종: " + " · ".join(strong))
-    view.append("앱 확률 모델(종목마다 2년 일봉으로 계산)이 5일 뒤 오를 가능성을 높게 보는 업종: " + ", ".join(f"{s['name']} {s['p5']}%" for s in secs[:3]))
+    if hot:
+        view.append("오늘 한국에서 돈이 몰린 업종: " + " · ".join(f"{h['name']} {sg(h['r1'])} ({', '.join(h['lead'][:2])})" for h in hot))
+    view.append("시황 리포트의 테마 판단은 국내 상장 ETF로 담고, 개별 종목은 참고로만 적음")
     return {"title": "한국 주식 시장 지금", "kpis": kp,
             "charts": [chart_of(kospi, "코스피 · 1년과 200일 평균선", "", "#e0533d", 260, 200)],
             "view": view,
-            "outlook": {"title": "업종별 5일 뒤 오를 확률 (앱 확률 모델)", "cols": ["업종", "확률", "최근 5일", "대표 종목"],
-                        "rows": [[f"{s['icon']} {s['name']}", f"{s['p5']}%", sg(s["r5"]), " · ".join(x["name"] for x in s["stocks"])] for s in secs],
-                        "src": f"앱 확률 모델 · 신뢰도 {rel or '보통'} · 참고값"}}
+            "outlook": {"title": "오늘 한국에서 돈이 몰린 업종", "cols": ["업종", "오늘", "5일", "대표 종목"],
+                        "rows": [[h["name"], sg(h["r1"]), sg(h["r5"]), " · ".join(h["lead"])] for h in hot], "src": "앱 시장 흐름(장 마감 기준)"} if hot else None}
 
 
 CRISES = [("2008 금융위기", "2008-05-19", "2009-03-09"), ("2011 미국 신용강등", "2011-04-29", "2011-10-03"), ("2018 미·중 무역분쟁", "2018-09-20", "2018-12-24"),
@@ -468,7 +467,7 @@ def sim_equity(f, k, P=None):
         g = REGION.get(a["k"]) or ("한국 주식" if a["k"].startswith("sec") else "기타")
         reg[g] = round(reg.get(g, 0) + a["pct"], 1)
     out = {"kind": "equity", "bt": bt, "cmp": cmp, "stress": stress, "region": [[k2, v] for k2, v in sorted(reg.items(), key=lambda x: -x[1])],
-           "look": lookthrough(al, P) if P else None, "note": f"{bt['from'][:7]}~{bt['to'][:7]} 실제 지수로 이 비중을 매달 맞췄다면의 계산 · 달러 자산은 달러 기준 · 배당·수수료·세금 제외(보수적) · 국내 업종 칸은 코스피로 대신함",
+           "look": lookthrough(al, P) if P else None, "note": f"{bt['from'][:7]}~{bt['to'][:7]} 실제 지수로 이 비중을 매달 맞췄다면의 계산 · 달러 자산은 달러 기준 · 배당·수수료·세금 제외(보수적) · 🧭 시황 테마 칸은 테마가 자주 바뀌어 과거 계산에서 빼고 나머지 비중으로 계산함",
             "contrib": {"pension": 600, "irp": 900}.get(k)}
     return out
 

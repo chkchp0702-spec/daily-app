@@ -174,62 +174,133 @@ def market_block():
     }
 
 
-# ───────── 1. 주식 — 국내만 ─────────
-def kr_sectors(n=3):
-    kr = ((PS.get("markets") or {}).get("KR") or {})
-    secs = sorted(kr.get("sectors") or [], key=lambda s: -(s.get("p5") or 0))
+# ───────── 🧭 시황 테마 칸 (10/29 사용자 「지수 위주로만 단조롭지 않아? 시황을 반영한 ETF·종목은?」) ─────────
+#   10/28 저녁부터 💼 기본 포트에 「섹터 칸」(주식의 20%)이 실제 돈으로 들어감 → 제안서도 그대로 따라감
+#   돈은 ETF로(한 회사 소식에 덜 흔들림) · 개별 종목은 「대표 종목」으로 이름만 (킥 신호 종목 성적이 아직 검증 전이라)
+THEME_TXT = {"전력·인프라": "AI 데이터센터가 전기를 많이 쓰면서 발전·송전·전력 장비 수요가 커지는 테마",
+             "에너지": "유가가 높게 버티는 동안 정유·석유 회사 이익이 커지는 테마",
+             "금융": "금리가 높게 유지되면 대출 이자로 버는 은행 이익이 커지는 테마",
+             "반도체 (HBM)": "AI 서버용 고성능 메모리(HBM)와 반도체 장비 수요 테마",
+             "광통신": "데이터센터 안 빛으로 데이터를 보내는 부품(광모듈·기판) 테마",
+             "AI 소프트웨어": "AI가 퍼질수록 해킹 방어가 중요해지는 사이버보안 테마",
+             "필수소비재": "경기가 흔들려도 꾸준히 팔리는 생필품·식품 회사 — 방어 역할"}
+US_ETF = {"XLU": "미국 유틸리티 ETF (XLU)", "XLE": "미국 에너지 ETF (XLE)", "KBWB": "미국 은행 ETF (KBWB)", "SOXX": "미국 반도체 ETF (SOXX)",
+          "CIBR": "미국 사이버보안 ETF (CIBR)", "XLP": "미국 필수소비재 ETF (XLP)"}
+TCOL = ["#f08a3c", "#c9568f", "#1f9fb5", "#22a06b", "#4f8fbf", "#b08a2e", "#8a6bd1"]
+
+
+def sig_txt(sig):
+    sig = str(sig or "")
+    if sig.startswith("강함"):
+        return "강함", "최근 시장보다 강하고 상승 흐름 — 유지·늘릴 쪽"
+    if sig.startswith("약함"):
+        return "약함", "최근 약해 비중을 작게 · 눌림 때만 추가"
+    return "보통", "시장과 비슷한 흐름"
+
+
+def sleeve():
+    vr = {r.get("name"): r for r in ((PORT.get("views") or {}).get("rows") or [])}
+    since = (PORT.get("views") or {}).get("since")
     out = []
-    for s in secs[:n]:
-        st = sorted((s.get("st") or [])[:6], key=lambda x: -(x.get("p5") or 0))[:2]
-        out.append({"name": s.get("name"), "icon": s.get("icon"), "p5": int(round((s.get("p5") or 0) * 100)), "r5": r1(s.get("r5")),
-                    "stocks": [{"code": x["s"].split(".")[0], "name": x["n"], "p5": int(round((x.get("p5") or 0) * 100)), "r5": r1(x.get("r5"))} for x in st]})
-    return out, kr.get("rel")
+    for i, h in enumerate(PORT.get("hold") or []):
+        nm = str(h.get("name") or "")
+        if not nm.startswith("🧭") or not h.get("pct"):
+            continue
+        nm = nm.replace("🧭", "").strip()
+        kr = h.get("kr") or []
+        us = h.get("us") or []
+        kre = [k for k in kr if k.get("etf")]
+        krs = [k for k in kr if not k.get("etf") and k.get("name")]
+        use = [u for u in us if not u.get("name") and u.get("t") in US_ETF]
+        uss = [u for u in us if u.get("name")]
+        lv, why = sig_txt(h.get("sig"))
+        stocks = [str(u["name"]).split("(")[0].strip() for u in uss] + [str(k["name"]).replace("🌏", "").strip() for k in krs]
+        out.append({"name": nm, "pct": h["pct"], "color": TCOL[len(out) % len(TCOL)], "txt": THEME_TXT.get(nm, ""),
+                    "kr_etf": [{"code": k["code"], "name": k["name"]} for k in kre[:2]],
+                    "us_etf": [{"t": u["t"], "name": US_ETF[u["t"]]} for u in use[:1]],
+                    "stocks": list(dict.fromkeys(stocks))[:4], "sig": lv, "sig_txt": why,
+                    "ret": (vr.get(nm) or {}).get("ret"), "since": since})
+    return out
+
+
+def themes_for(total, korean_only):
+    """total = 이 폼에서 테마 칸에 줄 비중(%) · korean_only = 국내 상장 ETF 있는 테마만(연금·퇴직연금·국내 주식)"""
+    A = sleeve()
+    T = [t for t in A if (t["kr_etf"] if korean_only else (t["kr_etf"] or t["us_etf"]))]
+    s = sum(t["pct"] for t in A) or 1      # 전체 테마 기준 비율 — 담을 ETF 없는 테마 몫은 부풀리지 않고 코어로 돌림
+    out = []
+    for t in T:
+        x = dict(t)
+        x["w"] = round(total * t["pct"] / s, 1)
+        e = (t["kr_etf"] or [None])[0] if (korean_only or t["kr_etf"]) else None
+        x["pick"] = {"code": e["code"], "name": e["name"], "where": "국내 상장"} if e else {"code": t["us_etf"][0]["t"], "name": t["us_etf"][0]["name"], "where": "미국 상장 · 해외주식 계좌"}
+        out.append(x)
+    return out
+
+
+def theme_slot(pct, th):
+    return {"k": "theme", "pct": round(pct, 1), "name": "🧭 시황 테마 칸", "code": None, "inst": f"{len(th)}개 테마 ETF — " + " · ".join(t["name"] for t in th),
+            "us": None, "why": "매일 아침 시황 리포트가 「돈이 몰리는 곳」으로 고른 테마 — 리포트 의견이 바뀌면 비중도 바뀜", "kind": "위험", "color": "#f08a3c"}
+
+
+def theme_table(th):
+    return {"title": "🧭 시황 테마 칸 — 무엇을 왜 담나", "cols": ["테마", "비중", "담을 ETF", "같은 테마 대표 종목(참고)", "최근 흐름"],
+            "rows": [[t["name"], f"{t['w']:g}%", f"{t['pick']['name']} ({t['pick']['code']})", " · ".join(t["stocks"][:3]) or "–", t["sig"]] for t in th]}
+
+
+# ───────── 1. 주식 — 국내만 ─────────
+def kr_hot():
+    for c in ((jl(os.path.join("_src", "market-strategy-report", "market", "focus.json"), {}) or remote("focus.json")).get("countries") or []):
+        if c.get("k") == "KR":
+            return [{"name": h.get("name"), "r1": h.get("r1"), "r5": h.get("r5"), "lead": [x.get("n") for x in (h.get("lead") or [])][:3]} for h in (c.get("hot") or [])][:3]
+    return []
 
 
 def f_kr_stock():
-    secs, rel = kr_sectors(3)
-    core, each, cash = (55, 10, 15) if KR_UP else (35, 8, 41)
+    core, tpct, cash = (55, 30, 15) if KR_UP else (35, 24, 41)
+    th = themes_for(tpct, True)
+    used = round(sum(t["w"] for t in th), 1)
+    core, tpct = core + tpct - used, used
     al = [slot("k200", core, "코스피200 코어", "한국 대표 200개 기업을 한 번에 — 삼성전자·SK하이닉스 등 반도체 대형주가 이미 크게 들어 있음")]
-    cols = ["s1", "s2", "s3"]
-    for i, s in enumerate(secs):
-        nm = " · ".join(x["name"] for x in s["stocks"])
-        al.append({"k": "sec%d" % i, "pct": each, "name": f"{s['icon']} {s['name']}", "code": " · ".join(x["code"] for x in s["stocks"]), "inst": nm, "us": None,
-                   "why": f"5일 뒤 오를 확률 {s['p5']}% (앱 확률 모델 상위) · 최근 5일 {sg(s['r5'])} — 종목은 반씩 나눠 담음", "kind": "위험", "color": C[cols[i]]})
+    if th:
+        al.append(theme_slot(tpct, th))
     al.append(slot("cd", cash, "현금성 (대기 자금)", "하루만 맡겨도 CD금리만큼 이자가 붙는 ETF — 떨어질 때 나눠 사기 위한 총알", "안전"))
     norm(al)
+    hot = kr_hot()
     lines = [
         f"코스피가 200일 평균선 {'위' if KR_UP else '아래'}" + (f"({sg(KR_GAP)})" if KR_GAP is not None else "") + f"라 주식 {100 - cash}% · 대기 자금 {cash}%로 제안임",
-        "코어는 지수 ETF 하나로 — 개별 종목을 많이 고를 필요 없이 한국 시장 전체를 담음",
-        f"업종은 앱 확률 모델 상위 3개({', '.join(s['name'] for s in secs)})를 조금씩 — 한 업종에 몰지 않음",
+        "코어는 코스피200 ETF 하나로 — 한국 시장 전체를 담고, 반도체 대형주도 이미 크게 들어 있음",
+        (f"🧭 시황 테마는 매일 아침 리포트가 고른 테마 중 국내 상장 ETF가 있는 것만 담음: " + ", ".join(f"{t['name']} {t['w']:g}%" for t in th)) if th else "오늘은 국내 상장 ETF로 담을 시황 테마가 없어 코어에 합침",
+        "개별 종목은 한 회사 소식에 크게 흔들려 돈은 ETF로 담고, 대표 종목은 참고로만 적음",
     ]
     if not KR_UP:
         lines.append("한 번에 다 사지 말고 3번(오늘·2주 뒤·한 달 뒤)에 나눠 담는 것을 권함")
+    tab = theme_table(th) if th else None
     return {
         "key": "kr_stock", "icon": "📈", "title": "국내 주식 포트폴리오", "short": "국내 주식", "color": "#e0533d",
-        "sub": "한국 상장 지수 ETF + 확률 상위 업종 + 대기 자금",
-        "fit": "국내 주식만 원하시는 고객 · 해외 투자가 부담스러운 고객",
-        "headline": f"코스피200 코어 {al[0]['pct']:g}% + 상위 업종 {each * len(secs)}% + 대기 자금 {cash}% 제안임",
-        "points": lines, "alloc": al,
-        "table": {"title": "업종별 담을 종목", "cols": ["업종", "종목", "5일 뒤 오를 확률", "최근 5일"],
-                  "rows": [[s["icon"] + " " + s["name"], x["name"] + " (" + x["code"] + ")", f"{x['p5']}%", sg(x["r5"])] for s in secs for x in s["stocks"]]},
-        "chart": {"type": "bar", "title": "업종별 5일 뒤 오를 확률 (앱 확률 모델)", "unit": "%",
-                  "labels": [s["name"] for s in secs], "vals": [s["p5"] for s in secs], "ref": 50, "refl": "동전 던지기 50%"},
+        "sub": "코스피200 코어 + 시황 테마 ETF + 대기 자금 — 매일 아침 시황 리포트 기준",
+        "fit": "국내 계좌로만 투자하시는 고객 · 해외 직접 투자가 부담스러운 고객",
+        "headline": f"코스피200 코어 {al[0]['pct']:g}%" + (f" + 🧭 시황 테마 {next((a['pct'] for a in al if a['k'] == 'theme'), 0):g}%" if th else "") + f" + 대기 자금 {cash}% 제안임",
+        "points": lines, "alloc": al, "themes": th, "kr_hot": hot,
+        "table": tab,
+        "chart": {"type": "donut"},
         "split": None if KR_UP else [40, 30, 30],
         "risks": ["주식은 원금 손실이 날 수 있음 — 지수가 20~30% 빠지는 해도 있음",
-                  f"업종 확률은 과거 2년 패턴으로 계산한 참고값임 (신뢰도: {rel or '보통'}) — 맞는다는 보장 없음",
-                  "개별 종목은 지수보다 더 크게 오르내림"],
-        "tags": ["한국 상장", "지수 코어", "분할 매수" if not KR_UP else "추세 유지"],
+                  "테마 ETF는 한 업종에 몰려 있어 지수보다 크게 오르내림 — 그래서 주식의 일부만 담음",
+                  "시황 테마는 리포트 의견에 따라 바뀜 · 국내 상장 해외 테마 ETF는 환율 영향도 받음"],
+        "tags": ["국내 상장", "코어 + 테마", "분할 매수" if not KR_UP else "추세 유지"],
     }
 
 
 # ───────── 2. 주식 — 국내 + 해외 ─────────
 def base_now():
-    now = ((PORT.get("rule") or {}).get("now")) or {h["name"]: h["pct"] for h in (PORT.get("hold") or [])}
+    now = {h["name"]: h["pct"] for h in (PORT.get("hold") or [])}
     spx = now.get("S&P500 코어", 47.5)
     ndx = now.get("나스닥100 코어", 47.5)
     gold = now.get("금", 5.0)
     cash = now.get("현금·단기채", 0.0)
-    return spx, ndx, gold, cash
+    sl = round(sum(v for k, v in now.items() if str(k).startswith("🧭")), 1)
+    return spx, ndx, gold, cash, sl
 
 
 def views():
@@ -237,49 +308,59 @@ def views():
     return [{"name": r.get("name"), "pct": r.get("pct"), "t": ", ".join(r.get("t") or [])} for r in rows[:4]]
 
 
-def gl_alloc():
-    spx, ndx, gold, cash = base_now()
+def gl_alloc(korean_only=False):
+    """💼 기본 포트 그대로: S&P·나스닥 코어 + 🧭 시황 테마 칸 + 금 + 현금 · 한국 칸은 코어에서 떼어 줌"""
+    spx, ndx, gold, cash, sl = base_now()
+    th = themes_for(sl, korean_only) if sl else []
+    used = sum(t["w"] for t in th)
+    spx, ndx = spx + (sl - used) / 2, ndx + (sl - used) / 2     # 국내 상장 ETF 없는 테마 몫은 코어로
     kr = 20 if KR_UP else 10
-    spx2, ndx2 = spx - kr / 2, ndx - kr / 2
-    al = [slot("spx", spx2, "미국 S&P500", "미국 대표 500개 기업 — 포트의 뼈대"),
-          slot("ndx", ndx2, "미국 나스닥100", "애플·엔비디아·마이크로소프트 같은 기술 성장주"),
-          slot("k200", kr, "한국 코스피200", "한국 대표 200개 기업 — " + ("추세가 살아 있어 비중을 늘림" if KR_UP else "추세 회복 전이라 조금만")),
-          slot("gold", gold, "금", "주식이 크게 빠질 때 버팀목이 되는 보험")]
+    al = [slot("spx", spx - kr / 2, "미국 S&P500", "미국 대표 500개 기업 — 포트의 뼈대"),
+          slot("ndx", ndx - kr / 2, "미국 나스닥100", "애플·엔비디아·마이크로소프트 같은 기술 성장주"),
+          slot("k200", kr, "한국 코스피200", "한국 대표 200개 기업 — " + ("추세가 살아 있어 비중을 늘림" if KR_UP else "추세 회복 전이라 조금만"))]
+    if th:
+        al.append(theme_slot(used, th))
+    al.append(slot("gold", gold, "금", "주식이 크게 빠질 때 버팀목이 되는 보험"))
     if cash:
         al.append(slot("cd", cash, "현금·단기채", "시장이 조심 구간이라 쉬어 가는 돈", "안전"))
-    return norm([a for a in al if a["pct"] > 0])
+    return norm([a for a in al if a["pct"] > 0]), th
 
 
 def f_gl_stock():
-    al = gl_alloc()
-    spx, ndx, gold, cash = base_now()
-    vw = views()
-    eq = sum(a["pct"] for a in al if a["k"] in ("spx", "ndx", "k200"))
+    al, th = gl_alloc(False)
+    gold = next((a["pct"] for a in al if a["k"] == "gold"), 0)
+    cash = next((a["pct"] for a in al if a["k"] == "cd"), 0)
+    tp = next((a["pct"] for a in al if a["k"] == "theme"), 0)
+    us = sum(a["pct"] for a in al if a["k"] in ("spx", "ndx"))
+    kr = next((a["pct"] for a in al if a["k"] == "k200"), 0)
+    eq = us + kr + tp
+    nus = sum(1 for t in th if t["pick"]["where"].startswith("미국"))
     return {
         "key": "gl_stock", "icon": "🌏", "title": "국내 + 해외 주식 포트폴리오", "short": "국내+해외 주식", "color": "#2f6fdf",
-        "sub": "미국 S&P500·나스닥100 코어 + 한국 + 금 — 매일 아침 시황 배분표 기준",
+        "sub": "미국 지수 코어 + 한국 + 시황 테마 칸 + 금 — 매일 아침 시황 배분표 그대로",
         "fit": "한국·미국에 고루 나눠 투자하고 싶은 고객 · 장기 자산 증식",
-        "headline": f"미국 {round(al[0]['pct'] + al[1]['pct'])}% · 한국 {al[2]['pct']:g}% · 금 {gold:g}%" + (f" · 현금 {cash:g}%" if cash else "") + " 제안임",
+        "headline": f"미국 지수 {us:g}% · 한국 {kr:g}%" + (f" · 🧭 시황 테마 {tp:g}%" if tp else "") + f" · 금 {gold:g}%" + (f" · 현금 {cash:g}%" if cash else "") + " 제안임",
         "points": [
             f"미국 S&P500이 200일 평균선 {'위' if US_UP else '아래'}라 " + ("주식을 꽉 채우는 「상승장 뼈대」임" if US_UP else "현금을 늘린 「조심 뼈대」임"),
-            "미국 두 지수(S&P500·나스닥100)를 반씩 — 한 나라 한 업종에 몰리지 않게 함",
-            f"한국은 {'추세가 살아 있어' if KR_UP else '추세 회복 전이라'} {al[2]['pct']:g}%만 · 금 {gold:g}%로 큰 하락에 대비함",
-            "전부 한국 증시에 상장된 ETF라 원화로 바로 사고팔 수 있음",
+            "뼈대 80%는 미국 두 지수(S&P500·나스닥100) + 한국 — 한 회사·한 업종에 몰리지 않게 함",
+            (f"🧭 시황 테마 {tp:g}%는 매일 아침 리포트가 「돈이 몰리는 곳」으로 고른 {len(th)}개 테마를 ETF로 담음 — 리포트 의견이 바뀌면 비중도 같이 바뀜") if th else "오늘은 시황 테마 칸이 비어 있음",
+            f"한국은 {'추세가 살아 있어' if KR_UP else '추세 회복 전이라'} {kr:g}%만 · 금 {gold:g}%로 큰 하락에 대비함",
+            ("대부분 국내 상장 ETF로 원화 매매 · " + (f"테마 {nus}개는 미국 상장 ETF라 해외주식 계좌가 필요함" if nus else "전부 원화로 바로 사고팔 수 있음")),
         ],
-        "alloc": al,
-        "table": {"title": "요즘 돈이 몰리는 곳 (참고 · 배분 밖)", "cols": ["테마", "앱 의견 비중", "대표 종목·ETF"],
-                  "rows": [[v["name"], f"{v['pct']}%", v["t"]] for v in vw]},
+        "alloc": al, "themes": th,
+        "table": theme_table(th) if th else None,
         "chart": {"type": "donut"},
         "risks": ["해외 ETF는 환율이 오르내리면 원화 수익도 같이 변함 (원화가 강해지면 손해)",
                   "주식 비중 " + f"{eq:g}%" + "는 공격적인 편임 — 1년에 −20% 이상도 가능",
+                  "테마 칸은 업종이 몰려 있어 지수보다 크게 출렁임 · 8주마다 지수보다 나았는지 점검해 늘리거나 줄임",
                   "배분은 매일 시황 규칙으로 바뀔 수 있음 (S&P500 200일선 아래 3일이면 현금 확대)"],
-        "tags": ["시황 배분표", "한국 상장 ETF", "🟢 상승장" if US_UP else "🔴 조심"],
+        "tags": ["시황 배분표", "코어 80 + 테마 20", "🟢 상승장" if US_UP else "🔴 조심"],
     }
 
 
 # ───────── 3. 개인연금 (연금저축) ─────────
 def f_pension():
-    al = gl_alloc()
+    al, th = gl_alloc(True)
     return {
         "key": "pension", "icon": "🌱", "title": "개인연금(연금저축) 포트폴리오", "short": "개인연금", "color": "#3fb28f",
         "sub": "세액공제 받으며 국내 상장 ETF로 미국·한국·금에 나눠 투자",
@@ -287,11 +368,11 @@ def f_pension():
         "headline": "연금저축 계좌로 같은 배분을 — 세금은 줄이고 수익은 길게 굴리는 제안임",
         "points": [
             "연금저축은 위험자산 한도가 없어 주식형 ETF로 100% 가능함 (레버리지·인버스는 안 됨)",
-            "해외 주식을 직접은 못 사서 한국에 상장된 미국 지수 ETF로 담음",
+            "해외 주식을 직접은 못 사서 한국에 상장된 미국 지수·테마 ETF로 담음" + (f" — 시황 테마는 국내 상장 ETF가 있는 {len(th)}개({', '.join(t['name'] for t in th)})만" if th else ""),
             "운용 중 생긴 수익엔 세금이 안 붙고, 나중에 연금으로 받을 때 낮은 세율(3.3~5.5%)만 냄",
             "매년 넣은 돈 600만원까지 세액공제 — 바로 아래 계산 참고",
         ],
-        "alloc": al,
+        "alloc": al, "themes": th, "table": theme_table(th) if th else None,
         "tax": {"kind": "pension", "limit": 600, "rates": [[16.5, "총급여 5,500만원 이하"], [13.2, "총급여 5,500만원 초과"]],
                 "note": "연금저축 600만 + IRP 합쳐 연 900만원까지 · 2026년 현행 세법 기준(바뀔 수 있음)"},
         "chart": {"type": "donut"},
@@ -304,7 +385,8 @@ def f_pension():
 
 # ───────── 4·5. 퇴직연금 DC · IRP (위험자산 70% 한도) ─────────
 def retire_alloc():
-    risky = [a for a in gl_alloc() if a["kind"] == "위험"]
+    al0, th = gl_alloc(True)
+    risky = [a for a in al0 if a["kind"] == "위험"]
     tot = sum(a["pct"] for a in risky) or 1
     cap = 70 if US_UP else 55
     out = []
@@ -316,11 +398,15 @@ def retire_alloc():
     safe = 100 - sum(a["pct"] for a in out)
     out.append(slot("corp", safe / 2, "우량 회사채", "신용 좋은 회사채에 나눠 투자 — 예금보다 조금 높은 이자", "안전"))
     out.append(slot("cd", safe / 2, "CD금리 (현금성)", "매일 이자가 붙는 현금성 ETF — 언제든 갈아탈 수 있음", "안전"))
-    return norm(out), cap
+    out = norm(out)
+    tp = next((a["pct"] for a in out if a["k"] == "theme"), 0)
+    s0 = sum(t["w"] for t in th) or 1
+    th = [dict(t, w=round(t["w"] * tp / s0, 1)) for t in th]
+    return out, cap, th
 
 
 def f_dc():
-    al, cap = retire_alloc()
+    al, cap, th = retire_alloc()
     risky = sum(a["pct"] for a in al if a["kind"] == "위험")
     return {
         "key": "dc", "icon": "🏢", "title": "퇴직연금 DC형 포트폴리오", "short": "DC", "color": "#4f8fbf",
@@ -333,7 +419,7 @@ def f_dc():
             ("미국 시장이 상승 추세라 한도(70%)까지 채움" if US_UP else f"미국 시장이 조심 구간이라 위험자산을 {cap}%로 낮춤"),
             "회사가 넣는 돈과 별개로 내가 더 넣으면 IRP처럼 세액공제됨",
         ],
-        "alloc": al,
+        "alloc": al, "themes": th, "table": theme_table(th) if th else None,
         "chart": {"type": "donut", "split": True},
         "risks": ["원리금 보장 상품이 아님 — 손실이 나면 퇴직금이 줄어듦",
                   "위험자산 70% 한도는 매수할 때 기준 — 주가가 오르면 넘을 수 있어 1년에 한 번 맞춰 줌",
@@ -343,7 +429,7 @@ def f_dc():
 
 
 def f_irp():
-    al, cap = retire_alloc()
+    al, cap, th = retire_alloc()
     risky = sum(a["pct"] for a in al if a["kind"] == "위험")
     return {
         "key": "irp", "icon": "🛡️", "title": "IRP(개인형 퇴직연금) 포트폴리오", "short": "IRP", "color": "#7b5cff",
@@ -356,7 +442,7 @@ def f_irp():
             "주식형은 70%까지 · 나머지는 채권·현금성 · 예금·ELB 같은 원리금보장 상품도 안전 칸에 넣을 수 있음",
             ("미국 상승 추세라 한도까지 채움" if US_UP else f"미국 조심 구간이라 위험자산 {cap}%로 낮춤"),
         ],
-        "alloc": al,
+        "alloc": al, "themes": th, "table": theme_table(th) if th else None,
         "tax": {"kind": "irp", "limit": 900, "rates": [[16.5, "총급여 5,500만원 이하"], [13.2, "총급여 5,500만원 초과"]],
                 "note": "연금저축과 합산 연 900만원 · 2026년 현행 세법 기준(바뀔 수 있음)"},
         "chart": {"type": "donut", "split": True},
