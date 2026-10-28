@@ -1,0 +1,31 @@
+name: krwhale
+# 🐳 한국 고래 그림자 장부 — 평일 장 마감 뒤 외국인 20일 순매수 상위 바구니 기록·채점 → archive/x/kr_whale.json · 판정 나면 텔레그램 한 번 (10/28)
+on:
+  schedule:
+    - cron: "23 10 * * 1-5"   # KST 19:23 평일 (다음 금융 투자자 자료가 다 나온 뒤)
+    - cron: "53 11 * * 1-5"   # KST 20:53 다시 한 번(앞이 늦거나 빠졌을 때 · 같은 날은 한 번만 셈)
+  push:
+    branches: [main]
+    paths: [kr_whale.py]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: krwhale
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 고래 바구니
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
+        run: python kr_whale.py
+      - name: 저장
+        run: bash scripts/push.sh "krwhale $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/kr_whale.json
