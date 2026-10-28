@@ -8,8 +8,8 @@ CAP, BUILD, OUT = f"{ROOT}/cap", f"{ROOT}/build", f"{ROOT}/out"
 os.makedirs(OUT, exist_ok=True)
 T = json.load(open(f"{ROOT}/texts.json"))
 NAME = {"home": "🏠 오늘", "mkt": "🌐 시장", "inv": "💼 포트", "sig": "🎯 신호", "prod": "🛍️ 상품", "feed": "📰 피드"}
-MORE_NAME = {"home": "🏠 오늘", "market": "🌐 시황", "sector": "🧭 나침반", "prob": "🎲 시장확률", "port": "💼 포트",
-             "score": "📊 성적표", "whale": "🐋 고래", "cup": "☕ 컵", "gap": "📈 갭", "screen": "🔎 거르기",
+MORE_NAME = {"home": "🏠 오늘", "market": "🌐 시황", "sector": "🧭 시장 흐름", "prob": "🎲 오를 확률", "port": "💼 포트",
+             "score": "📊 성적표", "whale": "🐋 큰손", "cup": "☕ 컵 차트", "gap": "📈 갭 상승", "screen": "🔎 종목 찾기",
              "sigmore": "🗂 더 보기", "bond": "🏦 채권", "fund": "📦 펀드", "els": "🎯 ELS", "feed": "📰 피드"}
 POSE = {"home": "kid_thumb", "mkt": "kid_globe", "inv": "kid_piggy", "sig": "kid_detect", "prod": "kid_piggy", "feed": "kid_wave",
         "market": "kid_globe", "sector": "kid_globe", "prob": "kid_think", "port": "kid_piggy", "score": "kid_joy",
@@ -34,13 +34,13 @@ MARK = {"market": "🌐", "sector": "🧭", "prob": "🎲", "port": "💼", "sco
 def norm(t):
     """guide.js 의 vkey() 와 똑같이: 공백·숫자·기호를 빼고 소문자 24자"""
     t = re.sub(r"[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()−▲▼△▽›‹]", "", t or "")
-    t = re.sub(r"(미국|한국|일본|중국|홍콩)시장은어느국면인가", "", t)      # 고른 나라에 따라 바뀌는 부제(10/27)
+    t = re.sub(r"(미국|한국|일본|중국|홍콩)시장은어느(국면|장분위기)인가", "", t)      # 고른 나라에 따라 바뀌는 부제(10/27)
     return t.lower()[:24]
 
 
 # 10/27 사용자 「한국 고르고 눌렀는데 미국 시장은~ 이라고 설명」 — 찍을 때 고른 나라·시각이 글에 박히는 줄은 어느 때나 맞는 글로
 LINE_FIX = [
-    (r"^(미국|한국|일본|중국|홍콩) 시장은 어느 국면인가$", "나라 칩(미국·한국·일본·중국·홍콩)을 누르면 그 나라 시장이 지금 어느 국면인지 보여 줘요."),
+    (r"^(미국|한국|일본|중국|홍콩) 시장은 어느 (국면|장 분위기)인가$", "나라 칩(미국·한국·일본·중국·홍콩)을 누르면 그 나라 시장이 지금 어느 장 분위기인지 보여 줘요."),
     (r"한국시각 \d{1,2}:\d{2} 기준 · ", ""),
     (r"열린 시장은 \d{1,2}:\d{2} 지금 등락으로", "열린 시장은 지금 등락으로"),
 ]

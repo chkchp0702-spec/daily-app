@@ -9,7 +9,7 @@ OUT = "explain/cap"
 os.makedirs(OUT, exist_ok=True)
 TARGETS = ["home", "market", "sector", "prob", "port", "score", "whale", "cup", "gap", "screen", "sigmore",
            "bond", "fund", "els", "feed",
-           # 10/27 사용자 「조이 사진 있는 곳은 다」 — 나머지 탭 + 종목리포트(onepager) + 고래 운용사 시트(mgr)
+           # 10/27 사용자 「조이 사진 있는 곳은 다」 — 나머지 탭 + 종목리포트(onepager) + 큰손 운용사 시트(mgr)
            "accum", "danta", "onepager", "alarm", "idea", "mgr"]
 
 # 오늘 탭의 조이 그림 자리(날씨판 꼬마·세 컷 만화·배지·첫 인사) — 앱 글이 없어서 여기서 씀(today.js 머리 설명 그대로)
@@ -28,7 +28,7 @@ HOME_X = [
         "숫자 표는 「숫자로 자세히」에 있어요. 과거 평균일 뿐, 앞으로를 약속하지는 않아요."]),
     (".tz-bdg", "🏆 오늘의 배지", [
         "날씨판 아래 동그란 칩이 오늘의 배지예요.",
-        "어제 S&P500을 이겼는지, 예고가 맞았는지, 시장 절반 넘게 앞섰는지, 며칠 연속 왔는지에 따라 받아요.",
+        "어제 S&P500을 이겼는지, 예측이 맞았는지, 시장 절반 넘게 앞섰는지, 며칠 연속 왔는지에 따라 받아요.",
         "배지를 누르면 왜 받았는지 알려 줘요."]),
     ("#tdhero", "👋 조이 인사", [
         "안녕하세요! 저는 어플 안내자 조이(Joey)예요.",
@@ -122,11 +122,11 @@ with sync_playwright() as p:
             continue
         try:
             pg.set_viewport_size({"width": 390, "height": 844})
-            if key == "onepager":       # 종목리포트: 고래 TOP 10 첫 종목을 엶
+            if key == "onepager":       # 종목리포트: 큰손 TOP 10 첫 종목을 엶
                 pg.evaluate("go('whale')"); pg.wait_for_timeout(6000)
                 code = pg.evaluate("(document.querySelector('[data-op]') || {getAttribute: () => '005930'}).getAttribute('data-op')")
                 pg.evaluate(f"openOP({json.dumps(code)})")
-            elif key == "mgr":          # 고래 운용사 보유 종목 시트
+            elif key == "mgr":          # 큰손 운용사 보유 종목 시트
                 pg.evaluate("go('whale')"); pg.wait_for_timeout(6000)
                 nm = pg.evaluate("(document.querySelector('[data-mgr]') || {getAttribute: () => ''}).getAttribute('data-mgr')")
                 if nm: pg.evaluate(f"openMgr({json.dumps(nm)})")
