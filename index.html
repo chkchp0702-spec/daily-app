@@ -1508,7 +1508,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261028z";
+var APPV = "20261028zb";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1589,7 +1589,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="pdfx.js?v=9"></script>
 <script defer src="honest.js?v=1"></script>
 <script defer src="up10.js?v=25"></script>
-<script defer src="nav2.js?v=26"></script>
+<script defer src="nav2.js?v=28"></script>
 <script defer src="clamp.js?v=5"></script>
 <script defer src="ticker.js?v=3"></script>
 <script defer src="ux1013.js?v=4"></script>
@@ -1615,7 +1615,8 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="iconz.js?v=3"></script>   <!-- 🔣 10/22 아이콘 풀이 -->
 <script defer src="today.js?v=9"></script>   <!-- 🏠 10/22 오늘 탭 10가지 -->
 <script defer src="vidmap.js?v=6"></script>   <!-- 🎬 조이 설명 영상 목록(자동 생성) -->
-<script defer src="guide.js?v=22"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
+<script defer src="guide.js?v=24"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
+<script defer src="easy.js?v=1"></script>   <!-- 🗣 10/28 쉬운 말 (끄기: localStorage easy=off) -->
 <script defer src="design.js?v=2"></script>   <!-- 🎨 10/22 디자인 한 벌 — 늘 맨 마지막 -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
