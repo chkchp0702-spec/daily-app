@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix: { shard: [0, 1, 2, 3, 4, 5, 6, 7] }
+      matrix: { shard: [0] }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { path: parts, merge-multiple: true }
       - run: |
-          cd parts && ls -la && (head -1 kr_flow_0.csv; for f in kr_flow_*.csv; do tail -n +2 $f; done) | gzip > kr_flow.csv.gz && rm -f kr_flow_*.csv
+          cd parts && ls -la && if ls kr_flow_*.csv >/dev/null 2>&1; then (head -1 kr_flow_0.csv; for f in kr_flow_*.csv; do tail -n +2 $f; done) | gzip > kr_flow.csv.gz && rm -f kr_flow_*.csv; fi
           cat fetch_log_*.txt > fetch_log.txt 2>/dev/null || true
           git init -q -b whale-lab-out && git config user.name lab-bot && git config user.email lab-bot@users.noreply.github.com
           git add -A && git commit -qm "lab $(date -u +%H:%M)" && git push -f https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} whale-lab-out
