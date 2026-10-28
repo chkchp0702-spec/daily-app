@@ -22,7 +22,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
-XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX"]
+XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F"]
 FX = {"KR": ("KRW=X", "원/달러"), "JP": ("JPY=X", "엔/달러"), "CN": ("CNY=X", "위안/달러"), "HK": ("CNY=X", "위안/달러"), "US": ("DX-Y.NYB", "달러 인덱스")}
 
 
@@ -532,6 +532,28 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                 research["holiday"] = {"kind": kind, "t1": str(t1.date()), "hol": hn}
         except Exception as e:
             research["holiday_err"] = str(e)[:120]
+    # 🟤 구리/금 5일 꼬리 (10/28 14시 #18 · probe/cug_bt.py · 구리=경기·위험선호, 금=안전자산) — 한국·일본 「다음 날」만, 꼬리에서만
+    #   구리(HG=F)÷금(GC=F) 5일 로그 변화의 1년 백분위 · 미국 날짜 값 → 다음 아시아 장. 2001~, 2016-04/05 기준 앞/뒤 · 걸어가며 사전 100 브라이어
+    #   한국 ≥90% 다음 날 +8.9·+5.3%p(n 326·329) · ≤10% −3.3·−0.1 · 브라이어 0.24632→0.2434 · 0.24619→0.24516 · 최근5년 0.24393→0.23985 ✅
+    #   일본 ≥90% +5.2·+5.1%p(n 324·335) · ≤10% −2.9·−3.2 · 브라이어 0.2499→0.24842 · 0.24822→0.24652 · 최근5년 0.24785→0.24629 ✅
+    #   5일 뒤는 한국 뒤 기간 나빠짐·일본 ≤10% 뒤집힘 → 안 씀 · 중국·홍콩·미국 ❌ · 20·60일 변화 ❌(앞/뒤 엇갈림)
+    hg_, gd_ = _c(H, "HG=F"), _c(H, "GC=F")
+    if mk in ("KR", "JP") and hg_ is not None and gd_ is not None:
+        try:
+            cg = pd.concat([hg_, gd_], axis=1, keys=["h", "g"]).dropna()
+            cg = cg[(cg > 0).all(axis=1)]
+            lr_ = np.log(cg["h"] / cg["g"])
+            rk = align(rank252(lr_.diff(5)), idx); cv = rk.iloc[-1]
+            research["cug"] = {"d": str(lr_.index[-1].date()), "r5": round(float(lr_.diff(5).iloc[-1]) * 100, 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+            if not pd.isna(cv) and (cv >= 0.9 or cv <= 0.1):
+                hi = cv >= 0.9
+                m = cond(d, ((rk >= 0.9) if hi else (rk <= 0.1)).fillna(False), "구리/금 5일 " + ("급등(1년 상위 10%)" if hi else "급락(1년 하위 10%)"))
+                add("cug", "🟤", "구리/금 비율", "자금", m, 0.5,
+                    f"구리÷금 5일 {float(lr_.diff(5).iloc[-1])*100:+.1f}% (1년 백분위 {cv*100:.0f}%) — 경기 금속이 안전자산보다 강하면 경기에 민감한 한국·일본 다음 날이 평소보다 잘 오름(다음 날만)")
+                if M and M[-1]["k"] == "cug":
+                    M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["cug_err"] = str(e)[:120]
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
