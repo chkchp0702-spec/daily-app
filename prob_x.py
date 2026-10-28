@@ -22,7 +22,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
-XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F"]
+XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE"]
 FX = {"KR": ("KRW=X", "원/달러"), "JP": ("JPY=X", "엔/달러"), "CN": ("CNY=X", "위안/달러"), "HK": ("CNY=X", "위안/달러"), "US": ("DX-Y.NYB", "달러 인덱스")}
 
 
@@ -554,6 +554,27 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                     M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["cug_err"] = str(e)[:120]
+    # 🏛️ 채권 공포 대 주식 공포 (10/28 15시 #19 · probe/move_bt.py) — 한국·일본 「다음 날」만, 꼬리에서만
+    #   (MOVE 1년 백분위 − VIX 1년 백분위)의 1년 백분위 · 미국 날짜 값 → 다음 아시아 장. 2002-11~, 2016 기준 앞/뒤 · 걸어가며 사전 100 브라이어
+    #   한국 ≤10%(주식 공포가 채권보다 훨씬 큼) 다음 날 −9.2·−5.0%p(n 330·433) · ≥90% +1.4·+2.5 · 브라이어 0.25151→0.24909 · 0.24998→0.24857 · 최근5년 0.25051→0.24703 ✅
+    #   일본 ≤10% −8.3·−8.3%p(n 331·428) · ≥90% +7.6·+5.4(n 321·451) · 브라이어 0.25035→0.24395 · 0.24917→0.24664 · 최근5년 0.25022→0.24756 ✅
+    #   MOVE 수준·5일 변화 ❌(앞/뒤 엇갈림) · 중국·홍콩·미국 ❌(뒤 기간 나빠짐) · 5일 뒤 ❌
+    mv_, vx_ = _c(H, "^MOVE"), _c(H, "^VIX")
+    if mk in ("KR", "JP") and mv_ is not None and vx_ is not None:
+        try:
+            mv_ = mv_[mv_ > 0].dropna()
+            gap_ = rank252(mv_) - rank252(vx_.reindex(mv_.index).ffill())
+            rk = align(rank252(gap_), idx); cv = rk.iloc[-1]
+            research["move"] = {"d": str(mv_.index[-1].date()), "move": round(float(mv_.iloc[-1]), 1), "gap": None if pd.isna(gap_.iloc[-1]) else round(float(gap_.iloc[-1]), 3), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+            if not pd.isna(cv) and (cv >= 0.9 or cv <= 0.1):
+                hi = cv >= 0.9
+                m = cond(d, ((rk >= 0.9) if hi else (rk <= 0.1)).fillna(False), "채권 공포 대비 주식 공포 " + ("작음(1년 상위 10%)" if hi else "큼(1년 하위 10%)"))
+                add("move", "🏛️", "채권 대 주식 공포(MOVE·VIX)", "심리", m, 0.5,
+                    f"MOVE {float(mv_.iloc[-1]):.0f} — 채권 변동성 백분위 − VIX 백분위가 1년 중 {cv*100:.0f}% 자리 · " + ("채권은 불안한데 주식은 차분할 때 한국·일본 다음 날이 평소보다 잘 오름" if hi else "채권은 차분한데 주식만 겁먹을 때 한국·일본 다음 날이 평소보다 덜 오름") + "(다음 날만)")
+                if M and M[-1]["k"] == "move":
+                    M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["move_err"] = str(e)[:120]
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
