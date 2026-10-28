@@ -1450,6 +1450,11 @@ function opShow(sym, noPush){
           d.querySelector(".kpi.k1 .ks").innerHTML = '<span class="' + (chg >= 0 ? "up" : "down") + '">' + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%</span> · " + (p.lv ? p.lv + " 실시간" : p[0].slice(5).replace("-", "/") + " 종가");
           [].forEach.call(d.querySelectorAll("h2"), function(h){ if (/주가/.test(h.textContent)){ h.parentNode.innerHTML = "<h2>주가 (1년)</h2>" + opChart(p, u); } });
           if (hdr) hdr.innerHTML = "가격 " + p[0] + (p.lv ? " " + p.lv + " 실시간 (10분마다)" : " 종가") + "<br>설명 " + hdr.innerHTML.split("<br>")[0] + " 기준<br>통화 " + u + (u !== "원" ? '<br><span class="fxl"></span>' : "");
+          if (p.lv){   // 💹 목표가까지 여유도 지금 가격으로 다시 (리포트 글은 어제 종가 기준)
+            var tg = null; [].forEach.call(d.querySelectorAll(".kpi"), function(k){ if (/목표주가/.test(k.textContent)){ var v = k.querySelector(".kv"); if (v) tg = +String(v.textContent).replace(/[^\d.]/g, ""); } });
+            if (tg && p[1]){ var upv = (tg / p[1] - 1) * 100, ut = (upv >= 0 ? "+" : "") + upv.toFixed(1) + "%";
+              var tw = d.createTreeWalker(d.body, 4), nd; while ((nd = tw.nextNode())){ if (/현재가(보다| 대비)\s*[+−\-]?\d+(\.\d+)?%/.test(nd.nodeValue)) nd.nodeValue = nd.nodeValue.replace(/(현재가(?:보다| 대비)\s*)[+−\-]?\d+(\.\d+)?%/, "$1" + ut); } }
+          }
           var w = d.querySelector(".w52"), lo = w && +w.getAttribute("data-lo"), hi = w && +w.getAttribute("data-hi");
           if (w && hi > lo){ var n = w.querySelector(".w52-n"), pos = Math.max(0, Math.min(100, (p[1] - lo) / (hi - lo) * 100));
             n.style.left = pos.toFixed(1) + "%"; var em = n.querySelector("em"); if (em){ em.textContent = "현재 " + fmtPrice(p[1], u); em.className = pos > 85 ? "r" : pos < 15 ? "l" : ""; } }
@@ -1498,7 +1503,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261028o";
+var APPV = "20261028p";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
