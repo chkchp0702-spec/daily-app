@@ -921,7 +921,7 @@
     var W_ = wlItems(), P_ = pinItems(), all = W_.concat(P_);
     var box = document.createElement("div"); box.id = "opch";
     var row = function(it, i){ var ic = it.kind === "stock" ? "⭐" : it.kind === "myels" ? "🎯" : it.kind === "fund" ? "📦" : "🏦"; return '<label class="opc-r"><input type="checkbox" data-i="' + i + '"><span>' + ic + '</span><b>' + String(it.nm).replace(/[<>&]/g, "").slice(0, 26) + '</b><small>' + (it.kind === "stock" ? it.id : it.kind === "myels" ? "내 ELS" : it.kind === "fund" ? "펀드" : "채권") + '</small></label>'; };
-    box.innerHTML = '<div class="opc-s"><h3>📨 고객에게 보내기</h3>' +
+    box.innerHTML = '<div class="opc-s"><h3>📨 보내기</h3>' +
       '<label class="opc-n">✍️ 보내는 사람 <input id="opcnm" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + String(ls("pbname") || "").replace(/[&<>"]/g, "") + '"></label>' +
       '<button class="opc-b main" data-m="mkt">📊 시황만 <small>시장 한 장</small></button>' +
       '<button class="opc-b" data-m="pick">⭐ 종목·상품 고르기 <small>고른 종목·상품 한 장씩 · 시황은 넣어도 빼도 돼요</small></button>' +
@@ -1328,7 +1328,7 @@
     opts.push(["view", sh ? "📄 열어 둔 이 내용 한 장" : "📄 지금 보고 있는 부분 한 장", vt || "화면에 보이는 카드"]);
     if (opts.length === 1 && !R){ go2("view"); return; }
     var box = document.createElement("div"); box.id = "opch";
-    box.innerHTML = '<div class="opc-s"><h3>📨 고객에게 보내기</h3><label class="opc-n">✍️ 보내는 사람 <input id="opcnm" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + String(ls("pbname") || "").replace(/[&<>"]/g, "") + '"></label>' +
+    box.innerHTML = '<div class="opc-s"><h3>📨 보내기</h3><label class="opc-n">✍️ 보내는 사람 <input id="opcnm" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + String(ls("pbname") || "").replace(/[&<>"]/g, "") + '"></label>' +
       opts.map(function(o, i){ return '<button class="opc-b' + (i === 0 ? " main" : "") + '" data-o="' + o[0] + '">' + o[1] + ' <small>' + String(o[2]).replace(/[&<>"]/g, "").slice(0, 80) + '</small></button>'; }).join("") +
       '<button class="opc-x" data-x="1">닫기</button></div>';
     document.body.appendChild(box);
@@ -1371,7 +1371,7 @@
     var k = cur(), b = document.getElementById("opbtn");
     if (!TABS[k] && !document.getElementById("sheet")){ if (b) b.remove(); return; }
     if (b){ b.classList.toggle("onsheet", !!document.getElementById("sheet")); return; }
-    b = document.createElement("button"); b.id = "opbtn"; b.type = "button"; b.innerHTML = "📨 <span>고객에게</span>"; b.setAttribute("aria-label", "고객에게 보내기 — 한 장");
+    b = document.createElement("button"); b.id = "opbtn"; b.type = "button"; b.innerHTML = "📨 <span>보내기</span>"; b.setAttribute("aria-label", "보내기 — 한 장");
     b.onclick = function(ev){ ev.stopPropagation(); var k2 = cur(); if (k2 === "home" && !document.getElementById("sheet")) chooser(); else if (k2 === "onepager" && !document.getElementById("sheet")) go(null); else sendChooser(); };
     document.body.appendChild(b);
   }
@@ -1380,7 +1380,7 @@
     [].forEach.call(document.querySelectorAll("#pdroot .pd-tap.on > .pd-x:not([data-op1])"), function(p){
       p.setAttribute("data-op1", "1"); var row = p.parentNode, R = __pdObj(row.dataset.x); if (!R || !R.o) return;
       if (R.k === "pv" || R.k === "pvl" || R.o.pv === true) return;
-      var b = document.createElement("button"); b.className = "em-add op-row"; b.type = "button"; b.textContent = "📨 이 상품 고객에게 보내기";
+      var b = document.createElement("button"); b.className = "em-add op-row"; b.type = "button"; b.textContent = "📨 이 상품 한 장 보내기";
       b.onclick = function(ev){ ev.stopPropagation(); go(R); }; p.appendChild(b);
     });
   }

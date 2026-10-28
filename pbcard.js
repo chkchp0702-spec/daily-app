@@ -17,7 +17,7 @@
       (j.regime ? '<div class="pb-reg">🧭 ' + e(j.regime) + (j.one ? ' — ' + e(j.one) : '') + '</div>' : '') +
       '<div class="pb-talk"><small>💬 고객에게 할 말</small>' + (j.talk || []).map(function(t){ return '<p>· ' + e(t) + '</p>'; }).join("") + '</div>' +
       (j.events && j.events.length ? '<div class="pb-ev">📅 ' + e(j.events.join(" · ")) + '</div>' : '') +
-      '<div class="pb-ft"><button type="button" data-pbsend="1">📨 이 내용 고객에게 보내기</button><span class="mut">장중 매시간 새로 써요 · 알림은 아침 한 번</span></div></section>';
+      '<div class="pb-ft"><button type="button" data-pbsend="1">📨 이 내용 보내기</button><span class="mut">장중 매시간 새로 써요 · 알림은 아침 한 번</span></div></section>';
   }
   function mount(){
     var b = document.getElementById("hmbody"); if (!b) return;
