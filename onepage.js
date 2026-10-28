@@ -3,7 +3,8 @@
    화면 캡처가 아니라 앱 자료(실시간 시세·국면·배분·과거 재생)를 골라 캔버스에 새로 그림(1080×1350 PNG):
    숫자 타일 · 업종 막대 · 배분 막대 · 성과 선 · 만기 시간표 · ELS 계단 · 수익률 막대. 앱 이름은 넣지 않음(PB 이름만). 🔒 사모 라인업은 절대 안 들어감. */
 (function(){
-  var TABS = {home: "시장", market: "시장", port: "포트", bond: "상품", els: "상품", fund: "상품"};
+  var TABS = {home: "시장", market: "시장", sector: "시장", prob: "시장", port: "포트", score: "포트", whale: "신호", cup: "신호", gap: "신호", screen: "신호", sigmore: "신호", bond: "상품", els: "상품", fund: "상품", feed: "피드", onepager: "종목"};
+  var SCREENS = {};   // 화면 키 → 한 장 만들기 (아래에서 채움)
   var RAWM = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/";
   function ls(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(x) {} return null; }
   function strip(t){ return String(t || "").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim(); }
@@ -588,14 +589,74 @@
       g.fillStyle = r.op == null ? MUT : r.op >= 0 ? "#2f9e44" : DN; font(g, 700, 21); g.fillText(r.op == null ? "–" : "이익 " + F_.fmt(r.op), x + bw / 2, base + 58); g.textAlign = "left"; });
     return h + 24;
   }
+  /* ───────────── 🖼 화면 한 장 (10/28 15:39 「어디에 있던 그 화면의 대부분을 차지하는 내용을 원페이지로 — 시황 보내듯 깔끔하게」) ───────────── */
+  function bannerScreen(g, C, name){
+    var bh = C.hero || (C.stats && C.stats.length) ? 470 : 300, mood = C.mood || "flat";
+    scene(g, C.scene || "chart", W, bh, mood); topLine(g, name);
+    g.fillStyle = "#fff"; font(g, 800, 54); wrap(g, C.title, MX, 134, CW, 60, 1);
+    if (C.sub){ g.fillStyle = "rgba(255,255,255,.82)"; font(g, 600, 25); wrap(g, C.sub, MX, 178, CW, 30, 1); }
+    if (C.hero){
+      var Hh = C.hero; g.fillStyle = "rgba(255,255,255,.75)"; font(g, 700, 25); wrap(g, Hh.l || "", MX, 250, 470, 28, 1);
+      g.fillStyle = Hh.c === "up" ? LUP : Hh.c === "dn" ? LDN : "#fff"; var hs = 96; font(g, 800, hs); while (g.measureText(String(Hh.v)).width > 470 && hs > 50){ hs -= 6; font(g, 800, hs); } g.fillText(String(Hh.v), MX - 2, 348);
+      if (Hh.s){ g.fillStyle = "rgba(255,255,255,.85)"; font(g, 600, 24); wrap(g, Hh.s, MX, 398, 470, 28, 2); }
+    }
+    if (C.stats && C.stats.length){
+      var S_ = C.stats.slice(0, 4), x0 = C.hero ? 560 : MX, bw = W - MX - x0, rh = Math.min(62, 230 / S_.length);
+      rr(g, x0, 222, bw, rh * S_.length + 26, 22, "rgba(255,255,255,.10)");
+      S_.forEach(function(s, i){ var yy = 222 + 13 + i * rh + rh / 2 + 9;
+        g.fillStyle = "rgba(255,255,255,.78)"; font(g, 600, 22); wrap(g, s.l, x0 + 22, yy, bw * 0.55, 26, 1);
+        g.fillStyle = s.c === "up" ? LUP : s.c === "dn" ? LDN : "#fff"; font(g, 800, 30); g.textAlign = "right"; g.fillText(String(s.v), x0 + bw - 22, yy + 2); g.textAlign = "left";
+        if (i < S_.length - 1){ g.fillStyle = "rgba(255,255,255,.12)"; g.fillRect(x0 + 22, yy + rh / 2 - 6, bw - 44, 1); } });
+    }
+    return bh + 30;
+  }
+  function bList(g, y, L){   // 순위 목록 — 이름 · 작은 설명 · 값 · 막대
+    if (!L || !L.items || !L.items.length) return 0;
+    var items = L.items.slice(0, L.max || 8), hasS = items.some(function(it){ return it.s; }), rowH = hasS ? 78 : 58, h = 58 + items.length * rowH + 4;
+    rr(g, MX, y, CW, h, 22, TILE);
+    g.fillStyle = SUB; font(g, 800, 24); g.fillText(L.title, MX + 24, y + 38);
+    if (L.right){ g.fillStyle = MUT; font(g, 600, 21); g.textAlign = "right"; g.fillText(L.right, W - MX - 24, y + 38); g.textAlign = "left"; }
+    var bmax = Math.max.apply(null, items.map(function(it){ return Math.abs(it.bar || 0); }).concat([1e-9]));
+    items.forEach(function(it, i){
+      var yy = y + 54 + i * rowH, x = MX + 24, vx = W - MX - 24;
+      if (it.bar != null){ rr(g, x, yy + rowH - 12, (CW - 48) * Math.abs(it.bar) / bmax, 6, 3, it.barc || (it.bar >= 0 ? "rgba(214,69,61,.28)" : "rgba(47,111,221,.28)")); }
+      if (L.rank !== false){ g.fillStyle = i < 3 ? ACC : MUT; font(g, 800, 26); g.fillText(String(i + 1), x, yy + 32); x += 40; }
+      g.fillStyle = INK; font(g, 800, 28); var nw = wrap(g, (it.f ? it.f + " " : "") + it.n, x, yy + 32, CW - 48 - (x - MX - 24) - 190, 30, 1);
+      if (it.s){ g.fillStyle = MUT; font(g, 500, 21); wrap(g, it.s, x, yy + 60, CW - 48 - (x - MX - 24) - 150, 24, 1); }
+      if (it.v != null){ var vv = typeof it.v === "number" ? pct(it.v) : String(it.v); g.fillStyle = it.vc || (typeof it.v === "number" ? cls(it.v) : INK); font(g, 800, 30); g.textAlign = "right"; g.fillText(vv, vx, yy + 32); g.textAlign = "left"; }
+      if (it.v2){ g.fillStyle = MUT; font(g, 600, 20); g.textAlign = "right"; g.fillText(it.v2, vx, yy + 60); g.textAlign = "left"; }
+      if (i < items.length - 1 && it.bar == null){ g.fillStyle = LINE; g.fillRect(MX + 24, yy + rowH - 4, CW - 48, 1); }
+    });
+    return h + 24;
+  }
+  function bStat(g, y, T){   // 숫자 칸 2~5개 (색 있는 값)
+    if (!T || !T.items || !T.items.length) return 0;
+    var it = T.items.slice(0, 5), n = it.length, gap = 12, w = (CW - gap * (n - 1)) / n, h = T.title ? 196 : 152, y0 = y;
+    if (T.title){ g.fillStyle = SUB; font(g, 800, 24); g.fillText(T.title, MX + 4, y + 30); y0 = y + 44; }
+    it.forEach(function(t, i){ var x = MX + i * (w + gap), sel = t.sel; rr(g, x, y0, w, 152, 20, sel ? "#eef2ff" : TILE); if (sel){ g.strokeStyle = "#3b5bdb"; g.lineWidth = 3; g.beginPath(); if (g.roundRect) g.roundRect(x + 1.5, y0 + 1.5, w - 3, 149, 19); else g.rect(x, y0, w, 152); g.stroke(); }
+      g.fillStyle = SUB; font(g, 700, 22); wrap(g, t.l, x + 16, y0 + 36, w - 28, 24, 1);
+      g.fillStyle = t.c === "up" ? UP : t.c === "dn" ? DN : t.c === "ok" ? "#2f9e44" : INK; var fs = n >= 5 ? 36 : 44; font(g, 800, fs); while (g.measureText(String(t.v)).width > w - 28 && fs > 22){ fs -= 2; font(g, 800, fs); } g.fillText(String(t.v), x + 16, y0 + 92);
+      if (t.s){ g.fillStyle = MUT; font(g, 500, 20); wrap(g, t.s, x + 16, y0 + 128, w - 28, 22, 1); } });
+    return (T.title ? 44 : 0) + 152 + 24;
+  }
+  function bNote(g, y, N){   // 글 상자 (정직 경고·설명) — tone: warn | info | dark
+    if (!N || !N.t) return 0;
+    var tone = N.tone || "info", bg = tone === "warn" ? "#fff4dc" : tone === "dark" ? "#1f2d4d" : "#eef2fa", fg = tone === "dark" ? "#f3f5fa" : INK, tw = CW - 56;
+    font(g, 600, 26); var n = nLines(g, N.t, tw, N.max || 4), h = (N.h ? 50 : 22) + n * 36 + 24;
+    rr(g, MX, y, CW, h, 20, bg);
+    if (N.h){ g.fillStyle = tone === "warn" ? "#b7791f" : tone === "dark" ? "#d9a441" : ACC; font(g, 800, 24); g.fillText(N.h, MX + 28, y + 38); }
+    g.fillStyle = fg; font(g, 600, 26); wrap(g, N.t, MX + 28, y + (N.h ? 50 : 22) + 28, tw, 36, N.max || 4);
+    return h + 24;
+  }
   function draw(C, name){
-    var dyn = C.kind === "market" || C.kind === "stock";
+    var dyn = C.kind === "market" || C.kind === "stock" || C.kind === "screen";
     H = dyn ? 3400 : 1620;
     var c = document.createElement("canvas"); c.width = W; c.height = H; var g = ctx2d(c);
     g.fillStyle = BG; g.fillRect(0, 0, W, H);
     var d = kst(), y = 70;
     if (C.kind === "market") y = bannerMarket(g, C, name);
     else if (C.kind === "stock") y = bannerStock(g, C, name);
+    else if (C.kind === "screen") y = bannerScreen(g, C, name);
     else {
       g.fillStyle = MUT; font(g, 600, 24); g.fillText(d.getUTCFullYear() + "년 " + (d.getUTCMonth() + 1) + "월 " + d.getUTCDate() + "일", MX, y);
       if (name){ g.textAlign = "right"; g.fillStyle = SUB; font(g, 700, 24); g.fillText(name, W - MX, y); g.textAlign = "left"; }
@@ -604,14 +665,15 @@
       y += 24;
     }
     var blocks;
-    if (C.kind === "market") blocks = [["key", C.key], ["world", C.world], ["stars", C.stars], ["heat", C.heat], ["gauge", C.gauge], ["advice", C.advice, name], ["kpis", C.kpis2], ["rows", C.themes], ["alloc", C.alloc, false]];
+    if (C.kind === "screen") blocks = C.blocks || [];
+    else if (C.kind === "market") blocks = [["key", C.key], ["world", C.world], ["stars", C.stars], ["heat", C.heat], ["gauge", C.gauge], ["advice", C.advice, name], ["kpis", C.kpis2], ["rows", C.themes], ["alloc", C.alloc, false]];
     else if (C.kind === "port") blocks = [["chips", C.chips], ["alloc", C.alloc, true], ["line", C.line], ["kpis", C.kpis], ["rows", C.why, "text"], ["bullets", C.bullets], ["rows", C.sched, "text"]];
     else if (C.kind === "bond") blocks = [["kpis", C.kpis], ["timeline", C.timeline], ["tiles", C.tiles], ["risk", C.risk, C.riskTitle], ["bars", C.cmp], ["bullets", C.bullets]];
     else if (C.kind === "els") blocks = [["chips", C.chips], ["kpis", C.kpis], ["steps", C.steps], ["prob", C.prob], ["tiles", C.tiles], ["bullets", C.bullets]];
     else if (C.kind === "stock") blocks = [["chips", C.chips], ["kpis", C.kpis], ["chart", C.chart], ["glance", C.glance], ["news", C.news], ["advice", C.advice, name], ["fin", C.fin], ["dna5", C.dna], ["anl", C.anl]];
     else if (C.kind === "myels") blocks = [["kpis", C.kpis], ["ua", C.uabars], ["advice", C.advice, name], ["steps", C.steps]];
     else blocks = [["chips", C.chips], ["kpis", C.kpis], ["risk", C.risk], ["bars", C.bars], ["tiles", C.tiles], ["bullets", C.bullets]];
-    var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb, rows: bRows, risk: bRisk, hero: bHero, world: bWorld, heat: bHeat, gauge: bGauge, advice: bAdvice, chart: bChart, dna: bDna, anl: bAnl, ua: bUa, glance: bGlance, news: bNews, dna5: bDna5, key: bKey, stars: bStars, fin: bFin};
+    var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb, rows: bRows, risk: bRisk, hero: bHero, world: bWorld, heat: bHeat, gauge: bGauge, advice: bAdvice, chart: bChart, dna: bDna, anl: bAnl, ua: bUa, glance: bGlance, news: bNews, dna5: bDna5, key: bKey, stars: bStars, fin: bFin, list: bList, stat: bStat, note: bNote};
     var c2 = document.createElement("canvas"); c2.width = W; c2.height = H; var g2 = ctx2d(c2);   // 먼저 재 보고 들어갈 때만 그림
     blocks.forEach(function(b){ if (!b[1]) return; var hh = FN[b[0]](g2, 0, b[1], b[2]) || 0; if (!hh || y + hh > H - 104) return; FN[b[0]](g, y, b[1], b[2]); y += hh; });
     if (dyn && y + 130 < H){   // 내용만큼만 — 아래 빈 화면 없게
@@ -897,7 +959,12 @@
     });
   }
   function go(R){
-    var k = cur(), p = R ? mkProduct(R) : (k === "port" ? mkPort() : (k === "home" || k === "market") ? mkMarket() : null);
+    var k = cur(), p = null;
+    if (R) p = mkProduct(R);
+    else if (k === "onepager"){ var ob = document.querySelector("[data-opstk]"); p = ob ? mkStock(ob.dataset.opstk, ob.dataset.nm) : null; if (!ob){ toast("종목을 하나 연 뒤 눌러 주세요"); return; } }
+    else if (SCREENS[k]) p = SCREENS[k]();
+    else if (k === "port") p = mkPort();
+    else if (k === "home") p = mkMarket();
     if (!p){ if (TABS[k] === "상품") toast("보낼 상품을 하나 펼친 뒤 눌러 주세요"); else toast("이 화면은 한 장으로 못 만들어요"); return; }
     toast("한 장 만드는 중…");
     p.then(function(C){
@@ -913,7 +980,7 @@
     if (!TABS[k] || document.getElementById("sheet")){ if (b) b.remove(); return; }
     if (b) return;
     b = document.createElement("button"); b.id = "opbtn"; b.type = "button"; b.innerHTML = "📨 <span>고객에게</span>"; b.setAttribute("aria-label", "고객에게 보내기 — 한 장");
-    b.onclick = function(ev){ ev.stopPropagation(); var k2 = cur(); if (k2 === "home" || k2 === "market") chooser(); else go(TABS[k2] === "상품" ? selected() : null); };
+    b.onclick = function(ev){ ev.stopPropagation(); var k2 = cur(); if (k2 === "home") chooser(); else go(TABS[k2] === "상품" ? selected() : null); };
     document.body.appendChild(b);
   }
   function rowBtns(){
