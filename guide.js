@@ -60,7 +60,7 @@
   var VIDV = "5";
   function vidOf(g, mk){ var k = mk ? "m_" + mk : "t_" + g; return VID[k] ? "vid/" + k + ".mp4?v=" + VIDV : ""; }
   // 10/26 사용자 「조이가 있는 모든 곳에 설명 영상」 — 카드 머리·접기 ⓘ·「ⓘ 설명」·「ⓘ …」 접는 칸: vidmap.js(window.VIDC, 자동 생성)에 「화면|제목」 → 파일
-  function vkey(t){ return String(t || "").replace(/[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()−▲▼△▽›‹]/g, "").replace(/(미국|한국|일본|중국|홍콩)시장은어느국면인가/g, "").toLowerCase().slice(0, 24); }   // 10/27 고른 나라에 따라 바뀌는 부제는 빼고
+  function vkey(t){ return String(t || "").replace(/[\s\d·:%,.()\[\]~\-–—+/…?!「」『』()−▲▼△▽›‹]/g, "").replace(/(미국|한국|일본|중국|홍콩)시장은어느(국면|장분위기)인가/g, "").toLowerCase().slice(0, 24); }   // 10/27 고른 나라에 따라 바뀌는 부제는 빼고
   // 10/27 사용자 「조이 사진 있는 곳은 다」 — ① 이 화면에서 같은 제목 ② 다른 화면(시트·종목리포트 등)에서 같은 제목 ③ 없으면 이 화면 설명 영상(글 먼저, ▶ 로 보기)
   function vid1(title){ var m = window.VIDC; if (!m) return ""; var vk = vkey(title); if (!vk || vk === "설명") return "";   // 10/27: 제목 없는 회색 설명 줄(「설명」)이 엉뚱한 카드 영상(펀드 화면에서 ELS 설계 영상)에 붙던 것 → 화면 소개 영상으로
     var k = ((typeof cur !== "undefined" && cur) || "") + "|" + vk, f = m[k];
