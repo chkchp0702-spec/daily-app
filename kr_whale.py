@@ -75,6 +75,29 @@ def summary(S):
             "n_indep": len(sub), "first": done[0]["entry_date"], "last": done[-1]["exit_date"]}
 
 
+def mkt_log(S):
+    """시장 전체 「금융투자 20일 순매수」 1년 백분위 (10/28 연구: 상위 20% 뒤 20일 지수가 평균보다 나았음, 앞·뒤 기간·코스피·코스닥 모두 — 다만 해마다 들쭉날쭉 t≈1.5~1.8)
+       매일 기록만 → 1년 쌓이면 채점. 지수 종가도 여기서 같이 적음(다음 금융 시장 자료 날짜 기준)"""
+    M = S.setdefault("mkt", {})
+    for mk in ("KOSPI", "KOSDAQ"):
+        try:
+            rows = []
+            for pg in (1, 2, 3):
+                j = get(f"https://finance.daum.net/api/investor/{mk}/days?page={pg}&perPage=100&details=true", "https://finance.daum.net/domestic/investors")
+                rows += [(x["date"][:10], (x.get("details") or {}).get("FINANCIAL_INVESTOR")) for x in j.get("data") or []]
+            rows = sorted(r for r in rows if r[1] is not None)
+            v = [r[1] for r in rows]
+            s20 = [sum(v[i - 19:i + 1]) for i in range(19, len(v))]
+            if len(s20) < 200:
+                continue
+            last = s20[-1]; pr = sum(x <= last for x in s20[-252:]) / len(s20[-252:])
+            ix = get(f"https://m.stock.naver.com/api/index/{mk}/basic", "https://m.stock.naver.com/")
+            c = float(str(ix.get("closePrice", "0")).replace(",", ""))
+            M.setdefault(mk, {})[rows[-1][0]] = {"pr": round(pr, 3), "fi20": round(last / 1e8), "close": c}
+        except Exception as e:
+            print("시장 금융투자 실패", mk, e)
+
+
 def main():
     S = json.load(open(P, encoding="utf-8")) if os.path.exists(P) else {
         "v": 1, "start": None, "rule": __doc__.split("자료:")[0].strip(), "days": [], "batches": [], "notified": {}}
@@ -96,9 +119,8 @@ def main():
         print("자료 없음"); return
     today = max(set(lasts), key=lasts.count)
     now = dt.datetime.now(KST)
-    if today != now.strftime("%Y-%m-%d") and os.environ.get("FORCE") != "1":
-        print("오늘 자료 아님(휴장·아직 안 나옴)", today); return
-    if today in S["days"]:
+    # 종목별 투자자 자료는 그날 밤~다음 날 아침에 채워짐(10/28 저녁엔 시장 전체만 10/28, 종목은 10/27) → 「아직 안 센 가장 최근 날」을 셈
+    if S["days"] and today <= S["days"][-1]:
         print("이미 함", today); return
     close = {cd: r[0]["c"] for cd, r in data.items() if r and r[0]["d"] == today and r[0]["c"]}
     S["days"].append(today)
@@ -140,6 +162,7 @@ def main():
             picks = [c for c, _ in sorted(sig.items(), key=lambda x: -x[1])[:k]]
             S["batches"].append({"sig_date": today, "uni": sorted(sig), "picks": picks, "pick_names": [names.get(c, c) for c in picks],
                                  "sig_top": round(sig[picks[0]] * 100, 2)})
+    mkt_log(S)
     S["summary"] = sm = summary(S)
     S["updated"] = now.strftime("%Y-%m-%d %H:%M"); S["bad"] = bad
     # ④ 판정 → 텔레그램(한 번씩)
@@ -150,6 +173,20 @@ def main():
         elif sm["n"] >= 36 and sm["mean_net"] <= 0 and not S["notified"].get("bad"):
             if tg(f"🐳 한국 고래 그림자 — 안 됨\n바구니 {sm['n']}개, 비용 뺀 평균 {sm['mean_net']:+.2f}% · t {sm['t']}. 외국인 따라 사기는 실전에서 시장을 못 이겼어요. 그림자 장부를 멈춰도 돼요."):
                 S["notified"]["bad"] = today
+    # ⑤ 시장 금융투자: 기록 250일↑ 이면 채점 — 상위 20% 날 뒤 20일 지수 − 모든 날 평균, 코스피·코스닥 둘 다 +1%p↑ 이고 하위 20% 는 둘 다 −1%p↓ 이면 「의미 있음」
+    ms = {}
+    for mk, M in (S.get("mkt") or {}).items():
+        ds = sorted(M); fw = []
+        for i, d in enumerate(ds[:-21]):
+            c0, c1 = M[ds[i + 1]]["close"], M[ds[i + 21]]["close"]
+            if c0 and c1: fw.append((M[d]["pr"], c1 / c0 - 1))
+        if len(fw) >= 250:
+            al = sum(x for _, x in fw) / len(fw); hi = [x for p_, x in fw if p_ >= .8]; lo = [x for p_, x in fw if p_ <= .2]
+            ms[mk] = {"n": len(fw), "hi": round((sum(hi) / len(hi) - al) * 100, 2) if hi else None, "lo": round((sum(lo) / len(lo) - al) * 100, 2) if lo else None}
+    S["mkt_summary"] = ms
+    if len(ms) == 2 and all(v["hi"] is not None and v["lo"] is not None and v["hi"] >= 1 and v["lo"] <= -1 for v in ms.values()) and not S["notified"].get("mkt_good"):
+        if tg("🐳 시장 고래(금융투자 20일 순매수) — 의미 있어졌어요\n" + " · ".join(f"{k} 상위 20% 뒤 20일 {v['hi']:+.2f}%p / 하위 {v['lo']:+.2f}%p ({v['n']}일)" for k, v in ms.items()) + "\n시장 확률·포트 현금 판단에 넣을지 정해 주세요."):
+            S["notified"]["mkt_good"] = today
     json.dump(S, open(P, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
     print(today, "바구니", len(S["batches"]), sm)
 
