@@ -300,7 +300,10 @@
     var jit = function(k){ return hash(seed + k) % 7 - 3; };
     var area = function(targets, extra){ var v = 22 + sc * 0.62 + jit(targets.join("")); [[gG, gE], [bG, bE]].forEach(function(x){ if (targets.indexOf(x[0]) >= 0) v += es(x[1]) >= 1 ? 12 : es(x[1]) === 0 ? 4 : -9; }); return Math.max(12, Math.min(98, Math.round(v + (extra || 0)))); };
     var dCh = L.tags.some(function(x){ return x.t === "충" && x.k === "d"; }), dHap = L.tags.some(function(x){ return (x.t === "합" || x.t === "반합") && x.k === "d"; }), hy = L.tags.some(function(x){ return x.t === "형"; });
+    var invV = Math.max(12, Math.min(98, Math.round(22 + sc * 0.62 + jit("inv") + [[gG, gE], [bG, bE]].reduce(function(v, x){ return v + (x[0] === "재성" ? (es(x[1]) >= 0 ? 10 : -6) : x[0] === "식상" ? (es(x[1]) >= 0 ? 5 : -3) : x[0] === "비겁" ? -5 : 0) + (es(x[1]) >= 1 ? 4 : es(x[1]) < 0 ? -4 : 0); }, 0) - (dCh ? 10 : 0) - (hy ? 4 : 0))));
+    var invD = t.INV_DAY[gG] || t.INV_DAY.재성;
     var areas = [
+      ["📈", "투자", invV, invD.t + " — " + invD.ok],
       ["💼", "일", area(["관성", "식상"]), (t.AREA[gG] || {}).일],
       ["💰", "돈", area(["재성"], gG === "비겁" ? -4 : 0), (t.AREA[gG === "재성" || bG !== "재성" ? gG : bG] || {}).돈],
       ["🤝", "사람", area(["비겁", "인성"], (dHap ? 8 : 0) - (dCh ? 10 : 0)), (t.AREA[bG] || {}).사람],
@@ -345,9 +348,15 @@
     var word = pick(t.WORD[sc >= 72 ? "hi" : sc >= 50 ? "mid" : "lo"], seed + "w");
     var ml = s.monthLuck(R, dd.y, dd.m, 1, dd.d)[0], yl = s.yearLuck(R, dd.y);
     var itemEl = luckyEl;
+    var style = null; t.INV_STYLE.forEach(function(x){ if (!style && invV >= x[0]) style = x[1]; });
+    var invTips = []; L.tags.forEach(function(x){ var k = (x.t === "합" || x.t === "반합") && x.k === "d" ? "합d" : x.t; if (t.INV_TAG[k] && invTips.indexOf(t.INV_TAG[k]) < 0) invTips.push(t.INV_TAG[k]); });
+    var invTimes = t.INV_TIME.map(function(q){ var v = q.br.split("").map(function(b){ return s.luckScore(R, s.hourPillar(L.p[0], b), [{p: L.p, tag: "오늘"}]).s; }); return {q: q, v: v.reduce(function(a, b){ return a + b; }, 0) / v.length}; });
+    var invBest = invTimes.slice().sort(function(a, b){ return b.v - a.v; })[0], invWorst = invTimes.slice().sort(function(a, b){ return a.v - b.v; })[0];
+    var secEls = [R.yong, (es(bE) >= 1 ? bE : es(gE) >= 1 ? gE : R.hui)].filter(function(v, i, a){ return a.indexOf(v) === i; });
+    var inv = {v: invV, style: style, d: invD, tips: invTips.slice(0, 2), best: invBest, worst: invWorst, secs: secEls, avoidSec: R.gi, word: pick(t.INV_WORD, seed + "iw")};
     return {dd: dd, L: L, sc: sc, head: head, areas: areas, tips: tips.slice(0, 3), col: col, num: nums[hash(seed + "n") % 2], dir: t.DIRW[luckyEl], good: good, gG: gG, bG: bG,
       story: story, periods: periods, bestP: bestP, okB: okB.map(ani), noB: noB.map(ani), dos: dos, donts: donts.slice(0, 2), item: t.ITEM[itemEl], avoidCol: t.COLW[R.gi][0], avoidDir: t.DIRW[R.gi],
-      mz: mz, zrel: zrel, word: word, ml: ml, yl: yl};
+      mz: mz, zrel: zrel, word: word, ml: ml, yl: yl, inv: inv};
   }
   function renderLuck(){
     var root = document.getElementById("sjL"); if (!root) return;
@@ -365,6 +374,18 @@
       '<div class="chips"><span>' + (t.ANI_EMO[D.L.p[1]] || "") + ' ' + t.DAYNAME(D.L.p) + ' 날 · ' + t.read(D.L.p) + '일</span><span>' + EMO_EL[D.L.gEl] + ' ' + t.EL_KO[D.L.gEl] + ' · ' + EMO_EL[D.L.bEl] + ' ' + t.EL_KO[D.L.bEl] + '</span><span>🍀 ' + D.col + ' · ' + D.num + '</span></div></div>';
     h += '<div class="lk-flipw lk-pop" style="animation-delay:.1s"><div class="lk-flip' + (flipped ? " on" : "") + '" id="lkFlip"><div class="lk-face lk-front">' + twinkles(10, "f" + dayStr) + '<div class="q">🔮</div><b>오늘의 카드 뽑기</b><small>눌러서 카드를 뒤집어 보세요</small></div>' +
       '<div class="lk-face lk-back" style="background:linear-gradient(150deg,' + CD.c1 + ',' + CD.c2 + ')">' + twinkles(8, "b" + dayStr) + '<div class="ic">' + CD.ic + '</div><b>' + CD.n + '</b><div class="k">' + CD.k + '</div><p>' + CD.m + '</p><p style="font-size:12px;opacity:.85;margin-top:6px">「' + e(D.word) + '」</p></div></div></div>';
+    var IV = D.inv, ivc = scoreCol(IV.v), rr = 34, cc = 2 * Math.PI * rr;
+    h += '<div class="card lk-pop" style="border:1.5px solid ' + IV.style.c + '66;background:linear-gradient(160deg,' + IV.style.c + '1f,var(--panel) 55%)"><h3>📈 오늘의 투자운 <small style="font-weight:500;color:var(--dim)">재미로 보는 투자 기운</small></h3>' +
+      '<div style="display:flex;gap:14px;align-items:center"><svg viewBox="0 0 84 84" style="width:84px;flex:none"><circle cx="42" cy="42" r="' + rr + '" fill="none" stroke="var(--panel2)" stroke-width="8"/><circle cx="42" cy="42" r="' + rr + '" fill="none" stroke="' + ivc + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + (cc * IV.v / 100).toFixed(1) + ' ' + cc.toFixed(1) + '" transform="rotate(-90 42 42)"/><text x="42" y="48" text-anchor="middle" font-size="22" font-weight="900" fill="var(--text)">' + IV.v + '</text></svg>' +
+      '<div style="min-width:0"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span class="lk-g" style="background:' + IV.style.c + ';color:#111;font-size:13px">' + IV.style.ic + ' 오늘은 「' + IV.style.n + '」 모드</span></div><div style="font-size:16px;font-weight:800;margin:6px 0 2px">' + e(IV.d.t) + '</div><div style="font-size:13.5px;color:var(--sub);line-height:1.5">' + e(IV.d.m) + '</div></div></div>' +
+      '<div style="display:flex;gap:4px;margin:12px 0 4px">' + t.INV_STYLE.slice().reverse().map(function(x){ var on = x[1].n === IV.style.n; return '<div style="flex:1;text-align:center;padding:6px 2px;border-radius:10px;font-size:12px;font-weight:800;background:' + (on ? x[1].c : "var(--panel2)") + ';color:' + (on ? "#111" : "var(--dim)") + '">' + x[1].ic + ' ' + x[1].n + '</div>'; }).join("") + '</div>' +
+      '<div class="lk-lucky" style="margin-top:10px"><div><small>매매 타이밍</small><b style="font-size:13.5px">👍 ' + IV.best.q.n + '<br><span style="font-weight:600;color:var(--sub)">' + IV.best.q.t + '</span></b></div>' +
+      '<div><small>쉬어 갈 때</small><b style="font-size:13.5px">🐢 ' + IV.worst.q.n + '<br><span style="font-weight:600;color:var(--sub)">' + IV.worst.q.t + '</span></b></div>' +
+      '<div style="grid-column:1/-1"><small>오늘 기운과 어울리는 업종 (오행)</small><b style="font-size:13.5px">' + IV.secs.map(function(k){ return t.INV_SECTOR[k][0] + ' ' + t.INV_SECTOR[k][1]; }).join("<br>") + '</b><small style="margin-top:3px">한 박자 쉬어 볼 쪽 — ' + t.INV_SECTOR[IV.avoidSec][0] + ' ' + t.INV_SECTOR[IV.avoidSec][1] + '</small></div></div>' +
+      '<div style="margin-top:10px"><div class="lk-tip"><span>✅</span><span>' + e(IV.d.ok) + '</span></div><div class="lk-tip"><span>🚫</span><span>' + e(IV.d.no) + '</span></div>' + IV.tips.map(function(x){ return '<div class="lk-tip"><span>⚠️</span><span>' + e(x) + '</span></div>'; }).join("") + '</div>' +
+      '<div style="text-align:center;font-weight:800;font-size:15px;margin:10px 0 4px">💬 「' + e(IV.word) + '」</div>' +
+      '<div class="sj-btns" style="margin-top:8px"><button class="sj-btn g" id="lkMkt">🌐 진짜 시장은 시황에서 보기</button></div>' +
+      '<p class="sj-note">⚠️ 사주로 본 재미 운세예요. 업종은 오행에 맞춘 놀이일 뿐 추천이 아니고, 실제 투자 판단은 시황 · 포트 · 상품 정보를 보고 하세요.</p></div>';
     h += '<div class="card"><h3>오늘의 이야기</h3>' + D.story.map(function(x){ return '<p style="margin:0 0 8px;font-size:14.5px;line-height:1.65">' + e(x) + '</p>'; }).join("") +
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"><span class="lk-g" style="background:var(--panel2);color:var(--sub)">오늘 글자 ' + D.L.p + '</span><span class="lk-g" style="background:var(--panel2);color:var(--sub)">' + t.EL_KO[D.L.gEl] + ' · ' + t.EL_KO[D.L.bEl] + ' 기운</span><span class="lk-g" style="background:var(--panel2);color:var(--sub)">내게 ' + t.grpShort(D.gG, R.sex) + ' 글자</span></div></div>';
     var addEl = {}; addEl[D.L.gEl] = (addEl[D.L.gEl] || 0) + 1; addEl[D.L.bEl] = (addEl[D.L.bEl] || 0) + 1;
@@ -373,7 +394,7 @@
       return '<div class="r"><span>' + EMO_EL[k] + ' ' + t.EL_KO[k] + '</span><div class="bb"><i style="width:' + (b / mxE * 100) + '%;background:' + t.EL_COL[k] + '"></i>' + (a ? '<i class="add" style="width:' + (a / mxE * 100) + '%;background-color:' + t.EL_COL[k] + '"></i>' : "") + '</div><small style="color:' + (role === "용신" || role === "희신" ? "#38c172" : role === "기신" || role === "구신" ? "#f08a4b" : "var(--dim)") + ';font-weight:800">' + (role === "용신" ? "필요" : role === "희신" ? "도움" : role === "기신" ? "조심" : role === "구신" ? "부담" : "보통") + '</small></div>'; }).join("") +
       '</div><p class="sj-note">' + (function(){ var g = Object.keys(addEl).filter(function(k){ return (R.ES[k] || 0) > 0; }), b = Object.keys(addEl).filter(function(k){ return (R.ES[k] || 0) < 0; });
         return (g.length ? "오늘은 내게 필요한 " + g.map(function(k){ return t.EL_KO[k]; }).join("·") + " 기운이 채워져요 👍 " : "") + (b.length ? b.map(function(k){ return t.EL_KO[k]; }).join("·") + " 기운은 조금 부담 — 무리하지 않기." : g.length ? "" : "무난한 기운이 들어오는 날이에요."); })() + '</p></div>';
-    h += '<div class="card"><h3>오늘 일곱 가지</h3><div class="lk-areas">' + D.areas.map(function(a){ var cc = scoreCol(a[2]);
+    h += '<div class="card"><h3>오늘 여덟 가지</h3><div class="lk-areas">' + D.areas.map(function(a){ var cc = scoreCol(a[2]);
       return '<div class="lk-a"><span class="qi">' + a[0] + '</span><div><b>' + a[1] + '</b> <small style="color:' + cc + ';font-weight:800">' + a[2] + '점</small><div class="bar"><i style="width:' + a[2] + '%;background:' + cc + '"></i></div><p>' + e(a[3] || "") + '</p></div></div>'; }).join("") + '</div></div>';
     h += '<div class="card"><h3>시간대별 흐름 <small style="font-weight:500;color:var(--dim)">가장 좋은 때: ' + D.bestP.P.n + '</small></h3><div style="display:grid;gap:8px">' + D.periods.map(function(q){ var cc = scoreCol(q.sc), ok = q.sc >= 58;
       return '<div style="display:grid;grid-template-columns:28px 64px 1fr;gap:8px;align-items:center"><span style="font-size:19px">' + q.P.ic + '</span><div><b style="font-size:14px">' + q.P.n + '</b><br><small style="color:var(--dim)">' + q.P.t + '</small></div>' +
@@ -416,13 +437,14 @@
     [].forEach.call(root.querySelectorAll(".lk-all [data-id]"), function(b){ b.onclick = function(){ ls("sj_sel", b.dataset.id); renderLuck(); window.scrollTo({top: 0, behavior: "smooth"}); }; });
     var rp = root.querySelector("#lkRep"); if (rp) rp.onclick = function(){ if (window.go) go("saju"); };
     countUp(root.querySelector("#lkSc"), D.sc);
+    var mk = root.querySelector("#lkMkt"); if (mk) mk.onclick = function(){ if (window.go) go("market"); };
     var fl = root.querySelector("#lkFlip"); if (fl) fl.onclick = function(){ fl.classList.toggle("on"); ls(flipKey, fl.classList.contains("on") ? 1 : 0); try { if (navigator.vibrate) navigator.vibrate(12); } catch(x) {} };
     var txt = "🔮 " + p.name + " 님의 " + dd.m + "월 " + dd.d + "일 운세\n" + D.sc + "점 · " + t.GRADE(D.sc) + "\n" + D.head + "\n\n" + D.areas.map(function(a){ return a[0] + " " + a[1] + " " + a[2] + "점 — " + (a[3] || ""); }).join("\n") +
-      "\n\n🍀 행운의 색 " + D.col + " · 숫자 " + D.num + " · 방향 " + D.dir + "\n" + CD.ic + " 오늘의 카드: " + CD.n + " — " + CD.m + "\n💬 「" + D.word + "」\n\n(재미로 보는 운세 · CH Investing)";
+      "\n\n📈 투자운 " + D.inv.v + "점 · " + D.inv.style.ic + " " + D.inv.style.n + " 모드 — " + D.inv.d.m + "\n💬 「" + D.inv.word + "」" + "\n\n🍀 행운의 색 " + D.col + " · 숫자 " + D.num + " · 방향 " + D.dir + "\n" + CD.ic + " 오늘의 카드: " + CD.n + " — " + CD.m + "\n💬 「" + D.word + "」\n\n(재미로 보는 운세 · CH Investing)";
     var sh = root.querySelector("#lkShare"); if (sh) sh.onclick = function(){ if (navigator.share){ navigator.share({title: "오늘의 운세", text: txt}).catch(function(){}); } else copyText(txt, sh); };
     var cp = root.querySelector("#lkCopy"); if (cp) cp.onclick = function(){ copyText(txt, cp); };
   }
-  window.luckView = function(){ return '<div id="sjL" class="no-clp tidy-x"><div class="loading">불러오는 중…</div></div>'; };
+  window.luckView = function(){ return '<div id="sjL" class="no-clp tidy-x" data-noemo="1"><div class="loading">불러오는 중…</div></div>'; };
   window.luckInit = function(){ LK.off = 0; renderLuck(); };
 
   /* ───────── 사주 리포트 — 글 만들기 ───────── */
