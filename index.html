@@ -411,15 +411,16 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
 <link rel="stylesheet" href="plus.css?v=44">
 </head>
 <body>
-<!-- 🧒 10/22 사용자: 앱을 켜면 꼬마가 「오늘도 행복한 하루 되세요」 + 「늘 업데이트되니 껐다 다시 켜기 권해요」 5초 뒤 앱으로 (10/22 2초→3초→4초 · 10/23 5초 + 「어플 안내자 조이(Joey)」 첫 줄 · 두 줄 글씨 크기 같게) -->
+<!-- 🧒 10/22 사용자: 앱을 켜면 꼬마가 「오늘도 행복한 하루 되세요」 + 「늘 업데이트되니 껐다 다시 켜기 권해요」 5초 뒤 앱으로 (10/22 2초→3초→4초 · 10/23 5초 + 「어플 안내자 조이(Joey)」 첫 줄 · 두 줄 글씨 크기 같게 · 10/28 2초 · 10/28 저녁 「제 얼굴을 톡 눌러 주세요」 안내 + 읽을 시간 5초) -->
 <div id="kidsplash" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;background:#f3e6d6;transition:opacity .45s ease;font-family:inherit">
   <img src="img/kid_hello.jpg?v=1" alt="" style="width:min(58vw,240px);height:auto;border-radius:28px;box-shadow:0 10px 30px rgba(80,50,20,.18);animation:kshop 1.6s ease-in-out infinite">
   <div style="font-size:19px;line-height:1.5;font-weight:800;color:#2a1d10;letter-spacing:-.4px;text-align:center">안녕하세요, 어플 안내자 조이(Joey)입니다 👋</div>
   <div style="font-size:19px;line-height:1.5;font-weight:800;color:#2a1d10;letter-spacing:-.4px;text-align:center">오늘도 행복한 하루 되세요! ☀️</div>
-  <div style="font-size:16px;line-height:1.5;font-weight:600;color:#6b5640;letter-spacing:-.4px;text-align:center;max-width:320px">앱은 매일 새로워져요 — 새 버전은 저절로 반영돼요</div>
+  <div style="font-size:16px;line-height:1.55;font-weight:700;color:#2a1d10;letter-spacing:-.4px;text-align:center;max-width:320px;background:#fff7ec;border:1px solid #e6cfb3;border-radius:16px;padding:10px 14px">사용법이나 궁금한 점이 생기면<br>앱 곳곳의 <b style="color:#c2410c">제 얼굴을 톡 눌러 주세요</b> 👆<br>제가 바로 설명해 드릴게요!</div>
+  <div style="font-size:14px;line-height:1.5;font-weight:600;color:#8a735a;letter-spacing:-.4px;text-align:center;max-width:320px">앱은 매일 새로워져요 — 새 버전은 저절로 반영돼요</div>
 </div>
 <style>@keyframes kshop{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}@media (prefers-reduced-motion:reduce){#kidsplash img{animation:none}}</style>
-<script>(function(){var s=document.getElementById("kidsplash");if(!s)return;var done=false;function go(){if(done)return;done=true;s.style.opacity="0";setTimeout(function(){s.remove();},460);}setTimeout(go,2000);s.addEventListener("click",go);})();</script>
+<script>(function(){var s=document.getElementById("kidsplash");if(!s)return;var done=false;function go(){if(done)return;done=true;s.style.opacity="0";setTimeout(function(){s.remove();},460);}setTimeout(go,5000);s.addEventListener("click",go);})();</script>
 <header>
   <div class="top">
     <div class="brand"><span id="brandDot">CH</span> Investing</div>
@@ -1504,7 +1505,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261028x";
+var APPV = "20261028y";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
