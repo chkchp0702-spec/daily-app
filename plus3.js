@@ -580,7 +580,7 @@
 
   /* ======================= 🔔 알림 ======================= */
   var OLD_AV = window.alarmView, OLD_AI = window.alarmInit;
-  ALARMS.push({t: "brief", ic: "☀️", nm: "아침 요약 하나로", d: "탭별 알림 대신 아침에 한 번: 국면·시황 할 일·오늘 신호 수·다가오는 실적"});
+  ALARMS.push({t: "brief", ic: "☀️", nm: "PB 한 장 (아침 8시)", d: "하루 한 번: 국면 한 줄 · 고객에게 할 말 3줄 · 오늘 만기·이벤트"});
   ALARMS.push({t: "danta-a", ic: "🅰️", nm: "단타 — 품질 A만", d: "같은 유형·시간대 과거 승률이 좋은 알람만 (실시간)"});
   ALARMS.push({t: "danta-best", ic: "⏰", nm: "단타 — 잘 맞는 시간대만", d: "승률이 평균보다 높은 시간대에 뜬 알람만 (실시간)"});
   window.alarmView = function(){

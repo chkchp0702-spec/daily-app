@@ -77,13 +77,15 @@
   // 서버 알림을 위해 관심종목·목표가만 올리기 (메모 글은 휴대폰에만)
   var SYNC = "chkchp-ch-sync", ST = null;
   function syncSoon(){ clearTimeout(ST); ST = setTimeout(sync, 2500); }
+  window.__cpSync = syncSoon;
   function sync(){
     var al = store.al || {};
     var body = {uid: UID, wl: Object.keys(WL).map(function(k){ var w = WL[k]; return [k, (w.n || k).slice(0, 40), w.buy || null, w.tgt || null, w.stop || null]; }),
-                quiet: al.quiet || [23, 7], brief: al.brief === 0 ? 0 : 1, lim: al.lim || null};
+                quiet: al.quiet || [23, 7], brief: al.brief === 0 ? 0 : 1, lim: al.lim || null,
+                cp: (store.cp || []).slice(0, 60), els: (function(){ try { return (JSON.parse(localStorage.getItem("elsmy") || "[]") || []).slice(0, 30).map(function(x){ return [x.id, String(x.nm || "").slice(0, 40), x.key, x.base]; }); } catch(z) { return []; } })()};   // 10/28 📌 내 고객 상품(채권·펀드·ELS) — 알림용
     fetch("https://ntfy.sh/" + SYNC, {method: "POST", body: JSON.stringify(body)}).then(function(){ store.synced = today(); save(); }).catch(function(){});
   }
-  if (store.synced !== today() && (Object.keys(WL).length || store.al)) setTimeout(sync, 4000);
+  if (store.synced !== today() && (Object.keys(WL).length || store.al || (store.cp && store.cp.length))) setTimeout(sync, 4000);
   window.MYTOPIC = "chkchp-ch-u-" + UID;
 
   // 헤더 ⭐ 버튼

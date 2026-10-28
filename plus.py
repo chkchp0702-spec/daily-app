@@ -126,8 +126,16 @@ def sync_users():
         q = m.get("quiet")
         q = [int(q[0]) % 24, int(q[1]) % 24] if isinstance(q, list) and len(q) == 2 else None
         lim = m.get("lim")
+        cp = []
+        for it in (m.get("cp") or [])[:60]:                      # 10/28 📌 내 고객 상품: [종류, 코드, 이름, 만기]
+            if isinstance(it, list) and len(it) >= 2 and str(it[0]) in ("krw", "ust", "aud", "brl", "fund"):
+                cp.append([str(it[0]), str(it[1])[:40], str(it[2] if len(it) > 2 else "")[:40], (str(it[3])[:10] if len(it) > 3 and it[3] else None)])
+        els = []
+        for it in (m.get("els") or [])[:30]:                     # [isin, 이름, key, 가입 기준일]
+            if isinstance(it, list) and len(it) >= 4 and it[2] and it[3]:
+                els.append([str(it[0])[:20], str(it[1])[:40], str(it[2])[:80], str(it[3])[:10]])
         U[uid] = {"ts": ts, "wl": wl, "quiet": q, "brief": 1 if m.get("brief", 1) else 0, "lim": int(lim) if isinstance(lim, (int, float)) and 0 < lim < 100 else None,
-                  "seen": dt.date.today().isoformat()}
+                  "cp": cp, "els": els, "seen": dt.date.today().isoformat()}
         n += 1
     # 60일 넘게 소식 없는 사용자 정리
     cut = (dt.date.today() - dt.timedelta(days=60)).isoformat()
@@ -718,6 +726,11 @@ def alerts2(U):
             X.push("u", f"⭐ {nm[:16]} — {txt}", "관심종목에 신호가 떴어요. 눌러서 확인.", tab, key, tags="star", syms=[[s, None]],
                    quiet=tuple(u.get("quiet") or X.QUIET), full_topic=user_topic(uid), log=False, level="hi" if imp == 3 else "mid" if imp == 2 else "lo")
             used += 1
+    # ①-2 📌 내 고객 상품 변동 (10/28 동료 PB ③·④) — 하루 한 번, 사용자별 한 묶음: 만기·이자일 D-3 안 · 펀드 1주 ±3% · ELS 평가 D-3 안
+    try:
+        cp_alerts(U)
+    except Exception as e:
+        P("고객 상품 알림 실패", e)
     # ④ 월요일 아침: 지난주 알림 성적 (보낸 때 가격 → 지금)
     now = dt.datetime.now(X.KST)
     if now.weekday() == 0 and 8 <= now.hour < 12:
@@ -730,12 +743,12 @@ def alerts2(U):
     t = S.get("today") or {}
     if t.get("d") == X.TODAY and (t.get("streak") or 0) >= 3:
         X.push("danta", f"🛑 단타 연속 손절 {t['streak']}번", f"오늘 가상 매매 {t.get('pnl', 0):+.1f}% · 오늘은 쉬어 가는 게 좋아요.", "danta", f"streak:{X.TODAY}:{t['streak']}", tags="stop_sign", quiet=None)
-    # ③ 아침 요약 — 08:00 ~ 10:59 첫 실행 때 한 번
-    h = dt.datetime.now(X.KST).hour
-    if 8 <= h < 11:
+    # ③ ☀️ PB 한 장 — 07:55 ~ 10:59 첫 실행 때 한 번 (brief.yml 이 07:58 에 먼저 보냄 · 같은 key 라 두 번 안 감)
+    h, mi = dt.datetime.now(X.KST).hour, dt.datetime.now(X.KST).minute
+    if (h == 7 and mi >= 55) or 8 <= h < 11:
         msg = brief_text(hits)
         if msg:
-            X.push("brief", f"☀️ {dt.datetime.now(X.KST).strftime('%m/%d')} 아침 요약", msg, "market", f"brief:{X.TODAY}", tags="sunny", quiet=None)
+            X.push("brief", f"☀️ {dt.datetime.now(X.KST).strftime('%m/%d')} PB 한 장", msg, "market", f"brief:{X.TODAY}", tags="sunny", quiet=None, level="mid")
             for uid, u in U.items():
                 if not u.get("brief", 1):
                     continue
@@ -743,6 +756,59 @@ def alerts2(U):
                 if mine:
                     X.push("u", "☀️ 내 관심종목 아침 요약", "\n".join(mine[:8]), "market", f"ubrief:{uid}:{X.TODAY}", tags="sunny",
                            quiet=None, full_topic=user_topic(uid), log=False)
+
+
+def _addm(s, m):
+    y, mo, d = int(s[:4]), int(s[5:7]), int(s[8:10])
+    mo += m; y += (mo - 1) // 12; mo = (mo - 1) % 12 + 1
+    import calendar
+    return dt.date(y, mo, min(d, calendar.monthrange(y, mo)[1]))
+
+
+def cp_alerts(U):
+    today = dt.date.today()
+    PR = X.jl(os.path.join(X.OUT, "products.json"), {}) or {}
+    F = {f.get("c"): f for f in PR.get("funds") or []}
+    B = {b.get("code"): b for b in PR.get("krw") or []}
+    now = dt.datetime.now(X.KST)
+    if not (8 <= now.hour < 20):
+        return
+    for uid, u in U.items():
+        key = f"cp:{uid}:{X.TODAY}"
+        lines = []
+        for k, cid, nm, mat in u.get("cp") or []:
+            if k == "fund":
+                f = F.get(cid)
+                if f and f.get("w1") is not None and abs(f["w1"]) >= 3:
+                    lines.append(f"📦 {nm[:18]} 1주 {f['w1']:+.1f}%")
+                continue
+            if mat:
+                try:
+                    dm = (dt.date.fromisoformat(mat) - today).days
+                except Exception:
+                    dm = None
+                if dm is not None and 0 <= dm <= 3:
+                    lines.append(f"🏦 {nm[:18]} 만기 D-{dm} · 재투자 상담")
+            b = B.get(cid) if k == "krw" else None
+            if b and b.get("freq") and b.get("issue") and "복리" not in str(b.get("ctype") or ""):
+                t, n = dt.date.fromisoformat(b["issue"]), 0
+                while t < today and n < 600:
+                    t = _addm(t.isoformat(), int(b["freq"])); n += 1
+                if 0 <= (t - today).days <= 3:
+                    lines.append(f"🏦 {nm[:18]} 이자 지급일 D-{(t - today).days}")
+        for isin, nm, keyx, base in u.get("els") or []:
+            try:
+                pr = keyx.split("|"); cyc = int(pr[2]); bars = pr[1].split("-")
+                t, kk = dt.date.fromisoformat(base), 0
+                while t <= today and kk < len(bars):
+                    t = _addm(base, cyc * (kk + 1)); kk += 1
+                dd = (t - today).days
+                if 0 <= dd <= 3:
+                    lines.append(f"🎯 {nm[:18]} {'만기' if kk == len(bars) else str(kk) + '차'} 평가 D-{dd} · 배리어 {bars[kk - 1]}")
+            except Exception:
+                continue
+        if lines:
+            X.push("u", "📌 내 고객 상품 — 오늘 챙길 것", "\n".join(lines[:8]), "home", key, tags="pushpin", quiet=tuple(u.get("quiet") or X.QUIET), full_topic=user_topic(uid), log=False, level="mid")
 
 
 def weekly_report():
@@ -773,32 +839,52 @@ def weekly_report():
     X.js("push_weekly.json", {"date": X.TODAY, "n": len(res), "avg": X.r2(avg), "win": win, "rows": [[s, X.r2(r), t] for r, s, t in res]})
 
 
+def strip(t):
+    return re.sub(r"<[^>]+>", "", str(t or "")).replace("&nbsp;", " ").strip()
+
+
 def brief_text(hits):
+    """☀️ PB 한 장 (10/28 사용자 「동료 PB」 — 아침 8시 고정): ① 국면 한 줄 ② 고객에게 할 말 3줄 ③ 오늘 만기·이벤트.
+       시황리포트 data.json 의 kakao.lines(고객용 5줄)·summary·schedule 을 그대로 씀 → 리포트가 좋아지면 알림도 좋아짐."""
     L = []
     cs = sorted(glob.glob(os.path.join(X.ARC, "sector", "20*", "compass.json")))
+    reg = ""
     if cs:
         C = X.jl(cs[-1], {}) or {}
         ms = C.get("markets") or {}
-        L.append("🧭 " + " · ".join(f"{m['flag']}{m['regime'][:2]}" for k, m in ms.items()))
+        reg = " · ".join(f"{m['flag']}{m['regime'][:2]}" for k, m in ms.items())
     md = sorted(d for d in glob.glob(os.path.join(X.ARC, "market", "20*", "data.json")))
-    if md:
-        d = X.jl(md[-1], {}) or {}
-        if d.get("one_liner"):
-            L.append("🌐 " + re.sub(r"<[^>]+>", "", d["one_liner"])[:110])
-        for c in (d.get("checks") or [])[:2]:
-            L.append("✅ " + re.sub(r"<[^>]+>", "", c)[:90])
+    d = X.jl(md[-1], {}) if md else {}
+    d = d or {}
+    one = strip(d.get("one_liner"))[:90]
+    L.append("🧭 " + (reg + (" — " if reg and one else "") + one if (reg or one) else "국면 자료 없음"))
+    kk = [strip(x) for x in ((d.get("kakao") or {}).get("lines") or [])]
+    if not kk:
+        kk = [strip(x) for x in ((d.get("summary") or {}).get("three_lines") or [])]
+    if kk:
+        L.append("💬 고객에게 할 말")
+        for x in kk[:3]:
+            L.append("· " + x[:120])
+    ev = []
+    for sc in (d.get("schedule") or [])[:1]:
+        ev.append(strip(sc.get("what"))[:70])
+    ec = X.jl(os.path.join(X.OUT, "earn_cal.json"), {}) or {}
+    soon = [x for x in ec.get("items") or [] if x["kind"] == "실적" and x["d"] <= (dt.date.today() + dt.timedelta(days=1)).isoformat()]
+    if soon:
+        ev.append("실적 " + ", ".join(f"{x['n'][:10]}" for x in soon[:3]))
+    els = X.jl(os.path.join(X.OUT, "els_watch.json"), {}) or {}
+    for x in (els.get("soon") or [])[:3]:
+        ev.append(strip(x)[:60])
+    if ev:
+        L.append("📅 오늘 " + " · ".join(ev))
     by = {}
     for s, xs in hits.items():
         for txt, tab in xs:
-            by.setdefault(tab, 0)
-            by[tab] += 1
-    nm = {"cup": "☕ 컵", "gap": "📈 갭", "accum": "🤫 매집", "whale": "🐋 고래", "danta": "⚡ 단타"}
-    if by:
-        L.append("오늘 신호 " + " · ".join(f"{nm.get(k, k)} {v}" for k, v in by.items()))
-    ec = X.jl(os.path.join(X.OUT, "earn_cal.json"), {}) or {}
-    soon = [x for x in ec.get("items") or [] if x["kind"] == "실적" and x["d"] <= (dt.date.today() + dt.timedelta(days=2)).isoformat()]
-    if soon:
-        L.append("📅 실적: " + ", ".join(f"{x['n'][:10]}({x['d'][5:].replace('-', '/')})" for x in soon[:5]))
+            by[tab] = by.get(tab, 0) + 1
+    nm = {"cup": "☕ 컵", "gap": "📈 갭", "whale": "🐋 고래"}
+    sig = " · ".join(f"{nm[k]} {v}" for k, v in by.items() if k in nm)
+    if sig:
+        L.append("신호 " + sig + " (앱 신호 탭)")
     return "\n".join(L)
 
 
@@ -976,3 +1062,31 @@ def main(mod):
             P("실패", fn.__name__)
             traceback.print_exc()
     P("plus ok")
+
+
+if __name__ == "__main__":
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import extras as _X
+    X = _X
+    if len(sys.argv) > 1 and sys.argv[1] == "brief":          # brief.yml: 07:58 PB 한 장만
+        U = {}
+        try:
+            U = sync_users() or {}
+        except Exception as e:
+            P("실패 sync", e)
+        hits = {}
+        try:
+            hits = today_hits()
+        except Exception as e:
+            P("실패 hits", e)
+        msg = brief_text(hits)
+        print(msg)
+        if msg:
+            X.push("brief", f"☀️ {dt.datetime.now(X.KST).strftime('%m/%d')} PB 한 장", msg, "market", f"brief:{X.TODAY}", tags="sunny", quiet=None, level="mid")
+            for uid, u in U.items():
+                if not u.get("brief", 1):
+                    continue
+                mine = [f"⭐ {it[1][:12]}: " + ", ".join(x[0] for x in hits.get(kn(it[0]), [])[:2]) for it in u.get("wl") or [] if hits.get(kn(it[0]))]
+                if mine:
+                    X.push("u", "☀️ 내 관심종목 아침 요약", "\n".join(mine[:8]), "market", f"ubrief:{uid}:{X.TODAY}", tags="sunny", quiet=None, full_topic=user_topic(uid), log=False)

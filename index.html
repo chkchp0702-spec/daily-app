@@ -415,10 +415,10 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
   <img src="img/kid_hello.jpg?v=1" alt="" style="width:min(58vw,240px);height:auto;border-radius:28px;box-shadow:0 10px 30px rgba(80,50,20,.18);animation:kshop 1.6s ease-in-out infinite">
   <div style="font-size:19px;line-height:1.5;font-weight:800;color:#2a1d10;letter-spacing:-.4px;text-align:center">안녕하세요, 어플 안내자 조이(Joey)입니다 👋</div>
   <div style="font-size:19px;line-height:1.5;font-weight:800;color:#2a1d10;letter-spacing:-.4px;text-align:center">오늘도 행복한 하루 되세요! ☀️</div>
-  <div style="font-size:19px;line-height:1.5;font-weight:600;color:#6b5640;letter-spacing:-.4px;text-align:center;max-width:320px">이 앱은 늘 업데이트되니,<br>한 번 껐다가 다시 켜는 걸<br>늘 권해드려요</div>
+  <div style="font-size:16px;line-height:1.5;font-weight:600;color:#6b5640;letter-spacing:-.4px;text-align:center;max-width:320px">앱은 매일 새로워져요 — 새 버전은 저절로 반영돼요</div>
 </div>
 <style>@keyframes kshop{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}@media (prefers-reduced-motion:reduce){#kidsplash img{animation:none}}</style>
-<script>(function(){var s=document.getElementById("kidsplash");if(!s)return;var done=false;function go(){if(done)return;done=true;s.style.opacity="0";setTimeout(function(){s.remove();},460);}setTimeout(go,5000);s.addEventListener("click",go);})();</script>
+<script>(function(){var s=document.getElementById("kidsplash");if(!s)return;var done=false;function go(){if(done)return;done=true;s.style.opacity="0";setTimeout(function(){s.remove();},460);}setTimeout(go,2000);s.addEventListener("click",go);})();</script>
 <header>
   <div class="top">
     <div class="brand"><span id="brandDot">CH</span> Investing</div>
@@ -1493,11 +1493,20 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261028b";
-fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
-  v = (v || "").trim();
-  if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {} location.replace(location.pathname + "?v=" + v + location.hash); }
-}).catch(function(){});
+var APPV = "20261028c";
+function chkVer(){
+  fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
+    v = (v || "").trim();
+    if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {}
+      // 10/28: 입력 중(의견함·메모 등)이면 다음 기회에
+      var ae = document.activeElement; if (ae && /^(INPUT|TEXTAREA)$/.test(ae.tagName) && ae.value) return;
+      location.replace(location.pathname + "?v=" + v + location.hash); }
+  }).catch(function(){});
+}
+chkVer();
+// 10/28 「첫 10초」: 앱을 오래 켜 둔 채 돌아와도(홈 화면 앱) 새 버전이면 저절로 새로고침 → 「껐다 켜라」가 필요 없게
+document.addEventListener("visibilitychange", function(){ if (!document.hidden) chkVer(); });
+setInterval(function(){ if (!document.hidden) chkVer(); }, 30 * 60e3);
 /* ---------- 시작 ---------- */
 // 목록을 못 받으면(사이트가 막 바뀌는 순간 등) 1.5초·4초 뒤 두 번 더 받아 보고 나서야 「준비 중」 (10/10)
 function getManifest(n){ return getJSON("manifest.json?" + Date.now()).catch(function(e){ if ((n || 0) >= 2) throw e; return new Promise(function(r){ setTimeout(r, n ? 4000 : 1500); }).then(function(){ return getManifest((n || 0) + 1); }); }); }
@@ -1544,9 +1553,11 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="extras.js?v=11"></script>
 <script defer src="burst.js?v=1"></script>   <!-- ⚠️ 10/28 거래폭발 = 따라 사지 마세요 -->
 <script defer src="usage.js?v=1"></script>   <!-- 📈 10/28 사용 현황(익명) -->
-<script defer src="plus.js?v=3"></script>
+<script defer src="plus.js?v=4"></script>
+<script defer src="cpin.js?v=1"></script>   <!-- 📌 10/28 내 고객 상품 -->
+<script defer src="onepage.js?v=1"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
 <script defer src="plus2.js?v=2"></script>
-<script defer src="plus3.js?v=17"></script>
+<script defer src="plus3.js?v=18"></script>
 <script defer src="plus4.js?v=5"></script>
 <script defer src="plus5.js?v=9"></script>
 <script defer src="plus6.js?v=16"></script>
@@ -1555,7 +1566,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="gsearch.js?v=2"></script>
 <script defer src="brain.js?v=8"></script>
 <script defer src="feed.js?v=11"></script>
-<script defer src="push.js?v=4"></script>
+<script defer src="push.js?v=5"></script>
 <script defer src="port.js?v=47"></script>
 <script defer src="simple.js?v=18"></script>
 <script defer src="pdfx.js?v=7"></script>
@@ -1587,7 +1598,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="iconz.js?v=3"></script>   <!-- 🔣 10/22 아이콘 풀이 -->
 <script defer src="today.js?v=9"></script>   <!-- 🏠 10/22 오늘 탭 10가지 -->
 <script defer src="vidmap.js?v=6"></script>   <!-- 🎬 조이 설명 영상 목록(자동 생성) -->
-<script defer src="guide.js?v=20"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
+<script defer src="guide.js?v=21"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
 <script defer src="design.js?v=1"></script>   <!-- 🎨 10/22 디자인 한 벌 — 늘 맨 마지막 -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>

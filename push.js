@@ -32,8 +32,13 @@
   function post(topic, body){ return fetch(NT + topic, {method: "POST", body: typeof body === "string" ? body : JSON.stringify(body)}).then(function(r){ if (!r.ok) throw new Error("ntfy " + r.status); }); }
   function sendSub(sub){
     return keys().then(function(k){ return Promise.all([idOf(sub), seal(sub.toJSON(), k.rsa_pub)]); })
-      .then(function(r){ ls("pushId", r[0]); ls("pushSent", String(Date.now())); return post(SUB, Object.assign({op: "on", id: r[0]}, r[1])).then(function(){ return r[0]; }); });
+      .then(function(r){ ls("pushId", r[0]); ls("pushSent", String(Date.now()));
+        var uid = ""; try { uid = (window.store && store.uid) || (JSON.parse(localStorage.getItem("app") || "{}").uid) || ""; } catch(z) {}
+        return post(SUB, Object.assign({op: "on", id: r[0], mode: mode(), uid: uid}, r[1])).then(function(){ return r[0]; }); });
   }
+  // 10/28 알림 다이어트(동료 PB ④): 👔 PB 기본 = 하루 2개(☀️ PB 한 장 + 📌 내 고객 상품·⭐ 관심종목) · 🔔 전부
+  function mode(){ return ls("pushMode") === "all" ? "all" : "pb"; }
+  window.__pushMode = function(m){ ls("pushMode", m === "all" ? "all" : "pb"); if (ls("pushOn") === "1") current().then(function(s){ if (s) sendSub(s).catch(function(){}); }); };
   function current(){ if (!can()) return Promise.resolve(null); return navigator.serviceWorker.getRegistration("./").then(function(r){ return r ? r.pushManager.getSubscription() : null; }).catch(function(){ return null; }); }
 
   function turnOn(){
@@ -74,7 +79,11 @@
       return '<div class="pu-g"><div class="pu-gh"><span>' + g.ic + '</span><b>' + g.t + '</b><small>' + g.s + '</small><em class="pu-n" data-g="' + g.k + '"></em></div>' +
         g.it.map(function(a){ return '<div class="pu-li"><span>' + a[0] + '</span><div><b>' + a[1] + '</b><small>' + a[2] + '</small></div></div>'; }).join("") + '</div>';
     }).join("");
-    return '<section class="card pu-main"><div class="pu-top"><div><div class="pu-t">🔔 이 휴대폰으로 알림 받기</div><div class="pu-s" id="pust">확인하는 중…</div></div>' +
+    var pb = mode() === "pb";
+    var pick = '<section class="card pu-mode"><div class="sec" style="margin:0 0 8px">얼마나 받을까요</div>' +
+      '<label class="pu-opt' + (pb ? ' on' : '') + '"><input type="radio" name="pumode" value="pb"' + (pb ? ' checked' : '') + '><div><b>👔 PB 기본 — 하루 2개</b><small>아침 8시 ☀️ PB 한 장 + 📌 내 고객 상품·⭐ 관심종목에 일이 있을 때만</small></div></label>' +
+      '<label class="pu-opt' + (pb ? '' : ' on') + '"><input type="radio" name="pumode" value="all"' + (pb ? '' : ' checked') + '><div><b>🔔 전부</b><small>아래 시간표의 신호 알림까지 모두 (최근 10일 하루 평균 6건쯤)</small></div></label></section>';
+    return pick + '<section class="card pu-main"><div class="pu-top"><div><div class="pu-t">🔔 이 휴대폰으로 알림 받기</div><div class="pu-s" id="pust">확인하는 중…</div></div>' +
       '<button class="pu-sw" id="pusw" role="switch" aria-checked="false" aria-label="알림 받기"><i></i></button></div>' +
       '<div id="puhelp"></div><div class="pu-act" id="puact"></div></section>' +
       '<div class="sec">켜면 하루에 이렇게 와요 <span class="mut" id="putot"></span></div><section class="card pu-list">' + list + '</section>' +
@@ -95,6 +104,7 @@
     }).catch(function(){});
   }
   window.alarmInit = function(){
+    [].forEach.call(document.querySelectorAll('input[name="pumode"]'), function(r){ r.onchange = function(){ __pushMode(r.value); [].forEach.call(document.querySelectorAll(".pu-opt"), function(l){ l.classList.toggle("on", l.querySelector("input").checked); }); }; });
     var sw = document.getElementById("pusw"), st = document.getElementById("pust"), help = document.getElementById("puhelp"), act = document.getElementById("puact");
     function set(on, msg, cls){ sw.classList.toggle("on", !!on); sw.setAttribute("aria-checked", on ? "true" : "false"); st.className = "pu-s " + (cls || ""); st.innerHTML = msg; }
     function testBtn(){ act.innerHTML = '<button class="btn pu-test" id="putest">테스트 알림 보내기</button>';
@@ -143,4 +153,5 @@
     ".pu-lv{padding:12px 14px;font-size:13.5px}.pu-lv>b{display:block;margin-bottom:6px;font-size:14px}.pu-lv div{padding:3px 0}.pu-lv span{display:inline-block;width:24px}.pu-lv small{color:var(--sub)}" +
     ".pu-li>span{font-size:20px;line-height:1.3}.pu-li b{display:block;font-size:14.5px}.pu-li small{color:var(--sub);font-size:12.5px}";
   document.head.appendChild(css);
+  (function(){ var c = document.createElement("style"); c.textContent = ".pu-opt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer}.pu-opt.on{border-color:var(--acc,#7c9cff);background:rgba(124,156,255,.08)}.pu-opt input{margin-top:4px}.pu-opt b{display:block;font-size:14.5px}.pu-opt small{color:var(--sub,#aab);font-size:12.5px;line-height:1.4}"; document.head.appendChild(c); })();
 })();
