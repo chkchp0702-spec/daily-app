@@ -15,10 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 feedback.py
+      - run: python3 usage.py          # 📈 사용 현황(익명 열림 신호)
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT: ${{ secrets.TG_CHAT }}
       - name: 저장
         run: |
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/ideas.json archive/fb
+          bash scripts/push.sh "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/ideas.json archive/fb archive/x/usage.json
