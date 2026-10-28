@@ -24,33 +24,44 @@
   // 🌐 시장: 숫자 타일(코스피·코스닥·오른 종목·S&P 선물) + 업종 막대 + 국면 칩 + 할 말 3줄 + 오늘 일정 + 배분 한 줄
   function mkMarket(){
     var it = latest("market");
-    return Promise.all([window.__pbbrief ? __pbbrief() : null, gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), it ? gj(file("market", it.id, "data.json")) : null, gj(RAWM + "ledger/ledger.json")]).then(function(r){
-      var PB = r[0], L = r[1], U = r[2], D = r[3] || {}, LG = r[4];
+    return Promise.all([window.__pbbrief ? __pbbrief() : null, gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), it ? gj(file("market", it.id, "data.json")) : null, gj(RAWM + "ledger/ledger.json"), gj(RAWM + "market/home.json")]).then(function(r){
+      var PB = r[0], L = r[1], U = r[2], D = r[3] || {}, LG = r[4], HM = r[5] || {};
       var live = !!(L && L.date === today() && L.index && L.index.length), liveMode = !!(PB && PB.mode === "장중" && live);
       var ix = {}; (live ? L.index : []).forEach(function(x){ ix[x.name] = x; });
       var kpis = [];
       if (live){ kpis.push({l: "코스피", v: pct(ix["코스피"] && ix["코스피"].chg), s: ix["코스피"] && ix["코스피"].last ? Math.round(ix["코스피"].last).toLocaleString() : ""});
         kpis.push({l: "코스닥", v: pct(ix["코스닥"] && ix["코스닥"].chg), s: ix["코스닥"] && ix["코스닥"].last ? Math.round(ix["코스닥"].last).toLocaleString() : ""});
         if (L.total) kpis.push({l: "오른 종목", v: Math.round(L.up / L.total * 100) + "%", s: L.limit_up ? "상한가 " + L.limit_up : "", neutral: true}); }
-      var fut = U && U.date === today() ? (U.fut || []) : [];
-      var es = fut.filter(function(f){ return f.s === "ES=F"; })[0], nq = fut.filter(function(f){ return f.s === "NQ=F"; })[0];
+      var fut = U && U.date === today() ? (U.fut || []) : [], mac = U && U.date === today() ? (U.macro || []) : [], wd = U && U.date === today() ? (U.world || []) : [];
+      var F = function(arr, nm){ return arr.filter(function(f){ return f.name === nm; })[0]; };
+      var es = F(fut, "S&P500 선물"), nq = F(fut, "나스닥100 선물");
       if (es) kpis.push({l: "S&P500 선물", v: pct(es.chg), s: nq ? "나스닥 " + pct(nq.chg) : ""});
+      var k2 = [];
+      [["닛케이225", "닛케이"], ["항셍", "항셍"]].forEach(function(w){ var x = F(wd, w[0]); if (x) k2.push({l: w[1] + (x.st === "prev" ? " (전일)" : ""), v: pct(x.chg)}); });
+      [["원/달러", "원/달러"], ["WTI", "유가 WTI"], ["금", "금"], ["미 10년물 국채 선물", "미 10년 국채"]].forEach(function(w){ var x = F(mac, w[0]); if (x && k2.length < 4) k2.push({l: w[1], v: pct(x.chg), s: x.last && w[0] === "원/달러" ? Math.round(x.last).toLocaleString() + "원" : ""}); });
       var sec = live ? (L.sectors || []).filter(function(s){ return s.n >= 5; }) : [];
-      var hi = sec.slice().sort(function(a, b){ return b.r - a.r; }).slice(0, 3), lo = sec.slice().sort(function(a, b){ return a.r - b.r; }).slice(0, 2).reverse();
+      var hi = sec.slice().sort(function(a, b){ return b.r - a.r; }).slice(0, 4), lo = sec.slice().sort(function(a, b){ return a.r - b.r; }).slice(0, 2).reverse();
       var bars = hi.concat(lo).map(function(s){ return {n: s.name.replace(/\(.*?\)/g, "").slice(0, 9), v: s.r}; });
+      var themes = live ? (L.themes || []).slice(0, 3).map(function(t){ return {n: t.name.replace(/\(.*?\)/g, "").slice(0, 10), v: t.r, s: (t.lead || []).slice(0, 3).map(function(x){ return x.n; }).join(" · ")}; }) : [];
+      var vol = live ? (L.value || []).slice(0, 5).map(function(x){ return {n: x.n, v: x.r, s: x.v ? Math.round(x.v / 100) / 10 + "천억" : ""}; }) : [];
       var talk = (PB && PB.asof && PB.asof.slice(0, 10) === today() && PB.talk && PB.talk.length ? PB.talk : ((D.kakao || {}).lines || []).map(strip)).slice(0, 4);
-      if (live) talk = talk.filter(function(t){ return !/^한국/.test(t); });   // 타일로 이미 보여 준 한국 숫자는 글에서 뺌
-      if (bars.length >= 4) talk = talk.filter(function(t){ return !/^돈이 가는 곳/.test(t); });   // 막대로 보여 준 업종도 뺌
+      if (live) talk = talk.filter(function(t){ return !/^한국/.test(t); });
+      if (bars.length >= 4) talk = talk.filter(function(t){ return !/^돈이 가는 곳/.test(t); });
       talk = talk.slice(0, 3);
       var reg = (PB && PB.regime) || "";
       var chips = reg ? reg.split("·").map(function(x){ return x.trim(); }).filter(Boolean) : [];
       var ev = (PB && PB.events) || [];
       var al = (LG && LG.allocation || []).filter(function(a){ return a.pct > 0; });
       if (!al.length) (D.allocation_seen || []).forEach(function(a, i){ var m = /([\d.]+)/.exec(a.verdict || ""); if (m && +m[1] > 0) al.push({name: ["S&P500", "나스닥100", "금", "현금"][i] || "", pct: +m[1]}); });
+      var fc = (HM.focus || []).slice(0, 3).map(function(f){ return {n: f.name + " (" + f.sym + ")", v: f.rs20 != null ? f.rs20 : f.r5, s: (f.stage || "") + " · " + (f.do || "").split(" — ")[0] + ((f.etf_kr || [])[0] ? " · 국내 " + f.etf_kr[0].name : "")}; });
       var lab = liveMode ? (PB.label || "장중") : (PB && PB.label) || (md(D.date) + " 아침");
       return {kind: "market", title: liveMode ? "지금 시장 한 장" : "오늘 시장 한 장", sub: lab + (D.one_liner ? " · " + strip(D.one_liner).split(" — ")[0].slice(0, 44) : ""),
-        kpis: kpis.slice(0, 4), chips: chips, bars: bars.length >= 4 ? {title: "업종 — 돈이 가는 곳 / 약한 곳", items: bars} : null,
-        bullets: talk, events: ev, alloc: al.length ? al.map(function(a){ return {n: a.name.replace(" 코어", ""), pct: a.pct}; }) : null,
+        kpis: kpis.slice(0, 4), kpis2: k2.slice(0, 4), chips: chips, events: ev,
+        bars: bars.length >= 4 ? {title: "업종 — 돈이 가는 곳 / 약한 곳", items: bars} : null,
+        themes: themes.length ? {title: "오늘 뜨는 테마 — 대장주", items: themes} : null,
+        vol: vol.length ? {title: "거래대금 많은 종목 (억원)", items: vol} : null,
+        focus: fc.length ? {title: "미국 — 돈이 몰리는 ETF (20일 S&P 대비 %p)", items: fc} : null,
+        bullets: talk, alloc: al.length ? al.map(function(a){ return {n: a.name.replace(" 코어", ""), pct: a.pct}; }) : null,
         note: liveMode ? "장중 시세는 10~15분 늦을 수 있어요" : null};
     });
   }
@@ -66,7 +77,9 @@
       var P = (H && H.port) || {}, nav = null, spy = null;
       try { nav = typeof P.nav === "string" ? JSON.parse(P.nav) : P.nav; spy = typeof P.spy_line === "string" ? JSON.parse(P.spy_line) : P.spy_line; } catch(x) {}
       var badge = D.decision && D.decision.badges ? strip(D.decision.badges[0]) : "";
-      return {kind: "port", title: "오늘의 자산배분 제안", sub: (P.asof ? md(P.asof) + " 기준 · " : "") + "지수 ETF 뼈대 · 레버리지 없음",
+      var why = (D.allocation_seen || []).map(function(a, i){ return {n: ["S&P500", "나스닥100", "금", "현금"][i] || "", s: strip(a.seen), v: strip(a.verdict)}; }).filter(function(x){ return x.s; });
+      var sch = (D.schedule || []).slice(0, 3).map(function(x){ return {n: strip(x.when), s: strip(x.what)}; });
+      return {kind: "port", title: "오늘의 자산배분 제안", why: why.length ? {title: "오늘 국면 근거 — 본 것 → 판정", items: why} : null, sched: sch.length ? {title: "앞으로 볼 일정", items: sch} : null, sub: (P.asof ? md(P.asof) + " 기준 · " : "") + "지수 ETF 뼈대 · 레버리지 없음",
         chips: badge ? [badge] : [], alloc: al.map(function(a){ return {n: a.name.replace(" 코어", ""), pct: a.pct, s: strip(a.instruments).split("/")[0].trim()}; }),
         line: nav && spy && nav.length > 3 ? {a: nav, b: spy, la: "이 배분", lb: "S&P500", from: md(P.start)} : null,
         kpis: P.start ? [{l: md(P.start) + "부터 이 배분", v: pct(P.base)}, {l: "같은 기간 S&P500", v: pct(P.spy)}] : [],
@@ -80,13 +93,19 @@
     if (k === "pv" || k === "pvl" || (o && o.pv === true)) return Promise.resolve({refuse: "사내 사모 라인업은 고객용 한 장에 넣지 않아요"});
     if (k === "krw"){
       var y = yrs(o.mat), A = 1000;
-      var kp = [{l: "세후 수익률 (연)", v: o.after != null ? o.after.toFixed(2) + "%" : "–", big: true}, {l: "세전", v: o.buy != null ? o.buy.toFixed(2) + "%" : "–", neutral: true}, {l: "표면금리", v: o.cpn != null ? o.cpn + "%" : "–", neutral: true}];
-      var tiles = [{l: "1,000만원 넣으면", v: o.after != null ? "세후 약 " + Math.round(A * o.after / 100 * y) + "만원" : "–", s: "만기까지 이자 합 (대략)"}, {l: "이자 받는 주기", v: o.freq ? o.freq + "개월마다" : (o.ctype || "–"), s: o.redeem || "만기일시상환"}];
-      return Promise.resolve({kind: "bond", title: o.name, sub: "원화 채권 · " + o.kind + (o.risk ? " · " + o.risk : ""), kpis: kp, tiles: tiles,
-        timeline: {from: today(), to: o.mat, freq: o.freq, label: y < 1 ? "만기까지 " + Math.round(y * 12) + "개월" : "만기까지 " + y.toFixed(1) + "년"},
-        bullets: [o.kind === "국채" ? "대한민국 정부가 갚는 채권이라 부도 걱정은 거의 없어요" : o.kind === "공사채·지방채" ? "공기업·지자체가 발행 — 사실상 정부가 뒤에 있어요" : o.kind === "신종·후순위" ? "은행·금융사가 발행 — 이자가 높은 대신 갚는 순서가 뒤예요" : "회사가 발행한 채권 — 회사가 갚을 힘(신용등급)이 핵심이에요",
-          (o.freq ? "이자는 " + o.freq + "개월마다 통장으로, 원금은 만기에 돌려받아요" : "이자와 원금을 만기에 한 번에 받아요"), "중간에 팔 수도 있어요 — 그날 시장 가격으로"],
-        note: "세후 수익률은 매수 시점 가격 기준 · 중도 매도 시 가격이 바뀔 수 있어요"});
+      var kp = [{l: "세후 수익률 (연)", v: o.after != null ? o.after.toFixed(2) + "%" : "–", big: true}, {l: "예금으로 치면", v: o.bank != null ? o.bank.toFixed(2) + "%" : "–", neutral: true}, {l: "표면금리", v: o.cpn != null ? o.cpn + "%" : "–", neutral: true}];
+      var tiles = [{l: "1,000만원 넣으면", v: o.after != null ? "약 " + Math.round(A * o.after / 100 * y).toLocaleString() + "만원" : "–", s: "만기까지 세후 이자 합 (대략)"}, {l: "한 해 세후 이자", v: o.after != null ? "약 " + Math.round(A * o.after / 100) + "만원" : "–", s: o.freq ? "한 번에 약 " + Math.round(A * (o.cpn || 0) / 100 / (12 / o.freq) * 0.846) + "만원씩" : ""}, {l: "이자 받는 주기", v: o.freq ? o.freq + "개월마다" : (o.ctype || "–"), s: o.redeem || "만기일시상환"}];
+      var RK = {"매우낮은위험": 1, "낮은위험": 2, "보통위험": 3, "다소높은위험": 4, "높은위험": 5, "매우높은위험": 6};
+      return gj("archive/x/products.json" + q()).then(function(PD){
+        var same = ((PD && PD.krw) || []).filter(function(b){ return b.kind === o.kind && b.after != null; }).sort(function(a, b){ return b.after - a.after; });
+        var rank = same.findIndex(function(b){ return b.code === o.code; }), med = same.length ? same[Math.floor(same.length / 2)].after : null;
+        var cmp = same.length >= 3 ? {title: "같은 종류(" + o.kind + ") 세후 수익률 — 이 채권은 " + (rank + 1) + "위 / " + same.length + "개", items: [{n: "이 채권", v: o.after}, {n: "같은 종류 중간값", v: med}, {n: "같은 종류 최고", v: same[0].after}, {n: "같은 종류 최저", v: same[same.length - 1].after}], plain: true} : null;
+        return {kind: "bond", title: o.name, sub: "원화 채권 · " + o.kind + (o.risk ? " · " + o.risk : "") + (o.issue ? " · 발행 " + o.issue.slice(0, 7).replace("-", ".") : ""), kpis: kp, tiles: tiles, risk: RK[o.risk] || null, riskTitle: "위험 등급 (" + (o.risk || "") + ")",
+          timeline: {from: today(), to: o.mat, freq: o.freq, label: y < 1 ? "만기까지 " + Math.round(y * 12) + "개월" : "만기까지 " + y.toFixed(1) + "년"}, cmp: cmp,
+          bullets: [o.kind === "국채" ? "대한민국 정부가 갚는 채권이라 부도 걱정은 거의 없어요" : o.kind === "공사채·지방채" ? "공기업·지자체가 발행 — 사실상 정부가 뒤에 있어요" : o.kind === "신종·후순위" ? "은행·금융사가 발행 — 이자가 높은 대신 갚는 순서가 뒤예요" : "회사가 발행한 채권 — 회사가 갚을 힘(신용등급)이 핵심이에요",
+            (o.freq ? "이자는 " + o.freq + "개월마다 통장으로, 원금은 만기에 돌려받아요" : "이자와 원금을 만기에 한 번에 받아요"), "「예금으로 치면」은 같은 돈을 예금에 넣었을 때 필요한 세전 금리예요", "중간에 팔 수도 있어요 — 그날 시장 가격으로"],
+          note: "세후 수익률은 매수 시점 가격 기준 · 중도 매도 시 가격이 바뀔 수 있어요"};
+      });
     }
     if (k === "ust" || k === "aud" || k === "brl"){
       var y2 = yrs(o.mat);
@@ -100,24 +119,38 @@
         var C = {kind: "els", title: o.n, sub: (o.t || "ELS") + " · " + (o.kind || "") + " · 만기 " + (o.mat || "") + " · " + (o.cyc || "") + "마다 평가", chips: ua,
           kpis: [{l: "연 수익률 (조건 충족 시)", v: o.cpn != null ? o.cpn + "%" : "–", big: true}, {l: "낙인(KI)", v: o.ki != null ? o.ki + "%" : (o.pp >= 100 ? "원금지급형" : "없음"), neutral: true}, {l: "청약 마감", v: o.e ? md(o.e) : "–", neutral: true}],
           steps: bars.length ? {bars: bars, ki: o.ki} : null, note: "조건 미충족 시 원금 손실 가능 · 과거 계산은 미래를 보장하지 않아요"};
-        if (st && st.n && st.k){ C.prob = {k: st.k, n: st.n}; C.bullets = [st.from + "년부터 매일 가입했다면 " + st.n.toLocaleString() + "번 중 1차에 " + Math.round(st.k[0]) + "% 상환 · 손실로 끝난 경우 " + (st.loss != null ? st.loss.toFixed(1) : "–") + "%"]; }
-        else C.bullets = ["기초자산이 모두 배리어 위에 있으면 평가일에 쿠폰과 함께 조기 상환돼요"];
+        var cycM = parseInt(o.cyc) || 6, bar0 = bars[0], barL = bars[bars.length - 1];
+        C.bullets = [cycM + "개월마다 평가 — 기초자산 모두가 처음 가격의 " + bar0 + "% 위면 연 " + (o.cpn != null ? o.cpn : "–") + "% 쿠폰과 함께 상환",
+          o.ki != null ? "만기까지 한 번도 " + o.ki + "%(낙인) 아래로 안 가면 마지막 평가는 " + barL + "%만 넘어도 상환" : "만기 평가는 " + barL + "% — 못 넘으면 그만큼 손실",
+          "가장 많이 빠진 기초자산 하나가 기준 — 두세 개 중 하나만 무너져도 조건 미충족"];
+        if (st && st.n && st.k){ C.prob = {k: st.k, n: st.n};
+          var worst = st.worst ? Object.keys(st.worst).sort(function(a, b){ return st.worst[b] - st.worst[a]; })[0] : null;
+          C.tiles = [{l: "손실로 끝난 경우", v: (st.loss != null ? st.loss.toFixed(1) : "–") + "%", s: st.loss_avg != null ? "평균 " + st.loss_avg.toFixed(0) + "% · 최악 " + (st.loss_worst || 0).toFixed(0) + "%" : "손실 사례 없음"},
+            {l: "1년 안 상환", v: Math.round(st.k[Math.min(st.k.length - 1, Math.max(0, Math.round(12 / cycM) - 1))]) + "%", s: st.from + "년~ " + st.n.toLocaleString() + "번 재생"},
+            {l: "발목 잡은 기초자산", v: worst ? worst.slice(0, 8) : "–", s: worst ? "손실 사례의 " + st.worst[worst] + "%" : ""}]; }
         return C;
       });
     }
     if (k === "fund"){
-      var rr_ = [["1개월", o.m1], ["3개월", o.m3], ["6개월", o.m6], ["1년", o.y1], ["3년", o.y3]].filter(function(x){ return x[1] != null; });
-      return Promise.resolve({kind: "fund", title: o.n, sub: (o.co || "") + " · " + (o.t || "") + (o.st ? " · " + o.st : ""), chips: o.rk ? ["위험 " + o.rk + "등급"] : [],
-        kpis: [{l: "1년 수익률", v: pct(o.y1), big: true}, {l: "총보수", v: o.fee != null ? o.fee + "%" : "–", neutral: true}, {l: "선취", v: o.sfee ? o.sfee + "%" : "없음", neutral: true}],
-        bars: rr_.length ? {title: "기간별 수익률 (보수 차감 후)", items: rr_.map(function(x){ return {n: x[0], v: x[1]}; })} : null,
-        bullets: [/채권/.test(o.t || "") ? "채권에 투자해 이자를 쌓는 펀드 — 금리가 오르면 잠깐 흔들릴 수 있어요" : /주식/.test(o.t || "") ? (/해외/.test(o.t) ? "해외 주식에 투자하는 펀드 — 시장과 환율에 따라 움직여요" : "주식에 투자하는 펀드 — 시장이 빠지면 같이 빠져요") : "여러 자산에 나눠 투자하는 펀드예요", "수익률은 보수를 뺀 뒤 숫자예요 · 환매는 보통 며칠 걸려요"],
-        note: "기준일 " + (o.d ? String(o.d).replace(/(\d{4})(\d{2})(\d{2})/, "$1.$2.$3") : "") + " · 과거 성과는 미래 수익을 보장하지 않아요"});
+      var rr_ = [["1개월", o.m1], ["3개월", o.m3], ["6개월", o.m6], ["1년", o.y1], ["3년", o.y3], ["5년", o.y5]].filter(function(x){ return x[1] != null; });
+      return gj("archive/x/products.json" + q()).then(function(PD){
+        var same = ((PD && PD.funds) || []).filter(function(f){ return f.t === o.t && f.y1 != null; }).sort(function(a, b){ return b.y1 - a.y1; });
+        var rank = same.findIndex(function(f){ return f.c === o.c; });
+        var since = o.est ? String(o.est).replace(/(\d{4})(\d{2})(\d{2})/, "$1.$2") : "";
+        return {kind: "fund", title: o.n, sub: (o.co || "") + " · " + (o.t || "") + (o.st ? " · " + o.st : "") + (since ? " · 설정 " + since : ""), chips: o.rk ? ["위험 " + o.rk + "등급 (1 높음 ~ 6 낮음)"] : [],
+          kpis: [{l: "1년 수익률", v: pct(o.y1), big: true}, {l: "총보수 (연)", v: o.fee != null ? o.fee + "%" : "–", neutral: true}, {l: "선취 수수료", v: o.sfee ? o.sfee + "%" : "없음", neutral: true}],
+          tiles: rank >= 0 ? [{l: (o.t || "같은 유형") + " " + same.length + "개 중", v: (rank + 1) + "위", s: "1년 수익률 기준"}, {l: "같은 유형 가운데", v: pct(same[Math.floor(same.length / 2)].y1), s: "1년 수익률 중간값"}] : null,
+          risk: o.rk ? +o.rk : null,
+          bars: rr_.length ? {title: "기간별 수익률 (보수 차감 후)", items: rr_.map(function(x){ return {n: x[0], v: x[1]}; })} : null,
+          bullets: [/채권/.test(o.t || "") ? "채권에 투자해 이자를 쌓는 펀드 — 금리가 오르면 잠깐 흔들릴 수 있어요" : /주식/.test(o.t || "") ? (/해외/.test(o.t) ? "해외 주식에 투자하는 펀드 — 시장과 환율에 따라 움직여요" : "주식에 투자하는 펀드 — 시장이 빠지면 같이 빠져요") : "여러 자산에 나눠 투자하는 펀드예요", "수익률은 보수를 뺀 뒤 숫자예요 · 환매는 보통 며칠 걸려요"],
+          note: "기준일 " + (o.d ? String(o.d).replace(/(\d{4})(\d{2})(\d{2})/, "$1.$2.$3") : "") + " · 과거 성과는 미래 수익을 보장하지 않아요"};
+      });
     }
     return Promise.resolve(null);
   }
 
   /* ───────────── 그리기 ───────────── */
-  var W = 1080, H = 1350, MX = 60, CW = W - MX * 2;
+  var W = 1080, H = 1620, MX = 60, CW = W - MX * 2;
   var INK = "#141414", SUB = "#6a6f7a", MUT = "#9aa0ab", LINE = "#e6e8ec", UP = "#d6453d", DN = "#2f6fdd", ACC = "#1f2d4d", BG = "#f7f7f5", TILE = "#ffffff";
   var F = '-apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif';
   function font(g, w, s){ g.font = w + " " + s + "px " + F; }
@@ -157,14 +190,14 @@
     var items = B.items, n = items.length, rowH = 44, lw = 230, bx = MX + lw + 16, bw = CW - lw - 16 - 120;
     var h = 36 + n * rowH + 14; rr(g, MX, y, CW, h, 20, TILE);
     g.fillStyle = SUB; font(g, 700, 24); g.fillText(B.title, MX + 22, y + 32);
-    var mx = Math.max.apply(null, items.map(function(i){ return Math.abs(i.v); }).concat([0.1])), zero = bx + bw / 2;
+    var mx = Math.max.apply(null, items.map(function(i){ return Math.abs(i.v); }).concat([0.1])), zero = B.plain ? bx : bx + bw / 2;
     items.forEach(function(it, i){
       var yy = y + 36 + i * rowH + 10;
       g.fillStyle = INK; font(g, 600, 24); wrap(g, it.n, MX + 22, yy + 24, lw - 10, 26, 1);
-      var len = Math.abs(it.v) / mx * (bw / 2 - 6);
+      var len = Math.abs(it.v) / mx * (B.plain ? bw - 6 : bw / 2 - 6);
       g.fillStyle = "#eef0f4"; g.fillRect(bx, yy + 8, bw, 20);
-      g.fillStyle = it.v >= 0 ? UP : DN; g.fillRect(it.v >= 0 ? zero : zero - len, yy + 8, Math.max(2, len), 20);
-      g.fillStyle = cls(it.v); font(g, 800, 26); g.textAlign = "right"; g.fillText(pct(it.v), W - MX - 22, yy + 26); g.textAlign = "left";
+      g.fillStyle = B.plain ? (i === 0 ? ACC : "#9aa0ab") : it.v >= 0 ? UP : DN; g.fillRect(it.v >= 0 ? zero : zero - len, yy + 8, Math.max(2, len), 20);
+      g.fillStyle = B.plain ? INK : cls(it.v); font(g, 800, 26); g.textAlign = "right"; g.fillText(B.plain ? (+it.v).toFixed(2) + "%" : pct(it.v), W - MX - 22, yy + 26); g.textAlign = "left";
     });
     return h + 24;
   }
@@ -243,6 +276,28 @@
       g.fillStyle = INK; font(g, 700, 21); g.textAlign = "center"; g.fillText(Math.round(v) + "%", x + bw / 2, y + 100); g.fillStyle = MUT; font(g, 500, 18); g.fillText(i + 1 === n ? "만기" : (i + 1) + "차", x + bw / 2, y + 124); g.textAlign = "left"; });
     return h + 24;
   }
+  function bRows(g, y, R, mode){   // 이름 · 값(%) · 작은 설명  — 테마·거래대금·집중 ETF·국면 근거·일정
+    if (!R || !R.items || !R.items.length) return 0;
+    var items = R.items.slice(0, 5), rowH = mode === "text" ? 66 : 62, h = 40 + items.length * rowH + 6; rr(g, MX, y, CW, h, 20, TILE);
+    g.fillStyle = SUB; font(g, 700, 24); g.fillText(R.title, MX + 22, y + 32);
+    items.forEach(function(it, i){
+      var yy = y + 40 + i * rowH;
+      g.fillStyle = INK; font(g, 700, 27); wrap(g, it.n, MX + 22, yy + 28, mode === "text" ? 200 : CW - 180, 30, 1);
+      if (it.v != null && mode !== "text"){ g.fillStyle = cls(it.v); font(g, 800, 28); g.textAlign = "right"; g.fillText(typeof it.v === "number" ? pct(it.v) : it.v, W - MX - 22, yy + 29); g.textAlign = "left"; }
+      if (mode === "text"){ g.fillStyle = INK; font(g, 600, 25); wrap(g, it.s + (it.v ? "  →  " + it.v : ""), MX + 232, yy + 28, CW - 260, 30, 2); }
+      else if (it.s){ g.fillStyle = MUT; font(g, 500, 22); wrap(g, it.s, MX + 22, yy + 54, CW - 60, 24, 1); }
+      if (i < items.length - 1){ g.fillStyle = LINE; g.fillRect(MX + 22, yy + rowH - 4, CW - 44, 1); }
+    });
+    return h + 24;
+  }
+  function bRisk(g, y, r, title){
+    if (!r) return 0;
+    var h = 96; rr(g, MX, y, CW, h, 20, TILE);
+    g.fillStyle = SUB; font(g, 700, 24); g.fillText(title || "위험 등급", MX + 22, y + 32);
+    var x0 = MX + 160, bw = (CW - 200) / 6;
+    for (var i = 1; i <= 6; i++){ var x = x0 + (i - 1) * bw; g.fillStyle = i === r ? (i <= 2 ? UP : i <= 4 ? "#d9a441" : "#3fb950") : "#eef0f4"; rr(g, x + 3, y + 48, bw - 6, 26, 8, g.fillStyle); g.fillStyle = i === r ? "#fff" : MUT; font(g, 700, 20); g.textAlign = "center"; g.fillText(i === 1 ? "1 높음" : i === 6 ? "6 낮음" : String(i), x + bw / 2, y + 67); g.textAlign = "left"; }
+    return h + 24;
+  }
   function bBullets(g, y, B, title){
     if (!B || !B.length) return 0;
     var lines = B.slice(0, 4), lh = 40, est = 0; font(g, 600, 29);
@@ -270,13 +325,14 @@
     if (C.sub){ g.fillStyle = SUB; font(g, 500, 26); y += wrap(g, C.sub, MX, y + 36, CW, 34, 2) + 6; }
     y += 24;
     var blocks;
-    if (C.kind === "market") blocks = [["kpis", C.kpis], ["chips", C.chips], ["events", C.events], ["bars", C.bars], ["bullets", C.bullets, "고객에게 할 말"], ["alloc", C.alloc, false]];
-    else if (C.kind === "port") blocks = [["chips", C.chips], ["alloc", C.alloc, true], ["line", C.line], ["kpis", C.kpis], ["bullets", C.bullets]];
-    else if (C.kind === "bond") blocks = [["kpis", C.kpis], ["timeline", C.timeline], ["tiles", C.tiles], ["bullets", C.bullets]];
-    else if (C.kind === "els") blocks = [["chips", C.chips], ["kpis", C.kpis], ["steps", C.steps], ["prob", C.prob], ["bullets", C.bullets]];
-    else blocks = [["chips", C.chips], ["kpis", C.kpis], ["bars", C.bars], ["bullets", C.bullets]];
-    var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb};
-    blocks.forEach(function(b){ if (y > H - 150) return; var hh = FN[b[0]](g, y, b[1], b[2]); y += hh || 0; });
+    if (C.kind === "market") blocks = [["kpis", C.kpis], ["kpis", C.kpis2], ["chips", C.chips], ["events", C.events], ["bars", C.bars], ["bullets", C.bullets, "고객에게 할 말"], ["rows", C.themes], ["rows", C.focus], ["alloc", C.alloc, false], ["rows", C.vol]];
+    else if (C.kind === "port") blocks = [["chips", C.chips], ["alloc", C.alloc, true], ["line", C.line], ["kpis", C.kpis], ["rows", C.why, "text"], ["bullets", C.bullets], ["rows", C.sched, "text"]];
+    else if (C.kind === "bond") blocks = [["kpis", C.kpis], ["timeline", C.timeline], ["tiles", C.tiles], ["risk", C.risk, C.riskTitle], ["bars", C.cmp], ["bullets", C.bullets]];
+    else if (C.kind === "els") blocks = [["chips", C.chips], ["kpis", C.kpis], ["steps", C.steps], ["prob", C.prob], ["tiles", C.tiles], ["bullets", C.bullets]];
+    else blocks = [["chips", C.chips], ["kpis", C.kpis], ["risk", C.risk], ["bars", C.bars], ["tiles", C.tiles], ["bullets", C.bullets]];
+    var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb, rows: bRows, risk: bRisk};
+    var c2 = document.createElement("canvas"); c2.width = W; c2.height = H; var g2 = c2.getContext("2d");   // 먼저 재 보고 들어갈 때만 그림
+    blocks.forEach(function(b){ if (!b[1]) return; var hh = FN[b[0]](g2, 0, b[1], b[2]) || 0; if (!hh || y + hh > H - 104) return; FN[b[0]](g, y, b[1], b[2]); y += hh; });
     g.fillStyle = LINE; g.fillRect(MX, H - 96, CW, 2);
     g.fillStyle = MUT; font(g, 500, 21);
     wrap(g, (C.note ? C.note + " · " : "") + "참고용 자료 · 과거 성과는 미래 수익을 보장하지 않아요 · 투자 판단과 책임은 본인에게 있어요", MX, H - 58, CW, 28, 2);
