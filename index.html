@@ -1356,6 +1356,9 @@ function opSearch(q){
     if (sc) out.push([sc + (r.built ? 5 : 0) - r.name.length / 100, r]);
   });
   out.sort(function(a, b){ return b[0] - a[0]; });
+  // 10/28 「하이닉스를 쳤는데 왜 ADR로 나와」 — 한국 본주가 같이 찾아지면 미국 ADR 은 숨김 (adr·티커를 직접 치면 보임)
+  var krN = {}; out.forEach(function(x){ if (x[1].mkt === "KR") krN[x[1].n1] = 1; });
+  if (q.indexOf("adr") < 0) out = out.filter(function(x){ var r = x[1]; return !(/ ADR$/.test(r.name) && krN[norm(r.name.replace(/ ADR$/, ""))] && r.s1 !== q); });
   var res = out.slice(0, 8).map(function(x){ return x[1]; });
   if (res.length < 8){                                            // 발음이 비슷한 이름으로 더 찾기
     var have = {}; res.forEach(function(r){ have[r.sym] = 1; });
@@ -1493,7 +1496,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261028m";
+var APPV = "20261028n";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1553,9 +1556,9 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="extras.js?v=11"></script>
 <script defer src="burst.js?v=1"></script>   <!-- ⚠️ 10/28 거래폭발 = 따라 사지 마세요 -->
 <script defer src="usage.js?v=1"></script>   <!-- 📈 10/28 사용 현황(익명) -->
-<script defer src="plus.js?v=4"></script>
+<script defer src="plus.js?v=5"></script>
 <script defer src="cpin.js?v=1"></script>   <!-- 📌 10/28 내 고객 상품 -->
-<script defer src="onepage.js?v=9"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
+<script defer src="onepage.js?v=10"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
 <script defer src="pbcard.js?v=3"></script>   <!-- 👔 10/28 PB 한 장 카드(장중 매시간) -->
 <script defer src="plus2.js?v=2"></script>
 <script defer src="plus3.js?v=19"></script>

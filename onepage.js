@@ -13,7 +13,7 @@
   function toast(m){ var d = document.createElement("div"); d.className = "ch-toast"; d.textContent = m; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2600); }
   function gj(u){ return (window.getJSON ? getJSON(u, {ttl: 600000}) : fetch(u).then(function(r){ return r.json(); })).catch(function(){ return null; }); }
   function q(){ return "?" + Math.floor(Date.now() / 300000); }
-  function pbname(){ var n = ls("pbname"); if (n != null) return n; n = prompt("한 장 아래에 넣을 이름 (예: 홍길동 PB · 비워도 돼요)", "") || ""; ls("pbname", n.trim().slice(0, 30)); return ls("pbname") || ""; }
+  function pbname(){ var n = ls("pbname"); if (n != null) return n; n = prompt("한 장 위에 넣을 내 이름 (예: 김OO PB · 비워도 돼요)", "") || ""; ls("pbname", n.trim().slice(0, 30)); return ls("pbname") || ""; }
   function pct(v, d){ return v == null || isNaN(v) ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(+v).toFixed(d == null ? 1 : d) + "%"; }
   function cur(){ return (typeof window.cur !== "undefined" && window.cur) || ""; }
   function latest(cat){ var L = (window.M && M.cats && M.cats[cat]) || []; return L.length ? L[0] : null; }
@@ -29,8 +29,8 @@
   // 🌐 시장 한 장 — 고객이 한눈에: 코스피 큰 숫자+오늘 흐름+한 달 흐름 · 세계 시장 타일 · 업종 열지도 · 시장 온도(오른 종목) · 테마 · 환율·유가·금 · 일정 · 자산배분
   function mkMarket(){
     var it = latest("market");
-    return Promise.all([window.__pbbrief ? __pbbrief() : null, gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), it ? gj(file("market", it.id, "data.json")) : null, gj(RAWM + "ledger/ledger.json"), kospiHist()]).then(function(r){
-      var PB = r[0], L = r[1], U = r[2], D = r[3] || {}, LG = r[4], KH = r[5];
+    return Promise.all([window.__pbbrief ? __pbbrief() : null, gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), it ? gj(file("market", it.id, "data.json")) : null, gj(RAWM + "ledger/ledger.json"), kospiHist(), gj("archive/x/wl_live.json" + q())]).then(function(r){
+      var PB = r[0], L = r[1], U = r[2], D = r[3] || {}, LG = r[4], KH = r[5], WLJ = r[6];
       var live = !!(L && L.date === today() && L.index && L.index.length), liveMode = !!(PB && PB.mode === "장중" && live);
       var ix = {}; (live ? L.index : []).forEach(function(x){ ix[x.name] = x; });
       var ks = ix["코스피"] || {}, kq = ix["코스닥"] || {};
@@ -46,7 +46,12 @@
       var gauge = live && L.total ? {up: L.up, down: L.down, flat: L.flat, total: L.total, lu: L.limit_up || 0, ld: L.limit_dn || 0} : null;
       var themes = live ? (L.themes || []).slice(0, 3).map(function(t){ return {n: t.name.replace(/\(.*?\)/g, "").slice(0, 10), v: t.r, s: (t.lead || []).slice(0, 3).map(function(x){ return x.n; }).join(" · ")}; }) : [];
       var k2 = [];
-      [["원/달러", "원/달러"], ["WTI", "유가 WTI"], ["금", "금"], ["미 10년물 국채 선물", "미 10년 국채"]].forEach(function(w){ var x = F(mac, w[0]); if (x) k2.push({l: w[1], v: pct(x.chg), s: x.last && w[0] === "원/달러" ? Math.round(x.last).toLocaleString() + "원" : ""}); });
+      [["원/달러", "원/달러"], ["WTI", "유가 WTI"], ["금", "금"], ["미 10년물 국채 선물", "미 10년 국채"]].forEach(function(w){ var x = F(mac, w[0]);
+        if (w[0] === "원/달러"){   // 💱 환율은 「1,331원 ▲2.3원」 — % 아니라 원으로 · wl_live 10분마다 값
+          var fx = WLJ && WLJ.fx && WLJ.fx.t && WLJ.fx.t.slice(0, 10) === today() ? WLJ.fx : x ? {p: x.last, prev: x.chg != null ? x.last / (1 + x.chg / 100) : null, t: ""} : null;
+          if (fx && fx.p){ var dw = fx.prev ? fx.p - fx.prev : null; k2.push({l: "원/달러" + (fx.t ? " " + fx.t.slice(11, 16) : ""), v: (Math.round(fx.p * 10) / 10).toLocaleString() + "원", neutral: true, s: dw == null ? "" : (dw > 0 ? "▲" : dw < 0 ? "▼" : "") + Math.abs(dw).toFixed(1) + "원"}); }
+          return; }
+        if (x) k2.push({l: w[1], v: pct(x.chg)}); });
       var reg = (PB && PB.regime) || "";
       var chips = reg ? reg.split("·").map(function(x){ return x.trim(); }).filter(Boolean) : [];
       var ev = (PB && PB.events) || [];
@@ -826,6 +831,7 @@
     var box = document.createElement("div"); box.id = "opch";
     var row = function(it, i){ var ic = it.kind === "stock" ? "⭐" : it.kind === "myels" ? "🎯" : it.kind === "fund" ? "📦" : "🏦"; return '<label class="opc-r"><input type="checkbox" data-i="' + i + '"><span>' + ic + '</span><b>' + String(it.nm).replace(/[<>&]/g, "").slice(0, 26) + '</b><small>' + (it.kind === "stock" ? it.id : it.kind === "myels" ? "내 ELS" : it.kind === "fund" ? "펀드" : "채권") + '</small></label>'; };
     box.innerHTML = '<div class="opc-s"><h3>📨 고객에게 보내기</h3>' +
+      '<label class="opc-n">✍️ 보내는 사람 <input id="opcnm" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + String(ls("pbname") || "").replace(/[&<>"]/g, "") + '"></label>' +
       '<button class="opc-b main" data-m="mkt">📊 시황만 <small>시장 한 장</small></button>' +
       '<button class="opc-b" data-m="pick">⭐ 관심종목 포함 <small>시장 한 장 + 고른 종목·상품 한 장씩</small></button>' +
       '<div id="opcl" hidden>' + (all.length ? '<div class="opc-h"><span>보낼 것 고르기</span><button type="button" data-all="1">전체</button></div><div class="opc-list">' + all.map(row).join("") + '</div><button class="opc-go" id="opcgo" disabled>골라 주세요</button>' :
@@ -835,6 +841,7 @@
     var sel = function(){ return [].filter.call(box.querySelectorAll('input[type=checkbox]'), function(c){ return c.checked; }).map(function(c){ return all[+c.dataset.i]; }); };
     var upd = function(){ var b = document.getElementById("opcgo"); if (!b) return; var n = sel().length; b.disabled = !n; b.textContent = n ? "시장 한 장 + " + n + "장 = " + (n + 1) + "장 만들기" : "골라 주세요"; };
     box.addEventListener("change", upd);
+    var nmI = document.getElementById("opcnm"); if (nmI) nmI.addEventListener("input", function(){ ls("pbname", nmI.value.trim().slice(0, 30)); });
     box.addEventListener("click", function(ev){
       var t = ev.target; if (t === box || t.closest("[data-x]")){ box.remove(); return; }
       var m = t.closest("[data-m]"); if (m){ if (m.dataset.m === "mkt"){ box.remove(); go(null); } else { document.getElementById("opcl").hidden = false; m.classList.add("on"); } return; }
@@ -903,6 +910,7 @@
   var css = document.createElement("style");
   css.textContent = "#opbtn{position:fixed;left:16px;bottom:calc(env(safe-area-inset-bottom) + 74px);z-index:80;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:rgba(18,24,38,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font:inherit;font-size:14px;font-weight:800;padding:9px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.45)}" +
     "#opch{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}.opc-s{width:100%;max-width:520px;max-height:85vh;overflow:auto;background:var(--panel);color:var(--text);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom) + 20px);box-sizing:border-box}.opc-s h3{margin:0 0 12px;font-size:17px}" +
+    ".opc-n{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub,#aab);margin:0 0 10px}.opc-n input{flex:1;min-width:0;font:inherit;font-size:15px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}" +
     ".opc-b{display:block;width:100%;text-align:left;font:inherit;font-size:16px;font-weight:800;padding:14px;margin:0 0 8px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel2);color:var(--text)}.opc-b small{display:block;font-weight:500;font-size:12.5px;color:var(--sub,#aab);margin-top:3px}.opc-b.main,.opc-b.on{border-color:var(--acc,#7c9cff)}" +
     ".opc-h{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;font-size:13px;color:var(--sub,#aab)}.opc-h button{font:inherit;font-size:12.5px;background:none;border:1px solid var(--line);color:var(--text);border-radius:999px;padding:3px 10px}" +
     ".opc-list{display:flex;flex-direction:column;gap:4px;max-height:40vh;overflow:auto}.opc-r{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;background:var(--panel2);font-size:14px}.opc-r b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.opc-r small{color:var(--mut,#8a94a8);font-size:11.5px}.opc-r input{width:18px;height:18px}" +

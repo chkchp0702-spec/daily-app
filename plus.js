@@ -38,6 +38,11 @@
 
   /* =================== ⭐ 관심종목 · 메모 =================== */
   var WL = store.wl || {};
+  (function(){   // 10/28 「하이닉스를 쳤는데 왜 ADR로 나와」 — 관심종목에 담긴 한국 회사 미국 ADR → 한국 본주로 바꿈 (한 번)
+    var TW = {SKHY: ["000660", "SK하이닉스"], PKX: ["005490", "POSCO홀딩스"], KB: ["105560", "KB금융"], SHG: ["055550", "신한지주"], WF: ["316140", "우리금융지주"], KEP: ["015760", "한국전력"], LPL: ["034220", "LG디스플레이"], SKM: ["017670", "SK텔레콤"]}, ch = [];
+    Object.keys(WL).forEach(function(k){ var t = TW[String(k).toUpperCase()]; if (!t) return; if (!WL[t[0]]) WL[t[0]] = {n: t[1], s: t[0] + ".KS", t: WL[k].t || ""}; delete WL[k]; ch.push(t[1]); });
+    if (ch.length){ store.wl = WL; save(); setTimeout(function(){ try { syncSoon(); } catch(x) {} try { toast("⭐ " + ch.join("·") + " — 미국 ADR 대신 한국 본주로 바꿔 담았어요"); } catch(x) {} }, 2500); }
+  })();
   if (!store.uid){ store.uid = Math.random().toString(36).slice(2, 12).replace(/[^a-z0-9]/g, "x"); save(); }
   var UID = store.uid;
   function wlSave(){ store.wl = WL; save(); syncSoon(); refreshStars(); }

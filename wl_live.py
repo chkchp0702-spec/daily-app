@@ -188,7 +188,22 @@ def main():
             if k:
                 q["kr"] = {"c": twin[0], "n": twin[1], "p": k["p"], "chg": k["chg"], "t": k["t"]}
         out[code] = q
-    json.dump({"at": NOW.strftime("%Y-%m-%d %H:%M"), "q": out}, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    fx = None
+    try:   # 💱 원/달러 지금 값 (10/28 「원달러 환율 저거 아니야」 — 아침 09:25 값이 그대로 쓰이던 것)
+        import yfinance as yf
+        d = yf.Ticker("KRW=X").history(period="5d", interval="1d")["Close"].dropna()
+        m = yf.Ticker("KRW=X").history(period="1d", interval="5m")["Close"].dropna()
+        last = float(m.iloc[-1]) if len(m) else float(d.iloc[-1])
+        # 전일 종가 = 오늘 이전 마지막 일봉
+        dd = [(i.tz_convert(KST).date() if getattr(i, "tzinfo", None) else i.date(), float(v)) for i, v in d.items()]
+        prev = [v for di, v in dd if di < NOW.date()]
+        prev = prev[-1] if prev else None
+        t = (m.index[-1].tz_convert(KST) if len(m) else NOW).strftime("%Y-%m-%d %H:%M")
+        if 900 < last < 2500:
+            fx = {"p": round(last, 2), "prev": round(prev, 2) if prev else None, "chg": round((last / prev - 1) * 100, 2) if prev else None, "t": t}
+    except Exception as e:
+        print("환율 실패", e)
+    json.dump({"at": NOW.strftime("%Y-%m-%d %H:%M"), "fx": fx, "q": out}, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("관심종목", len(out), "/", len(S))
 
 
