@@ -1,0 +1,92 @@
+{
+"c_accum_1": {
+"key": "accum|🚀박스돌파",
+"title": "🚀 박스 돌파",
+"kind": "card",
+"n": 3
+},
+"c_accum_2": {
+"key": "accum|거래량이상종목",
+"title": "거래량 이상 종목",
+"kind": "card",
+"n": 2
+},
+"c_accum_3": {
+"key": "accum|이화면은🤫거래량이상종목참고용",
+"title": "이 화면은? 🤫 거래량 이상 종목 (참고용)",
+"kind": "sum",
+"n": 4
+},
+"c_alarm_1": {
+"key": "alarm|안내",
+"title": "안내",
+"kind": "td",
+"n": 1
+},
+"c_danta_1": {
+"key": "danta|📺오늘알람실시간전광판",
+"title": "📺 오늘 알람 실시간 전광판",
+"kind": "card",
+"n": 3
+},
+"c_danta_2": {
+"key": "danta|날짜별성적",
+"title": "날짜별 성적",
+"kind": "card",
+"n": 2
+},
+"c_danta_3": {
+"key": "danta|이화면은⚡단타당일급등신호알람을모은화면",
+"title": "이 화면은? ⚡ 단타(당일 급등 신호) 알람을 모은 화면",
+"kind": "sum",
+"n": 4
+},
+"c_danta_4": {
+"key": "danta|품질c",
+"title": "품질 C",
+"kind": "tip",
+"n": 3
+},
+"c_idea_1": {
+"key": "idea|✍️의견남기기",
+"title": "✍️ 의견 남기기",
+"kind": "card",
+"n": 2
+},
+"c_mgr_1": {
+"key": "mgr|어디에돈을넣었나",
+"title": "어디에 돈을 넣었나",
+"kind": "card",
+"n": 1
+},
+"c_mgr_2": {
+"key": "mgr|보유종목top",
+"title": "보유 종목 TOP 30",
+"kind": "card",
+"n": 1
+},
+"c_mgr_3": {
+"key": "mgr|이번분기에판종목",
+"title": "이번 분기에 판 종목",
+"kind": "card",
+"n": 1
+},
+"c_onepager_1": {
+"key": "onepager|🐇🐢누가먼저말했나",
+"title": "🐇🐢 누가 먼저 말했나",
+"kind": "card",
+"n": 2
+},
+"c_onepager_2": {
+"key": "onepager|🧵이종목앱성적표",
+"title": "🧵 이 종목, 앱 성적표",
+"kind": "card",
+"n": 2
+},
+"c_onepager_3": {
+"key": "onepager|안내",
+"title": "안내",
+"kind": "tip",
+"n": 1
+}
+}

@@ -1,0 +1,85 @@
+
+◆  Rendering c_port_2 → /home/runner/work/daily-app/daily-app/explain/build/c_port_2/raw.mp4
+   30fps · standard · auto workers (4 cores detected)
+   GPU: browser GPU (auto-detect)
+
+  █░░░░░░░░░░░░░░░░░░░░░░░░  5%  Compiling composition
+@hf-progress {"code":"compile","pct":5}
+  ██░░░░░░░░░░░░░░░░░░░░░░░  10%  Extracting video frames
+@hf-progress {"code":"extract_video","pct":10}
+  █████░░░░░░░░░░░░░░░░░░░░  20%  Processing audio tracks
+@hf-progress {"code":"process_audio","pct":20}
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Starting frame capture
+@hf-progress {"code":"start_browsers","pct":25}
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Checking browser GPU
+@hf-progress {"code":"start_browsers","pct":25}
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Measuring capture speed
+@hf-progress {"code":"start_browsers","pct":25}
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Starting browsers (0/2 ready)
+@hf-progress {"code":"start_browsers","done":0,"total":2,"pct":25}
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Starting browsers (1/2 ready)
+@hf-progress {"code":"start_browsers","done":1,"total":2,"pct":25}
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Streaming frame 1/147 (2 workers)
+@hf-progress {"code":"capture","done":1,"total":147,"pct":25}
+  ███████░░░░░░░░░░░░░░░░░░  31%  Streaming frame 17/147 (2 workers)
+@hf-progress {"code":"capture","done":17,"total":147,"pct":31}
+  █████████░░░░░░░░░░░░░░░░  36%  Streaming frame 29/147 (2 workers)
+@hf-progress {"code":"capture","done":29,"total":147,"pct":36}
+  ██████████░░░░░░░░░░░░░░░  42%  Streaming frame 45/147 (2 workers)
+@hf-progress {"code":"capture","done":45,"total":147,"pct":42}
+  ███████████░░░░░░░░░░░░░░  46%  Streaming frame 56/147 (2 workers)
+@hf-progress {"code":"capture","done":56,"total":147,"pct":46}
+  ████████████░░░░░░░░░░░░░  51%  Streaming frame 69/147 (2 workers)
+@hf-progress {"code":"capture","done":69,"total":147,"pct":51}
+  ██████████████░░░░░░░░░░░  57%  Streaming frame 85/147 (2 workers)
+@hf-progress {"code":"capture","done":85,"total":147,"pct":57}
+  ████████████████░░░░░░░░░  64%  Streaming frame 103/147 (2 workers)
+@hf-progress {"code":"capture","done":103,"total":147,"pct":64}
+  █████████████████░░░░░░░░  69%  Streaming frame 118/147 (2 workers)
+@hf-progress {"code":"capture","done":118,"total":147,"pct":69}
+  ██████████████████░░░░░░░  75%  Streaming frame 134/147 (2 workers)
+@hf-progress {"code":"capture","done":134,"total":147,"pct":75}
+  ████████████████████░░░░░  80%  Streaming frame 147/147 (2 workers)
+@hf-progress {"code":"capture","done":147,"total":147,"pct":80}
+  █████████████████████░░░░  86%  Encoding frame 82/147
+@hf-progress {"code":"encode","done":82,"total":147,"pct":86}
+  ██████████████████████░░░  90%  Encoding frame 147/147
+@hf-progress {"code":"encode","done":147,"total":147,"pct":90}
+  ██████████████████████░░░  90%  Assembling final video
+@hf-progress {"code":"assemble","done":0,"total":4.9,"pct":90}
+  ██████████████████████░░░  90%  Assembling final video
+@hf-progress {"code":"assemble","done":0,"total":4.9,"pct":90}
+  ████████████████████████░  99%  Assembling final video
+@hf-progress {"code":"assemble","done":4.9,"total":4.9,"pct":99}
+  █████████████████████████  100%  Render complete
+
+◇  /home/runner/work/daily-app/daily-app/explain/build/c_port_2/raw.mp4
+   977.6 KB · 4.9s video · rendered in 5.0s
+   beginframe capture · software gpu · compile 0.2s · extract 0.0s · audio 0.7s · probe 0.0s · setup 1.0s · capture 3.5s · encode (during capture) 3.5s · assemble 0.3s
+   Keep editing by chatting with Framey in the HyperFrames desktop app → https://hyperframes.studio/studio/download?os=linux&src=cli
+O] [Render] Parallel capture worker phase {"renderJobId":"ad7e9faa-1876-4afb-a374-c045c53c6206","workerId":0,"phase":"browser_probe","browserExecutable":"/home/runner/.cache/hyperframes/chrome/chrome-headless-shell/linux-152.0.7977.30/chrome-headless-shell-linux64/chrome-headless-shell","browserVersion":"unknown","canvasDrawElement":"unknown","gpuBackend":"unknown"}
+[INFO] [Render] Parallel capture worker phase {"renderJobId":"ad7e9faa-1876-4afb-a374-c045c53c6206","workerId":0,"phase":"session_init","browserExecutable":"/home/runner/.cache/hyperframes/chrome/chrome-headless-shell/linux-152.0.7977.30/chrome-headless-shell-linux64/chrome-headless-shell","browserVersion":"HeadlessChrome/152.0.7977.30","canvasDrawElement":"unknown","gpuBackend":"unknown"}
+[initSession:beginframe] warmup loop started (0ms)
+[initSession:beginframe] page.goto start (0ms)
+[initSession:beginframe] page.goto complete (102ms)
+[initSession:beginframe] GSAP proxy flush complete (108ms)
+[HyperFrames] render runtime fps {"canonicalFps":30,"source":"render-options","rawFpsSource":"render-options","rawFps":30}
+[initSession:beginframe] page.goto complete (128ms)
+[initSession:beginframe] GSAP proxy flush complete (135ms)
+[HyperFrames] render runtime fps {"canonicalFps":30,"source":"render-options","rawFpsSource":"render-options","rawFps":30}
+[initSession:beginframe] pollHfReady complete (241ms)
+[initSession:beginframe] pollSubCompositionTimelines complete (ready) (243ms)
+[initSession:beginframe] applyVideoMetadataHints complete (243ms)
+[initSession:beginframe] media + fonts + tailwind ready (245ms)
+[initSession:beginframe] static-frame dedup: disabled (capture mode beginframe, not screenshot) (279ms)
+[initSession:beginframe] pollHfReady complete (270ms)
+[initSession:beginframe] pollSubCompositionTimelines complete (ready) (275ms)
+[initSession:beginframe] applyVideoMetadataHints complete (275ms)
+[initSession:beginframe] media + fonts + tailwind ready (276ms)
+[INFO] [Render] Parallel capture worker phase {"renderJobId":"ad7e9faa-1876-4afb-a374-c045c53c6206","workerId":1,"phase":"frame_capture","frameIndex":1,"browserExecutable":"/home/runner/.cache/hyperframes/chrome/chrome-headless-shell/linux-152.0.7977.30/chrome-headless-shell-linux64/chrome-headless-shell","browserVersion":"HeadlessChrome/152.0.7977.30","canvasDrawElement":false,"gpuBackend":"unknown"}
+[initSession:beginframe] static-frame dedup: disabled (capture mode beginframe, not screenshot) (309ms)
+[INFO] [Render] Parallel capture worker phase {"renderJobId":"ad7e9faa-1876-4afb-a374-c045c53c6206","workerId":0,"phase":"frame_capture","frameIndex":0,"browserExecutable":"/home/runner/.cache/hyperframes/chrome/chrome-headless-shell/linux-152.0.7977.30/chrome-headless-shell-linux64/chrome-headless-shell","browserVersion":"HeadlessChrome/152.0.7977.30","canvasDrawElement":false,"gpuBackend":"unknown"}
+[INFO] [Render:trace] {"renderJobId":"ad7e9faa-1876-4afb-a374-c045c53c6206","phase":"capture_streaming","status":"end","elapsedMs":4649,"durationMs":3515,"stagePhase":"capturing","workerCount":2,"forceScreenshot":false,"totalFrames":147,"framesCompleted":147,"captureMode":"beginframe","captureOperation":"encode"}
+[INFO] [Render:trace] {"renderJobId":"ad7e9faa-1876-4afb-a374-c045c53c6206","phase":"assemble","status":"start","elapsedMs":4650,"stagePhase":"capturing","hasAudio":true,"workerCount":2,"forceScreenshot":false,"totalFrames":147,"framesCompleted":147,"captureMode":"beginframe","captureOperation":"encode"}
+[INFO] [Render:trace] {"renderJobId":"ad7e9faa-1876-4afb-a374-c045c53c6206","phase":"assemble","status":"end","elapsedMs":4910,"durationMs":260,"stagePhase":"capturing","hasAudio":true,"workerCount":2,"forceScreenshot":false,"totalFrames":147,"framesCompleted":147,"captureMode":"beginframe","captureOperation":"encode"}
+[INFO] [Render:trace] {"renderJobId":"ad7e9faa-1876-4afb-a374-c045c53c6206","phase":"pipeline","status":"checkpoint","elapsedMs":4951,"message":"artifact validated","totalElapsedMs":4951}

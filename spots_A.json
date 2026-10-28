@@ -1,0 +1,44 @@
+{
+"c_home_1": {
+"key": "home|☀️오늘한장",
+"title": "☀️ 오늘 한 장",
+"kind": "card",
+"n": 2
+},
+"c_home_2": {
+"key": "home|🌤오늘날씨판",
+"title": "🌤 오늘 날씨판",
+"kind": "x",
+"n": 5
+},
+"c_home_3": {
+"key": "home|🎞그날팔았다면",
+"title": "🎞 그날 팔았다면?",
+"kind": "x",
+"n": 5
+},
+"c_home_4": {
+"key": "home|🏆오늘의배지",
+"title": "🏆 오늘의 배지",
+"kind": "x",
+"n": 3
+},
+"c_home_5": {
+"key": "home|👋조이인사",
+"title": "👋 조이 인사",
+"kind": "x",
+"n": 3
+},
+"c_market_1": {
+"key": "market|✅오늘할일",
+"title": "✅ 오늘 할 일",
+"kind": "card",
+"n": 1
+},
+"c_prob_1": {
+"key": "prob|🎲다음장오를확률",
+"title": "🎲 다음 장 · 오를 확률",
+"kind": "card",
+"n": 2
+}
+}

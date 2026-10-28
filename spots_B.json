@@ -1,0 +1,74 @@
+{
+"c_port_1": {
+"key": "port|🏁시장곳과비교",
+"title": "🏁 시장 14곳과 비교",
+"kind": "fold",
+"n": 3
+},
+"c_port_2": {
+"key": "port|🗣목소리경주",
+"title": "🗣 목소리 경주",
+"kind": "fold",
+"n": 1
+},
+"c_port_3": {
+"key": "port|🎯집중포트",
+"title": "🎯 집중 포트",
+"kind": "fold",
+"n": 1
+},
+"c_port_4": {
+"key": "port|📋지금이렇게담으면돼요",
+"title": "📋 지금 이렇게 담으면 돼요",
+"kind": "fold",
+"n": 3
+},
+"c_port_5": {
+"key": "port|🔁비중바뀐날",
+"title": "🔁 비중 바뀐 날",
+"kind": "fold",
+"n": 1
+},
+"c_port_6": {
+"key": "port|🌏미국강세섹터×해외동종주",
+"title": "🌏 미국 강세 섹터 × 해외 동종주",
+"kind": "fold",
+"n": 2
+},
+"c_port_7": {
+"key": "port|🧩어느칸이벌고잃었나",
+"title": "🧩 어느 칸이 벌고 잃었나",
+"kind": "fold",
+"n": 2
+},
+"c_port_8": {
+"key": "port|📅날짜별성적",
+"title": "📅 날짜별 성적",
+"kind": "fold",
+"n": 1
+},
+"c_port_9": {
+"key": "port|포트개뭐가달라요",
+"title": "포트 4개, 뭐가 달라요?",
+"kind": "sum",
+"n": 5
+},
+"c_port_10": {
+"key": "port|🎯집중포트오르는시장이면벌때번다검증한규칙그대로",
+"title": "🎯 집중 포트 오르는 시장이면 벌 때 번다 · 검증한 규칙 그대로",
+"kind": "td",
+"n": 1
+},
+"c_score_1": {
+"key": "score|🧪포트규칙검증",
+"title": "🧪 포트 규칙 검증",
+"kind": "card",
+"n": 3
+},
+"c_score_2": {
+"key": "score|📊성적표안내",
+"title": "📊 성적표 안내",
+"kind": "td",
+"n": 1
+}
+}

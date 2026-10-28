@@ -1,0 +1,74 @@
+{
+"c_bond_1": {
+"key": "bond|🇰🇷국고채국민주택채권",
+"title": "🇰🇷 국고채·국민주택채권",
+"kind": "card",
+"n": 2
+},
+"c_bond_2": {
+"key": "bond|🏦채권안내",
+"title": "🏦 채권 안내",
+"kind": "td",
+"n": 1
+},
+"c_els_1": {
+"key": "els|🎯els원금비보장",
+"title": "🎯 ELS · 원금 비보장",
+"kind": "card",
+"n": 1
+},
+"c_els_2": {
+"key": "els|🛡️elb원금지급형",
+"title": "🛡️ ELB · 원금지급형",
+"kind": "card",
+"n": 1
+},
+"c_els_3": {
+"key": "els|🎯els안내",
+"title": "🎯 ELS 안내",
+"kind": "td",
+"n": 1
+},
+"c_els_4": {
+"key": "els|📘els구조빨리읽기",
+"title": "📘 ELS 구조 빨리 읽기",
+"kind": "td",
+"n": 1
+},
+"c_feed_1": {
+"key": "feed|📰피드안내",
+"title": "📰 피드 안내",
+"kind": "td",
+"n": 1
+},
+"c_fund_1": {
+"key": "fund|📦펀드안내",
+"title": "📦 펀드 안내",
+"kind": "td",
+"n": 1
+},
+"c_screen_1": {
+"key": "screen|🔎종목찾기안내",
+"title": "🔎 종목 찾기 안내",
+"kind": "td",
+"n": 1
+},
+"c_sigmore_1": {
+"key": "sigmore|🧠자동분석전망",
+"title": "🧠 자동 분석 전망",
+"kind": "card",
+"n": 1
+},
+"c_sigmore_2": {
+"key": "sigmore|📂신호상세",
+"title": "📂 신호 상세",
+"kind": "card",
+"n": 1
+},
+"d_els_dz": {
+"key": "els|🎛els내맘대로설계기",
+"title": "🎛 ELS 내 맘대로 설계기",
+"kind": "demo",
+"n": 10
+}
+}

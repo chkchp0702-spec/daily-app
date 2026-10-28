@@ -1,0 +1,308 @@
+{
+"c_home_1": {
+"key": "home|☀️오늘한장",
+"title": "☀️ 오늘 한 장",
+"kind": "card",
+"n": 2
+},
+"c_home_2": {
+"key": "home|🌤오늘날씨판",
+"title": "🌤 오늘 날씨판",
+"kind": "x",
+"n": 5
+},
+"c_home_3": {
+"key": "home|🎞그날팔았다면",
+"title": "🎞 그날 팔았다면?",
+"kind": "x",
+"n": 5
+},
+"c_home_4": {
+"key": "home|🏆오늘의배지",
+"title": "🏆 오늘의 배지",
+"kind": "x",
+"n": 3
+},
+"c_home_5": {
+"key": "home|👋조이인사",
+"title": "👋 조이 인사",
+"kind": "x",
+"n": 3
+},
+"c_market_1": {
+"key": "market|✅오늘할일",
+"title": "✅ 오늘 할 일",
+"kind": "card",
+"n": 1
+},
+"c_prob_1": {
+"key": "prob|🎲다음장오를확률",
+"title": "🎲 다음 장 · 오를 확률",
+"kind": "card",
+"n": 2
+},
+"c_port_1": {
+"key": "port|🏁시장곳과비교",
+"title": "🏁 시장 14곳과 비교",
+"kind": "fold",
+"n": 3
+},
+"c_port_2": {
+"key": "port|🗣목소리경주",
+"title": "🗣 목소리 경주",
+"kind": "fold",
+"n": 1
+},
+"c_port_3": {
+"key": "port|🎯집중포트",
+"title": "🎯 집중 포트",
+"kind": "fold",
+"n": 1
+},
+"c_port_4": {
+"key": "port|📋지금이렇게담으면돼요",
+"title": "📋 지금 이렇게 담으면 돼요",
+"kind": "fold",
+"n": 3
+},
+"c_port_5": {
+"key": "port|🔁비중바뀐날",
+"title": "🔁 비중 바뀐 날",
+"kind": "fold",
+"n": 1
+},
+"c_port_6": {
+"key": "port|🌏미국강세섹터×해외동종주",
+"title": "🌏 미국 강세 섹터 × 해외 동종주",
+"kind": "fold",
+"n": 2
+},
+"c_port_7": {
+"key": "port|🧩어느칸이벌고잃었나",
+"title": "🧩 어느 칸이 벌고 잃었나",
+"kind": "fold",
+"n": 2
+},
+"c_port_8": {
+"key": "port|📅날짜별성적",
+"title": "📅 날짜별 성적",
+"kind": "fold",
+"n": 1
+},
+"c_port_9": {
+"key": "port|포트개뭐가달라요",
+"title": "포트 4개, 뭐가 달라요?",
+"kind": "sum",
+"n": 5
+},
+"c_port_10": {
+"key": "port|🎯집중포트오르는시장이면벌때번다검증한규칙그대로",
+"title": "🎯 집중 포트 오르는 시장이면 벌 때 번다 · 검증한 규칙 그대로",
+"kind": "td",
+"n": 1
+},
+"c_score_1": {
+"key": "score|🧪포트규칙검증",
+"title": "🧪 포트 규칙 검증",
+"kind": "card",
+"n": 3
+},
+"c_score_2": {
+"key": "score|📊성적표안내",
+"title": "📊 성적표 안내",
+"kind": "td",
+"n": 1
+},
+"c_cup_1": {
+"key": "cup|🎯돌파임박",
+"title": "🎯 돌파 임박",
+"kind": "card",
+"n": 3
+},
+"c_cup_2": {
+"key": "cup|이화면은☕컵모양차트를찾는화면",
+"title": "이 화면은? ☕ 컵 모양 차트를 찾는 화면",
+"kind": "sum",
+"n": 4
+},
+"c_gap_1": {
+"key": "gap|이화면은📈갭상승돌파를찾는화면",
+"title": "이 화면은? 📈 갭 상승 돌파를 찾는 화면",
+"kind": "sum",
+"n": 4
+},
+"c_whale_1": {
+"key": "whale|오늘의큰손top",
+"title": "오늘의 큰손 TOP 10",
+"kind": "card",
+"n": 3
+},
+"c_whale_2": {
+"key": "whale|이화면은🐋유명펀드투자자의보유종목을보는화면",
+"title": "이 화면은? 🐋 유명 펀드·투자자의 보유 종목을 보는 화면",
+"kind": "sum",
+"n": 4
+},
+"c_bond_1": {
+"key": "bond|🇰🇷국고채국민주택채권",
+"title": "🇰🇷 국고채·국민주택채권",
+"kind": "card",
+"n": 2
+},
+"c_bond_2": {
+"key": "bond|🏦채권안내",
+"title": "🏦 채권 안내",
+"kind": "td",
+"n": 1
+},
+"c_els_1": {
+"key": "els|🎯els원금비보장",
+"title": "🎯 ELS · 원금 비보장",
+"kind": "card",
+"n": 1
+},
+"c_els_2": {
+"key": "els|🛡️elb원금지급형",
+"title": "🛡️ ELB · 원금지급형",
+"kind": "card",
+"n": 1
+},
+"c_els_3": {
+"key": "els|🎯els안내",
+"title": "🎯 ELS 안내",
+"kind": "td",
+"n": 1
+},
+"c_els_4": {
+"key": "els|📘els구조빨리읽기",
+"title": "📘 ELS 구조 빨리 읽기",
+"kind": "td",
+"n": 1
+},
+"c_feed_1": {
+"key": "feed|📰피드안내",
+"title": "📰 피드 안내",
+"kind": "td",
+"n": 1
+},
+"c_fund_1": {
+"key": "fund|📦펀드안내",
+"title": "📦 펀드 안내",
+"kind": "td",
+"n": 1
+},
+"c_screen_1": {
+"key": "screen|🔎종목찾기안내",
+"title": "🔎 종목 찾기 안내",
+"kind": "td",
+"n": 1
+},
+"c_sigmore_1": {
+"key": "sigmore|🧠자동분석전망",
+"title": "🧠 자동 분석 전망",
+"kind": "card",
+"n": 1
+},
+"c_sigmore_2": {
+"key": "sigmore|📂신호상세",
+"title": "📂 신호 상세",
+"kind": "card",
+"n": 1
+},
+"d_els_dz": {
+"key": "els|🎛els내맘대로설계기",
+"title": "🎛 ELS 내 맘대로 설계기",
+"kind": "demo",
+"n": 10
+},
+"c_accum_1": {
+"key": "accum|🚀박스돌파",
+"title": "🚀 박스 돌파",
+"kind": "card",
+"n": 3
+},
+"c_accum_2": {
+"key": "accum|거래량이상종목",
+"title": "거래량 이상 종목",
+"kind": "card",
+"n": 2
+},
+"c_accum_3": {
+"key": "accum|이화면은🤫거래량이상종목참고용",
+"title": "이 화면은? 🤫 거래량 이상 종목 (참고용)",
+"kind": "sum",
+"n": 4
+},
+"c_alarm_1": {
+"key": "alarm|안내",
+"title": "안내",
+"kind": "td",
+"n": 1
+},
+"c_danta_1": {
+"key": "danta|📺오늘알람실시간전광판",
+"title": "📺 오늘 알람 실시간 전광판",
+"kind": "card",
+"n": 3
+},
+"c_danta_2": {
+"key": "danta|날짜별성적",
+"title": "날짜별 성적",
+"kind": "card",
+"n": 2
+},
+"c_danta_3": {
+"key": "danta|이화면은⚡단타당일급등신호알람을모은화면",
+"title": "이 화면은? ⚡ 단타(당일 급등 신호) 알람을 모은 화면",
+"kind": "sum",
+"n": 4
+},
+"c_danta_4": {
+"key": "danta|품질c",
+"title": "품질 C",
+"kind": "tip",
+"n": 3
+},
+"c_idea_1": {
+"key": "idea|✍️의견남기기",
+"title": "✍️ 의견 남기기",
+"kind": "card",
+"n": 2
+},
+"c_mgr_1": {
+"key": "mgr|어디에돈을넣었나",
+"title": "어디에 돈을 넣었나",
+"kind": "card",
+"n": 1
+},
+"c_mgr_2": {
+"key": "mgr|보유종목top",
+"title": "보유 종목 TOP 30",
+"kind": "card",
+"n": 1
+},
+"c_mgr_3": {
+"key": "mgr|이번분기에판종목",
+"title": "이번 분기에 판 종목",
+"kind": "card",
+"n": 1
+},
+"c_onepager_1": {
+"key": "onepager|🐇🐢누가먼저말했나",
+"title": "🐇🐢 누가 먼저 말했나",
+"kind": "card",
+"n": 2
+},
+"c_onepager_2": {
+"key": "onepager|🧵이종목앱성적표",
+"title": "🧵 이 종목, 앱 성적표",
+"kind": "card",
+"n": 2
+},
+"c_onepager_3": {
+"key": "onepager|안내",
+"title": "안내",
+"kind": "tip",
+"n": 1
+}
+}
