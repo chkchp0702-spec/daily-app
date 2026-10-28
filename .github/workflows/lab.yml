@@ -21,7 +21,7 @@ jobs:
       - name: job
         timeout-minutes: 300
         continue-on-error: true
-        env: { SHARD: "${{ matrix.shard }}", NSHARD: "8", LIMIT: "3", KRX_ID: "${{ secrets.KRX_ID }}", KRX_PW: "${{ secrets.KRX_PW }}" }
+        env: { SHARD: "${{ matrix.shard }}", NSHARD: "8", KRX_ID: "${{ secrets.KRX_ID }}", KRX_PW: "${{ secrets.KRX_PW }}" }
         run: mkdir -p out && python $(cat job.txt)
       - uses: actions/upload-artifact@v4
         if: always()
