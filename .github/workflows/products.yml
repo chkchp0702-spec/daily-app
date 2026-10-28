@@ -31,5 +31,7 @@ jobs:
         run: python port_px.py || echo "port_px skipped"
       - name: 🔬 S&P500·나스닥100 구성 종목 (10/23 A10/23-3, 하루 한 번)
         run: (pip install -q openpyxl && python etf_hold.py) || echo "etf_hold skipped"; test -f archive/x/etf_hold.json || echo '{"etf":{}}' > archive/x/etf_hold.json
+      - name: 📝 제안서 기본폼 (채권·ELS 새 금리 반영)
+        run: python proposal.py || echo "제안서 기본폼 실패"
       - name: 저장
-        run: bash scripts/push.sh "products $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/products.json archive/x/fund_hold.json archive/x/pv_kofia.json archive/x/pv_nav.json archive/x/pv_pub.json archive/x/els_replay.json archive/x/els_px archive/x/port_px archive/x/etf_hold.json
+        run: bash scripts/push.sh "products $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/products.json archive/x/proposal.json archive/x/fund_hold.json archive/x/pv_kofia.json archive/x/pv_nav.json archive/x/pv_pub.json archive/x/els_replay.json archive/x/els_px archive/x/port_px archive/x/etf_hold.json

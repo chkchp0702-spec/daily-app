@@ -49,6 +49,8 @@ jobs:
         run: |
           pip install -q yfinance pandas
           python extras.py || echo "extras 일부 실패"
+      - name: 📝 제안서 기본폼 9종 (10/28 · AI 없이 시황·포트·상품 조립)
+        run: python proposal.py || echo "제안서 기본폼 실패"
       - name: 저장
         run: |
           git config user.name "bot"

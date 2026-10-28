@@ -43,13 +43,13 @@ jobs:
           CP=$(ls archive/sector/*/compass.json | sort | tail -1); echo "$CP" > /tmp/cp.txt
           python opdb/ixlive.py "$CP" archive/x || echo "나침반 덧입히기 실패"
           # 👔 10/28 PB 한 장 — 장중 매시간(각 시 첫 실행) 갱신 · 알림은 아침 한 번만(brief.yml)
-          M=$(TZ=Asia/Seoul date +%M); if [ "$M" -lt 15 ] || [ -n "$FORCE" ]; then python pbbrief.py || echo "PB 한 장 실패"; fi
+          M=$(TZ=Asia/Seoul date +%M); if [ "$M" -lt 15 ] || [ -n "$FORCE" ]; then python pbbrief.py || echo "PB 한 장 실패"; python proposal.py || echo "📝 제안서 기본폼 실패"; fi
           python wl_live.py || echo "⭐ 관심종목 시세 실패"   # 10/28 고객 한 장용 실시간 시세·뉴스
       - name: 저장
         run: |
           git config user.name "bot"
           git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/live_*.json archive/x/focus_live.json archive/x/cup_live.json archive/x/pbbrief.json archive/x/wl_live.json "$(cat /tmp/cp.txt)"
+          bash scripts/push.sh "live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/live_*.json archive/x/focus_live.json archive/x/cup_live.json archive/x/pbbrief.json archive/x/proposal.json archive/x/wl_live.json "$(cat /tmp/cp.txt)"
       - name: 지킴이 살아 있나 (없으면 켬)
         if: always()
         env:
