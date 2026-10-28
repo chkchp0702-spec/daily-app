@@ -22,46 +22,44 @@
 
   /* ───────────── 내용 ───────────── */
   // 🌐 시장: 숫자 타일(코스피·코스닥·오른 종목·S&P 선물) + 업종 막대 + 국면 칩 + 할 말 3줄 + 오늘 일정 + 배분 한 줄
+  function kospiHist(){   // 최근 25거래일 코스피 종가 (port_px) — 한 달 흐름 선
+    return gj("archive/x/port_px/index.json" + q()).then(function(ix){ var a = ix && ix.assets && ix.assets.KOSPI; if (!a) return null;
+      return gj("archive/x/port_px/" + a.f + "?" + String(a.at || "").replace(/\D/g, "")).then(function(j){ if (!j || !j.dd) return null; var c = j.c.slice(-25).map(Number); return c; }); }).catch(function(){ return null; });
+  }
+  // 🌐 시장 한 장 — 고객이 한눈에: 코스피 큰 숫자+오늘 흐름+한 달 흐름 · 세계 시장 타일 · 업종 열지도 · 시장 온도(오른 종목) · 테마 · 환율·유가·금 · 일정 · 자산배분
   function mkMarket(){
     var it = latest("market");
-    return Promise.all([window.__pbbrief ? __pbbrief() : null, gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), it ? gj(file("market", it.id, "data.json")) : null, gj(RAWM + "ledger/ledger.json"), gj(RAWM + "market/home.json")]).then(function(r){
-      var PB = r[0], L = r[1], U = r[2], D = r[3] || {}, LG = r[4], HM = r[5] || {};
+    return Promise.all([window.__pbbrief ? __pbbrief() : null, gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), it ? gj(file("market", it.id, "data.json")) : null, gj(RAWM + "ledger/ledger.json"), kospiHist()]).then(function(r){
+      var PB = r[0], L = r[1], U = r[2], D = r[3] || {}, LG = r[4], KH = r[5];
       var live = !!(L && L.date === today() && L.index && L.index.length), liveMode = !!(PB && PB.mode === "장중" && live);
       var ix = {}; (live ? L.index : []).forEach(function(x){ ix[x.name] = x; });
-      var kpis = [];
-      if (live){ kpis.push({l: "코스피", v: pct(ix["코스피"] && ix["코스피"].chg), s: ix["코스피"] && ix["코스피"].last ? Math.round(ix["코스피"].last).toLocaleString() : ""});
-        kpis.push({l: "코스닥", v: pct(ix["코스닥"] && ix["코스닥"].chg), s: ix["코스닥"] && ix["코스닥"].last ? Math.round(ix["코스닥"].last).toLocaleString() : ""});
-        if (L.total) kpis.push({l: "오른 종목", v: Math.round(L.up / L.total * 100) + "%", s: L.limit_up ? "상한가 " + L.limit_up : "", neutral: true}); }
+      var ks = ix["코스피"] || {}, kq = ix["코스닥"] || {};
+      var snaps = live ? (L.snaps || []).map(function(x){ return {t: x[0], k: x[3], q: x[4]}; }) : [];
+      var hero = live ? {name: "코스피", last: ks.last, chg: ks.chg, sub: "코스닥 " + pct(kq.chg) + (kq.last ? " · " + Math.round(kq.last).toLocaleString() : ""), intra: snaps.length >= 3 ? snaps : null, hist: KH, t: L.t} : null;
       var fut = U && U.date === today() ? (U.fut || []) : [], mac = U && U.date === today() ? (U.macro || []) : [], wd = U && U.date === today() ? (U.world || []) : [];
       var F = function(arr, nm){ return arr.filter(function(f){ return f.name === nm; })[0]; };
+      var world = [];
       var es = F(fut, "S&P500 선물"), nq = F(fut, "나스닥100 선물");
-      if (es) kpis.push({l: "S&P500 선물", v: pct(es.chg), s: nq ? "나스닥 " + pct(nq.chg) : ""});
-      var k2 = [];
-      [["닛케이225", "닛케이"], ["항셍", "항셍"]].forEach(function(w){ var x = F(wd, w[0]); if (x) k2.push({l: w[1] + (x.st === "prev" ? " (전일)" : ""), v: pct(x.chg)}); });
-      [["원/달러", "원/달러"], ["WTI", "유가 WTI"], ["금", "금"], ["미 10년물 국채 선물", "미 10년 국채"]].forEach(function(w){ var x = F(mac, w[0]); if (x && k2.length < 4) k2.push({l: w[1], v: pct(x.chg), s: x.last && w[0] === "원/달러" ? Math.round(x.last).toLocaleString() + "원" : ""}); });
-      var sec = live ? (L.sectors || []).filter(function(s){ return s.n >= 5; }) : [];
-      var hi = sec.slice().sort(function(a, b){ return b.r - a.r; }).slice(0, 4), lo = sec.slice().sort(function(a, b){ return a.r - b.r; }).slice(0, 2).reverse();
-      var bars = hi.concat(lo).map(function(s){ return {n: s.name.replace(/\(.*?\)/g, "").slice(0, 9), v: s.r}; });
+      if (es) world.push({f: "🇺🇸", n: "미국 선물", v: es.chg, s: nq ? "나스닥 " + pct(nq.chg) : ""});
+      [["🇯🇵", "닛케이225", "일본"], ["🇭🇰", "항셍", "홍콩"], ["🇨🇳", "상해종합", "중국"], ["🇪🇺", "유로스톡스50", "유럽"], ["🇮🇳", "인도 니프티", "인도"]].forEach(function(w){ var x = F(wd, w[1]); if (x && world.length < 6) world.push({f: w[0], n: w[2] + (x.st === "prev" ? " · 전일" : ""), v: x.chg}); });
+      var heat = live ? (L.sectors || []).filter(function(x){ return x.n >= 5; }).map(function(x){ var nm = x.name.replace(/\(.*?\)/g, ""); if (nm.length > 6) nm = nm.split("·")[0]; return {n: nm.slice(0, 7), ic: x.icon || "", v: x.r}; }) : [];
+      var gauge = live && L.total ? {up: L.up, down: L.down, flat: L.flat, total: L.total, lu: L.limit_up || 0, ld: L.limit_dn || 0} : null;
       var themes = live ? (L.themes || []).slice(0, 3).map(function(t){ return {n: t.name.replace(/\(.*?\)/g, "").slice(0, 10), v: t.r, s: (t.lead || []).slice(0, 3).map(function(x){ return x.n; }).join(" · ")}; }) : [];
-      var vol = live ? (L.value || []).slice(0, 5).map(function(x){ return {n: x.n, v: x.r, s: x.v ? Math.round(x.v / 100) / 10 + "천억" : ""}; }) : [];
-      var talk = (PB && PB.asof && PB.asof.slice(0, 10) === today() && PB.talk && PB.talk.length ? PB.talk : ((D.kakao || {}).lines || []).map(strip)).slice(0, 4);
-      if (live) talk = talk.filter(function(t){ return !/^한국/.test(t); });
-      if (bars.length >= 4) talk = talk.filter(function(t){ return !/^돈이 가는 곳/.test(t); });
-      talk = talk.slice(0, 3);
+      var k2 = [];
+      [["원/달러", "원/달러"], ["WTI", "유가 WTI"], ["금", "금"], ["미 10년물 국채 선물", "미 10년 국채"]].forEach(function(w){ var x = F(mac, w[0]); if (x) k2.push({l: w[1], v: pct(x.chg), s: x.last && w[0] === "원/달러" ? Math.round(x.last).toLocaleString() + "원" : ""}); });
       var reg = (PB && PB.regime) || "";
       var chips = reg ? reg.split("·").map(function(x){ return x.trim(); }).filter(Boolean) : [];
       var ev = (PB && PB.events) || [];
       var al = (LG && LG.allocation || []).filter(function(a){ return a.pct > 0; });
       if (!al.length) (D.allocation_seen || []).forEach(function(a, i){ var m = /([\d.]+)/.exec(a.verdict || ""); if (m && +m[1] > 0) al.push({name: ["S&P500", "나스닥100", "금", "현금"][i] || "", pct: +m[1]}); });
-      var fc = (HM.focus || []).slice(0, 3).map(function(f){ return {n: f.name + " (" + f.sym + ")", v: f.rs20 != null ? f.rs20 : f.r5, s: (f.stage || "") + " · " + (f.do || "").split(" — ")[0] + ((f.etf_kr || [])[0] ? " · 국내 " + f.etf_kr[0].name : "")}; });
-      var lab = liveMode ? (PB.label || "장중") : (PB && PB.label) || (md(D.date) + " 아침");
-      return {kind: "market", title: liveMode ? "지금 시장 한 장" : "오늘 시장 한 장", sub: lab + (D.one_liner ? " · " + strip(D.one_liner).split(" — ")[0].slice(0, 44) : ""),
-        kpis: kpis.slice(0, 4), kpis2: k2.slice(0, 4), chips: chips, events: ev,
-        bars: bars.length >= 4 ? {title: "업종 — 돈이 가는 곳 / 약한 곳", items: bars} : null,
-        themes: themes.length ? {title: "오늘 뜨는 테마 — 대장주", items: themes} : null,
-        vol: vol.length ? {title: "거래대금 많은 종목 (억원)", items: vol} : null,
-        focus: fc.length ? {title: "미국 — 돈이 몰리는 ETF (20일 S&P 대비 %p)", items: fc} : null,
-        bullets: talk, alloc: al.length ? al.map(function(a){ return {n: a.name.replace(" 코어", ""), pct: a.pct}; }) : null,
+      var lab = live ? (L.t || "") + " 장중" : (PB && PB.label) || (md(D.date) + " 아침");
+      var top2 = heat.slice().sort(function(a, b){ return b.v - a.v; }).slice(0, 2).map(function(x){ return x.n; }).join("·");
+      var word = !live ? "" : ks.chg >= 3 ? "급등" : ks.chg >= 1 ? "강세" : ks.chg > -1 ? "보합" : ks.chg > -3 ? "약세" : "급락";
+      var head = live ? "코스피 " + pct(ks.chg) + " " + word + (top2 ? " · " + top2 + " 주도" : "") + (gauge ? " · 종목 " + Math.round(gauge.up / gauge.total * 100) + "% 상승" : "") : (D.one_liner ? strip(D.one_liner).split(" — ")[0].slice(0, 44) : "");
+      return {kind: "market", title: liveMode ? "지금 시장 한 장" : "오늘 시장 한 장", sub: lab + (head ? " · " + head : ""),
+        hero: hero, world: world.length ? world : null, heat: heat.length >= 8 ? heat : null, gauge: gauge, chips: chips, events: ev,
+        themes: themes.length ? {title: "오늘 뜨는 테마 — 대장주", items: themes} : null, kpis2: k2.slice(0, 4),
+        alloc: al.length ? al.map(function(a){ return {n: a.name.replace(" 코어", ""), pct: a.pct}; }) : null,
         note: liveMode ? "장중 시세는 10~15분 늦을 수 있어요" : null};
     });
   }
@@ -83,7 +81,7 @@
         chips: badge ? [badge] : [], alloc: al.map(function(a){ return {n: a.name.replace(" 코어", ""), pct: a.pct, s: strip(a.instruments).split("/")[0].trim()}; }),
         line: nav && spy && nav.length > 3 ? {a: nav, b: spy, la: "이 배분", lb: "S&P500", from: md(P.start)} : null,
         kpis: P.start ? [{l: md(P.start) + "부터 이 배분", v: pct(P.base)}, {l: "같은 기간 S&P500", v: pct(P.spy)}] : [],
-        bullets: ((D.kakao || {}).lines || []).map(strip).filter(function(x){ return /^포트/.test(x); }).slice(0, 1),
+        bullets: ["주식 비중은 미국 대표 지수(S&P500·나스닥100) ETF로, 시장이 꺾이면(S&P500이 200일 평균 아래) 주식을 줄이고 금·현금을 늘려요", "레버리지·개별 종목 없이 한국에서 살 수 있는 ETF만 써요"],
         note: "시장 국면(S&P500 200일선)에 따라 비중이 바뀌는 규칙 · 개별 종목 추천 아님"};
     });
   }
@@ -298,6 +296,70 @@
     for (var i = 1; i <= 6; i++){ var x = x0 + (i - 1) * bw; g.fillStyle = i === r ? (i <= 2 ? UP : i <= 4 ? "#d9a441" : "#3fb950") : "#eef0f4"; rr(g, x + 3, y + 48, bw - 6, 26, 8, g.fillStyle); g.fillStyle = i === r ? "#fff" : MUT; font(g, 700, 20); g.textAlign = "center"; g.fillText(i === 1 ? "1 높음" : i === 6 ? "6 낮음" : String(i), x + bw / 2, y + 67); g.textAlign = "left"; }
     return h + 24;
   }
+  function bHero(g, y, Hh){
+    if (!Hh) return 0;
+    var h = 300; rr(g, MX, y, CW, h, 24, TILE);
+    g.fillStyle = SUB; font(g, 600, 26); g.fillText(Hh.name + (Hh.t ? "  " + Hh.t : ""), MX + 28, y + 46);
+    g.fillStyle = cls(Hh.chg); font(g, 800, 96); var v = pct(Hh.chg); g.fillText(v, MX + 28, y + 150);
+    g.fillStyle = INK; font(g, 700, 34); g.fillText(Hh.last ? Math.round(Hh.last).toLocaleString() : "", MX + 28, y + 200);
+    g.fillStyle = SUB; font(g, 500, 24); g.fillText(Hh.sub || "", MX + 28, y + 240);
+    // 오른쪽: 오늘 흐름(10분마다) 또는 한 달 흐름
+    var x0 = MX + 470, x1 = W - MX - 28, y0 = y + 60, y1 = y + 236;
+    var ser = Hh.intra ? Hh.intra.map(function(p){ return p.k; }) : null, lab = "오늘 흐름 (전일 대비 %)";
+    if (!ser && Hh.hist && Hh.hist.length > 5){ ser = Hh.hist; lab = "최근 한 달 흐름"; }
+    if (ser){
+      var mn = Math.min.apply(null, ser), mx = Math.max.apply(null, ser); if (Hh.intra){ mn = Math.min(mn, 0); mx = Math.max(mx, 0); } if (mx === mn) mx = mn + 1;
+      var X = function(i){ return x0 + (x1 - x0) * i / Math.max(1, ser.length - 1); }, Y = function(v){ return y1 - (v - mn) / (mx - mn) * (y1 - y0); };
+      g.fillStyle = SUB; font(g, 600, 22); g.fillText(lab, x0, y + 44);
+      if (Hh.intra){ g.strokeStyle = LINE; g.lineWidth = 2; g.setLineDash([6, 6]); g.beginPath(); g.moveTo(x0, Y(0)); g.lineTo(x1, Y(0)); g.stroke(); g.setLineDash([]); }
+      var col = ser[ser.length - 1] >= (Hh.intra ? 0 : ser[0]) ? UP : DN;
+      g.beginPath(); ser.forEach(function(p, i){ i ? g.lineTo(X(i), Y(p)) : g.moveTo(X(i), Y(p)); }); g.lineTo(X(ser.length - 1), y1); g.lineTo(x0, y1); g.closePath(); g.fillStyle = col === UP ? "rgba(214,69,61,.12)" : "rgba(47,111,221,.12)"; g.fill();
+      g.strokeStyle = col; g.lineWidth = 5; g.lineJoin = "round"; g.beginPath(); ser.forEach(function(p, i){ i ? g.lineTo(X(i), Y(p)) : g.moveTo(X(i), Y(p)); }); g.stroke();
+      g.fillStyle = col; g.beginPath(); g.arc(X(ser.length - 1), Y(ser[ser.length - 1]), 8, 0, 7); g.fill();
+      g.fillStyle = MUT; font(g, 500, 20); g.fillText(Hh.intra ? Hh.intra[0].t : "한 달 전", x0, y1 + 28); g.textAlign = "right"; g.fillText(Hh.intra ? Hh.intra[Hh.intra.length - 1].t : "오늘", x1, y1 + 28); g.textAlign = "left";
+      if (!Hh.intra){ var r1 = (ser[ser.length - 1] / ser[0] - 1) * 100; g.fillStyle = cls(r1); font(g, 700, 22); g.textAlign = "right"; g.fillText("한 달 " + pct(r1), x1, y + 44); g.textAlign = "left"; }
+    }
+    if (Hh.intra && Hh.hist && Hh.hist.length > 5){ var r2 = (Hh.hist[Hh.hist.length - 1] / Hh.hist[0] - 1) * 100; g.fillStyle = SUB; font(g, 600, 22); g.fillText("최근 한 달 " , MX + 28, y + 276); g.fillStyle = cls(r2); font(g, 800, 22); g.fillText(pct(r2), MX + 28 + 112, y + 276); }
+    return h + 24;
+  }
+  function bWorld(g, y, Wd){
+    if (!Wd || !Wd.length) return 0;
+    var n = Math.min(6, Wd.length), gap = 12, w = (CW - gap * (n - 1)) / n, h = 138;
+    Wd.slice(0, n).forEach(function(x, i){ var xx = MX + i * (w + gap), bg = x.v == null || x.v === 0 ? "#eef0f4" : x.v > 0 ? "rgba(214,69,61,.10)" : "rgba(47,111,221,.10)";
+      rr(g, xx, y, w, h, 18, bg);
+      font(g, 600, 28); g.fillStyle = INK; g.fillText(x.f, xx + 14, y + 38);
+      g.fillStyle = SUB; font(g, 600, 20); wrap(g, x.n, xx + 14, y + 68, w - 22, 22, 1);
+      g.fillStyle = cls(x.v); font(g, 800, 34); g.fillText(pct(x.v), xx + 14, y + 110);
+      if (x.s){ g.fillStyle = MUT; font(g, 500, 18); wrap(g, x.s, xx + 14, y + 130, w - 22, 20, 1); } });
+    return h + 24;
+  }
+  function bHeat(g, y, Hm){
+    if (!Hm || Hm.length < 8) return 0;
+    var items = Hm.slice().sort(function(a, b){ return b.v - a.v; }).slice(0, 30), cols = 6, rows = Math.ceil(items.length / cols), gap = 8, w = (CW - gap * (cols - 1)) / cols, th = 76, h = 40 + rows * (th + gap) + 8;
+    rr(g, MX, y, CW, h, 20, TILE);
+    g.fillStyle = SUB; font(g, 700, 24); g.fillText("업종 열지도 — 빨강 오름 · 파랑 내림 (진할수록 큼)", MX + 22, y + 32);
+    var mx = Math.max.apply(null, items.map(function(i){ return Math.abs(i.v); }).concat([1]));
+    items.forEach(function(it, i){ var c = i % cols, r = Math.floor(i / cols), x = MX + 22 + c * (w + gap) - 22 + 22, yy = y + 44 + r * (th + gap);
+      x = MX + 12 + c * (w - 4 + gap) ; var ww = w - 4;
+      var a = Math.min(1, 0.18 + Math.abs(it.v) / mx * 0.82), bg = it.v > 0 ? "rgba(214,69,61," + a.toFixed(2) + ")" : it.v < 0 ? "rgba(47,111,221," + a.toFixed(2) + ")" : "#e6e8ec";
+      rr(g, x, yy, ww, th, 12, bg);
+      var dark = a > 0.5; g.fillStyle = dark ? "#fff" : INK; font(g, 700, 20); wrap(g, it.n, x + 10, yy + 30, ww - 16, 22, 1);
+      font(g, 800, 24); g.fillText(pct(it.v), x + 10, yy + 62); });
+    return h + 24;
+  }
+  function bGauge(g, y, G, T){
+    if (!G) return 0;
+    var h = 150; rr(g, MX, y, CW, h, 20, TILE);
+    var upr = Math.round(G.up / G.total * 100), dnr = Math.round(G.down / G.total * 100);
+    g.fillStyle = SUB; font(g, 700, 24); g.fillText("시장 온도 — 오늘 오른 종목 " + upr + "% (" + G.total.toLocaleString() + "개 중)", MX + 22, y + 32);
+    var x0 = MX + 22, bw = CW - 44, yy = y + 52;
+    g.fillStyle = DN; rr(g, x0, yy, bw, 30, 15, DN); g.fillStyle = "#c9ced8"; g.fillRect(x0 + bw * upr / 100, yy, bw * (100 - upr - dnr) / 100, 30); g.fillStyle = UP; rr(g, x0, yy, bw * upr / 100, 30, 15, UP); g.fillRect(x0 + 15, yy, Math.max(0, bw * upr / 100 - 15), 30);
+    g.fillStyle = "#fff"; font(g, 800, 22); g.fillText("오름 " + upr + "%", x0 + 14, yy + 22); g.textAlign = "right"; g.fillText("내림 " + dnr + "%", x0 + bw - 14, yy + 22); g.textAlign = "left";
+    var mood = upr >= 70 ? "🔥 거의 다 오르는 날" : upr >= 55 ? "🙂 오르는 종목이 더 많아요" : upr >= 45 ? "😐 반반이에요" : upr >= 30 ? "😟 내리는 종목이 더 많아요" : "🥶 거의 다 내리는 날";
+    g.fillStyle = INK; font(g, 700, 26); g.fillText(mood, x0, y + 122);
+    g.fillStyle = MUT; font(g, 500, 22); g.textAlign = "right"; g.fillText("상한가 " + G.lu + " · 하한가 " + G.ld, x0 + bw, y + 122); g.textAlign = "left";
+    return h + 24;
+  }
   function bBullets(g, y, B, title){
     if (!B || !B.length) return 0;
     var lines = B.slice(0, 4), lh = 40, est = 0; font(g, 600, 29);
@@ -325,12 +387,12 @@
     if (C.sub){ g.fillStyle = SUB; font(g, 500, 26); y += wrap(g, C.sub, MX, y + 36, CW, 34, 2) + 6; }
     y += 24;
     var blocks;
-    if (C.kind === "market") blocks = [["kpis", C.kpis], ["kpis", C.kpis2], ["chips", C.chips], ["events", C.events], ["bars", C.bars], ["bullets", C.bullets, "고객에게 할 말"], ["rows", C.themes], ["rows", C.focus], ["alloc", C.alloc, false], ["rows", C.vol]];
+    if (C.kind === "market") blocks = [["hero", C.hero], ["world", C.world], ["heat", C.heat], ["gauge", C.gauge], ["rows", C.themes], ["kpis", C.kpis2], ["chips", C.chips], ["events", C.events], ["alloc", C.alloc, false]];
     else if (C.kind === "port") blocks = [["chips", C.chips], ["alloc", C.alloc, true], ["line", C.line], ["kpis", C.kpis], ["rows", C.why, "text"], ["bullets", C.bullets], ["rows", C.sched, "text"]];
     else if (C.kind === "bond") blocks = [["kpis", C.kpis], ["timeline", C.timeline], ["tiles", C.tiles], ["risk", C.risk, C.riskTitle], ["bars", C.cmp], ["bullets", C.bullets]];
     else if (C.kind === "els") blocks = [["chips", C.chips], ["kpis", C.kpis], ["steps", C.steps], ["prob", C.prob], ["tiles", C.tiles], ["bullets", C.bullets]];
     else blocks = [["chips", C.chips], ["kpis", C.kpis], ["risk", C.risk], ["bars", C.bars], ["tiles", C.tiles], ["bullets", C.bullets]];
-    var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb, rows: bRows, risk: bRisk};
+    var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb, rows: bRows, risk: bRisk, hero: bHero, world: bWorld, heat: bHeat, gauge: bGauge};
     var c2 = document.createElement("canvas"); c2.width = W; c2.height = H; var g2 = c2.getContext("2d");   // 먼저 재 보고 들어갈 때만 그림
     blocks.forEach(function(b){ if (!b[1]) return; var hh = FN[b[0]](g2, 0, b[1], b[2]) || 0; if (!hh || y + hh > H - 104) return; FN[b[0]](g, y, b[1], b[2]); y += hh; });
     g.fillStyle = LINE; g.fillRect(MX, H - 96, CW, 2);
