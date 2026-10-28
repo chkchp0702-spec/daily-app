@@ -98,40 +98,49 @@
         '<span class="pr5p ' + ecls(m.e1) + '">' + Math.round(m.p1 * 100) + '<small>%</small></span>' + (m.pb1 != null ? zbar(m.p1, m.pb1).split('<div class="zl">')[0] : pbar(m.p1)) + '<small class="' + ecls(m.e1) + '">' + (Math.abs(m.e1) < 0.5 ? "평소쯤" : (m.e1 > 0 ? "▲" : "▼") + Math.abs(m.e1).toFixed(0) + "%p") + '</small></button>'; }).join("") + '</div>';
   }
   // 10/14 사용자 「각 시장 밑에 오르고 내릴 섹터 확률도, 그 안에 종목들 확률도」 → archive/x/prob_sec.json (prob_sec.yml)
-  var SECX = null, SOPEN = {}, SALL = {};
+  var SECX = null, SOPEN = {}, SALL = {}, REGM = null;
+  // 🌡️ 10/28 사용자 「미국 지수 차트를 보면 극공포가 맞아? 바꿔야 하지 않을까」 → 우리 점수는 「지난 1년 안 순위」라 말을 상대 표현으로.
+  //   CNN·크립토 공포·탐욕은 원래 이름(극공포 등) 그대로. 숫자·구간·연구 표 계산은 안 바꿈.
+  function OL(x){ return x < 20 ? "1년 중 가장 움츠림" : x < 40 ? "평소보다 조심" : x < 60 ? "보통" : x < 80 ? "평소보다 들뜸" : "1년 중 가장 들뜸"; }
+  function OS(x){ return x < 20 ? "가장 움츠림" : x < 40 ? "조심" : x < 60 ? "보통" : x < 80 ? "들뜸" : "가장 들뜸"; }
+  function OK(k){ return String(k || "").replace(/^극공포/, "1년 중 가장 움츠림").replace(/^공포/, "평소보다 조심").replace(/^중립/, "보통").replace(/^극탐욕/, "1년 중 가장 들뜸").replace(/^탐욕/, "평소보다 들뜸"); }
   function lg(p){ p = Math.min(0.9999, Math.max(0.0001, p)); return Math.log(p / (1 - p)); }
   function sgm(x){ return 1 / (1 + Math.exp(-x)); }
   // 😱 심리 지표 카드 — 우리 공포·탐욕 게이지 · 항목 · 연구 표(구간별 다음 5일 상승 확률)
-  function rtable(tb, now){
+  function rtable(tb, now, ours){
     if (!tb || !tb.length) return "";
     return '<table class="pr-tb"><tr><th>구간</th><th>날수</th><th>내일↑</th><th>5일↑</th><th>5일 중앙값</th></tr>' + tb.map(function(r){
-      return '<tr' + (r.now ? ' class="now"' : '') + '><td>' + (r.now ? '👉 ' : '') + e(r.k) + '</td><td>' + (r.n || 0).toLocaleString() + '</td><td class="' + tcls(r.p1) + '">' + pc(r.p1) + '</td><td class="' + tcls(r.p5) + '">' + pc(r.p5) + '</td><td class="' + cls(r.m5) + '">' + (r.m5 != null ? sg(r.m5, 2) : "–") + '</td></tr>'; }).join("") + '</table>';
+      return '<tr' + (r.now ? ' class="now"' : '') + '><td>' + (r.now ? '👉 ' : '') + e(ours ? OK(r.k) : r.k) + '</td><td>' + (r.n || 0).toLocaleString() + '</td><td class="' + tcls(r.p1) + '">' + pc(r.p1) + '</td><td class="' + tcls(r.p5) + '">' + pc(r.p5) + '</td><td class="' + cls(r.m5) + '">' + (r.m5 != null ? sg(r.m5, 2) : "–") + '</td></tr>'; }).join("") + '</table>';
   }
   function sentiCard(m, D){
     var R = m.research || {}, S = R.senti;
     if (!S || S.now == null) return "";
-    var v = S.now, lab = v < 20 ? "극공포" : v < 40 ? "공포" : v < 60 ? "중립" : v < 80 ? "탐욕" : "극탐욕", col = v < 20 ? "#2f6fd0" : v < 40 ? "#5b8fd8" : v < 60 ? "#6b7385" : v < 80 ? "#d98a7a" : "#e05555";
+    var v = S.now, lab = OL(v), col = v < 20 ? "#2f6fd0" : v < 40 ? "#5b8fd8" : v < 60 ? "#6b7385" : v < 80 ? "#d98a7a" : "#e05555";
     var B = SECX && SECX.markets && SECX.markets[m.mk] && SECX.markets[m.mk].breadth, op = OPEN["_s" + m.mk];
     // 10/15 사용자 「공포탐욕이 왜 미국만 나와? 다른 시장도 다 나오게」 → 맨 위에 5개 시장 공포·탐욕 한 줄 (누르면 그 시장)
-    var fl = function(x){ return x < 20 ? "극공포" : x < 40 ? "공포" : x < 60 ? "중립" : x < 80 ? "탐욕" : "극탐욕"; };
+    var fl = OS;
     var fc = function(x){ return x < 20 ? "#2f6fd0" : x < 40 ? "#5b8fd8" : x < 60 ? "#6b7385" : x < 80 ? "#d98a7a" : "#e05555"; };
     var strip5 = '<div class="sg5">' + ORDER.filter(function(k){ return D.markets[k] && D.markets[k].research && D.markets[k].research.senti && D.markets[k].research.senti.now != null; }).map(function(k){
         var mm = D.markets[k], x = Math.round(mm.research.senti.now);
         return '<button class="sg5c' + (k === m.mk ? " on" : "") + '" data-m="' + k + '"><small>' + mm.flag + ' ' + e(mm.name) + '</small><b style="color:' + fc(x) + '">' + x + '</b><em style="color:' + fc(x) + '">' + fl(x) + '</em>' +
           '<i class="sg5b"><i style="left:' + x + '%"></i></i></button>'; }).join("") + '</div>';
-    var h = '<section class="card"><h3>😱 공포·탐욕 <span class="mut">5개 시장 · 매시간</span></h3>' + strip5 +
+    var h = '<section class="card"><h3>🌡️ 시장 심리 온도 <span class="mut">지난 1년과 비교 · 매시간</span></h3>' + strip5 +
       '<div class="sub2" style="margin-top:4px">' + m.flag + ' ' + e(m.name) + ' 자세히</div>' +
       '<div class="sg-w"><div class="sg-n" style="color:' + col + '">' + Math.round(v) + '</div><div style="flex:1"><b style="color:' + col + '">' + lab + '</b>' +
-      '<div class="sg-b"><i style="left:' + v + '%"></i></div><div class="zl"><span>극공포</span><span>중립</span><span>극탐욕</span></div></div></div>' +
+      '<div class="sg-b"><i style="left:' + v + '%"></i></div><div class="zl"><span>움츠림</span><span>보통</span><span>들뜸</span></div></div></div>' +
       (function(){ var w = S.how || {}, fl = function(x){ return x < 20 ? "극공포" : x < 40 ? "공포" : x < 60 ? "중립" : x < 80 ? "탐욕" : "극탐욕"; }, t = [];   // 10/15 계산 풀이 + CNN 원본
+        var rg = REGM && REGM[m.mk], up = rg && /상승|우위/.test(rg.label || "");
+        if (up && v < 40) t.push('💡 ' + m.flag + ' 지수 흐름은 <b>' + e(rg.label) + '</b>인데 심리는 ' + (v < 20 ? '지난 1년 중 가장 식어 있어요' : '평소보다 조심스러워요') + ' — 무섭다기보다 <b>쉬어 가는 중</b>이라는 뜻이에요');
+        else if (rg && /하락|약세/.test(rg.label || "") && v >= 60) t.push('💡 ' + m.flag + ' 지수 흐름은 <b>' + e(rg.label) + '</b>인데 심리는 평소보다 들떠 있어요 — 반등 기대가 앞선 상태예요');
+        t.push('<span class="mut">이 점수는 「지금이 무서운가」가 아니라 <b>지난 1년 안에서 몇 번째로 들떠 있나</b>예요. 강하게 오른 해엔 잠깐 쉬어도 낮게 나와요.</span>');
         if (w.avg != null) t.push(m.mk === "US" ? '아래 ' + (S.parts || []).length + '개 항목 평균 <b>' + w.avg + '</b>점 → 지난 1년 중 몇 % 자리인지로 바꾸면 <b>' + Math.round(v) + '</b>점'
           : '🇺🇸 미국 심리 <b>' + w.us + '</b> · ' + m.flag + ' ' + e(m.name) + ' 자체 <b>' + w.loc + '</b> → 미국 1/3 · 자기 시장 2/3로 섞어 지난 1년 중 몇 % 자리인지로 바꾸면 <b>' + Math.round(v) + '</b>점');
         if (w.asof) t.push('<span class="mut">항목 기준일 ' + md(w.asof) + ' 마감 — 모든 항목 자료가 다 들어온 마지막 날</span>');
-        if (m.open_now && m.intra_chg != null && Math.abs(m.intra_chg) >= 1.5) t.push('⚠️ 오늘 장중 ' + (m.intra_chg > 0 ? '+' : '') + m.intra_chg.toFixed(1) + '%는 아직 안 들어갔어요 — 마감 뒤 다시 계산하면 ' + (m.intra_chg < 0 ? '공포 쪽으로' : '탐욕 쪽으로') + ' 움직여요');
+        if (m.open_now && m.intra_chg != null && Math.abs(m.intra_chg) >= 1.5) t.push('⚠️ 오늘 장중 ' + (m.intra_chg > 0 ? '+' : '') + m.intra_chg.toFixed(1) + '%는 아직 안 들어갔어요 — 마감 뒤 다시 계산하면 ' + (m.intra_chg < 0 ? '움츠림 쪽으로' : '들뜸 쪽으로') + ' 움직여요');
         if (w.cnn != null) t.push('📰 CNN 공식 공포·탐욕(미국) <b>' + w.cnn + '</b> (' + fl(w.cnn) + ' · ' + md(w.cnn_d) + ')');
         return t.length ? '<div class="sg-how">' + t.join('<br>') + '</div>' : ''; })() +
       '<div class="sg-ps">' + (S.parts || []).map(function(p){ var loc = /^자기 |코스닥\/코스피|\(반대 · 자국|엔 약세/.test(p.k); return '<div><small>' + (m.mk === "US" ? "🇺🇸 " : loc ? m.flag + " " : "🇺🇸 ") + e(p.k.replace(/^자기 지수/, (m.ixn || "") )) + '</small><span class="xbar" style="flex:1"><i style="width:' + p.v + '%;background:' + (p.v >= 60 ? "var(--up)" : p.v <= 40 ? "var(--down)" : "#6b7385") + '"></i></span><b>' + p.v + '</b></div>'; }).join("") + '</div>' +
-      '<div class="sub2">📚 연구: 심리 구간별 그 뒤 성적 <span class="mut">' + e(m.ixn) + ' · ' + e(S.since || "") + '~</span></div>' + rtable(S.table) +
+      '<div class="sub2">📚 연구: 심리 구간별 그 뒤 성적 <span class="mut">' + e(m.ixn) + ' · ' + e(S.since || "") + '~</span></div>' + rtable(S.table, null, true) +
       '<button class="fold pr-f' + (op ? " open" : "") + '" data-f="_s' + m.mk + '">🔬 다른 심리·폭 지표 연구 표 <i class="fchev">▾</i></button><div style="' + (op ? "" : "display:none") + '">' +
       (R.vterm ? '<div class="sub2">🌡️ VIX ÷ VIX3M 구간별</div>' + rtable(R.vterm) : '') +
       (R.cnn ? '<div class="sub2">📰 CNN 공포·탐욕 구간별</div>' + rtable(R.cnn) : '') +
@@ -246,7 +255,8 @@
   }
   window.probView = function(){ return '<div id="prbody"><div class="loading">확률 계산 자료 불러오는 중…</div></div>'; };
   window.probInit = function(){
-    P("prob_sec.json").then(function(j){ SECX = j; }).catch(function(){}).then(function(){ return P("prob.json"); }).then(liveFix).then(draw).catch(function(){ var b = document.getElementById("prbody"); if (b) b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률이 아직 안 올라왔어요.<br>다음 시간 계산 때 채워져요.</div>'; });
+    P("prob_sec.json").then(function(j){ SECX = j; }).catch(function(){}).then(function(){ return P("regime_mk.json").then(function(j){ var ms = j && j.markets; REGM = {};
+      (ms ? (ms.length ? ms : Object.keys(ms).map(function(k){ return ms[k]; })) : []).forEach(function(x){ if (x && x.mk) REGM[x.mk] = x; }); }).catch(function(){}); }).then(function(){ return P("prob.json"); }).then(liveFix).then(draw).catch(function(){ var b = document.getElementById("prbody"); if (b) b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률이 아직 안 올라왔어요.<br>다음 시간 계산 때 채워져요.</div>'; });
   };
   (function(){ var st = document.createElement("style"); st.textContent =
     ".pr5{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:2px 0 8px}" +
