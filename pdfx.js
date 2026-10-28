@@ -150,4 +150,47 @@
       // 10/14: html2pdf 가 남기는 투명 덮개(html2pdf__overlay)가 화면을 덮어 「PDF 저장하기」를 못 누르던 문제 — 다 치움
       [].forEach.call(d.querySelectorAll(".html2pdf__overlay,.html2pdf__container"), function(x){ x.remove(); }); });
   };
+
+  /* 📨 10/28 「어느 화면에서든 그 화면의 대부분을 고객 한 장으로」 — 보이는 카드만 밝은 화면으로 찍어 캔버스 목록으로 (onepage.js 가 그림 머리·바닥글 틀에 끼움)
+     조이(꼬마) 그림·단추·펼치기 줄은 빼고, SVG 차트는 그림으로 바꿔 찍음. */
+  window.snapEls = function(els, opt){
+    opt = opt || {};
+    var w = window, d = document, H2P = w.html2pdf;
+    if (!H2P) return Promise.reject("html2pdf 없음");
+    var root = d.documentElement, oldUi = root.getAttribute("data-ui"), light = opt.light !== false;
+    var cover = d.createElement("div"); cover.style.cssText = "position:fixed;inset:0;z-index:2147483646;background:rgba(10,14,22,.82);color:#fff;display:flex;align-items:center;justify-content:center;font:700 16px system-ui";
+    cover.textContent = "📨 한 장 만드는 중…"; d.body.appendChild(cover);
+    if (light) root.setAttribute("data-ui", "light");
+    var sx = w.scrollX, sy = w.scrollY, shEl = d.getElementById("sheet"), shY = shEl ? shEl.scrollTop : 0;
+    w.scrollTo(0, 0);   // html2canvas 는 스크롤만큼 어긋나 찍힘 → 덮개 뒤에서 잠깐 맨 위로
+    var restore = function(){ w.scrollTo(sx, sy); if (shEl) shEl.scrollTop = shY; if (light){ if (oldUi == null) root.removeAttribute("data-ui"); else root.setAttribute("data-ui", oldUi); } cover.remove();
+      [].forEach.call(d.querySelectorAll(".html2pdf__overlay,.html2pdf__container"), function(x){ x.remove(); }); };
+    return wait(120).then(function(){
+      var width = Math.round(els[0].getBoundingClientRect().width) || 360, bg = w.getComputedStyle(d.body).backgroundColor || "#fff";
+      var host = d.createElement("div"); host.id = "snaphost"; host.style.cssText = "position:absolute;left:-20000px;top:0;width:" + width + "px;background:" + conv(bg);
+      var hs = d.createElement("style"); hs.textContent = "#snaphost *::before{background-image:none!important}"; host.appendChild(hs);
+      d.body.appendChild(host);
+      var clones = els.map(function(el){ var c = el.cloneNode(true); c.style.margin = "0"; c.style.maxHeight = "none"; c.style.width = width + "px"; host.appendChild(c); return {src: el, c: c}; });
+      var jobs = [];
+      clones.forEach(function(o){
+        [].forEach.call(o.c.querySelectorAll("button,.pdfbar,.pdfb,.xs-tg,.xs-cl,script,input,select,.seg2 button:not(.on)"), function(x){ x.remove(); });
+        [].forEach.call(o.c.querySelectorAll("img"), function(im){ if (/img\/(kid_|guide)/.test(im.getAttribute("src") || "")) im.remove(); });
+        [].forEach.call(o.c.querySelectorAll(".gd-b,.gd-kid,.gd-vw,video,[class*=joy]"), function(x){ x.remove(); });   // 조이 얼굴(작은 동그라미)
+        [].forEach.call(o.c.querySelectorAll(".td-n"), function(x){ x.classList.remove("td-n"); });
+        [].forEach.call(o.c.querySelectorAll(".xs-clamp"), function(x){ x.classList.remove("xs-clamp"); });
+        var ss = o.src.querySelectorAll("svg"), cs = o.c.querySelectorAll("svg");
+        [].forEach.call(cs, function(svg, i){ var s0 = ss[i]; if (!s0) return; jobs.push(svgToPng(svg, s0, w).then(function(img){ if (img && svg.parentNode) svg.parentNode.replaceChild(img, svg); })); });
+        [].forEach.call(o.c.querySelectorAll("img"), function(im){ jobs.push(inlineImg(im, w)); });
+      });
+      return Promise.all(jobs).then(function(){ return wait(120); }).then(function(){
+        fixOnce(host, w);
+        var o2 = {margin: 0, jsPDF: {unit: "px", format: [width, 2000], orientation: "portrait", hotfixes: ["px_scaling"]}, html2canvas: {scale: IOS ? 2 : 2.4, scrollX: 0, scrollY: 0, backgroundColor: conv(bg), useCORS: true,
+          ignoreElements: function(n){ return n.parentNode === d.body && n !== host && !(n.classList && n.classList.contains("html2pdf__overlay")) && !/^(HEAD|STYLE|LINK|SCRIPT)$/.test(n.tagName); }}};
+        var out = [], i = 0;
+        var next = function(){ if (i >= clones.length) return Promise.resolve(out); var el = clones[i++].c;
+          return H2P().set(o2).from(el).toCanvas().get("canvas").then(function(cv){ [].forEach.call(d.querySelectorAll(".html2pdf__overlay,.html2pdf__container"), function(x){ x.remove(); }); if (cv && cv.width && cv.height) out.push(cv); return next(); }, function(){ return next(); }); };
+        return next();
+      }).then(function(out){ host.remove(); restore(); return out; }, function(e){ host.remove(); restore(); throw e; });
+    }, function(e){ restore(); throw e; });
+  };
 })();
