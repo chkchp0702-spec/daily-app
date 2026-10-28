@@ -18,11 +18,20 @@
 
   // ---------- 내용 만들기 ----------
   function mkMarket(){
-    var it = latest("market"); if (!it) return Promise.resolve(null);
-    return gj(file("market", it.id, "data.json")).then(function(d){
-      if (!d) return null;
-      var lines = ((d.kakao || {}).lines || (d.summary || {}).three_lines || []).map(strip).filter(Boolean).slice(0, 5);
-      return {title: "오늘 시장 한 장", sub: md(d.date) + " 아침 · " + strip(d.one_liner).slice(0, 60), rows: lines.map(function(l){ return {t: l}; }), big: null};
+    // 10/28: 👔 PB 한 장(pbbrief.json, 장중 매시간)이 오늘 것이면 그걸로 「지금 시장 한 장」 · 아니면 아침 리포트 5줄
+    var pb = window.__pbbrief ? __pbbrief() : Promise.resolve(null);
+    return pb.then(function(j){
+      if (j && j.asof && j.asof.slice(0, 10) === kst().toISOString().slice(0, 10) && (j.talk || []).length){
+        var rows = (j.talk || []).slice(0, 4).map(function(l){ return {t: l}; });
+        if (j.events && j.events.length) rows.push({t: "오늘: " + j.events.join(" · "), small: true});
+        return {title: j.mode === "장중" ? "지금 시장 한 장" : "오늘 시장 한 장", sub: (j.label || "") + (j.regime ? " · " + j.regime : ""), rows: rows, note: j.mode === "장중" ? "장중 시세는 10~15분 늦을 수 있음" : null};
+      }
+      var it = latest("market"); if (!it) return null;
+      return gj(file("market", it.id, "data.json")).then(function(d){
+        if (!d) return null;
+        var lines = ((d.kakao || {}).lines || (d.summary || {}).three_lines || []).map(strip).filter(Boolean).slice(0, 5);
+        return {title: "오늘 시장 한 장", sub: md(d.date) + " 아침 · " + strip(d.one_liner).slice(0, 60), rows: lines.map(function(l){ return {t: l}; })};
+      });
     });
   }
   function mkPort(){

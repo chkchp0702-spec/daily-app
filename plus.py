@@ -861,6 +861,9 @@ def brief_text(hits):
     kk = [strip(x) for x in ((d.get("kakao") or {}).get("lines") or [])]
     if not kk:
         kk = [strip(x) for x in ((d.get("summary") or {}).get("three_lines") or [])]
+    PB = X.jl(os.path.join(X.OUT, "pbbrief.json"), {}) or {}        # 10/28 pbbrief.py(장중 매시간)와 같은 글
+    if str(PB.get("asof", ""))[:10] == X.TODAY and PB.get("talk"):
+        kk = list(PB["talk"])
     if kk:
         L.append("💬 고객에게 할 말")
         for x in kk[:3]:

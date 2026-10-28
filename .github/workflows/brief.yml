@@ -22,8 +22,10 @@ jobs:
           python-version: "3.12"
       - run: pip install -q yfinance pandas
       - name: ☀️ PB 한 장
-        run: python plus.py brief
+        run: |
+          python pbbrief.py || echo "아침판 실패"
+          python plus.py brief
       - name: 저장 (보낸 기록)
         run: |
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "brief $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/sent.json archive/x/push_log.json archive/x/users.json
+          bash scripts/push.sh "brief $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/sent.json archive/x/push_log.json archive/x/users.json archive/x/pbbrief.json
