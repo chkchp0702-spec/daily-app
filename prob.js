@@ -236,7 +236,7 @@
       '<div><small>일주일 적중</small><b>' + (A.d5.n ? A.d5.hit + '%' : '–') + '</b><small class="mut">' + A.d5.n + '건</small></div><div><small>일주일 브라이어</small><b>' + (A.d5.brier != null ? A.d5.brier : '–') + '</b><small class="mut"></small></div></div>' +
       (A.d1.buckets && A.d1.buckets.length ? '<div class="sub2">보정표 (내일)</div><div class="pr-rc">' + bk(A.d1) + '</div>' : '') + '</section>';
   }
-  function draw(D){
+  function draw(D){ window.__probD = D;   // 📨 시장확률 한 장이 화면과 같은 값(장중 덧입힌 값)을 쓰게
     var b = document.getElementById("prbody"); if (!b) return;
     var ks = ORDER.filter(function(k){ return D.markets[k]; });
     if (!ks.length){ b.innerHTML = '<div class="empty"><div class="big">🎲</div>시장확률 자료가 아직 없어요.</div>'; return; }
