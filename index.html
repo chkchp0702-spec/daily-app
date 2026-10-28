@@ -406,6 +406,7 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
 .cp-st span.up{color:#ff8a8a}.cp-st span.dn{color:#7fb0ff}
 .cp-wk{padding:8px 0;border-bottom:1px solid var(--line)}.cp-wk:last-child{border:0}
 .cp-wk>span{float:right;font-weight:800}
+.op1send{display:block;width:100%;margin:0 0 10px;padding:12px;border-radius:14px;border:1.5px solid var(--acc,#7c9cff);background:var(--panel2);color:var(--text);font:inherit;font-size:15px;font-weight:800}
 </style>
 <link rel="stylesheet" href="plus.css?v=44">
 </head>
@@ -1373,7 +1374,7 @@ function opInit(first){
   opLoadIdx().then(function(){
     setTimeout(phonIndex, 300);
     var ready = OPIDX.filter(function(r){ return r.built; }).length, ne = OPIDX.filter(function(r){ return r.etf; }).length;
-    $("opmsg").textContent = "미국·한국·일본·중국·홍콩 " + (OPIDX.length - ne).toLocaleString() + "종목" + (ne ? " + ETF " + ne.toLocaleString() + "개" : "") + " · " + ready.toLocaleString() + "개 준비됨 · 최근 종가 기준";
+    $("opmsg").textContent = "미국·한국·일본·중국·홍콩 " + (OPIDX.length - ne).toLocaleString() + "종목" + (ne ? " + ETF " + ne.toLocaleString() + "개" : "") + " · " + ready.toLocaleString() + "개 준비됨 · 한국은 장중 10분마다 실시간";
     var q = $("opq");
     q.oninput = function(){
       var res = opSearch(q.value), fz = res.fz || {};
@@ -1437,7 +1438,7 @@ function opShow(sym, noPush){
     window.LIVEPX ? LIVEPX.load().catch(function(){ return null; }) : null
   ]).then(function(res){
     var html = res[0].replace("<style></style>", "<style>" + res[1] + "</style>");
-    box.innerHTML = '<div id="opsig"></div><div class="card" style="padding:6px"><iframe class="rep" id="opf"></iframe></div>';
+    box.innerHTML = '<div id="opsig"></div><button type="button" class="op1send" data-op1="' + esc(sym) + '" data-nm="' + esc(r.name) + '">📨 이 종목 한 장 고객에게 보내기</button><div class="card" style="padding:6px"><iframe class="rep" id="opf"></iframe></div>';
     sigBadges(sym).then(function(hh){ var el = $("opsig"); if (el) el.innerHTML = hh; });
     var fr = $("opf");
     fr.onload = function(){
@@ -1503,7 +1504,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261028p";
+var APPV = "20261028q";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1565,7 +1566,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="usage.js?v=1"></script>   <!-- 📈 10/28 사용 현황(익명) -->
 <script defer src="plus.js?v=5"></script>
 <script defer src="cpin.js?v=1"></script>   <!-- 📌 10/28 내 고객 상품 -->
-<script defer src="onepage.js?v=11"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
+<script defer src="onepage.js?v=12"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
 <script defer src="pbcard.js?v=3"></script>   <!-- 👔 10/28 PB 한 장 카드(장중 매시간) -->
 <script defer src="plus2.js?v=2"></script>
 <script defer src="plus3.js?v=19"></script>

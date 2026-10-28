@@ -651,6 +651,7 @@
     return a.length > 42 ? a.slice(0, 41) + "…" : a;
   }
   function mkStock(code, nm){
+    code = String(code || ""); if (/^\d{6}\.K[SQ]$/.test(code)) code = code.slice(0, 6);
     var ks = /^\d{6}$/.test(code) ? [code + ".KS", code + ".KQ"] : [code];
     return Promise.all([pxOf(code), Promise.all(ks.map(function(k){ return oj("d/" + k + ".json"); })), Promise.all(ks.map(function(k){ return oj("e/" + k + ".json"); })), Promise.all(ks.map(dnaOf)), Promise.all(ks.map(sigOf)), gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), window.__pbbrief ? __pbbrief() : null, gj("archive/x/wl_live.json" + q()), Promise.all(ks.map(function(k){ return oj("m/" + k + ".json"); }))]).then(function(r){
       var P = r[0], Dd = r[1].filter(Boolean)[0] || {}, E = r[2].filter(Boolean)[0] || {}, DN = r[3].filter(Boolean)[0], SG = r[4].filter(Boolean)[0], L = r[5], U = r[6], PB = r[7], WLv = ((r[8] || {}).q || {})[code], MD = r[9].filter(Boolean)[0] || {};
@@ -846,26 +847,30 @@
     box.innerHTML = '<div class="opc-s"><h3>📨 고객에게 보내기</h3>' +
       '<label class="opc-n">✍️ 보내는 사람 <input id="opcnm" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + String(ls("pbname") || "").replace(/[&<>"]/g, "") + '"></label>' +
       '<button class="opc-b main" data-m="mkt">📊 시황만 <small>시장 한 장</small></button>' +
-      '<button class="opc-b" data-m="pick">⭐ 관심종목 포함 <small>시장 한 장 + 고른 종목·상품 한 장씩</small></button>' +
-      '<div id="opcl" hidden>' + (all.length ? '<div class="opc-h"><span>보낼 것 고르기</span><button type="button" data-all="1">전체</button></div><div class="opc-list">' + all.map(row).join("") + '</div><button class="opc-go" id="opcgo" disabled>골라 주세요</button>' :
+      '<button class="opc-b" data-m="pick">⭐ 종목·상품 고르기 <small>고른 종목·상품 한 장씩 · 시황은 넣어도 빼도 돼요</small></button>' +
+      '<div id="opcl" hidden>' + (all.length ? '<div class="opc-h"><span>보낼 것 고르기</span><button type="button" data-all="1">전체</button></div><div class="opc-list">' + all.map(row).join("") + '</div><label class="opc-wm"><input type="checkbox" id="opcwm"' + (ls("opc_wm") === "0" ? "" : " checked") + '> 📊 시황 한 장도 같이 넣기</label><button class="opc-go" id="opcgo" disabled>골라 주세요</button>' :
         '<p class="note">⭐ 관심종목이나 📌 담아 둔 상품이 아직 없어요. 종목 화면의 ☆, 상품 카드의 「📌 담아 두기」, ELS 관제탑으로 담아 주세요.</p>') + '</div>' +
       '<button class="opc-x" data-x="1">닫기</button></div>';
     document.body.appendChild(box);
     var sel = function(){ return [].filter.call(box.querySelectorAll('input[type=checkbox]'), function(c){ return c.checked; }).map(function(c){ return all[+c.dataset.i]; }); };
-    var upd = function(){ var b = document.getElementById("opcgo"); if (!b) return; var n = sel().length; b.disabled = !n; b.textContent = n ? "시장 한 장 + " + n + "장 = " + (n + 1) + "장 만들기" : "골라 주세요"; };
-    box.addEventListener("change", upd);
+    var withM = function(){ var c = document.getElementById("opcwm"); return !c || c.checked; };
+    var upd = function(){ var b = document.getElementById("opcgo"); if (!b) return; var n = sel().length, wm = withM(); b.disabled = !n; b.textContent = n ? (wm ? "시장 한 장 + " + n + "장 = " + (n + 1) + "장 만들기" : n + "장만 만들기 (시황 없이)") : "골라 주세요"; };
+    box.addEventListener("change", function(ev){ if (ev.target && ev.target.id === "opcwm") ls("opc_wm", ev.target.checked ? "1" : "0"); upd(); });
     var nmI = document.getElementById("opcnm"); if (nmI) nmI.addEventListener("input", function(){ ls("pbname", nmI.value.trim().slice(0, 30)); });
     box.addEventListener("click", function(ev){
       var t = ev.target; if (t === box || t.closest("[data-x]")){ box.remove(); return; }
       var m = t.closest("[data-m]"); if (m){ if (m.dataset.m === "mkt"){ box.remove(); go(null); } else { document.getElementById("opcl").hidden = false; m.classList.add("on"); } return; }
       if (t.closest("[data-all]")){ var cs = box.querySelectorAll('input[type=checkbox]'), on = [].some.call(cs, function(c){ return !c.checked; }); [].forEach.call(cs, function(c){ c.checked = on; }); upd(); return; }
-      if (t.closest("#opcgo")){ var L = sel(); box.remove(); goMany(L); }
+      if (t.closest("#opcgo")){ var L = sel(), wm = withM(); box.remove(); goMany(L, wm); }
     });
   }
-  function goMany(L){
-    toast("시장 한 장 + " + L.length + "장 만드는 중…");
+  // 🔍 종목리포트 화면에서 그 종목 한 장만 바로 (10/28 14:25)
+  document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-op1]"); if (!b) return; ev.stopPropagation(); goMany([{kind: "stock", id: b.dataset.op1, nm: b.dataset.nm || ""}], false); }, true);
+  function goMany(L, withMkt){   // 10/28 14:25 「종목만 따로 보낼 수 있게 — 반드시 시황과 같이가 아닌」 → withMkt=false 면 시황 빼고
+    if (withMkt === undefined) withMkt = true;
+    toast((withMkt ? "시장 한 장 + " : "") + L.length + "장 만드는 중…");
     var nm = pbname();
-    var jobs = [mkMarket()].concat(L.map(function(it){ return it.kind === "stock" ? mkStock(it.id, it.nm) : it.kind === "myels" ? mkMyEls(it.it) : mkPin(it.pin); }));
+    var jobs = (withMkt ? [mkMarket()] : []).concat(L.map(function(it){ return it.kind === "stock" ? mkStock(it.id, it.nm) : it.kind === "myels" ? mkMyEls(it.it) : mkPin(it.pin); }));
     Promise.all(jobs.map(function(p_){ return p_.catch(function(){ return null; }); })).then(function(Cs){
       var ok = Cs.filter(function(C){ return C && !C.refuse; }), miss = Cs.length - ok.length;
       if (!ok.length){ toast("자료를 못 가져왔어요"); return; }
@@ -925,6 +930,7 @@
     "#opch{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}.opc-s{width:100%;max-width:520px;max-height:85vh;overflow:auto;background:var(--panel);color:var(--text);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom) + 20px);box-sizing:border-box}.opc-s h3{margin:0 0 12px;font-size:17px}" +
     ".opc-n{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub,#aab);margin:0 0 10px}.opc-n input{flex:1;min-width:0;font:inherit;font-size:15px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}" +
     ".opc-b{display:block;width:100%;text-align:left;font:inherit;font-size:16px;font-weight:800;padding:14px;margin:0 0 8px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel2);color:var(--text)}.opc-b small{display:block;font-weight:500;font-size:12.5px;color:var(--sub,#aab);margin-top:3px}.opc-b.main,.opc-b.on{border-color:var(--acc,#7c9cff)}" +
+    ".opc-wm{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;margin:10px 2px 4px}.opc-wm input{width:20px;height:20px}" +
     ".opc-h{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;font-size:13px;color:var(--sub,#aab)}.opc-h button{font:inherit;font-size:12.5px;background:none;border:1px solid var(--line);color:var(--text);border-radius:999px;padding:3px 10px}" +
     ".opc-list{display:flex;flex-direction:column;gap:4px;max-height:40vh;overflow:auto}.opc-r{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;background:var(--panel2);font-size:14px}.opc-r b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.opc-r small{color:var(--mut,#8a94a8);font-size:11.5px}.opc-r input{width:18px;height:18px}" +
     ".opc-go{display:block;width:100%;margin-top:10px;font:inherit;font-size:15px;font-weight:800;padding:13px;border-radius:14px;border:0;background:var(--acc,#7c9cff);color:#fff}.opc-go:disabled{opacity:.45}.opc-x{display:block;width:100%;margin-top:8px;font:inherit;font-size:14px;padding:10px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--text)}" +
