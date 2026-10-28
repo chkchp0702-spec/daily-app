@@ -94,10 +94,10 @@
       var why = (D.allocation_seen || []).map(function(a, i){ return {n: ["S&P500", "나스닥100", "금", "현금"][i] || "", s: strip(a.seen), v: strip(a.verdict)}; }).filter(function(x){ return x.s; });
       var sch = (D.schedule || []).slice(0, 3).map(function(x){ return {n: strip(x.when), s: strip(x.what)}; });
       return {kind: "port", title: "오늘의 자산배분 제안", why: why.length ? {title: "오늘 국면 근거 — 본 것 → 판정", items: why} : null, sched: sch.length ? {title: "앞으로 볼 일정", items: sch} : null, sub: (P.asof ? md(P.asof) + " 기준 · " : "") + "지수 ETF 뼈대 · 레버리지 없음",
-        chips: badge ? [badge] : [], alloc: al.map(function(a){ return {n: a.name.replace(" 코어", ""), pct: a.pct, s: strip(a.instruments).split("/")[0].trim()}; }),
+        chips: badge ? [badge] : [], alloc: al.map(function(a){ return {n: a.name.replace(" 코어", ""), pct: a.pct, s: a.sleeve ? "업종 ETF 묶음 — 리포트의 섹터 판단대로" : strip(a.instruments).split("/")[0].trim()}; }),
         line: nav && spy && nav.length > 3 ? {a: nav, b: spy, la: "이 배분", lb: "S&P500", from: md(P.start)} : null,
         kpis: P.start ? [{l: md(P.start) + "부터 이 배분", v: pct(P.base)}, {l: "같은 기간 S&P500", v: pct(P.spy)}] : [],
-        bullets: ["주식 비중은 미국 대표 지수(S&P500·나스닥100) ETF로, 시장이 꺾이면(S&P500이 200일 평균 아래) 주식을 줄이고 금·현금을 늘려요", "레버리지·개별 종목 없이 한국에서 살 수 있는 ETF만 써요"],
+        bullets: ["주식의 80%는 미국 대표 지수(S&P500·나스닥100) ETF, 20%는 리포트가 고른 업종 ETF로 담아요", "시장이 꺾이면(S&P500이 200일 평균 아래) 주식을 줄이고 금·현금을 늘려요 · 레버리지 없음"],
         note: "시장 국면(S&P500 200일선)에 따라 비중이 바뀌는 규칙 · 개별 종목 추천 아님"};
     });
   }

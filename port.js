@@ -225,11 +225,14 @@
     // 🧭 섹터 의견 (10/11 C안) — 리포트의 섹터 판단은 배분표 밖에서 그림자로 채점 (port.json views)
     if (P.views && P.views.rows && P.views.rows.length){
       var VW = P.views, vmx = Math.max.apply(null, VW.rows.map(function(x){ return Math.abs(x.ret || 0); }).concat([0.5]));
-      h += '<div class="sec">🧭 섹터 의견 <small class="mut">리포트의 섹터 판단 · 돈은 안 넣고 지수 코어와 비교</small></div><section class="card po-vw">' +
-        (VW.pending ? '<p class="cn-n">' + md(VW.since) + ' 첫 거래일부터 채점해요. 코어(S&P½+나스닥½)보다 8주 넘게 나으면 「주식 칸의 절반까지 섹터로」를 제안해요.</p>'
-          : '<div class="cn-v" style="grid-template-columns:repeat(3,1fr)"><div class="me"><small>🧭 섹터 의견</small><b class="' + cls(VW.ret) + '">' + sg(VW.ret) + '</b></div><div><small>코어</small><b class="' + cls(VW.core) + '">' + sg(VW.core) + '</b></div><div><small>차이</small><b class="' + cls(VW.edge) + '">' + sg(VW.edge).replace("%", "%p") + '</b></div></div>') +
+      // 10/28 사용자 「2번」: 섹터 의견 = 실제 돈 (🧭 섹터 칸 = 주식의 20%) — 칩의 %는 실제 비중
+      var SLV = (P.hold || []).filter(function(x){ return /^🧭/.test(x.name); }).reduce(function(a, x){ return a + (+x.pct || 0); }, 0), VT = VW.rows.reduce(function(a, x){ return a + (+x.pct || 0); }, 0);
+      var realPct = function(x){ return SLV && VT ? Math.round(x.pct / VT * SLV * 10) / 10 : x.pct; };
+      h += '<div class="sec">🧭 섹터 칸 <small class="mut">' + (SLV ? '실제 ' + Math.round(SLV * 10) / 10 + '% (주식의 20%) · 리포트 섹터 판단대로 · 지수 코어와 비교' : '리포트의 섹터 판단 · 돈은 안 넣고 지수 코어와 비교') + '</small></div><section class="card po-vw">' +
+        (VW.pending ? '<p class="cn-n">' + md(VW.since) + ' 첫 거래일부터 채점해요. 12/23에 코어(S&P½+나스닥½)와 비교해 키울지·접을지 정해요.</p>'
+          : '<div class="cn-v" style="grid-template-columns:repeat(3,1fr)"><div class="me"><small>🧭 섹터 ' + (SLV ? "칸" : "의견") + '</small><b class="' + cls(VW.ret) + '">' + sg(VW.ret) + '</b></div><div><small>코어</small><b class="' + cls(VW.core) + '">' + sg(VW.core) + '</b></div><div><small>차이</small><b class="' + cls(VW.edge) + '">' + sg(VW.edge).replace("%", "%p") + '</b></div></div>') +
         '<div class="po-vcs">' + VW.rows.map(function(x, i){ var st = x.ret == null ? "wait" : x.ret - (VW.core || 0) >= 0 ? "g" : "b";
-          return '<button class="po-vc ' + st + '" data-vi="' + i + '"><b>' + e(x.name.replace(/\s*\(.*\)$/, "")) + '</b> ' + x.pct + '%<small>' + (x.ret == null ? "대기" : sg(x.ret, 1) + (st === "g" ? " ↑" : " ↓")) + '</small></button>'; }).join("") + '</div>' +
+          return '<button class="po-vc ' + st + '" data-vi="' + i + '"><b>' + e(x.name.replace(/\s*\(.*\)$/, "")) + '</b> ' + realPct(x) + '%<small>' + (x.ret == null ? "대기" : sg(x.ret, 1) + (st === "g" ? " ↑" : " ↓")) + '</small></button>'; }).join("") + '</div>' +
         '<div class="po-vd" id="povd"></div>' +
         '<p class="note" style="margin:6px 0 0">10/11부터 💼 기본 포트 뼈대는 검증한 규칙(🟢 S&P·나스닥 코어 95%·금 5% / 🔴 코어 63%·금 11%·현금 26%)이 정해요. 2017년 이후 옛 뼈대(섹터 칸 + 현금 26% 상시)는 S&P보다 연 −1.5%p, 새 뼈대는 +1.9%p였어요.</p></section>';
     }
