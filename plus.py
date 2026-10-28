@@ -748,7 +748,7 @@ def alerts2(U):
     if (h == 7 and mi >= 55) or 8 <= h < 11:
         msg = brief_text(hits)
         if msg:
-            X.push("brief", f"☀️ {dt.datetime.now(X.KST).strftime('%m/%d')} PB 한 장", msg, "market", f"brief:{X.TODAY}", tags="sunny", quiet=None, level="mid")
+            X.push("brief", f"☀️ {dt.datetime.now(X.KST).strftime('%m/%d')} 오늘 한 장", msg, "market", f"brief:{X.TODAY}", tags="sunny", quiet=None, level="mid")
             for uid, u in U.items():
                 if not u.get("brief", 1):
                     continue
@@ -1086,7 +1086,7 @@ if __name__ == "__main__":
         msg = brief_text(hits)
         print(msg)
         if msg:
-            X.push("brief", f"☀️ {dt.datetime.now(X.KST).strftime('%m/%d')} PB 한 장", msg, "market", f"brief:{X.TODAY}", tags="sunny", quiet=None, level="mid")
+            X.push("brief", f"☀️ {dt.datetime.now(X.KST).strftime('%m/%d')} 오늘 한 장", msg, "market", f"brief:{X.TODAY}", tags="sunny", quiet=None, level="mid")
             for uid, u in U.items():
                 if not u.get("brief", 1):
                     continue

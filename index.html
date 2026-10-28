@@ -1493,7 +1493,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261028i";
+var APPV = "20261028j";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1556,9 +1556,9 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="plus.js?v=4"></script>
 <script defer src="cpin.js?v=1"></script>   <!-- 📌 10/28 내 고객 상품 -->
 <script defer src="onepage.js?v=6"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
-<script defer src="pbcard.js?v=1"></script>   <!-- 👔 10/28 PB 한 장 카드(장중 매시간) -->
+<script defer src="pbcard.js?v=2"></script>   <!-- 👔 10/28 PB 한 장 카드(장중 매시간) -->
 <script defer src="plus2.js?v=2"></script>
-<script defer src="plus3.js?v=18"></script>
+<script defer src="plus3.js?v=19"></script>
 <script defer src="plus4.js?v=5"></script>
 <script defer src="plus5.js?v=9"></script>
 <script defer src="plus6.js?v=16"></script>
@@ -1567,13 +1567,13 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="gsearch.js?v=2"></script>
 <script defer src="brain.js?v=8"></script>
 <script defer src="feed.js?v=11"></script>
-<script defer src="push.js?v=5"></script>
+<script defer src="push.js?v=6"></script>
 <script defer src="port.js?v=48"></script>
 <script defer src="simple.js?v=18"></script>
 <script defer src="pdfx.js?v=7"></script>
 <script defer src="honest.js?v=1"></script>
 <script defer src="up10.js?v=25"></script>
-<script defer src="nav2.js?v=22"></script>
+<script defer src="nav2.js?v=23"></script>
 <script defer src="clamp.js?v=5"></script>
 <script defer src="ticker.js?v=3"></script>
 <script defer src="ux1013.js?v=4"></script>
