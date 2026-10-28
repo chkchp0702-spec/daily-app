@@ -164,13 +164,13 @@
           if (c.kick) return '<div class="cn-buy" data-goto="port~pofollow"><b class="pct">' + c.x.pct + '%</b><span class="nm">⚡ 킥 종목 ' + c.items.length + '개<small>' + c.items.slice(0, 4).map(function(t){ return e(t.short); }).join(" · ") + (c.items.length > 4 ? " …" : "") + '</small></span><span class="q"><b>›</b><small>' + won(c.amt) + '원</small></span></div>';
           return '<div class="cn-buy" data-op="' + e(it.code) + '"><b class="pct">' + c.x.pct + '%</b><span class="nm">' + e(c.x.name) + '<small>' + e(it.nm) + (it.code && it.code !== it.nm ? ' ' + e(it.code) : '') + '</small></span>' +
             '<span class="q"><b>' + (it.sh != null ? it.sh.toLocaleString("ko-KR") + '주' : '가격 확인') + '</b><small>' + won(c.amt) + '원</small></span></div>'; }).join("") +
-        '<div class="po-cbn">판정이 바뀌는 날에만 고치면 돼요 · 투자금은 📋 따라하기에서</div></div>' : '') +
+        '<div class="po-cbn">판정이 바뀌는 날 · 🔄 월말 흐름 날에만 고치면 돼요 · 투자금은 📋 따라하기에서</div></div>' : '') +
       (function(){ var VR = F.k === "kick" ? (K && K.vol_rule) : F.k === "conc" ? (CN && CN.vol_rule) : F.k === "mine" ? null : P.vol_rule; if (!VR || !VR.on) return '';
         return '<div class="po-vr" data-tip="' + e("🦴 변동성 맞춤(" + VR.role + ") — S&P½+나스닥½ 최근 20일 흔들림이 목표 " + VR.target + "%를 넘으면 주식을 그만큼 줄여 현금·단기채로. 바닥 " + VR.floor + "% · 5%p 넘게 바뀔 때만 조정 · " + (VR.from || "").slice(5) + "부터") + '">🦴 변동성 방어(' + e(VR.role) + ') · 주식 <b>' + VR.eq_scale + '%</b> 유지 <small>20일 흔들림 ' + VR.vol20 + '% / 목표 ' + VR.target + '% ⓘ</small></div>'; })() +
-      // 🔄 10/28 Q10/28-2: 연기금 월말 리밸런싱 앞지르기 (💼 에만 · port.json month_flow)
-      (function(){ var M = (F.k === "kick" || F.k === "conc" || F.k === "mine") ? null : P.month_flow; if (!M || !M.on) return '';
-        var tip = "🔄 월말 흐름 — 매달 마지막 " + M.k + "거래일, 60/40 펀드(S&P·중기채) 주식 비중이 ±" + M.th + "%p 넘게 쏠리면 펀드가 억지로 사고팔 쪽에 미리 섬: 넘침 → 주식 칸 60% 미국 장기채(TLT) · 모자람 → 금·추세 칸 60% 주식. 검증 2017~ 연 +2.4%p · " + (M.from || "").slice(5) + "부터";
-        var st = M.sig > 0 ? '주식 → 장기채 <b>' + M.pct + '%</b>' : M.sig < 0 ? '금·추세 → 주식 쪽' : M.window ? '쏠림 작음 · 그대로' : '쉬는 중 · 월말 ' + M.k + '거래일에만';
+      // 🔄 10/28 Q10/28-2: 연기금 월말 리밸런싱 앞지르기 (💼 port.json month_flow · 🎯 conc.json month_flow — Q10/28-3)
+      (function(){ var M = F.k === "conc" ? (CN && CN.month_flow) : (F.k === "kick" || F.k === "mine") ? null : P.month_flow; if (!M || !M.on) return '';
+        var tip = "🔄 월말 흐름 — 매달 마지막 " + M.k + "거래일, 60/40 펀드(S&P·중기채) 주식 비중이 ±" + M.th + "%p 넘게 쏠리면 펀드가 억지로 사고팔 쪽에 미리 섬: 넘침 → 주식 칸 60% 미국 장기채(TLT) · 모자람 → " + (F.k === "conc" ? "추세·현금" : "금·추세") + " 칸 60% 주식. 검증 2017~ 연 +" + (F.k === "conc" ? "2.3" : "2.4") + "%p · " + (M.from || "").slice(5) + "부터";
+        var st = M.sig > 0 ? '주식 → 장기채 <b>' + M.pct + '%</b>' : M.sig < 0 ? (F.k === "conc" ? '추세·현금 → 주식 쪽' : '금·추세 → 주식 쪽') : M.window ? '쏠림 작음 · 그대로' : '쉬는 중 · 월말 ' + M.k + '거래일에만';
         return '<div class="po-vr" data-tip="' + e(tip) + '">🔄 월말 흐름 · ' + st + ' <small>' + (M.drift != null ? '쏠림 ' + (M.drift >= 0 ? "+" : "") + M.drift + '%p · ' : '') + (M.for || "").slice(5) + ' 기준 ⓘ</small></div>'; })() +
       '<div class="po-sub">' + F.days + '거래일 · 시장 ' + BM.length + '곳 중 <b>' + beat(F) + '</b>곳보다 앞섬 · 가장 크게 빠졌을 때 <b>' + sg(F.mdd) + '</b></div>' +
       '<div class="po-cmp n' + cmp.length + '">' + cmp.map(function(n){ var x = B[n][B[n].length - 1];
@@ -793,7 +793,9 @@
         return '<div class="cn-buy" data-op="' + e(it.code) + '"><b class="pct">' + c.x.pct + '%</b><span class="nm">' + e(c.x.name) + '<small>' + e(it.nm) + (it.code && it.code !== it.nm ? ' ' + e(it.code) : '') + '</small></span>' +
           '<span class="q"><b>' + (it.sh != null ? it.sh.toLocaleString("ko-KR") + '주' : '가격 확인') + '</b><small>' + won(c.amt) + '원</small></span></div>'; }).join("") +
       (CN.vol_rule && CN.vol_rule.on ? '<div class="cn-vr">🦴 변동성 방어(' + e(CN.vol_rule.role) + ') · 주식 <b>' + CN.vol_rule.eq_scale + '%</b> 유지 <small>20일 흔들림 ' + CN.vol_rule.vol20 + '% / 목표 ' + CN.vol_rule.target + '%</small></div>' : '') +
-      '<p class="cn-n2">판정이 바뀌는 날(🟢↔🔴)에만 고치면 돼요. 금액·환율 바꾸기는 아래 📋 따라하기에서.</p>' +
+      (CN.month_flow && CN.month_flow.on ? (function(M){ var st = M.sig > 0 ? '주식 60% → 장기채 <b>' + M.pct + '%</b>' : M.sig < 0 ? '추세·현금 60% → 주식' : M.window ? '쏠림 작음 · 그대로' : '쉬는 중 · 월말 ' + M.k + '거래일에만';
+        return '<div class="cn-vr">🔄 월말 흐름 · ' + st + ' <small>' + (M.drift != null ? '쏠림 ' + (M.drift >= 0 ? "+" : "") + M.drift + '%p · ' : '') + (M.for || "").slice(5) + ' 기준</small></div>'; })(CN.month_flow) : '') +
+      '<p class="cn-n2">판정이 바뀌는 날(🟢↔🔴)과 🔄 월말 흐름 날에만 고치면 돼요. 금액·환율 바꾸기는 아래 📋 따라하기에서.</p>' +
       '<details class="cn-d"><summary>📊 성적·검증 보기</summary>' +
       '<div class="cn-h">' + md(CN.start) + '부터 <small>비용 포함 · 달러 기준</small></div>' +
       '<div class="cn-v">' + [["🎯 집중", CN.ret], ["💼 기본", CN.base], ["⚡ 킥", CN.kick], ["S&P500", CN.spy_ret], ["나스닥100", CN.qqq_ret]].map(function(x){
