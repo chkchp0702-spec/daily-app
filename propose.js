@@ -114,7 +114,7 @@
     }).join("");
     return '<div style="position:relative"><div style="display:flex;justify-content:space-around;align-items:flex-start;height:' + h + 'px;position:relative">' +
       '<div style="position:absolute;left:0;right:0;top:' + base + 'px;border-top:1px solid #c7ced9"></div>' + cols + '</div>' +
-      '<div style="display:flex;justify-content:space-around;font-size:' + Math.round(fs * 0.8) + 'px;color:' + SUB + ';margin-top:4px">' + items.map(function(x){ return '<div style="width:' + (bw + 16) + 'px;text-align:center;line-height:1.3">' + e(x.l) + '</div>'; }).join("") + '</div></div>';
+      '<div style="display:flex;justify-content:space-around;font-size:' + Math.round(fs * 0.8) + 'px;color:' + SUB + ';margin-top:4px">' + items.map(function(x){ return '<div style="width:' + (bw + 16) + 'px;text-align:center;line-height:1.3">' + e(x.l).replace(/\n/g, "<br>") + '</div>'; }).join("") + '</div></div>';
   }
 
   /* ───────── 계산 ───────── */
@@ -141,10 +141,18 @@
     var tot = rows.reduce(function(s, r){ return s + r.krw; }, 0);
     var yrs = rows.length ? rows.reduce(function(s, r){ return s + r.p.yrs * r.a; }, 0) / (amt || 1) : 0;
     var fxScen = (S.fx_moves || []).map(function(m){ var k = rows.reduce(function(s, r){ return s + (r.p.cur === "KRW" ? r.krw : r.krw * (1 + m / 100)); }, 0); return {m: m, krw: k, pnl: k - amt, pct: (k / amt - 1) * 100}; });
-    var rateScen = (S.rate_moves || []).map(function(d){ var v = rows.reduce(function(s, r){ var inc = r.p.comp5 ? 0 : r.face * r.p.cpn / 100 * (1 - (r.p.tax_int || 0) / 100) / (r.a / r.fx); var pc = -r.p.dur * d / 100 + (r.p.y || 0) / 100 * 0 + inc; return s + r.a * pc; }, 0); return {d: d, pnl: v, pct: v / (amt || 1) * 100}; });
+    // 1년 들고 있는 동안 버는 몫(만기수익률 − 이자 세금) + 금리 변화로 값이 변하는 몫(듀레이션)
+    var carry = function(r){ var y = (r.p.y || 0) / 100, cy = r.p.comp5 ? 0 : (r.p.cpn / 100) / r.p.p; return y - cy * (r.p.tax_int || 0) / 100; };
+    var after1 = function(r, d, fxm){ var v = r.a * (1 + carry(r) - Math.min(r.p.dur, r.p.yrs) * d / 100); return r.p.cur === "KRW" ? v : v * (1 + fxm / 100); };
+    var rateScen = (S.rate_moves || []).map(function(d){ var v = rows.reduce(function(s, r){ return s + after1(r, d, 0) - r.a; }, 0); return {d: d, pnl: v, pct: v / (amt || 1) * 100}; });
+    var heat = null;
+    if (S.cur !== "KRW"){
+      var fm = S.cur === "MIX" ? [-30, -20, -10, 0, 10, 20] : [-15, -10, -5, 0, 5, 10, 15], dm = [-1, -0.5, 0, 0.5, 1];
+      heat = {fx: fm, d: dm, cells: fm.map(function(m){ return dm.map(function(d){ var v = rows.reduce(function(s, r){ return s + after1(r, d, m); }, 0) - amt; return {pnl: v, pct: v / (amt || 1) * 100}; }); })};
+    }
     var years = [], maxY = Math.ceil(Math.max.apply(null, rows.map(function(r){ return r.p.yrs; }).concat([0])));
     for (var y = 1; y <= Math.min(maxY, 30); y++){ var c = rows.reduce(function(s, r){ return s + (y <= Math.ceil(r.p.yrs) ? r.perYear : 0); }, 0); years.push({y: y, v: c}); }
-    return {rows: rows, tot: tot, pnl: tot - amt, cagr: amt ? (Math.pow(tot / amt, 1 / (yrs || 1)) - 1) * 100 : 0, yrs: yrs, fxScen: fxScen, rateScen: rateScen, years: years,
+    return {heat: heat, rows: rows, tot: tot, pnl: tot - amt, cagr: amt ? (Math.pow(tot / amt, 1 / (yrs || 1)) - 1) * 100 : 0, yrs: yrs, fxScen: fxScen, rateScen: rateScen, years: years,
             be: (function(){ var kr = 0, fx = 0; rows.forEach(function(r){ if (r.p.cur === "KRW") kr += r.krw; else fx += r.krw; }); return fx ? ((amt - kr) / fx - 1) * 100 : null; })()};
   }
   function elsCalc(S, amt){
@@ -218,11 +226,30 @@
     opt = opt || {};
     return (t.title ? '<div style="font-size:' + (fs + 2) + 'px;font-weight:800;margin:4px 0 8px;color:' + INK + '">' + e(t.title) + '</div>' : '') + '<table style="width:100%;border-collapse:collapse;font-size:' + fs + 'px;color:' + INK + '">' +
       '<tr>' + t.cols.map(function(c, i){ return '<th style="text-align:' + (i && opt.right ? "right" : "left") + ';background:' + NAVY + ';color:#fff;padding:7px 8px;font-weight:700">' + e(c) + '</th>'; }).join("") + '</tr>' +
-      t.rows.map(function(r, i){ var hl = opt.hl && opt.hl(r, i); return '<tr style="background:' + (hl ? "#fff6e8" : i % 2 ? "#f7f9fc" : "#fff") + '">' + r.map(function(c, j){ return '<td style="padding:' + (opt.pad || "6px 8px") + ';border-bottom:1px solid ' + LINE + ';vertical-align:top;color:' + INK + ';text-align:' + (j && opt.right ? "right" : "left") + (hl || (opt.bold && opt.bold(j)) ? ';font-weight:800' : '') + '">' + (opt.raw ? c : e(c)) + '</td>'; }).join("") + '</tr>'; }).join("") + '</table>' +
+      t.rows.map(function(r, i){ var hl = opt.hl && opt.hl(r, i); return '<tr style="background:' + (hl ? "#fff6e8" : i % 2 ? "#f7f9fc" : "#fff") + '">' + r.map(function(c, j){ return '<td style="padding:' + (opt.pad || "6px 8px") + ';border-bottom:1px solid ' + LINE + ';vertical-align:top;color:' + INK + ';' + (opt.nowrap ? 'white-space:nowrap;' : '') + 'text-align:' + (j && opt.right ? "right" : "left") + (hl || (opt.bold && opt.bold(j)) ? ';font-weight:800' : '') + '">' + (opt.raw ? c : e(c)) + '</td>'; }).join("") + '</tr>'; }).join("") + '</table>' +
       (t.src ? '<div style="font-size:' + (fs - 1) + 'px;color:' + SUB + ';margin-top:4px">자료: ' + e(t.src) + '</div>' : '');
   }
   function box(inner, extra){ return '<div style="background:' + BG + ';border-radius:14px;padding:16px 18px;color:' + INK + ';' + (extra || "") + '">' + inner + '</div>'; }
   function bullets(arr, fs, color){ return (arr || []).map(function(p){ return '<div style="display:flex;gap:10px;font-size:' + fs + 'px;line-height:1.6;margin-top:7px;color:' + INK + '"><span style="flex:none;color:' + (color || NAVY) + ';font-weight:900">▸</span><span>' + e(p) + '</span></div>'; }).join(""); }
+
+  function onePageExtra(f, amt, multi){
+    var S = f.sim; if (!S || !amt || multi) return "";
+    var o = "";
+    if (S.kind === "equity"){
+      if (S.look) o += '<div style="margin:0 26px 16px;background:' + BG + ';border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:8px">🔍 실제로 담기는 회사 TOP 5 (' + S.look.n + '개 회사에 나눠 담김)</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        S.look.top.slice(0, 5).map(function(t){ return '<span style="background:#fff;border:1px solid ' + LINE + ';border-radius:12px;padding:8px 12px;font-size:21px"><b>' + e(t.n) + '</b> <span style="color:' + NAVY + ';font-weight:800">' + man(amt * t.w / 100) + '</span></span>'; }).join("") + '</div></div>';
+      var cr = (S.stress || []).filter(function(r){ return /코로나|금융위기/.test(r.name); });
+      if (cr.length) o += '<div style="margin:0 26px 16px;background:#fff4f2;border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:6px">🌪️ 위기 때는 (이 제안 vs 코스피만)</div>' +
+        cr.map(function(r){ var w = r["이 제안"], k = r["코스피만"]; return '<div style="font-size:22px;padding:3px 0">' + e(r.name) + ': <b style="color:' + UP + '">' + sgn(w.ret, 1) + '</b> (' + man(Math.abs(amt * w.ret / 100)) + (w.rec != null ? ' · ' + w.rec + '개월 뒤 회복' : '') + ')' + (k ? ' <span style="color:' + SUB + '">vs 코스피 ' + sgn(k.ret, 1) + '</span>' : '') + '</div>'; }).join("") + '</div>';
+    }
+    if (S.kind === "bond" && S.cur !== "KRW"){
+      var B = bondCalc(S, amt), LV = fxLv(S);
+      o += '<div style="margin:0 26px 16px;background:' + BG + ';border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:6px">🌐 만기 때 환율이 바뀌면 — 원화 손익</div>' +
+        pnBars(B.fxScen.map(function(q){ return {l: (q.m > 0 ? "+" : q.m < 0 ? "−" : "") + Math.abs(q.m) + "%" + (LV.fx ? "\n" + (LV.fx * (1 + q.m / 100)).toLocaleString("ko-KR", {maximumFractionDigits: LV.d}) + "원" : ""), v: q.pnl, t: (q.pnl >= 0 ? "+" : "−") + man(Math.abs(q.pnl)), hl: q.m === 0}; }), 950, 150, 20) +
+        (B.be != null ? '<div style="font-size:21px;margin-top:8px">👉 환율이 만기까지 <b>' + Math.abs(B.be).toFixed(0) + '%</b> 넘게 떨어지지만 않으면 원화로도 이익</div>' : '') + '</div>';
+    }
+    return o;
+  }
 
   /* ═════════ ① 원페이지 (전송용 그림 1080px) ═════════ */
   function onePage(m){
@@ -249,6 +276,7 @@
         '<div style="display:flex;gap:26px;align-items:center;padding:6px 26px 14px">' + donut(f.alloc, multi ? 220 : 270, multi ? 44 : 54, x.amt ? "제안 금액" : "비중", x.amt ? man(x.amt) : "100%") +
         '<div style="flex:1;min-width:0">' + legend(ls, multi ? 22 : 24, !!x.amt) + '</div></div>' +
         (sl ? '<div style="margin:0 26px 16px;background:#eef4ff;border-radius:16px;padding:16px 20px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700">🧮 모의 계산 · ' + e(sl.lab) + '</div><div style="font-size:38px;font-weight:800;color:' + NAVY + ';margin:2px 0">' + e(sl.big) + '</div><div style="font-size:21px;color:' + INK + '">' + e(sl.sub) + '</div></div>' : '') +
+        onePageExtra(f, x.amt, multi) +
         (f.tax ? '<div style="margin:0 26px 16px;background:#effaf4;border-radius:14px;padding:12px 18px;font-size:23px;color:' + INK + '">🧾 연 ' + f.tax.limit + '만원 넣으면 세액공제 <b>' + taxLine(f).map(function(t){ return t.full + "(" + t.rate + "%)"; }).join(" / ") + '</b></div>' : '') +
         '<div style="padding:0 26px 22px">' + bullets((mk.view || f.points || []).slice(0, multi ? 2 : 3), multi ? 21 : 23, f.color) + '</div></div></div>';
     });
@@ -271,6 +299,54 @@
   // 10/28 사용자 「레이아웃에 좀 더 신경쓰자 여백이 너무 많아」 — 쪽을 미리 나누지 않고 덩어리(블록)를 재서 A4에 빈틈없이 채움
   function gap(n){ return '<div style="height:' + (n || 12) + 'px"></div>'; }
   function stat3(cells){ return '<div style="display:flex;gap:10px">' + cells.map(function(c){ return box('<div style="font-size:12.5px;color:' + SUB + ';font-weight:700">' + c[0] + '</div><div style="font-size:24px;font-weight:800;color:' + (c[2] || INK) + ';letter-spacing:-0.5px">' + c[1] + '</div>' + (c[3] ? '<div style="font-size:12.5px;color:' + INK + '">' + c[3] + '</div>' : ''), "flex:1;padding:12px 14px;background:" + (c[4] || BG)); }).join("") + '</div>'; }
+  function fxLv(S){   // 시나리오 환율 수준 글자 (미국채: 달러·원 · 브라질: 헤알·원)
+    var p = (S.picks || []).filter(function(q){ return q.cur !== "KRW"; })[0] || {}, fx = p.fx || S.fx;
+    return {fx: fx, unit: p.cur === "BRL" ? "원/헤알" : "원/달러", d: p.cur === "BRL" ? 1 : 0};
+  }
+  function heatBlock(BB, S, A){
+    var H = BB.heat, L = fxLv(S), mx = 0;
+    H.cells.forEach(function(r){ r.forEach(function(c){ mx = Math.max(mx, Math.abs(c.pct)); }); });
+    var col = function(p){ var t = Math.min(1, Math.abs(p) / (mx || 1)); return p >= 0 ? "rgba(34,160,107," + (0.12 + t * 0.7).toFixed(2) + ")" : "rgba(224,83,61," + (0.12 + t * 0.7).toFixed(2) + ")"; };
+    var head = '<tr><th style="background:' + NAVY + ';color:#fff;padding:7px 8px;text-align:left;font-size:11.5px">환율 ↓ · 금리 →</th>' + H.d.map(function(d){ return '<th style="background:' + NAVY + ';color:#fff;padding:7px 6px;font-size:11.5px">' + (d === 0 ? "그대로" : (d > 0 ? "+" : "−") + Math.abs(d) + "%p") + '</th>'; }).join("") + '</tr>';
+    var body = H.fx.map(function(m, i){ return '<tr><td style="padding:6px 8px;font-size:11.5px;font-weight:800;color:' + INK + ';border-bottom:1px solid #fff;background:' + BG + '">' + (m === 0 ? "그대로" : (m > 0 ? "+" : "−") + Math.abs(m) + "%") + (L.fx ? ' <span style="font-weight:500;color:' + SUB + '">' + (L.fx * (1 + m / 100)).toLocaleString("ko-KR", {maximumFractionDigits: L.d}) + '</span>' : '') + '</td>' +
+      H.cells[i].map(function(c, j){ var me = m === 0 && H.d[j] === 0; return '<td style="padding:6px 6px;text-align:center;font-size:11.5px;font-weight:' + (me ? 900 : 700) + ';color:' + INK + ';background:' + col(c.pct) + ';border:1px solid #fff' + (me ? ';outline:2px solid ' + NAVY : '') + '">' + (c.pnl >= 0 ? "+" : "−") + man(Math.abs(c.pnl)).replace("원", "") + '<br><span style="font-weight:500;font-size:10.5px">' + sgn(c.pct, 1) + '</span></td>'; }).join("") + '</tr>'; }).join("");
+    return '<!--K-->' + secT("🌐 1년 뒤 원화 손익 — 환율 × 금리 한눈에 (" + man(A) + " 기준)") +
+      '<div style="display:flex;gap:14px;align-items:flex-start"><table style="flex:1.6;border-collapse:collapse;color:' + INK + '">' + head + body + '</table>' +
+      '<div style="flex:1;font-size:12.5px;line-height:1.6;color:' + INK + '">' + box('<b>읽는 법</b><br>가로 = 1년 뒤 금리 변화, 세로 = 1년 뒤 ' + (S.cur === "MIX" ? "헤알·달러" : "달러") + ' 값 변화 (옆 숫자 = 그때 ' + L.unit + ')<br>초록은 이익, 빨강은 손실 · 진할수록 큼<br><br><b>핵심</b><br>' +
+        '· 금리보다 <b>환율</b>이 손익을 더 크게 흔듦<br>· 가운데(둘 다 그대로) = 1년 이자만큼 이익<br>· 1년 뒤 팔지 않고 만기까지 들고 가면 금리 영향은 사라짐', "padding:12px 13px") + '</div></div>';
+  }
+  function eqBlocks(S, A, f){
+    var B = [], b = S.bt;
+    if (S.cmp && S.cmp.length > 1){
+      var mxc = Math.max.apply(null, S.cmp.map(function(c){ return Math.abs(c.cagr); }));
+      var rows = S.cmp.map(function(c){ return [(c.me ? "★ " : "") + c.name, sgn(c.cagr, 1), sgn(c.mdd, 1), c.pos + "%", (c.uw || 0) + "개월", man(A * Math.pow(1 + c.cagr / 100, 10))]; });
+      B.push('<!--K-->' + secT("⚔️ 다른 선택과 비교 — 같은 기간(" + b.from.slice(0, 4) + "년~), 같은 금액") +
+        '<div style="display:flex;gap:14px;align-items:flex-start"><div style="flex:2">' + tbl({cols: ["", "연평균", "최대 하락", "1년 이익 확률", "원금 아래 최장", "10년 뒤"], rows: rows}, 11, {right: true, nowrap: true, pad: "6px 6px", hl: function(r){ return r[0].indexOf("★") === 0; }}) + '</div>' +
+        '<div style="flex:1">' + box('<div style="font-size:13px;font-weight:800;margin-bottom:4px">연평균 수익</div>' + hbars(S.cmp.map(function(c){ return [c.name, c.cagr, c.me ? f.color : "#b7c0cf", sgn(c.cagr, 1), c.me]; }), 11.5, mxc, 38) +
+          '<div style="font-size:13px;font-weight:800;margin:8px 0 4px">최대 하락 (작을수록 좋음)</div>' + hbars(S.cmp.map(function(c){ return [c.name, Math.abs(c.mdd), c.me ? "#e0533d" : "#f2b8b0", sgn(c.mdd, 0), c.me]; }), 11.5, 60, 38), "padding:10px 12px") + '</div></div>');
+    }
+    if (S.stress && S.stress.length){
+      var keys = ["이 제안", "코스피만", "S&P500만"];
+      var cell = function(w, me){ if (!w) return "–"; var c = w.ret >= 0 ? "#1a8a5a" : UP; return '<b style="color:' + c + '">' + sgn(w.ret, 1) + '</b>' + (me ? '<br><span style="font-size:10.5px;color:' + SUB + '">' + (w.ret >= 0 ? "+" : "−") + man(Math.abs(A * w.ret / 100)) + (w.rec != null ? " · " + w.rec + "개월 뒤 회복" : "") + '</span>' : ''); };
+      B.push('<!--K-->' + secT("🌪️ 위기 때는 어땠나 — 스트레스 테스트 (같은 금액이 그때 있었다면)") +
+        tbl({cols: ["위기", "기간", "이 제안", "코스피만", "S&P500만"], rows: S.stress.map(function(r){ return [r.name, r.from.slice(2, 7).replace("-", ".") + "~" + r.to.slice(2, 7).replace("-", "."), cell(r["이 제안"], 1), cell(r["코스피만"]), cell(r["S&P500만"])]; })}, 11.5, {raw: true, right: true}) +
+        '<div style="font-size:12px;color:' + SUB + ';margin-top:4px;line-height:1.5">달러 자산은 달러 기준 — 위기 때는 보통 달러값이 올라 원화로는 손실이 이보다 작았음 · 「회복」 = 위기 시작 때 금액을 되찾기까지</div>');
+    }
+    var L = S.look;
+    if (L){
+      var trs = L.top.slice(0, 10).map(function(t, i){ return [(i + 1) + ". " + t.n, t.sec, t.w.toFixed(2) + "%", man(A * t.w / 100)]; });
+      B.push('<!--K-->' + secT("🔍 실제로 담기는 회사 — ETF 속을 열어 보면 (" + L.n + "개 회사에 나눠 담김)") +
+        '<div style="display:flex;gap:14px;align-items:flex-start"><div style="flex:1.35">' + tbl({cols: ["회사", "업종", "비중", "금액"], rows: trs}, 11.5, {right: true, pad: "4px 8px"}) + '</div>' +
+        '<div style="flex:1">' + box('<div style="font-size:13px;font-weight:800;margin-bottom:4px">🧩 업종별 (주식 칸 전체 기준)</div>' + hbars(L.sector.map(function(x, i){ return [x[0], x[1], ["#2f6fdf", "#7b5cff", "#1f9fb5", "#22a06b", "#e6a817", "#f08a3c", "#c9568f", "#4f8fbf", "#b7c0cf"][i % 9], x[1].toFixed(1) + "%"]; }), 11, null, 44), "padding:10px 12px") + '</div></div>' +
+        '<div style="font-size:11.5px;color:' + SUB + ';margin-top:4px">S&P500·나스닥100 ETF 공식 구성표(' + e(L.asof || "") + ') × 제안 비중 · 두 ETF에 같이 든 회사는 합쳐서 계산</div>');
+    }
+    if (S.region && S.region.length){
+      B.push(box('<div style="display:flex;gap:18px;align-items:center"><div style="font-size:13.5px;font-weight:800;flex:none">🌍 돈이 어디에 있나</div><div style="flex:1;display:flex;height:30px;border-radius:8px;overflow:hidden">' +
+        S.region.map(function(r2, i){ return '<div style="width:' + r2[1] + '%;background:' + ["#2f6fdf", "#e0533d", "#e6a817", "#3fb28f", "#9aa3b2"][i % 5] + ';color:#fff;font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden">' + (r2[1] >= 8 ? e(r2[0]) + " " + pc(r2[1]) : "") + '</div>'; }).join("") + '</div></div>' +
+        '<div style="font-size:12px;color:' + SUB + ';margin-top:6px">' + S.region.map(function(r2){ return e(r2[0]) + " " + pc(r2[1]) + " · " + man(A * r2[1] / 100); }).join("  |  ") + '</div>', "padding:12px 14px"));
+    }
+    return B;
+  }
   function propBlocks(f, x){
     var ls = lines(f, x.amt), sl = simLine(f, x.amt), B = [];
     B.push('<!--K--><div style="display:flex;align-items:center;gap:14px;margin-bottom:12px"><div style="font-size:40px">' + e(f.icon) + '</div><div><div style="font-size:26px;font-weight:800;letter-spacing:-0.8px;color:' + f.color + '">' + e(f.title) + '</div><div style="font-size:14px;color:' + SUB + '">' + e(f.sub) + '</div></div>' + (x.amt ? '<div style="margin-left:auto;text-align:right"><div style="font-size:12px;color:' + SUB + '">제안 금액</div><div style="font-size:24px;font-weight:800;color:' + NAVY + '">' + man(x.amt) + '</div></div>' : '') + '</div>' +
@@ -309,15 +385,16 @@
           fm(r.total), "<b>" + man(r.krw) + "</b>", r.p.yrs.toFixed(1) + "년", r.cagr.toFixed(2) + "%"]; });
       B.push('<!--K-->' + head + stat3([["넣는 돈", man(A)], ["만기까지 받는 돈 " + (S.cur === "KRW" ? "(세후)" : "(환율 그대로)"), man(BB.tot), NAVY, "", "#eef4ff"], ["이익 · 연 환산", "+" + man(BB.pnl), "#1a8a5a", "연 " + BB.cagr.toFixed(2) + "% · 평균 " + BB.yrs.toFixed(1) + "년", "#effaf4"]]));
       B.push(tbl({title: "① 만기까지 들고 가면", cols: ["칸", "넣는 돈", "사게 되는 양", "받는 이자", "만기 총액", "원화로", "기간", "연 환산"], rows: r1}, 11.5, {raw: true, right: true}));
-      var half = (CW - 16) / 2;
+      var half = (CW - 16) / 2 - 28;
       var fx = BB.fxScen.length ? '<div style="font-size:15px;font-weight:800;margin-bottom:6px">② 환율이 바뀌면 (만기 때 ' + (S.cur === "MIX" ? "헤알·달러" : "달러") + ' 값이 지금보다)</div>' +
-        pnBars(BB.fxScen.map(function(s){ return {l: (s.m > 0 ? "+" : s.m < 0 ? "−" : "") + Math.abs(s.m) + "%" + (s.m === 0 ? " 그대로" : ""), v: s.pnl, t: (s.pnl >= 0 ? "+" : "−") + man(Math.abs(s.pnl)), hl: s.m === 0}; }), BB.rateScen.length ? half : CW, 120, 11.5) +
+        pnBars(BB.fxScen.map(function(s){ var LV = fxLv(S); return {l: (s.m > 0 ? "+" : s.m < 0 ? "−" : "") + Math.abs(s.m) + "%" + (s.m === 0 ? " 그대로" : "") + (LV.fx ? "\n" + (LV.fx * (1 + s.m / 100)).toLocaleString("ko-KR", {maximumFractionDigits: LV.d}) + "원" : ""), v: s.pnl, t: (s.pnl >= 0 ? "+" : "−") + man(Math.abs(s.pnl)), hl: s.m === 0}; }), BB.rateScen.length ? half : CW, 120, 11.5) +
         (BB.be != null ? '<div style="font-size:12.5px;margin-top:6px;color:' + INK + ';line-height:1.45">👉 환율이 만기까지 <b>' + Math.abs(BB.be).toFixed(1) + '%</b> 넘게 떨어지지만 않으면 원화로도 이익임 (연 약 ' + Math.abs((Math.pow(1 + BB.be / 100, 1 / (BB.yrs || 1)) - 1) * 100).toFixed(1) + '%까지 견딤)</div>' : '') : '';
       var rt = BB.rateScen.length ? '<div style="font-size:15px;font-weight:800;margin-bottom:6px">' + (BB.fxScen.length ? "③" : "②") + ' 1년 뒤 팔면 — 금리가 바뀔 때</div>' +
         pnBars(BB.rateScen.map(function(s){ return {l: (s.d > 0 ? "+" : s.d < 0 ? "−" : "") + Math.abs(s.d) + "%p" + (s.d === 0 ? " 그대로" : ""), v: s.pnl, t: (s.pnl >= 0 ? "+" : "−") + man(Math.abs(s.pnl)), hl: s.d === 0}; }), BB.fxScen.length ? half : CW, 120, 11.5) +
         '<div style="font-size:12px;color:' + SUB + ';margin-top:6px;line-height:1.45">1년치 이자 포함 · 금리가 내리면 값이 올라 이익이 커짐 · 만기까지 들고 가면 이 변동은 사라짐' + (S.cur !== "KRW" ? " · 환율 변화는 빼고 계산" : "") + '</div>' : '';
       if (fx && rt) B.push('<div style="display:flex;gap:16px">' + box(fx, "flex:1;padding:12px 13px") + box(rt, "flex:1;padding:12px 13px") + '</div>');
       else if (fx || rt) B.push(box(fx || rt));
+      if (BB.heat) B.push(heatBlock(BB, S, A));
       if (BB.years.filter(function(y){ return y.v > 0; }).length > 1) B.push(secT("📅 해마다 받는 이자 (지금 환율·세후)") + pnBars(BB.years.slice(0, 15).map(function(y){ return {l: y.y + "년", v: y.v, t: man(y.v).replace("만원", "만")}; }), CW, 80, 10.5));
       B.push(note);
       return B;
@@ -342,6 +419,7 @@
       var half2 = (CW - 16) / 2;
       B.push('<div style="display:flex;gap:16px">' + box('<div style="font-size:15px;font-weight:800;margin-bottom:6px">① 1년 뒤 (과거 모든 1년 기준)</div>' + pnBars(Q.y1.map(function(q){ return {l: q.l.replace(/ \(.*\)/, ""), v: q.won - A, t: (q.r >= 0 ? "+" : "−") + man(Math.abs(q.won - A)), hl: /보통/.test(q.l)}; }), half2 - 26, 120, 11.5), "flex:1;padding:12px 13px") +
         box('<div style="font-size:15px;font-weight:800;margin-bottom:6px">② 5년 뒤 (연평균으로)</div>' + (Q.y5 ? tbl({cols: ["경우", "연평균", "5년 뒤", "이익"], rows: Q.y5.map(function(q){ return [q.l, sgn(q.r, 1), man(q.won), (q.won - A >= 0 ? "+" : "−") + man(Math.abs(q.won - A))]; })}, 12, {right: true, hl: function(r){ return /보통/.test(r[0]); }}) : ''), "flex:1;padding:12px 13px") + '</div>');
+      B = B.concat(eqBlocks(S, A, f));
       if (cb) B.push(secT("③ 매년 " + S.contrib + "만원씩 넣으면 (세액공제 포함)") + tbl({cols: ["기간", "넣은 돈", "보통이면", "나쁘면", "돌려받는 세금"], rows: cb.map(function(c){ return [c.y + "년", man(c.put), man(c.mid), man(c.low), man(c.tax132) + "~" + man(c.tax165)]; })}, 12.5, {right: true}));
       B.push(secT("📅 해마다 수익률 (최근 " + b.years.length + "년)") + pnBars(b.years.map(function(y){ return {l: String(y[0]).slice(2) + "년", v: y[1], t: sgn(y[1], 0)}; }), CW, 90, 10.5));
       B.push(note);
@@ -385,7 +463,7 @@
       '<div style="margin-top:34px;display:flex;justify-content:space-between;align-items:flex-end;color:' + INK + '"><div><div style="font-size:14px;color:' + SUB + '">제안</div><div style="font-size:24px;font-weight:800;margin-top:6px">' + e(byLine(m) || "담당 PB") + '</div></div><div style="text-align:right"><div style="font-size:14px;color:' + SUB + '">' + e(custName(m)) + ' 확인</div><div style="width:200px;border-bottom:1px solid #9aa3b2;height:40px"></div></div></div>'];
   }
   // 덩어리 높이를 재서 쪽에 채움 · 남는 높이는 덩어리 사이 간격으로 고르게 나눔(너무 벌어지지 않게 최대 26px)
-  var BODY_H = PH - 8 - 26 - 58, GAP = 14;
+  var BODY_H = PH - 8 - 26 - 70, GAP = 14;
   function measure(blocks){
     var H = host(); H.innerHTML = '<div style="width:' + CW + 'px;font-family:' + FONT + ';color:' + INK + '">' + blocks.map(function(b){ return '<div class="ppb" style="width:' + CW + 'px">' + b + '</div>'; }).join("") + '</div>';
     var hs = [].map.call(H.querySelectorAll(".ppb"), function(n){ return Math.ceil(n.getBoundingClientRect().height); }); H.innerHTML = ""; return hs;
@@ -559,6 +637,36 @@
             lineChart(s, {title: man(A) + "을 " + b.from.slice(0, 4) + "년에 넣었다면", labels: b.growth.labels, vals: b.growth.vals.map(function(v){ return Math.round(v * A / 10000); }), color: f.color}, 0.6, 2.55, 6.2, 4.3, f.color);
             colChart(s, "1년 뒤 이익 (원) — 나쁜·보통·좋은 해", Q.y1.map(function(q){ return {l: q.l.split(" ")[0] + " 해 " + sgn(q.r, 0), v: q.won - A}; }), 7.1, 2.55, 5.7, 2.1);
             colChart(s, "해마다 수익률 (%)", b.years.map(function(y){ return {l: String(y[0]).slice(2), v: y[1]}; }), 7.1, 4.75, 5.7, 2.1);
+          }
+        }
+        // 10/28 「우와」 — 주식: 비교·위기·속 들여다보기 / 외화채: 환율 × 금리 표
+        if (S && S.kind === "equity"){
+          if (S.cmp && S.cmp.length > 1){ s = P.addSlide(); head(s, "⚔️ 다른 선택과 비교 · 🌪️ 위기 때는", "같은 기간(" + S.bt.from.slice(0, 4) + "년~) · 같은 금액 " + man(A), f.color);
+            s.addTable([th(["", "연평균", "최대 하락", "1년 이익 확률", "원금 아래 최장", "10년 뒤"])].concat(S.cmp.map(function(c){ var o = c.me ? {bold: true, fill: {color: "FFF6E8"}} : {}; return [{text: (c.me ? "★ " : "") + c.name, options: o}, {text: sgn(c.cagr, 1), options: o}, {text: sgn(c.mdd, 1), options: o}, {text: c.pos + "%", options: o}, {text: (c.uw || 0) + "개월", options: o}, {text: man(A * Math.pow(1 + c.cagr / 100, 10)), options: o}]; })),
+              {x: 0.6, y: 1.4, w: 7.4, colW: [1.7, 1.0, 1.1, 1.2, 1.2, 1.2], fontFace: F, fontSize: 10.5, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle", align: "right"});
+            s.addChart(P.ChartType.bar, [{name: "연평균 %", labels: S.cmp.map(function(c){ return c.name; }), values: S.cmp.map(function(c){ return c.cagr; })}], {x: 8.2, y: 1.3, w: 4.6, h: 2.3, barDir: "bar", chartColors: S.cmp.map(function(c){ return c.me ? hx(f.color) : "B7C0CF"; }), showValue: true, dataLabelFormatCode: '0.0"%"', dataLabelFontFace: F, dataLabelFontSize: 9, catAxisLabelFontFace: F, catAxisLabelFontSize: 9, valAxisHidden: true, valGridLine: {style: "none"}, showLegend: false, catAxisOrientation: "maxMin", showTitle: true, title: "연평균 수익", titleFontFace: F, titleFontSize: 11});
+            if (S.stress && S.stress.length){
+              var keys = ["이 제안", "코스피만", "S&P500만"];
+              s.addChart(P.ChartType.bar, keys.map(function(k2){ return {name: k2, labels: S.stress.map(function(r){ return r.name; }), values: S.stress.map(function(r){ return r[k2] ? r[k2].ret : 0; })}; }),
+                {x: 0.5, y: 3.75, w: 8.0, h: 3.2, barDir: "col", barGrouping: "clustered", chartColors: [hx(f.color), "E0533D", "9AA3B2"], showValue: true, dataLabelFormatCode: '0"%"', dataLabelFontFace: F, dataLabelFontSize: 8, catAxisLabelFontFace: F, catAxisLabelFontSize: 9, valAxisLabelFontFace: F, valAxisLabelFontSize: 8, showLegend: true, legendPos: "b", legendFontFace: F, legendFontSize: 9, showTitle: true, title: "위기 때 수익률 (스트레스 테스트)", titleFontFace: F, titleFontSize: 11});
+              T(s, S.stress.map(function(r){ var w = r["이 제안"]; return {text: r.name + ": " + sgn(w.ret, 1) + " (" + (w.ret >= 0 ? "+" : "−") + man(Math.abs(A * w.ret / 100)) + (w.rec != null ? ", " + w.rec + "개월 뒤 회복" : "") + ")", options: {bullet: true, breakLine: true}}; }), {x: 8.7, y: 3.9, w: 4.1, h: 3.0, fontSize: 10, paraSpaceAfter: 4});
+            }
+          }
+          if (S.look){ var L = S.look; s = P.addSlide(); head(s, "🔍 실제로 담기는 회사 — ETF 속을 열어 보면", L.n + "개 회사에 나눠 담김 · ETF 구성표 " + (L.asof || "") + " × 제안 비중", f.color);
+            s.addTable([th(["회사", "업종", "비중", "금액"])].concat(L.top.slice(0, 12).map(function(t, i){ return [(i + 1) + ". " + t.n, t.sec, {text: t.w.toFixed(2) + "%", options: {align: "right"}}, {text: man(A * t.w / 100), options: {align: "right", bold: true}}]; })), {x: 0.6, y: 1.4, w: 6.6, colW: [2.4, 2.0, 0.9, 1.3], fontFace: F, fontSize: 10.5, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"});
+            s.addChart(P.ChartType.doughnut, [{name: "업종", labels: L.sector.map(function(x){ return x[0]; }), values: L.sector.map(function(x){ return x[1]; })}], {x: 7.5, y: 1.3, w: 5.3, h: 4.0, holeSize: 52, chartColors: ["2F6FDF", "7B5CFF", "1F9FB5", "22A06B", "E6A817", "F08A3C", "C9568F", "4F8FBF", "B7C0CF"], showPercent: true, showLegend: true, legendPos: "r", legendFontFace: F, legendFontSize: 9, dataLabelColor: "FFFFFF", dataLabelFontFace: F, dataLabelFontSize: 8, showTitle: true, title: "업종별 (주식 칸)", titleFontFace: F, titleFontSize: 11});
+            if (S.region) T(s, "🌍 돈이 어디에 있나: " + S.region.map(function(r2){ return r2[0] + " " + pc(r2[1]) + "(" + man(A * r2[1] / 100) + ")"; }).join(" · "), {x: 7.5, y: 5.5, w: 5.3, h: 1.2, fontSize: 11, bold: true, color: hx(NAVY)});
+          }
+        }
+        if (S && S.kind === "bond"){ var BH = bondCalc(S, A);
+          if (BH.heat){ s = P.addSlide(); head(s, "🌐 1년 뒤 원화 손익 — 환율 × 금리", man(A) + " 기준 · 가로 = 금리 변화 · 세로 = " + (S.cur === "MIX" ? "헤알·달러" : "달러") + " 값 변화", f.color);
+            var LV = fxLv(S), H2 = BH.heat, mx2 = 0; H2.cells.forEach(function(r){ r.forEach(function(c){ mx2 = Math.max(mx2, Math.abs(c.pct)); }); });
+            var hcol = function(p2){ var t = Math.min(1, Math.abs(p2) / (mx2 || 1)); var mix = function(a2, b2){ return Math.round(a2 + (b2 - a2) * (0.15 + t * 0.7)); }; var to = p2 >= 0 ? [34, 160, 107] : [224, 83, 61]; return [mix(255, to[0]), mix(255, to[1]), mix(255, to[2])].map(function(v){ return ("0" + v.toString(16)).slice(-2); }).join("").toUpperCase(); };
+            s.addTable([th(["환율 ↓ · 금리 →"].concat(H2.d.map(function(d){ return d === 0 ? "그대로" : (d > 0 ? "+" : "−") + Math.abs(d) + "%p"; })))].concat(H2.fx.map(function(m2, i){ return [{text: (m2 === 0 ? "그대로" : (m2 > 0 ? "+" : "−") + Math.abs(m2) + "%") + (LV.fx ? "  " + (LV.fx * (1 + m2 / 100)).toLocaleString("ko-KR", {maximumFractionDigits: LV.d}) + "원" : ""), options: {bold: true, fill: {color: "F5F7FB"}}}].concat(H2.cells[i].map(function(c){ return {text: (c.pnl >= 0 ? "+" : "−") + man(Math.abs(c.pnl)) + "\n" + sgn(c.pct, 1), options: {align: "center", fill: {color: hcol(c.pct)}, bold: m2 === 0}}; })); })),
+              {x: 0.6, y: 1.4, w: 8.6, fontFace: F, fontSize: 10, border: {type: "solid", pt: 1, color: "FFFFFF"}, valign: "middle", rowH: 0.62});
+            T(s, [{text: "읽는 법", options: {bold: true, breakLine: true}}, {text: "초록은 이익, 빨강은 손실 · 진할수록 큼", options: {breakLine: true}}, {text: " ", options: {breakLine: true}}, {text: "핵심", options: {bold: true, breakLine: true}},
+              {text: "금리보다 환율이 손익을 더 크게 흔듦", options: {bullet: true, breakLine: true}}, {text: "가운데(둘 다 그대로) = 1년 이자만큼 이익", options: {bullet: true, breakLine: true}}, {text: "만기까지 들고 가면 금리 영향은 사라짐", options: {bullet: true, breakLine: true}},
+              {text: (BH.be != null ? "환율이 만기까지 " + Math.abs(BH.be).toFixed(1) + "% 넘게 안 빠지면 원화로도 이익" : ""), options: {bullet: true}}], {x: 9.5, y: 1.4, w: 3.3, h: 4.8, fontSize: 11, paraSpaceAfter: 4});
           }
         }
         // 위험

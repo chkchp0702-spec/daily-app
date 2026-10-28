@@ -74,11 +74,11 @@ def chg(s, days):
 def chart_of(s, title, unit, color, n=260, with_ma=None, fmt_d=True):
     vals = [c for _, c in s]
     m = ma(vals, with_ma) if with_ma else None
-    s2 = last_n(s, n)[::2] if n >= 200 else last_n(s, n)
+    s2 = last_n(s, n)[::-2][::-1] if n >= 200 else last_n(s, n)   # 끝(오늘)은 꼭 들어가게
     out = {"title": title, "unit": unit, "color": color, "labels": [d.isoformat() for d, _ in s2], "vals": [r(c, 4) for _, c in s2]}
     if m:
         mm = m[-len(last_n(s, n)):]
-        out["ma"] = [r(x, 4) if x is not None else None for x in (mm[::2] if n >= 200 else mm)]
+        out["ma"] = [r(x, 4) if x is not None else None for x in (mm[::-2][::-1] if n >= 200 else mm)]
         out["mal"] = f"{with_ma}일 평균선"
     return out
 
@@ -174,7 +174,7 @@ def last(xs):
 ASSET = {"spx": "SPY", "ndx": "QQQ", "k200": "KOSPI", "gold": "GLD", "cd": "BIL", "corp": "BIL"}
 
 
-def backtest(alloc):
+def backtest(alloc, raw=False, start_at=None):
     w = {}
     for a in alloc:
         k = a["k"]
@@ -187,6 +187,8 @@ def backtest(alloc):
     if not all(S.values()):
         return None
     start = max(min(s) for s in S.values())
+    if start_at:
+        start = max(start, start_at)
     days = sorted(set().union(*[set(s) for s in S.values()]))
     days = [d for d in days if d >= start]
     lastp = {k: None for k in w}
@@ -208,6 +210,8 @@ def backtest(alloc):
         nav.append((d, val))
     if len(nav) < 260 * 3:
         return None
+    if raw:
+        return nav
     vals = [v for _, v in nav]
     yrs = (nav[-1][0] - nav[0][0]).days / 365.25
     cagr = (vals[-1] / vals[0]) ** (1 / yrs) - 1
@@ -275,10 +279,10 @@ def enrich(forms, P, old_macro):
         try:
             if k in ("gl_stock", "pension", "dc", "irp"):
                 f["mkt"] = mkt_global(P, spy, qqq, gld, fx_us, k)
-                f["sim"] = sim_equity(f, k)
+                f["sim"] = sim_equity(f, k, P)
             elif k == "kr_stock":
                 f["mkt"] = mkt_korea(P, kospi)
-                f["sim"] = sim_equity(f, k)
+                f["sim"] = sim_equity(f, k, P)
             elif k == "ktb":
                 f["mkt"] = mkt_ktb(P, M)
                 f["sim"] = sim_ktb(f, today)
@@ -362,12 +366,107 @@ def mkt_korea(P, kospi):
                         "src": f"앱 확률 모델 · 신뢰도 {rel or '보통'} · 참고값"}}
 
 
-def sim_equity(f, k):
-    bt = backtest([a for a in f["alloc"] if a.get("pct")])
+CRISES = [("2008 금융위기", "2008-05-19", "2009-03-09"), ("2011 미국 신용강등", "2011-04-29", "2011-10-03"), ("2018 미·중 무역분쟁", "2018-09-20", "2018-12-24"),
+          ("2020 코로나 폭락", "2020-02-19", "2020-03-23"), ("2022 금리 쇼크", "2022-01-03", "2022-10-12")]
+
+
+def window(nav, a, b):
+    a, b = dt.date.fromisoformat(a), dt.date.fromisoformat(b)
+    xs = [(d, v) for d, v in nav if a <= d <= b]
+    if len(xs) < 5:
+        return None
+    pk, mdd = xs[0][1], 0
+    for _, v in xs:
+        pk = max(pk, v)
+        mdd = min(mdd, v / pk - 1)
+    # 회복: b 이후 처음 시작 값으로 돌아온 날
+    rec = None
+    for d, v in nav:
+        if d > b and v >= xs[0][1]:
+            rec = round((d - b).days / 30.4)
+            break
+    return {"ret": r((xs[-1][1] / xs[0][1] - 1) * 100, 1), "mdd": r(mdd * 100, 1), "rec": rec}
+
+
+def underwater(nav):
+    pk, pkd, longest = nav[0][1], nav[0][0], 0
+    for d, v in nav:
+        if v >= pk:
+            longest = max(longest, (d - pkd).days)
+            pk, pkd = v, d
+    longest = max(longest, (nav[-1][0] - pkd).days)
+    return round(longest / 30.4)
+
+
+def lookthrough(alloc, P):
+    E = (jl(os.path.join("archive", "x", "etf_hold.json"), {}) or {}).get("etf") or {}
+    names, secs = {}, {}
+    for mk in ("US",):
+        for s in (((P.PS.get("markets") or {}).get(mk) or {}).get("sectors") or []):
+            for x in s.get("st") or []:
+                names[x["s"]] = x["n"]
+                secs[x["s"]] = s["name"]
+    sn = jl(os.path.join("archive", "x", "sig_names.json"), {}) or {}
+    comp, sector, n_all = {}, {}, set()
+    for a in alloc:
+        etf = {"spx": "SPY", "ndx": "QQQ"}.get(a["k"])
+        if not etf or not E.get(etf):
+            continue
+        for t, nm, w in E[etf].get("top") or []:
+            t2 = "GOOGL" if t == "GOOG" else t
+            share = a["pct"] * w / 100
+            comp[t2] = comp.get(t2, 0) + share
+            n_all.add(t2)
+            sc = secs.get(t2) or secs.get(t) or "기타"
+            sector[sc] = sector.get(sc, 0) + share
+    if not comp:
+        return None
+    top = sorted(comp.items(), key=lambda x: -x[1])[:15]
+    rows = [{"t": t, "n": names.get(t) or sn.get(t) or t, "sec": secs.get(t, "기타"), "w": round(w, 2)} for t, w in top]
+    seco = sorted(sector.items(), key=lambda x: -x[1])
+    main = [[k, round(v, 1)] for k, v in seco if k != "기타"][:8]
+    other = round(sum(v for k, v in seco) - sum(v for _, v in main), 1)
+    return {"top": rows, "sector": main + ([["그 밖 업종", other]] if other > 0.2 else []), "n": len(n_all),
+            "asof": (E.get("SPY") or {}).get("asof"), "us_pct": round(sum(a["pct"] for a in alloc if a["k"] in ("spx", "ndx")), 1)}
+
+
+REGION = {"spx": "미국 주식", "ndx": "미국 주식", "k200": "한국 주식", "gold": "금", "cd": "현금·채권", "corp": "현금·채권"}
+
+
+def sim_equity(f, k, P=None):
+    al = [a for a in f["alloc"] if a.get("pct")]
+    bt = backtest(al)
     if not bt:
         return None
-    return {"kind": "equity", "bt": bt, "note": f"{bt['from'][:7]}~{bt['to'][:7]} 실제 지수로 이 비중을 매달 맞췄다면의 계산 · 달러 자산은 달러 기준 · 배당·수수료·세금 제외(보수적) · 국내 업종 칸은 코스피로 대신함",
+    nav = backtest(al, raw=True)
+    # 비교: 같은 기간 코스피만 · S&P500만 · 현금(예금 대용)
+    start = nav[0][0]
+    cmp = [{"name": "이 제안", "me": 1, **{k2: bt[k2] for k2 in ("cagr", "mdd", "vol")}, "pos": bt["y1"]["pos"], "uw": underwater(nav)}]
+    navs = {"이 제안": nav}
+    for nm, sym in (("코스피만", "k200"), ("S&P500만", "spx"), ("현금(단기채)만", "cd")):
+        one = [{"k": sym, "pct": 100}]
+        b1 = backtest(one, start_at=start)
+        n1 = backtest(one, raw=True, start_at=start)
+        if b1 and n1:
+            cmp.append({"name": nm, "cagr": b1["cagr"], "mdd": b1["mdd"], "vol": b1["vol"], "pos": b1["y1"]["pos"], "uw": underwater(n1)})
+            navs[nm] = n1
+    stress = []
+    for nm, a, b in CRISES:
+        row = {"name": nm, "from": a, "to": b}
+        for key, nv in navs.items():
+            w = window(nv, a, b)
+            if w:
+                row[key] = w
+        if "이 제안" in row:
+            stress.append(row)
+    reg = {}
+    for a in al:
+        g = REGION.get(a["k"]) or ("한국 주식" if a["k"].startswith("sec") else "기타")
+        reg[g] = round(reg.get(g, 0) + a["pct"], 1)
+    out = {"kind": "equity", "bt": bt, "cmp": cmp, "stress": stress, "region": [[k2, v] for k2, v in sorted(reg.items(), key=lambda x: -x[1])],
+           "look": lookthrough(al, P) if P else None, "note": f"{bt['from'][:7]}~{bt['to'][:7]} 실제 지수로 이 비중을 매달 맞췄다면의 계산 · 달러 자산은 달러 기준 · 배당·수수료·세금 제외(보수적) · 국내 업종 칸은 코스피로 대신함",
             "contrib": {"pension": 600, "irp": 900}.get(k)}
+    return out
 
 
 # ── 국고채 ──
