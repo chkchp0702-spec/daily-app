@@ -439,6 +439,8 @@
     });
   }
   function shareBlob(blob, name, mime){
+    // 🛠 10/28 아이폰은 누른 바로 그 순간에만 공유창 — PDF·PPT 를 만드는 사이 그 순간이 지나 카톡·문자로 안 열리던 것 → 준비 창의 「카톡·문자로 보내기」를 한 번 더 눌러 보냄
+    try { var f0 = new File([blob], name, {type: mime}); if (window.__onepage && __onepage.ready){ __onepage.ready([f0], name); return Promise.resolve(); } } catch(x) {}
     try { var f = new File([blob], name, {type: mime}); if (navigator.canShare && navigator.canShare({files: [f]})) return navigator.share({files: [f], title: name}).catch(function(e2){ if (e2 && e2.name !== "AbortError") dl(blob, name); }); } catch(x) {}
     dl(blob, name); return Promise.resolve();
   }

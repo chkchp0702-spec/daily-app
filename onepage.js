@@ -956,11 +956,40 @@
   }
   function shareMany(arr){
     return Promise.all(arr.map(function(a, i){ return new Promise(function(res){ a.c.toBlob(function(b){ res(b ? new File([b], (i + 1) + "_" + (a.t || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 24) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + ".png", {type: "image/png"}) : null); }, "image/png"); }); })).then(function(fs){
-      fs = fs.filter(Boolean);
-      if (navigator.canShare && navigator.canShare({files: fs})) return navigator.share({files: fs, title: "시장 한 장 외 " + (fs.length - 1) + "장"}).catch(function(e){ if (e && e.name !== "AbortError") throw e; });
-      fs.forEach(function(f, i){ setTimeout(function(){ var u = URL.createObjectURL(f), a = document.createElement("a"); a.href = u; a.download = f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 30000); }, i * 400); });
-      toast("그림 " + fs.length + "장을 저장했어요 — 사진에서 보내세요");
+      fs = fs.filter(Boolean); if (!fs.length) throw new Error("blob");
+      readySheet(fs, "시장 한 장" + (fs.length > 1 ? " 외 " + (fs.length - 1) + "장" : ""));
     });
+  }
+  /* 🛠 10/28 사용자 「보내기 했더니 카톡이나 문자로 연결 안 돼」 — 아이폰은 「누른 바로 그 순간」에만 공유창을 열어 줌.
+     그림을 만드는 동안(자료 받기·그림 굽기) 그 순간이 지나가 공유창이 막혔던 것 → 다 만든 뒤 「카톡·문자로 보내기」 단추를 한 번 더 누르게(그 누름에서 바로 공유창). */
+  function esc0(t){ return String(t || "").replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
+  function readySheet(fs, title){
+    var old = document.getElementById("opready"); if (old) old.remove();
+    var box = document.createElement("div"); box.id = "opready";
+    var urls = fs.map(function(f){ return URL.createObjectURL(f); });
+    var can = !!(navigator.share && navigator.canShare && navigator.canShare({files: fs}));
+    var img = /^image\//.test(fs[0].type);
+    box.innerHTML = '<div class="opr-s"><h3>📨 ' + (img ? "한 장이" : "파일이") + ' 준비됐어요</h3>' +
+      '<div class="opr-im">' + urls.map(function(u, i){ return /^image\//.test(fs[i].type) ? '<img src="' + u + '" alt="">' : '<div class="opr-f">📄 ' + esc0(fs[i].name) + '</div>'; }).join("") + '</div>' +
+      (can ? '<button class="opr-go" type="button">💬 카톡·문자로 보내기</button>' : '') +
+      '<button class="opr-sv" type="button">' + (img ? (can ? "⬇️ 사진으로 저장" : "⬇️ 그림 저장 (사진에서 보내기)") : "⬇️ 파일 저장") + '</button>' +
+      (img ? '<p class="opr-n">그림을 길게 눌러도 저장·공유할 수 있어요</p>' : '') +
+      '<button class="opr-x" type="button">닫기</button></div>';
+    function close(){ box.remove(); setTimeout(function(){ urls.forEach(function(u){ URL.revokeObjectURL(u); }); }, 60000); }
+    box.addEventListener("click", function(ev){
+      var t = ev.target;
+      if (t === box || t.closest(".opr-x")) return close();
+      if (t.closest(".opr-go")){
+        var p; try { p = navigator.share({files: fs, title: title}); } catch(e){ p = Promise.reject(e); }
+        p.then(close).catch(function(e){ if (e && e.name === "AbortError") return; console.warn(e); toast("공유창을 못 열었어요 — 「사진으로 저장」 뒤 카톡에서 보내 주세요"); });
+        return;
+      }
+      if (t.closest(".opr-sv")){
+        fs.forEach(function(f, i){ setTimeout(function(){ var a = document.createElement("a"); a.href = urls[i]; a.download = f.name; a.target = "_blank"; document.body.appendChild(a); a.click(); a.remove(); }, i * 400); });
+        toast("저장했어요 — 사진에서 카톡으로 보내세요");
+      }
+    });
+    document.body.appendChild(box);
   }
 
   /* ───────────── 🖼 화면별 한 장 만들기 (10/28 15:39) — 화면 키 → {kind:"screen", scene, title, sub, hero, stats, blocks} ───────────── */
@@ -1345,9 +1374,7 @@
     return new Promise(function(res){ c.toBlob(function(b){ res(b); }, "image/png"); }).then(function(b){
       if (!b) throw new Error("blob");
       var f = new File([b], (title || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 30) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + ".png", {type: "image/png"});
-      if (navigator.canShare && navigator.canShare({files: [f]})) return navigator.share({files: [f], title: title}).catch(function(e){ if (e && e.name !== "AbortError") throw e; });
-      var u = URL.createObjectURL(b), a = document.createElement("a"); a.href = u; a.download = f.name; a.target = "_blank"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 30000);
-      toast("그림을 저장했어요 — 사진에서 보내세요");
+      readySheet([f], title || "한 장");
     });
   }
   function go(R){
@@ -1395,12 +1422,13 @@
     ".opc-h{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;font-size:13px;color:var(--sub,#aab)}.opc-h button{font:inherit;font-size:12.5px;background:none;border:1px solid var(--line);color:var(--text);border-radius:999px;padding:3px 10px}" +
     ".opc-list{display:flex;flex-direction:column;gap:4px;max-height:40vh;overflow:auto}.opc-r{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;background:var(--panel2);font-size:14px}.opc-r b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.opc-r small{color:var(--mut,#8a94a8);font-size:11.5px}.opc-r input{width:18px;height:18px}" +
     ".opc-go{display:block;width:100%;margin-top:10px;font:inherit;font-size:15px;font-weight:800;padding:13px;border-radius:14px;border:0;background:var(--acc,#7c9cff);color:#fff}.opc-go:disabled{opacity:.45}.opc-x{display:block;width:100%;margin-top:8px;font:inherit;font-size:14px;padding:10px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--text)}" +
+    "#opready{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}.opr-s{width:100%;max-width:520px;max-height:90vh;overflow:auto;background:var(--panel);color:var(--text);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom) + 18px);box-sizing:border-box}.opr-s h3{margin:0 0 10px;font-size:17px}.opr-im{display:flex;gap:8px;overflow-x:auto;margin:0 0 12px}.opr-f{flex:1;padding:16px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-weight:700;font-size:14px;word-break:break-all}.opr-im img{flex:none;height:min(42vh,360px);width:auto;border-radius:12px;border:1px solid var(--line);-webkit-touch-callout:default}.opr-go{display:block;width:100%;font:inherit;font-size:17px;font-weight:800;padding:15px;border-radius:14px;border:0;background:#fee500;color:#191919;margin:0 0 8px}.opr-sv{display:block;width:100%;font:inherit;font-size:15px;font-weight:700;padding:12px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel2);color:var(--text)}.opr-n{margin:8px 0 4px;font-size:12.5px;color:var(--sub,#aab);text-align:center}.opr-x{display:block;width:100%;margin-top:6px;font:inherit;font-size:14px;padding:10px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--text)}" +
     "#opbtn.onsheet{z-index:100001}#opch{z-index:100002!important}#opbtn span{font-size:14px}:root[data-ui=light] #opbtn{background:#fff;color:#141a26;border-color:#dde2ea}#opbtn:active{transform:scale(.96)}.op-row{margin-top:8px}";
   document.head.appendChild(css);
   var T = null;
   function soon(){ if (!T) T = setTimeout(function(){ T = null; try { fab(); } catch(x) {} try { rowBtns(); } catch(x) {} }, 300); }
   try { new MutationObserver(soon).observe(document.body, {childList: true, subtree: true}); } catch(x) {}
   window.addEventListener("hashchange", soon);
-  window.__onepage = {screens: SCREENS, dom: domScreen, sendChooser: sendChooser, go: go, draw: draw, chooser: chooser, _mkStock: mkStock, _mkMyEls: mkMyEls, _mkPin: mkPin, _goMany: goMany, _mkProduct: mkProduct, _mkPort: mkPort, _mkMarket: mkMarket};
+  window.__onepage = {ready: readySheet, screens: SCREENS, dom: domScreen, sendChooser: sendChooser, go: go, draw: draw, chooser: chooser, _mkStock: mkStock, _mkMyEls: mkMyEls, _mkPin: mkPin, _goMany: goMany, _mkProduct: mkProduct, _mkPort: mkPort, _mkMarket: mkMarket};
   soon();
 })();
