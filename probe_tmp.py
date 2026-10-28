@@ -6,14 +6,14 @@ def fz(obj, a="20250101", b="20261231", p="D"):
         json={"dmSearch": {"tmpV40": "100000000", "tmpV41": "1", "tmpV1": p, "tmpV45": a, "tmpV46": b, "OBJ_NM": obj}},
         headers={**UA, "Content-Type": "application/json; charset=UTF-8", "Referer": "https://freesis.kofia.or.kr/"}, timeout=30)
     return r
-for pre in ("STATSCU01000000",):
+for pre in ("STATSCU0100000", "STATSCU0200000", "STATSCU0300000"):
     for i in list(range(10, 210, 10)):
         r = None
         obj = f"{pre}{i:03d}BO"
         try:
-            r = fz(obj); j = r.json(); ds = j.get("ds1") or []
+            r = fz(obj, "20260901", "20261027"); j = r.json(); ds = j.get("ds1") or []
             if ds: print("FZ", obj, len(ds), json.dumps(ds[-1], ensure_ascii=False)[:300], [k for k in j.keys()])
-        except Exception as e: print("FZERR", obj, str(e)[:120], getattr(locals().get("r"),"status_code",None), (locals().get("r").text[:150] if locals().get("r") is not None else ""))
+        except Exception as e: pass
 # KRX
 for bld, extra in (("dbms/MDC/STAT/srt/MDCSTAT30001", {"mktId": "STK", "strtDd": "20260901", "endDd": "20261027"}),
                    ("dbms/MDC/STAT/srt/MDCSTAT30101", {"mktId": "STK", "inqCond": "1", "strtDd": "20260901", "endDd": "20261027"}),
