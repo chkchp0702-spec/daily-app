@@ -6,13 +6,14 @@ def fz(obj, a="20250101", b="20261231", p="D"):
         json={"dmSearch": {"tmpV40": "100000000", "tmpV41": "1", "tmpV1": p, "tmpV45": a, "tmpV46": b, "OBJ_NM": obj}},
         headers={**UA, "Content-Type": "application/json; charset=UTF-8", "Referer": "https://freesis.kofia.or.kr/"}, timeout=30)
     return r
-for pre in ("STATSCU01000000", "STATSCU02000000", "STATSCU03000000"):
-    for i in range(10, 260, 10):
+for pre in ("STATSCU01000000",):
+    for i in list(range(10, 210, 10)):
+        r = None
         obj = f"{pre}{i:03d}BO"
         try:
             r = fz(obj); j = r.json(); ds = j.get("ds1") or []
             if ds: print("FZ", obj, len(ds), json.dumps(ds[-1], ensure_ascii=False)[:300], [k for k in j.keys()])
-        except Exception as e: pass
+        except Exception as e: print("FZERR", obj, str(e)[:120], getattr(locals().get("r"),"status_code",None), (locals().get("r").text[:150] if locals().get("r") is not None else ""))
 # KRX
 for bld, extra in (("dbms/MDC/STAT/srt/MDCSTAT30001", {"mktId": "STK", "strtDd": "20260901", "endDd": "20261027"}),
                    ("dbms/MDC/STAT/srt/MDCSTAT30101", {"mktId": "STK", "inqCond": "1", "strtDd": "20260901", "endDd": "20261027"}),
@@ -28,4 +29,12 @@ for nm, url in (("krxshort", "https://short.krx.co.kr/contents/SRT/02/02010100/S
                 ("naver_lend", "https://m.stock.naver.com/api/stock/005930/lending")):
     try:
         r = requests.get(url, headers={**UA, "Referer": "https://finance.daum.net/"}, timeout=20); print("URL", nm, r.status_code, r.text[:200].replace("\n", " "))
+    except Exception as e: print("URL", nm, "ERR", e)
+
+for nm, url in (("naver_pc_short", "https://finance.naver.com/sise/sise_short_selling.naver"),
+                ("seibro", "https://seibro.or.kr/websquare/control.jsp?w2xPath=/IPORTAL/user/stock/BIP_CNTS10004V.xml"),
+                ("ksfc", "https://www.ksfc.co.kr/"),
+                ("krx_open", "https://openapi.krx.co.kr/contents/OPP/MAIN/main/index.cmd")):
+    try:
+        r = requests.get(url, headers=UA, timeout=20); print("URL", nm, r.status_code, len(r.content), r.text[:150].replace("\n", " "))
     except Exception as e: print("URL", nm, "ERR", e)
