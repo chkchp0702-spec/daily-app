@@ -503,7 +503,10 @@ var CATS = [
   {key:"fund",   name:"펀드", short:"펀드",     icon:"📦", color:"#b9e769", desc:"미래에셋 판매 공모펀드 1,800개 — 사모펀드(재간접) 수익률 순위 · 전체 순위 · 유형별"},
   {key:"els",    name:"ELS", short:"ELS",       icon:"🎯", color:"#ffb84d", desc:"지금 청약 중인 ELS·ELB — 연 수익률 · 기초자산 · 구조 · 마감일"},
   // 📝 제안서 (10/28): 아침 시황에 맞춘 기본폼 9종 + 고객·금액 → 한 장·PDF·PPT (propose.js · archive/x/proposal.json · AI 안 씀)
-  {key:"prop",   name:"제안서", short:"제안서", icon:"📝", color:"#8fb8ff", desc:"오늘 시황에 맞춘 기본폼 9종 — 고객·금액만 넣으면 한 장·PDF·PPT"}
+  {key:"prop",   name:"제안서", short:"제안서", icon:"📝", color:"#8fb8ff", desc:"오늘 시황에 맞춘 기본폼 9종 — 고객·금액만 넣으면 한 장·PDF·PPT"},
+  // 🔮 운세 (10/28 사용자: 「사주리포트랑 오늘의 운세 카테고리 · API나 돈 안 들게 · 오늘의 운세는 쉽게」) — saju_core.js 계산 · saju_txt.js 문장 · saju.js 화면
+  {key:"luck",   name:"오늘의 운세", short:"운세", icon:"🔮", color:"#c9a7ff", desc:"생일만 넣으면 매일 — 오늘 점수 · 일 · 돈 · 사람 · 몸 · 행운의 색 (휴대폰 안에서 계산 · 재미로)"},
+  {key:"saju",   name:"사주 리포트", short:"사주", icon:"📜", color:"#e6b450", desc:"8글자 · 다섯 기운 · 10년 대운 · 올해 운 · 별자리 — 「나를 읽는 리포트」 그대로 · PDF 저장"}
 ];
 var M = null, cur = null, curDate = null, store = {};
 try { store = JSON.parse(localStorage.getItem("app") || "{}"); } catch(e) {}
@@ -624,8 +627,8 @@ function go(key, id){
   var items = (M.cats[key] || []);
   curDate = id || (items[0] && items[0].id);
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
-          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">켜기 · 끄기만</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "port" ? '<span class="chip">10/2부터 · 매일 갱신</span>' : key === "home" ? '<span class="chip">매시간 갱신</span><span class="chip">누르면 그 탭으로</span>' : key === "score" ? '<span class="chip">매시간 자동 채점</span>' : key === "sigmore" ? '<span class="chip">한 단계 아래 · 참고</span>' : key === "prob" ? '<span class="chip">매시간 계산</span><span class="chip">마감 뒤 채점</span>' : (key === "bond" || key === "fund" || key === "els") ? '<span class="chip">미래에셋증권</span><span class="chip">하루 3번 갱신</span>' : key === "prop" ? '<span class="chip">매일 아침 + 장중 갱신</span><span class="chip">AI 안 씀 · 0원</span>' : key === "feed" ? '<span class="chip">블로그 5 · 텔레그램 8 · 뉴스 47</span><span class="chip">15분마다</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
-          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" && key !== "port" && key !== "home" && key !== "score" && key !== "sigmore" && key !== "prob" && key !== "bond" && key !== "fund" && key !== "els" && key !== "prop" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
+          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">켜기 · 끄기만</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "port" ? '<span class="chip">10/2부터 · 매일 갱신</span>' : key === "home" ? '<span class="chip">매시간 갱신</span><span class="chip">누르면 그 탭으로</span>' : key === "score" ? '<span class="chip">매시간 자동 채점</span>' : key === "sigmore" ? '<span class="chip">한 단계 아래 · 참고</span>' : key === "prob" ? '<span class="chip">매시간 계산</span><span class="chip">마감 뒤 채점</span>' : (key === "bond" || key === "fund" || key === "els") ? '<span class="chip">미래에셋증권</span><span class="chip">하루 3번 갱신</span>' : key === "prop" ? '<span class="chip">매일 아침 + 장중 갱신</span><span class="chip">AI 안 씀 · 0원</span>' : key === "feed" ? '<span class="chip">블로그 5 · 텔레그램 8 · 뉴스 47</span><span class="chip">15분마다</span>' : key === "luck" ? '<span class="chip">매일 0시 새로</span><span class="chip">🔒 생일은 이 휴대폰에만</span>' : key === "saju" ? '<span class="chip">휴대폰 안에서 계산</span><span class="chip">📄 PDF 저장</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
+          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" && key !== "port" && key !== "home" && key !== "score" && key !== "sigmore" && key !== "prob" && key !== "bond" && key !== "fund" && key !== "els" && key !== "prop" && key !== "luck" && key !== "saju" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
   if (key === "onepager") { $("main").innerHTML = h + opView(); opInit(id); window.scrollTo(0, 0); return; }
   if (key === "alarm") { $("main").innerHTML = h + alarmView(); alarmInit(); window.scrollTo(0, 0); return; }
   if (key === "idea") { $("main").innerHTML = h + ideaView(); ideaInit(); window.scrollTo(0, 0); return; }
@@ -636,6 +639,8 @@ function go(key, id){
   if (key === "feed") { $("main").innerHTML = h + feedView(); feedInit(); window.scrollTo(0, 0); return; }
   if (key === "prob") { $("main").innerHTML = h + probView(); probInit(); window.scrollTo(0, 0); return; }
   if (key === "bond" || key === "fund" || key === "els") { $("main").innerHTML = h + prodView(key); prodInit(key); window.scrollTo(0, 0); return; }
+  if (key === "luck") { $("main").innerHTML = h + (window.luckView ? luckView() : '<div class="loading">불러오는 중…</div>'); if (window.luckInit) luckInit(); window.scrollTo(0, 0); return; }
+  if (key === "saju") { $("main").innerHTML = h + (window.sajuView ? sajuView() : '<div class="loading">불러오는 중…</div>'); if (window.sajuInit) sajuInit(); window.scrollTo(0, 0); return; }
   if (key === "prop") { $("main").innerHTML = h + propView(); propInit(); window.scrollTo(0, 0); return; }
   if (!items.length) {
     h += '<div class="empty"><div class="big">🗂️</div>아직 모인 자료가 없어요.<br>' +
@@ -1508,7 +1513,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261028zb";
+var APPV = "20261028zsj";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1564,6 +1569,9 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="problive.js?v=3"></script>
 <script defer src="prob.js?v=24"></script>
 <script defer src="products.js?v=28"></script>
+<script defer src="saju_core.js?v=1"></script>   <!-- 🔮 10/28 사주 계산 엔진(만세력·별자리) -->
+<script defer src="saju_txt.js?v=1"></script>   <!-- 🔮 10/28 사주·운세 문장 창고 -->
+<script defer src="saju.js?v=1"></script>   <!-- 🔮📜 10/28 오늘의 운세 · 사주 리포트 -->
 <script defer src="propose.js?v=4"></script>
 <script defer src="els_design.js?v=4"></script>
 <script defer src="extras.js?v=11"></script>

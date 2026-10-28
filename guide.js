@@ -17,8 +17,8 @@
   var MKPOSE = {prob: FACE.think, cup: FACE.detect, gap: FACE.detect, screen: FACE.detect};                      // 자세히 묶음별 자세 (확률 = 생각하는 조이)
   var GRP = {home: "home", market: "mkt", sector: "mkt", prob: "mkt", port: "inv", score: "inv",
              whale: "sig", cup: "sig", gap: "sig", screen: "sig", sigmore: "sig", accum: "sig", danta: "sig",
-             bond: "prod", fund: "prod", els: "prod", feed: "feed", prop: "prop"};
-  var NAME = {intro: "👋 인사", home: "🏠 오늘", mkt: "🌐 시장", inv: "💼 포트", sig: "🎯 신호", prod: "🛍️ 상품", prop: "📝 제안서", feed: "📰 피드"};
+             bond: "prod", fund: "prod", els: "prod", feed: "feed", prop: "prop", luck: "luck", saju: "luck"};
+  var NAME = {intro: "👋 인사", home: "🏠 오늘", mkt: "🌐 시장", inv: "💼 포트", sig: "🎯 신호", prod: "🛍️ 상품", prop: "📝 제안서", feed: "📰 피드", luck: "🔮 운세"};
   var SAY = {
     intro: ["안녕하세요! 저는 어플 안내자 조이(Joey)예요.", "어려운 투자 이야기, 제가 쉽게 알려 줄게요.", "궁금할 땐 위에 있는 제 얼굴을 눌러 주세요!"],
     home: ["여기는 「오늘」이에요.", "오늘 꼭 알아야 할 것만 한 장에 모았어요.", "카드를 누르면 그 탭으로 바로 가요.", "바쁠 땐 여기만 봐도 돼요!"],
@@ -27,6 +27,7 @@
     sig: ["「신호」에는 차트와 큰손이 보내는 신호가 모여요.", "🐋 고래는 큰 펀드가 새로 산 종목이에요.", "☕ 컵은 컵 모양 차트, 📈 갭은 힘차게 뛰어오른 종목이에요.", "성적이 확인된 신호만 포트에 들어가요!"],
     prod: ["「상품」에서는 채권, 펀드, ELS를 한곳에서 비교해요.", "🏦 채권은 만기 순서로도 볼 수 있어요.", "하루 세 번 새 정보로 바뀌어요!"],
     feed: ["「피드」는 매일 읽는 블로그와 텔레그램 글을 모아 둔 곳이에요.", "주요 뉴스도 15분마다 들어와요.", "중요한 글은 시황 리포트에도 들어가요!"],
+    luck: ["「운세」는 생일만 넣으면 되는 곳이에요.", "🔮 오늘의 운세는 오늘 점수랑 행운의 색을 알려 줘요.", "📜 사주 리포트는 나를 읽는 긴 리포트예요. PDF로도 받아요!", "생일은 이 휴대폰에만 저장돼요!"],
     prop: ["「제안서」는 고객에게 줄 투자 제안서를 만드는 곳이에요.", "매일 아침 시황에 맞춰 9가지 기본폼이 미리 만들어져 있어요.", "고객 이름, 내 이름, 금액만 넣으면 한 장 그림·PDF·PPT가 바로 나와요.", "AI를 따로 부르지 않아서 돈이 안 들어요!"]
   };
   // ⓘ 자세히 (10/22 사용자: 「작은 i 설명칸에도 캐릭터 얼굴 탭 — 확률은 이렇게 계산된다, 아직 그대로 따라하긴 무리, 컵은 매일 몇 종목 돌린다, 포트는 과거로 돌려 볼 수 있다, ELS는 직접 짜고 과거 확률도 본다 … 싹 다」)
@@ -47,6 +48,8 @@
     fund: ["📦 펀드는 미래에셋이 파는 공모펀드 약 1,800개예요.", "사모펀드(재간접) 수익률 순위, 전체 순위, 유형별로 볼 수 있어요.", "⚠️ 과거 수익률은 앞으로를 보장하지 않아요. 보수(수수료)도 같이 보세요."],
     els: ["🎯 ELS는 지금 청약 중인 ELS·ELB의 연 수익률·기초자산·구조·마감일을 모은 거예요.", "🎬 과거 재생: 이 조건으로 2006년부터 매일 가입했다면 몇 번이 일찍 끝나고 몇 번이 손실이었는지 보여 줘요.", "🎛 설계: 배리어·낙인·기초자산을 손가락으로 밀어 내 ELS를 직접 짜 보고, 과거 확률이 바로 바뀌어요.", "타사 비교, 📌 담아 두기(들고 있는 ELS가 지금 어디쯤인지)도 있어요.", "⚠️ 과거 계산이에요. 미래를 보장하지 않아요."],
     prop: ["📝 제안서 기본폼 9종: 국내 주식 · 국내+해외 주식 · 개인연금 · DC · IRP · 국고채 · 미국채 · 브라질국채 · ELS.", "주식·연금은 매일 아침 시황 배분표(미국 S&P500 200일선 규칙)를, 퇴직연금은 위험자산 70% 한도를 따라요.", "채권·ELS는 미래에셋이 지금 파는 상품 중 기간별 세후 1등, 원금지급형+지수형으로 골라요.", "📱 한 장은 카톡용 그림, 📄 PDF는 표지부터 유의사항까지, 📊 PPT는 맑은 고딕에 차트를 PPT에서 고칠 수 있어요.", "⚠️ 참고 자료예요. 고객에게 드리기 전 숫자와 상품 조건을 한 번 더 확인해 주세요."],
+    luck: ["🔮 오늘의 운세는 그날의 기운(일진)과 태어난 사주를 비교해서 점수를 매겨요.", "일 · 돈 · 사람 · 몸 네 가지와 행운의 색 · 숫자 · 방향 · 좋은 시간을 알려 줘요.", "이번 주 막대를 누르면 다른 날 운세도 볼 수 있어요. 가족 · 고객을 여러 명 넣어 두면 「모두의 오늘」로 한눈에 봐요.", "인터넷 · API 없이 휴대폰 안에서 계산해요. 생일은 이 휴대폰에만 저장돼요.", "⚠️ 재미로 보는 참고예요. 투자 판단의 근거가 아니에요."],
+    saju: ["📜 사주 리포트는 예전 「나를 읽는 리포트」 모양 그대로예요.", "8글자 · 숨은 글자 · 관계도 · 간판 · 가장 필요한 기운 · 특별한 표시 · 다섯 기운 · 재물 · 10년 대운 · 연도별 · 올해 월별 · 배우자 · 별자리 · 생활 · 정리까지.", "만세력(절기 · 음력 · 윤달), 서머타임, 태어난 곳 경도까지 천문 계산식으로 직접 계산해요.", "📄 PDF로 저장해서 보낼 수 있어요. 더 깊은 글은 「Claude 심화판 문구」를 복사해 Claude 채팅에 붙여 넣으면 돼요(API 비용 없음).", "⚠️ 전통 이론에 따른 해석이고, 과학적 예측이 아니에요."],
     feed: ["📰 피드는 매일 읽는 블로그·텔레그램 글과 주요 뉴스를 한곳에 모았어요.", "15분마다 새 글을 가져와요.", "📣 채널 성적표: 채널이 이름을 부른 종목을 5일·20일 뒤 채점해서, 어느 채널 말이 잘 맞는지 보여 줘요.", "중요한 글은 다음 날 시황 리포트 재료로 들어가요."]
   };
   var MORE_ALIAS = {accum: "sigmore", danta: "sigmore"};
@@ -66,7 +69,7 @@
     return f ? "vid/" + f + ".mp4?v=" + (m._v || VIDV) : ""; }
   function vidScreen(){ var c = (typeof cur !== "undefined" && cur) || "", k = VID["m_" + (MORE_ALIAS[c] || c)] ? "m_" + (MORE_ALIAS[c] || c) : "t_" + curGrp(); return VID[k] ? "vid/" + k + ".mp4?v=" + VIDV : ""; }
   function vidHtml(vs, wait){ return vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted' + (wait ? '' : ' autoplay') + ' playsinline preload="' + (wait ? 'metadata' : 'auto') + '" controls disablepictureinpicture></video></div>' : ""; }
-  var MORE_NAME = {home: "🏠 오늘", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", feed: "📰 피드"};
+  var MORE_NAME = {home: "🏠 오늘", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", feed: "📰 피드", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트"};
   function ls(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); } catch(x) { return null; } }
   function seen(){ return ls("gd_seen") || {}; }
   function mark(g){ var s = seen(); s[g] = 1; ls("gd_seen", s); }
