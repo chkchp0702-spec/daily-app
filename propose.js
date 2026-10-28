@@ -54,231 +54,340 @@
   }
   function donut(parts, size, thick, top, bot){
     return '<div style="position:relative;width:' + size + 'px;height:' + size + 'px;flex:none"><img src="' + svgUrl(donutSvg(parts, size, thick)) + '" width="' + size + '" height="' + size + '" style="display:block">' +
-      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">' +
+      '<div style="position:absolute;left:0;top:0;width:' + size + 'px;height:' + size + 'px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">' +
       (top ? '<div style="font-size:' + Math.round(size * 0.075) + 'px;color:' + SUB + ';font-weight:700">' + e(top) + '</div>' : '') +
-      (bot ? '<div style="font-size:' + Math.round(size * 0.12) + 'px;color:' + INK + ';font-weight:800;letter-spacing:-1px;line-height:1.15">' + e(bot) + '</div>' : '') + '</div></div>';
+      (bot ? '<div style="font-size:' + Math.round(size * 0.115) + 'px;color:' + INK + ';font-weight:800;letter-spacing:-1px;line-height:1.15">' + e(bot) + '</div>' : '') + '</div></div>';
   }
-  function lineSvg(vals, w, h, color){
-    var v = vals.filter(function(x){ return x != null; }); if (v.length < 2) return "";
-    var mn = Math.min.apply(null, v), mx = Math.max.apply(null, v), pad = (mx - mn) * 0.08 || 1; mn -= pad; mx += pad;
-    var pts = vals.map(function(x, i){ return x == null ? null : [i / (vals.length - 1) * w, h - (x - mn) / (mx - mn) * h]; }).filter(Boolean);
-    var d = pts.map(function(p, i){ return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
-    var area = d + " L" + w + " " + h + " L0 " + h + " Z", last = pts[pts.length - 1];
-    var grid = [0.25, 0.5, 0.75].map(function(f){ return '<line x1="0" x2="' + w + '" y1="' + (h * f) + '" y2="' + (h * f) + '" stroke="#e8ecf2" stroke-width="1"/>'; }).join("");
-    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' + grid +
-      '<path d="' + area + '" fill="' + color + '" fill-opacity="0.10"/><path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>' +
-      '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="5" fill="' + color + '" stroke="#fff" stroke-width="2"/></svg>';
+  // 선 그림: series = [{vals, color, dash}] · x 가 있으면 그 간격대로(금리 곡선)
+  function lineSvg(series, w, h, x){
+    var all = []; series.forEach(function(s){ s.vals.forEach(function(v){ if (v != null) all.push(+v); }); });
+    if (all.length < 2) return "";
+    var mn = Math.min.apply(null, all), mx = Math.max.apply(null, all), pad = (mx - mn) * 0.1 || 1; mn -= pad; mx += pad;
+    var X = function(i, n){ if (x){ var x0 = x[0], x1 = x[x.length - 1]; return (x[i] - x0) / ((x1 - x0) || 1) * w; } return i / Math.max(1, n - 1) * w; };
+    var Y = function(v){ return h - (v - mn) / (mx - mn) * h; };
+    var grid = [0.25, 0.5, 0.75].map(function(f){ return '<line x1="0" x2="' + w + '" y1="' + (h * f) + '" y2="' + (h * f) + '" stroke="#e6eaf0" stroke-width="1"/>'; }).join("");
+    var body = series.map(function(s, si){
+      var pts = []; s.vals.forEach(function(v, i){ if (v != null) pts.push([X(i, s.vals.length), Y(+v)]); });
+      if (pts.length < 2) return "";
+      var d = pts.map(function(p, i){ return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" "), lp = pts[pts.length - 1];
+      return (si === 0 && !s.dash && series.length === 1 ? '<path d="' + d + ' L' + lp[0].toFixed(1) + ' ' + h + ' L' + pts[0][0].toFixed(1) + ' ' + h + ' Z" fill="' + s.color + '" fill-opacity="0.10"/>' : '') +
+        '<path d="' + d + '" fill="none" stroke="' + s.color + '" stroke-width="' + (s.dash ? 2 : 2.8) + '"' + (s.dash ? ' stroke-dasharray="6 5"' : '') + ' stroke-linejoin="round" stroke-linecap="round"/>' +
+        (s.dash ? '' : '<circle cx="' + lp[0] + '" cy="' + lp[1] + '" r="5" fill="' + s.color + '" stroke="#fff" stroke-width="2"/>') +
+        (s.dots ? pts.map(function(p){ return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.2" fill="' + s.color + '"/>'; }).join("") : '');
+    }).join("");
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' + grid + body + '</svg>';
   }
-  function lineBox(ch, w, h, color, fs){
+  function fmtv(v, unit){ if (v == null) return "–"; if (unit === "원" && Math.abs(v) >= 1e6) return man(v); return unit === "%" ? (+v).toFixed(2) + "%" : unit === "원" ? (+v).toLocaleString("ko-KR", {maximumFractionDigits: v < 1000 ? 1 : 0}) + "원" : (+v).toLocaleString("ko-KR", {maximumFractionDigits: v < 100 ? 2 : 0}); }
+  function chartBox(ch, w, h, fs){
     if (!ch || !ch.vals || ch.vals.length < 2) return "";
+    var series = ch.multi ? ch.multi.map(function(m){ return {vals: m.vals, color: m.color}; }) : [{vals: ch.vals, color: ch.color || NAVY, dots: ch.kind === "curve"}].concat(ch.ma ? [{vals: ch.ma, color: "#9aa3b2", dash: 1}] : []);
     var v = ch.vals.filter(function(x){ return x != null; }), lo = Math.min.apply(null, v), hi = Math.max.apply(null, v), last = v[v.length - 1], first = v[0];
-    var f = function(x){ return ch.unit === "%" ? x.toFixed(2) + "%" : Math.round(x).toLocaleString("ko-KR") + (ch.unit || ""); };
-    var chg = (last / first - 1) * 100;
-    return '<div style="font-size:' + fs + 'px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><b style="color:' + INK + '">' + e(ch.title) + '</b><span style="color:' + SUB + '">지금 <b style="color:' + INK + '">' + f(last) + '</b> · 1년 ' + (ch.unit === "%" ? ((last - first) >= 0 ? "+" : "−") + Math.abs(last - first).toFixed(2) + "%p" : sgn(chg, 1)) + '</span></div>' +
-      '<img src="' + svgUrl(lineSvg(ch.vals, w, h, color)) + '" width="' + w + '" height="' + h + '" style="display:block;width:' + w + 'px;height:' + h + 'px">' +
-      '<div style="display:flex;justify-content:space-between;color:' + SUB + ';font-size:' + Math.round(fs * 0.85) + 'px;margin-top:4px"><span>' + e((ch.labels[0] || "").slice(0, 7).replace("-", ".")) + '</span><span>최고 ' + f(hi) + ' · 최저 ' + f(lo) + '</span><span>' + e((ch.labels[ch.labels.length - 1] || "").slice(0, 7).replace("-", ".")) + '</span></div></div>';
+    var right = ch.kind === "curve" ? "짧은 쪽 " + fmtv(first, ch.unit) + " → 긴 쪽 " + fmtv(last, ch.unit)
+      : ch.multi ? "" : "지금 <b style=\"color:" + INK + "\">" + fmtv(last, ch.unit) + "</b> · " + (ch.unit === "%" ? "1년 " + ((last - first) >= 0 ? "+" : "−") + Math.abs(last - first).toFixed(2) + "%p" : "1년 " + sgn((last / first - 1) * 100, 1));
+    var leg = ch.multi ? '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:6px;font-size:' + Math.round(fs * 0.85) + 'px;color:' + INK + '">' + ch.multi.map(function(m){ var lv = m.vals[m.vals.length - 1]; return '<span><span style="display:inline-block;width:12px;height:4px;border-radius:2px;background:' + m.color + ';vertical-align:middle;margin-right:5px"></span>' + e(m.name) + ' <b>' + sgn(lv - 100, 1) + '</b></span>'; }).join("") + '</div>'
+      : ch.ma ? '<div style="font-size:' + Math.round(fs * 0.85) + 'px;color:' + SUB + ';margin-top:4px"><span style="display:inline-block;width:16px;border-top:2px dashed #9aa3b2;vertical-align:middle;margin-right:5px"></span>' + e(ch.mal || "평균선") + ' — 이 선 위면 상승 추세</div>' : '';
+    var xl = ch.kind === "curve" ? [ch.labels[0], ch.labels[ch.labels.length - 1]] : [(ch.labels[0] || "").slice(0, 7).replace("-", "."), (ch.labels[ch.labels.length - 1] || "").slice(0, 7).replace("-", ".")];
+    return '<div style="font-size:' + fs + 'px;color:' + INK + '">' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px"><b style="color:' + INK + '">' + e(ch.title) + '</b><span style="color:' + SUB + ';font-size:' + Math.round(fs * 0.9) + 'px;white-space:nowrap">' + right + '</span></div>' +
+      '<img src="' + svgUrl(lineSvg(series, w, h, ch.kind === "curve" ? ch.x : null)) + '" width="' + w + '" height="' + h + '" style="display:block;width:' + w + 'px;height:' + h + 'px">' +
+      '<div style="display:flex;justify-content:space-between;color:' + SUB + ';font-size:' + Math.round(fs * 0.82) + 'px;margin-top:4px"><span>' + e(xl[0]) + '</span><span>' + (ch.multi ? "" : "최고 " + fmtv(hi, ch.unit) + " · 최저 " + fmtv(lo, ch.unit)) + '</span><span>' + e(xl[1]) + '</span></div>' + leg + '</div>';
   }
-  function hbars(rows, fs, max){   // rows: [label, value, color, right-text, highlight]
-    max = max || Math.max.apply(null, rows.map(function(r){ return +r[1] || 0; })) || 1;
+  function hbars(rows, fs, max, lw){   // rows: [label, value, color, right-text, bold]
+    max = max || Math.max.apply(null, rows.map(function(r){ return Math.abs(+r[1] || 0); })) || 1;
     return rows.map(function(r){
-      return '<div style="display:flex;align-items:center;gap:10px;margin:' + Math.round(fs * 0.45) + 'px 0;font-size:' + fs + 'px">' +
-        '<div style="width:34%;flex:none;color:' + INK + ';font-weight:' + (r[4] ? 800 : 600) + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(r[0]) + '</div>' +
-        '<div style="flex:1;height:' + Math.round(fs * 1.05) + 'px;background:#eef1f6;border-radius:99px;overflow:hidden"><div style="height:100%;width:' + Math.max(2, Math.min(100, (+r[1] || 0) / max * 100)) + '%;background:' + (r[2] || NAVY) + ';border-radius:99px"></div></div>' +
-        '<div style="width:22%;flex:none;text-align:right;font-weight:800;color:' + INK + '">' + e(r[3] != null ? r[3] : r[1]) + '</div></div>';
+      return '<div style="display:flex;align-items:center;gap:10px;margin:' + Math.round(fs * 0.45) + 'px 0;font-size:' + fs + 'px;color:' + INK + '">' +
+        '<div style="width:' + (lw || 34) + '%;flex:none;color:' + INK + ';font-weight:' + (r[4] ? 800 : 600) + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(r[0]) + '</div>' +
+        '<div style="flex:1;height:' + Math.round(fs * 1.05) + 'px;background:#eef1f6;border-radius:99px;overflow:hidden"><div style="height:100%;width:' + Math.max(2, Math.min(100, Math.abs(+r[1] || 0) / max * 100)) + '%;background:' + (r[2] || NAVY) + ';border-radius:99px"></div></div>' +
+        '<div style="width:24%;flex:none;text-align:right;font-weight:800;color:' + INK + '">' + e(r[3] != null ? r[3] : r[1]) + '</div></div>';
     }).join("");
   }
-  function vbars(ch, w, h, fs){   // 세로 막대 (국고채 곡선 · ELS 이자)
-    var vals = ch.vals || [], n = vals.length; if (!n) return "";
-    var mx = Math.max.apply(null, vals), mn = Math.min(0, Math.min.apply(null, vals)), bw = Math.max(4, w / n - 4);
-    var cols = vals.map(function(v, i){ var hl = ch.hl && ch.hl[i]; var bh = Math.max(3, (v - mn) / (mx - mn || 1) * (h - fs * 1.6));
-      return '<div style="width:' + bw + 'px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">' +
-        (hl ? '<div style="font-size:' + Math.round(fs * 0.8) + 'px;font-weight:800;color:' + NAVY + ';white-space:nowrap">' + (+v).toFixed(ch.unit === "%" && v < 30 ? 1 : 0) + '</div>' : '') +
-        '<div style="width:100%;height:' + bh + 'px;border-radius:4px 4px 0 0;background:' + (hl ? "#f08a3c" : "#c9d3e3") + '"></div></div>'; }).join("");
-    return '<div style="font-size:' + fs + 'px;color:' + INK + ';font-weight:700;margin-bottom:6px">' + e(ch.title) + '</div>' +
-      '<div style="display:flex;align-items:flex-end;justify-content:space-between;height:' + h + 'px;border-bottom:1px solid ' + LINE + '">' + cols + '</div>' +
-      '<div style="display:flex;justify-content:space-between;font-size:' + Math.round(fs * 0.8) + 'px;color:' + SUB + ';margin-top:4px"><span>' + e(ch.labels[0]) + '</span><span><span style="display:inline-block;width:10px;height:10px;background:#f08a3c;border-radius:2px"></span> 제안에 담은 것</span><span>' + e(ch.labels[n - 1]) + '</span></div>';
+  // 위아래 막대 (계산서 시나리오 · 연도별) — 플러스 초록, 마이너스 빨강
+  function pnBars(items, w, h, fs){   // items: [{l, v, t, hl}]
+    if (!items.length) return "";
+    var mx = Math.max.apply(null, items.map(function(x){ return Math.abs(x.v); })) || 1, n = items.length, bw = Math.min(90, w / n - 10), mid = h / 2;
+    var anyNeg = items.some(function(x){ return x.v < 0; }), base = anyNeg ? mid : h - fs * 1.2;
+    var cols = items.map(function(x){
+      var bh = Math.max(2, Math.abs(x.v) / mx * (anyNeg ? mid - fs * 1.6 : h - fs * 2.6)), pos = x.v >= 0, col = x.hl ? NAVY : pos ? "#22a06b" : "#e0533d";
+      return '<div style="position:relative;width:' + bw + 'px;height:' + h + 'px">' +
+        '<div style="position:absolute;left:0;width:' + bw + 'px;' + (pos ? 'bottom:' + (h - base) + 'px' : 'top:' + base + 'px') + ';height:' + bh + 'px;background:' + col + ';border-radius:' + (pos ? '5px 5px 0 0' : '0 0 5px 5px') + '"></div>' +
+        '<div style="position:absolute;left:-20px;width:' + (bw + 40) + 'px;text-align:center;font-size:' + Math.round(fs * 0.85) + 'px;font-weight:800;color:' + col + ';' + (pos ? 'bottom:' + (h - base + bh + 3) + 'px' : 'top:' + (base + bh + 3) + 'px') + '">' + e(x.t) + '</div></div>';
+    }).join("");
+    return '<div style="position:relative"><div style="display:flex;justify-content:space-around;align-items:flex-start;height:' + h + 'px;position:relative">' +
+      '<div style="position:absolute;left:0;right:0;top:' + base + 'px;border-top:1px solid #c7ced9"></div>' + cols + '</div>' +
+      '<div style="display:flex;justify-content:space-around;font-size:' + Math.round(fs * 0.8) + 'px;color:' + SUB + ';margin-top:4px">' + items.map(function(x){ return '<div style="width:' + (bw + 16) + 'px;text-align:center;line-height:1.3">' + e(x.l) + '</div>'; }).join("") + '</div></div>';
   }
 
   /* ───────── 계산 ───────── */
   function lines(f, amt){ return (f.alloc || []).map(function(a){ return {a: a, won: amt * (+a.pct || 0) / 100}; }); }
-  function income(f, amt){   // 연 예상 이자 (채권·ELS)
-    if (f.avg == null) return null;
-    var lab = {ktb: "예상 연 이자 (세후)", ust: "예상 연 이자 (달러 기준)", brl: "예상 연 이자 (현지 통화 기준)", els: "조건 충족 시 연 이자"}[f.key];
-    return lab ? {lab: lab, won: amt * f.avg / 100, pct: f.avg} : null;
-  }
   function taxLine(f){
     if (!f.tax) return null;
     var L = f.tax.limit * 10000;
     return f.tax.rates.map(function(r){ return {rate: r[0], who: r[1], won: L * r[0] / 100, full: Math.round(L * r[0] / 100).toLocaleString("ko-KR") + "원"}; });
   }
+  var CUR = {KRW: "원", USD: "달러", BRL: "헤알"};
+  function fxOf(p, S){ return p.cur === "KRW" ? 1 : (p.fx || S.fx || 1); }
+  // 채권: 만기까지 들고 가면
+  function bondCalc(S, amt){
+    var rows = (S.picks || []).map(function(p){
+      var a = amt * p.pct / 100, fx = fxOf(p, S), ac = a / fx, face = ac / p.p, cpnAll, tax, total;
+      if (p.comp5){ var g = Math.pow(1 + p.cpn / 100, 5); cpnAll = face * (g - 1); }
+      else cpnAll = face * p.cpn / 100 * p.yrs;
+      tax = cpnAll * (p.tax_int || 0) / 100; total = face + cpnAll - tax;
+      var krw = total * fx, cagr = Math.pow(krw / a, 1 / p.yrs) - 1;
+      var perYear = p.comp5 ? 0 : face * p.cpn / 100 * (1 - (p.tax_int || 0) / 100) * fx;
+      var be = p.cur === "KRW" ? null : (a / (total * fx) - 1) * 100;
+      return {p: p, a: a, fx: fx, face: face, cpnAll: cpnAll, tax: tax, gain: face - ac, total: total, krw: krw, cagr: cagr * 100, perYear: perYear, be: be};
+    });
+    var tot = rows.reduce(function(s, r){ return s + r.krw; }, 0);
+    var yrs = rows.length ? rows.reduce(function(s, r){ return s + r.p.yrs * r.a; }, 0) / (amt || 1) : 0;
+    var fxScen = (S.fx_moves || []).map(function(m){ var k = rows.reduce(function(s, r){ return s + (r.p.cur === "KRW" ? r.krw : r.krw * (1 + m / 100)); }, 0); return {m: m, krw: k, pnl: k - amt, pct: (k / amt - 1) * 100}; });
+    var rateScen = (S.rate_moves || []).map(function(d){ var v = rows.reduce(function(s, r){ var inc = r.p.comp5 ? 0 : r.face * r.p.cpn / 100 * (1 - (r.p.tax_int || 0) / 100) / (r.a / r.fx); var pc = -r.p.dur * d / 100 + (r.p.y || 0) / 100 * 0 + inc; return s + r.a * pc; }, 0); return {d: d, pnl: v, pct: v / (amt || 1) * 100}; });
+    var years = [], maxY = Math.ceil(Math.max.apply(null, rows.map(function(r){ return r.p.yrs; }).concat([0])));
+    for (var y = 1; y <= Math.min(maxY, 30); y++){ var c = rows.reduce(function(s, r){ return s + (y <= Math.ceil(r.p.yrs) ? r.perYear : 0); }, 0); years.push({y: y, v: c}); }
+    return {rows: rows, tot: tot, pnl: tot - amt, cagr: amt ? (Math.pow(tot / amt, 1 / (yrs || 1)) - 1) * 100 : 0, yrs: yrs, fxScen: fxScen, rateScen: rateScen, years: years,
+            be: (function(){ var kr = 0, fx = 0; rows.forEach(function(r){ if (r.p.cur === "KRW") kr += r.krw; else fx += r.krw; }); return fx ? ((amt - kr) / fx - 1) * 100 : null; })()};
+  }
+  function elsCalc(S, amt){
+    return (S.picks || []).map(function(p){
+      var a = amt * p.pct / 100, h = p.hist || {}, k = h.k || [], prev = 0, out = [];
+      (p.steps.length ? p.steps : [0, 0, 0, 0, 0, 0]).forEach(function(b, i){
+        var cum = k[i] != null ? k[i] : null, pr = cum != null ? Math.max(0, cum - prev) : null; if (cum != null) prev = cum;
+        out.push({t: (i + 1) * (p.cyc || 6), bar: b, won: a * (1 + p.cpn / 100 * (i + 1) * (p.cyc || 6) / 12), pr: pr});
+      });
+      var rest = Math.max(0, 100 - prev), loss = h.loss || 0;
+      var tail = p.pp ? [{lab: "원금만 돌려받음 (이자 없음)", won: a, pr: rest}] : [{lab: "만기 손실 (낙인 후 회복 못 함)", won: a * (1 + (h.loss_avg || -40) / 100), pr: loss, worst: h.loss_worst}].concat(rest - loss > 0.05 ? [{lab: "그 밖 (만기 원금 상환 등)", won: a, pr: rest - loss}] : []);
+      var ev = out.reduce(function(s, o){ return s + (o.pr || 0) / 100 * o.won; }, 0) + tail.reduce(function(s, o){ return s + (o.pr || 0) / 100 * o.won; }, 0);
+      return {p: p, a: a, steps: out, tail: tail, ev: ev, y1: (k[1] != null ? k[1] : null)};
+    });
+  }
+  function eqCalc(S, amt){
+    var b = S.bt, g = function(r, y){ return amt * Math.pow(1 + r / 100, y); };
+    return {b: b, y1: [{l: "나쁜 해 (하위 10%)", r: b.y1.p10}, {l: "보통 해 (중간)", r: b.y1.p50}, {l: "좋은 해 (상위 10%)", r: b.y1.p90}].map(function(x){ return {l: x.l, r: x.r, won: g(x.r, 1)}; }),
+            y5: b.y5 ? [{l: "나쁜 5년", r: b.y5.p10}, {l: "보통 5년", r: b.y5.p50}, {l: "좋은 5년", r: b.y5.p90}].map(function(x){ return {l: x.l, r: x.r, won: g(x.r, 5)}; }) : null,
+            mdd: amt * b.mdd / 100};
+  }
+  function contrib(S, f){
+    if (!S || !S.contrib) return null;
+    var c = S.contrib * 10000, r = (S.bt.cagr || 6) / 100, r2 = ((S.bt.y5 && S.bt.y5.p10) || 2) / 100;
+    var fv = function(rate, y){ var v = 0; for (var i = 0; i < y; i++) v = (v + c) * (1 + rate); return v; };
+    return [10, 20].map(function(y){ return {y: y, put: c * y, mid: fv(r, y), low: fv(r2, y), tax165: c * y * 0.165, tax132: c * y * 0.132}; });
+  }
+  // 한 줄 요약 (한 장·요약 쪽)
+  function simLine(f, amt){
+    var S = f.sim; if (!S || !amt) return null;
+    if (S.kind === "bond"){ var B = bondCalc(S, amt);
+      return {big: man(B.tot), lab: "만기까지 들고 가면 받는 돈" + (S.cur === "KRW" ? " (세후)" : " (환율 그대로)"), sub: "이익 " + man(B.pnl) + " · 연 " + B.cagr.toFixed(1) + "% · 평균 " + B.yrs.toFixed(1) + "년" + (B.be != null ? " · 환율이 " + Math.abs(B.be).toFixed(0) + "% 넘게 안 빠지면 이익" : "")}; }
+    if (S.kind === "els"){ var E = elsCalc(S, amt), ev = E.reduce(function(s, x){ return s + x.ev; }, 0), y1 = E.reduce(function(s, x){ return s + (x.y1 || 0) * x.a; }, 0) / amt;
+      return {big: man(ev - amt), lab: "과거 확률로 본 평균 이익 (가입 금액 대비)", sub: "1년 안에 끝난 비율 약 " + Math.round(y1) + "% · 손실 비율 " + E.filter(function(x){ return !x.p.pp; }).map(function(x){ return ((x.p.hist || {}).loss || 0) + "%"; }).join("·")}; }
+    if (S.kind === "equity"){ var Q = eqCalc(S, amt);
+      return {big: "연 " + S.bt.cagr + "%", lab: S.bt.from.slice(0, 4) + "년부터 이 비중이었다면 (연평균)", sub: "1년 뒤 보통 " + man(Q.y1[1].won) + " · 나쁜 해 " + man(Q.y1[0].won) + " · 최대 하락 " + S.bt.mdd + "%"}; }
+    return null;
+  }
   function model(){
     var items = ST.sel.map(function(k){ var f = form(k); return f ? {f: f, amt: amtOf(k)} : null; }).filter(Boolean);
     return {cust: (ST.cust || "").trim(), pb: (ME.pb || "").trim(), org: (ME.org || "").trim(), date: dlabel(), items: items,
-            total: items.reduce(function(s, x){ return s + x.amt; }, 0), M: DATA.market || {}, notice: DATA.notice || [], basis: DATA.basis || ""};
+            total: items.reduce(function(s, x){ return s + x.amt; }, 0), notice: DATA.notice || [], basis: DATA.basis || ""};
   }
   function titleOf(m){ return m.items.length === 1 ? m.items[0].f.title : m.items.map(function(x){ return x.f.short; }).slice(0, 3).join(" · ") + (m.items.length > 3 ? " 외 " + (m.items.length - 3) : "") + " 포트폴리오"; }
   function custName(m){ return m.cust ? m.cust + " 고객님" : "고객님"; }
-  function byLine(m){ return [m.org, m.pb ? m.pb + (/PB|팀장|부장|이사|대리|과장|차장|매니저|상무|센터장|지점장/.test(m.pb) ? "" : " PB") : ""].filter(Boolean).join(" · "); }
+  function byLine(m){ return [m.org, m.pb ? m.pb + (/PB|팀장|부장|이사|대리|과장|차장|매니저|상무|센터장|지점장|실장/.test(m.pb) ? "" : " PB") : ""].filter(Boolean).join(" · "); }
 
-  /* ═════════ ① 원페이지 (전송용 그림 1080px) ═════════ */
-  function kpiTiles(M, n, fs, cols){
-    var k = (M.kpis || []).slice(0, n);
-    return '<div style="display:grid;grid-template-columns:repeat(' + cols + ',1fr);gap:' + Math.round(fs * 0.5) + 'px">' + k.map(function(x){
-      var c = x.chg == null ? SUB : x.chg > 0 ? UP : x.chg < 0 ? DN : SUB;
-      return '<div style="background:#fff;border:1px solid ' + LINE + ';border-radius:' + Math.round(fs * 0.6) + 'px;padding:' + Math.round(fs * 0.55) + 'px ' + Math.round(fs * 0.6) + 'px">' +
-        '<div style="font-size:' + Math.round(fs * 0.72) + 'px;color:' + SUB + ';font-weight:700">' + e(x.label) + (x.asof ? ' <span style="font-weight:500">' + e(x.asof) + '</span>' : '') + '</div>' +
-        '<div style="font-size:' + Math.round(fs * 1.25) + 'px;font-weight:800;color:' + INK + ';letter-spacing:-0.5px">' + e(x.value) + '</div>' +
-        '<div style="font-size:' + Math.round(fs * 0.78) + 'px;font-weight:800;color:' + c + '">' + (x.chg == null ? "&nbsp;" : (x.chg > 0 ? "▲ " : x.chg < 0 ? "▼ " : "") + Math.abs(x.chg).toFixed(2) + "%") + '</div></div>';
+  /* ───────── 공통 조각 ───────── */
+  // 10/28 아이폰 다크 모드에서 글자가 흐리게(거의 안 보이게) 나오던 것 → 맨 바깥 대신 안쪽 상자에 글자색을 박아 둠
+  function wrapInk(html, bg){ return '<div style="color:' + INK + ';background:' + (bg || "transparent") + '">' + html + '</div>'; }
+  function kpiTiles(kp, fs, cols){
+    kp = (kp || []).filter(function(x){ return x && x.value && x.value !== "–"; });
+    return '<div style="display:grid;grid-template-columns:repeat(' + cols + ',1fr);gap:' + Math.round(fs * 0.55) + 'px">' + kp.map(function(x){
+      var c = x.tone > 0 ? "#1a8a5a" : x.tone < 0 ? UP : INK;
+      return '<div style="background:#fff;border:1px solid ' + LINE + ';border-radius:' + Math.round(fs * 0.6) + 'px;padding:' + Math.round(fs * 0.6) + 'px ' + Math.round(fs * 0.7) + 'px;color:' + INK + '">' +
+        '<div style="font-size:' + Math.round(fs * 0.78) + 'px;color:' + SUB + ';font-weight:700">' + e(x.label) + '</div>' +
+        '<div style="font-size:' + Math.round(fs * 1.4) + 'px;font-weight:800;color:' + c + ';letter-spacing:-0.5px;margin:2px 0">' + e(x.value) + '</div>' +
+        '<div style="font-size:' + Math.round(fs * 0.74) + 'px;color:' + SUB + ';line-height:1.35">' + e(x.sub || "") + '</div></div>';
     }).join("") + '</div>';
-  }
-  function trendRows(M, fs){
-    return (M.trend || []).map(function(t, i){ var ok = i === 0 ? M.us_up : M.kr_up;
-      return '<div style="display:flex;gap:10px;align-items:flex-start;font-size:' + fs + 'px;line-height:1.45;margin-top:' + Math.round(fs * 0.4) + 'px;color:' + INK + '">' +
-        '<span style="flex:none;margin-top:' + Math.round(fs * 0.25) + 'px;width:' + Math.round(fs * 0.7) + 'px;height:' + Math.round(fs * 0.7) + 'px;border-radius:50%;background:' + (ok ? "#22a06b" : "#e0533d") + '"></span><span>' + e(t.replace(/^🇺🇸 |^🇰🇷 /, "")) + '</span></div>'; }).join("");
   }
   function legend(ls, fs, showWon){
     return ls.map(function(l){ var a = l.a;
-      return '<div style="display:flex;align-items:center;gap:' + Math.round(fs * 0.5) + 'px;padding:' + Math.round(fs * 0.45) + 'px 0;border-bottom:1px solid ' + LINE + ';font-size:' + fs + 'px">' +
+      return '<div style="display:flex;align-items:center;gap:' + Math.round(fs * 0.5) + 'px;padding:' + Math.round(fs * 0.45) + 'px 0;border-bottom:1px solid ' + LINE + ';font-size:' + fs + 'px;color:' + INK + '">' +
         '<span style="flex:none;width:' + Math.round(fs * 0.75) + 'px;height:' + Math.round(fs * 0.75) + 'px;border-radius:3px;background:' + a.color + '"></span>' +
-        '<div style="flex:1;min-width:0"><div style="font-weight:800;color:' + INK + '">' + e(a.name) + '</div><div style="font-size:' + Math.round(fs * 0.78) + 'px;color:' + SUB + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(a.inst || "") + (a.code && String(a.code).length < 12 ? " (" + e(a.code) + ")" : "") + '</div></div>' +
-        '<div style="text-align:right;flex:none"><div style="font-weight:800;color:' + INK + '">' + pc(a.pct) + '</div>' + (showWon ? '<div style="font-size:' + Math.round(fs * 0.8) + 'px;color:' + NAVY + ';font-weight:700">' + man(l.won) + '</div>' : '') + '</div></div>';
+        '<div style="flex:1;min-width:0"><div style="font-weight:800;color:' + INK + '">' + e(a.name) + '</div><div style="font-size:' + Math.round(fs * 0.8) + 'px;color:' + SUB + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(a.inst || "") + (a.code && String(a.code).length < 12 ? " (" + e(a.code) + ")" : "") + '</div></div>' +
+        '<div style="text-align:right;flex:none"><div style="font-weight:800;color:' + INK + '">' + pc(a.pct) + '</div>' + (showWon ? '<div style="font-size:' + Math.round(fs * 0.82) + 'px;color:' + NAVY + ';font-weight:700">' + man(l.won) + '</div>' : '') + '</div></div>';
     }).join("");
   }
+  function tbl(t, fs, opt){
+    if (!t || !t.rows || !t.rows.length) return "";
+    opt = opt || {};
+    return (t.title ? '<div style="font-size:' + (fs + 2) + 'px;font-weight:800;margin:4px 0 8px;color:' + INK + '">' + e(t.title) + '</div>' : '') + '<table style="width:100%;border-collapse:collapse;font-size:' + fs + 'px;color:' + INK + '">' +
+      '<tr>' + t.cols.map(function(c, i){ return '<th style="text-align:' + (i && opt.right ? "right" : "left") + ';background:' + NAVY + ';color:#fff;padding:7px 8px;font-weight:700">' + e(c) + '</th>'; }).join("") + '</tr>' +
+      t.rows.map(function(r, i){ var hl = opt.hl && opt.hl(r, i); return '<tr style="background:' + (hl ? "#fff6e8" : i % 2 ? "#f7f9fc" : "#fff") + '">' + r.map(function(c, j){ return '<td style="padding:' + (opt.pad || "6px 8px") + ';border-bottom:1px solid ' + LINE + ';vertical-align:top;color:' + INK + ';text-align:' + (j && opt.right ? "right" : "left") + (hl || (opt.bold && opt.bold(j)) ? ';font-weight:800' : '') + '">' + (opt.raw ? c : e(c)) + '</td>'; }).join("") + '</tr>'; }).join("") + '</table>' +
+      (t.src ? '<div style="font-size:' + (fs - 1) + 'px;color:' + SUB + ';margin-top:4px">자료: ' + e(t.src) + '</div>' : '');
+  }
+  function box(inner, extra){ return '<div style="background:' + BG + ';border-radius:14px;padding:16px 18px;color:' + INK + ';' + (extra || "") + '">' + inner + '</div>'; }
+  function bullets(arr, fs, color){ return (arr || []).map(function(p){ return '<div style="display:flex;gap:10px;font-size:' + fs + 'px;line-height:1.6;margin-top:7px;color:' + INK + '"><span style="flex:none;color:' + (color || NAVY) + ';font-weight:900">▸</span><span>' + e(p) + '</span></div>'; }).join(""); }
+
+  /* ═════════ ① 원페이지 (전송용 그림 1080px) ═════════ */
   function onePage(m){
-    var W = 1080, fs = 27, M = m.M, multi = m.items.length > 1;
-    var h = '<div class="ppx" style="width:' + W + 'px;background:' + BG + ';font-family:' + FONT + ';color:' + INK + ';padding-bottom:28px">';
-    // 머리
-    h += '<div style="background:linear-gradient(135deg,' + NAVY + ' 0%,#24508a 100%);color:#fff;padding:52px 56px 46px;position:relative;overflow:hidden">' +
-      '<div style="position:absolute;right:-90px;top:-90px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.06)"></div>' +
-      '<div style="position:absolute;right:120px;bottom:-140px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.05)"></div>' +
-      '<div style="font-size:24px;opacity:.85;font-weight:700;letter-spacing:1px">INVESTMENT PROPOSAL · ' + e(m.date) + '</div>' +
-      '<div style="font-size:52px;font-weight:800;letter-spacing:-1.5px;margin-top:14px;line-height:1.2">' + e(custName(m)) + '을 위한<br>' + e(titleOf(m)) + '</div>' +
-      (m.total ? '<div style="display:inline-block;margin-top:22px;background:rgba(255,255,255,.14);border-radius:16px;padding:12px 22px;font-size:28px">제안 금액 <b style="font-size:36px">' + man(m.total) + '</b></div>' : '') +
-      '</div>';
-    // 시장
-    h += '<div style="padding:34px 44px 0"><div style="font-size:31px;font-weight:800;margin-bottom:14px">📊 오늘 시장 한눈에</div>' + kpiTiles(M, 4, fs, 4) +
-      '<div style="background:#fff;border:1px solid ' + LINE + ';border-radius:18px;padding:12px 22px 16px;margin-top:14px">' + trendRows(M, 25) +
-      (M.lead ? '<div style="font-size:24px;color:' + SUB + ';margin-top:10px">💰 돈이 몰리는 곳: <b style="color:' + INK + '">' + e(M.lead) + '</b></div>' : '') + '</div></div>';
-    // 여러 상품이면 전체 나눔
+    var W = 1080, multi = m.items.length > 1;
+    var h = '<div class="ppx" style="width:' + W + 'px;background:' + BG + ';font-family:' + FONT + '">' + '<div style="color:' + INK + ';padding-bottom:28px">';
+    h += '<div style="background:linear-gradient(135deg,' + NAVY + ' 0%,#24508a 100%);padding:52px 56px 46px;position:relative;overflow:hidden"><div style="color:#fff;position:relative">' +
+      '<div style="position:absolute;right:-150px;top:-140px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.06)"></div>' +
+      '<div style="font-size:24px;opacity:.85;font-weight:700;letter-spacing:1px;color:#fff">INVESTMENT PROPOSAL · ' + e(m.date) + '</div>' +
+      '<div style="font-size:52px;font-weight:800;letter-spacing:-1.5px;margin-top:14px;line-height:1.2;color:#fff">' + e(custName(m)) + '을 위한<br>' + e(titleOf(m)) + '</div>' +
+      (m.total ? '<div style="display:inline-block;margin-top:22px;background:rgba(255,255,255,.14);border-radius:16px;padding:12px 22px;font-size:28px;color:#fff">제안 금액 <b style="font-size:36px">' + man(m.total) + '</b></div>' : '') + '</div></div>';
     if (multi){
-      var parts = m.items.map(function(x, i){ return {pct: m.total ? x.amt / m.total * 100 : 100 / m.items.length, color: x.f.color}; });
-      h += '<div style="padding:30px 44px 0"><div style="font-size:31px;font-weight:800;margin-bottom:14px">🧺 전체 나눠 담기</div><div style="background:#fff;border:1px solid ' + LINE + ';border-radius:22px;padding:24px;display:flex;gap:26px;align-items:center">' +
-        donut(parts, 260, 52, "합계", m.total ? man(m.total) : m.items.length + "개") + '<div style="flex:1">' +
-        m.items.map(function(x){ return '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid ' + LINE + ';font-size:26px"><span style="width:20px;height:20px;border-radius:4px;background:' + x.f.color + '"></span><b style="flex:1">' + e(x.f.icon + " " + x.f.short) + '</b><span style="font-weight:800">' + (m.total ? pc(x.amt / m.total * 100) : "") + '</span><span style="width:170px;text-align:right;color:' + NAVY + ';font-weight:800">' + man(x.amt) + '</span></div>'; }).join("") +
-        '</div></div></div>';
+      var parts = m.items.map(function(x){ return {pct: m.total ? x.amt / m.total * 100 : 100 / m.items.length, color: x.f.color}; });
+      h += '<div style="padding:30px 44px 0"><div style="font-size:31px;font-weight:800;margin-bottom:14px;color:' + INK + '">🧺 전체 나눠 담기</div><div style="background:#fff;border:1px solid ' + LINE + ';border-radius:22px;padding:24px;display:flex;gap:26px;align-items:center">' +
+        donut(parts, 250, 50, "합계", m.total ? man(m.total) : m.items.length + "개") + '<div style="flex:1">' +
+        m.items.map(function(x){ return '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid ' + LINE + ';font-size:26px;color:' + INK + '"><span style="width:20px;height:20px;border-radius:4px;background:' + x.f.color + '"></span><b style="flex:1">' + e(x.f.icon + " " + x.f.short) + '</b><span style="font-weight:800">' + (m.total ? pc(x.amt / m.total * 100) : "") + '</span><span style="width:170px;text-align:right;color:' + NAVY + ';font-weight:800">' + man(x.amt) + '</span></div>'; }).join("") + '</div></div></div>';
     }
-    // 상품별
     m.items.forEach(function(x){
-      var f = x.f, ls = lines(f, x.amt), inc = income(f, x.amt);
+      var f = x.f, ls = lines(f, x.amt), mk = f.mkt || {}, sl = simLine(f, x.amt), ch = (mk.charts || [])[0];
       h += '<div style="padding:30px 44px 0"><div style="background:#fff;border:1px solid ' + LINE + ';border-radius:22px;overflow:hidden">' +
-        '<div style="background:' + f.color + ';color:#fff;padding:20px 26px;display:flex;align-items:center;gap:14px"><span style="font-size:40px">' + e(f.icon) + '</span><div style="flex:1"><div style="font-size:31px;font-weight:800">' + e(f.title) + '</div><div style="font-size:21px;opacity:.9">' + e(f.sub) + '</div></div>' + (x.amt ? '<div style="font-size:30px;font-weight:800">' + man(x.amt) + '</div>' : '') + '</div>' +
-        '<div style="padding:22px 26px 10px;font-size:27px;font-weight:800;line-height:1.45;color:' + NAVY + '">' + e(f.headline) + '</div>' +
-        '<div style="display:flex;gap:26px;align-items:center;padding:6px 26px 18px">' + donut(f.alloc, multi ? 230 : 290, multi ? 44 : 56, inc ? "연 " + inc.pct.toFixed(2) + "%" : "비중", inc ? (x.amt ? man(inc.won) : "") : "100%") +
+        '<div style="background:' + f.color + ';padding:20px 26px"><div style="display:flex;align-items:center;gap:14px;color:#fff"><span style="font-size:40px">' + e(f.icon) + '</span><div style="flex:1"><div style="font-size:31px;font-weight:800;color:#fff">' + e(f.title) + '</div><div style="font-size:21px;color:#fff;opacity:.92">' + e(f.sub) + '</div></div>' + (x.amt ? '<div style="font-size:30px;font-weight:800;color:#fff">' + man(x.amt) + '</div>' : '') + '</div></div>' +
+        '<div style="padding:20px 26px 0"><div style="font-size:24px;font-weight:800;color:' + SUB + ';margin-bottom:10px">📊 ' + e(mk.title || "시장 지금") + '</div>' + kpiTiles((mk.kpis || []).filter(function(k){ return k.value && k.value !== "–"; }).slice(0, multi ? 3 : 4), 22, multi ? 3 : 4) + '</div>' +
+        (ch && !multi ? '<div style="padding:18px 26px 0">' + chartBox(ch, 980, 220, 21) + '</div>' : '') +
+        '<div style="padding:22px 26px 6px;font-size:27px;font-weight:800;line-height:1.45;color:' + NAVY + '">' + e(f.headline) + '</div>' +
+        '<div style="display:flex;gap:26px;align-items:center;padding:6px 26px 14px">' + donut(f.alloc, multi ? 220 : 270, multi ? 44 : 54, x.amt ? "제안 금액" : "비중", x.amt ? man(x.amt) : "100%") +
         '<div style="flex:1;min-width:0">' + legend(ls, multi ? 22 : 24, !!x.amt) + '</div></div>' +
-        (inc && x.amt ? '<div style="margin:0 26px 18px;background:#f1f6ff;border-radius:14px;padding:12px 18px;font-size:24px">💡 ' + e(inc.lab) + ' 약 <b style="color:' + NAVY + '">' + man(inc.won) + '</b> (연 ' + inc.pct.toFixed(2) + '%)</div>' : '') +
-        (f.tax ? '<div style="margin:0 26px 18px;background:#effaf4;border-radius:14px;padding:12px 18px;font-size:24px">🧾 연 ' + f.tax.limit + '만원 넣으면 세액공제 <b>' + taxLine(f).map(function(t){ return t.full + "(" + t.rate + "%)"; }).join(" / ") + '</b></div>' : '') +
-        '<div style="padding:0 26px 20px">' + (f.points || []).slice(0, multi ? 2 : 3).map(function(p){ return '<div style="display:flex;gap:10px;font-size:' + (multi ? 22 : 24) + 'px;line-height:1.5;margin-top:8px;color:' + INK + '"><span style="color:' + f.color + ';font-weight:900">✓</span><span>' + e(p) + '</span></div>'; }).join("") + '</div>' +
-        '</div></div>';
+        (sl ? '<div style="margin:0 26px 16px;background:#eef4ff;border-radius:16px;padding:16px 20px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700">🧮 모의 계산 · ' + e(sl.lab) + '</div><div style="font-size:38px;font-weight:800;color:' + NAVY + ';margin:2px 0">' + e(sl.big) + '</div><div style="font-size:21px;color:' + INK + '">' + e(sl.sub) + '</div></div>' : '') +
+        (f.tax ? '<div style="margin:0 26px 16px;background:#effaf4;border-radius:14px;padding:12px 18px;font-size:23px;color:' + INK + '">🧾 연 ' + f.tax.limit + '만원 넣으면 세액공제 <b>' + taxLine(f).map(function(t){ return t.full + "(" + t.rate + "%)"; }).join(" / ") + '</b></div>' : '') +
+        '<div style="padding:0 26px 22px">' + bullets((mk.view || f.points || []).slice(0, multi ? 2 : 3), multi ? 21 : 23, f.color) + '</div></div></div>';
     });
-    // 일정·서명
-    if ((M.watch || []).length) h += '<div style="padding:30px 44px 0"><div style="font-size:31px;font-weight:800;margin-bottom:12px">📅 앞으로 지켜볼 일정</div><div style="background:#fff;border:1px solid ' + LINE + ';border-radius:18px;padding:8px 22px">' +
-      M.watch.slice(0, 3).map(function(w){ return '<div style="display:flex;gap:16px;padding:12px 0;border-bottom:1px solid ' + LINE + ';font-size:24px"><b style="flex:none;width:170px;color:' + NAVY + '">' + e(w[0]) + '</b><span>' + e(w[1]) + '</span></div>'; }).join("") + '</div></div>';
-    h += '<div style="margin:30px 44px 0;padding:22px 26px;border-radius:18px;background:' + NAVY + ';color:#fff;display:flex;align-items:center;gap:18px"><div style="font-size:44px">🤝</div><div style="flex:1"><div style="font-size:21px;opacity:.8">제안</div><div style="font-size:30px;font-weight:800">' + e(byLine(m) || "담당 PB") + '</div></div><div style="font-size:21px;opacity:.8;text-align:right">' + e(m.date) + '</div></div>';
-    h += '<div style="padding:18px 48px 0;font-size:17px;line-height:1.55;color:#8a93a3">' + m.notice.slice(0, 2).map(e).join(" · ") + '</div></div>';
+    h += '<div style="margin:30px 44px 0;padding:22px 26px;border-radius:18px;background:' + NAVY + '"><div style="display:flex;align-items:center;gap:18px;color:#fff"><div style="font-size:44px">🤝</div><div style="flex:1"><div style="font-size:21px;opacity:.8;color:#fff">제안</div><div style="font-size:30px;font-weight:800;color:#fff">' + e(byLine(m) || "담당 PB") + '</div></div><div style="font-size:21px;opacity:.8;text-align:right;color:#fff">' + e(m.date) + '</div></div></div>';
+    h += '<div style="padding:18px 48px 0;font-size:17px;line-height:1.55;color:#6b7484">' + m.notice.slice(0, 2).map(e).join(" · ") + '</div></div></div>';
     return h;
   }
 
   /* ═════════ ② 풀버전 PDF (A4 794×1123 쪽마다) ═════════ */
-  var PW = 794, PH = 1123;
+  var PW = 794, PH = 1123, CW = PW - 96;
   function page(inner, n, of, m, color){
-    return '<div class="ppx" style="width:' + PW + 'px;height:' + PH + 'px;background:#fff;font-family:' + FONT + ';color:' + INK + ';position:relative;overflow:hidden">' +
+    return '<div class="ppx" style="width:' + PW + 'px;height:' + PH + 'px;background:#fff;font-family:' + FONT + ';position:relative;overflow:hidden"><div style="color:' + INK + ';width:' + PW + 'px;height:' + PH + 'px;position:relative">' +
       '<div style="height:8px;background:' + (color || NAVY) + '"></div>' +
-      '<div style="padding:34px 48px 0">' + inner + '</div>' +
-      '<div style="position:absolute;left:48px;right:48px;bottom:26px;display:flex;justify-content:space-between;font-size:11px;color:#98a1b0;border-top:1px solid ' + LINE + ';padding-top:10px"><span>' + e(custName(m)) + ' 투자 제안 · ' + e(m.date) + '</span><span>' + e(byLine(m)) + '</span><span>' + n + ' / ' + of + '</span></div></div>';
+      '<div style="padding:30px 48px 0;color:' + INK + '">' + inner + '</div>' +
+      '<div style="position:absolute;left:48px;right:48px;bottom:24px;display:flex;justify-content:space-between;font-size:11px;color:#8a93a3;border-top:1px solid ' + LINE + ';padding-top:9px"><span>' + e(custName(m)) + ' 투자 제안 · ' + e(m.date) + '</span><span>' + e(byLine(m)) + '</span><span>' + n + ' / ' + of + '</span></div></div></div>';
   }
-  function hTitle(t, sub, color){ return '<div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:18px"><div style="font-size:26px;font-weight:800;letter-spacing:-0.8px;color:' + (color || NAVY) + '">' + t + '</div>' + (sub ? '<div style="font-size:13px;color:' + SUB + ';padding-bottom:4px">' + e(sub) + '</div>' : '') + '</div>'; }
-  function box(inner, extra){ return '<div style="background:' + BG + ';border-radius:14px;padding:16px 18px;' + (extra || "") + '">' + inner + '</div>'; }
-  function tbl(t, fs){
-    if (!t || !t.rows || !t.rows.length) return "";
-    return '<div style="font-size:' + (fs + 1) + 'px;font-weight:800;margin:4px 0 8px">' + e(t.title || "") + '</div><table style="width:100%;border-collapse:collapse;font-size:' + fs + 'px">' +
-      '<tr>' + t.cols.map(function(c){ return '<th style="text-align:left;background:' + NAVY + ';color:#fff;padding:7px 8px;font-weight:700">' + e(c) + '</th>'; }).join("") + '</tr>' +
-      t.rows.map(function(r, i){ return '<tr style="background:' + (i % 2 ? "#f7f9fc" : "#fff") + '">' + r.map(function(c){ return '<td style="padding:6px 8px;border-bottom:1px solid ' + LINE + ';vertical-align:top">' + e(c) + '</td>'; }).join("") + '</tr>'; }).join("") + '</table>';
+  function hTitle(t, sub, color){ return '<div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:16px"><div style="font-size:25px;font-weight:800;letter-spacing:-0.8px;color:' + (color || NAVY) + '">' + t + '</div>' + (sub ? '<div style="font-size:13.5px;color:' + SUB + ';padding-bottom:4px">' + e(sub) + '</div>' : '') + '</div>'; }
+  function secT(t){ return '<div style="font-size:17px;font-weight:800;margin:16px 0 8px;color:' + INK + '">' + t + '</div>'; }
+
+  // 시장 분석 쪽
+  function mktPage(f){
+    var mk = f.mkt || {}, ch = mk.charts || [];
+    var two = ch.length >= 2;
+    return hTitle("📊 " + e(mk.title || "시장 지금"), f.short + " 판단 근거", f.color) + kpiTiles(mk.kpis || [], 16, (mk.kpis || []).filter(function(k){ return k.value && k.value !== "–"; }).length > 4 ? 3 : 4) +
+      '<div style="height:14px"></div>' + box(chartBox(ch[0], CW - 36, two ? 150 : 200, 14)) +
+      (two ? '<div style="height:10px"></div>' + box(chartBox(ch[1], CW - 36, 130, 14)) : '') +
+      secT("🔎 그래서 지금은") + bullets(mk.view, 14.5, f.color);
   }
-  function chartHtml(f, w, fs){
-    var ch = f.chart || {};
-    if (ch.type === "line") return lineBox(ch, w, 150, f.color, fs) + (ch.chart2 ? '<div style="height:14px"></div>' + lineBox(ch.chart2, w, 120, "#7b5cff", fs) : "");
-    if (ch.type === "bar" && ch.labels && ch.labels.length > 6) return vbars(ch, w, 170, fs);
-    if (ch.type === "bar") return '<div style="font-size:' + fs + 'px;font-weight:700;margin-bottom:4px">' + e(ch.title) + '</div>' + hbars(ch.labels.map(function(l, i){ return [l, ch.vals[i], f.color, ch.vals[i] + (ch.unit || "")]; }), fs, 100);
-    // 도넛형 폼: 위험·안전 나눔 또는 칸별 막대
-    var risky = (f.alloc || []).filter(function(a){ return a.kind === "위험"; }).reduce(function(s, a){ return s + a.pct; }, 0);
-    return '<div style="font-size:' + fs + 'px;font-weight:700;margin-bottom:4px">칸별 비중</div>' + hbars(f.alloc.map(function(a){ return [a.name, a.pct, a.color, pc(a.pct)]; }), fs, 100) +
-      (ch.split ? '<div style="margin-top:12px;font-size:' + fs + 'px"><div style="display:flex;height:26px;border-radius:8px;overflow:hidden;font-weight:800;color:#fff;font-size:' + (fs - 1) + 'px"><div style="width:' + risky + '%;background:#e0533d;display:flex;align-items:center;justify-content:center">위험자산 ' + pc(risky) + '</div><div style="flex:1;background:#3fb28f;display:flex;align-items:center;justify-content:center">안전자산 ' + pc(100 - risky) + '</div></div><div style="color:' + SUB + ';margin-top:5px;font-size:' + (fs - 1) + 'px">법정 한도: 위험자산 70% 이하</div></div>' : '');
+  function outlookPage(f){
+    var mk = f.mkt || {}, ch = mk.charts || [], o = mk.outlook;
+    return hTitle("🔭 " + e(o ? o.title : "시장 자료 더 보기"), f.short + " · 시장 자료", f.color) +
+      (o ? tbl({cols: o.cols, rows: o.rows.slice(0, 24), src: o.src}, o.rows.length > 14 ? 11.5 : 13, {right: true}) : '') +
+      (ch[2] ? '<div style="height:14px"></div>' + box(chartBox(ch[2], CW - 36, 150, 14)) : '') +
+      (mk.curve ? '<div style="height:14px"></div>' + box('<div style="font-size:14px;font-weight:800;margin-bottom:6px">' + e(mk.curve.title) + '</div>' + hbars(mk.curve.rows.map(function(r){ return [r[0] + "년 만기", r[1], f.color, r[1].toFixed(2) + "%"]; }), 13, null, 20)) : '');
+  }
+  // 모의투자 계산서 쪽
+  function simPage(f, amt){
+    var S = f.sim; if (!S) return null;
+    var A = amt || 100000000, demo = !amt, head = hTitle("🧮 모의투자 계산서", (demo ? "1억원 넣었다고 치면" : man(A) + " 넣으면") + " · " + f.short, f.color);
+    if (S.kind === "bond"){
+      var B = bondCalc(S, A);
+      var r1 = B.rows.map(function(r){ var cu = r.p.cur, u = CUR[cu]; var fm = function(v){ return cu === "KRW" ? man(v) : (Math.round(v)).toLocaleString("ko-KR") + " " + u; };
+        return [r.p.slot + "<br><span style='color:" + SUB + ";font-weight:500;font-size:11px'>" + e(r.p.name) + "</span>", man(r.a), fm(r.face) + "<br><span style='color:" + SUB + ";font-size:11px'>(액면)</span>", fm(r.cpnAll - r.tax) + (r.tax ? "<br><span style='color:" + SUB + ";font-size:11px'>세금 " + fm(r.tax) + " 뺌</span>" : "<br><span style='color:#1a8a5a;font-size:11px'>비과세</span>"),
+          fm(r.total), "<b>" + man(r.krw) + "</b>", r.p.yrs.toFixed(1) + "년", r.cagr.toFixed(2) + "%"]; });
+      var big = '<div style="display:flex;gap:12px;margin-bottom:14px">' +
+        box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">넣는 돈</div><div style="font-size:26px;font-weight:800">' + man(A) + '</div>', "flex:1") +
+        box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">만기까지 받는 돈 ' + (S.cur === "KRW" ? "(세후)" : "(환율 그대로)") + '</div><div style="font-size:26px;font-weight:800;color:' + NAVY + '">' + man(B.tot) + '</div>', "flex:1;background:#eef4ff") +
+        box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">이익 · 연 환산</div><div style="font-size:26px;font-weight:800;color:#1a8a5a">+' + man(B.pnl) + '</div><div style="font-size:13px">연 ' + B.cagr.toFixed(2) + '% · 평균 ' + B.yrs.toFixed(1) + '년</div>', "flex:1;background:#effaf4") + '</div>';
+      var t1 = tbl({title: "① 만기까지 들고 가면", cols: ["칸", "넣는 돈", "사게 되는 양", "받는 이자", "만기 총액", "원화로", "기간", "연 환산"], rows: r1}, 11.5, {raw: true, right: true});
+      var fx = B.fxScen.length ? secT("② 환율이 바뀌면 (만기 때 " + (S.cur === "MIX" ? "헤알·달러" : "달러") + " 값이 지금보다)") +
+        pnBars(B.fxScen.map(function(s){ return {l: (s.m > 0 ? "+" : s.m < 0 ? "−" : "") + Math.abs(s.m) + "%" + (s.m === 0 ? " (그대로)" : ""), v: s.pnl, t: (s.pnl >= 0 ? "+" : "−") + man(Math.abs(s.pnl)), hl: s.m === 0}; }), CW, 125, 12.5) +
+        '<div style="font-size:13px;margin-top:6px;color:' + INK + '">' + (B.be != null ? "👉 환율이 만기까지 <b>" + Math.abs(B.be).toFixed(1) + "%</b> 넘게 떨어지지만 않으면 원화로도 이익임 (연 약 " + Math.abs((Math.pow(1 + B.be / 100, 1 / (B.yrs || 1)) - 1) * 100).toFixed(1) + "%까지 견딤)" : "") + '</div>' : '';
+      var rt = B.rateScen.length ? secT((B.fxScen.length ? "③" : "②") + " 1년 뒤 팔면 — 금리가 바뀔 때 (1년치 이자 포함)") +
+        pnBars(B.rateScen.map(function(s){ return {l: "금리 " + (s.d > 0 ? "+" : s.d < 0 ? "−" : "") + Math.abs(s.d) + "%p" + (s.d === 0 ? " (그대로)" : ""), v: s.pnl, t: (s.pnl >= 0 ? "+" : "−") + man(Math.abs(s.pnl)) + " (" + sgn(s.pct, 1) + ")", hl: s.d === 0}; }), CW, 115, 12) +
+        '<div style="font-size:12px;color:' + SUB + ';margin-top:4px">금리가 내리면 채권값이 올라 이익이 커지고, 오르면 값이 내려감 · 만기까지 들고 가면 이 변동은 사라짐' + (S.cur !== "KRW" ? " · 환율 변화는 빼고 계산" : "") + '</div>' : '';
+      var yr = B.years.filter(function(y){ return y.v > 0; }).length > 1 ? secT("📅 해마다 받는 이자 (지금 환율·세후)") + pnBars(B.years.slice(0, 12).map(function(y){ return {l: y.y + "년차", v: y.v, t: man(y.v)}; }), CW, 72, 10.5) : '';
+      return head + big + t1 + fx + rt + yr + '<div style="font-size:11.5px;color:' + SUB + ';margin-top:10px;line-height:1.5">※ ' + e(S.note) + '</div>';
+    }
+    if (S.kind === "els"){
+      var E = elsCalc(S, A);
+      return head + E.map(function(x, xi){ var p = x.p, h = p.hist;
+        var rows = x.steps.map(function(s, i){ return [(s.t) + "개월", s.bar ? "처음 값의 " + s.bar + "% 이상" : "–", man(s.won), "+" + man(s.won - x.a), s.pr != null ? s.pr.toFixed(1) + "%" : "–"]; })
+          .concat(x.tail.map(function(t){ return [t.lab, "", man(t.won), (t.won - x.a >= 0 ? "+" : "−") + man(Math.abs(t.won - x.a)), t.pr != null ? t.pr.toFixed(1) + "%" : "–"]; }));
+        return '<div style="margin-bottom:' + (xi < E.length - 1 ? 14 : 4) + 'px">' + '<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:14.5px;font-weight:800;margin:6px 0"><span style="color:' + (["#3fb28f", "#2f6fdf", "#7b5cff"][xi] || NAVY) + '">' + e(p.slot) + ' · ' + e(p.name) + '</span><span style="font-size:12.5px;color:' + SUB + '">' + e(p.ua) + ' · 연 ' + p.cpn + '%' + (p.ki ? ' · KI ' + p.ki + '%' : ' · 원금지급') + ' · ' + man(x.a) + '</span></div>' +
+          tbl({cols: ["끝나는 때", "조건", "받는 돈", "이익", "과거 확률"], rows: rows}, 10.5, {right: true, pad: "3px 8px", hl: function(r, i){ return i === 0; }}) +
+          '<div style="font-size:12px;color:' + SUB + ';margin-top:3px">' + (h ? "과거 " + h.from + "~" + h.to + " 매일 가입했다면 " + (h.n || 0).toLocaleString("ko-KR") + "번 중 · 평균 기대 회수액 <b style='color:" + NAVY + "'>" + man(x.ev) + "</b>" + (h.loss ? " · 손실 날 땐 평균 " + h.loss_avg + "% (최악 " + h.loss_worst + "%)" : "") : "과거 확률 자료 없음") + '</div></div>'; }).join("") +
+        '<div style="font-size:11.5px;color:' + SUB + ';margin-top:8px;line-height:1.5">※ ' + e(S.note) + '</div>';
+    }
+    if (S.kind === "equity"){
+      var Q = eqCalc(S, A), b = S.bt, cb = contrib(S, f);
+      var gv = b.growth.vals.map(function(v){ return v * A; });
+      return head + '<div style="display:flex;gap:12px;margin-bottom:12px">' +
+        box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">' + b.from.slice(0, 4) + '년부터 연평균</div><div style="font-size:26px;font-weight:800;color:' + NAVY + '">연 ' + b.cagr + '%</div>', "flex:1;background:#eef4ff") +
+        box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">1년 보유 시 이익 날 확률</div><div style="font-size:26px;font-weight:800;color:#1a8a5a">' + b.y1.pos + '%</div><div style="font-size:12.5px">5년 보유 시 ' + (b.y5 ? b.y5.pos + "%" : "–") + '</div>', "flex:1;background:#effaf4") +
+        box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">가장 크게 빠졌을 때</div><div style="font-size:26px;font-weight:800;color:' + UP + '">' + sgn(b.mdd, 1) + '</div><div style="font-size:12.5px">' + man(Math.abs(Q.mdd)) + ' 줄었다가 회복</div>', "flex:1;background:#fff4f2") + '</div>' +
+        box(chartBox({title: man(A) + "을 " + b.from.slice(0, 4) + "년에 넣었다면 (매달 비중 맞춤)", unit: "원", labels: b.growth.labels, vals: gv, color: f.color}, CW - 36, 150, 13)) +
+        secT("① 1년 뒤 (과거 모든 1년을 줄 세워 본 결과)") + pnBars(Q.y1.map(function(x){ return {l: x.l, v: x.won - A, t: (x.r >= 0 ? "+" : "−") + man(Math.abs(x.won - A)) + " (" + sgn(x.r, 1) + ")", hl: /보통/.test(x.l)}; }), CW, 115, 12.5) +
+        (Q.y5 ? secT("② 5년 뒤 (연평균으로)") + tbl({cols: ["경우", "연평균", "5년 뒤 금액", "이익"], rows: Q.y5.map(function(x){ return [x.l, sgn(x.r, 1), man(x.won), (x.won - A >= 0 ? "+" : "−") + man(Math.abs(x.won - A))]; })}, 12.5, {right: true, hl: function(r){ return /보통/.test(r[0]); }}) : '') +
+        (cb ? secT("③ 매년 " + S.contrib + "만원씩 넣으면 (세액공제 포함)") + tbl({cols: ["기간", "넣은 돈", "보통이면", "나쁘면", "돌려받는 세금"], rows: cb.map(function(c){ return [c.y + "년", man(c.put), man(c.mid), man(c.low), man(c.tax132) + "~" + man(c.tax165)]; })}, 12.5, {right: true}) : '') +
+        secT("📅 해마다 수익률 (최근 " + b.years.length + "년)") + pnBars(b.years.map(function(y){ return {l: String(y[0]).slice(2) + "년", v: y[1], t: sgn(y[1], 0)}; }), CW, 95, 10.5) +
+        '<div style="font-size:11.5px;color:' + SUB + ';margin-top:8px;line-height:1.5">※ ' + e(S.note) + '</div>';
+    }
+    return null;
   }
   function fullPages(m){
-    var P = [], M = m.M;
-    // 표지
-    P.push(function(n, of){ return '<div class="ppx" style="width:' + PW + 'px;height:' + PH + 'px;background:linear-gradient(160deg,' + NAVY + ' 0%,#1f4d86 60%,#2b6cb0 100%);font-family:' + FONT + ';position:relative;overflow:hidden"><div style="position:absolute;inset:0;color:#fff">' +
+    var P = [];
+    P.push(function(n, of){ return '<div class="ppx" style="width:' + PW + 'px;height:' + PH + 'px;background:linear-gradient(160deg,' + NAVY + ' 0%,#1f4d86 60%,#2b6cb0 100%);font-family:' + FONT + ';position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;width:' + PW + 'px;height:' + PH + 'px;color:#fff">' +
       '<div style="position:absolute;right:-160px;top:-120px;width:520px;height:520px;border-radius:50%;background:rgba(255,255,255,.06)"></div><div style="position:absolute;left:-120px;bottom:-160px;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,.05)"></div>' +
-      '<div style="padding:120px 70px 0;position:relative"><div style="font-size:16px;letter-spacing:4px;opacity:.8;font-weight:700">INVESTMENT PROPOSAL</div>' +
-      '<div style="font-size:24px;margin-top:40px;opacity:.9">' + e(custName(m)) + '을 위한</div><div style="font-size:46px;font-weight:800;letter-spacing:-1.5px;line-height:1.25;margin-top:8px">' + e(titleOf(m)) + '<br>투자 제안서</div>' +
+      '<div style="padding:120px 70px 0;position:relative;color:#fff"><div style="font-size:16px;letter-spacing:4px;opacity:.8;font-weight:700">INVESTMENT PROPOSAL</div>' +
+      '<div style="font-size:24px;margin-top:40px;opacity:.92">' + e(custName(m)) + '을 위한</div><div style="font-size:46px;font-weight:800;letter-spacing:-1.5px;line-height:1.25;margin-top:8px;color:#fff">' + e(titleOf(m)) + '<br>투자 제안서</div>' +
       '<div style="width:70px;height:5px;background:#f0b43c;margin:34px 0"></div>' +
-      (m.total ? '<div style="font-size:18px;opacity:.85">제안 금액</div><div style="font-size:40px;font-weight:800;margin-top:4px">' + man(m.total) + '</div>' : '') +
-      '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:30px">' + m.items.map(function(x){ return '<span style="background:rgba(255,255,255,.14);border-radius:99px;padding:8px 16px;font-size:16px;font-weight:700">' + e(x.f.icon + " " + x.f.short) + (x.amt ? " · " + man(x.amt) : "") + '</span>'; }).join("") + '</div></div>' +
-      '<div style="position:absolute;left:70px;right:70px;bottom:70px;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,.25);padding-top:22px"><div><div style="font-size:14px;opacity:.75">제안</div><div style="font-size:24px;font-weight:800;margin-top:4px">' + e(byLine(m) || "담당 PB") + '</div></div><div style="font-size:16px;opacity:.85">' + e(m.date) + '</div></div></div></div>'; });
-    // 시장
-    P.push(function(n, of){
-      var sc = (M.scen || []);
-      var inner = hTitle("📊 오늘 시장 한눈에", M.date ? M.date + " " + (M.edition || "") + " 시황 기준" : "") + kpiTiles(M, 6, 17, 3) +
-        '<div style="height:16px"></div>' + box('<div style="font-size:16px;font-weight:800;margin-bottom:2px">🧭 큰 흐름</div>' + trendRows(M, 15)) +
-        (M.one ? '<div style="height:14px"></div>' + box('<div style="font-size:16px;font-weight:800;margin-bottom:6px">📰 어제·오늘 한 줄</div><div style="font-size:15px;line-height:1.6">' + e(M.one) + '</div>' + (M.talk || []).map(function(t){ return '<div style="font-size:13.5px;line-height:1.6;color:' + SUB + ';margin-top:4px">· ' + e(t) + '</div>'; }).join("")) : '') +
-        (sc.length ? '<div style="height:14px"></div>' + box('<div style="font-size:16px;font-weight:800;margin-bottom:4px">🔮 앞으로 시나리오 (가능성)</div>' + hbars(sc.map(function(s){ return [s.label, s.pct, s.color || NAVY, s.pct + "%"]; }), 14, 100)) : '') +
-        (M.lead ? '<div style="height:14px"></div>' + box('<div style="font-size:16px;font-weight:800;margin-bottom:6px">💰 요즘 돈이 몰리는 곳</div><div style="font-size:14.5px;line-height:1.6">' + e(M.lead) + '</div>') : '') +
-        ((M.watch || []).length ? '<div style="height:14px"></div>' + box('<div style="font-size:16px;font-weight:800;margin-bottom:4px">📅 지켜볼 일정</div>' + M.watch.map(function(w){ return '<div style="display:flex;gap:14px;padding:6px 0;font-size:14px;border-bottom:1px solid ' + LINE + '"><b style="flex:none;width:110px;color:' + NAVY + '">' + e(w[0]) + '</b><span>' + e(w[1]) + '</span></div>'; }).join("")) : '');
-      return page(inner, n, of, m);
-    });
-    // 요약 (여러 상품)
+      (m.total ? '<div style="font-size:18px;opacity:.88">제안 금액</div><div style="font-size:40px;font-weight:800;margin-top:4px;color:#fff">' + man(m.total) + '</div>' : '') +
+      '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:30px">' + m.items.map(function(x){ return '<span style="background:rgba(255,255,255,.16);border-radius:99px;padding:8px 16px;font-size:16px;font-weight:700;color:#fff">' + e(x.f.icon + " " + x.f.short) + (x.amt ? " · " + man(x.amt) : "") + '</span>'; }).join("") + '</div></div>' +
+      '<div style="position:absolute;left:70px;right:70px;bottom:70px;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,.3);padding-top:22px;color:#fff"><div><div style="font-size:14px;opacity:.8">제안</div><div style="font-size:24px;font-weight:800;margin-top:4px">' + e(byLine(m) || "담당 PB") + '</div></div><div style="font-size:16px;opacity:.88">' + e(m.date) + '</div></div></div></div>'; });
     if (m.items.length > 1) P.push(function(n, of){
       var parts = m.items.map(function(x){ return {pct: m.total ? x.amt / m.total * 100 : 100 / m.items.length, color: x.f.color}; });
-      var inner = hTitle("🧺 제안 한눈에", "상품별 금액과 핵심") + '<div style="display:flex;gap:30px;align-items:center;margin-bottom:22px">' + donut(parts, 230, 46, "합계", m.total ? man(m.total) : "") +
-        '<div style="flex:1">' + m.items.map(function(x){ return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid ' + LINE + ';font-size:15px"><span style="width:14px;height:14px;border-radius:3px;background:' + x.f.color + '"></span><b style="flex:1">' + e(x.f.icon + " " + x.f.title) + '</b><span style="font-weight:800">' + (m.total ? pc(x.amt / m.total * 100) : "") + '</span><span style="width:120px;text-align:right;color:' + NAVY + ';font-weight:800">' + man(x.amt) + '</span></div>'; }).join("") + '</div></div>' +
-        (m.items.length > 4 ? m.items.map(function(x){ return '<div style="display:flex;gap:10px;font-size:12.5px;line-height:1.45;padding:7px 10px;margin-bottom:6px;background:' + BG + ';border-radius:10px;border-left:5px solid ' + x.f.color + '"><b style="flex:none;width:92px;color:' + x.f.color + '">' + e(x.f.short) + '</b><span>' + e(x.f.headline) + '</span></div>'; }).join("")
-          : m.items.map(function(x){ return box('<div style="font-size:15px;font-weight:800;color:' + x.f.color + '">' + e(x.f.icon + " " + x.f.short) + '</div><div style="font-size:14px;line-height:1.55;margin-top:4px">' + e(x.f.headline) + '</div>', "margin-bottom:10px;border-left:5px solid " + x.f.color); }).join(""));
+      var inner = hTitle("🧺 제안 한눈에", "상품별 금액과 핵심") + '<div style="display:flex;gap:30px;align-items:center;margin-bottom:20px">' + donut(parts, 220, 44, "합계", m.total ? man(m.total) : "") +
+        '<div style="flex:1">' + m.items.map(function(x){ return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid ' + LINE + ';font-size:15px;color:' + INK + '"><span style="width:14px;height:14px;border-radius:3px;background:' + x.f.color + '"></span><b style="flex:1">' + e(x.f.icon + " " + x.f.title) + '</b><span style="font-weight:800">' + (m.total ? pc(x.amt / m.total * 100) : "") + '</span><span style="width:120px;text-align:right;color:' + NAVY + ';font-weight:800">' + man(x.amt) + '</span></div>'; }).join("") + '</div></div>' +
+        m.items.map(function(x){ var sl = simLine(x.f, x.amt); return '<div style="display:flex;gap:10px;font-size:13px;line-height:1.5;padding:8px 12px;margin-bottom:6px;background:' + BG + ';border-radius:10px;border-left:5px solid ' + x.f.color + ';color:' + INK + '"><b style="flex:none;width:92px;color:' + x.f.color + '">' + e(x.f.short) + '</b><span style="flex:1">' + e(x.f.headline) + (sl ? '<br><span style="color:' + NAVY + ';font-weight:700">🧮 ' + e(sl.lab) + ' ' + e(sl.big) + '</span>' : '') + '</span></div>'; }).join("");
       return page(inner, n, of, m);
     });
-    // 상품마다 두 쪽
     m.items.forEach(function(x){
-      var f = x.f, ls = lines(f, x.amt), inc = income(f, x.amt);
+      var f = x.f, ls = lines(f, x.amt), sl = simLine(f, x.amt);
+      // ① 제안
       P.push(function(n, of){
-        var inner = '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><div style="font-size:42px">' + e(f.icon) + '</div><div><div style="font-size:26px;font-weight:800;letter-spacing:-0.8px;color:' + f.color + '">' + e(f.title) + '</div><div style="font-size:13.5px;color:' + SUB + '">' + e(f.sub) + '</div></div></div>' +
-          '<div style="background:' + f.color + ';color:#fff;border-radius:14px;padding:16px 20px;font-size:17px;font-weight:800;line-height:1.5">' + e(f.headline) + '</div>' +
-          '<div style="display:flex;gap:26px;align-items:center;margin:22px 0 10px">' + donut(f.alloc, 250, 50, inc ? "연 " + inc.pct.toFixed(2) + "%" : (x.amt ? "제안 금액" : "비중"), inc && x.amt ? man(inc.won) : (x.amt ? man(x.amt) : "100%")) +
-          '<div style="flex:1;min-width:0">' + legend(ls, 15, !!x.amt) + '</div></div>' +
-          (inc && x.amt ? box('💡 ' + e(inc.lab) + ' 약 <b style="color:' + NAVY + '">' + man(inc.won) + '</b> (연 ' + inc.pct.toFixed(2) + '%) — 금리·조건이 바뀌면 달라짐', "font-size:14px;margin-bottom:12px;background:#f1f6ff") : '') +
-          '<div style="font-size:17px;font-weight:800;margin:14px 0 6px">🤔 왜 이렇게 담나</div>' +
-          (f.points || []).map(function(p, i){ return '<div style="display:flex;gap:10px;font-size:14.5px;line-height:1.6;padding:7px 0;border-bottom:1px solid ' + LINE + '"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:' + f.color + ';color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">' + (i + 1) + '</span><span>' + e(p) + '</span></div>'; }).join("") +
-          '<div style="display:flex;gap:12px;margin-top:16px">' + box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">🙋 이런 분께</div><div style="font-size:14px;margin-top:4px;line-height:1.5">' + e(f.fit) + '</div>', "flex:1") +
-          box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">🏷️ 특징</div><div style="margin-top:6px">' + (f.tags || []).map(function(t){ return '<span style="display:inline-block;background:#fff;border:1px solid ' + LINE + ';border-radius:99px;padding:3px 10px;font-size:12.5px;margin:0 6px 6px 0">' + e(t) + '</span>'; }).join("") + '</div>', "flex:1") + '</div>';
+        var inner = '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px"><div style="font-size:42px">' + e(f.icon) + '</div><div><div style="font-size:26px;font-weight:800;letter-spacing:-0.8px;color:' + f.color + '">' + e(f.title) + '</div><div style="font-size:14px;color:' + SUB + '">' + e(f.sub) + '</div></div></div>' +
+          '<div style="background:' + f.color + ';border-radius:14px;padding:16px 20px"><div style="color:#fff;font-size:17.5px;font-weight:800;line-height:1.5">' + e(f.headline) + '</div></div>' +
+          '<div style="display:flex;gap:24px;align-items:center;margin:20px 0 8px">' + donut(f.alloc, 240, 48, x.amt ? "제안 금액" : "비중", x.amt ? man(x.amt) : "100%") +
+          '<div style="flex:1;min-width:0">' + legend(ls, 15.5, !!x.amt) + '</div></div>' +
+          (sl ? box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">🧮 모의 계산 · ' + e(sl.lab) + '</div><div style="font-size:24px;font-weight:800;color:' + NAVY + '">' + e(sl.big) + '</div><div style="font-size:13.5px">' + e(sl.sub) + '</div>', "background:#eef4ff;margin-bottom:6px") : '') +
+          secT("🤔 왜 이렇게 담나") +
+          (f.points || []).map(function(p, i){ return '<div style="display:flex;gap:10px;font-size:14.5px;line-height:1.6;padding:6px 0;border-bottom:1px solid ' + LINE + ';color:' + INK + '"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:' + f.color + ';color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">' + (i + 1) + '</span><span>' + e(p) + '</span></div>'; }).join("") +
+          '<div style="display:flex;gap:12px;margin-top:14px">' + box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">🙋 이런 분께</div><div style="font-size:14px;margin-top:4px;line-height:1.5">' + e(f.fit) + '</div>', "flex:1") +
+          box('<div style="font-size:13px;color:' + SUB + ';font-weight:700">🏷️ 특징</div><div style="margin-top:6px">' + (f.tags || []).map(function(t){ return '<span style="display:inline-block;background:#fff;border:1px solid ' + LINE + ';border-radius:99px;padding:3px 10px;font-size:12.5px;margin:0 6px 6px 0;color:' + INK + '">' + e(t) + '</span>'; }).join("") + '</div>', "flex:1") + '</div>';
         return page(inner, n, of, m, f.color);
       });
+      // ② 시장 분석
+      if (f.mkt) P.push(function(n, of){ return page(mktPage(f), n, of, m, f.color); });
+      // ③ 시장 자료 (전망·표)
+      if (f.mkt && (f.mkt.outlook || (f.mkt.charts || [])[2])) P.push(function(n, of){ return page(outlookPage(f), n, of, m, f.color); });
+      // ④ 모의투자 계산서
+      if (f.sim) P.push(function(n, of){ return page(simPage(f, x.amt) || "", n, of, m, f.color); });
+      // ⑤ 담을 상품 · 위험
       P.push(function(n, of){
         var rows = ls.map(function(l){ return [l.a.name, (l.a.inst || "") + (l.a.code && String(l.a.code).length < 12 ? " (" + l.a.code + ")" : ""), pc(l.a.pct), x.amt ? man(l.won) : "–"]; });
-        var inner = hTitle(e(f.icon) + " " + e(f.short) + " — 자세히", "무엇을 얼마나", f.color) +
-          tbl({title: "🧾 담을 상품과 금액", cols: ["칸", "상품", "비중", "금액"], rows: rows}, 12.5) +
-          '<div style="font-size:12px;color:' + SUB + ';margin-top:6px;line-height:1.5">' + ls.map(function(l){ return "· " + e(l.a.name) + ": " + e(l.a.why); }).join("<br>") + '</div>' +
-          '<div style="height:16px"></div>' + box(chartHtml(f, PW - 96 - 36, 13)) +
-          (f.tax ? '<div style="height:12px"></div>' + box('<div style="font-size:15px;font-weight:800;margin-bottom:6px">🧾 세액공제 계산 (연 ' + f.tax.limit + '만원 넣을 때)</div>' + taxLine(f).map(function(t){ return '<div style="display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px solid ' + LINE + '"><span>' + e(t.who) + ' · ' + t.rate + '%</span><b style="color:' + NAVY + '">' + t.full + ' 돌려받음</b></div>'; }).join("") + '<div style="font-size:12px;color:' + SUB + ';margin-top:6px">' + e(f.tax.note) + '</div>', "background:#effaf4") : '') +
-          (f.split && x.amt ? '<div style="height:12px"></div>' + box('<div style="font-size:15px;font-weight:800;margin-bottom:6px">🪜 나눠 사기 계획</div>' + ["오늘", "2주 뒤", "한 달 뒤"].map(function(w, i){ return '<div style="display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px solid ' + LINE + '"><span>' + (i + 1) + '회차 · ' + w + '</span><b>' + f.split[i] + '% · ' + man(x.amt * (100 - (f.alloc.filter(function(a){ return a.k === "cd"; })[0] || {pct: 0}).pct) / 100 * f.split[i] / 100) + '</b></div>'; }).join("") + '<div style="font-size:12px;color:' + SUB + ';margin-top:6px">주식 칸 금액을 3번에 나눔 — 그 사이 돈은 CD금리 ETF에서 이자를 받음</div>') : '') +
-          (f.table && f.table.rows && f.table.rows.length && f.key !== "kr_stock" && !(f.tax || f.split) ? '<div style="height:14px"></div>' + tbl({title: f.table.title, cols: f.table.cols, rows: f.table.rows.slice(0, f.key === "els" ? 7 : 8)}, f.key === "els" ? 10.5 : 11.5) : '') +
-          '<div style="height:14px"></div>' + box('<div style="font-size:15px;font-weight:800;margin-bottom:4px;color:#b3372a">⚠️ 꼭 알아 둘 점</div>' + (f.risks || []).map(function(r){ return '<div style="font-size:13px;line-height:1.55;padding:3px 0">· ' + e(r) + '</div>'; }).join(""), "background:#fff4f2");
+        var inner = hTitle(e(f.icon) + " " + e(f.short) + " — 담을 상품", "무엇을 얼마나 · 꼭 알아 둘 점", f.color) +
+          tbl({cols: ["칸", "상품", "비중", "금액"], rows: rows}, 13) +
+          '<div style="font-size:13px;color:' + INK + ';margin-top:8px;line-height:1.6">' + ls.map(function(l){ return "· <b>" + e(l.a.name) + "</b>: " + e(l.a.why); }).join("<br>") + '</div>' +
+          (f.tax ? '<div style="height:12px"></div>' + box('<div style="font-size:15px;font-weight:800;margin-bottom:6px">🧾 세액공제 (연 ' + f.tax.limit + '만원 넣을 때)</div>' + taxLine(f).map(function(t){ return '<div style="display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px solid ' + LINE + '"><span>' + e(t.who) + ' · ' + t.rate + '%</span><b style="color:' + NAVY + '">' + t.full + ' 돌려받음</b></div>'; }).join("") + '<div style="font-size:12px;color:' + SUB + ';margin-top:6px">' + e(f.tax.note) + '</div>', "background:#effaf4") : '') +
+          (f.split && x.amt ? '<div style="height:12px"></div>' + box('<div style="font-size:15px;font-weight:800;margin-bottom:6px">🪜 나눠 사기 계획 (주식 칸)</div>' + ["오늘", "2주 뒤", "한 달 뒤"].map(function(w, i){ var eqAmt = x.amt * (100 - (f.alloc.filter(function(a){ return a.k === "cd"; })[0] || {pct: 0}).pct) / 100; return '<div style="display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px solid ' + LINE + '"><span>' + (i + 1) + '회차 · ' + w + '</span><b>' + f.split[i] + '% · ' + man(eqAmt * f.split[i] / 100) + '</b></div>'; }).join("") + '<div style="font-size:12px;color:' + SUB + ';margin-top:6px">그 사이 돈은 CD금리 ETF에서 이자를 받음</div>') : '') +
+          (f.table && f.table.rows && f.table.rows.length && !/^(ktb|ust|brl|els)$/.test(f.key) ? '<div style="height:12px"></div>' + tbl({title: f.table.title, cols: f.table.cols, rows: f.table.rows.slice(0, 8)}, 12.5) : '') +
+          '<div style="height:14px"></div>' + box('<div style="font-size:16px;font-weight:800;margin-bottom:4px;color:#b3372a">⚠️ 꼭 알아 둘 점</div>' + (f.risks || []).map(function(r){ return '<div style="font-size:14px;line-height:1.6;padding:3px 0;color:' + INK + '">· ' + e(r) + '</div>'; }).join(""), "background:#fff4f2");
         return page(inner, n, of, m, f.color);
       });
     });
-    // 유의사항
     P.push(function(n, of){
-      var inner = hTitle("📌 투자 전 꼭 확인하실 점") + m.notice.map(function(t, i){ return '<div style="display:flex;gap:12px;font-size:15px;line-height:1.65;padding:12px 0;border-bottom:1px solid ' + LINE + '"><b style="color:' + NAVY + '">' + (i + 1) + '</b><span>' + e(t) + '</span></div>'; }).join("") +
-        '<div style="height:24px"></div>' + box('<div style="font-size:14px;color:' + SUB + ';line-height:1.7">이 제안서는 ' + e(m.basis) + ' 자료로 만들었음. 시장 상황에 따라 배분과 상품은 매일 바뀔 수 있음.</div>') +
-        '<div style="margin-top:60px;display:flex;justify-content:space-between;align-items:flex-end"><div><div style="font-size:14px;color:' + SUB + '">제안</div><div style="font-size:24px;font-weight:800;margin-top:6px">' + e(byLine(m) || "담당 PB") + '</div></div><div style="text-align:right"><div style="font-size:14px;color:' + SUB + '">' + e(custName(m)) + ' 확인</div><div style="width:200px;border-bottom:1px solid #9aa3b2;height:40px"></div></div></div>';
+      var inner = hTitle("📌 투자 전 꼭 확인하실 점") + m.notice.map(function(t, i){ return '<div style="display:flex;gap:12px;font-size:15px;line-height:1.65;padding:12px 0;border-bottom:1px solid ' + LINE + ';color:' + INK + '"><b style="color:' + NAVY + '">' + (i + 1) + '</b><span>' + e(t) + '</span></div>'; }).join("") +
+        '<div style="height:24px"></div>' + box('<div style="font-size:14px;color:' + INK + ';line-height:1.7">이 제안서는 ' + e(m.basis) + ' 자료로 만들었음. 시장 상황에 따라 배분과 상품은 매일 바뀔 수 있음. 모의 계산은 지금 금리·환율과 과거 자료로 계산한 예시이며 실제 결과와 다를 수 있음.</div>') +
+        '<div style="margin-top:60px;display:flex;justify-content:space-between;align-items:flex-end;color:' + INK + '"><div><div style="font-size:14px;color:' + SUB + '">제안</div><div style="font-size:24px;font-weight:800;margin-top:6px">' + e(byLine(m) || "담당 PB") + '</div></div><div style="text-align:right"><div style="font-size:14px;color:' + SUB + '">' + e(custName(m)) + ' 확인</div><div style="width:200px;border-bottom:1px solid #9aa3b2;height:40px"></div></div></div>';
       return page(inner, n, of, m);
     });
     var of = P.length;
@@ -288,7 +397,7 @@
   /* ───────── 그림 찍기 ───────── */
   var HOST = null;
   function host(){ if (!HOST || !document.body.contains(HOST)){ HOST = document.createElement("div"); HOST.id = "ppxhost"; HOST.setAttribute("aria-hidden", "true");
-      HOST.style.cssText = "position:fixed;left:-20000px;top:0;z-index:-1;pointer-events:none;"; document.body.appendChild(HOST); } return HOST; }
+      HOST.style.cssText = "position:fixed;left:-20000px;top:0;z-index:-1;pointer-events:none;color:" + INK + ";background:#fff;color-scheme:light"; document.body.appendChild(HOST); } return HOST; }
   function needLib(){ return new Promise(function(ok, no){ if (window.html2pdf) return ok(); var s = document.createElement("script"); s.src = "lib/html2pdf.bundle.min.js"; s.onload = function(){ ok(); }; s.onerror = function(){ no(new Error("PDF 도구를 못 받음")); }; document.head.appendChild(s); }); }
   function needPpt(){ return new Promise(function(ok, no){ if (window.PptxGenJS) return ok(); var s = document.createElement("script"); s.src = "lib/pptxgen.bundle.js?v=1"; s.onload = function(){ ok(); }; s.onerror = function(){ no(new Error("PPT 도구를 못 받음")); }; document.head.appendChild(s); }); }
   function imgsReady(el){ return Promise.all([].map.call(el.querySelectorAll("img"), function(i){ return i.complete && i.naturalWidth ? 1 : new Promise(function(r){ i.onload = i.onerror = function(){ r(); }; setTimeout(r, 3000); }); })); }
@@ -298,7 +407,8 @@
     return imgsReady(el).then(function(){
       var h = Math.ceil(el.getBoundingClientRect().height);
       return html2pdf().set({margin: 0, jsPDF: {unit: "px", format: [w, h], orientation: "portrait", hotfixes: ["px_scaling"]},
-        html2canvas: {scale: scale, backgroundColor: "#ffffff", useCORS: true, logging: false, scrollX: 0, scrollY: 0, windowWidth: w, width: w, height: h}}).from(el).toCanvas().get("canvas")
+        html2canvas: {scale: scale, backgroundColor: "#ffffff", useCORS: true, logging: false, scrollX: 0, scrollY: 0, windowWidth: w, width: w, height: h,
+          onclone: function(d){ try { d.documentElement.removeAttribute("data-ui"); d.documentElement.style.colorScheme = "light"; d.body.style.color = INK; d.body.style.background = "#fff"; } catch(x) {} }}}).from(el).toCanvas().get("canvas")
         .then(function(c){ H.innerHTML = ""; return c; });
     });
   }
@@ -316,7 +426,7 @@
   function makePdf(m){
     var pages = fullPages(m), pdf = null;
     return needLib().then(function(){
-      return pages.reduce(function(p, html, i){
+      return pages.reduce(function(p, html){
         return p.then(function(){ return snap(html, PW, IOS ? 1.6 : 2).then(function(c){
           var url = c.toDataURL("image/jpeg", 0.9); c.width = c.height = 0;
           if (!pdf){ return html2pdf().set({margin: 0, jsPDF: {unit: "px", format: [PW, PH], orientation: "portrait", hotfixes: ["px_scaling"]}}).from(document.createElement("div")).toPdf().get("pdf").then(function(P0){ pdf = P0; pdf.addImage(url, "JPEG", 0, 0, PW, PH); }); }
@@ -326,96 +436,114 @@
     }).then(function(){ return pdf.output("blob"); });
   }
 
-  /* ═════════ ③ PPT (16:9 · 맑은 고딕 · 차트는 PPT 안에서 고칠 수 있는 진짜 차트) ═════════ */
+  /* ═════════ ③ PPT (16:9 · 맑은 고딕 · PPT 안에서 고칠 수 있는 진짜 차트) ═════════ */
   function hx(c){ return String(c || "#14304f").replace("#", "").toUpperCase(); }
   function makePpt(m){
     return needPpt().then(function(){
-      var P = new PptxGenJS(), F = "맑은 고딕", M = m.M;
+      var P = new PptxGenJS(), F = "맑은 고딕";
       P.layout = "LAYOUT_WIDE"; P.theme = {headFontFace: F, bodyFontFace: F}; P.title = custName(m) + " 투자 제안서"; P.author = byLine(m) || "PB";
       function T(s, text, o){ var d = {fontFace: F, fontSize: 14, color: "1D2533", valign: "top", margin: 0}; for (var k in o) d[k] = o[k]; s.addText(text, d); }
       function head(s, t, sub, color){ s.background = {color: "FFFFFF"}; s.addShape(P.ShapeType.rect, {x: 0, y: 0, w: 13.333, h: 0.12, fill: {color: hx(color || NAVY)}, line: {color: hx(color || NAVY)}});
-        T(s, t, {x: 0.6, y: 0.35, w: 9.5, h: 0.6, fontSize: 26, bold: true, color: hx(color || NAVY)}); if (sub) T(s, sub, {x: 0.6, y: 0.95, w: 12, h: 0.35, fontSize: 12, color: "5B6576"});
-        T(s, custName(m) + " 투자 제안 · " + m.date + (byLine(m) ? " · " + byLine(m) : ""), {x: 0.6, y: 7.05, w: 12.1, h: 0.3, fontSize: 9, color: "98A1B0"}); }
-      function rbox(s, x, y, w, h, fill){ s.addShape(P.ShapeType.roundRect, {x: x, y: y, w: w, h: h, fill: {color: hx(fill || BG)}, line: {color: hx(fill || BG)}, rectRadius: 0.12}); }
+        T(s, t, {x: 0.6, y: 0.32, w: 10, h: 0.6, fontSize: 25, bold: true, color: hx(color || NAVY)}); if (sub) T(s, sub, {x: 0.6, y: 0.92, w: 12, h: 0.35, fontSize: 12, color: "5B6576"});
+        T(s, custName(m) + " 투자 제안 · " + m.date + (byLine(m) ? " · " + byLine(m) : ""), {x: 0.6, y: 7.08, w: 12.1, h: 0.28, fontSize: 9, color: "8A93A3"}); }
+      function rbox(s, x, y, w, h, fill){ s.addShape(P.ShapeType.roundRect, {x: x, y: y, w: w, h: h, fill: {color: hx(fill || BG)}, line: {color: hx(fill || BG)}, rectRadius: 0.1}); }
+      function th(cols){ return cols.map(function(c){ return {text: c, options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}}}; }); }
+      function kpis(s, kp, x, y, w, cols){ kp = (kp || []).filter(function(k){ return k && k.value && k.value !== "–"; }); var cw = (w - 0.15 * (cols - 1)) / cols; (kp || []).forEach(function(k, i){ var xx = x + (i % cols) * (cw + 0.15), yy = y + Math.floor(i / cols) * 1.12;
+        rbox(s, xx, yy, cw, 1.0); T(s, k.label, {x: xx + 0.12, y: yy + 0.08, w: cw - 0.2, h: 0.26, fontSize: 9.5, color: "5B6576", bold: true});
+        T(s, k.value, {x: xx + 0.12, y: yy + 0.32, w: cw - 0.2, h: 0.38, fontSize: 17, bold: true, color: k.tone > 0 ? "1A8A5A" : k.tone < 0 ? hx(UP) : "1D2533"});
+        T(s, k.sub || "", {x: xx + 0.12, y: yy + 0.68, w: cw - 0.2, h: 0.28, fontSize: 8, color: "5B6576"}); }); }
+      function lineChart(s, ch, x, y, w, h, color){
+        if (!ch || !ch.vals || ch.vals.length < 2) return;
+        var step = Math.max(1, Math.floor(ch.vals.length / 70)), data = [];
+        var sub = function(arr){ var o = []; for (var i = 0; i < arr.length; i += step) o.push(arr[i]); return o; };
+        var lb = sub(ch.labels).map(function(l){ return ch.kind === "curve" ? l : String(l).slice(2, 7).replace("-", "."); });
+        if (ch.multi) ch.multi.forEach(function(mm){ data.push({name: mm.name, labels: lb, values: sub(mm.vals)}); });
+        else { data.push({name: ch.title, labels: lb, values: sub(ch.vals)}); if (ch.ma) data.push({name: ch.mal || "평균선", labels: lb, values: sub(ch.ma).map(function(v){ return v == null ? null : v; })}); }
+        T(s, ch.title, {x: x, y: y, w: w, h: 0.3, fontSize: 12, bold: true});
+        s.addChart(P.ChartType.line, data, {x: x - 0.1, y: y + 0.3, w: w + 0.1, h: h - 0.3, chartColors: ch.multi ? ch.multi.map(function(mm){ return hx(mm.color); }) : [hx(ch.color || color), "9AA3B2"], lineDataSymbol: ch.kind === "curve" ? "circle" : "none", lineDataSymbolSize: 5, lineSize: 2,
+          catAxisLabelFontFace: F, catAxisLabelFontSize: 8, valAxisLabelFontFace: F, valAxisLabelFontSize: 8, showLegend: !!(ch.multi || ch.ma), legendPos: "b", legendFontFace: F, legendFontSize: 8, catAxisLabelFrequency: Math.max(1, Math.ceil(lb.length / 6)), valGridLine: {color: "EEF1F6", size: 0.5}});
+      }
+      function colChart(s, title, items, x, y, w, h){
+        T(s, title, {x: x, y: y, w: w, h: 0.3, fontSize: 12, bold: true});
+        s.addChart(P.ChartType.bar, [{name: title, labels: items.map(function(i){ return i.l; }), values: items.map(function(i){ return Math.round(i.v); })}], {x: x - 0.1, y: y + 0.3, w: w + 0.1, h: h - 0.3, barDir: "col",
+          chartColors: items.map(function(i){ return i.v >= 0 ? "22A06B" : "E0533D"; }), showValue: true, dataLabelFormatCode: '#,##0', dataLabelFontFace: F, dataLabelFontSize: 8, catAxisLabelFontFace: F, catAxisLabelFontSize: 8.5, valAxisHidden: true, valGridLine: {style: "none"}, showLegend: false});
+      }
       // 표지
       var s = P.addSlide(); s.background = {color: hx(NAVY)};
       s.addShape(P.ShapeType.ellipse, {x: 9.3, y: -1.6, w: 5.6, h: 5.6, fill: {color: "FFFFFF", transparency: 93}, line: {color: "FFFFFF", transparency: 100}});
       T(s, "INVESTMENT PROPOSAL", {x: 0.9, y: 1.1, w: 8, h: 0.4, fontSize: 13, color: "C9D6EA", bold: true, charSpacing: 4});
       T(s, custName(m) + "을 위한", {x: 0.9, y: 1.9, w: 11, h: 0.5, fontSize: 20, color: "E6EDF7"});
-      T(s, titleOf(m) + " 투자 제안서", {x: 0.9, y: 2.45, w: 11.5, h: 1.3, fontSize: 38, bold: true, color: "FFFFFF"});
+      T(s, titleOf(m) + " 투자 제안서", {x: 0.9, y: 2.45, w: 11.5, h: 1.3, fontSize: 36, bold: true, color: "FFFFFF"});
       s.addShape(P.ShapeType.rect, {x: 0.9, y: 3.95, w: 0.8, h: 0.07, fill: {color: "F0B43C"}, line: {color: "F0B43C"}});
       if (m.total) { T(s, "제안 금액", {x: 0.9, y: 4.3, w: 4, h: 0.35, fontSize: 13, color: "C9D6EA"}); T(s, man(m.total), {x: 0.9, y: 4.65, w: 6, h: 0.7, fontSize: 32, bold: true, color: "FFFFFF"}); }
       T(s, m.items.map(function(x){ return x.f.short + (x.amt ? " " + man(x.amt) : ""); }).join("   ·   "), {x: 0.9, y: 5.55, w: 11.5, h: 0.4, fontSize: 13, color: "E6EDF7"});
       T(s, "제안  " + (byLine(m) || "담당 PB"), {x: 0.9, y: 6.55, w: 8, h: 0.4, fontSize: 16, bold: true, color: "FFFFFF"});
       T(s, m.date, {x: 8.9, y: 6.6, w: 3.6, h: 0.35, fontSize: 12, color: "C9D6EA", align: "right"});
-      // 시장
-      s = P.addSlide(); head(s, "📊 오늘 시장 한눈에", (M.date || "") + " " + (M.edition || "") + " 시황 기준");
-      (M.kpis || []).slice(0, 6).forEach(function(k, i){ var x = 0.6 + (i % 3) * 2.15, y = 1.45 + Math.floor(i / 3) * 1.25;
-        rbox(s, x, y, 2.0, 1.1); T(s, k.label + (k.asof ? " " + k.asof : ""), {x: x + 0.15, y: y + 0.1, w: 1.8, h: 0.3, fontSize: 10, color: "5B6576", bold: true});
-        T(s, k.value, {x: x + 0.15, y: y + 0.38, w: 1.8, h: 0.4, fontSize: 19, bold: true});
-        T(s, k.chg == null ? "" : (k.chg > 0 ? "▲ " : k.chg < 0 ? "▼ " : "") + Math.abs(k.chg).toFixed(2) + "%", {x: x + 0.15, y: y + 0.76, w: 1.8, h: 0.28, fontSize: 11, bold: true, color: k.chg > 0 ? hx(UP) : k.chg < 0 ? hx(DN) : "5B6576"}); });
-      rbox(s, 0.6, 4.05, 6.3, 2.8);
-      T(s, "🧭 큰 흐름", {x: 0.8, y: 4.15, w: 6, h: 0.35, fontSize: 14, bold: true});
-      T(s, (M.trend || []).map(function(t){ return {text: t, options: {bullet: true, breakLine: true}}; }).concat(M.one ? [{text: "어제·오늘: " + M.one, options: {bullet: true, breakLine: true}}] : []).concat(M.lead ? [{text: "돈이 몰리는 곳: " + M.lead, options: {bullet: true}}] : []), {x: 0.8, y: 4.55, w: 5.9, h: 2.2, fontSize: 12, paraSpaceAfter: 6, valign: "top"});
-      if ((M.scen || []).length){ T(s, "🔮 앞으로 시나리오 (가능성 %)", {x: 7.3, y: 1.45, w: 5.4, h: 0.35, fontSize: 14, bold: true});
-        s.addChart(P.ChartType.bar, [{name: "가능성", labels: M.scen.map(function(c){ return c.label; }), values: M.scen.map(function(c){ return c.pct; })}],
-          {x: 7.2, y: 1.85, w: 5.6, h: 2.4, barDir: "bar", chartColors: M.scen.map(function(c){ return hx(c.color); }), showValue: true, dataLabelFormatCode: '0"%"', dataLabelFontFace: F, dataLabelFontSize: 11, catAxisLabelFontFace: F, catAxisLabelFontSize: 11, valAxisHidden: true, valGridLine: {style: "none"}, catAxisOrientation: "maxMin", showLegend: false, barGapWidthPct: 60}); }
-      if ((M.watch || []).length){ T(s, "📅 지켜볼 일정", {x: 7.3, y: 4.45, w: 5.4, h: 0.35, fontSize: 14, bold: true});
-        s.addTable(M.watch.map(function(w){ return [{text: w[0], options: {bold: true, color: hx(NAVY)}}, w[1]]; }), {x: 7.3, y: 4.85, w: 5.5, colW: [1.4, 4.1], fontFace: F, fontSize: 11, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle", rowH: 0.42}); }
-      // 요약
       if (m.items.length > 1){ s = P.addSlide(); head(s, "🧺 제안 한눈에", "상품별 금액");
         s.addChart(P.ChartType.doughnut, [{name: "금액", labels: m.items.map(function(x){ return x.f.short; }), values: m.items.map(function(x){ return x.amt || 1; })}],
-          {x: 0.5, y: 1.4, w: 5, h: 5, holeSize: 58, chartColors: m.items.map(function(x){ return hx(x.f.color); }), showPercent: true, showLegend: true, legendPos: "b", legendFontFace: F, legendFontSize: 11, dataLabelColor: "FFFFFF", dataLabelFontFace: F, dataLabelFontSize: 11});
-        s.addTable([[{text: "상품", options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}}}, {text: "금액", options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}}}, {text: "핵심", options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}}}]].concat(
-          m.items.map(function(x){ return [{text: x.f.icon + " " + x.f.short, options: {bold: true}}, man(x.amt), x.f.headline]; })), {x: 5.8, y: 1.5, w: 7.0, colW: [1.6, 1.4, 4.0], fontFace: F, fontSize: 10.5, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"}); }
-      // 상품마다
+          {x: 0.5, y: 1.4, w: 5, h: 5.3, holeSize: 58, chartColors: m.items.map(function(x){ return hx(x.f.color); }), showPercent: true, showLegend: true, legendPos: "b", legendFontFace: F, legendFontSize: 11, dataLabelColor: "FFFFFF", dataLabelFontFace: F, dataLabelFontSize: 11});
+        s.addTable([th(["상품", "금액", "핵심"])].concat(m.items.map(function(x){ var sl = simLine(x.f, x.amt); return [{text: x.f.icon + " " + x.f.short, options: {bold: true}}, man(x.amt), x.f.headline + (sl ? "\n🧮 " + sl.lab + " " + sl.big : "")]; })),
+          {x: 5.8, y: 1.5, w: 7.0, colW: [1.6, 1.3, 4.1], fontFace: F, fontSize: 10, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"}); }
       m.items.forEach(function(x){
-        var f = x.f, ls = lines(f, x.amt), inc = income(f, x.amt);
+        var f = x.f, ls = lines(f, x.amt), mk = f.mkt || {}, S = f.sim, A = x.amt || 100000000, sl = simLine(f, x.amt);
+        // 제안
         s = P.addSlide(); head(s, f.icon + " " + f.title, f.sub, f.color);
-        rbox(s, 0.6, 1.45, 12.1, 0.75, f.color); T(s, f.headline, {x: 0.8, y: 1.52, w: 11.8, h: 0.6, fontSize: 15, bold: true, color: "FFFFFF", valign: "middle"});
+        rbox(s, 0.6, 1.4, 12.1, 0.72, f.color); T(s, f.headline, {x: 0.8, y: 1.46, w: 11.8, h: 0.6, fontSize: 15, bold: true, color: "FFFFFF", valign: "middle"});
         s.addChart(P.ChartType.doughnut, [{name: "비중", labels: f.alloc.map(function(a){ return a.name; }), values: f.alloc.map(function(a){ return a.pct; })}],
-          {x: 0.5, y: 2.35, w: 4.4, h: 4.5, holeSize: 55, chartColors: f.alloc.map(function(a){ return hx(a.color); }), showPercent: true, showLegend: false, dataLabelColor: "FFFFFF", dataLabelFontFace: F, dataLabelFontSize: 11, dataLabelFontBold: true});
-        if (inc && x.amt) T(s, inc.lab + "\n" + man(inc.won), {x: 1.5, y: 4.2, w: 2.4, h: 0.8, fontSize: 11, bold: true, align: "center", color: hx(NAVY), valign: "middle"});
-        s.addTable([[{text: "칸", options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}}}, {text: "상품", options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}}}, {text: "비중", options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}, align: "right"}}, {text: "금액", options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}, align: "right"}}]].concat(
-          ls.map(function(l){ return [{text: l.a.name, options: {bold: true, color: hx(l.a.color)}}, (l.a.inst || "") + (l.a.code && String(l.a.code).length < 12 ? " (" + l.a.code + ")" : ""), {text: pc(l.a.pct), options: {align: "right", bold: true}}, {text: x.amt ? man(l.won) : "–", options: {align: "right"}}]; })),
-          {x: 5.1, y: 2.45, w: 7.6, colW: [1.9, 3.6, 0.8, 1.3], fontFace: F, fontSize: 11, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"});
-        T(s, (f.points || []).map(function(p){ return {text: p, options: {bullet: {code: "2714"}, breakLine: true}}; }), {x: 5.1, y: 2.55 + 0.38 * (ls.length + 1) + 0.25, w: 7.6, h: 6.85 - (2.55 + 0.38 * (ls.length + 1) + 0.25), fontSize: 12, paraSpaceAfter: 5});
-        // 자세히
-        s = P.addSlide(); head(s, f.icon + " " + f.short + " — 자세히", "근거 그림 · 꼭 알아 둘 점", f.color);
-        var ch = f.chart || {};
-        if (ch.type === "line" && ch.vals && ch.vals.length > 2){
-          var step = Math.max(1, Math.floor(ch.vals.length / 60)), lb = [], vv = [];
-          for (var i = 0; i < ch.vals.length; i += step){ lb.push((ch.labels[i] || "").slice(2, 7).replace("-", ".")); vv.push(ch.vals[i]); }
-          T(s, ch.title, {x: 0.6, y: 1.4, w: 7, h: 0.35, fontSize: 13, bold: true});
-          s.addChart(P.ChartType.line, [{name: ch.title, labels: lb, values: vv}], {x: 0.5, y: 1.75, w: 7.2, h: 2.6, chartColors: [hx(f.color)], lineDataSymbol: "none", lineSize: 2, catAxisLabelFontFace: F, catAxisLabelFontSize: 9, valAxisLabelFontFace: F, valAxisLabelFontSize: 9, showLegend: false, catAxisLabelFrequency: Math.ceil(lb.length / 6), valGridLine: {color: "EEF1F6", size: 0.5}});
-          if (ch.chart2){ var c2 = ch.chart2, lb2 = [], v2 = []; for (var j = 0; j < c2.vals.length; j += step){ lb2.push((c2.labels[j] || "").slice(2, 7).replace("-", ".")); v2.push(c2.vals[j]); }
-            T(s, c2.title, {x: 0.6, y: 4.45, w: 7, h: 0.35, fontSize: 13, bold: true});
-            s.addChart(P.ChartType.line, [{name: c2.title, labels: lb2, values: v2}], {x: 0.5, y: 4.8, w: 7.2, h: 2.1, chartColors: ["7B5CFF"], lineDataSymbol: "none", lineSize: 2, catAxisLabelFontFace: F, catAxisLabelFontSize: 9, valAxisLabelFontFace: F, valAxisLabelFontSize: 9, showLegend: false, catAxisLabelFrequency: Math.ceil(lb2.length / 6), valGridLine: {color: "EEF1F6", size: 0.5}}); }
-        } else if (ch.type === "bar" && ch.vals){
-          T(s, ch.title, {x: 0.6, y: 1.4, w: 7, h: 0.35, fontSize: 13, bold: true});
-          s.addChart(P.ChartType.bar, [{name: ch.title, labels: ch.labels, values: ch.vals}], {x: 0.5, y: 1.75, w: 7.2, h: 3.0, barDir: ch.labels.length > 6 ? "col" : "bar", chartColors: [hx(f.color)], showValue: ch.labels.length <= 12, dataLabelFontFace: F, dataLabelFontSize: 9, dataLabelFormatCode: "0.0", catAxisLabelFontFace: F, catAxisLabelFontSize: ch.labels.length > 12 ? 7 : 10, valAxisHidden: true, valGridLine: {style: "none"}, showLegend: false, catAxisOrientation: ch.labels.length > 6 ? "minMax" : "maxMin"});
-        } else {
-          T(s, "칸별 비중", {x: 0.6, y: 1.4, w: 7, h: 0.35, fontSize: 13, bold: true});
-          s.addChart(P.ChartType.bar, [{name: "비중", labels: f.alloc.map(function(a){ return a.name; }), values: f.alloc.map(function(a){ return a.pct; })}], {x: 0.5, y: 1.75, w: 7.2, h: 3.0, barDir: "bar", chartColors: [hx(f.color)], showValue: true, dataLabelFormatCode: '0.0"%"', dataLabelFontFace: F, dataLabelFontSize: 10, catAxisLabelFontFace: F, catAxisLabelFontSize: 10, valAxisHidden: true, valGridLine: {style: "none"}, showLegend: false, catAxisOrientation: "maxMin"});
+          {x: 0.5, y: 2.3, w: 4.3, h: 4.5, holeSize: 55, chartColors: f.alloc.map(function(a){ return hx(a.color); }), showPercent: true, showLegend: false, dataLabelColor: "FFFFFF", dataLabelFontFace: F, dataLabelFontSize: 11, dataLabelFontBold: true});
+        s.addTable([th(["칸", "상품", "비중", "금액"])].concat(ls.map(function(l){ return [{text: l.a.name, options: {bold: true, color: hx(l.a.color)}}, (l.a.inst || "") + (l.a.code && String(l.a.code).length < 12 ? " (" + l.a.code + ")" : ""), {text: pc(l.a.pct), options: {align: "right", bold: true}}, {text: x.amt ? man(l.won) : "–", options: {align: "right"}}]; })),
+          {x: 5.0, y: 2.35, w: 7.7, colW: [1.9, 3.7, 0.8, 1.3], fontFace: F, fontSize: 11, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"});
+        var yy = 2.45 + 0.38 * (ls.length + 1) + 0.15;
+        if (sl){ rbox(s, 5.0, yy, 7.7, 0.85, "#EEF4FF"); T(s, "🧮 " + sl.lab, {x: 5.15, y: yy + 0.06, w: 7.4, h: 0.26, fontSize: 10, color: "5B6576", bold: true}); T(s, sl.big + "   " + sl.sub, {x: 5.15, y: yy + 0.33, w: 7.4, h: 0.45, fontSize: 12.5, bold: true, color: hx(NAVY)}); yy += 1.0; }
+        T(s, (f.points || []).map(function(p){ return {text: p, options: {bullet: {code: "2714"}, breakLine: true}}; }), {x: 5.0, y: yy, w: 7.7, h: 6.9 - yy, fontSize: 11.5, paraSpaceAfter: 4});
+        // 시장
+        if (f.mkt){ s = P.addSlide(); head(s, "📊 " + (mk.title || "시장 지금"), f.short + " 판단 근거", f.color);
+          var nk = Math.min(6, (mk.kpis || []).filter(function(k){ return k && k.value && k.value !== "–"; }).length), cols = nk > 4 ? 3 : nk;
+          kpis(s, (mk.kpis || []).slice(0, 6), 0.6, 1.4, 6.3, cols || 1);
+          var ky = 1.4 + Math.ceil(nk / (cols || 1)) * 1.12 + 0.1;
+          T(s, "🔎 그래서 지금은", {x: 0.6, y: ky, w: 6.3, h: 0.3, fontSize: 13, bold: true});
+          T(s, (mk.view || []).map(function(v){ return {text: v, options: {bullet: true, breakLine: true}}; }), {x: 0.6, y: ky + 0.35, w: 6.3, h: 6.95 - ky - 0.35, fontSize: 10.5, paraSpaceAfter: 4});
+          var chs = mk.charts || [];
+          lineChart(s, chs[0], 7.25, 1.4, 5.5, chs[1] ? 2.75 : 5.5, f.color);
+          if (chs[1]) lineChart(s, chs[1], 7.25, 4.25, 5.5, 2.7, f.color);
+          if (mk.outlook || chs[2]){ s = P.addSlide(); head(s, "🔭 " + (mk.outlook ? mk.outlook.title : "시장 자료"), f.short + " · " + ((mk.outlook || {}).src || ""), f.color);
+            if (mk.outlook) s.addTable([th(mk.outlook.cols)].concat(mk.outlook.rows.slice(0, 14).map(function(r){ return r.map(function(c){ return String(c); }); })), {x: 0.6, y: 1.4, w: chs[2] || mk.curve ? 6.6 : 12.1, fontFace: F, fontSize: mk.outlook.rows.length > 10 ? 9 : 11, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle", autoPage: false});
+            if (chs[2]) lineChart(s, chs[2], 7.5, 1.4, 5.3, mk.curve ? 2.7 : 5.4, f.color);
+            if (mk.curve){ var cy = chs[2] ? 4.3 : 1.4; T(s, mk.curve.title, {x: 7.5, y: cy, w: 5.3, h: 0.3, fontSize: 12, bold: true});
+              s.addChart(P.ChartType.bar, [{name: "금리", labels: mk.curve.rows.map(function(r){ return r[0] + "년"; }), values: mk.curve.rows.map(function(r){ return r[1]; })}], {x: 7.4, y: cy + 0.3, w: 5.4, h: 2.4, barDir: "col", chartColors: [hx(f.color)], showValue: true, dataLabelFormatCode: "0.00", dataLabelFontFace: F, dataLabelFontSize: 8, catAxisLabelFontFace: F, catAxisLabelFontSize: 9, valAxisHidden: true, valGridLine: {style: "none"}, showLegend: false}); }
+          }
         }
-        var yR = 1.4;
-        if (f.tax){ rbox(s, 8.0, yR, 4.75, 1.45, "#effaf4"); T(s, "🧾 세액공제 (연 " + f.tax.limit + "만원 넣을 때)", {x: 8.15, y: yR + 0.1, w: 4.5, h: 0.3, fontSize: 12, bold: true});
-          T(s, taxLine(f).map(function(t){ return t.who + " · " + t.rate + "% → " + t.full; }).join("\n") + "\n" + f.tax.note, {x: 8.15, y: yR + 0.45, w: 4.5, h: 0.95, fontSize: 10.5}); yR += 1.6; }
-        if (inc && x.amt){ rbox(s, 8.0, yR, 4.75, 0.75, "#f1f6ff"); T(s, "💡 " + inc.lab + " 약 " + man(inc.won) + " (연 " + inc.pct.toFixed(2) + "%)", {x: 8.15, y: yR + 0.12, w: 4.5, h: 0.5, fontSize: 12, bold: true, color: hx(NAVY), valign: "middle"}); yR += 0.9; }
-        rbox(s, 8.0, yR, 4.75, 6.85 - yR, "#fff4f2");
-        T(s, "⚠️ 꼭 알아 둘 점", {x: 8.15, y: yR + 0.1, w: 4.5, h: 0.3, fontSize: 12, bold: true, color: "B3372A"});
-        T(s, (f.risks || []).map(function(r){ return {text: r, options: {bullet: true, breakLine: true}}; }), {x: 8.15, y: yR + 0.45, w: 4.5, h: 6.85 - yR - 0.55, fontSize: 10.5, paraSpaceAfter: 4});
-        if (f.table && f.table.rows && f.table.rows.length && ch.type !== "line"){
-          var tr = [f.table.cols.map(function(c){ return {text: c, options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}}}; })].concat(f.table.rows.slice(0, f.key === "els" ? 3 : 5).map(function(r){ return r.map(function(c){ return String(c).slice(0, 28); }); }));
-          s.addTable(tr, {x: 0.6, y: 4.9, w: 7.1, fontFace: F, fontSize: 8.5, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle", autoPage: false});
-        } else if (f.table && f.table.rows && f.table.rows.length && ch.type === "line" && !ch.chart2){
-          var tr2 = [f.table.cols.map(function(c){ return {text: c, options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}}}; })].concat(f.table.rows.slice(0, 6));
-          s.addTable(tr2, {x: 0.6, y: 4.55, w: 7.1, fontFace: F, fontSize: 9, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle", autoPage: false});
+        // 계산서
+        if (S){ s = P.addSlide(); head(s, "🧮 모의투자 계산서", (x.amt ? man(A) + " 넣으면" : "1억원 넣었다고 치면") + " · " + f.short, f.color);
+          if (S.kind === "bond"){ var B = bondCalc(S, A);
+            [["넣는 돈", man(A), "1D2533"], ["만기까지 받는 돈", man(B.tot), hx(NAVY)], ["이익 · 연 환산", "+" + man(B.pnl) + " · 연 " + B.cagr.toFixed(2) + "%", "1A8A5A"]].forEach(function(c, i){ rbox(s, 0.6 + i * 4.1, 1.4, 3.9, 0.95); T(s, c[0], {x: 0.75 + i * 4.1, y: 1.47, w: 3.6, h: 0.26, fontSize: 10, color: "5B6576", bold: true}); T(s, c[1], {x: 0.75 + i * 4.1, y: 1.75, w: 3.7, h: 0.5, fontSize: 18, bold: true, color: c[2]}); });
+            s.addTable([th(["칸", "상품", "넣는 돈", "받는 이자(세후)", "원화로", "기간", "연 환산"])].concat(B.rows.map(function(r){ var cu = r.p.cur; return [r.p.slot, r.p.name, man(r.a), cu === "KRW" ? man(r.cpnAll - r.tax) : Math.round(r.cpnAll - r.tax).toLocaleString("ko-KR") + " " + CUR[cu], man(r.krw), r.p.yrs.toFixed(1) + "년", r.cagr.toFixed(2) + "%"]; })),
+              {x: 0.6, y: 2.5, w: 12.1, colW: [1.5, 3.4, 1.4, 2.0, 1.5, 0.9, 1.4], fontFace: F, fontSize: 10, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"});
+            if (B.fxScen.length) colChart(s, "환율이 바뀌면 — 이익 (원)" + (B.be != null ? " · 환율이 " + Math.abs(B.be).toFixed(1) + "% 넘게 안 빠지면 이익" : ""), B.fxScen.map(function(q){ return {l: "환율 " + (q.m > 0 ? "+" : q.m < 0 ? "−" : "") + Math.abs(q.m) + "%", v: q.pnl}; }), 0.6, 4.0, B.rateScen.length ? 6.0 : 12.1, 2.9);
+            if (B.rateScen.length) colChart(s, "1년 뒤 팔면 — 금리가 바뀔 때 이익 (원)", B.rateScen.map(function(q){ return {l: "금리 " + (q.d > 0 ? "+" : q.d < 0 ? "−" : "") + Math.abs(q.d) + "%p", v: q.pnl}; }), B.fxScen.length ? 6.8 : 0.6, 4.0, B.fxScen.length ? 5.9 : 12.1, 2.9);
+          } else if (S.kind === "els"){ var EE = elsCalc(S, A);
+            var rws = []; EE.forEach(function(q){ q.steps.forEach(function(st, i){ rws.push([i === 0 ? q.p.slot + "\n" + q.p.name : "", st.t + "개월", man(st.won), "+" + man(st.won - q.a), st.pr != null ? st.pr.toFixed(1) + "%" : "–"]); }); q.tail.forEach(function(t){ rws.push(["", t.lab, man(t.won), (t.won - q.a >= 0 ? "+" : "−") + man(Math.abs(t.won - q.a)), t.pr != null ? t.pr.toFixed(1) + "%" : "–"]); }); });
+            s.addTable([th(["상품", "끝나는 때", "받는 돈", "이익", "과거 확률"])].concat(rws), {x: 0.6, y: 1.4, w: 7.3, colW: [2.2, 1.9, 1.2, 1.1, 0.9], fontFace: F, fontSize: 8, rowH: 0.19, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle", autoPage: false});
+            colChart(s, "평균 기대 이익 (과거 확률 반영)", EE.map(function(q){ return {l: q.p.slot, v: q.ev - q.a}; }), 8.2, 1.4, 4.6, 3.0);
+            T(s, S.note, {x: 8.2, y: 4.6, w: 4.6, h: 2.2, fontSize: 9.5, color: "5B6576"});
+          } else if (S.kind === "equity"){ var Q = eqCalc(S, A), b = S.bt;
+            [["연평균 (" + b.from.slice(0, 4) + "년부터)", "연 " + b.cagr + "%", hx(NAVY)], ["1년 보유 시 이익 확률", b.y1.pos + "%", "1A8A5A"], ["가장 크게 빠졌을 때", b.mdd + "%", hx(UP)]].forEach(function(c, i){ rbox(s, 0.6 + i * 4.1, 1.4, 3.9, 0.95); T(s, c[0], {x: 0.75 + i * 4.1, y: 1.47, w: 3.6, h: 0.26, fontSize: 10, color: "5B6576", bold: true}); T(s, c[1], {x: 0.75 + i * 4.1, y: 1.75, w: 3.7, h: 0.5, fontSize: 20, bold: true, color: c[2]}); });
+            lineChart(s, {title: man(A) + "을 " + b.from.slice(0, 4) + "년에 넣었다면", labels: b.growth.labels, vals: b.growth.vals.map(function(v){ return Math.round(v * A / 10000); }), color: f.color}, 0.6, 2.55, 6.2, 4.3, f.color);
+            colChart(s, "1년 뒤 이익 (원) — 나쁜·보통·좋은 해", Q.y1.map(function(q){ return {l: q.l.split(" ")[0] + " 해 " + sgn(q.r, 0), v: q.won - A}; }), 7.1, 2.55, 5.7, 2.1);
+            colChart(s, "해마다 수익률 (%)", b.years.map(function(y){ return {l: String(y[0]).slice(2), v: y[1]}; }), 7.1, 4.75, 5.7, 2.1);
+          }
         }
+        // 위험
+        s = P.addSlide(); head(s, f.icon + " " + f.short + " — 담을 상품 · 꼭 알아 둘 점", "", f.color);
+        s.addTable([th(["칸", "상품", "비중", "금액", "이유"])].concat(ls.map(function(l){ return [{text: l.a.name, options: {bold: true}}, l.a.inst || "", pc(l.a.pct), x.amt ? man(l.won) : "–", l.a.why]; })), {x: 0.6, y: 1.4, w: 12.1, colW: [1.6, 2.8, 0.8, 1.3, 5.6], fontFace: F, fontSize: 9.5, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle", autoPage: false});
+        var ry = 1.6 + 0.45 * (ls.length + 1);
+        if (f.tax){ rbox(s, 0.6, ry, 5.9, 1.3, "#EFFAF4"); T(s, "🧾 세액공제 (연 " + f.tax.limit + "만원 넣을 때)\n" + taxLine(f).map(function(t){ return t.who + " · " + t.rate + "% → " + t.full; }).join("\n") + "\n" + f.tax.note, {x: 0.75, y: ry + 0.1, w: 5.6, h: 1.1, fontSize: 10}); }
+        rbox(s, f.tax ? 6.8 : 0.6, ry, f.tax ? 5.9 : 12.1, 6.9 - ry, "#FFF4F2");
+        T(s, "⚠️ 꼭 알아 둘 점", {x: (f.tax ? 6.95 : 0.75), y: ry + 0.1, w: 5.6, h: 0.3, fontSize: 12, bold: true, color: "B3372A"});
+        T(s, (f.risks || []).map(function(r){ return {text: r, options: {bullet: true, breakLine: true}}; }), {x: (f.tax ? 6.95 : 0.75), y: ry + 0.45, w: (f.tax ? 5.6 : 11.8), h: 6.9 - ry - 0.55, fontSize: 11, paraSpaceAfter: 4});
       });
-      // 유의사항
       s = P.addSlide(); head(s, "📌 투자 전 꼭 확인하실 점", m.basis);
-      T(s, m.notice.map(function(t){ return {text: t, options: {bullet: {type: "number"}, breakLine: true}}; }), {x: 0.8, y: 1.5, w: 11.8, h: 3.2, fontSize: 15, paraSpaceAfter: 10});
+      T(s, m.notice.concat(["모의 계산은 지금 금리·환율과 과거 자료로 계산한 예시이며 실제 결과와 다를 수 있음"]).map(function(t){ return {text: t, options: {bullet: {type: "number"}, breakLine: true}}; }), {x: 0.8, y: 1.5, w: 11.8, h: 3.6, fontSize: 15, paraSpaceAfter: 10});
       T(s, "제안  " + (byLine(m) || "담당 PB"), {x: 0.8, y: 5.6, w: 6, h: 0.5, fontSize: 20, bold: true, color: hx(NAVY)});
       T(s, custName(m) + " 확인  ______________________", {x: 6.8, y: 5.7, w: 6, h: 0.4, fontSize: 13, color: "5B6576", align: "right"});
       return P.write({outputType: "blob"});

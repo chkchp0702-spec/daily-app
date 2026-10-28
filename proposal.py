@@ -601,8 +601,20 @@ def main():
                 forms.append(x)
         except Exception as e:
             print("기본폼 실패", f.__name__, repr(e))
+    # 10/28 사용자 「각각 좀 전문되게」 — 상품마다 시장 분석·모의투자 계산서
+    old = jl(OUT, {}) or {}
+    macro = old.get("macro") or {}
+    try:
+        import sys
+        import proposal_mkt
+        macro = proposal_mkt.enrich(forms, sys.modules[__name__], macro)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print("시장·계산서 붙이기 실패", repr(e))
     out = {
         "at": NOW.strftime("%Y-%m-%d %H:%M"),
+        "macro": macro,
         "basis": f"{md(D.get('date'))} 아침 시황 · 상품 {str(PR.get('updated') or '')[5:16].replace('-', '/')} · 시세 {PB.get('label') or ''}",
         "market": market_block(),
         "forms": forms,
