@@ -167,6 +167,11 @@
         '<div class="po-cbn">판정이 바뀌는 날에만 고치면 돼요 · 투자금은 📋 따라하기에서</div></div>' : '') +
       (function(){ var VR = F.k === "kick" ? (K && K.vol_rule) : F.k === "conc" ? (CN && CN.vol_rule) : F.k === "mine" ? null : P.vol_rule; if (!VR || !VR.on) return '';
         return '<div class="po-vr" data-tip="' + e("🦴 변동성 맞춤(" + VR.role + ") — S&P½+나스닥½ 최근 20일 흔들림이 목표 " + VR.target + "%를 넘으면 주식을 그만큼 줄여 현금·단기채로. 바닥 " + VR.floor + "% · 5%p 넘게 바뀔 때만 조정 · " + (VR.from || "").slice(5) + "부터") + '">🦴 변동성 방어(' + e(VR.role) + ') · 주식 <b>' + VR.eq_scale + '%</b> 유지 <small>20일 흔들림 ' + VR.vol20 + '% / 목표 ' + VR.target + '% ⓘ</small></div>'; })() +
+      // 🔄 10/28 Q10/28-2: 연기금 월말 리밸런싱 앞지르기 (💼 에만 · port.json month_flow)
+      (function(){ var M = (F.k === "kick" || F.k === "conc" || F.k === "mine") ? null : P.month_flow; if (!M || !M.on) return '';
+        var tip = "🔄 월말 흐름 — 매달 마지막 " + M.k + "거래일, 60/40 펀드(S&P·중기채) 주식 비중이 ±" + M.th + "%p 넘게 쏠리면 펀드가 억지로 사고팔 쪽에 미리 섬: 넘침 → 주식 칸 60% 미국 장기채(TLT) · 모자람 → 금·추세 칸 60% 주식. 검증 2017~ 연 +2.4%p · " + (M.from || "").slice(5) + "부터";
+        var st = M.sig > 0 ? '주식 → 장기채 <b>' + M.pct + '%</b>' : M.sig < 0 ? '금·추세 → 주식 쪽' : M.window ? '쏠림 작음 · 그대로' : '쉬는 중 · 월말 ' + M.k + '거래일에만';
+        return '<div class="po-vr" data-tip="' + e(tip) + '">🔄 월말 흐름 · ' + st + ' <small>' + (M.drift != null ? '쏠림 ' + (M.drift >= 0 ? "+" : "") + M.drift + '%p · ' : '') + (M.for || "").slice(5) + ' 기준 ⓘ</small></div>'; })() +
       '<div class="po-sub">' + F.days + '거래일 · 시장 ' + BM.length + '곳 중 <b>' + beat(F) + '</b>곳보다 앞섬 · 가장 크게 빠졌을 때 <b>' + sg(F.mdd) + '</b></div>' +
       '<div class="po-cmp n' + cmp.length + '">' + cmp.map(function(n){ var x = B[n][B[n].length - 1];
         return '<div style="border-top:3px solid ' + (BCOL[n] || "#8a94a8") + '"><small>' + e(n) + '</small><b class="' + cls(x) + '">' + sg(x) + '</b><em class="' + (F.ret >= x ? "w" : "l") + '">' + (F.ret >= x ? "포트가 앞섬" : "포트가 뒤짐") + '</em></div>'; }).join("") + '</div>' +
