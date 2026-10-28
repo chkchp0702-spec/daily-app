@@ -451,6 +451,41 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
     m = cond(d, inwk == cv, "만기 주간" if cv else "만기 주간 아님")
     nd = ex[ex > idx[-1]][0] if (ex > idx[-1]).any() else None
     add("expiry", "🗓️", "옵션 만기 주간", "일정", m, 0.4, f"다음 만기 {nd.strftime('%m/%d') if nd is not None else '-'} ({'일주일 안' if cv else '일주일 밖'})")
+    # ⚖️ 월말 리밸런싱 (10/28 10시 #16 · probe/reb_bt.py · Etula 외 「Dash for Cash」) — 그달 남은 거래일 1~4일일 때만, 「다음 날」만
+    #   미국: 그달 S&P 누적 − 국채 TLT 누적 · 일본: 그달 닛케이 누적만. 칸 = −1%↓ / 가운데 / +1%↑
+    #   검증(2002-08~, 월말 창 약 900일, 2017-05 기준 앞/뒤 · 걸어가며 사전 150 브라이어):
+    #   미국 −3%↓ 다음 날 오름 +11.8%p(n 129)·+9.0%p(n 101) · −3~−1 +12.6·+7.0 · +3%↑ −8.5·−5.5%p(n 215·229)
+    #     브라이어 0.2511→0.2451 · 0.2498→0.2476 · 최근 3년 0.2494→0.2433 → ✅ (5일은 앞·최근 나빠져 안 씀)
+    #   일본(주식만) −3~−1 +10.4·+8.4 · +3%↑ −4.3·−4.4%p · 브라이어 0.2519→0.2492 · 0.2508→0.2495 · 0.2474→0.2470 → ➖ 작게(w 0.3)
+    #   한국·중국 ❌(뒤 기간·최근 나빠짐) · 홍콩 개선 0.0005 안팎이라 뺌
+    if mk in ("US", "JP"):
+        mp = idx.to_period("M")
+        pos_ = pd.Series(idx, index=idx).groupby(mp).cumcount()
+        cnt_ = pd.Series(idx, index=idx).groupby(mp).transform("size")
+        rem = (cnt_ - 1 - pos_).astype(int)
+        cm = idx[-1].to_period("M"); me = idx[-1] + pd.offsets.BMonthEnd(0)
+        rem[mp == cm] = [len(pd.bdate_range(t, me)) - 1 for t in idx[mp == cm]]
+        win = (rem >= 1) & (rem <= 4)
+
+        def _mtd(c):
+            pl = c.groupby(c.index.to_period("M")).last().shift(1)
+            return c / pl.reindex(c.index.to_period("M")).values - 1
+        sm = _mtd(d["c"]) * 100
+        tl = _c(H, "TLT")
+        if us and tl is not None:
+            x = sm - (_mtd(tl) * 100).reindex(idx).ffill(); lab = "S&P 그달 누적 − 국채(TLT)"
+        else:
+            x = sm if not us else None; lab = "닛케이 그달 누적"
+        if x is not None and bool(win.iloc[-1]) and pd.notna(x.iloc[-1]):
+            cv = float(x.iloc[-1])
+            cut = pd.cut(x.where(win), [-999, -1, 1, 999], labels=["아래", "가운데", "위"])
+            lb = cut.iloc[-1]
+            m = cond(d, (cut == lb).fillna(False), f"월말 · {lab} {lb}")
+            add("rebal", "⚖️", "월말 리밸런싱", "일정", m, 0.6 if us else 0.3,
+                f"그달 남은 거래일 {int(rem.iloc[-1])}일 · {lab} {cv:+.1f}%p — 주식이 많이 오른 달은 월말에 연기금 되맞춤 매도로 약하고, 덜 오른 달은 반대(다음 날만)")
+            if M and M[-1]["k"] == "rebal":
+                M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+            research["rebal"] = {"rem": int(rem.iloc[-1]), "x": round(cv, 2), "lab": lab, "cut": str(lb)}
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
