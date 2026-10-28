@@ -542,12 +542,38 @@
     }).then(function(){ return pdf.output("blob"); });
   }
 
+  // 🖼️ 안 깨지는 그림판 PPT — PDF 쪽을 그림으로 한 장씩 (A4 세로)
+  function makePptImg(m){
+    var pages = fullPages(m), imgs = [];
+    return needLib().then(needPpt).then(function(){
+      return pages.reduce(function(p, html){ return p.then(function(){ return snap(html, PW, IOS ? 1.6 : 2).then(function(c){ imgs.push(c.toDataURL("image/jpeg", 0.9)); c.width = c.height = 0; }); }); }, Promise.resolve());
+    }).then(function(){
+      var P = new PptxGenJS(); P.defineLayout({name: "A4P", width: 8.27, height: 11.69}); P.layout = "A4P"; P.title = custName(m) + " 투자 제안서";
+      imgs.forEach(function(u){ var sl = P.addSlide(); sl.background = {color: "FFFFFF"}; sl.addImage({data: u, x: 0, y: 0, w: 8.27, h: 11.69}); });
+      return P.write({outputType: "blob"});
+    });
+  }
+  // PPT 글에서 이모지 빼기 — 일부 뷰어(윈도우 옛 버전·휴대폰)에서 네모로 깨짐
+  var EMO = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu;
+  function noEmo(x){
+    if (typeof x === "string") return x.replace(EMO, "").replace(/^\s+/, "").replace(/\s{2,}/g, " ");
+    if (Array.isArray(x)) return x.map(noEmo);
+    if (x && typeof x === "object" && "text" in x){ var o = {}; for (var k in x) o[k] = x[k]; o.text = noEmo(x.text); return o; }
+    return x;
+  }
+
   /* ═════════ ③ PPT (16:9 · 맑은 고딕 · PPT 안에서 고칠 수 있는 진짜 차트) ═════════ */
   function hx(c){ return String(c || "#14304f").replace("#", "").toUpperCase(); }
   function makePpt(m){
     return needPpt().then(function(){
       var P = new PptxGenJS(), F = "맑은 고딕";
-      P.layout = "LAYOUT_WIDE"; P.theme = {headFontFace: F, bodyFontFace: F}; P.title = custName(m) + " 투자 제안서"; P.author = byLine(m) || "PB";
+      P.layout = "LAYOUT_WIDE"; P.theme = {headFontFace: F, bodyFontFace: F};
+      var _add = P.addSlide.bind(P);
+      P.addSlide = function(){ var sl = _add(), at = sl.addText.bind(sl), tb = sl.addTable.bind(sl), ch = sl.addChart.bind(sl);
+        sl.addText = function(t, o){ return at(noEmo(t), o); };
+        sl.addTable = function(r, o){ return tb(noEmo(r), Object.assign({autoPage: false}, o || {})); };
+        sl.addChart = function(tp, d, o){ if (o && o.title) o.title = noEmo(o.title); return ch(tp, (d || []).map(function(z){ var y = {}; for (var k in z) y[k] = z[k]; if (y.labels) y.labels = noEmo(y.labels); if (y.name) y.name = noEmo(y.name); return y; }), o); };
+        return sl; }; P.title = custName(m) + " 투자 제안서"; P.author = byLine(m) || "PB";
       function T(s, text, o){ var d = {fontFace: F, fontSize: 14, color: "1D2533", valign: "top", margin: 0}; for (var k in o) d[k] = o[k]; s.addText(text, d); }
       function head(s, t, sub, color){ s.background = {color: "FFFFFF"}; s.addShape(P.ShapeType.rect, {x: 0, y: 0, w: 13.333, h: 0.12, fill: {color: hx(color || NAVY)}, line: {color: hx(color || NAVY)}});
         T(s, t, {x: 0.6, y: 0.32, w: 10, h: 0.6, fontSize: 25, bold: true, color: hx(color || NAVY)}); if (sub) T(s, sub, {x: 0.6, y: 0.92, w: 12, h: 0.35, fontSize: 12, color: "5B6576"});
@@ -694,25 +720,26 @@
     var w = document.getElementById("ppw"); if (!w || !DATA) return;
     ST.sel = ST.sel.filter(function(k){ return !!form(k); });
     var M = DATA.market || {};
-    var h = '<section class="card pp-top"><h3>📋 오늘의 기본폼</h3><p class="pp-tip" style="margin-top:-4px">' + e(DATA.basis || "") + '</p>' +
+    var h = '<section data-xc="1" class="card pp-top"><h3>📋 오늘의 기본폼</h3><p class="pp-tip" style="margin-top:-4px">' + e(DATA.basis || "") + '</p>' +
       '<div class="pp-reg"><span class="' + (M.us_up ? "ok" : "no") + '">🇺🇸 ' + (M.us_up ? "상승 추세" : "조심") + '</span><span class="' + (M.kr_up ? "ok" : "no") + '">🇰🇷 ' + (M.kr_up ? "상승 추세" : "회복 전") + '</span><span class="mut">' + e(String(DATA.at || "").slice(5).replace("-", "/")) + ' 갱신</span></div>' +
       '<p class="pp-tip">고를 상품을 누르세요 · 여러 개 함께 골라도 됨</p><div class="pp-grid">' + DATA.forms.map(function(f){ var on = ST.sel.indexOf(f.key) >= 0;
         return '<button type="button" class="pp-f' + (on ? " on" : "") + '" data-k="' + f.key + '" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small>' + e(f.headline.replace(/ 제안임$/, "")) + '</small>' + (on ? '<em>✓</em>' : '') + '</button>'; }).join("") + '</div></section>';
-    h += '<section class="card"><h3>✍️ 누구에게 · 누가</h3><div class="pp-in">' +
+    h += '<section data-xc="1" class="card"><h3>✍️ 누구에게 · 누가</h3><div class="pp-in">' +
       '<label>고객 이름<input id="ppcust" maxlength="20" placeholder="예: 홍길동" value="' + e(ST.cust) + '"></label>' +
       '<label>제안자 이름<input id="pppb" maxlength="20" placeholder="예: 김OO PB" value="' + e(ME.pb || "") + '"></label>' +
       '<label>소속<input id="pporg" maxlength="30" placeholder="예: OO WM센터" value="' + e(ME.org || "") + '"></label></div><p class="pp-tip">제안자·소속은 이 휴대폰에 기억해 둠</p></section>';
-    h += '<section class="card"><h3>💰 상품별 금액</h3>' + (ST.sel.length ? ST.sel.map(function(k){ var f = form(k), v = ST.amt[k] || "";
+    h += '<section data-xc="1" class="card"><h3>💰 상품별 금액</h3>' + (ST.sel.length ? ST.sel.map(function(k){ var f = form(k), v = ST.amt[k] || "";
         return '<div class="pp-amt" style="--fc:' + f.color + '"><div class="pp-an"><span>' + e(f.icon) + '</span><b>' + e(f.short) + '</b><span class="pp-aw" id="ppw_' + k + '">' + (v ? man(v * 10000) : "") + '</span></div>' +
           '<div class="pp-ar"><input inputmode="numeric" data-ak="' + k + '" placeholder="금액 (만원)" value="' + e(v) + '"><span>만원</span></div>' +
           '<div class="pp-q">' + AMTS.map(function(a){ return '<button type="button" data-qk="' + k + '" data-qv="' + a[0] + '"' + (+v === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div></div>'; }).join("") +
         '<div class="pp-tot">합계 <b id="pptot">' + (total() ? man(total()) : "–") + '</b></div>'
       : '<p class="mut">위에서 상품을 먼저 골라 주세요.</p>') + '</section>';
-    h += '<section class="card"><h3>📤 만들기</h3><p class="pp-tip" style="margin-top:-4px">휴대폰에서 바로 만듦 · 돈 안 듦</p><div class="pp-go">' +
+    h += '<section data-xc="1" class="card"><h3>📤 만들기</h3><p class="pp-tip" style="margin-top:-4px">휴대폰에서 바로 만듦 · 돈 안 듦</p><div class="pp-go">' +
       '<button type="button" data-mk="png" class="main">📱 한 장 <small>카톡 전송용 그림</small></button>' +
-      '<button type="button" data-mk="pdf">📄 풀버전 PDF <small>표지·시장·상품별 자세히</small></button>' +
-      '<button type="button" data-mk="ppt">📊 PPT <small>맑은 고딕 · 차트 수정 가능</small></button></div>' +
-      '<div id="ppst" class="mut pp-st"></div><div class="pp-pv-h">👀 한 장 미리 보기</div><div id="pppv" class="pp-pv"></div></section>';
+      '<button type="button" data-mk="pdf">' + BTNL.pdf + '</button>' +
+      '<button type="button" data-mk="ppt">' + BTNL.ppt + '</button>' +
+      '<button type="button" data-mk="pptimg">' + BTNL.pptimg + '</button></div>' +
+      '<div id="ppst" class="mut pp-st"></div>' + pptHelp() + '<div class="pp-pv-h">👀 한 장 미리 보기</div><div id="pppv" class="pp-pv"></div></section>';
     w.innerHTML = h;
     bind(); preview();
   }
@@ -737,8 +764,35 @@
     [].forEach.call(w.querySelectorAll("[data-qk]"), function(b){ b.onclick = function(){ var k = b.dataset.qk; ST.amt[k] = +b.dataset.qv; keep(); var inp = w.querySelector('[data-ak="' + k + '"]'); if (inp) inp.value = ST.amt[k];
       [].forEach.call(b.parentNode.children, function(x){ x.classList.toggle("on", x === b); }); upAmt(k); }; });
     [].forEach.call(w.querySelectorAll("[data-mk]"), function(b){ b.onclick = function(){ make(b.dataset.mk, b); }; });
+    var cp = document.getElementById("ppprc"); if (cp) cp.onclick = function(){ var t = PPT_PROMPT, ok = function(){ cp.textContent = "✓ 복사했어요"; setTimeout(function(){ cp.textContent = "📋 문구 복사"; }, 2000); };
+      try { navigator.clipboard.writeText(t).then(ok, function(){ fallback(); }); } catch(x) { fallback(); }
+      function fallback(){ var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch(y) {} ta.remove(); } };
   }
   function upAmt(k){ var s = document.getElementById("ppw_" + k); if (s) s.textContent = ST.amt[k] ? man(ST.amt[k] * 10000) : ""; var t = document.getElementById("pptot"); if (t) t.textContent = total() ? man(total()) : "–"; preview(); }
+  var BTNL = {png: "📱 한 장 <small>카톡 전송용 그림</small>", pdf: "📄 풀버전 PDF <small>표지·시장·상품별 자세히 · 가장 안 깨짐</small>",
+    ppt: "📊 PPT (고칠 수 있는 판) <small>맑은 고딕 · 글·표·차트를 PPT에서 직접 수정</small>", pptimg: "🖼️ PPT (안 깨지는 그림판) <small>PDF 그대로 한 쪽 = 한 장 · 어디서 열어도 똑같음</small>"};
+  // 10/28 사용자 「PPT는 깨지더라 — 왜 깨지는지 설명 · 다른 AI 도구로 어떻게 고치면 좋은지 문구도」
+  var PPT_PROMPT = "첨부한 PPT는 고객에게 줄 투자 제안서입니다. 숫자·상품명·비중·금액은 절대 바꾸지 말고 디자인만 다듬어 주세요.\n" +
+    "1) 모든 글꼴을 맑은 고딕으로 통일하고, 글이 상자 밖으로 넘치면 글자 크기를 줄이거나 상자를 키워 주세요.\n" +
+    "2) 표는 칸 너비를 내용에 맞게 다시 맞추고, 머리줄은 남색(#14304F) 바탕에 흰 글씨로 해 주세요.\n" +
+    "3) 차트는 깨지거나 겹친 것을 바로잡고, 범례·축 글씨는 9pt 이상으로 해 주세요.\n" +
+    "4) 슬라이드마다 여백을 고르게 맞추고, 문장 끝은 「~임」체를 그대로 두세요.\n" +
+    "5) 결과는 같은 내용의 .pptx 파일로 주세요.";
+  function pptHelp(){
+    return '<details class="pp-help no-clp" data-xc="1" data-cz="done"><summary>ⓘ PPT가 깨져 보일 때 — 이유 · 다른 AI로 고치는 법</summary>' +
+      '<div class="pp-hb no-clp" data-xc="1" data-cz="done"><b>왜 깨지나</b><ul>' +
+      '<li><b>휴대폰 미리보기</b>(아이폰 파일·카톡 뷰어)는 PPT를 다 못 그림 — 차트·표 위치가 틀어져 보여도 PC 파워포인트에선 정상인 경우가 많음</li>' +
+      '<li><b>글꼴</b>: 맑은 고딕은 윈도우 글꼴이라 아이폰·맥엔 없음 → 다른 글꼴로 바뀌며 글자 폭이 달라져 줄이 넘침</li>' +
+      '<li><b>상자 크기가 고정</b>: PDF는 내용 높이를 재서 맞추지만 PPT는 칸이 정해져 있어 글이 길면 밖으로 넘침</li>' +
+      '<li><b>진짜 차트</b>로 넣어서 고칠 수 있는 대신, 프로그램마다 차트를 그리는 방식이 달라 모양이 조금씩 다름</li></ul>' +
+      '<b>이렇게 쓰면 안전함</b><ul><li>고객에게 보낼 땐 <b>📄 PDF</b> 또는 <b>🖼️ 그림판 PPT</b> (어디서 열어도 똑같음)</li><li>숫자·문구를 고쳐야 할 땐 <b>📊 고칠 수 있는 판</b>을 PC 파워포인트에서 열기</li></ul>' +
+      '<b>다른 AI 도구로 다듬기</b><ul>' +
+      '<li><b>파워포인트 Copilot</b>: 파일 열고 Copilot 창에 아래 문구 붙여넣기 · 「디자이너」로 슬라이드별 디자인 고르기</li>' +
+      '<li><b>Gamma · Canva</b>: PPT 가져오기(Import) → 테마만 바꾸기 → 다시 PPT·PDF로 내보내기</li>' +
+      '<li><b>ChatGPT · Claude</b>: PPT 파일을 올리고 아래 문구 붙여넣기</li></ul>' +
+      '<div class="pp-pr"><pre id="pppr">' + e(PPT_PROMPT) + '</pre><button type="button" id="ppprc">📋 문구 복사</button></div>' +
+      '<p class="mut" style="margin:6px 0 0">⚠️ AI가 숫자를 바꾸는 일이 있으니 다듬은 뒤 금액·비중·금리는 꼭 한 번 대조할 것</p></div></details>';
+  }
   var READY = {};
   function make(kind, btn){
     if (!ST.sel.length){ toast("상품을 먼저 골라 주세요"); return; }
@@ -747,13 +801,13 @@
     if (ST.busy) return; ST.busy = true;
     var st = document.getElementById("ppst"), old = btn.innerHTML;
     btn.disabled = true; btn.innerHTML = "⏳ 만드는 중…<small>몇 초 걸려요</small>"; if (st) st.textContent = "";
-    var p = kind === "png" ? makePng(m) : kind === "pdf" ? makePdf(m) : makePpt(m);
+    var p = kind === "png" ? makePng(m) : kind === "pdf" ? makePdf(m) : kind === "pptimg" ? makePptImg(m) : makePpt(m);
     var mime = kind === "png" ? "image/png" : kind === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.presentationml.presentation";
     p.then(function(blob){
-      var name = fname(m, kind === "png" ? "png" : kind === "pdf" ? "pdf" : "pptx");
+      var name = kind === "pptimg" ? fname(m, "pptx").replace(/\.pptx$/, "_그림판.pptx") : fname(m, kind === "png" ? "png" : kind === "pdf" ? "pdf" : "pptx");
       READY[kind] = {sig: sig, blob: blob, name: name, mime: mime};
       btn.disabled = false; btn.classList.add("ready");
-      btn.innerHTML = "⬇️ " + (kind === "png" ? "한 장" : kind === "pdf" ? "PDF" : "PPT") + " 저장·보내기<small>" + e(name) + " · " + Math.max(1, Math.round(blob.size / 1024)) + "KB</small>";
+      btn.innerHTML = "⬇️ " + (kind === "png" ? "한 장" : kind === "pdf" ? "PDF" : kind === "pptimg" ? "그림판 PPT" : "PPT") + " 저장·보내기<small>" + e(name) + " · " + Math.max(1, Math.round(blob.size / 1024)) + "KB</small>";
       if (st) st.textContent = "✓ 다 만들었어요 — 버튼을 한 번 더 누르면 저장·공유 창이 떠요";
       try { if (window.ntfyUse) ntfyUse("propose_" + kind); } catch(x) {}
     }).catch(function(err){ btn.disabled = false; btn.innerHTML = old; if (st) st.textContent = "만들지 못했어요 · " + String((err && (err.message || err)) || "").slice(0, 80); try { console.error(err); } catch(x) {} })
@@ -763,11 +817,11 @@
   document.addEventListener("input", function(ev){ if (ev.target && ev.target.closest && ev.target.closest("#ppw")) resetBtns(); });
   document.addEventListener("click", function(ev){ if (ev.target && ev.target.closest && ev.target.closest("#ppw .pp-q button, #ppw .pp-f")) resetBtns(); }, true);
   function resetBtns(){ READY = {}; [].forEach.call(document.querySelectorAll("#ppw [data-mk].ready"), function(b){ b.classList.remove("ready");
-    b.innerHTML = {png: "📱 한 장 <small>카톡 전송용 그림</small>", pdf: "📄 풀버전 PDF <small>표지·시장·상품별 자세히</small>", ppt: "📊 PPT <small>맑은 고딕 · 차트 수정 가능</small>"}[b.dataset.mk]; }); var st = document.getElementById("ppst"); if (st) st.textContent = ""; }
+    b.innerHTML = BTNL[b.dataset.mk]; }); var st = document.getElementById("ppst"); if (st) st.textContent = ""; }
 
   // 시험·다른 화면에서 쓰도록
   window.PROPOSE = {load: load, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; },
-    png: function(){ return makePng(model()); }, pdf: function(){ return makePdf(model()); }, ppt: function(){ return makePpt(model()); }, onePage: function(){ return onePage(model()); }, pages: function(){ return fullPages(model()); }};
+    png: function(){ return makePng(model()); }, pdf: function(){ return makePdf(model()); }, ppt: function(){ return makePpt(model()); }, pptimg: function(){ return makePptImg(model()); }, onePage: function(){ return onePage(model()); }, pages: function(){ return fullPages(model()); }};
 
   var css = document.createElement("style");
   css.textContent =
@@ -787,8 +841,12 @@
     ".pp-go{display:grid;gap:8px}.pp-go button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit;font-size:15.5px;font-weight:800}" +
     ".pp-go button small{font-size:11.5px;color:var(--sub);font-weight:500}.pp-go button.main{background:var(--c,#7c9cff);color:#111;border-color:transparent}.pp-go button.main small{color:rgba(0,0,0,.65)}" +
     ".pp-go button.ready{background:#22a06b;color:#fff;border-color:transparent}.pp-go button.ready small{color:rgba(255,255,255,.85)}.pp-go button:disabled{opacity:.7}" +
+    ".pp-help{margin:10px 0 2px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font-size:13px}.pp-help summary{padding:10px 0;font-weight:800;cursor:pointer}" +
+    ".pp-hb{padding:0 0 12px;line-height:1.55}.pp-hb ul{margin:4px 0 10px;padding-left:18px}.pp-hb li{margin:3px 0}" +
+    ".pp-pr{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}.pp-pr pre{white-space:pre-wrap;margin:0 0 8px;font:inherit;font-size:12px;line-height:1.5}" +
+    ".pp-pr button{border:0;border-radius:8px;padding:7px 12px;font:inherit;font-weight:800;background:var(--c,#7c9cff);color:#111}" +
     ".pp-st{font-size:12.5px;margin:8px 2px 0;min-height:1em}.pp-pv-h{font-size:13px;font-weight:800;margin:14px 0 6px}" +
     ".pp-pv{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#f5f7fb;position:relative}.pp-pv-in{pointer-events:none}" +
-    "@media (min-width:560px){.pp-grid{grid-template-columns:repeat(5,1fr)}.pp-go{grid-template-columns:repeat(3,1fr)}}";
+    "@media (min-width:560px){.pp-grid{grid-template-columns:repeat(5,1fr)}.pp-go{grid-template-columns:repeat(2,1fr)}}";
   document.head.appendChild(css);
 })();
