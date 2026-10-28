@@ -5,6 +5,8 @@
 import sys, json, numpy as np, pandas as pd
 SRC = sys.argv[1]
 COST, SPLIT = 0.0045, "2021-01-01"
+import os
+MINN = int(os.environ.get("MINN", "80"))
 d = pd.read_csv(SRC, dtype={"code": str}, parse_dates=["date"]).drop_duplicates(["code", "date"]).sort_values(["code", "date"])
 mc = d.pivot(index="date", columns="code", values="mcap").sort_index()
 val = d.pivot(index="date", columns="code", values="val").reindex(mc.index)
@@ -25,11 +27,11 @@ def run(S, hs=(20, 60), step=5, top=0.9):
         s = S.loc[t]
         ok = s.notna() & (rank_cap.loc[t] <= 200) & (liq.loc[t] >= 1e9)
         s = s[ok]
-        if len(s) < 80: continue
+        if len(s) < MINN: continue
         q = s.rank(pct=True)
         for h in hs:
             f = fwd[h].loc[t, s.index]
-            if f.notna().sum() < 60: continue
+            if f.notna().sum() < MINN * 0.75: continue
             base = f.mean()
             rows.append((t, h, f[q >= top].mean() - base, f[q <= 1 - top].mean() - base))
     return pd.DataFrame(rows, columns=["t", "h", "top", "bot"])
@@ -53,6 +55,8 @@ for tp in TYPES + ["기관 합계"]:
             for per in ("앞", "뒤"):
                 st = stat(R, h, per)
                 if st: line[f"{per}{h}"] = [round(st[0], 2), round(st[1], 1), round(st[2], 2)]; txt.append(f"{per}{h}: {st[0]:+.2f}({st[1]:.1f})[{st[2]:+.2f}]")
+        if not len(R): continue
+        R["t"] = pd.to_datetime(R["t"])
         yr = R[R.h == 20].groupby(R.t.dt.year).top.mean() * 100
         line["years20"] = {int(k): round(v, 1) for k, v in yr.items()}
         ok = all(line.get(k, [0])[0] > 0.45 for k in ("앞20", "뒤20")) and all(line.get(k, [0, 0])[1] > 1.5 for k in ("앞20", "뒤20"))
@@ -64,6 +68,7 @@ for tp in TYPES + ["기관 합계"]:
 print("\n연기금 하루 순매수 상위 10% → 다음 1·3·5일 초과(%)")
 S = FL["연기금"] / mc
 R = run(S, hs=(1, 3, 5), step=1)
+R["t"] = pd.to_datetime(R["t"]) if len(R) else R.get("t")
 for h in (1, 3, 5):
     for per in ("앞", "뒤"):
         st = stat(R, h, per)
