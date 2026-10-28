@@ -7,7 +7,7 @@
   // 아이폰 사파리: 캔버스 메모리 한도가 작아 한 번에 많이 그리면 실패 → 작게 찍고, 쓴 캔버스는 바로 비우고, 한 카드가 실패해도 건너뛰고 계속
   var IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);          // PDF 쪽 크기(mm)·여백 — 휴대폰 화면 비율
   var CPROPS = ["fill", "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "opacity", "fill-opacity", "stroke-opacity",
-                "font-size", "font-weight", "font-family", "text-anchor", "dominant-baseline", "color"];
+                "font-size", "font-weight", "font-family", "font-style", "letter-spacing", "text-anchor", "dominant-baseline", "paint-order", "color"];   // 10/28 paint-order 빠지면 글자 테두리가 글자를 덮어 흰 덩어리(섹터 로테이션 지도)
   function rgb(v){ return conv(v); }
   function wait(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
   function loadImg(img){
@@ -163,19 +163,21 @@
     if (light) root.setAttribute("data-ui", "light");
     var sx = w.scrollX, sy = w.scrollY, shEl = d.getElementById("sheet"), shY = shEl ? shEl.scrollTop : 0;
     w.scrollTo(0, 0);   // html2canvas 는 스크롤만큼 어긋나 찍힘 → 덮개 뒤에서 잠깐 맨 위로
-    var restore = function(){ w.scrollTo(sx, sy); if (shEl) shEl.scrollTop = shY; if (light){ if (oldUi == null) root.removeAttribute("data-ui"); else root.setAttribute("data-ui", oldUi); } cover.remove();
+    var restore = function(){ w.scrollTo(sx, sy); if (shEl) shEl.scrollTop = shY; var sc_ = d.getElementById("snapcss"); if (sc_) sc_.remove(); if (light){ if (oldUi == null) root.removeAttribute("data-ui"); else root.setAttribute("data-ui", oldUi); } cover.remove();
       [].forEach.call(d.querySelectorAll(".html2pdf__overlay,.html2pdf__container"), function(x){ x.remove(); }); };
     return wait(120).then(function(){
       var width = Math.round(els[0].getBoundingClientRect().width) || 360, bg = w.getComputedStyle(d.body).backgroundColor || "#fff";
       var host = d.createElement("div"); host.id = "snaphost"; host.style.cssText = "position:absolute;left:-20000px;top:0;width:" + width + "px;background:" + conv(bg);
-      var hs = d.createElement("style"); hs.textContent = "#snaphost *::before{background-image:none!important}"; host.appendChild(hs);
+      var hs = d.createElement("style"); hs.id = "snapcss";   // 조이 얼굴은 안내 스크립트가 새 카드에 다시 붙임 → 찍는 동안 통째로 숨김 (html2pdf 복제본 포함)
+      hs.textContent = "#snaphost *::before,.html2pdf__container *::before{background-image:none!important}#snaphost [class*=gd-],.html2pdf__container [class*=gd-],#snaphost video,.html2pdf__container video{display:none!important}";
+      d.head.appendChild(hs);
       d.body.appendChild(host);
       var clones = els.map(function(el){ var c = el.cloneNode(true); c.style.margin = "0"; c.style.maxHeight = "none"; c.style.width = width + "px"; host.appendChild(c); return {src: el, c: c}; });
       var jobs = [];
       clones.forEach(function(o){
         [].forEach.call(o.c.querySelectorAll("button,.pdfbar,.pdfb,.xs-tg,.xs-cl,script,input,select,.seg2 button:not(.on)"), function(x){ x.remove(); });
         [].forEach.call(o.c.querySelectorAll("img"), function(im){ if (/img\/(kid_|guide)/.test(im.getAttribute("src") || "")) im.remove(); });
-        [].forEach.call(o.c.querySelectorAll(".gd-b,.gd-kid,.gd-vw,video,[class*=joy]"), function(x){ x.remove(); });   // 조이 얼굴(작은 동그라미)
+        [].forEach.call(o.c.querySelectorAll("[class*=gd-],video,[class*=joy]"), function(x){ x.remove(); });   // 조이 얼굴(작은 동그라미)
         [].forEach.call(o.c.querySelectorAll(".td-n"), function(x){ x.classList.remove("td-n"); });
         [].forEach.call(o.c.querySelectorAll(".xs-clamp"), function(x){ x.classList.remove("xs-clamp"); });
         var ss = o.src.querySelectorAll("svg"), cs = o.c.querySelectorAll("svg");
