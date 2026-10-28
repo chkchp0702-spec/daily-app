@@ -270,7 +270,8 @@ var V = (function(){
     var c = String(code || "");
     var cands = /^\d{6}$/.test(c) ? [c + ".KS", c + ".KQ"] : [c];
     return Promise.all(cands.map(function(s){ return loadShard(shard(s)).then(function(j){ return j[s]; }); }))
-      .then(function(r){ for (var i = 0; i < r.length; i++) if (r[i]) return r[i]; return null; });
+      .then(function(r){ var hit = null; for (var i = 0; i < r.length; i++) if (r[i]){ hit = r[i]; break; }
+        return hit && window.LIVEPX ? LIVEPX.load().then(function(){ return LIVEPX.apply(c, hit); }, function(){ return hit; }) : hit; });   // 💹 장중엔 지금 값
   }
   /* 화면의 [data-spark] 자리에 차트 채우기: data-spark=코드, data-ref=기준가, data-band="lo,hi", data-label */
   function fillSparks(root){
@@ -284,7 +285,7 @@ var V = (function(){
         if (band){ var b = band.split(","); o.band = [+b[0], +b[1]]; }
         var vals = p[6].slice(); vals[vals.length - 1] = p[1];
         var chg = (vals[vals.length - 1] / vals[0] - 1) * 100;
-        el.innerHTML = spark(vals, o) + '<div class="spark-cap"><span>1년</span><b class="' + cls(chg) + '">' + sgn(chg) + '%</b><span>' + p[0].slice(5).replace("-", "/") + ' 종가 ' + fmt(p[1]) + '</span></div>';
+        el.innerHTML = spark(vals, o) + '<div class="spark-cap"><span>1년</span><b class="' + cls(chg) + '">' + sgn(chg) + '%</b><span>' + (p.lv ? p.lv + ' 지금 ' : p[0].slice(5).replace("-", "/") + ' 종가 ') + fmt(p[1]) + '</span></div>';
       });
     });
   }

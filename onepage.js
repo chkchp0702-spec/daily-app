@@ -166,6 +166,19 @@
   var W = 1080, H = 1620, MX = 60, CW = W - MX * 2;   // 시장 한 장은 1920 (코멘트까지)
   var INK = "#141414", SUB = "#6a6f7a", MUT = "#9aa0ab", LINE = "#e6e8ec", UP = "#d6453d", DN = "#2f6fdd", ACC = "#1f2d4d", BG = "#f7f7f5", TILE = "#ffffff";
   var F = '-apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif';
+  // 10/28 「숫자표기 세자리수마다 ,」 — 한 장에 그리는 모든 글자에서 4자리 이상 숫자에 쉼표 (연도·코드·시각·날짜는 그대로)
+  function commaTxt(t){
+    return String(t).replace(/(^|[^\d.,:\/\-A-Za-z])(\d{4,})(?=(\.\d+)?)(?![\d]|년|\.K|\.T|\.S|\.H|\))/g, function(m, pre, n, off){
+      if (/^(19|20)\d\d$/.test(n) || /^0\d{5}$/.test(n) || /^\d{6}$/.test(n) && /^[0-9]/.test(n) && n.length === 6 && n[0] === "0") return m;
+      return pre + n.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    });
+  }
+  function ctx2d(c){
+    var g = c.getContext("2d"), ft = g.fillText.bind(g), mt = g.measureText.bind(g);
+    g.fillText = function(t, x, y, w){ return w === undefined ? ft(commaTxt(t), x, y) : ft(commaTxt(t), x, y, w); };
+    g.measureText = function(t){ return mt(commaTxt(t)); };
+    return g;
+  }
   function font(g, w, s){ g.font = w + " " + s + "px " + F; }
   function rr(g, x, y, w, h, r, fill){ g.fillStyle = fill; g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h); g.fill(); }
   function cls(v){ var n = typeof v === "number" ? v : num(v); return n == null || n === 0 ? INK : n > 0 ? UP : DN; }
@@ -578,7 +591,7 @@
   function draw(C, name){
     var dyn = C.kind === "market" || C.kind === "stock";
     H = dyn ? 3400 : 1620;
-    var c = document.createElement("canvas"); c.width = W; c.height = H; var g = c.getContext("2d");
+    var c = document.createElement("canvas"); c.width = W; c.height = H; var g = ctx2d(c);
     g.fillStyle = BG; g.fillRect(0, 0, W, H);
     var d = kst(), y = 70;
     if (C.kind === "market") y = bannerMarket(g, C, name);
@@ -599,10 +612,10 @@
     else if (C.kind === "myels") blocks = [["kpis", C.kpis], ["ua", C.uabars], ["advice", C.advice, name], ["steps", C.steps]];
     else blocks = [["chips", C.chips], ["kpis", C.kpis], ["risk", C.risk], ["bars", C.bars], ["tiles", C.tiles], ["bullets", C.bullets]];
     var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb, rows: bRows, risk: bRisk, hero: bHero, world: bWorld, heat: bHeat, gauge: bGauge, advice: bAdvice, chart: bChart, dna: bDna, anl: bAnl, ua: bUa, glance: bGlance, news: bNews, dna5: bDna5, key: bKey, stars: bStars, fin: bFin};
-    var c2 = document.createElement("canvas"); c2.width = W; c2.height = H; var g2 = c2.getContext("2d");   // 먼저 재 보고 들어갈 때만 그림
+    var c2 = document.createElement("canvas"); c2.width = W; c2.height = H; var g2 = ctx2d(c2);   // 먼저 재 보고 들어갈 때만 그림
     blocks.forEach(function(b){ if (!b[1]) return; var hh = FN[b[0]](g2, 0, b[1], b[2]) || 0; if (!hh || y + hh > H - 104) return; FN[b[0]](g, y, b[1], b[2]); y += hh; });
     if (dyn && y + 130 < H){   // 내용만큼만 — 아래 빈 화면 없게
-      var c3 = document.createElement("canvas"); c3.width = W; c3.height = Math.max(1350, y + 130); var g3 = c3.getContext("2d");
+      var c3 = document.createElement("canvas"); c3.width = W; c3.height = Math.max(1350, y + 130); var g3 = ctx2d(c3);
       g3.fillStyle = BG; g3.fillRect(0, 0, W, c3.height); g3.drawImage(c, 0, 0, W, y, 0, 0, W, y); c = c3; g = g3; H = c3.height;
     }
     g.fillStyle = LINE; g.fillRect(MX, H - 96, CW, 2);

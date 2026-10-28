@@ -47,6 +47,9 @@ def num(v):
         return None
 
 
+ALLPX = {}   # 전 종목(ETF·우선주 포함) 지금 가격
+
+
 def fetch(mkt):
     rows, page, empty = [], 1, 0
     while page <= 60:
@@ -63,6 +66,12 @@ def fetch(mkt):
             continue
         empty = 0
         for x in items:
+            try:
+                _p, _r = num(x.get("closePriceRaw") or x.get("closePrice")), num(x.get("fluctuationsRatio"))
+                if x.get("itemCode") and _p:
+                    ALLPX[x["itemCode"]] = [_p, _r]
+            except Exception:
+                pass
             if (x.get("stockEndType") and x["stockEndType"] != "stock") or ETF.match(x.get("stockName") or "") or "ETN" in (x.get("stockName") or ""):
                 continue
             rows.append({"c": x.get("itemCode"), "n": x.get("stockName"), "p": num(x.get("closePriceRaw") or x.get("closePrice")),
@@ -106,6 +115,11 @@ def main():
     if len(rows) < 500:
         print("종목이 너무 적음", len(rows))
         return
+    try:   # 💹 모든 종목 지금 가격 (10/28 「하이닉스 지금 10% 올랐는데 — 정확한 시세」 · 종목리포트·관심종목이 어제 종가를 쓰던 것)
+        json.dump({"date": NOW.strftime("%Y-%m-%d"), "t": NOW.strftime("%H:%M"), "q": ALLPX},
+                  open(os.path.join(os.path.dirname(OUT), "live_px.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    except Exception as e:
+        print("전 종목 가격 실패", e)
     # 우선주·스팩 빼기
     rows = [x for x in rows if not (x["n"] or "").endswith(("우", "우B", "우C")) and "스팩" not in (x["n"] or "")]
     up = sum(1 for x in rows if x["r"] > EPS)

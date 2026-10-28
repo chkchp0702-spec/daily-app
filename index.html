@@ -429,7 +429,8 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
 <main id="main"><div class="loading">불러오는 중…</div></main>
 <footer>※ 참고용 자료입니다. 투자 판단과 책임은 본인에게 있습니다.</footer>
 
-<script src="viz.js?v=11"></script>
+<script src="livepx.js?v=1"></script>
+<script src="viz.js?v=12"></script>
 <script>
 /* ---------- ⚠ 저장본 알림 띠 (10/11) — 서비스 워커가 느려서 마지막 저장본을 보여 주면 위쪽에 잠깐 ---------- */
 (function(){
@@ -1432,22 +1433,23 @@ function opShow(sym, noPush){
     getText(OPD + "s/" + opFile(sym) + ".html"),
     OPCSS ? Promise.resolve(OPCSS) : getText(OPD + "op.css").then(function(c){ OPCSS = c; return c; }),
     OPP[sh] ? Promise.resolve(OPP[sh]) : getJSON(OPD + "p/" + sh + ".json").then(function(j){ OPP[sh] = j; return j; }).catch(function(){ return {}; }),
-    FX ? Promise.resolve(FX) : getJSON(OPD + "p/fx.json").then(function(j){ FX = j; return j; }).catch(function(){ return null; })
+    FX ? Promise.resolve(FX) : getJSON(OPD + "p/fx.json").then(function(j){ FX = j; return j; }).catch(function(){ return null; }),
+    window.LIVEPX ? LIVEPX.load().catch(function(){ return null; }) : null
   ]).then(function(res){
     var html = res[0].replace("<style></style>", "<style>" + res[1] + "</style>");
     box.innerHTML = '<div id="opsig"></div><div class="card" style="padding:6px"><iframe class="rep" id="opf"></iframe></div>';
     sigBadges(sym).then(function(hh){ var el = $("opsig"); if (el) el.innerHTML = hh; });
     var fr = $("opf");
     fr.onload = function(){
-      var d = fr.contentDocument, p = res[2][sym];
+      var d = fr.contentDocument, p = res[2][sym]; if (p && window.LIVEPX) p = LIVEPX.apply(sym, p);   // 💹 장중엔 지금 값
       try {
         var hdr = d.querySelector(".hdr"), u = ((hdr && hdr.textContent.match(/통화\s*([가-힣]+)/)) || [, "달러"])[1];
         if (p){
           var chg = (p[1] / p[2] - 1) * 100;
           d.querySelector(".kpi.k1 .kv").textContent = fmtPrice(p[1], u);
-          d.querySelector(".kpi.k1 .ks").innerHTML = '<span class="' + (chg >= 0 ? "up" : "down") + '">' + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%</span> · " + p[0].slice(5).replace("-", "/") + " 종가";
+          d.querySelector(".kpi.k1 .ks").innerHTML = '<span class="' + (chg >= 0 ? "up" : "down") + '">' + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%</span> · " + (p.lv ? p.lv + " 실시간" : p[0].slice(5).replace("-", "/") + " 종가");
           [].forEach.call(d.querySelectorAll("h2"), function(h){ if (/주가/.test(h.textContent)){ h.parentNode.innerHTML = "<h2>주가 (1년)</h2>" + opChart(p, u); } });
-          if (hdr) hdr.innerHTML = "가격 " + p[0] + " 종가<br>설명 " + hdr.innerHTML.split("<br>")[0] + " 기준<br>통화 " + u + (u !== "원" ? '<br><span class="fxl"></span>' : "");
+          if (hdr) hdr.innerHTML = "가격 " + p[0] + (p.lv ? " " + p.lv + " 실시간 (10분마다)" : " 종가") + "<br>설명 " + hdr.innerHTML.split("<br>")[0] + " 기준<br>통화 " + u + (u !== "원" ? '<br><span class="fxl"></span>' : "");
           var w = d.querySelector(".w52"), lo = w && +w.getAttribute("data-lo"), hi = w && +w.getAttribute("data-hi");
           if (w && hi > lo){ var n = w.querySelector(".w52-n"), pos = Math.max(0, Math.min(100, (p[1] - lo) / (hi - lo) * 100));
             n.style.left = pos.toFixed(1) + "%"; var em = n.querySelector("em"); if (em){ em.textContent = "현재 " + fmtPrice(p[1], u); em.className = pos > 85 ? "r" : pos < 15 ? "l" : ""; } }
@@ -1496,7 +1498,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261028n";
+var APPV = "20261028o";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1558,7 +1560,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="usage.js?v=1"></script>   <!-- 📈 10/28 사용 현황(익명) -->
 <script defer src="plus.js?v=5"></script>
 <script defer src="cpin.js?v=1"></script>   <!-- 📌 10/28 내 고객 상품 -->
-<script defer src="onepage.js?v=10"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
+<script defer src="onepage.js?v=11"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
 <script defer src="pbcard.js?v=3"></script>   <!-- 👔 10/28 PB 한 장 카드(장중 매시간) -->
 <script defer src="plus2.js?v=2"></script>
 <script defer src="plus3.js?v=19"></script>
