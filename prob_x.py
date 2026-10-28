@@ -486,6 +486,52 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
             if M and M[-1]["k"] == "rebal":
                 M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
             research["rebal"] = {"rem": int(rem.iloc[-1]), "x": round(cv, 2), "lab": lab, "cut": str(lb)}
+    # 🎌 휴일 앞뒤 (10/28 12시 #17 · probe/hol_bt.py · Ariel 1990 휴일 전날 효과) — 「다음 날」만, 켜질 때만
+    #   과거 = 지수 이력 빈칸(다음 거래일까지 평일이 빔) · 앞으로 = holidays 패키지 거래소 달력(미 NYSE 111/111 · 중 77/77 · 홍 104/132 · 일 137/145 일치)
+    #   A 내일이 휴일 앞날 · B 내일이 휴일 뒤 첫날(오늘이 휴일 앞날). 2000~, 2016-05 기준 앞/뒤 · 걸어가며 사전 100 브라이어(표시 날만 조건부)
+    #   중국 A +10.0·+7.0%p(n 162) 브라이어 0.24884→0.24875 · 0.24938→0.24927 ✅ · B +5.9·+9.2%p 0.24884→0.24875 · 0.24938→0.2493 · 최근5년↑ ✅
+    #   홍콩 A +5.1·+8.2%p(n 292) 0.24999→0.24997 · 0.24982→0.24961 ✅ · B 뒤 기간 −1.1 뒤집힘 ❌
+    #   일본 B +9.8·+3.1%p(n 324) 0.24994→0.24985 · 0.24925→0.24902 · 최근5년 0.24905→0.24879 ✅ · A ❌
+    #   미국 A +1.8·+11.4%p(n 247) 앞 브라이어 그대로·뒤 0.2481→0.24782 ➖ 작게(w 0.3) · B 뒤 −8.6 ❌
+    #   한국 A 앞 +9.5·뒤 +1.4 브라이어 두 기간 나빠짐 ❌ · 긴 연휴 앞날 +20.6·+12.7%p 이나 n 69 ➖ 안 씀
+    HOLW = {"CN": {"A": 0.5, "B": 0.5}, "HK": {"A": 0.4}, "JP": {"B": 0.4}, "US": {"A": 0.3}}
+    if mk in HOLW:
+        try:
+            import holidays as _HL
+            yrs = range(idx[-1].year, idx[-1].year + 2)
+            cal = _HL.financial_holidays("NYSE", years=yrs) if us else _HL.country_holidays({"JP": "JP", "CN": "CN", "HK": "HK"}[mk], years=yrs)
+            if mk == "JP":                                   # 도쿄거래소 연말연시 휴장(12/31·1/2·1/3)
+                for y in yrs:
+                    for md in ((12, 31), (1, 2), (1, 3)):
+                        cal[dt.date(y, *md)] = "연말연시"
+            closed = lambda t: t.weekday() >= 5 or t.date() in cal
+            t0 = idx[-1]
+            t1 = t0 + pd.Timedelta(days=1)
+            while closed(t1):
+                t1 += pd.Timedelta(days=1)
+            gap0 = len(pd.bdate_range(t0, t1)) - 2           # 오늘 → 내일 사이 비는 평일
+            t2 = t1 + pd.Timedelta(days=1)
+            while closed(t2):
+                t2 += pd.Timedelta(days=1)
+            gap1 = len(pd.bdate_range(t1, t2)) - 2           # 내일 → 모레 사이 비는 평일
+            nx = list(idx[1:])
+            hg = pd.Series([len(pd.bdate_range(a, b)) - 2 for a, b in zip(idx[:-1], nx)] + [gap0], index=idx)
+            pre = hg >= 1
+            kind = "B" if (gap0 >= 1 and "B" in HOLW[mk]) else ("A" if (gap1 >= 1 and "A" in HOLW[mk]) else None)
+            if kind:
+                flag = pre if kind == "B" else pre.shift(-1, fill_value=False)
+                if kind == "A":
+                    flag.iloc[-1] = True
+                hn = [str(cal.get((t0 + pd.Timedelta(days=i)).date())) for i in range(1, 10) if (t0 + pd.Timedelta(days=i)).date() in cal][:1]
+                lab = f"내일({t1:%m/%d})이 휴일 {'뒤 첫날' if kind == 'B' else '앞날'}"
+                m = cond(d, flag.fillna(False), "🎌 " + lab)
+                add("holiday", "🎌", "휴일 앞뒤", "일정", m, HOLW[mk][kind],
+                    f"{lab}{' · ' + hn[0] if hn else ''} — 연휴 앞에는 팔기보다 들고 가려는 쪽이 많아 오르는 날이 잦음(다음 날만)")
+                if M and M[-1]["k"] == "holiday":
+                    M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+                research["holiday"] = {"kind": kind, "t1": str(t1.date()), "hol": hn}
+        except Exception as e:
+            research["holiday_err"] = str(e)[:120]
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
