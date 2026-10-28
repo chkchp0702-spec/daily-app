@@ -167,6 +167,10 @@ def advice(d):
         w0 = when.split(" ")[0]
         if w0 == td:
             when = "오늘"
+            # 이미 지난 오늘 일정(「09시 …」·「09:00」)은 빼기 (10/28 하이닉스 한 장에 지난 실적 일정이 남던 것)
+            hm = re.search(r"(\d{1,2})(?:시|:\d{2})", sc.get("when", "") + " " + what)
+            if hm and int(hm.group(1)) < NOW.hour:
+                continue
         watch.append([when[:12], plain(what)[:60]])
     # ③ 대응 — 국면(S&P 200일선)과 리포트 결정 · 주도 섹터
     al = d.get("allocation_seen") or []

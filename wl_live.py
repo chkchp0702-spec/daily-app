@@ -100,6 +100,43 @@ def news_kr(code):
         return []
 
 
+# 미국에 상장된 한국 회사(10/28 사용자가 SKHY 를 담음) → 한국 본주 실시간 값·한국 뉴스도 같이
+KR_TWIN = {"SKHY": ("000660", "SK하이닉스"), "SSNLF": ("005930", "삼성전자"), "PKX": ("005490", "POSCO홀딩스"), "KB": ("105560", "KB금융"),
+           "SHG": ("055550", "신한지주"), "WF": ("316140", "우리금융지주"), "KEP": ("015760", "한국전력"), "LPL": ("034220", "LG디스플레이"), "SKM": ("017670", "SK텔레콤"), "KT": ("030200", "KT")}
+
+
+def news_g(q):
+    """구글 뉴스(한국어) 최근 3일 — 네이버가 비거나 오래됐을 때·미국 종목"""
+    try:
+        import email.utils
+        import urllib.parse
+        x = http("https://news.google.com/rss/search?q=" + urllib.parse.quote(q + " when:3d") + "&hl=ko&gl=KR&ceid=KR:ko")
+        out = []
+        for it in re.findall(r"<item>(.*?)</item>", x, re.S)[:12]:
+            t = re.sub(r"<!\[CDATA\[|\]\]>", "", (re.search(r"<title>(.*?)</title>", it, re.S) or [None, ""])[1]).strip()
+            src = re.sub(r"<[^>]+>", "", (re.search(r"<source[^>]*>(.*?)</source>", it, re.S) or [None, ""])[1]).strip()
+            if src and t.endswith(" - " + src):
+                t = t[: -len(src) - 3]
+            pd = (re.search(r"<pubDate>(.*?)</pubDate>", it) or [None, ""])[1]
+            try:
+                d = email.utils.parsedate_to_datetime(pd).astimezone(KST).strftime("%Y%m%d%H%M")
+            except Exception:
+                d = ""
+            t = re.sub(r"&quot;|&#39;|&amp;", lambda m: {"&quot;": '"', "&#39;": "'", "&amp;": "&"}[m.group(0)], t)
+            if t:
+                out.append({"t": t[:80], "src": src, "d": d})
+        out.sort(key=lambda n: n["d"], reverse=True)
+        return out[:4]
+    except Exception as e:
+        print("구글뉴스 실패", q, e)
+        return []
+
+
+def fresh(nw, days=3):
+    lim = (NOW - dt.timedelta(days=days)).strftime("%Y%m%d%H%M")
+    return [n for n in nw if n.get("d", "") >= lim]
+
+
 def news_us(sym):
     try:
         import yfinance as yf
@@ -132,13 +169,24 @@ def main():
             continue
         o = Q.get(code) or {}
         nw = o.get("news") or []
-        if not o.get("nt") or o.get("nt", "") < (NOW - dt.timedelta(minutes=50)).strftime("%Y-%m-%d %H:%M"):   # 뉴스는 50분마다
-            nw = news_kr(code) if re.fullmatch(r"\d{6}", code) else news_us(q["s"])
+        if not nw or not o.get("nt") or o.get("nt", "") < (NOW - dt.timedelta(minutes=50)).strftime("%Y-%m-%d %H:%M"):   # 뉴스는 50분마다
+            twin = KR_TWIN.get(code.upper())
+            if re.fullmatch(r"\d{6}", code):
+                nw = fresh(sorted(news_kr(code), key=lambda n: n["d"], reverse=True)) or news_g(nm)
+            elif twin:
+                nw = fresh(sorted(news_kr(twin[0]), key=lambda n: n["d"], reverse=True)) or news_g(twin[1])
+            else:
+                nw = fresh(news_us(q["s"])) or news_g(re.sub(r",?\s+(Inc\.?|Corporation|Corp\.?|Ltd\.?|plc|Holdings|Company|Co\.)$", "", nm).strip() or code)
             q["nt"] = NOW.strftime("%Y-%m-%d %H:%M")
         else:
             q["nt"] = o.get("nt")
         q["news"] = nw
         q["n"] = nm
+        twin = KR_TWIN.get(code.upper())
+        if twin:   # 한국 본주 지금 값
+            k = quote(twin[0])
+            if k:
+                q["kr"] = {"c": twin[0], "n": twin[1], "p": k["p"], "chg": k["chg"], "t": k["t"]}
         out[code] = q
     json.dump({"at": NOW.strftime("%Y-%m-%d %H:%M"), "q": out}, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("관심종목", len(out), "/", len(S))

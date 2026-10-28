@@ -57,7 +57,7 @@
       var word = !live ? "" : ks.chg >= 3 ? "급등" : ks.chg >= 1 ? "강세" : ks.chg > -1 ? "보합" : ks.chg > -3 ? "약세" : "급락";
       var head = live ? "코스피 " + pct(ks.chg) + " " + word + (top2 ? " · " + top2 + " 주도" : "") + (gauge ? " · 종목 " + Math.round(gauge.up / gauge.total * 100) + "% 상승" : "") : (D.one_liner ? strip(D.one_liner).split(" — ")[0].slice(0, 44) : "");
       return {kind: "market", title: liveMode ? "지금 시장 한 장" : "오늘 시장 한 장", sub: lab + (head ? " · " + head : ""),
-        advice: PB && PB.advice && PB.asof && PB.asof.slice(0, 10) === today() ? PB.advice : null,
+        advice: PB && PB.advice && PB.asof && PB.asof.slice(0, 10) === today() ? Object.assign({}, PB.advice, {watch: liveWatch(PB.advice.watch)}) : null,
         hero: hero, world: world.length ? world : null, heat: heat.length >= 8 ? heat : null, gauge: gauge, chips: chips, events: ev,
         themes: themes.length ? {title: "오늘 뜨는 테마 — 대장주", items: themes} : null, kpis2: k2.slice(0, 4),
         alloc: al.length ? al.map(function(a){ return {n: a.name.replace(" 코어", ""), pct: a.pct}; }) : null,
@@ -162,6 +162,11 @@
     if (out.length > (max || 3)){ out = out.slice(0, max || 3); out[out.length - 1] = out[out.length - 1].replace(/.{2}$/, "…"); }
     out.forEach(function(l, i){ g.fillText(l, x, y + i * lh); });
     return out.length * lh;
+  }
+  function nLines(g, text, w, max){ var n = 0, line = "", ch = String(text).split(""); for (var i = 0; i < ch.length; i++){ var t = line + ch[i]; if (g.measureText(t).width > w && line){ n++; line = ch[i]; } else line = t; } if (line) n++; return Math.min(n, max || 3); }
+  function liveWatch(W_){   // 이미 지난 오늘 일정(「09시 …」)은 빼기
+    var hh = kst().getUTCHours();
+    return (W_ || []).map(function(w){ if (w[0] !== "오늘") return w; var parts = String(w[1]).split(" · ").filter(function(x){ var m = /^(\d{1,2})시/.exec(x.trim()); return !m || +m[1] > hh; }); return parts.length ? [w[0], parts.join(" · ")] : null; }).filter(Boolean);
   }
   function bKpis(g, y, K){
     if (!K || !K.length) return 0;
@@ -364,14 +369,14 @@
   function bAdvice(g, y, A, name){   // 📌 PB 코멘트 — 지금 해석 · 앞으로 볼 것 · 이렇게 대응
     if (!A || !A.read) return 0;
     var pad = 28, tw = CW - pad * 2 - 8, yy, h;
-    var measure = function(t, sz, mx){ font(g, 600, sz); var w = g.measureText(t).width; return Math.min(mx, Math.ceil(w / tw)); };
-    var nRead = measure(A.read, 30, 3), nPlan = 0; (A.plan || []).forEach(function(p){ nPlan += measure("✓ " + p, 26, 2); });
+    var measure = function(t, sz, mx){ font(g, 600, sz); return nLines(g, t, tw, mx); };
+    var RL = A.maxRead || 3, nRead = measure(A.read, 30, RL), nPlan = 0; (A.plan || []).forEach(function(p){ nPlan += measure("✓ " + p, 26, 2); });
     h = 70 + nRead * 42 + 22 + (A.watch && A.watch.length ? 44 + A.watch.length * 40 + 16 : 0) + (nPlan ? 44 + nPlan * 36 + (A.plan.length * 8) : 0) + 20;
     rr(g, MX, y, CW, h, 24, "#1f2d4d");
     g.fillStyle = "#d9a441"; g.fillRect(MX, y + 24, 8, 44);
     g.fillStyle = "#fff"; font(g, 800, 30); g.fillText("📌 " + (name ? name + "의 " : "PB ") + "코멘트" + (A.title ? " — " + A.title : " — 그래서 앞으로"), MX + pad, y + 56);
     yy = y + 70;
-    g.fillStyle = "#f3f5fa"; font(g, 600, 30); yy += wrap(g, A.read, MX + pad, yy + 34, tw, 42, 3) + 22;
+    g.fillStyle = "#f3f5fa"; font(g, 600, 30); yy += wrap(g, A.read, MX + pad, yy + 34, tw, 42, RL) + 22;
     if (A.watch && A.watch.length){
       g.fillStyle = "#d9a441"; font(g, 800, 24); g.fillText("앞으로 볼 일정", MX + pad, yy + 26); yy += 44;
       A.watch.forEach(function(w){ rr(g, MX + pad, yy + 4, 150, 32, 16, "rgba(255,255,255,.12)"); g.fillStyle = "#fff"; font(g, 700, 21); g.textAlign = "center"; g.fillText(w[0], MX + pad + 75, yy + 27); g.textAlign = "left";
@@ -402,10 +407,39 @@
     return h + 24;
   }
   function draw(C, name){
-    H = C.kind === "market" ? 2160 : C.kind === "stock" ? 2060 : 1620;
+    H = C.kind === "market" ? 2160 : C.kind === "stock" ? 2400 : 1620;
     var c = document.createElement("canvas"); c.width = W; c.height = H; var g = c.getContext("2d");
     g.fillStyle = BG; g.fillRect(0, 0, W, H);
     var d = kst(), y = 70;
+    if (C.kind === "stock"){   // 그림 머리 (회사 사진 · 없으면 업종 그림 + 1년 주가 물결)
+      var bh = 300, im = C.img;
+      g.save(); g.beginPath(); g.rect(0, 0, W, bh); g.clip();
+      if (im){ var sc = Math.max(W / im.width, bh / im.height), iw = im.width * sc, ih = im.height * sc; g.drawImage(im, (W - iw) / 2, (bh - ih) / 2, iw, ih); }
+      else {
+        var bg = g.createLinearGradient(0, 0, W, bh); bg.addColorStop(0, "#1b2a6b"); bg.addColorStop(1, "#3b5bdb"); g.fillStyle = bg; g.fillRect(0, 0, W, bh);
+        var wv = (C.chart && C.chart.v) || []; if (wv.length > 5){ var mn = Math.min.apply(null, wv), mx = Math.max.apply(null, wv);
+          g.beginPath(); wv.forEach(function(v, i){ var xx = i / (wv.length - 1) * W, yy = bh - 30 - (v - mn) / (mx - mn || 1) * (bh - 110); i ? g.lineTo(xx, yy) : g.moveTo(xx, yy); });
+          g.lineTo(W, bh); g.lineTo(0, bh); g.closePath(); g.fillStyle = "rgba(255,255,255,.10)"; g.fill(); }
+        g.globalAlpha = .9; font(g, 400, 150); g.textAlign = "right"; g.fillText(C.emoji || "🏢", W - MX, 200); g.textAlign = "left"; g.globalAlpha = 1;
+      }
+      var gr = g.createLinearGradient(0, 0, 0, bh); gr.addColorStop(0, "rgba(10,16,30,.25)"); gr.addColorStop(1, "rgba(10,16,30,.85)"); g.fillStyle = gr; g.fillRect(0, 0, W, bh); g.restore();
+      g.fillStyle = "rgba(255,255,255,.85)"; font(g, 600, 24); g.fillText(d.getUTCFullYear() + "년 " + (d.getUTCMonth() + 1) + "월 " + d.getUTCDate() + "일", MX, 56);
+      if (name){ g.textAlign = "right"; font(g, 700, 24); g.fillText(name, W - MX, 56); g.textAlign = "left"; }
+      g.fillStyle = "#fff"; font(g, 800, 56); wrap(g, C.title, MX, bh - 70, CW, 60, 1);
+      g.fillStyle = "rgba(255,255,255,.85)"; font(g, 500, 26); wrap(g, C.sub || "", MX, bh - 28, CW, 30, 1);
+      y = bh + 30;
+      var blocksI = [["chips", C.chips], ["kpis", C.kpis], ["chart", C.chart], ["glance", C.glance], ["news", C.news], ["advice", C.advice, name], ["dna5", C.dna], ["anl", C.anl]];
+      var FNI = {kpis: bKpis, chips: bChips, chart: bChart, glance: bGlance, news: bNews, advice: bAdvice, dna5: bDna5, anl: bAnl};
+      var cI = document.createElement("canvas"); cI.width = W; cI.height = H; var gI = cI.getContext("2d");
+      blocksI.forEach(function(b){ if (!b[1]) return; var hh = FNI[b[0]](gI, 0, b[1], b[2]) || 0; if (!hh || y + hh > H - 104) return; FNI[b[0]](g, y, b[1], b[2]); y += hh; });
+      if (y + 130 < H){   // 내용만큼만 — 아래 빈 화면 없게
+        var c2 = document.createElement("canvas"); c2.width = W; c2.height = Math.max(1500, y + 130); var g2 = c2.getContext("2d");
+        g2.fillStyle = BG; g2.fillRect(0, 0, W, c2.height); g2.drawImage(c, 0, 0, W, y, 0, 0, W, y); c = c2; g = c2.getContext("2d"); H = c2.height;
+      }
+      g.fillStyle = LINE; g.fillRect(MX, H - 96, CW, 2); g.fillStyle = MUT; font(g, 500, 21);
+      wrap(g, (C.note ? C.note + " · " : "") + "참고용 자료 · 과거 성과는 미래 수익을 보장하지 않아요 · 투자 판단과 책임은 본인에게 있어요", MX, H - 58, CW, 28, 2);
+      return c;
+    }
     g.fillStyle = MUT; font(g, 600, 24); g.fillText(d.getUTCFullYear() + "년 " + (d.getUTCMonth() + 1) + "월 " + d.getUTCDate() + "일", MX, y);
     if (name){ g.textAlign = "right"; g.fillStyle = SUB; font(g, 700, 24); g.fillText(name, W - MX, y); g.textAlign = "left"; }
     y += 20; g.fillStyle = INK; font(g, 800, 52); y += wrap(g, C.title, MX, y + 52, CW, 60, 2);
@@ -416,10 +450,10 @@
     else if (C.kind === "port") blocks = [["chips", C.chips], ["alloc", C.alloc, true], ["line", C.line], ["kpis", C.kpis], ["rows", C.why, "text"], ["bullets", C.bullets], ["rows", C.sched, "text"]];
     else if (C.kind === "bond") blocks = [["kpis", C.kpis], ["timeline", C.timeline], ["tiles", C.tiles], ["risk", C.risk, C.riskTitle], ["bars", C.cmp], ["bullets", C.bullets]];
     else if (C.kind === "els") blocks = [["chips", C.chips], ["kpis", C.kpis], ["steps", C.steps], ["prob", C.prob], ["tiles", C.tiles], ["bullets", C.bullets]];
-    else if (C.kind === "stock") blocks = [["chips", C.chips], ["kpis", C.kpis], ["chart", C.chart], ["advice", C.advice, name], ["dna", C.dna], ["anl", C.anl]];
+    else if (C.kind === "stock") blocks = [["chips", C.chips], ["kpis", C.kpis], ["chart", C.chart], ["glance", C.glance], ["news", C.news], ["advice", C.advice, name], ["dna5", C.dna], ["anl", C.anl]];
     else if (C.kind === "myels") blocks = [["kpis", C.kpis], ["ua", C.uabars], ["advice", C.advice, name], ["steps", C.steps]];
     else blocks = [["chips", C.chips], ["kpis", C.kpis], ["risk", C.risk], ["bars", C.bars], ["tiles", C.tiles], ["bullets", C.bullets]];
-    var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb, rows: bRows, risk: bRisk, hero: bHero, world: bWorld, heat: bHeat, gauge: bGauge, advice: bAdvice, chart: bChart, dna: bDna, anl: bAnl, ua: bUa};
+    var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb, rows: bRows, risk: bRisk, hero: bHero, world: bWorld, heat: bHeat, gauge: bGauge, advice: bAdvice, chart: bChart, dna: bDna, anl: bAnl, ua: bUa, glance: bGlance, news: bNews, dna5: bDna5};
     var c2 = document.createElement("canvas"); c2.width = W; c2.height = H; var g2 = c2.getContext("2d");   // 먼저 재 보고 들어갈 때만 그림
     blocks.forEach(function(b){ if (!b[1]) return; var hh = FN[b[0]](g2, 0, b[1], b[2]) || 0; if (!hh || y + hh > H - 104) return; FN[b[0]](g, y, b[1], b[2]); y += hh; });
     g.fillStyle = LINE; g.fillRect(MX, H - 96, CW, 2);
@@ -444,58 +478,102 @@
     var E = []; try { E = JSON.parse(localStorage.getItem("elsmy") || "[]") || []; } catch(x) {}
     return L.map(function(p){ return {kind: p.k === "fund" ? "fund" : "bond", k: p.k, id: p.id, nm: p.nm, pin: p}; }).concat(E.map(function(e){ return {kind: "myels", id: e.id, nm: e.nm, it: e}; }));
   }
-  // 종목 한 장
+  // 종목 한 장 (10/28 13:02 「디자인·그림·가독성 · 주가랑 뉴스가 어제꺼」 → 사진 머리 · 실시간 가격(wl_live.json, 10분마다) · 한눈에 4칸 · 오늘 뉴스 · 코멘트 · 점수·증권사)
+  function loadImg(url){ return new Promise(function(res){ if (!url) return res(null); var im = new Image(); im.crossOrigin = "anonymous"; var t = setTimeout(function(){ res(null); }, 3500); im.onload = function(){ clearTimeout(t); res(im); }; im.onerror = function(){ clearTimeout(t); res(null); }; im.src = url; }); }
   function mkStock(code, nm){
     var ks = /^\d{6}$/.test(code) ? [code + ".KS", code + ".KQ"] : [code];
-    return Promise.all([pxOf(code), Promise.all(ks.map(function(k){ return oj("d/" + k + ".json"); })), Promise.all(ks.map(function(k){ return oj("e/" + k + ".json"); })), Promise.all(ks.map(dnaOf)), Promise.all(ks.map(sigOf)), gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), window.__pbbrief ? __pbbrief() : null]).then(function(r){
-      var P = r[0], Dd = r[1].filter(Boolean)[0] || {}, E = r[2].filter(Boolean)[0] || {}, DN = r[3].filter(Boolean)[0], SG = r[4].filter(Boolean)[0], L = r[5], U = r[6], PB = r[7];
-      if (!P) return null;
+    return Promise.all([pxOf(code), Promise.all(ks.map(function(k){ return oj("d/" + k + ".json"); })), Promise.all(ks.map(function(k){ return oj("e/" + k + ".json"); })), Promise.all(ks.map(dnaOf)), Promise.all(ks.map(sigOf)), gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), window.__pbbrief ? __pbbrief() : null, gj("archive/x/wl_live.json" + q()), Promise.all(ks.map(function(k){ return oj("m/" + k + ".json"); }))]).then(function(r){
+      var P = r[0], Dd = r[1].filter(Boolean)[0] || {}, E = r[2].filter(Boolean)[0] || {}, DN = r[3].filter(Boolean)[0], SG = r[4].filter(Boolean)[0], L = r[5], U = r[6], PB = r[7], WLv = ((r[8] || {}).q || {})[code], MD = r[9].filter(Boolean)[0] || {};
+      if (!P && !WLv) return null;
+      P = P || [WLv.t.slice(0, 10), WLv.p, WLv.prev, WLv.p, WLv.p, "", []];
       var kr = /^\d{6}$/.test(code), cur_ = kr ? "원" : (Dd.currency === "USD" || !Dd.currency ? "$" : " " + Dd.currency);
-      var last = +P[1], prev = +P[2], hi = +P[3], lo = +P[4], wk = (P[6] || []).slice(), asof = P[0];
-      if (kr && L && L.date === today() && P[0] < today()){   // 장중·오늘 값이 있으면 그걸로 (거래대금·등락 상위·업종 대표에 든 종목)
+      var last = +P[1], prev = +P[2], hi = +P[3], lo = +P[4], wk = (P[6] || []).slice(), asof = P[0], live = false;
+      var closed = false;
+      if (WLv && WLv.p && WLv.t && WLv.t.slice(0, 10) >= String(P[0])){ last = +WLv.p; prev = WLv.prev ? +WLv.prev : prev; asof = WLv.t;
+        var ago = (kst() - new Date(WLv.t.replace(" ", "T") + ":00Z")) / 60e3; live = ago < 45; closed = !live; }
+      else if (kr && L && L.date === today() && P[0] < today()){
         var LV = {}; [].concat(L.value || [], L.movers || [], [].concat.apply([], (L.sectors || []).map(function(x){ return x.big || []; })), [].concat.apply([], (L.themes || []).map(function(x){ return x.lead || []; })), [].concat.apply([], (L.strong || []).map(function(x){ return x.lead || []; }))).forEach(function(x){ if (x && x.s) LV[x.s.split(".")[0]] = x; });
-        var lv = LV[code]; if (lv && lv.p){ last = +lv.p; prev = lv.r != null ? last / (1 + lv.r / 100) : +P[1]; asof = today() + " " + (L.t || ""); hi = Math.max(hi, last); lo = Math.min(lo, last); }
+        var lv = LV[code]; if (lv && lv.p){ last = +lv.p; prev = lv.r != null ? last / (1 + lv.r / 100) : +P[1]; asof = today() + " " + (L.t || ""); live = true; }
       }
+      hi = Math.max(hi, last); lo = Math.min(lo, last);
       if (wk.length) wk[wk.length - 1] = last;
-      var d1 = prev ? (last / prev - 1) * 100 : null, r4 = wk.length > 5 ? (last / wk[wk.length - 5] - 1) * 100 : null, r13 = wk.length > 14 ? (last / wk[wk.length - 14] - 1) * 100 : null, r52 = wk.length > 40 ? (last / wk[0] - 1) * 100 : null;
+      var d1 = prev ? (last / prev - 1) * 100 : null, r4 = wk.length > 5 ? (last / wk[wk.length - 5] - 1) * 100 : null, r13 = wk.length > 14 ? (last / wk[wk.length - 14] - 1) * 100 : null, r52 = wk.length >= 20 ? (last / wk[0] - 1) * 100 : null;
       var fromHi = hi ? (last / hi - 1) * 100 : null, posR = hi > lo ? (last - lo) / (hi - lo) * 100 : null;
       var fmtP = function(v){ return kr ? Math.round(v).toLocaleString() + "원" : (cur_ === "$" ? "$" + (+v).toFixed(2) : (+v).toFixed(2) + cur_); };
       var an = Dd.analyst || {}, tgt = an.target_mean, up = tgt && last ? (tgt / last - 1) * 100 : null;
       var mk = null; if (kr && L && L.date === today()){ var ix = (L.index || []).filter(function(x){ return x.name === "코스피"; })[0]; if (ix) mk = {n: "코스피", v: ix.chg}; }
       if (!kr && U && U.date === today()){ var es = (U.fut || []).filter(function(f){ return f.s === "ES=F"; })[0]; if (es) mk = {n: "S&P500 선물", v: es.chg}; }
+      if (closed && !kr) mk = null;
       var earn = ((E.cal || {}).earn || []).filter(function(d){ return d >= today(); })[0];
-      var surp = (E.surp || []).slice(-1)[0];
-      var tags = SG && SG.tags ? SG.tags.split("") .filter(function(c){ return c.trim(); }) : [];
+      var tags = SG && SG.tags ? SG.tags.split("").filter(function(c){ return c.trim(); }) : [];
       var TAGN = {"☕": "☕ 컵 모양(돌파 대기)", "📈": "📈 갭 돌파", "🐋": "🐋 큰손 매수", "🤫": "🤫 조용한 매집", "🎯": "🎯 집중"};
-      var chips = [Dd.country && Dd.country !== "South Korea" ? ({"United States": "🇺🇸 미국", "Japan": "🇯🇵 일본", "China": "🇨🇳 중국", "Hong Kong": "🇭🇰 홍콩"}[Dd.country] || Dd.country) : ""].filter(Boolean).concat(tags.map(function(t){ return TAGN[t] || t; }).filter(function(x){ return x.length > 1; }));
+      var nmS = nm || (Dd.ticker || {}).name || code;
+      // 한눈에 4칸
+      var trend = r13 == null ? null : r13 > 8 && (r4 == null || r4 > -5) ? ["📈", "상승 흐름", "석 달 " + pct(r13), UP] : r13 < -8 ? ["📉", "하락 흐름", "석 달 " + pct(r13), DN] : ["➡️", "옆걸음", "석 달 " + pct(r13), "#8a94a8"];
+      var place = posR == null ? null : posR >= 80 ? ["🔝", "1년 높은 쪽", "최고가 " + pct(fromHi), UP] : posR <= 30 ? ["🔻", "1년 낮은 쪽", "최고가 " + pct(fromHi), DN] : ["📍", "1년 가운데", "최고가 " + pct(fromHi), "#8a94a8"];
+      var val = DN && DN[3] != null ? (DN[3] >= 70 ? ["💰", "싼 편", "이익 대비 · " + DN[3] + "점", "#2f9e44"] : DN[3] <= 30 ? ["💸", "비싼 편", "이익 대비 · " + DN[3] + "점", UP] : ["⚖️", "보통", "이익 대비 · " + DN[3] + "점", "#8a94a8"]) : (Dd.pe ? ["⚖️", "PER " + (+Dd.pe).toFixed(1) + "배", "이익 대비 가격", "#8a94a8"] : null);
+      var buyN = (an.strong_buy || 0) + (an.buy || 0), sellN = (an.sell || 0) + (an.strong_sell || 0);
+      var pro = an.n_analysts ? (buyN / an.n_analysts >= 0.7 ? ["👍", "매수 우세", an.n_analysts + "곳 중 " + buyN + "곳", "#2f9e44"] : sellN / an.n_analysts >= 0.3 ? ["👎", "매도 많음", an.n_analysts + "곳 중 " + sellN + "곳", UP] : ["🤝", "의견 갈림", an.n_analysts + "곳", "#8a94a8"]) : null;
+      var glance = [trend, place, val, pro].filter(Boolean);
+      // 뉴스
+      var news = WLv && WLv.news && WLv.news.length ? WLv.news.slice(0, 3).map(function(n){ var d = String(n.d || ""); return {t: n.t, s: (n.src || "") + (d.length >= 8 ? " · " + (d.slice(0, 8) === today().replace(/-/g, "") ? "오늘 " + d.slice(8, 10) + ":" + d.slice(10, 12) : d.slice(4, 6) + "/" + d.slice(6, 8)) : "")}; }) : null;
       // 📌 PB 코멘트
       var read = "", plan = [], watch = [];
-      var nmS = nm || (Dd.ticker || {}).name || code;
-      if (d1 != null){
-        var rel = mk ? d1 - mk.v : null;
-        read = josa(nmS) + " 오늘 " + pct(d1) + (mk ? " — " + mk.n + "(" + pct(mk.v) + ")보다 " + (rel >= 0.5 ? "강해요" : rel <= -0.5 ? "약해요" : "비슷해요") : "") + ". ";
-      }
-      if (posR != null){
-        read += posR >= 85 ? "1년 중 가장 높은 쪽(최고가 " + pct(fromHi) + ")에 있어 추세는 강하지만 많이 오른 자리예요." : posR <= 20 ? "1년 중 가장 낮은 쪽에 있어요 — 싸 보이지만 하락 흐름이 멈췄는지 먼저 확인할 때예요." : "1년 가격 범위의 가운데쯤(" + Math.round(posR) + "%)에 있어요.";
-      }
-      if (r4 != null && r13 != null) read += " 최근 한 달 " + pct(r4) + " · 석 달 " + pct(r13) + ".";
-      var green = PB && PB.advice && PB.advice.plan && /상승 추세/.test(PB.advice.plan[0] || "");
-      if (r13 != null && r13 > 0 && (r4 == null || r4 > -5)) plan.push("흐름이 살아 있어요 — 들고 계시면 유지, 새로 담는다면 쉬어 가는 날에 나눠서.");
-      else if (r13 != null && r13 < -10) plan.push("석 달째 내리는 흐름이에요 — 비중이 크면 일부 줄이고, 새로 담는 건 반등이 확인된 뒤에.");
+      if (d1 != null){ var rel = mk ? d1 - mk.v : null; read = josa(nmS) + " " + (live ? "오늘 " : closed && !kr ? "지난밤 미국에서 " : "최근 거래일 ") + pct(d1) + (mk ? " — " + mk.n + "(" + pct(mk.v) + ")보다 " + (rel >= 0.5 ? "강해요" : rel <= -0.5 ? "약해요" : "비슷해요") : "") + ". "; }
+      if (posR != null) read += posR >= 80 ? "1년 중 높은 쪽(최고가 대비 " + pct(fromHi) + ")이라 흐름은 좋지만 많이 오른 자리예요." : posR <= 30 ? "1년 중 낮은 쪽(최고가 대비 " + pct(fromHi) + ")이에요 — 싸 보이지만 내림이 멈췄는지 먼저 확인할 때예요." : "1년 가격 범위의 가운데쯤이에요.";
+      if (r4 != null && r13 != null) read += " 한 달 " + pct(r4) + " · 석 달 " + pct(r13) + ".";
+      if (r13 != null && r13 > 8 && (r4 == null || r4 > -5)) plan.push("흐름이 살아 있어요 — 들고 계시면 유지, 새로 담는다면 쉬어 가는 날에 나눠서.");
+      else if (r13 != null && r13 < -8) plan.push("석 달째 내리는 흐름이에요 — 비중이 크면 일부 줄이고, 새로 담는 건 반등이 확인된 뒤에.");
+      else if (r4 != null && r4 < -15) plan.push("한 달 새 크게 빠졌어요 — 한 번에 사기보다 2~3번 나눠서, 정한 비중 안에서만.");
       else plan.push("방향이 뚜렷하지 않아요 — 서두르지 말고 정한 비중 안에서만.");
-      if (up != null && an.n_analysts) plan.push("증권사 " + an.n_analysts + "곳 평균 목표가 " + fmtP(tgt) + " — 지금보다 " + pct(up) + (up > 20 ? " (여유 있음)" : up < 0 ? " (이미 넘어섬)" : "") + ".");
-      if (DN && DN[3] != null && DN[3] >= 70) plan.push("이익 대비 주가가 싼 편이에요(싸다 점수 " + DN[3] + "/100).");
-      else if (DN && DN[3] != null && DN[3] <= 25) plan.push("이익 대비 주가가 비싼 편이에요(싸다 점수 " + DN[3] + "/100) — 기대가 이미 많이 반영돼 있어요.");
-      if (earn) watch.push([md(earn), "실적 발표" + (earn === today() ? " (오늘)" : "")]);
-      if (surp && surp[2] != null && surp[1]) watch.push(["지난 실적", "예상 대비 " + pct((surp[2] / surp[1] - 1) * 100, 0) + (surp[2] >= surp[1] ? " 웃돎" : " 밑돎")]);
-      (PB && PB.advice && PB.advice.watch || []).slice(0, 2).forEach(function(w){ if (watch.length < 3) watch.push(w); });
-      var kp = [{l: "지금 " + (asof ? (asof.length > 10 ? asof.slice(11) : md(asof)) : ""), v: fmtP(last), neutral: true}, {l: "오늘", v: pct(d1)}, {l: "한 달", v: pct(r4)}, {l: "1년", v: pct(r52)}];
+      if (up != null && an.n_analysts) plan.push("증권사 " + an.n_analysts + "곳 평균 목표가 " + fmtP(tgt) + " — 지금보다 " + pct(up) + (up > 20 ? ", 여유가 있는 편이에요." : up < 0 ? ", 이미 넘어섰어요." : "."));
+      if (earn) watch.push([earn === today() ? "오늘" : md(earn), "실적 발표 — 결과에 따라 크게 움직일 수 있어요"]);
+      liveWatch((PB && PB.advice && PB.advice.watch) || []).slice(0, 2).forEach(function(w){ if (watch.length < 3) watch.push(w); });
+      var tw = WLv && WLv.kr && WLv.kr.t && WLv.kr.t.slice(0, 10) === today() ? WLv.kr : null;
+      if (tw){ read = "한국 본주 " + josa(tw.n) + " 지금(" + tw.t.slice(11, 16) + ") " + pct(tw.chg) + " — 오늘 밤 미국 주가도 이 흐름을 따라갈 가능성이 커요. 미국 상장 " + code + "는 " + read.replace(/^.*?(지난밤|오늘|최근 거래일)/, "$1"); }
+      var kp = [{l: live ? "지금 " + (asof.length > 10 ? asof.slice(11, 16) : "") : closed && !kr ? md(asof) + " 미국 마감" : md(asof) + " 종가", v: fmtP(last), neutral: true}, {l: live ? "오늘" : "마지막 거래일", v: pct(d1)}, {l: "한 달", v: pct(r4)}, {l: wk.length >= 48 ? "1년" : wk.length >= 20 ? "상장 후" : "석 달", v: wk.length >= 20 ? pct(r52) : pct(r13)}];
       var dna = DN ? [{n: "성장", v: DN[1]}, {n: "수익성", v: DN[2]}, {n: "싸다", v: DN[3]}, {n: "주가 힘", v: DN[4]}, {n: "전문가", v: DN[5]}].filter(function(x){ return x.v != null; }) : null;
-      var anl = an.n_analysts ? {n: an.n_analysts, sb: an.strong_buy || 0, b: an.buy || 0, h: an.hold || 0, s: (an.sell || 0) + (an.strong_sell || 0), tgt: tgt, up: up, lo: an.target_low, hi: an.target_high, last: last, fmt: fmtP} : null;
-      return {kind: "stock", title: nmS + (kr ? "" : " (" + code + ")"), sub: (kr ? code + " · " : "") + (Dd.industry_ko || "") + (Dd.pe ? " · PER " + (+Dd.pe).toFixed(1) + "배" : "") + (Dd.market_cap ? " · 시총 " + (kr ? Math.round(Dd.market_cap / 1e12).toLocaleString() + "조원" : "$" + Math.round(Dd.market_cap / 1e9).toLocaleString() + "B") : ""),
-        chips: chips.slice(0, 4), kpis: kp, chart: wk.length > 10 ? {v: wk, hi: hi, lo: lo, last: last, fmt: fmtP, tgt: tgt} : null, dna: dna && dna.length >= 4 ? dna : null, anl: anl,
-        advice: {title: "이 종목, 이렇게 봐요", read: read.trim(), watch: watch.slice(0, 3), plan: plan.slice(0, 3)}, note: "개별 종목 정보는 참고용이에요 · 매수·매도 권유가 아니에요"};
+      var anl = an.n_analysts ? {n: an.n_analysts, sb: an.strong_buy || 0, b: an.buy || 0, h: an.hold || 0, s: sellN, tgt: tgt, up: up, lo: an.target_low, hi: an.target_high, last: last, fmt: fmtP} : null;
+      return loadImg(MD.photo).then(function(img){
+        var ind = (Dd.industry_ko || Dd.industry || "") + " " + nmS, EM = [[/반도체|메모리|hynix|하이닉스|Semicon/i, "💾"], [/자동차|Auto/i, "🚗"], [/배터리|2차전지|리튬|Albemarle|화학/i, "🔋"], [/바이오|제약|헬스|Pharma|Bio/i, "🧬"], [/은행|금융|보험|Bank|Financ/i, "🏦"], [/조선|해운|Ship/i, "🚢"], [/방산|항공|우주|Aero|Space|Defense/i, "🚀"], [/인터넷|소프트|플랫폼|Software|Internet|Meta|게임/i, "💻"], [/통신|네트워크|Network|Arista|Telecom/i, "📡"], [/에너지|정유|석유|Oil|Energy|전력|유틸/i, "⚡"], [/건설|Construction/i, "🏗️"], [/화장품|소비|유통|Retail|식품/i, "🛍️"], [/ETF|지수/i, "📊"]];
+        var emo = "🏢"; for (var ei = 0; ei < EM.length; ei++) if (EM[ei][0].test(ind)){ emo = EM[ei][1]; break; }
+        return {kind: "stock", emoji: emo, title: nmS + (kr ? "" : " · " + code), sub: [kr ? code : "", Dd.industry_ko || "", Dd.market_cap ? "시총 " + (kr ? Math.round(Dd.market_cap / 1e12).toLocaleString() + "조원" : "$" + Math.round(Dd.market_cap / 1e9).toLocaleString() + "B") : ""].filter(Boolean).join(" · "),
+          img: img, live: live, asof: asof, chips: (tw ? ["🇰🇷 본주 " + tw.n + " 지금 " + Math.round(tw.p).toLocaleString() + "원 " + pct(tw.chg)] : []).concat(tags.map(function(t){ return TAGN[t] || ""; }).filter(Boolean)),
+          kpis: kp, chart: wk.length > 10 ? {v: wk, hi: hi, lo: lo, last: last, fmt: fmtP} : null, glance: glance.length >= 3 ? glance : null, news: news ? {title: "📰 최근 뉴스", items: news} : null,
+          dna: dna && dna.length >= 4 ? dna : null, anl: anl,
+          advice: {title: "이 종목, 이렇게 봐요", maxRead: 5, read: read.trim(), watch: watch.slice(0, 3), plan: plan.slice(0, 2)},
+          note: (live ? "가격 " + asof.slice(5, 16).replace("-", "/") + " 기준(10~15분 늦을 수 있음) · " : closed && !kr ? "가격 " + asof.slice(5, 16).replace("-", "/") + " 미국 마감 기준 · " : "가격 " + md(asof) + " 종가 기준 · ") + "개별 종목 정보는 참고용이에요 · 매수·매도 권유가 아니에요"};
+      });
     });
+  }
+  function bGlance(g, y, G){
+    if (!G || !G.length) return 0;
+    var n = G.length, gap = 12, w = (CW - gap * (n - 1)) / n, h = 168;
+    G.forEach(function(x, i){ var xx = MX + i * (w + gap); rr(g, xx, y, w, h, 20, TILE); g.fillStyle = x[3]; g.fillRect(xx, y + 20, 6, h - 40);
+      font(g, 600, 46); g.fillStyle = INK; g.fillText(x[0], xx + 22, y + 62);
+      g.fillStyle = x[3] === "#8a94a8" ? INK : x[3]; font(g, 800, 30); wrap(g, x[1], xx + 22, y + 108, w - 34, 32, 1);
+      g.fillStyle = MUT; font(g, 500, 20); wrap(g, x[2], xx + 22, y + 142, w - 34, 22, 1); });
+    return h + 24;
+  }
+  function bNews(g, y, N){
+    if (!N || !N.items || !N.items.length) return 0;
+    var items = N.items, h = 46; font(g, 700, 26); items.forEach(function(it){ h += nLines(g, it.t, CW - 60, 2) * 34 + 38; }); h += 6;
+    rr(g, MX, y, CW, h, 20, TILE);
+    g.fillStyle = SUB; font(g, 700, 24); g.fillText(N.title, MX + 22, y + 32);
+    var yy = y + 46;
+    items.forEach(function(it, i){ g.fillStyle = INK; font(g, 700, 26); yy += wrap(g, it.t, MX + 22, yy + 28, CW - 60, 34, 2); g.fillStyle = MUT; font(g, 500, 20); g.fillText(it.s, MX + 22, yy + 22); yy += 38;
+      if (i < items.length - 1){ g.fillStyle = LINE; g.fillRect(MX + 22, yy - 8, CW - 44, 1); } });
+    return h + 24;
+  }
+  function bDna5(g, y, D){   // 다섯 점수 — 작은 원형 게이지 5개
+    if (!D || !D.length) return 0;
+    var n = D.length, w = CW / n, h = 196; rr(g, MX, y, CW, h, 20, TILE);
+    g.fillStyle = SUB; font(g, 700, 24); g.fillText("다섯 가지 점수 (100점 만점 · 같은 시장 종목과 비교)", MX + 22, y + 32);
+    D.forEach(function(d, i){ var cx = MX + w * i + w / 2, cy = y + 112, R = 46, c = d.v >= 70 ? "#2f9e44" : d.v >= 40 ? "#d9a441" : "#d6453d";
+      g.lineWidth = 12; g.strokeStyle = "#eef0f4"; g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.stroke();
+      g.strokeStyle = c; g.lineCap = "round"; g.beginPath(); g.arc(cx, cy, R, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * d.v / 100); g.stroke(); g.lineCap = "butt";
+      g.fillStyle = c; font(g, 800, 30); g.textAlign = "center"; g.fillText(String(d.v), cx, cy + 11); g.fillStyle = INK; font(g, 700, 22); g.fillText(d.n, cx, y + 184); g.textAlign = "left"; });
+    return h + 24;
   }
   // 📌 담은 채권·펀드 → 상품 한 장 (products.json 에서 원본 찾기)
   function mkPin(it){
