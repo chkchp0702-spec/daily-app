@@ -100,7 +100,32 @@
       ".qquote{text-align:center;font-family:'Noto Serif KR',serif;font-size:17px;font-weight:700;margin:14px 0;color:#1e2742;line-height:1.6}",
       ".qtools{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}.qtools button{flex:1;min-width:120px;border:1px solid #cfd6e4;background:#fff;color:#1e2742;border-radius:12px;padding:10px 8px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}",
       ".qtools button small{display:block;font-weight:500;font-size:11px;color:#6b7488}",
-      ".sjr .pdfbar{margin:0 0 12px}"
+      ".sjr .pdfbar{margin:0 0 12px}",
+      /* 우와 업그레이드 */
+      ".lk-hero{position:relative;overflow:hidden;border-radius:24px;padding:18px 18px 16px;color:#fff;margin-bottom:12px;box-shadow:0 10px 28px rgba(40,20,90,.22)}",
+      ".lk-hero .tw{position:absolute;border-radius:50%;background:#fff;animation:sjtw 2.6s ease-in-out infinite}@keyframes sjtw{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:.95;transform:scale(1.15)}}",
+      ".lk-hero .ani{position:absolute;right:-6px;top:-10px;font-size:120px;opacity:.22;transform:rotate(12deg);line-height:1;pointer-events:none}",
+      ".lk-hero .sc{font-size:64px;font-weight:900;line-height:1;letter-spacing:-2px;text-shadow:0 2px 12px rgba(0,0,0,.18)}.lk-hero .sc small{font-size:18px;font-weight:700;opacity:.8;margin-left:3px;letter-spacing:0}",
+      ".lk-hero .gd{display:inline-block;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:3px 11px;font-size:12.5px;font-weight:800;margin-bottom:8px;backdrop-filter:blur(4px)}",
+      ".lk-hero .hd{font-size:20px;font-weight:800;line-height:1.38;letter-spacing:-.4px;margin:10px 0 8px}.lk-hero .sub{font-size:12.5px;opacity:.92}",
+      ".lk-hero .meter{height:8px;background:rgba(255,255,255,.25);border-radius:6px;overflow:hidden;margin:10px 0 2px}.lk-hero .meter i{display:block;height:100%;background:#fff;border-radius:6px;animation:sjgrow 1.3s cubic-bezier(.2,.8,.2,1) both}@keyframes sjgrow{from{width:0}}",
+      ".lk-hero .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.lk-hero .chips span{background:rgba(255,255,255,.18);border-radius:14px;padding:3px 9px;font-size:11.5px;font-weight:700}",
+      ".lk-pop{animation:sjpop .6s cubic-bezier(.2,1.4,.4,1) both}@keyframes sjpop{from{opacity:0;transform:translateY(12px) scale(.96)}}",
+      ".lk-flipw{perspective:1000px;margin-bottom:12px}.lk-flip{position:relative;height:216px;transition:transform .9s cubic-bezier(.3,1.3,.5,1);transform-style:preserve-3d;cursor:pointer}.lk-flip.on{transform:rotateY(180deg)}",
+      ".lk-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center;color:#fff;overflow:hidden}",
+      ".lk-front{background:radial-gradient(circle at 30% 20%,#3b2d7a,#14112b 70%);border:2px solid #c9a7ff55}.lk-front .q{font-size:54px;animation:sjfloat 2.4s ease-in-out infinite}@keyframes sjfloat{50%{transform:translateY(-8px)}}",
+      ".lk-front b{font-size:17px;margin-top:8px}.lk-front small{opacity:.75;margin-top:4px}.lk-back{transform:rotateY(180deg)}.lk-back .ic{font-size:50px}.lk-back b{font-size:20px;margin:4px 0 2px}.lk-back .k{font-size:12px;opacity:.9;letter-spacing:2px}.lk-back p{margin:8px 0 0;font-size:14px;line-height:1.55}",
+      ".lk-el{display:grid;gap:8px}.lk-el .r{display:grid;grid-template-columns:52px 1fr 34px;gap:8px;align-items:center;font-size:13px}.lk-el .bb{height:14px;background:var(--panel2);border-radius:8px;overflow:hidden;display:flex}",
+      ".lk-el .bb i{display:block;height:100%}.lk-el .bb i.add{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.55) 0 4px,transparent 4px 8px);animation:sjgrow 1.2s both}",
+      ".lk-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.lk-cal .w{font-size:11px;color:var(--dim);text-align:center}.lk-cal button{aspect-ratio:1;border:0;border-radius:10px;font:inherit;font-size:12.5px;font-weight:700;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}",
+      ".lk-cal button small{font-size:9.5px;font-weight:600;opacity:.9}.lk-cal button.td{outline:2.5px solid var(--text);outline-offset:1px}.lk-cal button.sel{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,.3)}.lk-cal .x{visibility:hidden}",
+      ".lk-share{display:flex;gap:8px;margin:0 0 12px}.lk-share button{flex:1;border:0;border-radius:14px;padding:13px 10px;font:inherit;font-weight:800;font-size:14.5px;cursor:pointer;color:#fff;background:linear-gradient(135deg,#fee500,#f7c600);color:#3a1d1d}",
+      ".lk-share button.b2{background:var(--panel2);color:var(--text);border:1px solid var(--line)}",
+      ".qsum{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:center}@media(max-width:400px){.qsum{grid-template-columns:1fr}}",
+      ".qkw{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}.qkw span{border-radius:20px;padding:4px 11px;font-size:12.5px;font-weight:800;color:#fff}",
+      ".qbig{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.qbig div{border:1px solid var(--ln);border-radius:12px;padding:9px 6px;text-align:center;background:#fafbfd}.qbig b{display:block;font-size:17px}.qbig small{font-size:11px;color:#6b7488}",
+      ".qm12{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}.qm12 div{border-radius:11px;padding:7px 4px;text-align:center;font-size:11.5px;line-height:1.35;color:#fff}.qm12 b{display:block;font-size:13.5px}",
+      ".qcp{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:center;border:1px solid var(--ln);border-radius:14px;padding:12px;margin:8px 0;background:#fafbfd}.qcp ul{margin:4px 0 0;padding-left:16px;font-size:12.8px}"
     ].join("\n");
     document.head.appendChild(st);
   }
@@ -333,11 +358,21 @@
     var R; try { R = calcOf(p); } catch(x) { root.innerHTML = frame("luck", '<div class="card">계산하지 못했어요: ' + e(x.message || x) + '</div>'); bindPpl(root, renderLuck); return; }
     var t = T(), D = luckData(R, LK.off), dd = D.dd, c = scoreCol(D.sc);
     var dayStr = (LK.off === 0 ? "오늘 · " : LK.off === 1 ? "내일 · " : "") + dd.m + "월 " + dd.d + "일 (" + WD[dd.w] + ")";
-    var h = '<div class="card"><div class="lk-d">' + dayStr + ' · ' + e(p.name) + ' 님</div>' +
-      '<div class="lk-top" style="margin-top:8px">' + ring(D.sc, c) + '<div><span class="lk-g" style="background:' + c + '22;color:' + c + '">' + t.GRADE(D.sc) + '</span>' +
-      '<div class="lk-h">' + e(D.head) + '</div><div class="lk-d">오늘은 「' + t.DAYNAME(D.L.p) + '」 날 (' + t.read(D.L.p) + '일)</div></div></div></div>';
+    var gr = t.GRAD(D.sc), cardEl = D.L.bEl, CD = t.CARD[cardEl], flipKey = "sj_flip_" + p.id + "_" + dd.y + dd.m + dd.d, flipped = !!ls(flipKey);
+    var h = '<div class="lk-hero lk-pop" style="background:linear-gradient(140deg,' + gr[0] + ',' + gr[1] + ')">' + twinkles(14, dayStr) + '<div class="ani">' + (t.ANI_EMO[D.L.p[1]] || "✨") + '</div>' +
+      '<div class="sub">' + dayStr + ' · ' + e(p.name) + ' 님</div><div style="display:flex;align-items:flex-end;gap:12px;margin-top:6px"><div class="sc" id="lkSc">0<small>점</small></div><div style="padding-bottom:6px"><span class="gd">' + t.GRADE(D.sc) + '</span></div></div>' +
+      '<div class="meter"><i style="width:' + D.sc + '%"></i></div><div class="hd">' + e(D.head) + '</div>' +
+      '<div class="chips"><span>' + (t.ANI_EMO[D.L.p[1]] || "") + ' ' + t.DAYNAME(D.L.p) + ' 날 · ' + t.read(D.L.p) + '일</span><span>' + EMO_EL[D.L.gEl] + ' ' + t.EL_KO[D.L.gEl] + ' · ' + EMO_EL[D.L.bEl] + ' ' + t.EL_KO[D.L.bEl] + '</span><span>🍀 ' + D.col + ' · ' + D.num + '</span></div></div>';
+    h += '<div class="lk-flipw lk-pop" style="animation-delay:.1s"><div class="lk-flip' + (flipped ? " on" : "") + '" id="lkFlip"><div class="lk-face lk-front">' + twinkles(10, "f" + dayStr) + '<div class="q">🔮</div><b>오늘의 카드 뽑기</b><small>눌러서 카드를 뒤집어 보세요</small></div>' +
+      '<div class="lk-face lk-back" style="background:linear-gradient(150deg,' + CD.c1 + ',' + CD.c2 + ')">' + twinkles(8, "b" + dayStr) + '<div class="ic">' + CD.ic + '</div><b>' + CD.n + '</b><div class="k">' + CD.k + '</div><p>' + CD.m + '</p><p style="font-size:12px;opacity:.85;margin-top:6px">「' + e(D.word) + '」</p></div></div></div>';
     h += '<div class="card"><h3>오늘의 이야기</h3>' + D.story.map(function(x){ return '<p style="margin:0 0 8px;font-size:14.5px;line-height:1.65">' + e(x) + '</p>'; }).join("") +
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"><span class="lk-g" style="background:var(--panel2);color:var(--sub)">오늘 글자 ' + D.L.p + '</span><span class="lk-g" style="background:var(--panel2);color:var(--sub)">' + t.EL_KO[D.L.gEl] + ' · ' + t.EL_KO[D.L.bEl] + ' 기운</span><span class="lk-g" style="background:var(--panel2);color:var(--sub)">내게 ' + t.grpShort(D.gG, R.sex) + ' 글자</span></div></div>';
+    var addEl = {}; addEl[D.L.gEl] = (addEl[D.L.gEl] || 0) + 1; addEl[D.L.bEl] = (addEl[D.L.bEl] || 0) + 1;
+    var mxE = Math.max.apply(null, S().EL.map(function(k){ return R.elH[k] + (addEl[k] || 0); }));
+    h += '<div class="card"><h3>오늘 내 몸의 다섯 기운 <small style="font-weight:500;color:var(--dim)">빗금 = 오늘 더해진 기운</small></h3><div class="lk-el">' + S().EL.map(function(k){ var b = R.elH[k], a = addEl[k] || 0, role = R.role[k];
+      return '<div class="r"><span>' + EMO_EL[k] + ' ' + t.EL_KO[k] + '</span><div class="bb"><i style="width:' + (b / mxE * 100) + '%;background:' + t.EL_COL[k] + '"></i>' + (a ? '<i class="add" style="width:' + (a / mxE * 100) + '%;background-color:' + t.EL_COL[k] + '"></i>' : "") + '</div><small style="color:' + (role === "용신" || role === "희신" ? "#38c172" : role === "기신" || role === "구신" ? "#f08a4b" : "var(--dim)") + ';font-weight:800">' + (role === "용신" ? "필요" : role === "희신" ? "도움" : role === "기신" ? "조심" : role === "구신" ? "부담" : "보통") + '</small></div>'; }).join("") +
+      '</div><p class="sj-note">' + (function(){ var g = Object.keys(addEl).filter(function(k){ return (R.ES[k] || 0) > 0; }), b = Object.keys(addEl).filter(function(k){ return (R.ES[k] || 0) < 0; });
+        return (g.length ? "오늘은 내게 필요한 " + g.map(function(k){ return t.EL_KO[k]; }).join("·") + " 기운이 채워져요 👍 " : "") + (b.length ? b.map(function(k){ return t.EL_KO[k]; }).join("·") + " 기운은 조금 부담 — 무리하지 않기." : g.length ? "" : "무난한 기운이 들어오는 날이에요."); })() + '</p></div>';
     h += '<div class="card"><h3>오늘 일곱 가지</h3><div class="lk-areas">' + D.areas.map(function(a){ var cc = scoreCol(a[2]);
       return '<div class="lk-a"><span class="qi">' + a[0] + '</span><div><b>' + a[1] + '</b> <small style="color:' + cc + ';font-weight:800">' + a[2] + '점</small><div class="bar"><i style="width:' + a[2] + '%;background:' + cc + '"></i></div><p>' + e(a[3] || "") + '</p></div></div>'; }).join("") + '</div></div>';
     h += '<div class="card"><h3>시간대별 흐름 <small style="font-weight:500;color:var(--dim)">가장 좋은 때: ' + D.bestP.P.n + '</small></h3><div style="display:grid;gap:8px">' + D.periods.map(function(q){ var cc = scoreCol(q.sc), ok = q.sc >= 58;
@@ -360,12 +395,19 @@
     h += '<div class="card"><h3>이번 주 흐름 <small style="font-weight:500;color:var(--dim)">막대를 누르면 그날 운세</small></h3><div class="lk-week">' + wk.map(function(q, i){
       return '<button data-off="' + i + '" class="' + (i === LK.off ? "on" : "") + '"><small style="font-weight:800;color:' + scoreCol(q.sc) + '">' + q.sc + '</small><i style="height:' + Math.max(8, (q.sc - 10) * 0.9) + 'px;background:' + scoreCol(q.sc) + '"></i>' + (i === 0 ? "오늘" : WD[q.dd.w]) + '</button>'; }).join("") + '</div>' +
       (LK.off < 6 ? '<p class="sj-note" style="margin-top:10px">🔭 ' + (LK.off === 0 ? "내일" : "다음 날") + ' 미리 보기 — <b style="color:' + scoreCol(wk[LK.off + 1].sc) + '">' + wk[LK.off + 1].sc + '점</b> · ' + e(wk[LK.off + 1].head) + '</p>' : "") + '</div>' +
+      (function(){ var td = S().todayKST(0), sd = S().todayKST(LK.off), first = new Date(Date.UTC(sd.y, sd.m - 1, 1)), days = new Date(Date.UTC(sd.y, sd.m, 0)).getUTCDate(), lead = first.getUTCDay(), base = Date.UTC(td.y, td.m - 1, td.d), cells = "";
+        for (var i = 0; i < lead; i++) cells += '<button class="x"></button>';
+        for (var d = 1; d <= days; d++){ var x = S().dayLuck(R, sd.y, sd.m, d), off = Math.round((Date.UTC(sd.y, sd.m - 1, d) - base) / 86400e3);
+          cells += '<button data-off="' + off + '" class="' + (off === 0 ? "td " : "") + (off === LK.off ? "sel" : "") + '" style="background:' + scoreCol(x.score) + '">' + d + '<small>' + x.score + '</small></button>'; }
+        return '<div class="card"><h3>' + sd.m + '월 운세 달력 <small style="font-weight:500;color:var(--dim)">날짜를 누르면 그날 운세</small></h3><div class="lk-cal">' + WD.map(function(w){ return '<div class="w">' + w + '</div>'; }).join("") + cells + '</div>' +
+          '<div style="display:flex;gap:10px;justify-content:center;margin-top:10px;font-size:11.5px;color:var(--dim)">' + [[90, "아주 좋음"], [75, "좋음"], [60, "보통"], [48, "조심"], [30, "쉬기"]].map(function(q){ return '<span><i style="display:inline-block;width:9px;height:9px;border-radius:3px;background:' + scoreCol(q[0]) + ';margin-right:3px"></i>' + q[1] + '</span>'; }).join("") + '</div></div>'; })() +
       '<div class="card"><h3>더 길게 보면</h3><div class="lk-lucky"><div><small>이번 달 (' + D.ml.from.m + '/' + D.ml.from.d + '~' + D.ml.to.m + '/' + D.ml.to.d + ' · ' + D.ml.p + ')</small><b>' + D.ml.grade + '</b><small style="margin-top:3px;color:var(--sub)">' + e((t.tagText(D.ml.tags[0] || {}, R) || t.EL_KO[D.ml.gEl] + " · " + t.EL_KO[D.ml.bEl] + " 기운의 달")) + '</small></div>' +
       '<div><small>올해 (' + D.yl.year + ' · ' + D.yl.p + ')</small><b>' + D.yl.grade + '</b><small style="margin-top:3px;color:var(--sub)">' + e((t.tagText(D.yl.tags[0] || {}, R) || t.EL_KO[D.yl.gEl] + " · " + t.EL_KO[D.yl.bEl] + " 기운의 해")) + '</small></div></div><p class="sj-note">자세한 흐름은 📜 사주 리포트에서 볼 수 있어요.</p></div>';
     var L = people(); if (L.length > 1){
       h += '<div class="card"><h3>모두의 오늘</h3><div class="lk-all">' + L.map(function(x){ var r, sc = "–"; try { r = calcOf(x); sc = luckData(r, LK.off).sc; } catch(z) {}
         return '<button data-id="' + e(x.id) + '"><span>' + (x.rel === "고객" ? "💼" : x.rel === "가족" ? "🏠" : x.rel === "나" ? "🙂" : "👤") + '</span><span>' + e(x.name) + '</span><span class="s" style="color:' + scoreCol(+sc || 0) + '">' + sc + '</span></button>'; }).join("") + '</div></div>';
     }
+    h += '<div class="lk-share"><button id="lkShare">💬 오늘 운세 보내기</button><button class="b2" id="lkCopy">📋 글로 복사</button></div>';
     h += '<div class="sj-btns" style="margin:4px 0 10px"><button class="sj-btn g" id="lkRep">📜 ' + e(p.name) + ' 님 사주 리포트 보기</button></div>' +
       '<p class="sj-note">🔮 오늘의 운세는 그날의 기운(일진)과 태어난 사주를 비교해 휴대폰 안에서 계산한 거예요. 재미로 보는 참고이고, 투자 · 건강 판단의 근거가 아니에요.</p>';
     root.innerHTML = frame("luck", h);
@@ -373,6 +415,12 @@
     [].forEach.call(root.querySelectorAll("[data-off]"), function(b){ b.onclick = function(){ LK.off = +b.dataset.off; renderLuck(); }; });
     [].forEach.call(root.querySelectorAll(".lk-all [data-id]"), function(b){ b.onclick = function(){ ls("sj_sel", b.dataset.id); renderLuck(); window.scrollTo({top: 0, behavior: "smooth"}); }; });
     var rp = root.querySelector("#lkRep"); if (rp) rp.onclick = function(){ if (window.go) go("saju"); };
+    countUp(root.querySelector("#lkSc"), D.sc);
+    var fl = root.querySelector("#lkFlip"); if (fl) fl.onclick = function(){ fl.classList.toggle("on"); ls(flipKey, fl.classList.contains("on") ? 1 : 0); try { if (navigator.vibrate) navigator.vibrate(12); } catch(x) {} };
+    var txt = "🔮 " + p.name + " 님의 " + dd.m + "월 " + dd.d + "일 운세\n" + D.sc + "점 · " + t.GRADE(D.sc) + "\n" + D.head + "\n\n" + D.areas.map(function(a){ return a[0] + " " + a[1] + " " + a[2] + "점 — " + (a[3] || ""); }).join("\n") +
+      "\n\n🍀 행운의 색 " + D.col + " · 숫자 " + D.num + " · 방향 " + D.dir + "\n" + CD.ic + " 오늘의 카드: " + CD.n + " — " + CD.m + "\n💬 「" + D.word + "」\n\n(재미로 보는 운세 · CH Investing)";
+    var sh = root.querySelector("#lkShare"); if (sh) sh.onclick = function(){ if (navigator.share){ navigator.share({title: "오늘의 운세", text: txt}).catch(function(){}); } else copyText(txt, sh); };
+    var cp = root.querySelector("#lkCopy"); if (cp) cp.onclick = function(){ copyText(txt, cp); };
   }
   window.luckView = function(){ return '<div id="sjL" class="no-clp tidy-x"><div class="loading">불러오는 중…</div></div>'; };
   window.luckInit = function(){ LK.off = 0; renderLuck(); };
@@ -508,6 +556,69 @@
     return {rows: out, mind: mind, fire: fire};
   }
 
+
+  /* ───────── 우와 업그레이드: 공통 그림 ───────── */
+  var EMO_EL = {목: "🌳", 화: "🔥", 토: "⛰️", 금: "💎", 수: "💧"};
+  function countUp(el, to){ if (!el) return; var t0 = null, d = 1100; (function f(ts){ if (!t0) t0 = ts; var k = Math.min(1, (ts - t0) / d), v = Math.round(to * (1 - Math.pow(1 - k, 3))); el.firstChild.nodeValue = v; if (k < 1) requestAnimationFrame(f); })(performance.now()); requestAnimationFrame(function(ts){}); }
+  function twinkles(n, seed){ var h = ""; for (var i = 0; i < n; i++){ var a = hash(seed + i), x = a % 100, y = (a >> 7) % 100, sz = 2 + (a >> 3) % 3, dl = ((a >> 5) % 26) / 10; h += '<i class="tw" style="left:' + x + '%;top:' + y + '%;width:' + sz + 'px;height:' + sz + 'px;animation-delay:' + dl + 's"></i>'; } return h; }
+  function donut(R, sz){
+    var t = T(), E = S().EL, tot = E.reduce(function(a, k){ return a + R.elH[k]; }, 0) || 1, r = 52, c = 2 * Math.PI * r, off = 0, g = "";
+    E.forEach(function(k){ var f = c * R.elH[k] / tot; g += '<circle cx="70" cy="70" r="' + r + '" fill="none" stroke="' + t.EL_COL[k] + '" stroke-width="22" stroke-dasharray="' + f.toFixed(2) + ' ' + (c - f).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '" transform="rotate(-90 70 70)"/>'; off += f; });
+    var yg = R.yong;
+    g += '<text x="70" y="62" text-anchor="middle" font-size="11" fill="#7a8396">가장 필요</text><text x="70" y="88" text-anchor="middle" font-size="19" font-weight="800" fill="' + t.EL_COL[yg] + '">' + t.EL_HJ[yg] + ' ' + t.EL_KO[yg] + '</text>';
+    return '<svg viewBox="0 0 140 140" style="width:' + (sz || 140) + 'px;display:block;margin:0 auto">' + g + '</svg><div style="display:flex;flex-wrap:wrap;gap:4px 8px;justify-content:center;font-size:11px;color:#5d667a;margin-top:4px">' +
+      E.map(function(k){ return '<span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:' + t.EL_COL[k] + ';margin-right:3px"></i>' + t.EL_KO[k] + ' ' + R.elH[k] + '</span>'; }).join("") + '</div>';
+  }
+  function coverArt(R){
+    var g = '<defs><radialGradient id="sjmg" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffd98a" stop-opacity=".95"/><stop offset=".45" stop-color="#ffcf7a" stop-opacity=".35"/><stop offset="1" stop-color="#ffcf7a" stop-opacity="0"/></radialGradient></defs>';
+    for (var i = 0; i < 26; i++){ var a = hash("st" + i + R.dg), x = 10 + a % 330, y = 6 + (a >> 6) % 150, r = 0.8 + (a >> 3) % 3 * 0.6; g += '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="#fff" opacity="' + (0.4 + (a % 5) / 10) + '"><animate attributeName="opacity" values=".2;1;.2" dur="' + (2 + a % 3) + 's" begin="' + (a % 20) / 10 + 's" repeatCount="indefinite"/></circle>'; }
+    g += '<circle cx="62" cy="58" r="58" fill="url(#sjmg)"/><circle cx="62" cy="58" r="24" fill="#ffd37a"/>';
+    var el = R.dEl, col = {목: "#ff8fb1", 화: "#ffb35c", 토: "#f6d36b", 금: "#e9eef8", 수: "#8fc4ff"}[el];
+    g += '<path d="M140,170 C190,120 250,110 340,70" stroke="#7a5a3a" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M230,108 C240,90 262,86 280,92" stroke="#7a5a3a" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+    [[200, 118, 9], [262, 96, 11], [300, 80, 8], [235, 104, 6], [172, 142, 7]].forEach(function(f){ for (var k = 0; k < 5; k++){ var an = k * 72 * Math.PI / 180; g += '<circle cx="' + (f[0] + Math.cos(an) * f[2] * 0.62) + '" cy="' + (f[1] + Math.sin(an) * f[2] * 0.62) + '" r="' + f[2] * 0.55 + '" fill="' + col + '"/>'; } g += '<circle cx="' + f[0] + '" cy="' + f[1] + '" r="' + f[2] * 0.32 + '" fill="#ffdd55"/>'; });
+    return '<svg viewBox="0 0 350 170" style="width:100%;display:block;margin:2px 0 6px">' + g + '</svg>';
+  }
+  function lifeCurve(R){
+    var s = S(), pts = [], y0 = R.solar.y, now = s.todayKST().y, ag = now - y0;
+    for (var a = 0; a <= 89; a++){ var L = s.yearLuck(R, y0 + a); pts.push({a: a, v: L.stars, y: y0 + a, p: L.p}); }
+    var sm = pts.map(function(x, i){ var w = pts.slice(Math.max(0, i - 4), i + 5); return w.reduce(function(q, z){ return q + z.v; }, 0) / w.length; });
+    var W = 340, H = 190, l = 14, r = W - 10, top = 22, bot = 140, xs = function(a){ return l + a * (r - l) / 89; }, ys = function(v){ return bot - (v - 1) / 4 * (bot - top); };
+    var g = '<defs><linearGradient id="sjlc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7b5cff" stop-opacity=".45"/><stop offset="1" stop-color="#7b5cff" stop-opacity="0"/></linearGradient></defs>';
+    R.daeun.list.forEach(function(d, i){ if (d.age[0] > 89) return; var x0 = xs(Math.max(0, d.age[0])), x1 = xs(Math.min(89, d.age[1] + 1)); g += '<rect x="' + x0 + '" y="' + top + '" width="' + (x1 - x0) + '" height="' + (bot - top) + '" fill="' + (i % 2 ? "#f3f5fa" : "#fff") + '"/><text x="' + (x0 + x1) / 2 + '" y="' + (bot + 14) + '" text-anchor="middle" font-size="9" fill="#9aa3b5">' + d.p + '</text>'; });
+    var path = sm.map(function(v, i){ return (i ? "L" : "M") + xs(i).toFixed(1) + "," + ys(v).toFixed(1); }).join(" ");
+    g += '<path d="' + path + ' L' + xs(89) + ',' + bot + ' L' + xs(0) + ',' + bot + 'z" fill="url(#sjlc)"/><path d="' + path + '" fill="none" stroke="#6a4cff" stroke-width="2.6" stroke-linejoin="round"/>';
+    var peaks = sm.map(function(v, i){ return {i: i, v: v}; }).filter(function(x){ return x.i >= 18 && x.i < 88 && x.v >= sm[x.i - 1] && x.v >= sm[x.i + 1]; }).sort(function(a, b){ return b.v - a.v; });
+    var pk = []; peaks.forEach(function(x){ if (pk.length < 3 && pk.every(function(q){ return Math.abs(q.i - x.i) > 10; })) pk.push(x); });
+    pk.forEach(function(x){ g += '<circle cx="' + xs(x.i) + '" cy="' + ys(x.v) + '" r="4.5" fill="#ff6fb5" stroke="#fff" stroke-width="1.5"/><text x="' + xs(x.i) + '" y="' + (ys(x.v) - 9) + '" text-anchor="middle" font-size="10.5" font-weight="800" fill="#d4357f">' + x.i + '세 ★</text>'; });
+    if (ag >= 0 && ag <= 89) g += '<line x1="' + xs(ag) + '" x2="' + xs(ag) + '" y1="' + (top - 4) + '" y2="' + bot + '" stroke="#e9a400" stroke-width="2" stroke-dasharray="4 3"/><circle cx="' + xs(ag) + '" cy="' + ys(sm[ag]) + '" r="6" fill="#e9a400" stroke="#fff" stroke-width="2"><animate attributeName="r" values="5;8;5" dur="1.6s" repeatCount="indefinite"/></circle><text x="' + xs(ag) + '" y="' + (top - 7) + '" text-anchor="middle" font-size="10.5" font-weight="800" fill="#c58a00">지금 ' + ag + '세</text>';
+    [0, 20, 40, 60, 80].forEach(function(a){ g += '<text x="' + xs(a) + '" y="' + (bot + 28) + '" text-anchor="middle" font-size="10" fill="#7a8396">' + a + '세</text>'; });
+    return {svg: '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;display:block">' + g + '</svg>', peaks: pk.map(function(x){ return x.i; }).sort(function(a, b){ return a - b; })};
+  }
+  function heatCol(st){ return st >= 4.5 ? "#169466" : st >= 3.5 ? "#4cb882" : st >= 2.5 ? "#c9a227" : st >= 1.5 ? "#e8834a" : "#d9493a"; }
+  /* 💞 궁합 — 두 사람 */
+  function compat(A, B){
+    var s = S(), t = T(), sc = 60, why = [];
+    var gh = s.jiPair ? null : null, ga = A.dg, gb = B.dg, ea = s.GAN_EL[ga], eb = s.GAN_EL[gb];
+    var GH = {甲己: 1, 乙庚: 1, 丙辛: 1, 丁壬: 1, 戊癸: 1}, k = [ga, gb].sort().join("");
+    if (GH[k] || GH[[gb, ga].join("")] || GH[[ga, gb].join("")]){ sc += 18; why.push(["💘", "두 사람의 「나」 글자(" + ga + "·" + gb + ")가 하늘에서 합 — 서로 끌리는 힘이 아주 큽니다."]); }
+    else if (s.SAENG[ea] === eb || s.SAENG[eb] === ea){ sc += 10; why.push(["🌱", t.EL_KO[ea] + josa(t.EL_KO[ea], "과", "와") + " " + t.EL_KO[eb] + josa(t.EL_KO[eb], "은", "는") + " 서로 키워 주는 사이 — " + (s.SAENG[ea] === eb ? A.name + " 님이 " + B.name + " 님을" : B.name + " 님이 " + A.name + " 님을") + " 자연스럽게 밀어 줍니다."]); }
+    else if (ea === eb){ sc += 5; why.push(["🤝", "같은 " + t.EL_KO[ea] + " 기운 — 친구처럼 편하지만, 고집이 부딪히면 둘 다 안 물러섭니다."]); }
+    else { sc -= 6; why.push(["⚡", t.EL_KO[ea] + josa(t.EL_KO[ea], "과", "와") + " " + t.EL_KO[eb] + josa(t.EL_KO[eb], "은", "는") + " 한쪽이 다른 쪽을 누르는 사이 — 역할을 나누면 오히려 좋은 팀이 됩니다."]); }
+    s.jiPair(A.P.d[1], B.P.d[1]).forEach(function(q){
+      if (q.t === "합" || q.t === "반합"){ sc += 13; why.push(["🔗", "배우자 자리(" + A.P.d[1] + "·" + B.P.d[1] + ")가 " + q.t + " — 함께 있으면 편안하고 정이 깊어집니다."]); }
+      else if (q.t === "충"){ sc -= 14; why.push(["💥", "배우자 자리(" + A.P.d[1] + "·" + B.P.d[1] + ")가 충 — 생활 방식이 달라 부딪힐 수 있어요. 각자의 공간이 약입니다."]); }
+      else if (q.t === "형" || q.t === "원진"){ sc -= 7; why.push(["🌧️", "배우자 자리가 " + q.t + " — 가까울수록 말투를 부드럽게."]); }
+    });
+    var fillA = B.elH[A.yong] >= 3, fillB = A.elH[B.yong] >= 3;
+    if (fillA && fillB){ sc += 14; why.push(["🧩", "서로에게 필요한 기운을 갖고 있어요 — " + A.name + " 님에겐 " + t.EL_KO[A.yong] + ", " + B.name + " 님에겐 " + t.EL_KO[B.yong] + ". 퍼즐처럼 맞는 사이!"]); }
+    else if (fillA || fillB){ sc += 7; why.push(["🎁", (fillA ? B.name + " 님이 " + A.name + " 님에게 필요한 " + t.EL_KO[A.yong] : A.name + " 님이 " + B.name + " 님에게 필요한 " + t.EL_KO[B.yong]) + " 기운을 채워 줍니다."]); }
+    s.jiPair(A.P.y[1], B.P.y[1]).forEach(function(q){ if (q.t === "합" || q.t === "반합"){ sc += 5; why.push(["🐾", t.JI_ANI[A.P.y[1]] + "띠 · " + t.JI_ANI[B.P.y[1]] + "띠는 잘 맞는 띠."]); } else if (q.t === "충"){ sc -= 5; why.push(["🐾", t.JI_ANI[A.P.y[1]] + "띠 · " + t.JI_ANI[B.P.y[1]] + "띠는 서로 다른 띠 — 다름을 재미로."]); } });
+    var z1 = t.ZEL[A.astro.sun.sign], z2 = t.ZEL[B.astro.sun.sign], zok = {불: "공기", 공기: "불", 흙: "물", 물: "흙"};
+    if (z1 === z2 || zok[z1] === z2){ sc += 5; why.push(["✨", A.astro.sun.sign + " × " + B.astro.sun.sign + " — 별자리도 잘 어울려요."]); }
+    sc = Math.max(25, Math.min(98, sc));
+    return {sc: sc, why: why.slice(0, 4), word: sc >= 85 ? "천생연분" : sc >= 72 ? "아주 잘 맞음" : sc >= 60 ? "잘 맞음" : sc >= 48 ? "노력하면 좋음" : "서로 배우는 사이"};
+  }
+
   /* ───────── 사주 리포트 — 화면 ───────── */
   function pillarBox(R, k, dark){
     var t = T(), p = R.P[k], role = function(ch, gan){ if (k === "d" && gan) return ["나 자신", "일간"]; var ss = S().sipsin(R.dg, ch); return [t.grpShort(S().SS_GROUP[ss], R.sex), ss]; };
@@ -526,13 +637,27 @@
     var hh = R.noHour ? "시간 모름" : (R.solar.hh < 12 ? "오전 " : "오후 ") + ((R.solar.hh % 12) || 12) + "시" + (R.solar.mi ? " " + R.solar.mi + "분" : "") + "생";
     var lun = R.lunar ? "음력 " + R.lunar.y + "년 " + (R.lunar.leap ? "윤" : "") + R.lunar.m + "월 " + R.lunar.d + "일" : "";
     // 표지
-    h += '<section class="qsjp qcover"><div class="qeb">사 주 · 별 자 리</div><h1>나를 읽는 리포트</h1><div class="qnm">' + e(nm) + ' 님</div>' +
+    h += '<section class="qsjp qcover">' + coverArt(R) + '<div class="qeb">사 주 · 별 자 리</div><h1>나를 읽는 리포트</h1><div class="qnm">' + e(nm) + ' 님</div>' +
       '<div class="qbd">양력 ' + R.solar.y + '년 ' + R.solar.m + '월 ' + R.solar.d + '일 ' + hh + ' · ' + (R.sex === "M" ? "남성" : "여성") + (lun ? ' · ' + lun : "") + '</div>' +
       '<div class="qpills">' + ["h", "d", "m", "y"].map(function(k){ return pillarBox(R, k, true); }).join("") + '</div>' +
       '<div class="qone"><b>한 줄로 —</b> ' + oneLine(R) + '입니다.<br>' + seasonLine(R) + '<br>' + (missing(R).length ? "다섯 기운 중 <b>" + missing(R).map(function(k){ return t.EL_KO[k]; }).join("·") + "</b>" + josa(t.EL_KO[missing(R).slice(-1)[0]], "이", "가") + " 비어 있고" : "다섯 기운(나무·불·흙·쇠·물)이 <b>하나도 빠짐없이</b> 모두 들어 있고") +
       ', 별자리는 <b>' + R.astro.sun.sign + ' 태양 · ' + R.astro.moon.sign + ' 달' + (R.astro.asc ? ' · ' + R.astro.asc.sign + ' 상승' : '') + '</b>입니다.</div>' +
       '<div class="qft">태양궁 ' + R.astro.sun.sign + ' ' + R.astro.sun.deg + '도 · 달 ' + R.astro.moon.sign + ' ' + R.astro.moon.deg + '도' + (R.astro.asc ? ' · 상승궁 ' + R.astro.asc.sign + ' ' + R.astro.asc.deg + '도(' + R.city + ' 출생 기준)' : '') +
       '<br>분석 기준일 ' + now.y + '년 ' + now.m + '월 ' + now.d + '일 (만 ' + age + '세) · 쉽게 풀어 쓴 버전 · CH Investing 앱에서 계산</div></section>';
+    // 0 한 장 요약 (인포그래픽)
+    var LC = lifeCurve(R), kw = [];
+    (t.KW_GAN[R.dg] || []).forEach(function(w){ kw.push([w, t.EL_COL[R.dEl]]); });
+    var topG = ["식상", "재성", "관성", "인성", "비겁"].sort(function(a, b){ return R.grp[b] - R.grp[a]; })[0];
+    (t.KW_GRP[topG] || []).forEach(function(w){ kw.push([w, t.EL_COL[s.elOfGroup(R.dg, topG)]]); });
+    kw.push([t.KW_Z[t.ZEL[R.astro.sun.sign]] + " (" + R.astro.sun.sign.replace("자리", "") + ")", "#6a4cff"]);
+    if (R.sin.some(function(x){ return /귀인/.test(x.n); })) kw.push(["귀인운", "#d4357f"]);
+    var bestYear = YL.slice().sort(function(a, b){ return b.stars - a.stars || a.year - b.year; })[0];
+    h += pg("✦", "나를 한 장으로", "바쁠 땐 이 한 장만 보세요.",
+      '<div class="qsum"><div>' + donut(R, 150) + '</div><div><div style="font-size:12px;color:#7a8396">나를 나타내는 말</div><div class="qkw">' + kw.slice(0, 8).map(function(k){ return '<span style="background:' + k[1] + '">' + k[0] + '</span>'; }).join("") + '</div>' +
+      '<div style="font-size:15px;font-weight:800;line-height:1.5">' + oneLine(R).replace(/[「」]/g, "") + '</div></div></div>' +
+      '<div class="qbig"><div><small>나는</small><b style="color:' + t.EL_COL[R.dEl] + '">' + R.dg + ' ' + ig.short + '</b><small>' + t.read(R.P.d) + '일주</small></div><div><small>간판</small><b>' + R.gyeok.replace("격", "") + '</b><small>' + R.gyeok + '</small></div><div><small>힘</small><b>' + R.power + '점</b><small>' + R.powerLvl.replace("균형에 가까운 ", "") + '</small></div>' +
+      '<div><small>지금 대운</small><b>' + (ci >= 0 ? DL[ci].p : "-") + '</b><small>' + (ci >= 0 ? DL[ci].grade : "") + '</small></div><div><small>10년 중 최고 해</small><b>' + bestYear.year + '</b><small>' + bestYear.p + '</small></div><div><small>인생 꽃철</small><b>' + (LC.peaks[0] != null ? LC.peaks.slice(0, 2).join("·") + "세" : "-") + '</b><small>평생 곡선 봉우리</small></div></div>' +
+      '<h4 style="margin-top:14px">◆ 평생 운 곡선 <small style="font-weight:500;color:#7a8396">0~89세 · 해마다 계산 · ★ 봉우리 · 노란 점이 지금</small></h4>' + LC.svg);
     // 1 한눈에
     var radarV = [SC.표현력, SC.인복, SC.재물, SC.안정, SC.배우자, SC.균형], four = fourSentences(R, SC, DL);
     var one = {표현력: R.grp.식상 ? "표현 글자 " + R.grp.식상 + "개. 말하고 가르치고 만드는 힘" + (R.grp.식상 >= 2 ? "이 큽니다." : "이 있습니다.") : "표현 글자가 숨어 있어 실력으로 보여 주는 편입니다.",
@@ -636,6 +761,8 @@
       '<p>분석 기준일은 ' + now.y + '년 ' + now.m + '월 ' + now.d + '일입니다. 지금은 ' + Y0.p + '년' + (ci >= 0 ? '이고, 대운은 ' + DL[ci].p + '(' + DL[ci].age[0] + '~' + DL[ci].age[1] + '세) 안에 있습니다.' : '입니다.') + '</p>' +
       '<div class="qgrid2 qst1"><div class="qbox qgr"><h5>' + now.y + ' ' + Y0.p + '년 — 좋은 점</h5><ul style="margin:0">' + ((R.ES[Y0.gEl] || 0) >= 0 ? '<li>' + t.EL_KO[Y0.gEl] + '(' + t.grpShort(s.SS_GROUP[Y0.gSS], R.sex) + ') 기운이 ' + t.esWord(R.ES[Y0.gEl] || 0) + ' 쪽입니다.</li>' : "") + good0.map(function(q){ return '<li>' + t.tagText(q, R) + '</li>'; }).join("") + (!good0.length && (R.ES[Y0.gEl] || 0) < 0 ? '<li>큰 기회보다 다지는 해입니다.</li>' : "") + '</ul></div>' +
       '<div class="qbox qor"><h5>' + now.y + ' ' + Y0.p + '년 — 조심할 점</h5><ul style="margin:0">' + ((R.ES[Y0.bEl] || 0) < 0 ? '<li>' + t.EL_KO[Y0.bEl] + ' 기운이 ' + t.esWord(R.ES[Y0.bEl]) + ' 쪽 — 에너지를 쓰기만 하고 채우지 못하기 쉬움 → 수면 · 휴식 우선.</li>' : "") + bad0.map(function(q){ return '<li>' + t.tagText(q, R) + '</li>'; }).join("") + (!bad0.length && (R.ES[Y0.bEl] || 0) >= 0 ? '<li>크게 부딪히는 글자가 없는 해입니다.</li>' : "") + '</ul></div></div>' +
+      (function(){ var M12 = s.monthLuck(R, now.y, 2, 12, 6); return '<h4>◆ ' + now.y + '년 열두 달 한눈에 <small style="font-weight:500;color:#7a8396">(입춘 기준 절기 달)</small></h4><div class="qm12">' + M12.map(function(m){ var on = (now.m === m.from.m && now.d >= m.from.d) || (now.m === m.to.m && now.d <= m.to.d);
+        return '<div style="background:' + heatCol(m.stars) + (on ? ';outline:3px solid #1e2742;outline-offset:1px' : "") + '"><b>' + m.from.m + '월' + (on ? " ●" : "") + '</b>' + m.p + '<br>' + m.grade + '</div>'; }).join("") + '</div>'; })() +
       '<h4>◆ 앞으로 다섯 달</h4><div class="qmos">' + ML.map(function(m, i){ var tg = m.tags.map(function(q){ return t.tagText(q, R); }).filter(Boolean)[0] || (t.EL_KO[m.gEl] + "·" + t.EL_KO[m.bEl] + " 기운의 달.");
         return '<div class="qmo"' + (i === 0 ? ' style="border:2px solid #e9b949"' : "") + '><div class="qh"><span>' + m.from.m + '/' + m.from.d + '~' + m.to.m + '/' + m.to.d + '</span><span>' + m.p + '</span></div><div style="color:' + (m.stars >= 3.5 ? "#2e9e5b" : m.stars >= 2.5 ? "#9a7a14" : "#d0452f") + ';font-weight:800">' + (i === 0 ? "지금 · " : "") + m.grade + '</div>' + tg + '</div>'; }).join("") + '</div>' +
       '<table><tr><th>' + Y1.year + ' ' + Y1.p + '년</th><th>미리 보기</th></tr><tr><td class="qk">흐름</td><td>' + stars(Y1.stars) + ' ' + Y1.grade + '. ' + t.EL_KO[Y1.gEl] + '(' + t.esWord(R.ES[Y1.gEl] || 0) + ')·' + t.EL_KO[Y1.bEl] + '(' + t.esWord(R.ES[Y1.bEl] || 0) + ')</td></tr>' +
@@ -675,6 +802,15 @@
       '<div class="qgrid2 qst1"><div class="qbox"><h5>몸 — 신경 쓸 곳</h5>● ' + ig.body + ' — ' + R.dg + ' 일간의 기본 약한 곳.<br>● ' + t.ELIFE[R.gi].body + ' — 조심할 기운(' + t.EL_KO[R.gi] + ')과 연결.' + (R.season ? '<br>● ' + (R.season === "화" ? "손발 냉증 · 순환 — 추운 계절 출생." : "열 · 갈증 · 수면 — 더운 계절 출생.") : "") +
         (YL.filter(function(y){ return y.stars <= 1.5; }).length ? '<br>● ' + YL.filter(function(y){ return y.stars <= 1.5; }).map(function(y){ return y.year; }).join(" · ") + "년 — 조심의 해, 정기 검진 권장." : "") + '</div>' +
       '<div class="qbox"><h5>보약이 되는 습관</h5>● ' + t.ELIFE[R.yong].fill.split(",").slice(0, 2).join(" · ") + '<br>● ' + t.ELIFE[R.hui].fill.split(",").slice(0, 2).join(" · ") + '<br>● 일찍 자기 · 물 자주 마시기</div></div><p style="font-size:12px;color:#7a8396">건강은 반드시 병원 진단이 우선입니다.</p>');
+    // 💞 궁합 (저장된 다른 사람들과)
+    var others = people().filter(function(x){ return x.id !== selId(); }).map(function(x){ try { return calcOf(x); } catch(z) { return null; } }).filter(Boolean);
+    if (others.length){
+      var CP = others.map(function(o){ var c = compat(R, o); c.o = o; return c; }).sort(function(a, b){ return b.sc - a.sc; }).slice(0, 6);
+      h += pg("💞", "궁합 — 함께 저장한 사람들과", "앱에 저장된 사람과의 궁합을 계산했습니다. 관계를 돌아보는 재미로 읽어 주세요.",
+        CP.map(function(c){ var col = c.sc >= 85 ? "#d4357f" : c.sc >= 72 ? "#169466" : c.sc >= 60 ? "#4cb882" : c.sc >= 48 ? "#c9a227" : "#e8834a", r = 30, cc = 2 * Math.PI * r, f = cc * c.sc / 100;
+          return '<div class="qcp"><svg viewBox="0 0 76 76" style="width:76px"><circle cx="38" cy="38" r="' + r + '" fill="none" stroke="#e8ebf2" stroke-width="7"/><circle cx="38" cy="38" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + f.toFixed(1) + ' ' + cc.toFixed(1) + '" transform="rotate(-90 38 38)"/><text x="38" y="44" text-anchor="middle" font-size="19" font-weight="800" fill="' + col + '">' + c.sc + '</text></svg>' +
+            '<div><b style="font-size:15px">' + e(nm) + ' × ' + e(c.o.name) + '</b> <span class="qeltag" style="background:' + col + '">' + c.word + '</span><ul>' + c.why.map(function(w){ return '<li>' + w[0] + ' ' + w[1] + '</li>'; }).join("") + '</ul></div></div>'; }).join(""));
+    }
     // 14 정리
     var bestY = YL.slice().sort(function(a, b){ return b.stars - a.stars || a.year - b.year; })[0], worstY = YL.slice().sort(function(a, b){ return a.stars - b.stars || a.year - b.year; })[0];
     var tips = [["뿌리부터 챙기기", "가장 필요한 건 " + t.EL_KO[R.yong] + "(" + t.grpShort(s.groupOfEl(R.dg, R.yong), R.sex) + "). " + t.ELIFE[R.yong].fill.split(",")[0] + "부터."],
