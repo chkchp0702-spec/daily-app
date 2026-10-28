@@ -92,6 +92,102 @@ def intraday(d):
     return {"t": t, "talk": talk[:4]}
 
 
+JARGON = [("FOMC", "FOMC(미국 금리 결정)"), ("PCE", "PCE(물가)"), ("GDP", "GDP(성장률)"), ("보안 CIBR", "사이버보안"), ("유틸리티 XLU", "전력·유틸리티"), ("CIBR", "사이버보안"), ("XLU", "전력·유틸리티"), ("XLE", "에너지")]
+
+
+def plain(t):
+    for a, b in JARGON:
+        if b not in t:
+            t = t.replace(a, b)
+    return t
+
+
+def ga(word):   # 받침 따라 이/가
+    if not word:
+        return word
+    ch = word[-1]
+    return word + ("이" if "가" <= ch <= "힣" and (ord(ch) - 0xAC00) % 28 else "가")
+
+
+def num(v, d=0):
+    return f"{v:+.{d}f}".replace("-", "−")
+
+
+def kospi_month():
+    """최근 약 한 달(21거래일) 코스피 등락 %"""
+    try:
+        ix = jl(os.path.join(X, "port_px", "index.json"), {}) or {}
+        a = (ix.get("assets") or {}).get("KOSPI")
+        j = jl(os.path.join(X, "port_px", a["f"]), {}) if a else None
+        c = [float(v) for v in (j or {}).get("c") or []]
+        if len(c) > 22:
+            return (c[-1] / c[-22] - 1) * 100
+    except Exception:
+        pass
+    return None
+
+
+def advice(d):
+    """📌 PB 코멘트 — 「그래서 앞으로」 (10/28 사용자: 「현재 시장은 잘 보여줬는데 그러니 앞으로 이걸 보자 — PB가 고객에게 조언하듯」)
+       숫자에서 문장을 고르는 규칙 기반 — 지어내지 않고 앱 자료(실시간·시황리포트·국면)만 씀.
+       돌려줌: {"read": 지금 해석, "watch": [[언제, 무엇]], "plan": 대응 한두 줄}"""
+    L = jl(os.path.join(X, "live_kr.json"), {}) or {}
+    live = L.get("date") == TODAY and L.get("index")
+    ix = {x["name"]: x for x in (L.get("index") or [])} if live else {}
+    k = (ix.get("코스피") or {}).get("chg")
+    m1 = kospi_month()
+    up = round((L.get("up") or 0) / (L.get("total") or 1) * 100) if live else None
+    sec = sorted([x for x in (L.get("sectors") or []) if x.get("n", 0) >= 5], key=lambda x: -x["r"]) if live else []
+    lead = "·".join(re.sub(r"\(.*?\)", "", x["name"]).split("·")[0] for x in sec[:2])
+    # ① 지금 해석
+    read = ""
+    if k is not None:
+        big = abs(k) >= 2
+        if k >= 2 and m1 is not None and m1 <= -8:
+            read = f"한 달 새 {abs(m1):.0f}% 빠졌던 코스피가 오늘 {num(k, 1)}% 크게 되돌렸어요" + (f" — {ga(lead)} 앞장선 반등이에요" if lead else "") + ". 다만 하루 반등만으로 하락 추세가 끝났다고 보긴 일러요."
+        elif k >= 2:
+            read = f"코스피가 {num(k, 1)}% 강하게 오르는 날이에요" + (f" — {lead} 중심" if lead else "") + (f", 종목 {up}%가 올라 고르게 오르고 있어요." if up and up >= 60 else ", 다만 오르는 종목은 일부에 몰려 있어요.")
+        elif k <= -2 and m1 is not None and m1 <= -8:
+            read = f"한 달 새 {abs(m1):.0f}% 빠진 데 이어 오늘도 {num(k, 1)}% 밀리고 있어요. 공포가 커지는 구간이라 서둘러 팔기보다 비중과 현금을 점검할 때예요."
+        elif k <= -2:
+            read = f"코스피가 {num(k, 1)}% 크게 밀리는 날이에요. 하루 급락은 흔히 되돌림이 나와요 — 급하게 따라 팔 필요는 없어요."
+        elif abs(k) < 0.7:
+            read = f"코스피는 {num(k, 1)}%로 큰 방향 없이 쉬어 가는 날이에요" + (f" — 그 안에서 {ga(lead)} 강해요." if lead else ".")
+        else:
+            read = f"코스피 {k:+.1f}%" + (f", {lead}가 이끌고 있어요." if lead else ".") + (f" 최근 한 달은 {m1:+.0f}%예요." if m1 is not None else "")
+    else:
+        read = strip(d.get("one_liner"))[:120]
+    # ② 앞으로 볼 것 — 시황리포트 일정(오늘·다음)
+    watch = []
+    td = f"{NOW.month}/{NOW.day}"
+    for sc in (d.get("schedule") or [])[:4]:
+        what, when = strip(sc.get("what")), strip(sc.get("when"))
+        if not what:
+            continue
+        w0 = when.split(" ")[0]
+        if w0 == td:
+            when = "오늘"
+        watch.append([when[:12], plain(what)[:60]])
+    # ③ 대응 — 국면(S&P 200일선)과 리포트 결정 · 주도 섹터
+    al = d.get("allocation_seen") or []
+    seen = strip(al[0].get("seen")) if al else ""
+    badge = strip(((d.get("decision") or {}).get("badges") or [""])[0])
+    green = "🟢" in badge or "+" in seen.split("200일선")[-1][:8] if seen else "🟢" in badge
+    plan = []
+    if green:
+        plan.append("큰 그림은 아직 상승 추세예요(미국 S&P500이 200일 평균 위). 자산배분은 주식 비중을 그대로 두는 게 원칙이에요.")
+    else:
+        plan.append("큰 그림이 약해졌어요(미국 S&P500이 200일 평균 아래). 주식 비중을 줄이고 금·현금을 늘리는 쪽이 원칙이에요.")
+    if k is not None and k >= 2:
+        plan.append("오늘처럼 크게 오른 날엔 한 번에 사기보다 2~3번에 나눠 담는 게 좋아요.")
+    elif k is not None and k <= -2:
+        plan.append("크게 빠진 날 한꺼번에 파는 건 피하고, 미리 정한 비중을 넘는 부분만 정리해요.")
+    ls_ = strip((d.get("leaders") or {}).get("short"))
+    if ls_:
+        plan.append("요즘 돈이 몰리는 곳은 " + plain(ls_.split(" — ")[0])[:60] + " — 쫓아 사기보다 쉬어 갈 때 나눠 담는 쪽이에요.")
+    return {"read": plain(read), "watch": watch[:3], "plan": plan[:3]}
+
+
 def main():
     d = market_data()
     reg = regime_line()
@@ -111,6 +207,10 @@ def main():
             ks = ix.get("코스피") or {}
             talk = [f"한국 마감: 코스피 {ks.get('last', 0):,.0f}({sg(ks.get('chg'))}) · 코스닥 {sg((ix.get('코스닥') or {}).get('chg'))} · 오른 종목 {round((L.get('up') or 0) / (L.get('total') or 1) * 100)}%"] + [x for x in kk if not x.startswith("한국")][:2]
         out = {"mode": lab, "asof": f"{TODAY} {NOW.strftime('%H:%M')}", "label": f"{d.get('date', TODAY)[5:].replace('-', '/')} {lab}", "regime": reg, "one": one, "talk": talk, "events": events(d)}
+    try:
+        out["advice"] = advice(d)
+    except Exception as e:
+        print("코멘트 실패", e)
     out["at"] = NOW.strftime("%Y-%m-%d %H:%M")
     out["note"] = "참고용 · 사라·팔라는 뜻이 아니에요"
     os.makedirs(X, exist_ok=True)

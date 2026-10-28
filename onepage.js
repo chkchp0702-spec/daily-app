@@ -57,6 +57,7 @@
       var word = !live ? "" : ks.chg >= 3 ? "급등" : ks.chg >= 1 ? "강세" : ks.chg > -1 ? "보합" : ks.chg > -3 ? "약세" : "급락";
       var head = live ? "코스피 " + pct(ks.chg) + " " + word + (top2 ? " · " + top2 + " 주도" : "") + (gauge ? " · 종목 " + Math.round(gauge.up / gauge.total * 100) + "% 상승" : "") : (D.one_liner ? strip(D.one_liner).split(" — ")[0].slice(0, 44) : "");
       return {kind: "market", title: liveMode ? "지금 시장 한 장" : "오늘 시장 한 장", sub: lab + (head ? " · " + head : ""),
+        advice: PB && PB.advice && PB.asof && PB.asof.slice(0, 10) === today() ? PB.advice : null,
         hero: hero, world: world.length ? world : null, heat: heat.length >= 8 ? heat : null, gauge: gauge, chips: chips, events: ev,
         themes: themes.length ? {title: "오늘 뜨는 테마 — 대장주", items: themes} : null, kpis2: k2.slice(0, 4),
         alloc: al.length ? al.map(function(a){ return {n: a.name.replace(" 코어", ""), pct: a.pct}; }) : null,
@@ -148,7 +149,7 @@
   }
 
   /* ───────────── 그리기 ───────────── */
-  var W = 1080, H = 1620, MX = 60, CW = W - MX * 2;
+  var W = 1080, H = 1620, MX = 60, CW = W - MX * 2;   // 시장 한 장은 1920 (코멘트까지)
   var INK = "#141414", SUB = "#6a6f7a", MUT = "#9aa0ab", LINE = "#e6e8ec", UP = "#d6453d", DN = "#2f6fdd", ACC = "#1f2d4d", BG = "#f7f7f5", TILE = "#ffffff";
   var F = '-apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif';
   function font(g, w, s){ g.font = w + " " + s + "px " + F; }
@@ -335,9 +336,9 @@
   }
   function bHeat(g, y, Hm){
     if (!Hm || Hm.length < 8) return 0;
-    var items = Hm.slice().sort(function(a, b){ return b.v - a.v; }).slice(0, 30), cols = 6, rows = Math.ceil(items.length / cols), gap = 8, w = (CW - gap * (cols - 1)) / cols, th = 76, h = 40 + rows * (th + gap) + 8;
+    var srt = Hm.slice().sort(function(a, b){ return b.v - a.v; }), items = srt.length > 18 ? srt.slice(0, 12).concat(srt.slice(-6)) : srt, cols = 6, rows = Math.ceil(items.length / cols), gap = 8, w = (CW - gap * (cols - 1)) / cols, th = 76, h = 40 + rows * (th + gap) + 8;
     rr(g, MX, y, CW, h, 20, TILE);
-    g.fillStyle = SUB; font(g, 700, 24); g.fillText("업종 열지도 — 빨강 오름 · 파랑 내림 (진할수록 큼)", MX + 22, y + 32);
+    g.fillStyle = SUB; font(g, 700, 24); g.fillText("업종 열지도 — 강한 12 · 약한 6 (빨강 오름 · 파랑 내림)", MX + 22, y + 32);
     var mx = Math.max.apply(null, items.map(function(i){ return Math.abs(i.v); }).concat([1]));
     items.forEach(function(it, i){ var c = i % cols, r = Math.floor(i / cols), x = MX + 22 + c * (w + gap) - 22 + 22, yy = y + 44 + r * (th + gap);
       x = MX + 12 + c * (w - 4 + gap) ; var ww = w - 4;
@@ -360,6 +361,29 @@
     g.fillStyle = MUT; font(g, 500, 22); g.textAlign = "right"; g.fillText("상한가 " + G.lu + " · 하한가 " + G.ld, x0 + bw, y + 122); g.textAlign = "left";
     return h + 24;
   }
+  function bAdvice(g, y, A, name){   // 📌 PB 코멘트 — 지금 해석 · 앞으로 볼 것 · 이렇게 대응
+    if (!A || !A.read) return 0;
+    var pad = 28, tw = CW - pad * 2 - 8, yy, h;
+    var measure = function(t, sz, mx){ font(g, 600, sz); var w = g.measureText(t).width; return Math.min(mx, Math.ceil(w / tw)); };
+    var nRead = measure(A.read, 30, 3), nPlan = 0; (A.plan || []).forEach(function(p){ nPlan += measure("✓ " + p, 26, 2); });
+    h = 70 + nRead * 42 + 22 + (A.watch && A.watch.length ? 44 + A.watch.length * 40 + 16 : 0) + (nPlan ? 44 + nPlan * 36 + (A.plan.length * 8) : 0) + 20;
+    rr(g, MX, y, CW, h, 24, "#1f2d4d");
+    g.fillStyle = "#d9a441"; g.fillRect(MX, y + 24, 8, 44);
+    g.fillStyle = "#fff"; font(g, 800, 30); g.fillText("📌 " + (name ? name + "의 " : "PB ") + "코멘트 — 그래서 앞으로", MX + pad, y + 56);
+    yy = y + 70;
+    g.fillStyle = "#f3f5fa"; font(g, 600, 30); yy += wrap(g, A.read, MX + pad, yy + 34, tw, 42, 3) + 22;
+    if (A.watch && A.watch.length){
+      g.fillStyle = "#d9a441"; font(g, 800, 24); g.fillText("앞으로 볼 일정", MX + pad, yy + 26); yy += 44;
+      A.watch.forEach(function(w){ rr(g, MX + pad, yy + 4, 150, 32, 16, "rgba(255,255,255,.12)"); g.fillStyle = "#fff"; font(g, 700, 21); g.textAlign = "center"; g.fillText(w[0], MX + pad + 75, yy + 27); g.textAlign = "left";
+        g.fillStyle = "#e6e9f2"; font(g, 600, 24); wrap(g, w[1], MX + pad + 166, yy + 28, tw - 166, 28, 1); yy += 40; });
+      yy += 16;
+    }
+    if (A.plan && A.plan.length){
+      g.fillStyle = "#d9a441"; font(g, 800, 24); g.fillText("이렇게 대응해요", MX + pad, yy + 26); yy += 44;
+      A.plan.forEach(function(p){ g.fillStyle = "#fff"; font(g, 600, 26); yy += wrap(g, "✓ " + p, MX + pad, yy + 26, tw, 36, 2) + 8; });
+    }
+    return h + 24;
+  }
   function bBullets(g, y, B, title){
     if (!B || !B.length) return 0;
     var lines = B.slice(0, 4), lh = 40, est = 0; font(g, 600, 29);
@@ -378,6 +402,7 @@
     return h + 24;
   }
   function draw(C, name){
+    H = C.kind === "market" ? 2160 : 1620;
     var c = document.createElement("canvas"); c.width = W; c.height = H; var g = c.getContext("2d");
     g.fillStyle = BG; g.fillRect(0, 0, W, H);
     var d = kst(), y = 70;
@@ -387,12 +412,12 @@
     if (C.sub){ g.fillStyle = SUB; font(g, 500, 26); y += wrap(g, C.sub, MX, y + 36, CW, 34, 2) + 6; }
     y += 24;
     var blocks;
-    if (C.kind === "market") blocks = [["hero", C.hero], ["world", C.world], ["heat", C.heat], ["gauge", C.gauge], ["rows", C.themes], ["kpis", C.kpis2], ["chips", C.chips], ["events", C.events], ["alloc", C.alloc, false]];
+    if (C.kind === "market") blocks = [["hero", C.hero], ["world", C.world], ["heat", C.heat], ["gauge", C.gauge], ["advice", C.advice, name], ["kpis", C.kpis2], ["rows", C.themes], ["alloc", C.alloc, false]];
     else if (C.kind === "port") blocks = [["chips", C.chips], ["alloc", C.alloc, true], ["line", C.line], ["kpis", C.kpis], ["rows", C.why, "text"], ["bullets", C.bullets], ["rows", C.sched, "text"]];
     else if (C.kind === "bond") blocks = [["kpis", C.kpis], ["timeline", C.timeline], ["tiles", C.tiles], ["risk", C.risk, C.riskTitle], ["bars", C.cmp], ["bullets", C.bullets]];
     else if (C.kind === "els") blocks = [["chips", C.chips], ["kpis", C.kpis], ["steps", C.steps], ["prob", C.prob], ["tiles", C.tiles], ["bullets", C.bullets]];
     else blocks = [["chips", C.chips], ["kpis", C.kpis], ["risk", C.risk], ["bars", C.bars], ["tiles", C.tiles], ["bullets", C.bullets]];
-    var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb, rows: bRows, risk: bRisk, hero: bHero, world: bWorld, heat: bHeat, gauge: bGauge};
+    var FN = {kpis: bKpis, chips: bChips, bars: bBars, bullets: bBullets, events: bEvents, alloc: bAlloc, line: bLine, tiles: bTiles, timeline: bTimeline, steps: bSteps, prob: bProb, rows: bRows, risk: bRisk, hero: bHero, world: bWorld, heat: bHeat, gauge: bGauge, advice: bAdvice};
     var c2 = document.createElement("canvas"); c2.width = W; c2.height = H; var g2 = c2.getContext("2d");   // 먼저 재 보고 들어갈 때만 그림
     blocks.forEach(function(b){ if (!b[1]) return; var hh = FN[b[0]](g2, 0, b[1], b[2]) || 0; if (!hh || y + hh > H - 104) return; FN[b[0]](g, y, b[1], b[2]); y += hh; });
     g.fillStyle = LINE; g.fillRect(MX, H - 96, CW, 2);

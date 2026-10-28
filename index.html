@@ -1493,7 +1493,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261028h";
+var APPV = "20261028i";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1555,7 +1555,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="usage.js?v=1"></script>   <!-- 📈 10/28 사용 현황(익명) -->
 <script defer src="plus.js?v=4"></script>
 <script defer src="cpin.js?v=1"></script>   <!-- 📌 10/28 내 고객 상품 -->
-<script defer src="onepage.js?v=5"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
+<script defer src="onepage.js?v=6"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
 <script defer src="pbcard.js?v=1"></script>   <!-- 👔 10/28 PB 한 장 카드(장중 매시간) -->
 <script defer src="plus2.js?v=2"></script>
 <script defer src="plus3.js?v=18"></script>
