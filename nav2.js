@@ -13,6 +13,29 @@
     {k: "prop", ic: "📝", t: "제안서", tabs: ["prop"]},                 // 10/28 사용자: 제안서 카테고리 — 기본폼 9종 → 한 장·PDF·PPT
     {k: "feed", ic: "📰", t: "피드", tabs: ["feed"]}
   ];
+  // 👔 10/28 사용자 「여전히 어렵고 복잡하다는 말을 많이 들어」 → 간단 모드(기본): 아래 탭 4개만(오늘·시황·상품·제안서)
+  //    포트·신호·피드·나침반·시장확률은 ⚙️ 「🔬 전체 메뉴」(연구 모드)를 켠 사람에게만. 지운 게 아니라 숨김 — 링크·알림으로는 그대로 열림.
+  //    원복: ⚙️ › 🔬 전체 메뉴 켜기 (localStorage uimode = "lab") · 코드째 원복은 아래 SIMPLE 블록만 지우면 됨
+  var LABM = false; try { LABM = localStorage.getItem("uimode") === "lab"; } catch(x) {}
+  window.uiLab = LABM;
+  if (!LABM){
+    GROUPS = [
+      {k: "home", ic: "🏠", t: "오늘", tabs: ["home"]},
+      {k: "mkt",  ic: "🌐", t: "시장", tabs: ["market"]},
+      {k: "prod", ic: "🛍️", t: "상품", tabs: ["bond", "fund", "els"]},
+      {k: "prop", ic: "📝", t: "제안서", tabs: ["prop"]}
+    ];
+  }
+  function setMode(lab){ try { if (lab) localStorage.setItem("uimode", "lab"); else localStorage.removeItem("uimode"); } catch(x) {}
+    if (!lab && window.store){ try { store.gl = {}; if (["home","market","bond","fund","els","prop"].indexOf(window.cur) < 0) location.hash = "home"; } catch(x) {} }
+    setTimeout(function(){ location.reload(); }, 50); }
+  document.addEventListener("click", function(ev){ var t = ev.target.closest && ev.target.closest("[data-uimode]"); if (!t) return;
+    ev.preventDefault(); ev.stopPropagation(); setMode(!LABM); }, true);
+  function modeBtn(){ var g = document.querySelector("#uiset .us-go"); if (!g || g.querySelector("[data-uimode]")) return;
+    var b = document.createElement("button"); b.setAttribute("data-uimode", "1");
+    b.textContent = LABM ? "👔 간단 메뉴로" : "🔬 전체 메뉴 보기";
+    g.insertBefore(b, g.firstChild); }
+  new MutationObserver(function(){ if (document.getElementById("uiset")) modeBtn(); }).observe(document.documentElement, {childList: true, subtree: true});
   var LAB = {market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", prop: "📝 제안서"};
   function grpOf(k){ for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].tabs.indexOf(k) >= 0) return GROUPS[i]; return null; }
   function last(g){ var m = (window.store && store.gl) || {}; return m[g.k] && g.tabs.indexOf(m[g.k]) >= 0 ? m[g.k] : g.tabs[0]; }
