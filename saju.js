@@ -272,13 +272,17 @@
     var gG = G[L.gSS], bG = G[L.bSS], seed = (R.name || "") + dd.y + dd.m + dd.d;
     var head = null; t.HEAD.forEach(function(h){ if (!head && sc >= h[0]) head = pick(h[1], seed); });
     var es = function(el){ return R.ES[el] || 0; }, gE = L.gEl, bE = L.bEl;
-    var area = function(targets, extra){ var v = sc; [[gG, gE], [bG, bE]].forEach(function(x){ if (targets.indexOf(x[0]) >= 0) v += es(x[1]) >= 0 ? 7 : -5; }); return Math.max(12, Math.min(98, Math.round(v + (extra || 0)))); };
+    var jit = function(k){ return hash(seed + k) % 7 - 3; };
+    var area = function(targets, extra){ var v = 22 + sc * 0.62 + jit(targets.join("")); [[gG, gE], [bG, bE]].forEach(function(x){ if (targets.indexOf(x[0]) >= 0) v += es(x[1]) >= 1 ? 12 : es(x[1]) === 0 ? 4 : -9; }); return Math.max(12, Math.min(98, Math.round(v + (extra || 0)))); };
     var dCh = L.tags.some(function(x){ return x.t === "충" && x.k === "d"; }), dHap = L.tags.some(function(x){ return (x.t === "합" || x.t === "반합") && x.k === "d"; }), hy = L.tags.some(function(x){ return x.t === "형"; });
     var areas = [
       ["💼", "일", area(["관성", "식상"]), (t.AREA[gG] || {}).일],
       ["💰", "돈", area(["재성"], gG === "비겁" ? -4 : 0), (t.AREA[gG === "재성" || bG !== "재성" ? gG : bG] || {}).돈],
       ["🤝", "사람", area(["비겁", "인성"], (dHap ? 8 : 0) - (dCh ? 10 : 0)), (t.AREA[bG] || {}).사람],
-      ["💪", "몸", Math.max(12, Math.min(98, Math.round(sc + es(bE) * 3 - (dCh ? 12 : 0) - (hy ? 5 : 0)))), (t.AREA[bG] || {}).몸]
+      ["💕", "연애 · 가족", area(["식상", "재성", "관성"], (dHap ? 8 : 0) - (dCh ? 12 : 0)), (t.AREA2[bG] || {}).연애],
+      ["📚", "공부 · 자기계발", area(["인성", "식상"]), (t.AREA2[gG] || {}).공부],
+      ["🚗", "이동 · 외출", Math.max(12, Math.min(98, Math.round(22 + sc * 0.62 + jit("move") + (L.tags.some(function(x){ return x.t === "충"; }) ? -10 : 4)))), (t.AREA2[bG] || {}).이동],
+      ["💪", "몸 · 컨디션", Math.max(12, Math.min(98, Math.round(22 + sc * 0.62 + jit("body") + es(bE) * 4 - (dCh ? 12 : 0) - (hy ? 5 : 0)))), (t.AREA[bG] || {}).몸]
     ];
     var tips = [];
     L.tags.forEach(function(x){ var k = x.t === "충" ? "충" + (x.k === "d" || x.k === "m" || x.k === "y" || x.k === "h" ? x.k : "") : (x.t === "합" || x.t === "반합") && x.k === "d" ? "합d" : x.t;
@@ -288,7 +292,37 @@
     var col = t.COLW[luckyEl][hash(seed + "c") % 2], nums = t.NUMW[luckyEl];
     var good = s.JI.filter(function(b){ var pr = s.jiPair(b, L.p[1]); return (s.CHEONEUL[R.dg].indexOf(b) >= 0 || pr.some(function(q){ return (q.t === "합" || q.t === "반합") && es(q.el) >= 0; })) && !pr.some(function(q){ return q.t === "충"; }); })
       .filter(function(b){ return "卯辰巳午未申酉戌亥".indexOf(b) >= 0; }).slice(0, 2);
-    return {dd: dd, L: L, sc: sc, head: head, areas: areas, tips: tips.slice(0, 3), col: col, num: nums[hash(seed + "n") % 2], dir: t.DIRW[luckyEl], good: good, gG: gG, bG: bG};
+    // ① 총평: 오늘 들어오는 기운(하늘 글자 기준) + 나에게 맞는지
+    var dEs = Math.round((es(gE) + es(bE)) / 2), en = t.DAYEN[gG] || ["", ""];
+    var story = [en[0] + " " + en[1], t.ESNOTE[String(Math.max(-2, Math.min(2, dEs)))]];
+    if (dHap) story.push("오늘 글자가 내 자리(" + R.P.d[1] + ")와 손을 잡아서 사람 운이 따라와요.");
+    if (dCh) story.push("오늘 글자가 내 자리(" + R.P.d[1] + ")와 부딪혀서 마음이 흔들리기 쉬워요. 오늘은 반 박자 천천히!");
+    var tri = L.tags.filter(function(x){ return (x.t === "삼합" || x.t === "방합") && x.v > 0; })[0];
+    if (tri) story.push("흩어져 있던 " + t.EL_KO[tri.el] + " 기운이 한데 모이는 날이라 힘이 커져요.");
+    if (L.tags.some(function(x){ return x.t === "귀인"; })) story.push("도와주는 귀인 글자가 들어오는 날이에요. 부탁할 일이 있으면 오늘!");
+    // ② 시간대별
+    var dayP = L.p, periods = t.PERIOD.map(function(P){
+      var v = P.br.map(function(b){ var hp = s.hourPillar(dayP[0], b), x = s.luckScore(R, hp, [{p: dayP, tag: "오늘"}]); return x.s; });
+      var avg = v.reduce(function(a, b){ return a + b; }, 0) / v.length, scv = Math.max(15, Math.min(97, Math.round(sc * 0.5 + 30 + avg * 7)));
+      return {P: P, sc: scv}; });
+    var bestP = periods.slice().sort(function(a, b){ return b.sc - a.sc; })[0];
+    // ③ 띠
+    var ani = function(b){ return t.JI_ANI[b] + "띠"; }, okB = [], noB = [];
+    s.JI.forEach(function(b){ var pr = s.jiPair(b, dayP[1]); if (pr.some(function(q){ return q.t === "합" || q.t === "반합"; })) okB.push(b); if (pr.some(function(q){ return q.t === "충"; })) noB.push(b); });
+    // ④ 할 일 · 피할 일
+    var dos = (t.DO[gG] || []).slice(0, 2).concat((t.DO[R.yong === "목" ? "비겁" : s.groupOfEl(R.dg, R.yong)] || []).slice(0, 1)).filter(function(v, i, a){ return a.indexOf(v) === i; });
+    var donts = []; L.tags.forEach(function(x){ if (t.DONT[x.t] && donts.indexOf(t.DONT[x.t]) < 0) donts.push(t.DONT[x.t]); });
+    if (donts.length < 2) donts.push(t.DONT[bG] || t.DONT[gG]);
+    // ⑤ 오늘의 별자리 (오늘 낮 12시 달 자리 ↔ 태어난 태양)
+    var jd = s.jdUT(dd.y, dd.m, dd.d, 3), mz = t.ZFULL[Math.floor(s.moonLon(jd) / 30)], me = R.astro.sun.sign, e1 = t.ZEL[mz], e2 = t.ZEL[me];
+    var pairOK = {불: "공기", 공기: "불", 흙: "물", 물: "흙"}, zrel = e1 === e2 ? "같음" : pairOK[e1] === e2 ? "맞음" : "다름";
+    // ⑥ 한마디 · 이번 달 · 올해 · 내일
+    var word = pick(t.WORD[sc >= 72 ? "hi" : sc >= 50 ? "mid" : "lo"], seed + "w");
+    var ml = s.monthLuck(R, dd.y, dd.m, 1, dd.d)[0], yl = s.yearLuck(R, dd.y);
+    var itemEl = luckyEl;
+    return {dd: dd, L: L, sc: sc, head: head, areas: areas, tips: tips.slice(0, 3), col: col, num: nums[hash(seed + "n") % 2], dir: t.DIRW[luckyEl], good: good, gG: gG, bG: bG,
+      story: story, periods: periods, bestP: bestP, okB: okB.map(ani), noB: noB.map(ani), dos: dos, donts: donts.slice(0, 2), item: t.ITEM[itemEl], avoidCol: t.COLW[R.gi][0], avoidDir: t.DIRW[R.gi],
+      mz: mz, zrel: zrel, word: word, ml: ml, yl: yl};
   }
   function renderLuck(){
     var root = document.getElementById("sjL"); if (!root) return;
@@ -302,17 +336,32 @@
     var h = '<div class="card"><div class="lk-d">' + dayStr + ' · ' + e(p.name) + ' 님</div>' +
       '<div class="lk-top" style="margin-top:8px">' + ring(D.sc, c) + '<div><span class="lk-g" style="background:' + c + '22;color:' + c + '">' + t.GRADE(D.sc) + '</span>' +
       '<div class="lk-h">' + e(D.head) + '</div><div class="lk-d">오늘은 「' + t.DAYNAME(D.L.p) + '」 날 (' + t.read(D.L.p) + '일)</div></div></div></div>';
-    h += '<div class="card"><h3>오늘 네 가지</h3><div class="lk-areas">' + D.areas.map(function(a){ var cc = scoreCol(a[2]);
+    h += '<div class="card"><h3>오늘의 이야기</h3>' + D.story.map(function(x){ return '<p style="margin:0 0 8px;font-size:14.5px;line-height:1.65">' + e(x) + '</p>'; }).join("") +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"><span class="lk-g" style="background:var(--panel2);color:var(--sub)">오늘 글자 ' + D.L.p + '</span><span class="lk-g" style="background:var(--panel2);color:var(--sub)">' + t.EL_KO[D.L.gEl] + ' · ' + t.EL_KO[D.L.bEl] + ' 기운</span><span class="lk-g" style="background:var(--panel2);color:var(--sub)">내게 ' + t.grpShort(D.gG, R.sex) + ' 글자</span></div></div>';
+    h += '<div class="card"><h3>오늘 일곱 가지</h3><div class="lk-areas">' + D.areas.map(function(a){ var cc = scoreCol(a[2]);
       return '<div class="lk-a"><span class="qi">' + a[0] + '</span><div><b>' + a[1] + '</b> <small style="color:' + cc + ';font-weight:800">' + a[2] + '점</small><div class="bar"><i style="width:' + a[2] + '%;background:' + cc + '"></i></div><p>' + e(a[3] || "") + '</p></div></div>'; }).join("") + '</div></div>';
+    h += '<div class="card"><h3>시간대별 흐름 <small style="font-weight:500;color:var(--dim)">가장 좋은 때: ' + D.bestP.P.n + '</small></h3><div style="display:grid;gap:8px">' + D.periods.map(function(q){ var cc = scoreCol(q.sc), ok = q.sc >= 58;
+      return '<div style="display:grid;grid-template-columns:28px 64px 1fr;gap:8px;align-items:center"><span style="font-size:19px">' + q.P.ic + '</span><div><b style="font-size:14px">' + q.P.n + '</b><br><small style="color:var(--dim)">' + q.P.t + '</small></div>' +
+        '<div><div class="lk-a" style="display:block"><div class="bar" style="margin:0 0 4px"><i style="width:' + q.sc + '%;background:' + cc + '"></i></div></div><small style="color:var(--sub);font-size:13px">' + (ok ? "👍 " + q.P.good : "🐢 " + q.P.bad) + '</small></div></div>'; }).join("") + '</div></div>';
     h += '<div class="card"><h3>오늘의 행운</h3><div class="lk-lucky">' +
       '<div><small>행운의 색</small><b><span class="lk-dot" style="background:' + (t.COLHEX[D.col] || "#888") + '"></span>' + D.col + '</b></div>' +
       '<div><small>행운의 숫자</small><b>' + D.num + '</b></div><div><small>좋은 방향</small><b>' + D.dir + '</b></div>' +
-      '<div><small>좋은 시간</small><b style="font-size:13.5px">' + (D.good.length ? D.good.map(function(b){ return t.HOUR[b]; }).join("<br>") : "오전 일찍") + '</b></div></div></div>';
-    h += '<div class="card"><h3>' + (D.sc >= 58 ? "이것만 기억해요" : "오늘 조심할 것") + '</h3>' + D.tips.map(function(x){ return '<div class="lk-tip"><span>' + (/조심|확인|거리|갈팡|바빠|바뀔|신경/.test(x) ? "⚠️" : "✅") + '</span><span>' + e(x) + '</span></div>'; }).join("") + '</div>';
+      '<div><small>좋은 시간</small><b style="font-size:13.5px">' + (D.good.length ? D.good.map(function(b){ return t.HOUR[b]; }).join("<br>") : D.bestP.P.n + " " + D.bestP.P.t) + '</b></div>' +
+      '<div><small>행운 아이템</small><b style="font-size:13.5px">' + D.item.item + '</b></div><div><small>행운 음식</small><b style="font-size:13.5px">' + D.item.food + '</b></div>' +
+      '<div><small>가면 좋은 곳</small><b style="font-size:13.5px">' + D.item.place + '</b></div><div><small>잘 맞는 띠</small><b style="font-size:13.5px">' + (D.okB.join(" · ") || "모두 무난") + '</b></div></div></div>';
+    h += '<div class="card"><h3>오늘 할 일 · 피할 일</h3>' + D.dos.map(function(x){ return '<div class="lk-tip"><span>✅</span><span>' + e(x) + '</span></div>'; }).join("") +
+      D.donts.map(function(x){ return '<div class="lk-tip"><span>🚫</span><span>' + e(x) + '</span></div>'; }).join("") +
+      D.tips.map(function(x){ return '<div class="lk-tip"><span>' + (/조심|확인|거리|갈팡|바빠|바뀔|신경/.test(x) ? "⚠️" : "💡") + '</span><span>' + e(x) + '</span></div>'; }).join("") +
+      '<p class="sj-note" style="margin-top:8px">피하면 좋은 것 — ' + D.avoidCol + ' 옷 · ' + D.avoidDir + ' 방향 큰 일' + (D.noB.length ? ' · 오늘 부딪히기 쉬운 띠: ' + D.noB.join(" · ") : "") + '</p></div>';
+    h += '<div class="card"><h3>오늘의 별자리</h3><p style="margin:0 0 6px;font-size:14.5px">오늘 달은 <b>' + D.mz + '</b>(' + t.ZEL[D.mz] + ' · ' + t.ZMOODT[t.ZEL[D.mz]] + ')에 있고, 나는 <b>' + R.astro.sun.sign + '</b> 태양이에요.</p><p style="margin:0;font-size:14px;color:var(--sub)">' + t.ZTODAY[D.zrel] + '</p></div>';
+    h += '<div class="card" style="text-align:center"><h3 style="justify-content:center">오늘의 한마디</h3><div style="font-size:17px;font-weight:700;line-height:1.55;padding:2px 8px 4px">「' + e(D.word) + '」</div></div>';
     // 이번 주
     var wk = []; for (var i = 0; i < 7; i++){ var q = luckData(R, i); wk.push(q); }
     h += '<div class="card"><h3>이번 주 흐름 <small style="font-weight:500;color:var(--dim)">막대를 누르면 그날 운세</small></h3><div class="lk-week">' + wk.map(function(q, i){
-      return '<button data-off="' + i + '" class="' + (i === LK.off ? "on" : "") + '"><small style="font-weight:800;color:' + scoreCol(q.sc) + '">' + q.sc + '</small><i style="height:' + Math.max(8, (q.sc - 10) * 0.9) + 'px;background:' + scoreCol(q.sc) + '"></i>' + (i === 0 ? "오늘" : WD[q.dd.w]) + '</button>'; }).join("") + '</div></div>';
+      return '<button data-off="' + i + '" class="' + (i === LK.off ? "on" : "") + '"><small style="font-weight:800;color:' + scoreCol(q.sc) + '">' + q.sc + '</small><i style="height:' + Math.max(8, (q.sc - 10) * 0.9) + 'px;background:' + scoreCol(q.sc) + '"></i>' + (i === 0 ? "오늘" : WD[q.dd.w]) + '</button>'; }).join("") + '</div>' +
+      (LK.off < 6 ? '<p class="sj-note" style="margin-top:10px">🔭 ' + (LK.off === 0 ? "내일" : "다음 날") + ' 미리 보기 — <b style="color:' + scoreCol(wk[LK.off + 1].sc) + '">' + wk[LK.off + 1].sc + '점</b> · ' + e(wk[LK.off + 1].head) + '</p>' : "") + '</div>' +
+      '<div class="card"><h3>더 길게 보면</h3><div class="lk-lucky"><div><small>이번 달 (' + D.ml.from.m + '/' + D.ml.from.d + '~' + D.ml.to.m + '/' + D.ml.to.d + ' · ' + D.ml.p + ')</small><b>' + D.ml.grade + '</b><small style="margin-top:3px;color:var(--sub)">' + e((t.tagText(D.ml.tags[0] || {}, R) || t.EL_KO[D.ml.gEl] + " · " + t.EL_KO[D.ml.bEl] + " 기운의 달")) + '</small></div>' +
+      '<div><small>올해 (' + D.yl.year + ' · ' + D.yl.p + ')</small><b>' + D.yl.grade + '</b><small style="margin-top:3px;color:var(--sub)">' + e((t.tagText(D.yl.tags[0] || {}, R) || t.EL_KO[D.yl.gEl] + " · " + t.EL_KO[D.yl.bEl] + " 기운의 해")) + '</small></div></div><p class="sj-note">자세한 흐름은 📜 사주 리포트에서 볼 수 있어요.</p></div>';
     var L = people(); if (L.length > 1){
       h += '<div class="card"><h3>모두의 오늘</h3><div class="lk-all">' + L.map(function(x){ var r, sc = "–"; try { r = calcOf(x); sc = luckData(r, LK.off).sc; } catch(z) {}
         return '<button data-id="' + e(x.id) + '"><span>' + (x.rel === "고객" ? "💼" : x.rel === "가족" ? "🏠" : x.rel === "나" ? "🙂" : "👤") + '</span><span>' + e(x.name) + '</span><span class="s" style="color:' + scoreCol(+sc || 0) + '">' + sc + '</span></button>'; }).join("") + '</div></div>';
@@ -581,7 +630,7 @@
       (function(){ var b = YL.slice().sort(function(a, c){ return c.stars - a.stars || a.year - c.year; })[0], w = YL.slice().sort(function(a, c){ return a.stars - c.stars || a.year - c.year; })[0];
         return '<div class="qbox qgr"><h5>정리하면</h5>' + YL[0].year + '년은 「' + YL[0].grade + '」 → 가장 조심할 해는 <b>' + w.year + '년(' + w.p + ')</b> — 지키는 해 → 가장 좋은 해는 <b>' + b.year + '년(' + b.p + ')</b> — 새 출발 · 큰 결정에 좋습니다.</div>'; })());
     // 10 올해
-    var ML = s.monthLuck(R, now.y, now.m, 5), Y0 = YL[0], Y1 = YL[1];
+    var ML = s.monthLuck(R, now.y, now.m, 5, now.d), Y0 = YL[0], Y1 = YL[1];
     var good0 = Y0.tags.filter(function(q){ return /합|삼합|방합|귀인|간합/.test(q.t) && (q.v == null || q.v >= 0); }), bad0 = Y0.tags.filter(function(q){ return /충|형|원진|간충/.test(q.t); });
     h += pg(10, "올해의 운 — " + now.y + "년 자세히", "지금 이 순간의 흐름을 월 단위로 봅니다.",
       '<p>분석 기준일은 ' + now.y + '년 ' + now.m + '월 ' + now.d + '일입니다. 지금은 ' + Y0.p + '년' + (ci >= 0 ? '이고, 대운은 ' + DL[ci].p + '(' + DL[ci].age[0] + '~' + DL[ci].age[1] + '세) 안에 있습니다.' : '입니다.') + '</p>' +

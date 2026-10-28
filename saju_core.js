@@ -387,8 +387,8 @@
   function daeunLuck(R){ return R.daeun.list.map(function(x){ var L = luckScore(R, x.p, []); L.age = x.age; L.yr = x.yr; return L; }); }
   function yearLuck(R, y){ var du = daeunAt(R, y), L = luckScore(R, yearPillar(y), du ? [{p: du.p, tag: "대운"}] : []); L.year = y; L.du = du && du.p; return L; }
   // 월운: from(정수 날짜 번호) 이후 n개 절월
-  function monthLuck(R, y, m, n){
-    var out = [], jd = jdUT(y, m, 1, 3);
+  function monthLuck(R, y, m, n, d){
+    var out = [], jd = jdUT(y, m, d || 1, 3);
     var L = termsAround(y).concat(termsAround(y + 1)).filter(function(t, i, a){ return a.findIndex(function(u){ return Math.abs(u.jd - t.jd) < 1; }) === i; }).sort(function(a, b){ return a.jd - b.jd; });
     var st = 0; for (var i = 0; i < L.length; i++) if (L[i].jd <= jd) st = i;
     for (var k = st; k < L.length - 1 && out.length < n; k++){
@@ -410,7 +410,7 @@
     return L;
   }
 
-  G.SJ = {calc: calc, luckScore: luckScore, daeunLuck: daeunLuck, yearLuck: yearLuck, monthLuck: monthLuck, dayLuck: dayLuck, daeunAt: daeunAt,
+  G.SJ = {hourPillar: hourPillar, moonLon: moonLon, sunLon: sunLon, calc: calc, luckScore: luckScore, daeunLuck: daeunLuck, yearLuck: yearLuck, monthLuck: monthLuck, dayLuck: dayLuck, daeunAt: daeunAt,
     todayKST: todayKST, dayPillar: dayPillar, yearPillar: yearPillar, monthPillar: monthPillar, monthAt: monthAt, sajuYearAt: sajuYearAt, jdUT: jdUT,
     lunarToSolar: lunarToSolar, solarToLunar: solarToLunar, leapMonthOf: leapMonthOf, sipsin: sipsin, unseong: unseong, jiPair: jiPair,
     GAN: GAN, JI: JI, GAN_EL: GAN_EL, JI_EL: JI_EL, YANG: YANG, JZ: JZ, SS_GROUP: SS_GROUP, SAENG: SAENG, GEUK: GEUK, CITY: CITY, POSKO: POSKO, EL: EL,
