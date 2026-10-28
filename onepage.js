@@ -865,7 +865,7 @@
     });
   }
   // 🔍 종목리포트 화면에서 그 종목 한 장만 바로 (10/28 14:25)
-  document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-op1]"); if (!b) return; ev.stopPropagation(); goMany([{kind: "stock", id: b.dataset.op1, nm: b.dataset.nm || ""}], false); }, true);
+  document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-opstk]"); if (!b) return; ev.stopPropagation(); goMany([{kind: "stock", id: b.dataset.opstk, nm: b.dataset.nm || ""}], false); }, true);
   function goMany(L, withMkt){   // 10/28 14:25 「종목만 따로 보낼 수 있게 — 반드시 시황과 같이가 아닌」 → withMkt=false 면 시황 빼고
     if (withMkt === undefined) withMkt = true;
     toast((withMkt ? "시장 한 장 + " : "") + L.length + "장 만드는 중…");
