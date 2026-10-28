@@ -425,6 +425,58 @@ def sec_mom():
         return {}
 
 
+PEAD_K = {"pr5": 0.06, "p1": 0.05}   # 로그오즈 / 반응 5%p (측정 0.068~0.10 · 0.06~0.08 의 약 70~80%)
+
+
+def pead(H, ix, syms):
+    """🧾 실적 발표 반응일(오늘 종가가 반응일) 종목 → {sym: (반응 초과수익, 설명)}
+    검증 probe/pead_bt.py (10/28): 미국 220종목 2018-11~ 6,198건 · 반응일 시장 대비 +4.5%↑ → 다음 5일 시장보다 나음 +3.9·+1.7%p, −3.9%↓ → −5.3·−3.6%p(앞/뒤)
+    일반 모델 위 브라이어 0.25031→0.24970 · 0.25007→0.24944 · 놀람%(EPS 서프라이즈) 자체는 두 기간 엇갈려 안 씀 · 반응 뒤 2~5일째는 개선 거의 없음 → 반응일 하루만"""
+    out = {}
+    if FAKE or ix not in H:
+        return out
+    try:
+        import yfinance as yf
+        m = H[ix]["Close"]
+        last = m.index[-1]
+        for s in syms:
+            if s not in H or "." in s:
+                continue
+            try:
+                ed = yf.Ticker(s).get_earnings_dates(limit=4)
+                if ed is None or not len(ed):
+                    continue
+                ed = ed.dropna(subset=["Reported EPS"])
+                if not len(ed):
+                    continue
+                ts = pd.Timestamp(ed.index.max())
+                tsn = ts.tz_convert("America/New_York") if ts.tzinfo else ts
+                c = H[s]["Close"].reindex(m.index)
+                ex = c.pct_change() - m.pct_change()
+                k = m.index.searchsorted(pd.Timestamp(tsn.date()))
+                if k >= len(m.index):
+                    continue
+                hm = tsn.hour * 60 + tsn.minute
+                if 0 < hm < 570:
+                    d0 = k
+                elif hm >= 960:
+                    d0 = k + 1
+                else:
+                    if k + 1 >= len(m.index):
+                        continue
+                    d0 = k if abs(ex.iloc[k]) >= abs(ex.iloc[k + 1]) else k + 1
+                if d0 != len(m.index) - 1 or pd.isna(ex.iloc[d0]):
+                    continue
+                e = float(ex.iloc[d0])
+                out[s] = (e, f"실적 반응일 시장 대비 {e * 100:+.1f}% ({tsn.date()})")
+            except Exception:
+                pass
+        print("실적 반응일", len(out), {s: round(v[0] * 100, 1) for s, v in out.items()}, "기준일", last.date())
+    except Exception as e:
+        print("실적 반응 실패", e)
+    return out
+
+
 def main():
     t0 = time.time()
     if FAKE:
@@ -508,6 +560,15 @@ def main():
                     if x["k"] in mom and x["pr5"] is not None:
                         q = min(1 - 1e-4, max(1e-4, x["pr5"]))
                         x["pr5"] = r2(1 / (1 + math.exp(-(math.log(q / (1 - q)) + mom[x["k"]][0]))), 3)
+            pe = pead(H, cfg["ix"], [x["s"] for x in st]) if mk == "US" else {}
+            for x in st:
+                if x["s"] in pe:
+                    z = max(-3.0, min(3.0, pe[x["s"]][0] / 0.05))
+                    for f, kk in PEAD_K.items():
+                        if x[f] is not None:
+                            q = min(1 - 1e-4, max(1e-4, x[f]))
+                            x[f] = r2(1 / (1 + math.exp(-(math.log(q / (1 - q)) + kk * z))), 3)
+                    x["pead"] = pe[x["s"]][1]
             # 시장 방향 몫을 빼고(같은 날 모든 종목 평균과의 로그오즈 차이) 남는 「이 종목·섹터만의 기울기」 — 앱이 시장 카드 확률 위에 더함
             lg = lambda p: math.log(max(1e-4, min(1 - 1e-4, p)) / (1 - max(1e-4, min(1 - 1e-4, p))))
             for t in ("p1", "p5"):
@@ -529,7 +590,7 @@ def main():
                 secs.append({"k": k, "icon": i0["icon"], "name": i0["sname"], "n": len(xs), "p1": r2(wavg("p1"), 3), "p5": r2(wavg("p5"), 3), "pr5": r2(wavg("pr5"), 3),
                              "d1": r2(wavg("d1"), 3), "d5": r2(wavg("d5"), 3), "mom": (mom.get(k) or (0, None))[1],
                              "r5": r2(wavg("r5"), 2), "up5": sum(1 for x in xs if (x["p5"] or 0) > mres["base"]["y5"]),
-                             "st": [{kk: x[kk] for kk in ("s", "n", "p1", "p5", "pr5", "d1", "d5", "r1", "r5")} for x in xs]})
+                             "st": [{**{kk: x[kk] for kk in ("s", "n", "p1", "p5", "pr5", "d1", "d5", "r1", "r5")}, **({"pead": x["pead"]} if x.get("pead") else {})} for x in xs]})
             secs.sort(key=lambda x: -(x["d5"] or 0))
             a5 = mres["auc"].get("y5") or 0.5
             rel = "믿을 만" if a5 >= 0.56 else "약함" if a5 >= 0.52 else "동전 수준"
