@@ -19,19 +19,25 @@ B = "https://dart.fss.or.kr"
 S = requests.Session(); S.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128 Safari/537.36"})
 
 
+class DartDown(Exception):
+    pass
+
+
 async def lists():
     from playwright.async_api import async_playwright
     out = {}
     start = (datetime.date.today() - datetime.timedelta(days=730)).strftime("%Y%m%d"); end = datetime.date.today().strftime("%Y%m%d")
     async with async_playwright() as p:
         b = await p.chromium.launch(); pg = await b.new_page()
-        for k in range(3):   # 10/22 자가 업그레이드: DART 첫 화면 90초 멈춤으로 하루 실패 → 3번까지 다시 (load 대신 domcontentloaded)
-            try:
+        for k in range(4):   # 10/22 자가 업그레이드: DART 첫 화면 90초 멈춤으로 하루 실패 → 다시 (load 대신 domcontentloaded)
+            try:             # 10/29: 3번 다 같은 창에서 멈춤 → 매번 새 창(쿠키·연결 새로)으로 · 쉬는 시간 20→60초
                 await pg.goto(B + "/dsab007/main.do", timeout=90000, wait_until="domcontentloaded"); await pg.wait_for_function("!!document.searchForm", timeout=30000); break
             except Exception as e:
-                print(f"DART 첫 화면 {k+1}/3 실패:", str(e)[:80])
-                if k == 2: raise
-                await pg.wait_for_timeout(20000)
+                print(f"DART 첫 화면 {k+1}/4 실패:", str(e)[:80])
+                if k == 3: raise DartDown(str(e)[:120])
+                try: await pg.close()
+                except Exception: pass
+                await asyncio.sleep(60); pg = await (await b.new_context()).new_page()
         await pg.wait_for_timeout(2000)
         for nm in MG:
             try:
@@ -166,7 +172,17 @@ def main():
     cache = {}
     for m, L in (old.get("mg") or {}).items():
         for it in L: cache[it["rc"]] = it
-    L = asyncio.run(lists())
+    try:
+        L = asyncio.run(lists())
+    except DartDown as e:
+        # 10/29 자가 업그레이드: DART 사이트가 통째로 안 열리는 날(10/22·10/29)은 전 자료를 그대로 두고 성공으로 끝냄.
+        # 단 마지막 갱신이 3일(주말 포함 72시간)보다 오래됐으면 실패로 끝내 🩺 건강검진이 잡게 함.
+        KST = datetime.timezone(datetime.timedelta(hours=9))
+        try: age = (datetime.datetime.now(KST) - datetime.datetime.strptime(old.get("updated", "")[:16], "%Y-%m-%d %H:%M").replace(tzinfo=KST)).total_seconds() / 3600
+        except Exception: age = 999
+        print(f"DART 안 열림 — 마지막 자료 {age:.0f}시간 전:", e)
+        if age > 72: raise
+        print("전 자료 그대로 둠 (다음 날 다시)"); return
     res, err, need = {}, [], []
     for nm, rows in L.items():
         if rows is None: continue
