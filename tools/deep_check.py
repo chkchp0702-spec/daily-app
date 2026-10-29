@@ -179,11 +179,13 @@ def sweep(pg, url, tab, cap=45):
             info = pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); if(!e||!e.isConnected) return null; var r=e.getBoundingClientRect(); return [Math.round(r.top),((e.innerText||e.getAttribute('aria-label')||'').trim().slice(0,22).replace(/\\s+/g,' ')), document.body.innerHTML.length, !!e.closest('[data-j]')]}})()""")
             if not info: continue
             h0 = pg.evaluate("location.hash"); ne = len(errs)
+            top0 = pg.evaluate("((document.getElementById('main')||{}).innerText||'').slice(0,80)")
             pg.evaluate(f"""document.querySelector('[data-au="{i}"]').click()""")
             pg.wait_for_timeout(450)
             if len(errs) > ne: errs[-1] = f"「{info[1]}」 누르면 → " + errs[-1]
             h1 = pg.evaluate("location.hash"); peek = pg.evaluate("!!document.getElementById('peek')")
-            if h1 != h0 or peek or info[3]:
+            top1 = pg.evaluate("((document.getElementById('main')||{}).innerText||'').slice(0,80)")
+            if h1 != h0 or peek or info[3] or top1 != top0:   # 다른 화면으로 감(종목 화면 열기 등) — 튐 아님, 돌아와서 계속
                 pg.goto(url, wait_until="domcontentloaded", timeout=45000); pg.wait_for_timeout(2200); pg.evaluate(LIST_JS, SEL); continue
             aft = pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); if(!e||!e.isConnected) return [null, document.body.innerHTML.length]; return [Math.round(e.getBoundingClientRect().top), document.body.innerHTML.length]}})()""")
             if aft[0] is not None and abs(aft[0] - info[0]) > 150 and not EXPAND.search(info[1]):
