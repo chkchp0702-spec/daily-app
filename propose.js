@@ -135,7 +135,10 @@
       if (ex > 0){ var pick = function(kd){ var c = after.filter(function(a){ return a.kind === kd && a.pct > 0; }); if (!c.length) c = all.filter(function(a){ return a.kind === kd; }); return c.sort(function(a, b){ return b.pct - a.pct; })[0]; }, br = pick("위험"), bs = pick("안전");
         if (br && bs){ br.pct = r1(br.pct - ex); bs.pct = r1(bs.pct + ex); } }
     }
-    return {ins: ins, after: after, fr: fr, warn: warn, M: r1(ins.reduce(function(s2, a){ return s2 + a.pct; }, 0)),
+    // 10/29 사용자 「비중 큰 순으로 내리고 설명도 그 순으로」
+    var byP = function(a, b){ return b.pct - a.pct; };
+    ins.sort(byP); ins.forEach(function(a, i){ a.color = MCOL2[i % MCOL2.length]; }); after.sort(byP);
+    return {ins: ins, after: after, all: ins.concat(after).sort(byP), fr: fr, warn: warn, M: r1(ins.reduce(function(s2, a){ return s2 + a.pct; }, 0)),
             risky: r1(all.filter(function(a){ return a.kind === "위험"; }).reduce(function(s2, a){ return s2 + a.pct; }, 0))};
   }
   // 고른 방식(원화/환전) + 꼭 넣을 종목을 기본폼에 덧입힌 「이 고객용」 폼
@@ -147,10 +150,12 @@
     var P = mustPlan(k, f); if (!P) return f;
     var tf = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct, ta = (P.after.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
     (f.themes || []).forEach(function(t){ t.w = r1(t.w * (tf ? ta / tf : 0)); });
-    f.alloc = P.ins.concat(P.after.filter(function(a){ return a.pct > 0; }));
+    f.alloc = P.all.filter(function(a){ return a.pct > 0; });
+    if (f.themes) f.themes.sort(function(a, b){ return b.w - a.w; });
     f.must = P.ins; f.mustPlan = P;
-    f.headline = "⭐ 추천 종목 " + pc(P.M) + " + " + f.headline.replace(/^⭐ 추천 종목 [^+]*\+ /, "");
-    f.points = ["⭐ 추천 종목 " + P.ins.map(function(a){ return a.inst.split(" · ")[0] + " " + pc(a.pct); }).join(" · ") + " — 담는 이유는 아래 「추천 종목」 칸 · 나머지 " + pc(r1(100 - P.M)) + "는 기본 포트 비율 그대로"].concat(RET[k] ? ["위험자산 합계 " + pc(P.risky) + " (법정 한도 70% 안)"] : []).concat(f.points || []);
+    // 머리말도 넣은 뒤 비중 큰 순으로 다시 씀 (기본폼 숫자가 남지 않게)
+    f.headline = "⭐ 추천 종목 " + pc(P.M) + " + " + P.after.filter(function(a){ return a.pct > 0; }).map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" + ") + " 제안임";
+    f.points = ["⭐ 추천 종목 " + P.ins.map(function(a){ return a.inst.split(" · ")[0] + " " + pc(a.pct); }).join(" · ") + " — 담는 이유는 아래 「추천 종목」 칸 · 나머지 " + pc(r1(100 - P.M)) + "는 기본 포트 비율 그대로 (아래 설명의 % 숫자는 추천 종목 넣기 전 기본 포트 기준)"].concat(RET[k] ? ["위험자산 합계 " + pc(P.risky) + " (법정 한도 70% 안)"] : []).concat(f.points || []);
     if (f.sim && f.sim.note) f.sim.note += " · ⭐ 추천 종목은 과거 계산에서 빼고 기본 포트 비율로 계산";
     return f;
   }
@@ -522,7 +527,7 @@
           '<div style="flex:1;min-width:0;font-size:12.5px;line-height:1.55">' + (rs.length ? '<div style="font-size:12px;font-weight:800;color:' + SUB + ';margin-bottom:2px">왜 담나</div>' + rs.map(function(t){ return '<div style="padding:2px 0">' + e(t) + '</div>'; }).join("") : '<div style="color:' + SUB + '">' + e(a.why) + '</div>') + '</div></div>'; });
       B.push('<!--K-->' + secT("⭐ 추천 종목·ETF " + pc(Mt) + (A ? " · " + man(A * Mt / 100) : "") + " — 왜 담나", f.color) + (cardsM[0] || ""));
       cardsM.slice(1).forEach(function(c){ B.push(c); });
-      B.push((f.mustPlan ? '<div style="display:flex;gap:12px;align-items:flex-start;margin-top:2px"><div style="flex:1.4;min-width:0">' + tbl({cols: ["칸", "기본 포트", "추천 종목 넣은 뒤", "금액"], rows: f.mustPlan.ins.concat(f.mustPlan.after).map(function(a){ return [a.name, a.k === "must" ? "–" : pc(a.was), pc(a.pct), A ? man(A * a.pct / 100) : "–"]; }).concat([["합계", "100%", "100%", A ? man(A) : "–"]])}, 11.5, {right: true, pad: "4px 8px", hl: function(r){ return r[0] === "합계" || r[0].indexOf("⭐") === 0; }}) + '</div>' +
+      B.push((f.mustPlan ? '<div style="display:flex;gap:12px;align-items:flex-start;margin-top:2px"><div style="flex:1.4;min-width:0">' + tbl({cols: ["칸", "기본 포트", "추천 종목 넣은 뒤", "금액"], rows: f.mustPlan.all.map(function(a){ return [a.name, a.k === "must" ? "–" : pc(a.was), pc(a.pct), A ? man(A * a.pct / 100) : "–"]; }).concat([["합계", "100%", "100%", A ? man(A) : "–"]])}, 11.5, {right: true, pad: "4px 8px", hl: function(r){ return r[0] === "합계" || r[0].indexOf("⭐") === 0; }}) + '</div>' +
           '<div style="flex:1;min-width:0">' + box('<div style="font-size:13px;font-weight:800;margin-bottom:6px">이렇게 맞춤</div><div style="font-size:12.5px;line-height:1.6">① 추천 종목 ' + pc(f.mustPlan.M) + '를 먼저 담음<br>② 기본 포트는 칸마다 원래 비율 그대로 ' + pc(r1(100 - f.mustPlan.M)) + '로 줄임<br>③ 합계 100%' + (RET[f.key] ? '<br>④ 위험자산 ' + pc(f.mustPlan.risky) + ' — 법정 한도 70% 안' : '') + '</div>' +
           (f.mustPlan.warn.length ? '<div style="font-size:12px;color:' + UP + ';margin-top:6px">⚠️ ' + f.mustPlan.warn.map(e).join(" · ") + '</div>' : ''), "padding:12px 13px") + '</div></div>' : '') +
         '<div style="font-size:12px;color:' + SUB + ';margin-top:6px;line-height:1.5">개별 종목은 한 회사 소식에 크게 흔들리므로 비중을 너무 키우지 않는 것을 권함</div>');
@@ -1036,7 +1041,7 @@
     var o = ST.opt[k] || {}, f = JSON.parse(JSON.stringify(f0));
     if (k === "gl_stock" && o.mode === "usd" && f.alt && f.alt.usd){ var u = f.alt.usd; for (var q in u) f[q] = u[q]; }
     var P = mustPlan(k, f); if (!P) return "";
-    var all = P.ins.concat(P.after.filter(function(a){ return a.pct > 0; })), A = amtOf(k);
+    var all = P.all.filter(function(a){ return a.pct > 0; }), A = amtOf(k);
     return '<div class="pp-bar">' + all.map(function(a){ return '<i style="width:' + a.pct + '%;background:' + a.color + '"></i>'; }).join("") + '</div>' +
       '<div class="pp-pt">' + all.map(function(a){ return '<span><b style="color:' + a.color + '">●</b> ' + e(a.name.replace(/^⭐ /, "⭐")) + ' <b>' + pc(a.pct) + '</b>' + (a.k !== "must" && a.was !== a.pct ? ' <s>' + pc(a.was) + '</s>' : '') + '</span>'; }).join("") + '</div>' +
       '<div class="pp-ps">⭐ 지정 <b>' + pc(P.M) + '</b> + 기본 포트 <b>' + pc(r1(100 - P.M)) + '</b> = <b>100%</b>' + (A ? ' · 지정 금액 ' + man(A * P.M / 100) : '') + (RET[k] ? ' · 위험자산 ' + pc(P.risky) + ' / 한도 70%' : '') + '</div>' +
