@@ -1517,7 +1517,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261029M";
+var APPV = "20261029N";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1602,7 +1602,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="simple.js?v=18"></script>
 <script defer src="pdfx.js?v=9"></script>
 <script defer src="honest.js?v=1"></script>
-<script defer src="up10.js?v=25"></script>
+<script defer src="up10.js?v=26"></script>
 <script defer src="nav2.js?v=31"></script>
 <script defer src="clamp.js?v=5"></script>
 <script defer src="ticker.js?v=3"></script>

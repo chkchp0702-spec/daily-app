@@ -55,7 +55,9 @@ def events(d):
     ec = jl(os.path.join(X, "earn_cal.json"), {}) or {}
     soon = [x for x in ec.get("items") or [] if x.get("kind") == "실적" and x.get("d", "") <= (NOW.date() + dt.timedelta(days=1)).isoformat()]
     if soon:
-        ev.append("실적 " + ", ".join(x["n"][:10] for x in soon[:3]))
+        # 🩺 10/29 「실적 Blackbaud,, SIMPLEX HL, Everforth,」 — 회사 이름 뒤 「, Inc.」를 10자로 자르다 쉼표가 남던 것
+        nm = [re.split(r",| Inc\b| Corp\b| Co\.?,? Ltd", str(x.get("n") or ""))[0].strip()[:14].strip() for x in soon[:3]]
+        ev.append("실적 " + ", ".join(n for n in nm if n))
     return ev
 
 
@@ -200,6 +202,8 @@ def main():
     hh, mi = NOW.hour, NOW.minute
     live = intraday(d) if NOW.weekday() < 5 and (9 <= hh < 15 or (hh == 15 and mi <= 40)) else None
     if live:
+        # 🩺 10/29 장중엔 아침 한 줄의 코스피 숫자는 어제 것 — 「어제」를 붙여 오늘 숫자로 안 보이게
+        one = " ".join(("어제 " + x if re.match(r"코스피|코스닥", x) else x) for x in re.split(r"(?<=[.!?])\s+", one) if x)
         out = {"mode": "장중", "asof": f"{TODAY} {live['t']}", "label": f"{live['t']} 장중", "regime": reg, "one": one, "talk": live["talk"], "events": events(d)}
     else:
         close = NOW.weekday() < 5 and hh >= 15
@@ -210,6 +214,10 @@ def main():
             ix = {x["name"]: x for x in L["index"]}
             ks = ix.get("코스피") or {}
             talk = [f"한국 마감: 코스피 {ks.get('last', 0):,.0f}({sg(ks.get('chg'))}) · 코스닥 {sg((ix.get('코스닥') or {}).get('chg'))} · 오른 종목 {round((L.get('up') or 0) / (L.get('total') or 1) * 100)}%"] + [x for x in kk if not x.startswith("한국")][:2]
+        if lab == "마감" and L.get("index"):
+            # 🩺 10/29 아침 한 줄(어제 「코스피 6,012(+6.6%)」)이 오늘 마감 −1.2% 옆에 그대로 나와 오늘 숫자처럼 보이던 것 → 코스피·코스닥 문장은 오늘 마감으로 바꿈
+            keep = [x for x in re.split(r"(?<=[.!?])\s+", one) if x and not re.search(r"코스피|코스닥", x)]
+            one = (f"코스피 {ks.get('last', 0):,.0f}({sg(ks.get('chg'))}) 마감. " + " ".join(keep)).strip()[:110]
         out = {"mode": lab, "asof": f"{TODAY} {NOW.strftime('%H:%M')}", "label": f"{d.get('date', TODAY)[5:].replace('-', '/')} {lab}", "regime": reg, "one": one, "talk": talk, "events": events(d)}
     try:
         out["advice"] = advice(d)

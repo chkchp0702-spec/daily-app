@@ -20,11 +20,44 @@ APP = "https://chkchp0702-spec.github.io/daily-app/"
 MSR = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/"
 SS = "https://raw.githubusercontent.com/chkchp0702-spec/stock-screener/main/"
 DA = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/main/"
-OUT = Path("archive/x/health.json")
+OUT = Path(os.environ.get("HEALTH_OUT", "archive/x/health.json"))
 TABS = ["home", "market", "port", "score", "whale", "cup", "gap", "sector", "accum", "onepager", "danta", "alarm", "idea", "feed"]
+SHOTS = Path(os.environ.get("HEALTH_SHOTS", "shots"))      # 🩺 10/29 탭마다 첫 두 화면 사진 → health-shots 브랜치 (자가 업그레이드가 눈으로 봄)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools"))
+import deep_check as DC   # noqa: E402
+
+
+def all_tabs():
+    """🩺 10/29: 아래 탭 묶음(nav2.js GROUPS)의 모든 탭 + 숨은 탭 — 새 탭이 생기면 자동으로 검사 (전엔 14개만 봐서 상품·제안서·운세·확률·거르기는 검사 밖이었음)"""
+    try:
+        here = os.path.dirname(os.path.abspath(__file__))
+        g = open(os.path.join(here, "nav2.js"), encoding="utf-8").read().split("var GROUPS", 1)[1].split("];", 1)[0]
+        ts = [t for arr in re.findall(r"tabs:\s*\[([^\]]*)\]", g) for t in re.findall(r'"(\w+)"', arr)]
+    except Exception:
+        ts = []
+    out = []
+    for t in ts + TABS:
+        if t not in out: out.append(t)
+    return out
+
+
+LOCAL = os.environ.get("HEALTH_LOCAL")   # 🩺 10/29 인터넷이 막힌 작업 환경(자가 업그레이드 세션)에서도 같은 검진: 옆에 clone 한 저장소 파일로
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ROOTS = {MSR: os.path.join(os.path.dirname(_HERE), "market-strategy-report") + "/", SS: os.path.join(os.path.dirname(_HERE), "stock-screener") + "/", DA: _HERE + "/", APP: _HERE + "/"}
+
+
+def local_path(url):
+    for pre, root in _ROOTS.items():
+        if url.startswith(pre):
+            f = root + (url[len(pre):].split("?")[0].split("#")[0] or "index.html")
+            return f if os.path.isfile(f) else None
+    return False
 
 
 def web(url, t=40):
+    if LOCAL:
+        f = local_path(url)
+        return open(f, encoding="utf-8", errors="ignore").read() if f else None
     try:
         with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "ch-health"}), timeout=t) as r:
             return r.read().decode("utf-8", "ignore")
@@ -94,11 +127,24 @@ def app_checks():
         probs.append(f"버전 짝 검사 실패: {ex}")
     with sync_playwright() as p:
         b = p.chromium.launch()
-        ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2)
+        ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, service_workers="block")
         ctx.add_init_script("try{localStorage.setItem('userName','건강검진')}catch(e){}")
-        ctx.route(re.compile(r"https://ntfy\.sh/.*"), lambda r: r.abort())      # 검사 중 알림·사용 기록 안 보냄
+        ctx.route(re.compile(r"https://ntfy\.sh/.*"), lambda r: r.abort())
+        if LOCAL:
+            def _lr(r):
+                f = local_path(r.request.url.replace("refs/heads/main", "main"))
+                if f is False: return r.fulfill(status=404, body="")
+                return r.fulfill(path=f) if f else r.fulfill(status=404, body="")
+            ctx.route("**/*", _lr)      # 검사 중 알림·사용 기록 안 보냄
         retried = []
-        for tab in TABS:
+        tabs = all_tabs(); texts, lints = {}, {}
+        alltabs = list(tabs)
+        if os.environ.get("HEALTH_TABS"): tabs = [t for t in tabs if t in os.environ["HEALTH_TABS"].split(",")]   # 시험할 때만: 몇 탭만
+        SHOTS.mkdir(exist_ok=True)
+        try: kn = list((json.loads(web(MSR + "market/kick.json") or "{}").get("src_names") or {}).keys())
+        except Exception: kn = []
+        ids = sorted(set(kn) | {"nh52", "pead", "dip", "trend", "cust", "ins", "earn", "maxcut", "frog", "agree", "nonews", "pbskip", "krgap", "cup_eye", "lead", "focus"})
+        for tab in tabs:
             pg = ctx.new_page()
             errs = []
             pg.on("pageerror", lambda e, L=errs: L.append(str(e)[:160]))
@@ -107,12 +153,12 @@ def app_checks():
             try:
                 try:
                     pg.goto(APP + "#" + tab, wait_until="domcontentloaded", timeout=45000)
-                    pg.wait_for_selector("#main .card, #main .empty", timeout=30000)
+                    pg.wait_for_function("(()=>{var m=document.getElementById('main');return m&&!m.querySelector('.loading')&&(m.innerText||'').length>40})()", timeout=30000)
                 except Exception:
                     # 10/21: 한 번 시간초과(10/19·10/21 #whale — 배포·네트워크 순간 끊김)는 새로 열어 한 번만 더 봄. 두 번 다 안 열리면 문제로 셈
                     t0 = time.time()
                     pg.goto(APP + "?r=" + str(int(t0)) + "#" + tab, wait_until="domcontentloaded", timeout=45000)
-                    pg.wait_for_selector("#main .card, #main .empty", timeout=30000)
+                    pg.wait_for_function("(()=>{var m=document.getElementById('main');return m&&!m.querySelector('.loading')&&(m.innerText||'').length>40})()", timeout=30000)
                     retried.append(tab)
                 first = round(time.time() - t0, 1)
                 pg.wait_for_timeout(4000)
@@ -122,9 +168,28 @@ def app_checks():
                           bad: (t.match(/못 불러왔|아직 안 올라왔|자료 준비 중|undefined|NaN%/g) || []).slice(0, 4),
                           loading: document.querySelectorAll('#main .loading').length};
                 }""")
+                # 🩺 10/29 내용 검사 · 화면 글 · 사진
+                texts[tab] = pg.evaluate("(document.getElementById('main')||{}).innerText||''")
+                lints[tab] = pg.evaluate(DC.LINT_JS, {"ids": ids, "bad": DC.BAD_WORDS, "glitch": DC.GLITCH, "tabs": alltabs, "en": tab in ("feed", "onepager", "market", "sector")})
+                for x in DC.lint_probs(tab, lints[tab]):
+                    if not (info["bad"] and "화면에" in x): probs.append(x)
+                if tab == "home":   # 🧒 인사 화면(5초)이 안 사라지면 앱을 못 씀
+                    pg.wait_for_timeout(3500)
+                    if pg.evaluate("(()=>{var s=document.getElementById('kidsplash');return !!(s&&s.isConnected&&getComputedStyle(s).opacity>0.1)})()"):
+                        probs.append("#home 🧒 인사 화면이 7초 넘게 안 사라짐")
+                pg.evaluate("(()=>{var s=document.getElementById('kidsplash');if(s)s.remove()})()")
+                try:
+                    # 휴대폰에서 보는 그대로 첫 화면·두 번째 화면 (전체 캡처는 아래 고정 메뉴가 가운데 찍힘)
+                    pg.evaluate("window.scrollTo(0,0)"); pg.wait_for_timeout(300)
+                    pg.screenshot(path=str(SHOTS / f"{tab}_1.jpg"), type="jpeg", quality=55)
+                    pg.evaluate("window.scrollTo(0,780)"); pg.wait_for_timeout(500)
+                    pg.screenshot(path=str(SHOTS / f"{tab}_2.jpg"), type="jpeg", quality=55)
+                except Exception:
+                    pass
             except Exception as e:
                 first, info = None, {"cards": 0, "len": 0, "bad": ["열기 실패: " + str(e)[:80]], "loading": 0}
             r = {"tab": tab, "s": first, **info, "errs": errs[:3]}
+            print("  탭", tab, first, flush=True)
             res.append(r)
             if errs:
                 probs.append(f"#{tab} 오류: {errs[0][:80]}")
@@ -139,7 +204,7 @@ def app_checks():
         # 10/21: 홈 첫 화면 정리(673f9cd 「🧹 홈 더 줄임」)로 킥·성적표·종목 칸 모양이 바뀜 → 새 칸으로
         for start, sel, want in [("home", '#hmbody [data-goto="port~pokick"]', ("port", "pokick")), ("home", '#hmbody a[data-goto="score"]', ("score", None)),
                                  ("home", '#hmbody [data-op]', ("onepager", None)), ("score", '.sc-c[data-goto="market~mkfo"] .sc-h b', ("market", "mkfo")),
-                                 ("home", '#bnav button[data-g="sig"]', (("whale", "cup", "gap", "accum", "danta"), None)), ("market", '#tabs .tab[data-k="sector"]', ("sector", None)), ("home", '.hm-big [data-goto="port~poconc"]', ("port", "poconc"))]:
+                                 ("home", '#bnav button[data-g="sig"]', (("whale", "cup", "gap", "screen", "sigmore", "accum", "danta"), None)), ("market", '#tabs .tab[data-k="sector"]', ("sector", None)), ("home", '.hm-big [data-goto="port~poconc"]', ("port", "poconc"))]:
             pg = ctx.new_page(); pg.on("dialog", lambda d: d.dismiss())
             try:
                 pg.goto(APP + "?h=" + str(int(time.time())) + "#" + start, wait_until="domcontentloaded", timeout=45000)
@@ -161,9 +226,61 @@ def app_checks():
             if not ok:
                 probs.append(f"클릭 연동 실패: #{start} 「{sel}」 → {wn} 기대, 실제 {got}")
             pg.close()
+        # 🩺 10/29 ③ 모든 탭 버튼 다 눌러 보기
+        sw = []
+        for tab in tabs:
+            pg = ctx.new_page(); pg.on("dialog", lambda d: d.dismiss())
+            try:
+                print("  버튼 점검", tab, flush=True)
+                r = DC.sweep(pg, APP + "?s=" + str(int(time.time())) + "#" + tab, tab)
+                sw.append(r); probs += DC.sweep_probs(r)
+            except Exception as e:
+                sw.append({"tab": tab, "fail": str(e)[:80]})
+            pg.close()
+        res.append({"tab": "버튼 다 눌러 보기", "sweep": sw, "buttons": sum(x.get("buttons", 0) for x in sw)})
         b.close()
+    probs += anchor_check(lints)
+    # 🩺 10/29 ② 화면 숫자 ↔ 원래 자료
+    src = {}
+    for k, u in (("home", MSR + "market/home.json"), ("port", MSR + "market/port.json"), ("kick", MSR + "market/kick.json"), ("live_kr", DA + "archive/x/live_kr.json")):
+        try: src[k] = json.loads(web(u) or "null")
+        except Exception: src[k] = None
+    fok, fp = DC.facts(texts, src, NOW)
+    probs += fp
+    res.append({"tab": "숫자 맞추기", "ok": fok, "bad": fp})
+    res.append({"tab": "내용 검사", "lint": {t: {k: v for k, v in L.items() if k not in ("ids_here", "anchors")} for t, L in lints.items()}})
     if retried: res.append({"tab": "재시도로 열림", "tabs": retried})
     return res, probs
+
+
+def anchor_check(lints):
+    """🩺 10/29 다른 탭 카드로 가는 단추(data-goto="port~pokick")를 앱 자신의 방식으로 눌러 그 칸이 실제로 열리나 (창·탭 어느 쪽이든)"""
+    from playwright.sync_api import sync_playwright
+    gs = sorted({g for L in lints.values() for g in L.get("anchors", []) if "~" in g})[:20]
+    probs = []
+    if not gs: return probs
+    with sync_playwright() as p:
+        b = p.chromium.launch(); ctx = b.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
+        ctx.route(re.compile(r"https://ntfy\.sh/.*"), lambda r: r.abort())
+        if LOCAL:
+            ctx.route("**/*", lambda r: (lambda f: r.fulfill(status=404, body="") if not f else r.fulfill(path=f))(local_path(r.request.url.replace("refs/heads/main", "main"))))
+        for g in gs:
+            k, a = g.split("~", 1)
+            pg = ctx.new_page(); pg.on("dialog", lambda d: d.dismiss())
+            try:
+                pg.goto(APP + "?a=" + str(int(time.time())) + "#home", wait_until="domcontentloaded", timeout=45000); pg.wait_for_timeout(2500)
+                pg.evaluate("(g)=>{var s=document.getElementById('kidsplash');if(s)s.remove();var x=document.createElement('button');x.setAttribute('data-goto',g);x.textContent='검사';(document.getElementById('main')||document.body).appendChild(x);x.click();}", g)
+                ok = False
+                for _ in range(12):
+                    pg.wait_for_timeout(500)
+                    ok = pg.evaluate("""(a)=>{if(document.getElementById(a))return true;var pk=document.getElementById('peek'),f=pk&&pk.querySelector('iframe');try{return !!(f&&f.contentWindow.document.getElementById(a));}catch(e){return false;}}""", a)
+                    if ok: break
+                if not ok: probs.append(f"단추 「{g}」 눌러도 #{k} 「{a}」 칸이 안 열림")
+            except Exception as e:
+                probs.append(f"단추 「{g}」 검사 실패: {str(e)[:60]}")
+            pg.close()
+        b.close()
+    return probs
 
 
 def job_checks():
@@ -217,7 +334,7 @@ def main():
         app, p2 = app_checks()
     except Exception as e:
         app, p2 = [], [f"브라우저 검사 실패: {str(e)[:100]}"]
-    jobs, p3 = job_checks()
+    jobs, p3 = job_checks() if not LOCAL else ([], [])
     probs = p1 + p2 + p3
     fixed = week_fixed()
     out = {"at": NOW.strftime("%Y-%m-%d %H:%M"), "ok": not probs, "problems": probs, "data": data, "app": app, "jobs": jobs, "week_fixed": fixed,
@@ -225,6 +342,7 @@ def main():
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps({"ok": out["ok"], "problems": probs}, ensure_ascii=False, indent=1))
+    if LOCAL: return
     sunday = NOW.weekday() == 6
     urgent = [x for x in probs if re.search(r"오류|실패|깨짐|못 받음", x)]   # 작업 실패도 바로 알림
     if urgent or sunday:                     # 평소엔 급한 것만, 일요일엔 늘 (이번 주 고친 것 포함)

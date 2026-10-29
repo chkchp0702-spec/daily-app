@@ -325,6 +325,9 @@
     Promise.all([J("scores.json"), getJSON("archive/x/prob.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).catch(function(){ return null; })]).then(function(a){ drawScore(a[0], a[1]); }).catch(function(){ var b = document.getElementById("scbody"); if (b) b.innerHTML = '<div class="empty"><div class="big">📊</div>성적표가 아직 안 올라왔어요.</div>'; });
   };
   function bar(w, l){ var n = (w || 0) + (l || 0); if (!n) return ''; return '<div class="sc-bar"><span class="w" style="flex:' + w + '">' + (w ? w : "") + '</span><span class="l" style="flex:' + l + '">' + (l ? l : "") + '</span></div>'; }
+  /* 🩺 10/29 성적표 ⚡ 신호별에 「nh52·pead·cust·ins·earn·maxcut·frog」 영어 내부 이름이 그대로 보이던 것 — 건강검진 「영어 내부 이름」 검사로 찾음 */
+  var SIGK = {cup: "컵", gap: "갭", accum: "매집", whale: "고래", focus: "집중", lead: "선행", nh52: "52주 신고가", pead: "실적 표류", dip: "급락 반등", trend: "추세",
+    cust: "고객사 따라", ins: "내부자 매수", earn: "실적 갭", maxcut: "복권 거름망", frog: "개구리 갭", agree: "신호 겹침", nonews: "뉴스 없는 갭", pbskip: "눌림 안 온 갭", krgap: "한국 돌파 갭", cup_eye: "컵(눈 검사)"};
   function drawScore(S, PB){
     var b = document.getElementById("scbody"); if (!b) return;
     /* 🎲 10/21: 홈 첫 카드의 「아직 동전보다 못함」 경고·적중률은 여기로 (전면엔 말로만) */
@@ -344,7 +347,7 @@
       if (r.k === "report" && r.cal && r.cal.n) body += '<div class="sc-cal"><b>🎯 확률 채점 ' + r.cal.n + '건 · 브라이어 ' + r.cal.brier + ' <span class="mut">(0 완벽 · 0.25 동전)</span> · ' + e(r.cal.tone || "") + '</b>' +
         (r.cal.cats || []).map(function(c){ return '<span class="' + (c.ok ? "ok" : "") + '">' + e(c.k) + ' ' + c.rate + '% <small>' + c.n + '건</small>' + (c.ok ? ' ✓' : '') + '</span>'; }).join("") +
         '<small>' + e(r.cal.gate || "") + ' · ✓ = 비중을 바꿔도 되는 분야</small></div>';
-      if (r.k === "kick" && r.sig) body += '<div class="sc-sig">' + r.sig.map(function(x){ return '<div class="' + (x.shadow ? "sh" : x.trial ? "tr" : x.on ? "on" : "off") + '"><b>' + e(x.tag) + ' ' + e({cup: "컵", gap: "갭", accum: "매집", whale: "고래", focus: "집중", lead: "선행"}[x.k] || x.k) + '</b>' +
+      if (r.k === "kick" && r.sig) body += '<div class="sc-sig">' + r.sig.map(function(x){ return '<div class="' + (x.shadow ? "sh" : x.trial ? "tr" : x.on ? "on" : "off") + '"><b>' + e(x.tag) + ' ' + e(SIGK[x.k] || x.name || x.k) + '</b>' +
         '<small>' + (x.shadow ? "👻 그림자 " : x.trial ? "🧪 시험 " : x.on ? "✓ 킥에 들어감 " : "⏳ 대기 ") + (x.n != null ? x.n + "건" : "") + (x.avg != null ? " · 평균 " + sg(x.avg, 1) : "") + (x.pf ? " · 손익비 " + x.pf : "") + '</small>' +
         (window.HON ? '<div class="sc-hon">' + (x.h_n ? HON.chip(x.h_avg, {n: x.h_n, pf: x.h_pf, basis: x.h_basis, oos: x.h_oos}) + HON.tags(x) : '') + (x.k === "whale" ? HON.whale(x) : '') + '</div>' : '') + '</div>'; }).join("") + '</div>' +
         (r.honest_ret != null && window.HON ? '<div class="sc-hon">⚡ 킥 포트 전체 ' + HON.chip(r.honest_ret, {d: 2, note: r.honest_note}) + '</div>' : '');
