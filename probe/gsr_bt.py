@@ -74,3 +74,36 @@ for mk, cfg in prob.MK.items():
         print(mk, fn, json.dumps(r, ensure_ascii=False))
     out[mk] = R
 json.dump(out, open("probe/gsr_bt.json", "w"), ensure_ascii=False, indent=1)
+
+
+# ── 교차 로지스틱(겹침 공정 확인): 기존 꼬리 더미(구리/금·달러·S&P 5일 각 2) vs + 금/은 5일 ≥90 더미 · 앞에서 맞춰 뒤 채점, 뒤에서 맞춰 앞 채점
+def logit_fit(X, y, l2=1.0, it=200):
+    w = np.zeros(X.shape[1])
+    for _ in range(it):
+        p = 1 / (1 + np.exp(-X @ w)); g = X.T @ (p - y) / len(y) + l2 * np.r_[0, w[1:]] / len(y)
+        Hs = (X * (p * (1 - p))[:, None]).T @ X / len(y) + np.eye(X.shape[1]) * l2 / len(y)
+        w -= np.linalg.solve(Hs, g)
+    return w
+X_out = {}
+for mk, cfg in prob.MK.items():
+    d = prob.feats(H[cfg["ix"]]); d = d[d.index >= "2001-01-01"].copy()
+    A = (lambda s: prob_x.align(prob_x.rank252(s), d.index)) if mk != "US" else (lambda s: prob_x.rank252(s).reindex(d.index).ffill())
+    rd = A(np.log(dx).diff(5)); rs = A(np.log(sp).diff(5)); rc = A(cug.diff(5)); rg = A(gsr.diff(5))
+    D = pd.DataFrame({"c": 1.0, "ch": rc >= .9, "cl": rc <= .1, "dh": rd >= .9, "dl": rd <= .1, "sh": rs >= .9, "sl": rs <= .1, "g": rg >= .9}, index=d.index).astype(float)
+    ok = rd.notna() & rs.notna() & rc.notna() & rg.notna() & (d.index >= "2006-01-01")
+    R = {}
+    for ycol in ("y1", "y5"):
+        m = ok & d[ycol].notna(); idx = d.index[m]; mid = idx[len(idx) // 2]
+        y = d.loc[m, ycol].values.astype(float); Xa = D[m].values
+        a, b = idx < mid, idx >= mid
+        r = {}
+        for nm, tr, te in (("앞→뒤", a, b), ("뒤→앞", b, a)):
+            s = {}
+            for k, cols in (("기존", slice(0, 7)), ("기존+금은", slice(0, 8))):
+                w = logit_fit(Xa[tr][:, cols], y[tr]); p = 1 / (1 + np.exp(-Xa[te][:, cols] @ w))
+                s[k] = round(float(((p - y[te]) ** 2).mean()), 5)
+                if k == "기존+금은": s["금은계수"] = round(float(w[-1]), 3)
+            r[nm] = s
+        R[ycol] = r
+    print("교차", mk, json.dumps(R, ensure_ascii=False)); X_out[mk] = R
+json.dump({"tab": out, "cross": X_out}, open("probe/gsr_bt.json", "w"), ensure_ascii=False, indent=1)
