@@ -203,6 +203,7 @@
       ".tr-hero .tw{position:absolute;border-radius:50%;background:#fff;animation:trtw 2.8s ease-in-out infinite}@keyframes trtw{0%,100%{opacity:.15}50%{opacity:.9}}",
       ".tr-hero h2{margin:0 0 4px;font-size:20px;letter-spacing:-.4px;color:#ffe7a8}.tr-hero p{margin:0;font-size:13px;opacity:.85}",
       ".tr-q{width:100%;box-sizing:border-box;min-height:74px;border-radius:14px;border:1.5px solid #c9a22766;background:rgba(255,255,255,.06);color:#fff;font:inherit;font-size:16px;padding:12px;margin-top:12px;resize:none}",
+      ".tr-q{font-size:16px!important;line-height:1.5;caret-color:#ffe7a8;-webkit-user-select:text;user-select:text;outline:none;transition:border-color .2s,box-shadow .2s;overflow-y:auto}.tr-q:focus{border-color:#ffe08a;box-shadow:0 0 0 3px rgba(255,224,138,.18)}",
       ".tr-q::placeholder{color:#cfc4ec99}.tr-ex{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;scrollbar-width:none}.tr-ex::-webkit-scrollbar{display:none}",
       ".tr-ex button{flex:none;border:1px solid #c9a22755;background:rgba(255,255,255,.07);color:#f3e9d2;border-radius:16px;padding:6px 11px;font:inherit;font-size:12.5px;cursor:pointer}",
       ".tr-read{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.tr-read span{background:rgba(201,162,39,.18);border:1px solid #c9a22766;color:#ffe7a8;border-radius:14px;padding:4px 10px;font-size:12px;font-weight:700}",
@@ -249,37 +250,56 @@
     var R = root(); if (!R) return; css();
     if (!DECK){ R.innerHTML = '<div class="loading">카드를 섞는 중…</div>'; load().then(render, function(){ R.innerHTML = '<div class="card">카드 자료를 받지 못했어요. 인터넷 연결을 확인하고 다시 열어 주세요.</div>'; }); return; }
     if (ST.res) return renderResult();
+    // 10/29 사용자 「질문칸에 글씨 입력이 잘 안 돼 · 어색해」 — 예전엔 글자를 칠 때마다 화면 전체를 새로 그려 입력칸이 바뀌면서 한글 조합이 끊기고 커서가 튐
+    //   → 입력칸(위 카드)은 한 번만 그리고, 아래(주제·펼치기·카드)만 따로 다시 그림. 한글 조합 중에는 아무것도 안 건드림
+    var h = '<div class="tr-hero">' + tw(16, "h") + '<h2>🃏 타로 — 물어보세요</h2><p>질문을 적으면 주제를 읽고, 그 질문에 맞춰 카드를 풀어 드려요.</p>' +
+      '<textarea class="tr-q" id="trQ" maxlength="120" rows="2" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="예) 삼성전자 지금 사도 될까?&#10;예) 그 사람이랑 다시 잘 될까?">' + e(ST.q) + '</textarea>' +
+      '<div class="tr-ex">' + EX.map(function(x){ return '<button type="button" data-ex="' + e(x[1]) + '">' + x[0] + ' ' + e(x[1]) + '</button>'; }).join("") + '</div>' +
+      '<div class="tr-read" id="trRead"></div></div><div id="trBelow"></div>' +
+      '<p class="sj-note">🃏 질문 읽기 · 해석은 모두 휴대폰 안에서 해요(인터넷 · API 비용 없음). 카드 그림은 1909년 라이더-웨이트 타로(저작권 만료)예요. 재미와 자기 성찰용이고, 투자 · 건강 · 법률 결정의 근거가 아니에요.</p>';
+    R.innerHTML = h; bindTop(); renderBelow();
+  }
+  function renderBelow(){
+    var R = root(), B = R && R.querySelector("#trBelow"); if (!B) return;
     var Q = readQ(ST.q); if (ST.topic) Q.topic = ST.topic; ST.Q = Q;
     var spId = ST.sp || suggest(Q), sp = spOf(spId), rec = suggest(Q);
-    var h = '<div class="tr-hero">' + tw(16, "h") + '<h2>🃏 타로 — 물어보세요</h2><p>질문을 적으면 주제를 읽고, 그 질문에 맞춰 카드를 풀어 드려요.</p>' +
-      '<textarea class="tr-q" id="trQ" maxlength="120" placeholder="예) 삼성전자 지금 사도 될까?\n예) 그 사람이랑 다시 잘 될까?">' + e(ST.q) + '</textarea>' +
-      '<div class="tr-ex">' + EX.map(function(x){ return '<button data-ex="' + e(x[1]) + '">' + x[0] + ' ' + e(x[1]) + '</button>'; }).join("") + '</div>' +
-      '<div class="tr-read" id="trRead"></div></div>';
-    h += '<div class="card"><h3>질문 주제 <small style="font-weight:500;color:var(--dim)">자동으로 골랐어요 · 눌러서 바꾸기</small></h3><div class="tr-tp" id="trTp">' +
-      ["일반"].concat(TOPICS.map(function(t){ return t.k; })).map(function(k){ return '<button data-t="' + k + '" class="' + (k === Q.topic ? "on" : "") + '">' + TOPIC_IC[k] + ' ' + (k === "결혼" ? "결혼·가족" : k === "직장" ? "직장·이직" : k === "시험" ? "시험·공부" : k === "이사" ? "이사·집" : k === "관계" ? "인간관계" : k) + '</button>'; }).join("") + '</div></div>';
-    h += '<div class="card"><h3>펼치는 방법 <button class="sj-btn g" id="trSpT" style="padding:6px 10px;font-size:12.5px">' + (ST.spOpen ? "접기 ▴" : "다른 방법 " + (SPREADS.length - 1) + "가지 ▾") + '</button></h3><div class="tr-sps">' + SPREADS.filter(function(s){ return ST.spOpen || s.id === spId; }).map(function(s){ return '<button class="tr-sp' + (s.id === spId ? " on" : "") + '" data-sp="' + s.id + '">' + (s.id === rec ? '<span class="rec">이 질문에 추천</span>' : "") + '<b>' + s.nm + '</b> <small style="display:inline;color:#c9a227">' + s.n + '장</small><small>' + s.note + '</small></button>'; }).join("") + '</div></div>';
+    var h = '<div class="card"><h3>질문 주제 <small style="font-weight:500;color:var(--dim)">자동으로 골랐어요 · 눌러서 바꾸기</small></h3><div class="tr-tp" id="trTp">' +
+      ["일반"].concat(TOPICS.map(function(t){ return t.k; })).map(function(k){ return '<button type="button" data-t="' + k + '" class="' + (k === Q.topic ? "on" : "") + '">' + TOPIC_IC[k] + ' ' + (k === "결혼" ? "결혼·가족" : k === "직장" ? "직장·이직" : k === "시험" ? "시험·공부" : k === "이사" ? "이사·집" : k === "관계" ? "인간관계" : k) + '</button>'; }).join("") + '</div></div>';
+    h += '<div class="card"><h3>펼치는 방법 <button type="button" class="sj-btn g" id="trSpT" style="padding:6px 10px;font-size:12.5px">' + (ST.spOpen ? "접기 ▴" : "다른 방법 " + (SPREADS.length - 1) + "가지 ▾") + '</button></h3><div class="tr-sps">' + SPREADS.filter(function(s){ return ST.spOpen || s.id === spId; }).map(function(s){ return '<button type="button" class="tr-sp' + (s.id === spId ? " on" : "") + '" data-sp="' + s.id + '">' + (s.id === rec ? '<span class="rec">이 질문에 추천</span>' : "") + '<b>' + s.nm + '</b> <small style="display:inline;color:#c9a227">' + s.n + '장</small><small>' + s.note + '</small></button>'; }).join("") + '</div></div>';
     if (!ST.table.length) ST.table = shuffle(DECK.slice()).slice(0, 24).map(function(c){ return {c: c, r: Math.random() < 0.38}; });
-    h += '<div class="card"><h3>마음속으로 질문을 떠올리며 ' + sp.n + '장 고르세요 <button class="sj-btn g" id="trShuf" style="padding:6px 10px;font-size:12.5px">🔀 섞기</button></h3>' +
+    h += '<div class="card"><h3>마음속으로 질문을 떠올리며 ' + sp.n + '장 고르세요 <button type="button" class="sj-btn g" id="trShuf" style="padding:6px 10px;font-size:12.5px">🔀 섞기</button></h3>' +
       '<div class="tr-slots">' + sp.pos.map(function(p, i){ var x = ST.picked[i]; return '<div class="tr-slot' + (x ? " on" : "") + '">' + (x ? "✓<br>" : "") + e(p.replace("A를", (Q.ch ? Q.ch[0] : "A") + "를").replace("B를", (Q.ch ? Q.ch[1] : "B") + "를")) + '</div>'; }).join("") + '</div>' +
-      '<div class="tr-table" id="trTable">' + ST.table.map(function(x, i){ var on = ST.picked.indexOf(x) >= 0; return '<button class="tr-back' + (on ? " gone" : "") + '" data-i="' + i + '" style="--dx:' + ((hash("x" + i) % 40) - 20) + 'px;--dy:' + ((hash("y" + i) % 24) - 12) + 'px;--dr:' + ((hash("r" + i) % 30) - 15) + 'deg" aria-label="카드"></button>'; }).join("") + '</div>' +
-      '<button class="tr-go" id="trGo" style="margin-top:14px"' + (ST.picked.length < sp.n ? " disabled" : "") + '>' + (ST.picked.length < sp.n ? (sp.n - ST.picked.length) + "장 더 골라 주세요" : "🔮 카드 펼치기") + '</button></div>';
+      '<div class="tr-table" id="trTable">' + ST.table.map(function(x, i){ var on = ST.picked.indexOf(x) >= 0; return '<button type="button" class="tr-back' + (on ? " gone" : "") + '" data-i="' + i + '" style="--dx:' + ((hash("x" + i) % 40) - 20) + 'px;--dy:' + ((hash("y" + i) % 24) - 12) + 'px;--dr:' + ((hash("r" + i) % 30) - 15) + 'deg" aria-label="카드"></button>'; }).join("") + '</div>' +
+      '<button type="button" class="tr-go" id="trGo" style="margin-top:14px"' + (ST.picked.length < sp.n ? " disabled" : "") + '>' + (ST.picked.length < sp.n ? (sp.n - ST.picked.length) + "장 더 골라 주세요" : "🔮 카드 펼치기") + '</button></div>';
     h += dailyCard() + history();
-    h += '<p class="sj-note">🃏 질문 읽기 · 해석은 모두 휴대폰 안에서 해요(인터넷 · API 비용 없음). 카드 그림은 1909년 라이더-웨이트 타로(저작권 만료)예요. 재미와 자기 성찰용이고, 투자 · 건강 · 법률 결정의 근거가 아니에요.</p>';
-    R.innerHTML = h; bind(); readChips();
+    B.innerHTML = h; bindBelow(); readChips();
   }
   function readChips(){
     var Q = readQ(ST.q); if (ST.topic) Q.topic = ST.topic; var b = document.getElementById("trRead"); if (!b) return;
     b.innerHTML = ST.q ? '<span>' + TOPIC_IC[Q.topic] + ' ' + Q.topic + ' 질문</span><span>' + KIND_KO[Q.kind] + '</span>' + (Q.ch ? '<span>⚖️ ' + e(Q.ch[0]) + ' vs ' + e(Q.ch[1]) + '</span>' : Q.obj ? '<span>🎯 ' + e(Q.obj) + '</span>' : "") : '<span>✍️ 질문을 적으면 여기서 읽어 드려요 (안 적어도 돼요)</span>';
   }
-  function bind(){
-    var R = root(), q = R.querySelector("#trQ"), tmr = null;
-    q.oninput = function(){ ST.q = q.value; clearTimeout(tmr); tmr = setTimeout(function(){ var before = ST.Q && ST.Q.topic, nq = readQ(ST.q);
-      if (!ST.topic && nq.topic !== before || (!ST.spLock && suggest(nq) !== ST.sp)){ if (!ST.spLock && ST.picked.length === 0) ST.sp = null; var pos = q.selectionStart; render(); var q2 = root().querySelector("#trQ"); q2.focus(); try { q2.setSelectionRange(pos, pos); } catch(x) {} } else readChips(); }, 450); };
-    [].forEach.call(R.querySelectorAll("[data-ex]"), function(b){ b.onclick = function(){ ST.q = b.dataset.ex; ST.topic = null; ST.sp = null; ST.spLock = false; ST.picked = []; render(); }; });
-    [].forEach.call(R.querySelectorAll("[data-t]"), function(b){ b.onclick = function(){ ST.topic = b.dataset.t; render(); }; });
-    [].forEach.call(R.querySelectorAll("[data-sp]"), function(b){ b.onclick = function(){ ST.sp = b.dataset.sp; ST.spLock = true; ST.spOpen = false; ST.picked = ST.picked.slice(0, spOf(ST.sp).n); render(); }; });
-    var spt = R.querySelector("#trSpT"); if (spt) spt.onclick = function(){ ST.spOpen = !ST.spOpen; render(); };
-    var sh = R.querySelector("#trShuf"); if (sh) sh.onclick = function(){ ST.table = []; ST.picked = []; render(); var t = root().querySelector("#trTable"); if (t){ t.classList.add("shuf"); try { navigator.vibrate && navigator.vibrate([10, 40, 10]); } catch(x) {} } };
+  function bindTop(){
+    var R = root(), q = R.querySelector("#trQ"), tmr = null, comp = false;
+    var settle = function(){                               // 입력이 멈추면: 읽은 결과 칩 + (주제·추천이 바뀌었으면) 아래만 다시
+      if (comp) return;
+      var before = ST.Q ? (ST.Q.topic + "|" + suggest(ST.Q)) : "", nq = readQ(ST.q); if (ST.topic) nq.topic = ST.topic;
+      readChips();
+      if (nq.topic + "|" + suggest(nq) !== before){ if (!ST.spLock && ST.picked.length === 0) ST.sp = null; renderBelow(); }
+    };
+    q.addEventListener("compositionstart", function(){ comp = true; });
+    q.addEventListener("compositionend", function(){ comp = false; ST.q = q.value; clearTimeout(tmr); tmr = setTimeout(settle, 350); });
+    q.addEventListener("input", function(){ ST.q = q.value; clearTimeout(tmr); tmr = setTimeout(settle, comp ? 900 : 350); });
+    q.addEventListener("keydown", function(ev){ if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing){ ev.preventDefault(); q.blur(); settle(); } });
+    q.addEventListener("blur", function(){ comp = false; ST.q = q.value; settle(); });
+    var grow = function(){ q.style.height = "auto"; q.style.height = Math.min(160, Math.max(74, q.scrollHeight + 2)) + "px"; }; q.addEventListener("input", grow); grow();
+    [].forEach.call(R.querySelectorAll("[data-ex]"), function(b){ b.onclick = function(){ ST.q = b.dataset.ex; q.value = ST.q; grow(); ST.topic = null; ST.sp = null; ST.spLock = false; ST.picked = []; renderBelow(); }; });
+  }
+  function bindBelow(){
+    var R = root();
+    [].forEach.call(R.querySelectorAll("[data-t]"), function(b){ b.onclick = function(){ ST.topic = b.dataset.t; renderBelow(); }; });
+    [].forEach.call(R.querySelectorAll("[data-sp]"), function(b){ b.onclick = function(){ ST.sp = b.dataset.sp; ST.spLock = true; ST.spOpen = false; ST.picked = ST.picked.slice(0, spOf(ST.sp).n); renderBelow(); }; });
+    var spt = R.querySelector("#trSpT"); if (spt) spt.onclick = function(){ ST.spOpen = !ST.spOpen; renderBelow(); };
+    var sh = R.querySelector("#trShuf"); if (sh) sh.onclick = function(){ ST.table = []; ST.picked = []; renderBelow(); var t = root().querySelector("#trTable"); if (t){ t.classList.add("shuf"); try { navigator.vibrate && navigator.vibrate([10, 40, 10]); } catch(x) {} } };
     [].forEach.call(R.querySelectorAll(".tr-back"), function(b){ b.onclick = function(){
       var sp = spOf(ST.sp || suggest(ST.Q)), x = ST.table[+b.dataset.i];
       if (ST.picked.indexOf(x) >= 0 || ST.picked.length >= sp.n) return;
