@@ -16,25 +16,54 @@
   var MCOL = ["#c9962b", "#b5651d", "#8e44ad", "#16a085", "#c0392b", "#2c3e50"];
   function opt(k){ ST.opt[k] = ST.opt[k] || {mode: "krw", must: []}; if (!ST.opt[k].must) ST.opt[k].must = []; return ST.opt[k]; }
   // 고른 방식(원화/환전) + 꼭 넣을 종목을 기본폼에 덧입힌 「이 고객용」 폼
+  var RET = {dc: 1, irp: 1};
+  var MCOL2 = ["#c9962b", "#b5651d", "#8e44ad", "#16a085", "#c0392b", "#2c3e50", "#d35400", "#7f8c8d", "#27ae60", "#9b59b6"];
+  function r1(v){ return Math.round(v * 10) / 10; }
+  // 지정 종목을 넣고 기본 포트를 깎은 결과 (화면 요약·제안서 둘 다 이걸 씀)
+  function mustPlan(k, f){
+    var o = ST.opt[k] || {}, must = (o.must || []).filter(function(m){ return m && m.name && +m.pct > 0; });
+    if (!must.length) return null;
+    var base = f.alloc, Rb = base.filter(function(a){ return a.kind === "위험"; }).reduce(function(s2, a){ return s2 + a.pct; }, 0), Sb = 100 - Rb;
+    var items = must.map(function(m){ return {m: m, pct: +m.pct, safe: !!(RET[k] && m.safe)}; });
+    var tot = items.reduce(function(s2, x){ return s2 + x.pct; }, 0), warn = [];
+    if (tot > 100){ items.forEach(function(x){ x.pct = x.pct * 100 / tot; }); warn.push("지정 비중 합이 100%를 넘어 100%로 맞춤"); }
+    var fr = {}, cut = {};
+    if (RET[k]){   // 위험 70% 한도: 위험형 지정은 위험 칸에서, 안전형 지정은 안전 칸에서 먼저 깎음
+      var T = Rb, Mr = items.filter(function(x){ return !x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0), Ms = items.filter(function(x){ return x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0);
+      if (Mr > T){ var sc0 = T / Mr; items.forEach(function(x){ if (!x.safe) x.pct *= sc0; }); warn.push("위험자산 지정이 법정 한도(" + T + "%)를 넘어 " + T + "%로 줄임"); Mr = T; }
+      var rb = Math.max(0, Math.min(T - Mr, 100 - Mr - Ms)), sb = Math.max(0, 100 - Mr - Ms - rb);
+      fr["위험"] = Rb ? rb / Rb : 0; fr["안전"] = Sb ? sb / Sb : 0;
+    } else {
+      var M = items.reduce(function(s2, x){ return s2 + x.pct; }, 0);
+      fr["위험"] = fr["안전"] = (100 - M) / 100;
+    }
+    var after = base.map(function(a){ var b = JSON.parse(JSON.stringify(a)); b.was = a.pct; b.pct = r1(a.pct * (fr[a.kind] != null ? fr[a.kind] : fr["위험"])); return b; });
+    var ins = items.map(function(x, i){ var m = x.m; return {k: "must", pct: r1(x.pct), was: 0, name: "⭐ " + m.name, inst: m.name + (m.mkt ? " · " + m.mkt : ""), code: m.code || null, kind: x.safe ? "안전" : "위험",
+      color: MCOL2[i % MCOL2.length], why: "고객님 요청으로 꼭 담는 " + (m.etf ? "ETF" : m.code ? "종목" : "상품") + (x.safe ? " (안전자산으로 분류)" : "")}; });
+    var all = ins.concat(after), diff = r1(100 - all.reduce(function(s2, a){ return s2 + a.pct; }, 0));
+    if (diff){ var big = after.slice().sort(function(a, b){ return b.pct - a.pct; })[0] || ins[0]; if (big) big.pct = r1(big.pct + diff); }
+    if (RET[k]){   // 반올림으로 70.1% 같은 것이 나오지 않게 — 넘친 만큼 위험 칸 → 안전 칸
+      var rk = r1(all.filter(function(a){ return a.kind === "위험"; }).reduce(function(s2, a){ return s2 + a.pct; }, 0)), ex = r1(rk - Rb);
+      if (ex > 0){ var pick = function(kd){ var c = after.filter(function(a){ return a.kind === kd && a.pct > 0; }); if (!c.length) c = all.filter(function(a){ return a.kind === kd; }); return c.sort(function(a, b){ return b.pct - a.pct; })[0]; }, br = pick("위험"), bs = pick("안전");
+        if (br && bs){ br.pct = r1(br.pct - ex); bs.pct = r1(bs.pct + ex); } }
+    }
+    return {ins: ins, after: after, fr: fr, warn: warn, M: r1(ins.reduce(function(s2, a){ return s2 + a.pct; }, 0)),
+            risky: r1(all.filter(function(a){ return a.kind === "위험"; }).reduce(function(s2, a){ return s2 + a.pct; }, 0))};
+  }
+  // 고른 방식(원화/환전) + 꼭 넣을 종목을 기본폼에 덧입힌 「이 고객용」 폼
   function formX(k){
     var f0 = form(k); if (!f0) return null;
     var o = ST.opt[k] || {}, f = JSON.parse(JSON.stringify(f0));
     if (k === "gl_stock" && o.mode === "usd" && f.alt && f.alt.usd){ var u = f.alt.usd; for (var q in u) f[q] = u[q]; }
-    var must = (o.must || []).filter(function(m){ return m && m.name && +m.pct > 0; });
-    if (!must.length || !EQ[k]) return f;
-    var R0 = f.alloc.filter(function(a){ return a.kind === "위험"; }).reduce(function(s2, a){ return s2 + a.pct; }, 0) || 1;
-    var want = must.reduce(function(s2, m){ return s2 + (+m.pct); }, 0), M = Math.min(want, R0 * 0.6), sc = M / (want || 1), fac = (R0 - M) / R0;
-    f.alloc.forEach(function(a){ if (a.kind === "위험") a.pct = Math.round(a.pct * fac * 10) / 10; });
-    (f.themes || []).forEach(function(t){ t.w = Math.round(t.w * fac * 10) / 10; });
-    var ins = must.map(function(m, i){ return {k: "must", pct: Math.round(m.pct * sc * 10) / 10, name: "⭐ " + m.name, inst: m.name + (m.mkt ? " · " + m.mkt : ""), code: m.code || null, kind: "위험", color: MCOL[i % MCOL.length],
-      why: "고객님 요청으로 꼭 담는 " + (m.etf ? "ETF" : "종목") }; });
-    var diff = Math.round((100 - f.alloc.concat(ins).reduce(function(s2, a){ return s2 + a.pct; }, 0)) * 10) / 10;
-    var big = f.alloc.filter(function(a){ return a.kind === "위험"; }).sort(function(a, b){ return b.pct - a.pct; })[0]; if (big) big.pct = Math.round((big.pct + diff) * 10) / 10;
-    f.alloc = ins.concat(f.alloc);
-    var Mt = Math.round(ins.reduce(function(s2, a){ return s2 + a.pct; }, 0) * 10) / 10;
-    f.must = ins; f.headline = "⭐ 고객 지정 " + pc(Mt) + " + " + f.headline;
-    f.points = ["⭐ 고객님이 꼭 원하신 " + ins.map(function(a){ return a.inst.split(" · ")[0]; }).join(" · ") + "을(를) 먼저 " + pc(Mt) + " 담고, 나머지 주식 칸을 같은 비율로 줄여 맞춤"].concat(f.points || []);
-    if (f.sim && f.sim.note) f.sim.note += " · ⭐ 고객 지정 종목은 과거 계산에서 빼고 제안 배분 기준";
+    if (!EQ[k]) return f;
+    var P = mustPlan(k, f); if (!P) return f;
+    var tf = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct, ta = (P.after.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
+    (f.themes || []).forEach(function(t){ t.w = r1(t.w * (tf ? ta / tf : 0)); });
+    f.alloc = P.ins.concat(P.after.filter(function(a){ return a.pct > 0; }));
+    f.must = P.ins; f.mustPlan = P;
+    f.headline = "⭐ 고객 지정 " + pc(P.M) + " + 기본 포트 " + pc(r1(100 - P.M)) + " — 기본 포트는 원래 비율 그대로 줄여 합계 100%로 맞춘 제안임";
+    f.points = ["⭐ 고객님이 꼭 원하신 " + P.ins.map(function(a){ return a.inst.split(" · ")[0] + " " + pc(a.pct); }).join(" · ") + "를 먼저 담고, 기본 포트는 원래 비율 그대로 " + pc(r1(100 - P.M)) + "로 줄여 합계 100%를 맞춤"].concat(RET[k] ? ["위험자산 합계 " + pc(P.risky) + " (법정 한도 70% 안)"] : []).concat(f.points || []);
+    if (f.sim && f.sim.note) f.sim.note += " · ⭐ 고객 지정 종목은 과거 계산에서 빼고 기본 포트 비율로 계산";
     return f;
   }
   var FONT = '"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR",sans-serif';
@@ -399,7 +428,10 @@
       B.push('<!--K-->' + secT("⭐ 고객님이 꼭 원하신 종목·ETF " + pc(Mt) + (A ? " · " + man(A * Mt / 100) : ""), f.color) +
         '<div style="display:flex;gap:10px;flex-wrap:wrap">' + f.must.map(function(a){ return '<div style="flex:1 1 30%;min-width:180px;border:1px solid ' + LINE + ';border-top:5px solid ' + a.color + ';border-radius:12px;padding:10px 12px;color:' + INK + '"><div style="font-size:15px;font-weight:800">' + e(a.inst.split(" · ")[0]) + '</div>' +
           '<div style="font-size:11.5px;color:' + SUB + '">' + e([a.code, a.inst.split(" · ")[1]].filter(Boolean).join(" · ") || "직접 입력") + '</div><div style="display:flex;justify-content:space-between;margin-top:6px"><b style="font-size:20px;color:' + a.color + '">' + pc(a.pct) + '</b>' + (A ? '<b style="font-size:15px;color:' + NAVY + '">' + man(A * a.pct / 100) + '</b>' : '') + '</div></div>'; }).join("") + '</div>' +
-        '<div style="font-size:12px;color:' + SUB + ';margin-top:6px;line-height:1.5">고객님 요청으로 먼저 담고 나머지 주식 칸을 같은 비율로 줄였음 · 개별 종목은 한 회사 소식에 크게 흔들리므로 비중을 너무 키우지 않는 것을 권함</div>');
+        (f.mustPlan ? '<div style="display:flex;gap:12px;align-items:flex-start;margin-top:10px"><div style="flex:1.4;min-width:0">' + tbl({cols: ["칸", "원래 기본 포트", "지정 넣은 뒤", "금액"], rows: f.mustPlan.ins.concat(f.mustPlan.after).map(function(a){ return [a.name, a.k === "must" ? "–" : pc(a.was), pc(a.pct), A ? man(A * a.pct / 100) : "–"]; }).concat([["합계", "100%", "100%", A ? man(A) : "–"]])}, 11.5, {right: true, pad: "4px 8px", hl: function(r){ return r[0] === "합계" || r[0].indexOf("⭐") === 0; }}) + '</div>' +
+          '<div style="flex:1;min-width:0">' + box('<div style="font-size:13px;font-weight:800;margin-bottom:6px">이렇게 맞춤</div><div style="font-size:12.5px;line-height:1.6">① 고객님이 정한 비중(' + pc(f.mustPlan.M) + ')을 먼저 담음<br>② 기본 포트는 칸마다 원래 비율 그대로 ' + pc(r1(100 - f.mustPlan.M)) + '로 줄임<br>③ 합계 100%' + (RET[f.key] ? '<br>④ 위험자산 ' + pc(f.mustPlan.risky) + ' — 법정 한도 70% 안' : '') + '</div>' +
+          (f.mustPlan.warn.length ? '<div style="font-size:12px;color:' + UP + ';margin-top:6px">⚠️ ' + f.mustPlan.warn.map(e).join(" · ") + '</div>' : ''), "padding:12px 13px") + '</div></div>' : '') +
+        '<div style="font-size:12px;color:' + SUB + ';margin-top:6px;line-height:1.5">개별 종목은 한 회사 소식에 크게 흔들리므로 비중을 너무 키우지 않는 것을 권함</div>');
     }
     if (f.taxbox && f.taxbox.length){ var usd = f.mode === "usd", f0 = form(f.key) || {}, other = usd ? f0 : (f0.alt || {}).usd || {};
       B.push('<!--K-->' + secT("💱 " + (usd ? "💵 환전해서 투자" : "💴 원화로 투자") + "하는 방식 — 세금·거래", f.color) + '<div style="display:flex;gap:12px">' +
@@ -892,13 +924,28 @@
     var o = opt(k), h2 = "";
     if (k === "gl_stock") h2 += '<div class="pp-ol">💱 해외 투자는 어떻게?</div><div class="pp-md">' +
       [["krw", "💴 원화로", "국내 상장 ETF · 환전 없음"], ["usd", "💵 환전해서", "미국 상장 ETF · 달러로"]].map(function(x){ return '<button type="button" data-md="' + x[0] + '" data-mk2="' + k + '"' + (o.mode === x[0] ? ' class="on"' : '') + '><b>' + x[1] + '</b><small>' + x[2] + '</small></button>'; }).join("") + '</div>';
-    var only = {pension: 1, dc: 1, irp: 1}[k];
-    h2 += '<div class="pp-ol">⭐ 꼭 넣을 종목·ETF <span class="mut">(고객 요청 · 있으면)</span></div>' +
-      (o.must || []).map(function(m, i){ return '<div class="pp-mu"><span class="pp-mn"><b>' + e(m.name) + '</b>' + (m.code ? ' <small>' + e(m.code) + (m.mkt ? " · " + e(m.mkt) : "") + '</small>' : '') + '</span>' +
+    var only = {pension: 1, dc: 1, irp: 1}[k], A = amtOf(k);
+    h2 += '<div class="pp-ol">⭐ 꼭 넣을 종목·ETF <span class="mut">(고객 요청 · 여러 개 가능)</span></div>' +
+      (o.must || []).map(function(m, i){ return '<div class="pp-mu"><span class="pp-mn"><b>' + e(m.name) + '</b>' + (m.code ? ' <small>' + e(m.code) + (m.mkt ? " · " + e(m.mkt) : "") + '</small>' : ' <small>직접 입력</small>') +
+        (A ? '<em class="pp-mw" id="ppmw_' + k + '_' + i + '">' + (+m.pct ? man(A * m.pct / 100) : "") + '</em>' : '') + '</span>' +
+        (RET[k] ? '<label class="pp-sf"><input type="checkbox" data-mf="' + k + '" data-mi="' + i + '"' + (m.safe ? ' checked' : '') + '>안전형</label>' : '') +
         '<input inputmode="decimal" data-mp="' + k + '" data-mi="' + i + '" value="' + e(m.pct) + '"><span>%</span><button type="button" data-mx="' + k + '" data-mi="' + i + '" aria-label="빼기">✕</button></div>'; }).join("") +
       '<div class="pp-ms"><input data-ms="' + k + '" placeholder="' + (only ? "예: KODEX 200, TIGER 미국배당다우존스" : k === "gl_stock" && o.mode === "usd" ? "예: 엔비디아, AAPL, SCHD" : "예: 삼성전자, SK하이닉스, KODEX 200") + '" autocomplete="off"><button type="button" data-ma="' + k + '">더하기</button></div><div class="pp-sg" id="ppsg_' + k + '"></div>' +
-      '<p class="pp-tip" style="margin:4px 0 0">' + (only ? "연금·퇴직연금 계좌는 국내 상장 ETF만 담을 수 있음 (개별 주식·해외 상장 불가)" : "넣은 만큼 나머지 주식 칸을 같은 비율로 줄여 맞춤 · 비중은 % (주식 칸의 60%까지)") + '</p>';
+      '<div class="pp-pl" id="pppl_' + k + '">' + planHTML(k) + '</div>' +
+      '<p class="pp-tip" style="margin:4px 0 0">' + (only ? "연금·퇴직연금 계좌는 국내 상장 ETF만 담을 수 있음 (개별 주식·해외 상장 불가)" + (RET[k] ? " · 채권형·TDF 등은 「안전형」에 체크하면 안전자산 칸에서 깎음" : "") : "넣은 % 만큼 기본 포트를 원래 비율 그대로 줄여 합계 100%를 맞춤") + '</p>';
     return '<div class="pp-op">' + h2 + '</div>';
+  }
+  // 지정 비중 → 기본 포트가 어떻게 줄어드는지 한눈에
+  function planHTML(k){
+    var f0 = form(k); if (!f0) return "";
+    var o = ST.opt[k] || {}, f = JSON.parse(JSON.stringify(f0));
+    if (k === "gl_stock" && o.mode === "usd" && f.alt && f.alt.usd){ var u = f.alt.usd; for (var q in u) f[q] = u[q]; }
+    var P = mustPlan(k, f); if (!P) return "";
+    var all = P.ins.concat(P.after.filter(function(a){ return a.pct > 0; })), A = amtOf(k);
+    return '<div class="pp-bar">' + all.map(function(a){ return '<i style="width:' + a.pct + '%;background:' + a.color + '"></i>'; }).join("") + '</div>' +
+      '<div class="pp-pt">' + all.map(function(a){ return '<span><b style="color:' + a.color + '">●</b> ' + e(a.name.replace(/^⭐ /, "⭐")) + ' <b>' + pc(a.pct) + '</b>' + (a.k !== "must" && a.was !== a.pct ? ' <s>' + pc(a.was) + '</s>' : '') + '</span>'; }).join("") + '</div>' +
+      '<div class="pp-ps">⭐ 지정 <b>' + pc(P.M) + '</b> + 기본 포트 <b>' + pc(r1(100 - P.M)) + '</b> = <b>100%</b>' + (A ? ' · 지정 금액 ' + man(A * P.M / 100) : '') + (RET[k] ? ' · 위험자산 ' + pc(P.risky) + ' / 한도 70%' : '') + '</div>' +
+      (P.warn.length ? '<div class="pp-pw">⚠️ ' + P.warn.map(e).join(" · ") + '</div>' : '');
   }
   var sgT = null;
   function suggest(k, q){
@@ -916,7 +963,9 @@
   function addMust(k, m){
     var o = opt(k); if (!m || !m.name) return;
     if ({pension: 1, dc: 1, irp: 1}[k] && ((m.mkt && m.mkt !== "한국") || m.etf === false)) toast("연금·퇴직연금은 국내 상장 ETF만 담을 수 있어요 — 확인 후 쓰세요");
-    o.must = (o.must || []).concat([{name: m.name, code: m.code || "", mkt: m.mkt || "", etf: !!m.etf, pct: 10}]).slice(0, 6); keep(); resetBtns();
+    if ((o.must || []).some(function(x){ return x.name === m.name && (x.code || "") === (m.code || ""); })){ toast("이미 넣은 종목이에요"); return; }
+    var safe = RET[k] && /채권|국채|회사채|TDF|금리|단기|머니마켓|MMF|CD/i.test(m.name);
+    o.must = (o.must || []).concat([{name: m.name, code: m.code || "", mkt: m.mkt || "", etf: !!m.etf, pct: 10, safe: safe}]).slice(0, 20); keep(); resetBtns();
     var y = window.scrollY; draw(); window.scrollTo(0, y);
   }
   function pickR(r){ return {name: r.name, code: r.sym.replace(/\.(KS|KQ)$/, ""), mkt: MKT[r.mkt] || r.mkt, etf: r.etf}; }
@@ -944,7 +993,10 @@
     var redraw = function(){ var y = window.scrollY; draw(); window.scrollTo(0, y); };
     [].forEach.call(w.querySelectorAll("[data-md]"), function(b){ b.onclick = function(){ opt(b.dataset.mk2).mode = b.dataset.md; keep(); resetBtns(); redraw(); }; });
     [].forEach.call(w.querySelectorAll("[data-mx]"), function(b){ b.onclick = function(){ opt(b.dataset.mx).must.splice(+b.dataset.mi, 1); keep(); resetBtns(); redraw(); }; });
-    [].forEach.call(w.querySelectorAll("[data-mp]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d.]/g, ""); if (v !== inp.value) inp.value = v; opt(inp.dataset.mp).must[+inp.dataset.mi].pct = +v || 0; keep(); preview(); }; });
+    var upPlan = function(k){ var pl = document.getElementById("pppl_" + k); if (pl) pl.innerHTML = planHTML(k); var A = amtOf(k);
+      (opt(k).must || []).forEach(function(m, i){ var mw = document.getElementById("ppmw_" + k + "_" + i); if (mw) mw.textContent = A && +m.pct ? man(A * m.pct / 100) : ""; }); };
+    [].forEach.call(w.querySelectorAll("[data-mp]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d.]/g, ""); if (v !== inp.value) inp.value = v; opt(inp.dataset.mp).must[+inp.dataset.mi].pct = +v || 0; keep(); resetBtns(); upPlan(inp.dataset.mp); preview(); }; });
+    [].forEach.call(w.querySelectorAll("[data-mf]"), function(cb){ cb.onchange = function(){ opt(cb.dataset.mf).must[+cb.dataset.mi].safe = cb.checked; keep(); resetBtns(); upPlan(cb.dataset.mf); preview(); }; });
     [].forEach.call(w.querySelectorAll("[data-ms]"), function(inp){ inp.oninput = function(){ suggest(inp.dataset.ms, inp.value.trim()); };
       inp.onkeydown = function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); var b2 = w.querySelector('[data-ma="' + inp.dataset.ms + '"]'); if (b2) b2.click(); } }; });
     [].forEach.call(w.querySelectorAll("[data-ma]"), function(b){ b.onclick = function(){ var k = b.dataset.ma, inp = w.querySelector('[data-ms="' + k + '"]'), v = inp && inp.value.trim(); if (!v) return;
@@ -955,7 +1007,8 @@
       try { navigator.clipboard.writeText(t).then(ok, function(){ fallback(); }); } catch(x) { fallback(); }
       function fallback(){ var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch(y) {} ta.remove(); } };
   }
-  function upAmt(k){ var s = document.getElementById("ppw_" + k); if (s) s.textContent = ST.amt[k] ? man(ST.amt[k] * 10000) : ""; var t = document.getElementById("pptot"); if (t) t.textContent = total() ? man(total()) : "–"; preview(); }
+  function upAmt(k){ try { var pl = document.getElementById("pppl_" + k); if (pl) pl.innerHTML = planHTML(k); (opt(k).must || []).forEach(function(m, i){ var mw = document.getElementById("ppmw_" + k + "_" + i); if (mw) mw.textContent = amtOf(k) && +m.pct ? man(amtOf(k) * m.pct / 100) : ""; }); } catch(x) {}
+    var s = document.getElementById("ppw_" + k); if (s) s.textContent = ST.amt[k] ? man(ST.amt[k] * 10000) : ""; var t = document.getElementById("pptot"); if (t) t.textContent = total() ? man(total()) : "–"; preview(); }
   var BTNL = {png: "📱 한 장 <small>카톡 전송용 그림</small>", pdf: "📄 풀버전 PDF <small>표지·시장·상품별 자세히 · 가장 안 깨짐</small>",
     ppt: "📊 PPT (고칠 수 있는 판) <small>맑은 고딕 · 글·표·차트를 PPT에서 직접 수정</small>", pptimg: "🖼️ PPT (안 깨지는 그림판) <small>PDF 그대로 한 쪽 = 한 장 · 어디서 열어도 똑같음</small>"};
   // 10/28 사용자 「PPT는 깨지더라 — 왜 깨지는지 설명 · 다른 AI 도구로 어떻게 고치면 좋은지 문구도」
@@ -1031,7 +1084,10 @@
     ".pp-op{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.pp-ol{font-size:12.5px;font-weight:800;margin:8px 0 5px}" +
     ".pp-md{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pp-md button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px 10px;font:inherit}" +
     ".pp-md button small{font-size:11px;color:var(--sub)}.pp-md button.on{border-color:var(--fc);box-shadow:inset 0 0 0 1px var(--fc)}" +
-    ".pp-mu{display:flex;align-items:center;gap:6px;margin:5px 0}.pp-mn{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pp-mn small{color:var(--sub)}" +
+    ".pp-mw{display:inline-block;margin-left:6px;font-style:normal;font-size:11.5px;color:var(--sub)}.pp-sf{display:flex;align-items:center;gap:3px;font-size:11.5px;color:var(--sub);flex:none}" +
+    ".pp-pl{margin:8px 0 2px}.pp-bar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--panel2)}.pp-bar i{display:block;height:100%}" +
+    ".pp-pt{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11.5px;margin-top:6px}.pp-pt s{color:var(--sub);font-size:10.5px}.pp-ps{font-size:12.5px;margin-top:6px}.pp-pw{font-size:12px;color:#ff7a66;margin-top:4px}" +
+    ".pp-mu{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin:6px 0;padding-bottom:6px;border-bottom:1px solid var(--line)}.pp-mn{flex:1 1 100%;min-width:0;font-size:13.5px;line-height:1.35}.pp-mu>.pp-mn+*{margin-left:auto}.pp-mn small{color:var(--sub)}" +
     ".pp-mu input{width:58px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;font-size:16px;padding:6px 8px;text-align:right}.pp-mu button{border:0;background:transparent;color:var(--sub);font-size:16px;padding:4px 6px}" +
     ".pp-ms{display:flex;gap:6px}.pp-ms input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:12px;color:var(--text);font:inherit;font-size:16px;padding:9px 11px}" +
     ".pp-ms button{flex:none;border:0;border-radius:12px;padding:0 14px;font:inherit;font-weight:800;background:var(--fc);color:#fff}" +
