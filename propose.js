@@ -1160,7 +1160,7 @@
   // ⚖️ 위험고지 · 심의필 칸 (10/29 사용자 「PB들이 누르면 내용을 확인하고 심의필을 받게」)
   function simCard(){
     var S = simState(), D = discOf(allModel(), true), n = 0, li = function(t){ return '<li><b>' + (++n) + '.</b> ' + e(t) + '</li>'; };
-    return '<section data-xc="1" class="card pp-sim"><details class="no-clp" data-xc="1" data-cz="done"' + (S.ok ? '' : ' open') + '><summary><span class="pp-sh">⚖️ 위험고지 · 심의필</span><span id="ppsimst" class="pp-chip ' + S.cls + '">' + S.t + '</span></summary>' +
+    return '<section data-xc="1" class="card pp-sim"><details class="no-clp" data-xc="1" data-cz="done"' + (S.ok ? '' : ' open') + '><summary><span class="pp-sh">⚖️ 위험고지 · 심의필' + jt(JOY.sim) + '</span><span id="ppsimst" class="pp-chip ' + S.cls + '">' + S.t + '</span></summary>' +
       '<div class="pp-hb no-clp" data-xc="1" data-cz="done">' +
       '<p id="ppsimwhy" class="pp-tip" style="margin:0 0 8px' + (S.why ? '' : ';display:none') + '">' + e(S.why) + '</p>' +
       '<ol class="pp-steps"><li><b>① 문구 확인</b><span>모든 제안서 맨 끝에 들어가는 위험고지 원문을 아래에서 읽어 봄</span></li>' +
@@ -1178,26 +1178,57 @@
   }
   function simUp(){ var S = simState(), c = document.getElementById("ppsimst"), w2 = document.getElementById("ppsimwhy");
     if (c){ c.className = "pp-chip " + S.cls; c.textContent = S.t; } if (w2){ w2.textContent = S.why; w2.style.display = S.why ? "" : "none"; } }
+  /* 🧒 10/29 사용자 「제안서 카테고리의 조이는 설명이 거의 없어」 — 카드 제목 옆 조이를 누르면 읽어 주는 글(p.note → nav2 가 설명 칸으로 옮기고 조이가 읽음)
+     · 칸 안 작은 제목(🎚·💱·⭐)과 ⚖️ 칸에는 data-tip 조이 · 숫자는 오늘 기본폼(proposal.json)에서 바로 읽음 */
+  function notes(L){ return L.filter(Boolean).map(function(t){ return '<p class="note">' + e(t) + '</p>'; }).join(""); }
+  function jt(tip){ return ' <span class="pp-jt" data-tip="' + e(tip) + '">ⓘ</span>'; }
+  var JOY = {
+    forms: function(){ var M = DATA.market || {};
+      return ["매일 아침 시황 리포트가 나오면 9가지 제안서 틀(기본폼)이 저절로 다시 만들어져요. 장중에도 매시간 시세를 넣어 새로 고쳐요.",
+        "🇺🇸 · 🇰🇷 칩은 지금 미국·한국 시장이 상승 추세(200일 평균선 위)인지예요. 지금은 미국 " + (M.us_up ? "상승 추세" : "조심") + " · 한국 " + (M.kr_up ? "상승 추세" : "회복 전") + "이라 주식 비중이 거기에 맞춰져 있어요.",
+        "주식·개인연금 폼은 시황 리포트 배분표(미국 지수 + 한국 + 시황 테마 + 금)를 그대로 따르고, DC·IRP는 위험자산 법정 한도 70% 안에서 같은 비율로 담아요.",
+        "국고채·미국채·브라질국채는 미래에셋이 지금 파는 채권 중 기간별로 세금 뗀 수익률이 가장 좋은 것을, ELS는 원금지급형 ELB에 지수형 ELS 2개를 섞어요.",
+        "카드를 누르면 고르기, 한 번 더 누르면 빼기예요. 여러 개를 함께 고르면 한 제안서에 같이 들어가요.",
+        "오늘 폼 한 줄씩:"].concat(DATA.forms.map(function(f){ var al = (f.alloc || []).filter(function(a){ return +a.pct > 0; });
+          return f.icon + " " + f.short + " — " + (EQ[f.key] ? al.map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" · ") : String(f.headline || "").replace(/ 제안임$/, "")); })); },
+    who: ["고객 이름은 표지와 인사말에만 들어가요. 이 휴대폰 밖(서버·동료 링크)으로는 나가지 않아요. 비워 두면 「고객님」으로 나와요.",
+      "제안자 이름과 소속은 한 번 넣으면 이 휴대폰이 기억해서 다음부터 자동으로 들어가요.",
+      "직함(PB·팀장·지점장 등)을 안 쓰면 이름 뒤에 「PB」를 붙여 줘요."],
+    amt: ["상품마다 금액을 만원 단위로 적거나 칩(1천만~3억)을 눌러요. 그 금액으로 종목별 금액·이자·위기 때 줄어드는 돈이 원 단위로 계산돼요.",
+      "🎚 위험 정도(주식·연금): ⚖️ 보통 = 오늘 기본폼 그대로 · 🛡 안전 = 위험자산의 절반을 현금성(CD금리)으로 · 🔥 적극 = 안전자산의 절반을 위험자산으로(DC·IRP는 70% 한도 안). 고른 단계가 한 장·PDF·PPT에 그대로 들어가요.",
+      "💱 국내+해외 주식은 원화(국내 상장 ETF)로 할지, 환전해서 미국 상장 ETF로 할지 고를 수 있어요. 세금 방식이 달라요.",
+      "⭐ 추천 종목·ETF를 넣으면 넣은 % 만큼 기본 포트를 원래 비율 그대로 줄여 합계 100%를 맞춰요. 왜 추천하는지는 앱 자료로 자동으로 써 줘요.",
+      "개인연금·DC·IRP는 국내 상장 ETF만 담을 수 있어요."],
+    make: ["📲 고객에게 보여 주기 — 상담 자리에서 휴대폰을 고객에게 건네는 화면이에요. 큰 글씨 카드를 옆으로 넘기고, 고객이 금액과 위험 정도를 직접 눌러 보면 숫자가 바로 바뀌어요. 닫을 땐 ✕를 두 번.",
+      "그 화면 마지막 장의 🔗 동료 PB에게 보내기는 고른 상품·금액·위험 정도·추천 종목만 링크로 보내요. 고객 이름은 안 담겨요. 받은 PB가 열면 같은 세팅에 자기 이름·소속이 들어가요.",
+      "📱 한 장 = 카톡으로 보내는 그림 한 장 · 📄 PDF = 표지·시장·상품별 분석·모의 계산·유의사항까지 다 · 📊 PPT(고칠 수 있는 판) = 글·표·차트를 PPT에서 직접 고침 · 🖼️ 그림판 PPT = 어디서 열어도 똑같이 보임.",
+      "버튼을 한 번 누르면 만들고, 초록으로 바뀐 뒤 한 번 더 누르면 저장·공유 창이 떠요(아이폰은 누른 순간에만 공유 창이 열려서 그래요).",
+      "모든 출력물 맨 끝에는 위험고지가 들어가요. 고객에게 드리기 전 숫자와 상품 조건을 한 번 더 확인해 주세요."],
+    tier: "주식·연금 제안의 위험 정도를 세 단계로 골라요.\n⚖️ 보통 = 오늘 기본폼 그대로예요.\n🛡 안전 = 위험자산(주식·금) 몫의 절반을 현금성(CD금리 ETF)으로 옮겨요.\n🔥 적극 = 안전자산(현금성·회사채) 몫의 절반을 위험자산으로 옮겨요. DC·IRP는 법정 한도 70%를 넘지 않아요.\n이미 위험자산이 100%(또는 70% 한도)면 적극은 고를 수 없어요.\n과거 계산·위기 때 숫자도 고른 단계로 다시 계산돼서 한 장·PDF·PPT에 그대로 들어가요.",
+    fx: "💴 원화로 = 국내 상장 ETF(TIGER 미국S&P500 등)로 담아요. 환전이 없고, 팔아서 남은 돈은 배당소득으로 15.4% 세금(금융소득종합과세 대상)이에요.\n💵 환전해서 = 미국 상장 ETF(SPY·QQQ·GLD 등)를 달러로 담아요. 팔아서 남은 돈은 1년에 250만원까지 빼고 22% 양도세(분리과세)예요.\n고른 방식에 맞춰 담을 ETF와 세금 설명이 바뀌어요.",
+    must: "고객에게 꼭 넣고 싶은 종목·ETF를 검색해서 % 를 적어요(여러 개 가능).\n넣은 % 만큼 나머지 기본 포트를 원래 비율 그대로 줄여서 합계 100%를 맞춰요. 막대에서 줄어든 칸은 옛 % 가 흐리게 보여요.\n왜 추천하는지는 종목리포트·ETF 구성·실적·애널리스트·뉴스·시황 테마로 자동으로 써 줘요.\n개인연금·DC·IRP는 국내 상장 ETF만 담을 수 있고, DC·IRP에서 채권형·TDF는 「안전형」에 체크하면 안전자산 칸에서 깎아요.",
+    sim: "모든 제안서 맨 끝에 들어가는 위험고지 문구를 확인하고 심의필을 관리하는 칸이에요.\n① 아래 원문을 읽어 보고 ② 「심의 요청서 PDF」를 받아 준법감시 부서에 내요.\n③ 받은 심의필 번호와 유효기간을 넣으면 한 장·PDF·PPT 모두에 저절로 찍혀요.\n유효기간이 지나거나 문구가 바뀌면 번호가 자동으로 빠지고 여기서 알려 줘요. 번호는 꼭 회사에서 받은 것만 넣어 주세요."
+  };
   function draw(){
     var w = document.getElementById("ppw"); if (!w || !DATA) return;
     ST.sel = ST.sel.filter(function(k){ return !!form(k); });
     var M = DATA.market || {};
-    var h = '<section data-xc="1" class="card pp-top"><h3>📋 오늘의 기본폼</h3><p class="pp-tip" style="margin-top:-4px">' + e(DATA.basis || "") + '</p>' +
+    var h = '<section data-xc="1" class="card pp-top"><h3>📋 오늘의 기본폼</h3>' + notes(JOY.forms()) + '<p class="pp-tip" style="margin-top:-4px">' + e(DATA.basis || "") + '</p>' +
       '<div class="pp-reg"><span class="' + (M.us_up ? "ok" : "no") + '">🇺🇸 ' + (M.us_up ? "상승 추세" : "조심") + '</span><span class="' + (M.kr_up ? "ok" : "no") + '">🇰🇷 ' + (M.kr_up ? "상승 추세" : "회복 전") + '</span><span class="mut">' + e(String(DATA.at || "").slice(5).replace("-", "/")) + ' 갱신</span></div>' +
       '<p class="pp-tip">고를 상품을 누르세요 · 여러 개 함께 골라도 됨</p><div class="pp-grid">' + DATA.forms.map(function(f){ var on = ST.sel.indexOf(f.key) >= 0;
         return '<button type="button" class="pp-f' + (on ? " on" : "") + '" data-k="' + f.key + '" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small>' + e(f.headline.replace(/ 제안임$/, "")) + '</small>' + (on ? '<em>✓</em>' : '') + '</button>'; }).join("") + '</div></section>';
-    h += '<section data-xc="1" class="card"><h3>✍️ 누구에게 · 누가</h3><div class="pp-in">' +
+    h += '<section data-xc="1" class="card"><h3>✍️ 누구에게 · 누가</h3>' + notes(JOY.who) + '<div class="pp-in">' +
       '<label>고객 이름<input id="ppcust" maxlength="20" placeholder="예: 홍길동" value="' + e(ST.cust) + '"></label>' +
       '<label>제안자 이름<input id="pppb" maxlength="20" placeholder="예: 김OO PB" value="' + e(ME.pb || "") + '"></label>' +
       '<label>소속<input id="pporg" maxlength="30" placeholder="예: OO WM센터" value="' + e(ME.org || "") + '"></label></div><p class="pp-tip">제안자·소속은 이 휴대폰에 기억해 둠</p></section>';
     h += simCard();
-    h += '<section data-xc="1" class="card"><h3>💰 상품별 금액</h3>' + (ST.sel.length ? ST.sel.map(function(k){ var f = form(k), v = ST.amt[k] || "";
+    h += '<section data-xc="1" class="card"><h3>💰 상품별 금액</h3>' + notes(JOY.amt) + '' + (ST.sel.length ? ST.sel.map(function(k){ var f = form(k), v = ST.amt[k] || "";
         return '<div class="pp-amt" style="--fc:' + f.color + '"><div class="pp-an"><span>' + e(f.icon) + '</span><b>' + e(f.short) + '</b><span class="pp-aw" id="ppw_' + k + '">' + (v ? man(v * 10000) : "") + '</span></div>' +
           '<div class="pp-ar"><input inputmode="numeric" data-ak="' + k + '" placeholder="금액 (만원)" value="' + e(v) + '"><span>만원</span></div>' +
           '<div class="pp-q">' + AMTS.map(function(a){ return '<button type="button" data-qk="' + k + '" data-qv="' + a[0] + '"' + (+v === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div>' + optUI(k, f) + '</div>'; }).join("") +
         '<div class="pp-tot">합계 <b id="pptot">' + (total() ? man(total()) : "–") + '</b></div>'
       : '<p class="mut">위에서 상품을 먼저 골라 주세요.</p>') + '</section>';
-    h += '<section data-xc="1" class="card"><h3>📤 만들기</h3><p class="pp-tip" style="margin-top:-4px">휴대폰에서 바로 만듦 · 돈 안 듦' + (simState().ok ? ' · ⚖️ 심의필 ' + e(simText()) + ' 찍힘' : ' · <span style="color:#ff7a6e">⚠️ 심의필 없음 — 위 「⚖️ 위험고지 · 심의필」에서 받아 넣어 주세요</span>') + '</p><div class="pp-go">' +
+    h += '<section data-xc="1" class="card"><h3>📤 만들기</h3>' + notes(JOY.make) + '<p class="pp-tip" style="margin-top:-4px">휴대폰에서 바로 만듦 · 돈 안 듦' + (simState().ok ? ' · ⚖️ 심의필 ' + e(simText()) + ' 찍힘' : ' · <span style="color:#ff7a6e">⚠️ 심의필 없음 — 위 「⚖️ 위험고지 · 심의필」에서 받아 넣어 주세요</span>') + '</p><div class="pp-go">' +
       '<button type="button" id="ppshow" class="pp-show">📲 고객에게 보여 주기 <small>큰 글씨 카드 · 넘겨 보기 · 고객이 금액·위험 정도를 직접 눌러 봄</small></button>' +
       '<button type="button" data-mk="png" class="main">📱 한 장 <small>카톡 전송용 그림</small></button>' +
       '<button type="button" data-mk="pdf">' + BTNL.pdf + '</button>' +
@@ -1211,10 +1242,10 @@
   function optUI(k, f){
     if (!EQ[k]) return "";
     var o = opt(k), h2 = tierUI(k);
-    if (k === "gl_stock") h2 += '<div class="pp-ol">💱 해외 투자는 어떻게?</div><div class="pp-md">' +
+    if (k === "gl_stock") h2 += '<div class="pp-ol"><span data-tip="' + e(JOY.fx) + '">💱 해외 투자는 어떻게? ⓘ</span></div><div class="pp-md">' +
       [["krw", "💴 원화로", "국내 상장 ETF · 환전 없음"], ["usd", "💵 환전해서", "미국 상장 ETF · 달러로"]].map(function(x){ return '<button type="button" data-md="' + x[0] + '" data-mk2="' + k + '"' + (o.mode === x[0] ? ' class="on"' : '') + '><b>' + x[1] + '</b><small>' + x[2] + '</small></button>'; }).join("") + '</div>';
     var only = {pension: 1, dc: 1, irp: 1}[k], A = amtOf(k);
-    h2 += '<div class="pp-ol">⭐ 추천 종목·ETF 넣기 <span class="mut">(여러 개 가능 · 이유는 자동으로 찾아 넣음)</span></div>' +
+    h2 += '<div class="pp-ol"><span data-tip="' + e(JOY.must) + '">⭐ 추천 종목·ETF 넣기 ⓘ</span> <span class="mut">(여러 개 가능 · 이유는 자동으로 찾아 넣음)</span></div>' +
       (o.must || []).map(function(m, i){ return '<div class="pp-mu"><span class="pp-mn"><b>' + e(m.name) + '</b>' + (m.code ? ' <small>' + e(m.code) + (m.mkt ? " · " + e(m.mkt) : "") + '</small>' : ' <small>직접 입력</small>') +
         (A ? '<em class="pp-mw" id="ppmw_' + k + '_' + i + '">' + (+m.pct ? man(A * m.pct / 100) : "") + '</em>' : '') + '</span>' +
         (RET[k] ? '<label class="pp-sf"><input type="checkbox" data-mf="' + k + '" data-mi="' + i + '"' + (m.safe ? ' checked' : '') + '>안전형</label>' : '') +
@@ -1228,7 +1259,7 @@
   function tierUI(k){
     var f0 = form(k); if (!f0 || !f0.sim || !EQ[k]) return "";
     var o = opt(k), cur = o.tier || "normal", base = baseRisky(k);
-    return '<div class="pp-ol">🎚 위험 정도</div><div class="pp-md pp-tr">' + ["safe", "normal", "bold"].map(function(t){ var ok = tierOK(f0, t);
+    return '<div class="pp-ol"><span data-tip="' + e(JOY.tier) + '">🎚 위험 정도 ⓘ</span></div><div class="pp-md pp-tr">' + ["safe", "normal", "bold"].map(function(t){ var ok = tierOK(f0, t);
       return '<button type="button" data-tr="' + t + '" data-mk2="' + k + '"' + (cur === t ? ' class="on"' : '') + (ok ? '' : ' disabled') + '><b>' + TIER[t] + '</b><small>' + tierSub(k, t, base) + '</small></button>'; }).join("") + '</div>';
   }
   function baseRisky(k){ var f0 = form(k), o = ST.opt[k] || {}, al = f0.alloc; if (k === "gl_stock" && o.mode === "usd" && f0.alt && f0.alt.usd) al = f0.alt.usd.alloc; return riskyOf(al); }
@@ -1606,7 +1637,7 @@
     ".pp-pr button{border:0;border-radius:8px;padding:7px 12px;font:inherit;font-weight:800;background:var(--c,#7c9cff);color:#111}" +
     ".pp-st{font-size:12.5px;margin:8px 2px 0;min-height:1em}.pp-pv-h{font-size:13px;font-weight:800;margin:14px 0 6px}" +
     ".pp-pv{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#f5f7fb;position:relative}.pp-pv-in{pointer-events:none}" +
-    ".pp-tr{grid-template-columns:repeat(3,1fr)}.pp-tr button:disabled{opacity:.45}.pp-go button.pp-show{background:linear-gradient(135deg,#2f6fdf,#7b5cff);color:#fff;border-color:transparent}.pp-go button.pp-show small{color:rgba(255,255,255,.85)}" +
+    ".pp-jt{display:inline-flex;vertical-align:middle;margin-left:4px;cursor:pointer}.pp-tr{grid-template-columns:repeat(3,1fr)}.pp-tr button:disabled{opacity:.45}.pp-go button.pp-show{background:linear-gradient(135deg,#2f6fdf,#7b5cff);color:#fff;border-color:transparent}.pp-go button.pp-show small{color:rgba(255,255,255,.85)}" +
     "html.ppx-on,html.ppx-on body{overflow:hidden}" +
     "#ppx{position:fixed;inset:0;z-index:900;background:var(--bg,#0b0f17);color:var(--text);display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);-webkit-user-select:none;user-select:none}" +
     ".px-top{display:flex;align-items:center;gap:8px;padding:10px 14px 4px}.px-fs{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}.px-fs::-webkit-scrollbar{display:none}" +
