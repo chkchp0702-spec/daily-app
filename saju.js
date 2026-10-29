@@ -145,7 +145,7 @@
   }
   function opts(a, b, v, f){ var s = ""; for (var i = a; i <= b; i++) s += '<option value="' + i + '"' + (+v === i ? " selected" : "") + '>' + (f ? f(i) : i) + '</option>'; return s; }
   function formOpen(root, p, again){
-    var nw = !p, cities = Object.keys(S().CITY);
+    var nw = !p;
     p = p || {id: "p" + Date.now().toString(36), name: people().length ? "" : "나", rel: people().length ? "고객" : "나", sex: "F", cal: "S", y: 1980, m: 1, d: 1, leap: false, hh: -1, mi: 0, city: "서울"};
     var host = root.querySelector("#sjBody"), seg = function(name, list, v){ return '<div class="sj-seg" data-seg="' + name + '">' + list.map(function(x){ return '<button type="button" data-v="' + x[0] + '" class="' + (String(v) === String(x[0]) ? "on" : "") + '">' + x[1] + '</button>'; }).join("") + '</div>'; };
     host.innerHTML = '<div class="card sj-form"><h3>' + (nw ? "＋ 사람 추가" : "✏️ " + e(p.name) + " 고치기") + '</h3>' +
@@ -154,10 +154,14 @@
       '<div class="row row3"><div><label>태어난 해</label><select id="sfY">' + opts(1920, 2026, p.y) + '</select></div><div><label>월</label><select id="sfM">' + opts(1, 12, p.m) + '</select></div><div><label>일</label><select id="sfD">' + opts(1, 31, p.d) + '</select></div></div>' +
       '<div id="sfLeapW" style="display:none;margin:-2px 0 10px"><label style="display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--text)"><input type="checkbox" id="sfLeap" style="width:auto"' + (p.leap ? " checked" : "") + '> <span id="sfLeapT">윤달 생일</span></label></div>' +
       '<div class="row"><div><label>태어난 시간</label><select id="sfH"><option value="-1">모름</option>' + opts(0, 23, p.hh, function(i){ return i + "시"; }) + '</select></div><div><label>분</label><select id="sfMi">' + opts(0, 59, p.mi, function(i){ return i + "분"; }) + '</select></div></div>' +
-      '<div class="row"><div><label>태어난 곳</label><select id="sfC">' + cities.map(function(c){ return '<option' + (c === p.city ? " selected" : "") + '>' + c + '</option>'; }).join("") + '</select></div><div style="display:flex;align-items:flex-end"><p class="sj-note" style="margin:0">해외 출생이면 가까운 「서울」로 — 상승궁만 조금 달라져요</p></div></div>' +
+      '<div class="row"><div><label>태어난 곳 — 시·도</label><select id="sfR">' + S().REGION.map(function(r){ return '<option' + (r[0] === (S().CITY_RG[p.city] || "서울특별시") ? " selected" : "") + '>' + r[0] + '</option>'; }).join("") + '</select></div>' +
+      '<div><label>시·군</label><select id="sfC"></select></div></div><p class="sj-note" style="margin:-4px 0 10px">해외 출생이거나 모르면 「해외 · 모름」 — 서울 기준으로 계산하고 상승궁만 조금 달라져요. 목록에 없는 작은 곳은 가장 가까운 시·군을 고르세요.</p>' +
       '<div class="sj-btns"><button class="sj-btn" id="sfOk">저장하고 보기</button><button class="sj-btn g" id="sfNo">취소</button>' + (nw ? "" : '<button class="sj-btn g" id="sfDel">🗑 지우기</button>') + '</div>' +
       '<div class="sj-err" id="sfErr"></div><p class="sj-note">🔒 생일 정보는 이 휴대폰에만 저장돼요. 서버로 보내지 않아요.<br>시간을 모르면 「모름」 — 시주 없이 나머지는 그대로 계산돼요.</p></div>';
     var st = {rel: p.rel, sex: p.sex, cal: p.cal};
+    var fillC = function(){ var rg = host.querySelector("#sfR").value, R0 = S().REGION.filter(function(r){ return r[0] === rg; })[0], L = Object.keys(R0 ? R0[1] : {});
+      host.querySelector("#sfC").innerHTML = L.map(function(c){ return '<option' + (c === p.city ? " selected" : "") + '>' + c + '</option>'; }).join(""); };
+    fillC(); host.querySelector("#sfR").onchange = fillC;
     [].forEach.call(host.querySelectorAll("[data-seg]"), function(g){ [].forEach.call(g.children, function(b){ b.onclick = function(){ st[g.dataset.seg] = b.dataset.v;
       [].forEach.call(g.children, function(x){ x.classList.toggle("on", x === b); }); leapHint(); }; }); });
     function leapHint(){ var w = host.querySelector("#sfLeapW"); if (st.cal !== "L"){ w.style.display = "none"; return; }
