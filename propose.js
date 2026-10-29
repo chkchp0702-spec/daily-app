@@ -118,7 +118,7 @@
     var fr = {}, cut = {};
     if (RET[k]){   // 위험 70% 한도: 위험형 지정은 위험 칸에서, 안전형 지정은 안전 칸에서 먼저 깎음
       var T = Rb, Mr = items.filter(function(x){ return !x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0), Ms = items.filter(function(x){ return x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0);
-      if (Mr > T){ var sc0 = T / Mr; items.forEach(function(x){ if (!x.safe) x.pct *= sc0; }); warn.push("위험자산 지정이 법정 한도(" + T + "%)를 넘어 " + T + "%로 줄임"); Mr = T; }
+      if (Mr > T){ var sc0 = T / Mr; items.forEach(function(x){ if (!x.safe) x.pct *= sc0; }); warn.push("위험자산 지정이 " + (T >= 70 ? "법정 한도" : "이 제안의 위험자산 몫") + "(" + T + "%)를 넘어 " + T + "%로 줄임"); Mr = T; }
       var rb = Math.max(0, Math.min(T - Mr, 100 - Mr - Ms)), sb = Math.max(0, 100 - Mr - Ms - rb);
       fr["위험"] = Rb ? rb / Rb : 0; fr["안전"] = Sb ? sb / Sb : 0;
     } else {
@@ -142,10 +142,51 @@
             risky: r1(all.filter(function(a){ return a.kind === "위험"; }).reduce(function(s2, a){ return s2 + a.pct; }, 0))};
   }
   // 고른 방식(원화/환전) + 꼭 넣을 종목을 기본폼에 덧입힌 「이 고객용」 폼
-  function formX(k){
+  /* 🎚 10/29 A10/29-1 위험 정도 「안전 · 보통 · 적극」 — proposal_mkt.py tier_alloc 과 같은 규칙
+     안전 = 위험자산 몫의 절반을 현금성(CD금리)으로 · 적극 = 안전자산 몫의 절반을 위험자산으로(비율 그대로 · DC·IRP 70% 한도) · 보통 = 오늘 기본폼 */
+  var TIER = {safe: "🛡 안전", normal: "⚖️ 보통", bold: "🔥 적극"};
+  function tierOK(f0, t){ return t === "normal" || !!(f0 && f0.sim && f0.sim.tiers && f0.sim.tiers[t]); }
+  function tierAlloc(al, t, cap, cdT){
+    al = al.filter(function(a){ return +a.pct > 0; }).map(function(a){ return JSON.parse(JSON.stringify(a)); });
+    var R = 0, S = 0; al.forEach(function(a){ if (a.kind === "위험") R += a.pct; else S += a.pct; });
+    var mv2 = 0;
+    if (t === "safe"){ var mv = R * 0.5; al.forEach(function(a){ if (a.kind === "위험") a.pct *= 0.5; });
+      var cd = al.filter(function(a){ return a.k === "cd"; })[0]; if (!cd){ cd = JSON.parse(JSON.stringify(cdT || {k: "cd", name: "현금성 (CD금리)", kind: "안전", color: "#3fb28f"})); cd.pct = 0; al.push(cd); } cd.pct += mv; }
+    else { mv2 = S * 0.5; if (cap != null) mv2 = Math.min(mv2, cap - R); if (mv2 < 1 || R <= 0) return al;
+      al.forEach(function(a){ if (a.kind === "위험") a.pct += mv2 * a.pct / R; else a.pct *= (S - mv2) / S; }); }
+    var Rt = r1(t === "safe" ? R * 0.5 : R + mv2);
+    al.forEach(function(a){ a.pct = r1(a.pct); }); al = al.filter(function(a){ return a.pct > 0; });
+    [[true, Rt], [false, r1(100 - Rt)]].forEach(function(gt){   // 위험·안전 합이 딱 맞게 (proposal_mkt.py 와 같음)
+      var g = al.filter(function(a){ return (a.kind === "위험") === gt[0]; }); if (!g.length) return;
+      var d = r1(gt[1] - g.reduce(function(s2, a){ return s2 + a.pct; }, 0)); if (d){ var big = g.slice().sort(function(a, b){ return b.pct - a.pct; })[0]; big.pct = r1(big.pct + d); } });
+    return al.sort(function(a, b){ return b.pct - a.pct; });
+  }
+  function riskyOf(al){ return r1(al.reduce(function(s2, a){ return s2 + (a.kind === "위험" ? +a.pct || 0 : 0); }, 0)); }
+  // 원화/환전 + 위험 정도까지 입힌 폼 (⭐ 추천 종목 넣기 전)
+  function baseX(k){
     var f0 = form(k); if (!f0) return null;
     var o = ST.opt[k] || {}, f = JSON.parse(JSON.stringify(f0));
     if (k === "gl_stock" && o.mode === "usd" && f.alt && f.alt.usd){ var u = f.alt.usd; for (var q in u) f[q] = u[q]; }
+    var t = o.tier, T = EQ[k] && t && t !== "normal" && f.sim && f.sim.tiers && f.sim.tiers[t];
+    if (T){
+      var R0 = riskyOf(f.alloc), cdT = (T.alloc || []).filter(function(a){ return a.k === "cd"; })[0];
+      var th0 = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
+      f.alloc = tierAlloc(f.alloc, t, f.sim.tier_cap, cdT);
+      var th1 = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
+      (f.themes || []).forEach(function(x){ var rr = th0 ? (th1 || 0) / th0 : 0; if (x.pct != null) x.pct = r1(x.pct * rr); if (x.w != null) x.w = r1(x.w * rr); });
+      var keepC = f.sim.contrib, tiers = f.sim.tiers, cap = f.sim.tier_cap;
+      f.sim = JSON.parse(JSON.stringify(T)); f.sim.contrib = keepC; f.sim.tiers = tiers; f.sim.tier_cap = cap;
+      f.sim.note = (f.sim.note || "") + " · " + TIER[t].slice(2) + " 단계 비중으로 계산";
+      f.tier = t;
+      f.headline = f.alloc.map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" · ") + " 제안임";
+      f.points = [(t === "safe" ? "🛡 안전하게 — 오늘 기본 제안의 위험자산 " + pc(R0) + " 중 절반을 현금성(CD금리)으로 옮겨 " + pc(riskyOf(f.alloc)) + "만 담음"
+                               : "🔥 적극적으로 — 오늘 기본 제안의 안전자산 몫 절반을 위험자산으로 옮겨 위험자산 " + pc(R0) + " → " + pc(riskyOf(f.alloc)) + (cap ? " (법정 한도 " + cap + "% 안)" : "")) +
+                  " · 아래 설명의 % 숫자는 기본 제안 기준"].concat(f.points || []);
+    }
+    return f;
+  }
+  function formX(k){
+    var f = baseX(k); if (!f) return null;
     if (!EQ[k]) return f;
     var P = mustPlan(k, f); if (!P) return f;
     var tf = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct, ta = (P.after.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
@@ -1115,7 +1156,7 @@
   /* ═════════ 앱 화면 ═════════ */
   var AMTS = [[1000, "1천만"], [3000, "3천만"], [5000, "5천만"], [10000, "1억"], [30000, "3억"]];
   window.propView = function(){ return '<div id="ppw"><div class="loading">오늘 기본폼 불러오는 중…</div></div>'; };
-  window.propInit = function(){ load().then(draw).catch(function(){ var w = document.getElementById("ppw"); if (w) w.innerHTML = '<div class="empty"><div class="big">📝</div>오늘 기본폼을 아직 못 받았어요.<br>잠시 뒤 다시 열어 주세요.</div>'; }); };
+  window.propInit = function(){ load().then(function(){ takeSetting(); draw(); }).catch(function(){ var w = document.getElementById("ppw"); if (w) w.innerHTML = '<div class="empty"><div class="big">📝</div>오늘 기본폼을 아직 못 받았어요.<br>잠시 뒤 다시 열어 주세요.</div>'; }); };
   // ⚖️ 위험고지 · 심의필 칸 (10/29 사용자 「PB들이 누르면 내용을 확인하고 심의필을 받게」)
   function simCard(){
     var S = simState(), D = discOf(allModel(), true), n = 0, li = function(t){ return '<li><b>' + (++n) + '.</b> ' + e(t) + '</li>'; };
@@ -1157,6 +1198,7 @@
         '<div class="pp-tot">합계 <b id="pptot">' + (total() ? man(total()) : "–") + '</b></div>'
       : '<p class="mut">위에서 상품을 먼저 골라 주세요.</p>') + '</section>';
     h += '<section data-xc="1" class="card"><h3>📤 만들기</h3><p class="pp-tip" style="margin-top:-4px">휴대폰에서 바로 만듦 · 돈 안 듦' + (simState().ok ? ' · ⚖️ 심의필 ' + e(simText()) + ' 찍힘' : ' · <span style="color:#ff7a6e">⚠️ 심의필 없음 — 위 「⚖️ 위험고지 · 심의필」에서 받아 넣어 주세요</span>') + '</p><div class="pp-go">' +
+      '<button type="button" id="ppshow" class="pp-show">📲 고객에게 보여 주기 <small>큰 글씨 카드 · 넘겨 보기 · 고객이 금액·위험 정도를 직접 눌러 봄</small></button>' +
       '<button type="button" data-mk="png" class="main">📱 한 장 <small>카톡 전송용 그림</small></button>' +
       '<button type="button" data-mk="pdf">' + BTNL.pdf + '</button>' +
       '<button type="button" data-mk="ppt">' + BTNL.ppt + '</button>' +
@@ -1168,7 +1210,7 @@
   var MKT = {KR: "한국", US: "미국", JP: "일본", CN: "중국", HK: "홍콩"};
   function optUI(k, f){
     if (!EQ[k]) return "";
-    var o = opt(k), h2 = "";
+    var o = opt(k), h2 = tierUI(k);
     if (k === "gl_stock") h2 += '<div class="pp-ol">💱 해외 투자는 어떻게?</div><div class="pp-md">' +
       [["krw", "💴 원화로", "국내 상장 ETF · 환전 없음"], ["usd", "💵 환전해서", "미국 상장 ETF · 달러로"]].map(function(x){ return '<button type="button" data-md="' + x[0] + '" data-mk2="' + k + '"' + (o.mode === x[0] ? ' class="on"' : '') + '><b>' + x[1] + '</b><small>' + x[2] + '</small></button>'; }).join("") + '</div>';
     var only = {pension: 1, dc: 1, irp: 1}[k], A = amtOf(k);
@@ -1182,11 +1224,24 @@
       '<p class="pp-tip" style="margin:4px 0 0">' + (only ? "연금·퇴직연금 계좌는 국내 상장 ETF만 담을 수 있음 (개별 주식·해외 상장 불가)" + (RET[k] ? " · 채권형·TDF 등은 「안전형」에 체크하면 안전자산 칸에서 깎음" : "") : "넣은 % 만큼 기본 포트를 원래 비율 그대로 줄여 합계 100%를 맞춤") + '</p>';
     return '<div class="pp-op">' + h2 + '</div>';
   }
+  // 🎚 위험 정도 고르기 (주식·연금 폼) — 건네기 모드와 같은 값
+  function tierUI(k){
+    var f0 = form(k); if (!f0 || !f0.sim || !EQ[k]) return "";
+    var o = opt(k), cur = o.tier || "normal", base = baseRisky(k);
+    return '<div class="pp-ol">🎚 위험 정도</div><div class="pp-md pp-tr">' + ["safe", "normal", "bold"].map(function(t){ var ok = tierOK(f0, t);
+      return '<button type="button" data-tr="' + t + '" data-mk2="' + k + '"' + (cur === t ? ' class="on"' : '') + (ok ? '' : ' disabled') + '><b>' + TIER[t] + '</b><small>' + tierSub(k, t, base) + '</small></button>'; }).join("") + '</div>';
+  }
+  function baseRisky(k){ var f0 = form(k), o = ST.opt[k] || {}, al = f0.alloc; if (k === "gl_stock" && o.mode === "usd" && f0.alt && f0.alt.usd) al = f0.alt.usd.alloc; return riskyOf(al); }
+  function tierSub(k, t, base){
+    var f0 = form(k), T = f0 && f0.sim && f0.sim.tiers && f0.sim.tiers[t];
+    if (t === "normal") return "위험자산 " + pc(base) + " · 오늘 기본폼";
+    if (!f0.sim.tiers) return "준비 중";
+    if (!T) return t === "bold" ? (f0.sim.tier_cap && base >= f0.sim.tier_cap ? "이미 법정 한도 " + f0.sim.tier_cap + "%" : "이미 위험자산 " + pc(base)) : "준비 중";
+    return "위험자산 " + pc(T.risky);
+  }
   // 지정 비중 → 기본 포트가 어떻게 줄어드는지 한눈에
   function planHTML(k){
-    var f0 = form(k); if (!f0) return "";
-    var o = ST.opt[k] || {}, f = JSON.parse(JSON.stringify(f0));
-    if (k === "gl_stock" && o.mode === "usd" && f.alt && f.alt.usd){ var u = f.alt.usd; for (var q in u) f[q] = u[q]; }
+    var f = baseX(k); if (!f) return "";
     var P = mustPlan(k, f); if (!P) return "";
     var all = P.all.filter(function(a){ return a.pct > 0; }), A = amtOf(k);
     return '<div class="pp-bar">' + all.map(function(a){ return '<i style="width:' + a.pct + '%;background:' + a.color + '"></i>'; }).join("") + '</div>' +
@@ -1244,6 +1299,8 @@
     [].forEach.call(w.querySelectorAll("[data-mk]"), function(b){ b.onclick = function(){ make(b.dataset.mk, b); }; });
     var redraw = function(){ var y = window.scrollY; draw(); window.scrollTo(0, y); };
     [].forEach.call(w.querySelectorAll("[data-md]"), function(b){ b.onclick = function(){ opt(b.dataset.mk2).mode = b.dataset.md; keep(); resetBtns(); redraw(); }; });
+    [].forEach.call(w.querySelectorAll("[data-tr]"), function(b){ b.onclick = function(){ if (b.disabled) return; opt(b.dataset.mk2).tier = b.dataset.tr; keep(); resetBtns(); redraw(); }; });
+    var sh = document.getElementById("ppshow"); if (sh) sh.onclick = function(){ showOpen(); };
     [].forEach.call(w.querySelectorAll("[data-mx]"), function(b){ b.onclick = function(){ opt(b.dataset.mx).must.splice(+b.dataset.mi, 1); keep(); resetBtns(); redraw(); }; });
     var upPlan = function(k){ var pl = document.getElementById("pppl_" + k); if (pl) pl.innerHTML = planHTML(k); var A = amtOf(k);
       (opt(k).must || []).forEach(function(m, i){ var mw = document.getElementById("ppmw_" + k + "_" + i); if (mw) mw.textContent = A && +m.pct ? man(A * m.pct / 100) : ""; }); };
@@ -1342,8 +1399,169 @@
   function resetBtns(){ READY = {}; [].forEach.call(document.querySelectorAll("#ppw [data-mk].ready"), function(b){ b.classList.remove("ready");
     b.innerHTML = BTNL[b.dataset.mk]; }); var st = document.getElementById("ppst"); if (st) st.textContent = ""; }
 
+  /* ───────── 📲 고객에게 보여 주기 (10/29 A10/29-1 「건네기 모드」) ─────────
+     상담 자리에서 PB 폰을 고객에게 돌려 보여 주는 화면 — 큰 글씨 카드를 좌우로 넘김.
+     고객이 직접 금액 칩·위험 정도(안전·보통·적극)를 누르면 모든 카드 숫자가 그 자리에서 바뀜(proposal.json 에 미리 계산해 둔 값 · 휴대폰 계산 없음).
+     PB 전용 화면(확률·내 포트·채널)과 아래 탭은 덮어 가림 · 나가기는 ✕ 를 두 번 · 고객 이름은 화면에만(링크·서버에 안 실음). */
+  var PX = {k: null, i: 0};
+  function showOpen(){
+    if (!DATA){ toast("기본폼을 아직 못 받았어요"); return; }
+    if (!ST.sel.length){ toast("상품을 먼저 골라 주세요"); return; }
+    PX.k = ST.sel.indexOf(PX.k) >= 0 ? PX.k : ST.sel[0]; PX.i = 0;
+    ST.sel.forEach(function(k){ if (!+ST.amt[k]) ST.amt[k] = 10000; });   // 금액이 비었으면 1억으로 시작(고객이 칩으로 바꿈)
+    keep();
+    var x = document.getElementById("ppx"); if (x) x.remove();
+    x = document.createElement("div"); x.id = "ppx"; x.setAttribute("role", "dialog"); x.setAttribute("aria-label", "고객에게 보여 주기");
+    document.body.appendChild(x); document.documentElement.classList.add("ppx-on");
+    showDraw(true);
+    try { if (window.ntfyUse) ntfyUse("propose_show"); } catch(z) {}
+  }
+  function showClose(){ var x = document.getElementById("ppx"); if (x) x.remove(); document.documentElement.classList.remove("ppx-on");
+    try { var y = window.scrollY; draw(); window.scrollTo(0, y); } catch(z) {} }
+  function won(v){ return man(Math.round(v / 10000) * 10000); }
+  function signWon(v){ return (v > 0 ? "+" : v < 0 ? "−" : "") + man(Math.abs(v)); }
+  function slide(title, body, sub){ return '<section class="px-s"><div class="px-in">' + (title ? '<h2>' + title + '</h2>' : '') + (sub ? '<p class="px-sub">' + sub + '</p>' : '') + body + '</div></section>'; }
+  function barRow(lab, sub, val, frac, color, right){
+    return '<div class="px-br"><div class="px-bl"><b>' + lab + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</div><div class="px-bv"><b>' + val + '</b>' + (right ? '<small>' + right + '</small>' : '') + '</div>' +
+      '<div class="px-bb"><i style="width:' + Math.max(2, Math.min(100, frac * 100)).toFixed(1) + '%;background:' + color + '"></i></div></div>';
+  }
+  function slidesEq(f, A){
+    var S = f.sim, out = [], al = f.alloc.filter(function(a){ return a.pct > 0; }).sort(function(a, b){ return b.pct - a.pct; });
+    var fromY = S.bt.from.slice(0, 4);
+    // ② 어디에 얼마
+    out.push(slide("어디에 얼마 담나", '<div class="px-dn"><div class="px-dw"><img alt="" src="' + svgUrl(donutSvg(al, 240, 40)) + '"><div class="px-dc"><small>제안 금액</small><b>' + man(A) + '</b></div></div></div>' +
+      al.map(function(a){ return barRow('<i class="px-dot" style="background:' + a.color + '"></i>' + e(a.name.replace(/^⭐ /, "⭐")), e((a.inst || "").split(" · ")[0]), won(A * a.pct / 100), a.pct / al[0].pct, a.color, pc(a.pct)); }).join("") +
+      '<p class="px-note">위험자산 ' + pc(riskyOf(al)) + ' · 안전자산 ' + pc(r1(100 - riskyOf(al))) + '</p>'));
+    // ③ 실제로 담기는 회사 (ETF 속) — 없으면 나라·자산별
+    if (S.look && S.look.top && S.look.top.length){
+      var top = S.look.top.slice(0, 5);
+      out.push(slide("이 돈이 실제로 들어가는 회사", top.map(function(r){ return barRow(e(r.n), e(r.sec), won(A * r.w / 100), r.w / top[0].w, "#2f6fdf", pc(r.w)); }).join("") +
+        '<p class="px-note">ETF 속을 열어 보면 ' + S.look.n + '개 회사에 나눠 담김 · 구성표 ' + e(S.look.asof || "") + ' × 제안 비중</p>'));
+    } else if (S.region && S.region.length){
+      out.push(slide("어느 쪽에 나눠 담나", S.region.map(function(r){ return barRow(e(r[0]), "", won(A * r[1] / 100), r[1] / S.region[0][1], "#2f6fdf", pc(r[1])); }).join("")));
+    }
+    // ④ 위기 때는
+    var cr = (S.stress || []).filter(function(r){ return /2008|2020|2022/.test(r.name) && r["이 제안"]; });
+    if (cr.length){
+      var worst = cr.reduce(function(m, r){ return r["이 제안"].mdd < m ? r["이 제안"].mdd : m; }, 0);
+      out.push(slide("크게 빠졌던 때라면", '<div class="px-big dn">' + signWon(A * worst / 100) + '</div><p class="px-cap">가장 나빴던 때 잠깐 줄어든 돈 (' + man(A) + ' 기준)</p>' +
+        cr.map(function(r){ var me = r["이 제안"], k1 = r["코스피만"], s1 = r["S&P500만"];
+          return '<div class="px-cr"><b>' + e(r.name) + '</b><div class="px-crv"><span class="dn">' + signWon(A * me.mdd / 100) + '</span><small>' + sgn(me.mdd, 1) + (me.rec != null ? " · " + (me.rec ? me.rec + "개월 뒤 회복" : "바로 회복") : " · 아직 회복 전") + '</small></div>' +
+            '<small class="px-crc">같은 때 ' + [k1 ? "코스피만 " + sgn(k1.mdd, 1) : "", s1 ? "S&P500만 " + sgn(s1.mdd, 1) : ""].filter(Boolean).join(" · ") + '</small></div>'; }).join(""),
+        "같은 비중을 그때 들고 있었다면"));
+    }
+    // ⑤ 들고 있으면
+    var Q = eqCalc(S, A), b = S.bt;
+    out.push(slide("들고 있으면 어땠나", '<div class="px-pos"><b>' + b.y1.pos + '%</b><span>' + fromY + '년부터 아무 날에 사서 1년 들고 있었을 때 이익 난 비율</span></div>' +
+      '<div class="px-3">' + Q.y1.map(function(x, i){ return '<div class="' + ["dn", "", "up"][i] + '"><small>' + x.l.replace(/ \(.*\)/, "") + '</small><b>' + won(x.won) + '</b><em>' + sgn(x.r, 1) + '</em></div>'; }).join("") + '</div>' +
+      (Q.y5 ? '<p class="px-cap" style="margin-top:18px">5년 들고 있었다면 (연평균)</p><div class="px-3">' + Q.y5.map(function(x, i){ return '<div class="' + ["dn", "", "up"][i] + '"><small>' + x.l + '</small><b>' + won(x.won) + '</b><em>연 ' + sgn(x.r, 1) + '</em></div>'; }).join("") + '</div>' +
+        '<p class="px-note">5년 들고 있었을 때 이익 난 비율 ' + (b.y5.pos) + '% · 연평균 ' + b.cagr + '% (' + fromY + '~지금)</p>' : ''),
+      "1년 뒤 " + man(A) + "이"));
+    return out;
+  }
+  function slidesBond(f, A){
+    var S = f.sim, B = bondCalc(S, A), out = [], al = f.alloc.filter(function(a){ return a.pct > 0; });
+    out.push(slide("어디에 얼마 담나", '<div class="px-dn"><div class="px-dw"><img alt="" src="' + svgUrl(donutSvg(al, 240, 40)) + '"><div class="px-dc"><small>제안 금액</small><b>' + man(A) + '</b></div></div></div>' +
+      B.rows.map(function(r, i){ var c = (al[i] || {}).color || "#1f9fb5"; return barRow('<i class="px-dot" style="background:' + c + '"></i>' + e(r.p.slot || r.p.name), e(r.p.name) + " · " + r.p.yrs.toFixed(1) + "년", won(r.a), r.p.pct / 100, c, pc(r.p.pct)); }).join("")));
+    out.push(slide("만기까지 들고 가면", '<div class="px-big up">' + man(B.tot) + '</div><p class="px-cap">' + (S.cur === "KRW" ? "세후로 돌려받는 돈" : "돌려받는 돈 (환율이 지금 그대로라면)") + '</p>' +
+      '<div class="px-3"><div class="up"><small>이익</small><b>' + signWon(B.pnl) + '</b></div><div><small>연으로 치면</small><b>' + B.cagr.toFixed(1) + '%</b></div><div><small>평균 기간</small><b>' + B.yrs.toFixed(1) + '년</b></div></div>' +
+      (B.years.length && B.years[0].v ? '<p class="px-note">해마다 들어오는 이자 약 ' + won(B.years[0].v) + ' (세후)</p>' : '') +
+      (B.be != null ? '<p class="px-note">환율이 지금보다 ' + Math.abs(B.be).toFixed(0) + '% 넘게 떨어지지 않으면 이익</p>' : '')));
+    var rs = B.rateScen || [], fx = B.fxScen || [];
+    if (rs.length || fx.length){
+      var mx = Math.max.apply(null, rs.concat(fx).map(function(x){ return Math.abs(x.pnl); }).concat([1]));
+      out.push(slide("금리·환율이 움직이면", (rs.length ? '<p class="px-cap">1년 뒤 손익 · 금리가 이만큼 움직이면</p>' + rs.map(function(x){ return barRow((x.d > 0 ? "+" : x.d < 0 ? "−" : "") + Math.abs(x.d) + "%p", x.d ? (x.d > 0 ? "금리 오름" : "금리 내림") : "그대로", signWon(x.pnl), Math.abs(x.pnl) / mx, x.pnl >= 0 ? UP : DN, sgn(x.pct, 1)); }).join("") : '') +
+        (fx.length ? '<p class="px-cap" style="margin-top:16px">만기 때 환율이 이만큼 움직이면</p>' + fx.map(function(x){ return barRow((x.m > 0 ? "+" : x.m < 0 ? "−" : "") + Math.abs(x.m) + "%", "", signWon(x.pnl), Math.abs(x.pnl) / mx, x.pnl >= 0 ? UP : DN, sgn(x.pct, 1)); }).join("") : '')));
+    }
+    return out;
+  }
+  function slidesEls(f, A){
+    var E = elsCalc(f.sim, A), out = [], al = f.alloc.filter(function(a){ return a.pct > 0; });
+    out.push(slide("어디에 얼마 담나", '<div class="px-dn"><div class="px-dw"><img alt="" src="' + svgUrl(donutSvg(al, 240, 40)) + '"><div class="px-dc"><small>제안 금액</small><b>' + man(A) + '</b></div></div></div>' +
+      al.map(function(a){ return barRow('<i class="px-dot" style="background:' + a.color + '"></i>' + e(a.name), e((a.inst || "").slice(0, 34)), won(A * a.pct / 100), a.pct / 100, a.color, pc(a.pct)); }).join("")));
+    out.push(slide("과거엔 어떻게 끝났나", E.map(function(x){ var p = x.p, h = p.hist || {};
+      return '<div class="px-cr"><b>' + e(p.name || "") + '</b><small class="px-crc">' + (p.pp ? "원금지급형" : "연 " + p.cpn + "% · KI " + (p.ki || "없음")) + (p.ua ? " · " + e(p.ua) : "") + ' · ' + won(x.a) + '</small>' +
+        '<div class="px-3" style="margin-top:8px"><div class="up"><small>1년 안에 끝남</small><b>' + (x.y1 != null ? Math.round(x.y1) + "%" : "–") + '</b></div><div class="dn"><small>손실로 끝남</small><b>' + (p.pp ? "0%" : (h.loss || 0) + "%") + '</b></div><div><small>평균 받은 돈</small><b>' + won(x.ev) + '</b></div></div></div>'; }).join(""),
+      "같은 조건으로 " + String(((E[0] || {}).p || {}).hist && E[0].p.hist.from || "2006").slice(0, 4) + "년부터 매일 가입했다면"));
+    return out;
+  }
+  function showDraw(first){
+    var x = document.getElementById("ppx"); if (!x) return;
+    var k = PX.k, f = formX(k), A = amtOf(k); if (!f){ showClose(); return; }
+    var S = f.sim || {}, kind = S.kind, f0 = form(k), o = opt(k), cur = o.tier || "normal";
+    var cover = '<section class="px-s"><div class="px-in px-cv" style="--fc:' + f.color + '"><p class="px-for">' + e(ST.cust ? ST.cust.trim() + " 고객님을 위한" : "고객님을 위한") + '</p><h1>' + e(f.icon) + ' ' + e(f.title) + '</h1>' +
+      '<div class="px-amt">' + man(A) + '</div>' + (EQ[k] && cur !== "normal" ? '<div class="px-tg">' + TIER[cur] + ' 단계</div>' : '') +
+      '<p class="px-hl">' + e(String(f.headline || "").replace(/ 제안임$/, "")) + '</p>' + (f.fit ? '<p class="px-fit">이런 분께 · ' + e(f.fit) + '</p>' : '') +
+      '<p class="px-sw">옆으로 넘겨 보세요 →</p></div></section>';
+    var body = kind === "equity" ? slidesEq(f, A) : kind === "bond" ? slidesBond(f, A) : kind === "els" ? slidesEls(f, A) : [];
+    var link = '<section class="px-s"><div class="px-in"><h2>이 안으로 정리하면</h2>' +
+      (function(){ var L = simLine(f, A); return L ? '<div class="px-big">' + e(L.big) + '</div><p class="px-cap">' + e(L.lab) + '</p><p class="px-note">' + e(L.sub) + '</p>' : ''; })() +
+      '<div class="px-go"><button type="button" data-mk="png" class="main">📨 이 안 카톡으로 받기<small>한 장 그림으로 만들어 보내 드림</small></button>' +
+      '<button type="button" id="pxlink">🔗 동료 PB에게 이 세팅 보내기<small>고른 상품·금액·위험 정도·추천 종목만 · 고객 이름은 안 담김</small></button></div></div></section>';
+    var slides = [cover].concat(body).concat([link]);
+    var n = slides.length; PX.i = Math.min(PX.i, n - 1);
+    var chips = ST.sel.length > 1 ? '<div class="px-fs">' + ST.sel.map(function(q){ var g = form(q); return g ? '<button type="button" data-pf="' + q + '"' + (q === k ? ' class="on"' : '') + ' style="--fc:' + g.color + '">' + e(g.icon) + ' ' + e(g.short) + '</button>' : ''; }).join("") + '</div>' : '';
+    var tiers = EQ[k] && f0.sim ? '<div class="px-seg">' + ["safe", "normal", "bold"].map(function(t){ return '<button type="button" data-pt="' + t + '"' + (cur === t ? ' class="on"' : '') + (tierOK(f0, t) ? '' : ' disabled') + '>' + TIER[t] + '</button>'; }).join("") + '</div>' : '';
+    var amts = '<div class="px-am">' + AMTS.map(function(a){ return '<button type="button" data-pa="' + a[0] + '"' + (+ST.amt[k] === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div>';
+    x.innerHTML = '<div class="px-top">' + chips + '<button type="button" class="px-x" id="pxx" aria-label="닫기">✕</button></div>' +
+      '<div class="px-ctl">' + amts + tiers + '</div>' +
+      '<div class="px-rail" id="pxr">' + slides.join("") + '</div>' +
+      '<div class="px-ft"><div class="px-dots">' + slides.map(function(_, i){ return '<i' + (i === PX.i ? ' class="on"' : '') + '></i>'; }).join("") + '</div>' +
+      '<p>' + (kind === "equity" ? "과거 계산 · 미래 보장 아님 · 배당·수수료·세금 전" : kind === "bond" ? "지금 금리 기준 계산 · 중도 매도 땐 값이 달라짐" : "과거 계산 · 미래 보장 아님 · 원금 손실 가능") + '</p></div>';
+    var rail = document.getElementById("pxr");
+    rail.scrollLeft = PX.i * rail.clientWidth;
+    var dots = x.querySelectorAll(".px-dots i"), tm = null;
+    rail.addEventListener("scroll", function(){ clearTimeout(tm); tm = setTimeout(function(){ var i = Math.round(rail.scrollLeft / (rail.clientWidth || 1)); if (i !== PX.i){ PX.i = i; [].forEach.call(dots, function(d, j){ d.classList.toggle("on", j === i); }); } }, 60); }, {passive: true});
+    [].forEach.call(dots, function(d, j){ d.onclick = function(){ rail.scrollTo({left: j * rail.clientWidth, behavior: "smooth"}); }; });
+    // 나가기는 두 번 (고객이 실수로 닫지 않게)
+    var xb = document.getElementById("pxx"), armed = 0;
+    xb.onclick = function(){ if (Date.now() - armed < 1800){ showClose(); return; } armed = Date.now(); xb.textContent = "한 번 더"; xb.classList.add("arm"); setTimeout(function(){ if (xb.isConnected){ xb.textContent = "✕"; xb.classList.remove("arm"); } }, 1800); };
+    [].forEach.call(x.querySelectorAll("[data-pf]"), function(b){ b.onclick = function(){ PX.k = b.dataset.pf; PX.i = 0; showDraw(); }; });
+    [].forEach.call(x.querySelectorAll("[data-pa]"), function(b){ b.onclick = function(){ ST.amt[k] = +b.dataset.pa; keep(); resetBtns(); showDraw(); }; });
+    [].forEach.call(x.querySelectorAll("[data-pt]"), function(b){ b.onclick = function(){ if (b.disabled) return; opt(k).tier = b.dataset.pt; keep(); resetBtns(); showDraw(); }; });
+    [].forEach.call(x.querySelectorAll("[data-mk]"), function(b){ b.onclick = function(){ make(b.dataset.mk, b); }; });
+    var lk = document.getElementById("pxlink"); if (lk) lk.onclick = function(){ shareSetting(lk); };
+  }
+  document.addEventListener("keydown", function(ev){ if (ev.key === "Escape" && document.getElementById("ppx")) showClose(); });
+
+  /* 🔗 세팅 링크 — 고른 폼·금액·원화/환전·위험 정도·⭐ 추천 종목만 (고객 이름·제안자·소속은 안 담음) */
+  function b64e(str){ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+  function b64d(str){ str = str.replace(/-/g, "+").replace(/_/g, "/"); while (str.length % 4) str += "="; return decodeURIComponent(escape(atob(str))); }
+  function settingCode(){
+    var o = {v: 1, s: ST.sel.slice(), a: {}, o: {}};
+    ST.sel.forEach(function(k){ if (+ST.amt[k]) o.a[k] = +ST.amt[k]; var q = ST.opt[k]; if (!q) return; var y = {};
+      if (q.mode && q.mode !== "krw") y.m = q.mode; if (q.tier && q.tier !== "normal") y.t = q.tier;
+      if (q.must && q.must.length) y.u = q.must.map(function(m){ var z = {n: m.name, p: +m.pct || 0}; if (m.code) z.c = m.code; if (m.mkt) z.k = m.mkt; if (m.sym) z.y = m.sym; if (m.etf) z.e = 1; if (m.safe) z.f = 1; return z; });
+      if (Object.keys(y).length) o.o[k] = y; });
+    return b64e(JSON.stringify(o));
+  }
+  function shareSetting(btn){
+    var url = location.origin + location.pathname + "#prop~" + settingCode(), names = ST.sel.map(function(k){ var f = form(k); return f ? f.short : k; }).join(" · ");
+    var text = "📝 제안서 세팅 — " + names + "\n열면 같은 상품·금액·위험 정도로 바로 만들 수 있어요 (이름·소속은 각자 것으로)";
+    var done = function(m){ btn.innerHTML = m + '<small>고객 이름은 안 담겼어요</small>'; };
+    if (navigator.share){ navigator.share({title: "제안서 세팅", text: text, url: url}).then(function(){ done("✓ 보냈어요"); }).catch(function(){}); return; }
+    try { navigator.clipboard.writeText(text + "\n" + url).then(function(){ done("✓ 링크를 복사했어요"); }, function(){ prompt("이 링크를 복사해 보내세요", url); }); } catch(z) { prompt("이 링크를 복사해 보내세요", url); }
+  }
+  function takeSetting(){
+    var m = /^#prop~([A-Za-z0-9_-]{4,4000})$/.exec(location.hash || ""); if (!m || !DATA) return;
+    try { history.replaceState(history.state, "", location.pathname + location.search + "#prop"); } catch(z) {}
+    var o; try { o = JSON.parse(b64d(m[1])); } catch(z) { toast("세팅 링크를 읽지 못했어요"); return; }
+    if (!o || o.v !== 1 || !Array.isArray(o.s)) return;
+    var ok = function(k){ return typeof k === "string" && !!form(k); }, str = function(v, n){ return String(v == null ? "" : v).slice(0, n || 40); };
+    var sel = o.s.filter(ok).slice(0, 9); if (!sel.length) return;
+    ST.sel = sel; ST.amt = {}; ST.opt = {};
+    sel.forEach(function(k){ var a = +((o.a || {})[k]); if (a > 0 && a < 1e7) ST.amt[k] = Math.round(a);
+      var y = (o.o || {})[k] || {}, q = {mode: y.m === "usd" ? "usd" : "krw", must: []};
+      if (y.t === "safe" || y.t === "bold") q.tier = y.t;
+      (Array.isArray(y.u) ? y.u : []).slice(0, 20).forEach(function(z){ if (!z || !z.n) return; var mm = {name: str(z.n), pct: Math.max(0, Math.min(100, +z.p || 0))};
+        if (z.c) mm.code = str(z.c, 16); if (z.k) mm.mkt = str(z.k, 8); if (z.y) mm.sym = str(z.y, 20); if (z.e) mm.etf = true; if (z.f) mm.safe = true; q.must.push(mm); });
+      ST.opt[k] = q; });
+    ST.cust = ""; keep();
+    toast("동료가 보낸 제안서 세팅을 불러왔어요 — 이름·소속은 내 것으로");
+  }
+
   // 시험·다른 화면에서 쓰도록
-  window.PROPOSE = {load: load, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.sim != null){ ME.simNo = o.sim; ME.simVer = DISC_VER; } if (o.simTo != null) ME.simTo = o.simTo; if (o.simFrom != null) ME.simFrom = o.simFrom; if (o.opt) ST.opt = o.opt; },
+  window.PROPOSE = {load: load, _tierAlloc: function(al, t, cap, cdT){ return tierAlloc(al, t, cap, cdT); }, _code: function(){ return settingCode(); }, show: function(){ showOpen(); }, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.sim != null){ ME.simNo = o.sim; ME.simVer = DISC_VER; } if (o.simTo != null) ME.simTo = o.simTo; if (o.simFrom != null) ME.simFrom = o.simFrom; if (o.opt) ST.opt = o.opt; },
     review: function(){ return makePdf(allModel(), reviewPages()); }, discText: function(){ return discText(); }, simState: function(){ return simState(); },
     png: function(){ return ensureReasons().then(function(){ return makePng(model()); }); }, pdf: function(){ return ensureReasons().then(function(){ return makePdf(model()); }); },
     ppt: function(){ return ensureReasons().then(function(){ return makePpt(model()); }); }, pptimg: function(){ return ensureReasons().then(function(){ return makePptImg(model()); }); }, reasons: function(){ return ensureReasons().then(function(){ return RS; }); }, onePage: function(){ return onePage(model()); }, pages: function(){ return fullPages(model()); }};
@@ -1388,6 +1606,37 @@
     ".pp-pr button{border:0;border-radius:8px;padding:7px 12px;font:inherit;font-weight:800;background:var(--c,#7c9cff);color:#111}" +
     ".pp-st{font-size:12.5px;margin:8px 2px 0;min-height:1em}.pp-pv-h{font-size:13px;font-weight:800;margin:14px 0 6px}" +
     ".pp-pv{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#f5f7fb;position:relative}.pp-pv-in{pointer-events:none}" +
+    ".pp-tr{grid-template-columns:repeat(3,1fr)}.pp-tr button:disabled{opacity:.45}.pp-go button.pp-show{background:linear-gradient(135deg,#2f6fdf,#7b5cff);color:#fff;border-color:transparent}.pp-go button.pp-show small{color:rgba(255,255,255,.85)}" +
+    "html.ppx-on,html.ppx-on body{overflow:hidden}" +
+    "#ppx{position:fixed;inset:0;z-index:900;background:var(--bg,#0b0f17);color:var(--text);display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);-webkit-user-select:none;user-select:none}" +
+    ".px-top{display:flex;align-items:center;gap:8px;padding:10px 14px 4px}.px-fs{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}.px-fs::-webkit-scrollbar{display:none}" +
+    ".px-fs button{flex:none;border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:99px;padding:7px 12px;font:inherit;font-size:14px;font-weight:700}.px-fs button.on{border-color:var(--fc);background:var(--fc);color:#fff}" +
+    ".px-x{margin-left:auto;flex:none;min-width:44px;height:44px;border-radius:22px;border:1px solid var(--line);background:var(--panel2);color:var(--sub);font:inherit;font-size:18px;padding:0 12px}.px-x.arm{background:#e0533d;color:#fff;border-color:transparent;font-size:14px;font-weight:800}" +
+    ".px-ctl{padding:4px 14px 8px;display:flex;flex-direction:column;gap:8px}.px-am{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.px-am::-webkit-scrollbar{display:none}" +
+    ".px-am button{flex:1 0 auto;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:12px;padding:10px 8px;font:inherit;font-size:16px;font-weight:700}.px-am button.on{background:var(--text);color:var(--bg,#0b0f17);border-color:transparent}" +
+    ".px-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}.px-seg button{border:0;background:transparent;color:var(--text);font:inherit;font-size:16px;font-weight:700;padding:11px 4px}" +
+    ".px-seg button+button{border-left:1px solid var(--line)}.px-seg button.on{background:#2f6fdf;color:#fff}.px-seg button:disabled{opacity:.35}" +
+    ".px-rail{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}.px-rail::-webkit-scrollbar{display:none}" +
+    ".px-s{flex:0 0 100%;width:100%;scroll-snap-align:start;overflow-y:auto;box-sizing:border-box;padding:6px 18px 18px}.px-in{max-width:520px;margin:0 auto}" +
+    ".px-s h2{font-size:28px;line-height:1.25;letter-spacing:-.8px;margin:8px 0 6px}.px-sub{font-size:16px;color:var(--sub);margin:0 0 14px}" +
+    ".px-cv{display:flex;flex-direction:column;justify-content:center;min-height:100%;padding-top:4vh}.px-for{font-size:19px;color:var(--sub);margin:0 0 6px;font-weight:700}.px-cv h1{font-size:30px;line-height:1.25;letter-spacing:-.8px;margin:0 0 16px}" +
+    ".px-amt{font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1.05;color:var(--fc)}.px-tg{display:inline-block;align-self:flex-start;margin-top:10px;padding:6px 12px;border-radius:99px;background:var(--panel2);font-size:16px;font-weight:800}" +
+    ".px-hl{font-size:19px;line-height:1.5;margin:18px 0 8px;font-weight:700}.px-fit{font-size:16px;color:var(--sub);line-height:1.5;margin:0}.px-sw{margin-top:28px;font-size:15px;color:var(--sub)}" +
+    ".px-dn{display:flex;justify-content:center;margin:4px 0 12px}.px-dw{position:relative;width:240px;height:240px}.px-dw img{display:block;width:240px;height:240px}" +
+    ".px-dc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.px-dc small{font-size:15px;color:var(--sub)}.px-dc b{font-size:26px;letter-spacing:-1px}" +
+    ".px-br{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:11px 0;border-bottom:1px solid var(--line)}.px-bl{min-width:0}.px-bl b{display:block;font-size:19px;line-height:1.3}.px-bl small,.px-bv small{display:block;font-size:14px;color:var(--sub);margin-top:2px}" +
+    ".px-bv{text-align:right}.px-bv b{font-size:21px;white-space:nowrap}.px-s{word-break:keep-all}.px-bb{grid-column:1/-1;height:8px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:6px}.px-bb i{display:block;height:100%;border-radius:4px}" +
+    ".px-dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px;vertical-align:1px}" +
+    ".px-note{font-size:15px;color:var(--sub);line-height:1.5;margin:12px 0 0}.px-cap{font-size:16px;color:var(--sub);margin:4px 0 12px;line-height:1.45}" +
+    ".px-big{font-size:46px;font-weight:900;letter-spacing:-1.8px;line-height:1.1;margin-top:8px}.px-big.dn,.px-s .dn b,.px-crv .dn{color:#4d8dff}.px-big.up,.px-s .up b{color:#ff6b57}" +
+    ".px-cr{padding:13px 0;border-bottom:1px solid var(--line)}.px-cr>b{font-size:18px}.px-crv{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:4px}.px-crv span{font-size:28px;font-weight:900;letter-spacing:-1px}.px-crv small{font-size:15px;color:var(--sub)}.px-crc{display:block;font-size:14px;color:var(--sub);margin-top:3px}" +
+    ".px-pos{display:flex;align-items:center;gap:14px;margin:6px 0 16px}.px-pos b{flex:none;white-space:nowrap;font-size:56px;font-weight:900;letter-spacing:-2px;color:#ff6b57}.px-pos span{font-size:16px;line-height:1.45;color:var(--sub)}" +
+    ".px-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.px-3>div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 9px}.px-3 small{display:block;font-size:14px;color:var(--sub)}.px-3 b{display:block;font-size:16.5px;margin-top:4px;letter-spacing:-.5px;word-break:keep-all;line-height:1.25}.px-3 em{display:block;font-style:normal;font-size:14px;color:var(--sub);margin-top:2px}" +
+    ".px-go{display:grid;gap:10px;margin-top:22px}.px-go button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:16px;border-radius:16px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit;font-size:18px;font-weight:800}" +
+    ".px-go button small{font-size:13.5px;color:var(--sub);font-weight:500}.px-go button.main{background:#fee500;color:#191919;border-color:transparent}.px-go button.main small{color:rgba(0,0,0,.6)}.px-go button.ready{background:#22a06b;color:#fff}" +
+    ".px-ft{padding:6px 14px 10px;text-align:center}.px-dots{display:flex;justify-content:center;gap:7px;margin-bottom:6px}.px-dots i{width:8px;height:8px;border-radius:4px;background:var(--line);transition:width .2s}.px-dots i.on{width:22px;background:var(--text)}" +
+    ".px-ft p{margin:0;font-size:13.5px;color:var(--sub)}" +
+    "@media (min-width:560px){.px-s h2{font-size:32px}}" +
     "@media (min-width:560px){.pp-grid{grid-template-columns:repeat(5,1fr)}.pp-go{grid-template-columns:repeat(2,1fr)}}";
   document.head.appendChild(css);
 })();

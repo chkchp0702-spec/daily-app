@@ -1515,7 +1515,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261029t";
+var APPV = "20261029u";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1575,7 +1575,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="saju_txt.js?v=4"></script>   <!-- 🔮 10/28 사주·운세 문장 창고 -->
 <script defer src="saju.js?v=7"></script>   <!-- 🔮📜 10/28 오늘의 운세 · 사주 리포트 -->
 <script defer src="tarot.js?v=3"></script>   <!-- 🃏 10/29 타로 (질문 맞춤 해석 · API 없음) -->
-<script defer src="propose.js?v=20"></script>
+<script defer src="propose.js?v=21"></script>
 <script defer src="els_design.js?v=4"></script>
 <script defer src="extras.js?v=11"></script>
 <script defer src="burst.js?v=1"></script>   <!-- ⚠️ 10/28 거래폭발 = 따라 사지 마세요 -->
