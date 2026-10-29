@@ -1,80 +1,78 @@
 {
- "at": "2026-10-29 16:25",
- "ok": false,
- "problems": [
-  "작업 실패: daily-app/pv_hold (10-29T01:14 failure)"
- ],
+ "at": "2026-10-29 16:56",
+ "ok": true,
+ "problems": [],
  "data": [
   {
    "name": "💼 포트",
    "ok": true,
-   "age_h": 0.9,
+   "age_h": 0.5,
    "lim": 3
   },
   {
    "name": "⚡ 킥",
    "ok": true,
-   "age_h": 0.9,
+   "age_h": 0.5,
    "lim": 3
   },
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.5,
    "lim": 3
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.5,
    "lim": 3
   },
   {
    "name": "🌏 동종주",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.5,
    "lim": 3
   },
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 8.0,
+   "age_h": 8.5,
    "lim": 30
   },
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.1,
+   "age_h": 0.0,
    "lim": 1.5
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.4,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 1.3,
+   "age_h": 1.9,
    "lim": 30
   },
   {
    "name": "📱 앱 목록",
    "ok": true,
-   "age_h": 1.0,
+   "age_h": 0.3,
    "lim": 30
   },
   {
    "name": "🎲 시장확률",
    "ok": true,
-   "age_h": 0.1,
+   "age_h": 0.6,
    "lim": 2
   },
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.5,
    "lim": 12
   }
  ],
@@ -90,16 +88,16 @@
   },
   {
    "tab": "market",
-   "s": 0.7,
+   "s": 0.8,
    "cards": 29,
-   "len": 1630,
+   "len": 1640,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "port",
-   "s": 0.4,
+   "s": 0.5,
    "cards": 14,
    "len": 796,
    "bad": [],
@@ -108,7 +106,7 @@
   },
   {
    "tab": "score",
-   "s": 0.3,
+   "s": 0.4,
    "cards": 10,
    "len": 3068,
    "bad": [],
@@ -119,7 +117,7 @@
    "tab": "whale",
    "s": 0.5,
    "cards": 21,
-   "len": 1333,
+   "len": 1355,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -128,7 +126,7 @@
    "tab": "cup",
    "s": 0.5,
    "cards": 12,
-   "len": 3354,
+   "len": 3350,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -144,7 +142,7 @@
   },
   {
    "tab": "sector",
-   "s": 0.8,
+   "s": 0.7,
    "cards": 40,
    "len": 1467,
    "bad": [],
@@ -155,14 +153,14 @@
    "tab": "accum",
    "s": 0.5,
    "cards": 13,
-   "len": 1779,
+   "len": 1778,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "onepager",
-   "s": 0.3,
+   "s": 0.5,
    "cards": 1,
    "len": 338,
    "bad": [],
@@ -171,7 +169,7 @@
   },
   {
    "tab": "danta",
-   "s": 0.4,
+   "s": 0.5,
    "cards": 12,
    "len": 1598,
    "bad": [],
@@ -189,7 +187,7 @@
   },
   {
    "tab": "idea",
-   "s": 0.2,
+   "s": 0.3,
    "cards": 1,
    "len": 74,
    "bad": [],
@@ -200,7 +198,7 @@
    "tab": "feed",
    "s": 0.4,
    "cards": 1,
-   "len": 5270,
+   "len": 5569,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -267,13 +265,13 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-29T07:24"
+   "when": "2026-10-29T07:55"
   },
   {
    "repo": "daily-app",
    "job": "collect",
    "ok": true,
-   "when": "2026-10-29T06:28"
+   "when": "2026-10-29T07:55"
   },
   {
    "repo": "daily-app",
@@ -285,7 +283,7 @@
    "repo": "daily-app",
    "job": "opprice",
    "ok": true,
-   "when": "2026-10-29T01:56"
+   "when": "2026-10-29T07:20"
   },
   {
    "repo": "daily-app",
@@ -333,7 +331,7 @@
    "repo": "daily-app",
    "job": "live",
    "ok": true,
-   "when": "2026-10-29T07:23"
+   "when": "2026-10-29T07:53"
   },
   {
    "repo": "daily-app",
@@ -375,7 +373,7 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-28T14:11"
+   "when": "2026-10-29T07:25"
   },
   {
    "repo": "daily-app",
@@ -404,8 +402,8 @@
   {
    "repo": "daily-app",
    "job": "pv_hold",
-   "ok": false,
-   "when": "2026-10-29T01:14"
+   "ok": true,
+   "when": "2026-10-29T07:53"
   },
   {
    "repo": "daily-app",
@@ -643,6 +641,7 @@
   }
  ],
  "week_fixed": [
+  "10/29 🧺 pv_hold: DART 첫 화면이 안 열리면 매번 새 창(새 쿠키·연결)으로 4번까지 다시(쉬는 시간 ",
   "10/28 📰 「월가 IB 전략」 피드(gn_us_ib): 구글뉴스 받기 창 1일 → 3일 · 남기기 2일 → 7일(S",
   "10/27 ① 🖼 opmedia: 새 사진이 하나도 없는 날(media-* 조각 0개)엔 다시 그리기·저장을 건너뛰고 ",
   "10/26 📰 구글뉴스 RSS 가 막히면(503) 4초 쉬고 한 번 더 → 그래도 막히면 같은 검색어를 빙 뉴스 RSS",
