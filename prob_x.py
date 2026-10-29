@@ -575,6 +575,23 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                     M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["move_err"] = str(e)[:120]
+    # 🏛️ MOVE 5일 급등 꼬리(≥90% 한쪽만) — 한국 「다음 날」만 (10/29 10시 #24 · probe/move5_bt.py)
+    #   ^MOVE 5일 로그 변화의 1년 백분위 ≥90% · 미국 날짜 값 → 다음 한국 장. 2002-11~, 2016-06 기준 앞/뒤 · 걸어가며 사전 100 브라이어
+    #   한국 다음 날 −5.4·−6.4%p(n 294·338) · 브라이어 0.25659→0.25249 · 0.25215→0.25033 · 최근5년 0.25384→0.24986 ✅ · 5일 뒤 ❌(두 기간 나빠짐)
+    #   ≤10%(급락) 쪽 ❌(앞 나빠짐) · 일본(앞 +1.1·뒤 −10.1 엇갈림)·중국·홍콩·미국 ❌ · MOVE−VIX(위)와 겹칠 수 있어 w 작게
+    if mk == "KR" and mv_ is not None:
+        try:
+            r5m = np.log(mv_[mv_ > 0].dropna()).diff(5)
+            rk = align(rank252(r5m), idx); cv = rk.iloc[-1]
+            research["move5"] = {"d": str(r5m.index[-1].date()), "r5": round(float(r5m.iloc[-1]) * 100, 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+            if not pd.isna(cv) and cv >= 0.9:
+                m = cond(d, (rk >= 0.9).fillna(False), "MOVE 5일 급등(1년 상위 10%)")
+                add("move5", "🏛️", "채권 변동성 급등(MOVE 5일)", "심리", m, 0.4,
+                    f"MOVE 5일 {float(r5m.iloc[-1])*100:+.0f}% (1년 백분위 {cv*100:.0f}%) — 미국 채권 시장이 갑자기 불안해지면 한국 다음 날이 평소보다 덜 오름(다음 날만)")
+                if M and M[-1]["k"] == "move5":
+                    M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["move5_err"] = str(e)[:120]
     # 💵 달러지수 5일 급변 꼬리 (10/29 09시 #23 · probe/dxy_bt.py · 강달러 = 신흥 아시아 자금 이탈) — 한국·중국·홍콩, 꼬리에서만
     #   DX-Y.NYB 5일 로그 변화의 1년 백분위 · 미국 날짜 값 → 다음 아시아 장. 2000~, 2015-11 기준 앞/뒤 · 걸어가며 사전 100 브라이어
     #   홍콩 ≥90% 다음 날 −9.8·−10.6%p(n 320·326) · ≤10% +3.3·+3.1 · 브라이어 0.25083→0.24681 · 0.25082→0.24462 · 최근5년 0.25164→0.24096 ✅ · 5일 뒤도 0.25069→0.24969 · 0.24861→0.24752 ✅
