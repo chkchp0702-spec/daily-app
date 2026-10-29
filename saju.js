@@ -444,7 +444,7 @@
     var sh = root.querySelector("#lkShare"); if (sh) sh.onclick = function(){ if (navigator.share){ navigator.share({title: "오늘의 운세", text: txt}).catch(function(){}); } else copyText(txt, sh); };
     var cp = root.querySelector("#lkCopy"); if (cp) cp.onclick = function(){ copyText(txt, cp); };
   }
-  window.luckView = function(){ return '<div id="sjL" class="no-clp tidy-x" data-noemo="1"><div class="loading">불러오는 중…</div></div>'; };
+  window.luckView = function(){ return '<div id="sjL" class="no-clp tidy-x ez-no" data-noemo="1"><div class="loading">불러오는 중…</div></div>'; };
   window.luckInit = function(){ LK.off = 0; renderLuck(); };
 
   /* ───────── 사주 리포트 — 글 만들기 ───────── */
@@ -926,7 +926,7 @@
     var body; try { body = report(R); } catch(x) { try { console.error(x); } catch(z) {} body = '<section class="qsjp">리포트를 만들다 멈췄어요: ' + e(x.message || x) + '</section>'; }
     root.innerHTML = frame("saju", '<div class="sjr-tools sjr" style="padding:10px;margin-bottom:10px"><div class="qtools" style="margin:0">' +
       '<button id="sjPdf">📄 PDF로 저장<small>리포트 그대로 · 공유 가능</small></button><button id="sjCp">✨ Claude 심화판 문구<small>복사 → Claude 채팅에 붙여 넣기</small></button></div><div id="sjPdfBar"></div></div>' +
-      '<div class="sjr no-clp tidy-x" id="sjRep">' + body + '</div><p class="sj-note">📜 계산은 모두 이 휴대폰 안에서 했어요(인터넷 · API 비용 없음). 더 길고 깊은 글이 필요하면 「Claude 심화판 문구」를 복사해 Claude 채팅에 붙여 넣으면 예전 리포트처럼 써 줘요.</p>');
+      '<div class="sjr no-clp tidy-x ez-no" id="sjRep">' + body + '</div><p class="sj-note">📜 계산은 모두 이 휴대폰 안에서 했어요(인터넷 · API 비용 없음). 더 길고 깊은 글이 필요하면 「Claude 심화판 문구」를 복사해 Claude 채팅에 붙여 넣으면 예전 리포트처럼 써 줘요.</p>');
     bindPpl(root, renderSaju);
     root.querySelector("#sjCp").onclick = function(){ copyText(prompt(R), this); };
     root.querySelector("#sjPdf").onclick = function(){
