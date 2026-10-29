@@ -4,7 +4,8 @@
    → 사는 신호가 아니라 경고. stock-screener 가 장중 매분 data/burst_warn.json 에 쌓고, 여기서 2분마다 읽어 신호 화면 위에 보여 줌. */
 (function(){
   var URL = "https://raw.githubusercontent.com/chkchp0702-spec/stock-screener/main/data/burst_warn.json";
-  var TABS = {whale: 1, cup: 1, gap: 1, screen: 1, sigmore: 1, accum: 1, danta: 1};
+  // 10/29 사용자 「단타 화면이 없으니 감춰~ 기록만 해둬」 → 어느 화면에도 안 띄움 · 기록은 stock-screener data/burst_log.csv 에 계속 쌓임
+  var TABS = {};
   var W = null, at = 0;
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function kst(){ var d = new Date(Date.now() + 9 * 3600e3); return d.toISOString().slice(0, 10).replace(/-/g, ""); }
