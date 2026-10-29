@@ -126,7 +126,7 @@
       fr["위험"] = fr["안전"] = (100 - M) / 100;
     }
     var after = base.map(function(a){ var b = JSON.parse(JSON.stringify(a)); b.was = a.pct; b.pct = r1(a.pct * (fr[a.kind] != null ? fr[a.kind] : fr["위험"])); return b; });
-    var ins = items.map(function(x, i){ var m = x.m; return {k: "must", pct: r1(x.pct), was: 0, name: "⭐ " + m.name, inst: m.name + (m.mkt ? " · " + m.mkt : ""), code: m.code || null, kind: x.safe ? "안전" : "위험",
+    var ins = items.map(function(x, i){ var m = x.m; return {k: "must", pct: r1(x.pct), was: 0, name: "⭐ " + m.name, inst: m.name + (m.mkt ? " · " + m.mkt : ""), code: m.code || null, kind: x.safe ? "안전" : "위험", etf: !!m.etf,
       color: MCOL2[i % MCOL2.length], why: ((RS[rkey(m)] || {}).short || "PB 추천 " + (m.etf ? "ETF" : "종목")) + (x.safe ? " (안전자산으로 분류)" : ""), reason: (RS[rkey(m)] || {}).lines || [], sym: m.sym || ""}; });
     var all = ins.concat(after), diff = r1(100 - all.reduce(function(s2, a){ return s2 + a.pct; }, 0));
     if (diff){ var big = after.slice().sort(function(a, b){ return b.pct - a.pct; })[0] || ins[0]; if (big) big.pct = r1(big.pct + diff); }
@@ -436,7 +436,17 @@
         '<div style="padding:0 26px 22px">' + bullets((mk.view || f.points || []).slice(0, multi ? 2 : 3), multi ? 21 : 23, f.color) + '</div></div></div>';
     });
     h += '<div style="margin:30px 44px 0;padding:22px 26px;border-radius:18px;background:' + NAVY + '"><div style="display:flex;align-items:center;gap:18px;color:#fff"><div style="font-size:44px">🤝</div><div style="flex:1"><div style="font-size:21px;opacity:.8;color:#fff">제안</div><div style="font-size:30px;font-weight:800;color:#fff">' + e(byLine(m) || "담당 PB") + '</div></div><div style="font-size:21px;opacity:.8;text-align:right;color:#fff">' + e(m.date) + '</div></div></div>';
-    h += '<div style="padding:18px 48px 0;font-size:17px;line-height:1.55;color:#6b7484">' + m.notice.slice(0, 2).map(e).join(" · ") + '</div></div></div>';
+    var D = discOf(m), sl = simNo(m);
+    h += '<div style="margin:22px 44px 0;padding:18px 24px;border:1.5px solid #d5dbe5;border-radius:16px;background:#fafbfd;color:#4a5363">' +
+      '<div style="font-size:19px;font-weight:800;color:' + NAVY + ';margin-bottom:6px">⚖️ 투자위험 고지</div>' +
+      '<div style="font-size:15.5px;line-height:1.6">' + [
+        "본 자료는 투자 판단을 돕기 위한 참고 자료이며 수익을 보장하지 않음 · 투자 판단과 결과의 책임은 투자자 본인에게 있음",
+        "금융투자상품은 예금자보호법에 따라 보호되지 않으며 운용 결과에 따라 원금 손실(최대 전액)이 발생할 수 있음",
+        "과거 수익률·모의 계산은 가정치로 미래 수익을 보장하지 않음 · 보수·수수료·세금이 발생하며 세법은 바뀔 수 있음",
+        "가입 전 (간이)투자설명서·상품설명서를 반드시 읽고 충분한 설명을 들으셔야 함 · 투자자성향에 맞지 않으면 권유할 수 없음",
+        "금융소비자보호법상 청약철회권·위법계약해지권·자료열람요구권이 있음 · 민원 금융감독원 1332"
+      ].concat(D.P.map(function(g){ return g.ic + " " + g.t + ": " + g.l[0]; })).map(function(t){ return '<div style="display:flex;gap:8px"><span style="color:' + NAVY + '">·</span><span>' + e(t) + '</span></div>'; }).join("") + '</div>' +
+      (sl ? '<div style="font-size:15px;color:' + SUB + ';text-align:right;margin-top:6px">' + e(sl) + '</div>' : '') + '</div></div></div>';
     return h;
   }
 
@@ -718,10 +728,77 @@
       '<div style="flex:1">' + m.items.map(function(x){ return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid ' + LINE + ';font-size:14.5px;color:' + INK + '"><span style="width:14px;height:14px;border-radius:3px;background:' + x.f.color + '"></span><b style="flex:1">' + e(x.f.icon + " " + x.f.title) + '</b><span style="font-weight:800">' + (m.total ? pc(x.amt / m.total * 100) : "") + '</span><span style="width:120px;text-align:right;color:' + NAVY + ';font-weight:800">' + man(x.amt) + '</span></div>'; }).join("") + '</div></div>',
       m.items.map(function(x){ var sl = simLine(x.f, x.amt); return '<div style="display:flex;gap:10px;font-size:13px;line-height:1.5;padding:8px 12px;margin-bottom:6px;background:' + BG + ';border-radius:10px;border-left:5px solid ' + x.f.color + ';color:' + INK + '"><b style="flex:none;width:92px;color:' + x.f.color + '">' + e(x.f.short) + '</b><span style="flex:1">' + e(x.f.headline) + (sl ? '<br><span style="color:' + NAVY + ';font-weight:700">🧮 ' + e(sl.lab) + ' ' + e(sl.big) + '</span>' : '') + '</span></div>'; }).join("")];
   }
-  function noticeBlocks(m){
-    return [hTitle("📌 투자 전 꼭 확인하실 점") + m.notice.map(function(t, i){ return '<div style="display:flex;gap:12px;font-size:14.5px;line-height:1.6;padding:10px 0;border-bottom:1px solid ' + LINE + ';color:' + INK + '"><b style="color:' + NAVY + '">' + (i + 1) + '</b><span>' + e(t) + '</span></div>'; }).join("") +
-      gap(14) + box('<div style="font-size:13.5px;color:' + INK + ';line-height:1.65">이 제안서는 ' + e(m.basis) + ' 자료로 만들었음. 시장 상황에 따라 배분과 상품은 매일 바뀔 수 있음. 모의 계산은 지금 금리·환율과 과거 자료로 계산한 예시이며 실제 결과와 다를 수 있음.</div>') +
-      '<div style="margin-top:34px;display:flex;justify-content:space-between;align-items:flex-end;color:' + INK + '"><div><div style="font-size:14px;color:' + SUB + '">제안</div><div style="font-size:24px;font-weight:800;margin-top:6px">' + e(byLine(m) || "담당 PB") + '</div></div><div style="text-align:right"><div style="font-size:14px;color:' + SUB + '">' + e(custName(m)) + ' 확인</div><div style="width:200px;border-bottom:1px solid #9aa3b2;height:40px"></div></div></div>'];
+  /* ───────── ⚖️ 투자위험 고지 (10/29 사용자 「실제 심의필에 필적할 위험고지를 모든 제안서 마지막에」) ─────────
+     금융소비자보호법·금융투자협회 표준 안내 항목을 따름 · 고른 상품에 맞는 항목만 덧붙임 */
+  var EQK = {kr_stock: 1, gl_stock: 1, pension: 1, dc: 1, irp: 1}, FXK = {gl_stock: 1, ust: 1, brl: 1, pension: 1, dc: 1, irp: 1};
+  function discOf(m){
+    var ks = {}; m.items.forEach(function(x){ ks[x.f.key] = x.f; });
+    var has = function(o){ for (var q in ks) if (o[q]) return true; return false; };
+    var stock = m.items.some(function(x){ return (x.f.must || []).some(function(a){ return !a.etf && !a.safe && a.kind !== "안전"; }); });
+    var usd = ks.gl_stock && ks.gl_stock.mode === "usd";
+    var C = [
+      "본 자료는 고객의 투자 판단을 돕기 위해 작성한 참고 자료로, 특정 상품의 수익을 보장하거나 가입을 강요하지 않음. 최종 투자 판단과 그 결과에 대한 책임은 투자자 본인에게 있음",
+      "금융투자상품은 「예금자보호법」에 따라 예금보험공사가 보호하지 않음" + (has({pension: 1, dc: 1, irp: 1}) ? " (연금·퇴직연금 계좌 안의 예금 등 보호 대상 상품은 다른 예금과 별도로 1인당 1억원 한도 안에서 보호됨)" : ""),
+      "운용 결과에 따라 투자원금의 일부 또는 전부에 손실이 발생할 수 있으며, 그 손실은 투자자에게 귀속됨",
+      "과거 수익률·모의 계산·위기 시 하락 예시는 작성일 기준 금리·환율과 과거 가격으로 계산한 가정치로, 미래 수익을 보장하지 않음. 보수·수수료·세금·거래비용이 모두 반영되지 않았을 수 있음",
+      "투자자는 금융상품판매업자로부터 상품의 내용·위험·보수·수수료 등에 대해 충분한 설명을 받을 권리가 있음. 가입 전 (간이)투자설명서·상품설명서·약관을 반드시 읽어 보아야 함",
+      "투자자성향 진단 결과에 맞지 않는 상품은 권유할 수 없음(적합성·적정성 원칙). 65세 이상 고령 투자자, 투자 경험이 적은 투자자는 녹취·숙려기간 등 추가 보호 절차가 적용될 수 있음",
+      "금융소비자는 「금융소비자보호법」에 따라 청약철회권(대상 상품에 한함), 위법계약해지권(계약일로부터 5년 이내, 위법 사실을 안 날부터 1년 이내), 자료열람요구권을 가짐",
+      "매매수수료·ETF 총보수·환전 수수료·계좌 수수료 등이 발생하며, 이는 실제 수익률을 낮춤",
+      "세금 안내는 작성일 현재 세법 기준이며 세법 개정, 금융소득종합과세(이자·배당 연 2천만원 초과) 등 개인별 상황에 따라 달라질 수 있음. 구체적 세무 판단은 세무 전문가와 상의 필요",
+      "본 자료의 시장 정보·전망·종목 정보는 신뢰할 만한 공개 자료를 바탕으로 작성했으나 정확성·완전성을 보장하지 않으며, 시장 상황에 따라 예고 없이 바뀔 수 있음",
+      "회사는 제안 상품의 판매·운용과 관련해 보수·수수료를 받을 수 있으며, 회사 또는 계열사가 해당 상품을 발행·운용·보유할 수 있음",
+      "본 자료는 고객 본인에게만 제공되며 무단 복제·배포를 금함. 민원·분쟁은 회사 고객센터 또는 금융감독원(국번 없이 1332)에 신청할 수 있음"
+    ];
+    var Pd = [];
+    if (has(EQK)) Pd.push({ic: "📈", t: "주식·ETF", l: [
+      "주식·ETF는 시장·업종·개별 기업 사정에 따라 가격이 크게 오르내리며, 단기간에 큰 손실이 날 수 있음",
+      "ETF는 기초지수와 수익률이 다를 수 있음(추적오차) · 시장가격과 순자산가치가 벌어질 수 있음(괴리율) · 거래가 적으면 원하는 가격에 사고팔기 어려울 수 있고, 규모가 작아지면 상장폐지될 수 있음",
+      "「시황 테마」 칸은 작성일 시장 흐름을 반영한 것으로, 테마 흐름이 바뀌면 다른 칸보다 손실이 클 수 있음"]});
+    if (stock) Pd.push({ic: "⭐", t: "개별 종목", l: [
+      "개별 종목은 한 회사의 실적·공시·소송·업황 등에 크게 영향을 받아 분산된 ETF보다 변동성이 큼",
+      "종목 설명의 재무·애널리스트 의견·목표가는 표시된 기준일 자료이며, 이후 바뀌었을 수 있음. 특정 종목의 매수·매도를 권유하는 조사분석자료가 아님"]});
+    if (has(FXK)) Pd.push({ic: "💱", t: "해외 자산·환율", l: [
+      "해외 자산은 현지 가격뿐 아니라 환율 변동에 따라 원화 기준 수익률이 달라짐 · 환율이 내리면 원화 환산 손실이 날 수 있음",
+      "해외 시장은 휴장일·거래 시간·정치·경제·세제 환경이 달라 국가 위험이 있음"].concat(usd ? [
+      "미국 상장 주식·ETF 직접 투자: 연간 양도차익 250만원 초과분에 양도소득세 22%(지방세 포함) 신고·납부 · 배당은 현지 원천징수 15% · 환전 시 매매기준율과 차이(스프레드)가 비용으로 발생"] : []).concat(ks.gl_stock && !usd ? [
+      "국내 상장 해외 ETF: 매매차익·분배금에 배당소득세 15.4%가 원천징수되며 금융소득종합과세 대상에 포함됨 (연금·IRP 계좌는 과세 이연)"] : [])});
+    if (ks.pension) Pd.push({ic: "🛡", t: "연금저축", l: [
+      "연금 외로 찾으면 세액공제받은 원금과 운용수익에 기타소득세 16.5%가 부과됨 · 연금으로 받으면 연금소득세 3.3~5.5%(나이에 따라)",
+      "사적연금 수령액이 연 1,500만원을 넘으면 종합과세 또는 16.5% 분리과세 중 선택해야 함 · 세액공제 한도·공제율은 세법 개정으로 바뀔 수 있음"]});
+    if (ks.dc || ks.irp) Pd.push({ic: "🏦", t: "퇴직연금 (DC·IRP)", l: [
+      "퇴직연금 감독규정에 따라 위험자산 투자 한도는 적립금의 70%임 · 운용 결과에 대한 책임은 가입자 본인에게 있음",
+      "중도인출은 무주택자 주택 구입, 6개월 이상 요양 등 법에서 정한 사유에만 가능함 · 연금 외 수령 시 퇴직소득세·기타소득세가 부과됨" + (ks.irp ? " · IRP는 운용·자산관리 수수료가 발생할 수 있음" : "")]});
+    if (ks.ktb || ks.ust || ks.brl) Pd.push({ic: "🏛", t: "채권", l: [
+      "금리가 오르면 채권 가격이 내려감 · 만기 전에 팔면 시장 가격에 따라 원금 손실이 날 수 있으며, 만기가 길수록 가격 변동이 큼",
+      "발행자(국가) 신용도 변화·신용등급 하락 위험이 있으며, 장외 거래로 원하는 시점·가격에 팔기 어려울 수 있음(유동성 위험) · 제시 수익률은 작성일 시장 금리 기준으로 매수 시점에 따라 달라짐"]});
+    if (ks.ust) Pd.push({ic: "💵", t: "미국 국채", l: [
+      "달러로 투자하므로 원/달러 환율이 내리면 원화 환산 수익이 줄거나 손실이 날 수 있음 · 미국 금리·재정 상황 변화로 가격이 오르내림"]});
+    if (ks.brl) Pd.push({ic: "🌎", t: "브라질 국채", l: [
+      "헤알화는 변동성이 매우 큰 신흥국 통화로, 환율 하락 시 높은 이자를 넘는 원화 손실이 날 수 있음 · 원→달러→헤알 이중 환전 비용이 발생함",
+      "브라질 정치·재정 위험, 국가 신용등급 하락 위험이 있음 · 한·브라질 조세조약에 따른 개인 비과세 혜택과 브라질 금융거래세(IOF)는 조약·현지 세법 변경으로 바뀔 수 있음"]});
+    if (ks.els) Pd.push({ic: "🎯", t: "ELS (주가연계증권)", l: [
+      "원금 비보장 상품으로, 기초자산 가격이 손실 기준(낙인) 아래로 떨어지면 하락률만큼 원금 손실이 나며 최대 원금 전액을 잃을 수 있음 · 수익은 약속된 쿠폰으로 제한됨",
+      "발행사(증권사)가 파산하거나 신용이 나빠지면 조건과 상관없이 원금을 돌려받지 못할 수 있음(예금자보호 대상 아님) · 만기 전 중도상환 시 원금 손실이 날 수 있음",
+      "조기상환 여부와 시점은 기초자산 가격에 따라 정해지며 보장되지 않음 · 고령·부적합 투자자는 녹취와 숙려기간이 적용될 수 있음 · 상품별 위험등급과 조건은 투자설명서로 반드시 확인"]});
+    return {C: C, P: Pd};
+  }
+  function simNo(m){ return (ME.sim || "").trim() ? "준법감시인 심의필 " + ME.sim.trim() : ""; }
+  function discBlocks(m){
+    var D = discOf(m), n = 0;
+    var row = function(t){ n++; return '<div style="display:flex;gap:8px;font-size:11.5px;line-height:1.55;padding:4px 0;color:' + INK + '"><b style="color:' + NAVY + ';min-width:18px">' + n + '.</b><span>' + e(t) + '</span></div>'; };
+    var B = [hTitle("⚖️ 투자위험 고지 및 투자자 유의사항") + '<div style="font-size:12px;color:' + SUB + ';line-height:1.55;margin:-4px 0 10px">이 제안서를 받으신 고객님께 꼭 알려 드려야 하는 사항임 · 가입 전 끝까지 읽어 주시기 바람 · 이 제안서는 ' + e(m.basis) + ' 자료로 만들었으며 배분과 상품은 시장 상황에 따라 매일 바뀔 수 있음</div>' +
+      box('<div style="font-size:13px;font-weight:800;margin-bottom:4px;color:' + NAVY + '">공통 사항</div>' + D.C.map(row).join(""), "padding:12px 16px;background:#f7f9fc")];
+    D.P.forEach(function(g){ B.push(box('<div style="font-size:13px;font-weight:800;margin-bottom:4px;color:#b3372a">' + g.ic + ' ' + e(g.t) + ' 투자 시 위험</div>' + g.l.map(row).join(""), "padding:12px 16px;background:#fff7f5")); });
+    return B;
+  }
+  function signBlock(m){
+    var sl = simNo(m);
+    return '<div style="margin-top:18px;display:flex;justify-content:space-between;align-items:flex-end;color:' + INK + '"><div><div style="font-size:14px;color:' + SUB + '">제안</div><div style="font-size:24px;font-weight:800;margin-top:6px">' + e(byLine(m) || "담당 PB") + '</div></div><div style="text-align:right"><div style="font-size:14px;color:' + SUB + '">' + e(custName(m)) + ' — 위 위험 고지를 설명 듣고 이해했음</div><div style="width:240px;border-bottom:1px solid #9aa3b2;height:40px;margin-left:auto"></div></div></div>' +
+      '<div style="margin-top:14px;padding-top:8px;border-top:1px solid ' + LINE + ';display:flex;justify-content:space-between;font-size:11px;color:' + SUB + '"><span>작성일 ' + e(m.date) + (m.org ? ' · ' + e(m.org) : '') + '</span><span>' + e(sl) + '</span></div>';
+  }
+  function noticeBlocks(m){   // 쉬운 안내 4줄은 아래 위험고지 공통 사항에 모두 들어 있어 위험고지로 합침
+    return discBlocks(m).concat([signBlock(m)]);
   }
   // 덩어리 높이를 재서 쪽에 채움 · 남는 높이는 덩어리 사이 간격으로 고르게 나눔(너무 벌어지지 않게 최대 26px)
   var BODY_H = PH - 8 - 26 - 70, GAP = 14;
@@ -983,6 +1060,17 @@
       T(s, m.notice.concat(["모의 계산은 지금 금리·환율과 과거 자료로 계산한 예시이며 실제 결과와 다를 수 있음"]).map(function(t){ return {text: t, options: {bullet: {type: "number"}, breakLine: true}}; }), {x: 0.8, y: 1.5, w: 11.8, h: 3.6, fontSize: 15, paraSpaceAfter: 10});
       T(s, "제안  " + (byLine(m) || "담당 PB"), {x: 0.8, y: 5.6, w: 6, h: 0.5, fontSize: 20, bold: true, color: hx(NAVY)});
       T(s, custName(m) + " 확인  ______________________", {x: 6.8, y: 5.7, w: 6, h: 0.4, fontSize: 13, color: "5B6576", align: "right"});
+      var D = discOf(m), nn = 0, li = function(t){ nn++; return {text: nn + ". " + t, options: {breakLine: true}}; };
+      s = P.addSlide(); head(s, "⚖️ 투자위험 고지 — 공통 사항", "가입 전 반드시 확인");
+      T(s, D.C.slice(0, 6).map(li), {x: 0.5, y: 1.35, w: 6.1, h: 5.3, fontSize: 11.5, paraSpaceAfter: 7, valign: "top"});
+      T(s, D.C.slice(6).map(li), {x: 6.8, y: 1.35, w: 6.1, h: 5.3, fontSize: 11.5, paraSpaceAfter: 7, valign: "top"});
+      for (var di = 0; di < D.P.length; di += 4){ var grp = D.P.slice(di, di + 4);
+        s = P.addSlide(); head(s, "⚖️ 투자위험 고지 — 상품별 위험", D.P.length > 4 ? (di / 4 + 1) + "/" + Math.ceil(D.P.length / 4) : "제안 상품에 해당하는 항목");
+        grp.forEach(function(g, gi){ var gx = 0.5 + (gi % 2) * 6.3, gy = 1.35 + Math.floor(gi / 2) * 2.85;
+          rbox(s, gx, gy, 6.1, 2.7, "#FFF7F5");
+          T(s, g.ic + " " + g.t + " 투자 시 위험", {x: gx + 0.15, y: gy + 0.08, w: 5.8, h: 0.32, fontSize: 11, bold: true, color: "B3372A"});
+          T(s, g.l.map(function(t){ return {text: t, options: {bullet: true, breakLine: true}}; }), {x: gx + 0.15, y: gy + 0.42, w: 5.8, h: 2.2, fontSize: 10.5, paraSpaceAfter: 4, valign: "top"}); }); }
+      T(s, ["작성일 " + m.date + (m.org ? " · " + m.org : ""), simNo(m)].filter(Boolean).join("   |   "), {x: 0.5, y: 6.72, w: 12.3, h: 0.28, fontSize: 9.5, color: "5B6576", align: "right"});
       return P.write({outputType: "blob"});
     });
   }
@@ -1002,7 +1090,8 @@
     h += '<section data-xc="1" class="card"><h3>✍️ 누구에게 · 누가</h3><div class="pp-in">' +
       '<label>고객 이름<input id="ppcust" maxlength="20" placeholder="예: 홍길동" value="' + e(ST.cust) + '"></label>' +
       '<label>제안자 이름<input id="pppb" maxlength="20" placeholder="예: 김OO PB" value="' + e(ME.pb || "") + '"></label>' +
-      '<label>소속<input id="pporg" maxlength="30" placeholder="예: OO WM센터" value="' + e(ME.org || "") + '"></label></div><p class="pp-tip">제안자·소속은 이 휴대폰에 기억해 둠</p></section>';
+      '<label>소속<input id="pporg" maxlength="30" placeholder="예: OO WM센터" value="' + e(ME.org || "") + '"></label>' +
+      '<label>심의필 번호 (선택)<input id="ppsim" maxlength="60" placeholder="예: 제2026-0000호 (2026.10.29~2027.10.28)" value="' + e(ME.sim || "") + '"></label></div><p class="pp-tip">제안자·소속·심의필은 이 휴대폰에 기억해 둠 · 심의필은 회사 준법감시인에게 받은 번호를 넣으면 위험고지 아래에 찍힘 (비우면 안 찍힘)</p></section>';
     h += '<section data-xc="1" class="card"><h3>💰 상품별 금액</h3>' + (ST.sel.length ? ST.sel.map(function(k){ var f = form(k), v = ST.amt[k] || "";
         return '<div class="pp-amt" style="--fc:' + f.color + '"><div class="pp-an"><span>' + e(f.icon) + '</span><b>' + e(f.short) + '</b><span class="pp-aw" id="ppw_' + k + '">' + (v ? man(v * 10000) : "") + '</span></div>' +
           '<div class="pp-ar"><input inputmode="numeric" data-ak="' + k + '" placeholder="금액 (만원)" value="' + e(v) + '"><span>만원</span></div>' +
@@ -1087,6 +1176,7 @@
     if (cu) cu.oninput = function(){ ST.cust = cu.value; preview(); };
     if (pb) pb.oninput = function(){ ME.pb = pb.value.trim(); keep(); preview(); };
     if (og) og.oninput = function(){ ME.org = og.value.trim(); keep(); preview(); };
+    var sm = document.getElementById("ppsim"); if (sm) sm.oninput = function(){ ME.sim = sm.value.trim(); keep(); preview(); };
     [].forEach.call(w.querySelectorAll("[data-ak]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d]/g, ""); if (inp.value !== v) inp.value = v; ST.amt[inp.dataset.ak] = v ? +v : ""; keep(); upAmt(inp.dataset.ak); }; });
     [].forEach.call(w.querySelectorAll("[data-qk]"), function(b){ b.onclick = function(){ var k = b.dataset.qk; ST.amt[k] = +b.dataset.qv; keep(); var inp = w.querySelector('[data-ak="' + k + '"]'); if (inp) inp.value = ST.amt[k];
       [].forEach.call(b.parentNode.children, function(x){ x.classList.toggle("on", x === b); }); upAmt(k); }; });
@@ -1168,7 +1258,7 @@
   var READY = {};
   function make(kind, btn){
     if (!ST.sel.length){ toast("상품을 먼저 골라 주세요"); return; }
-    var m = model(), sig = JSON.stringify([kind, ST.sel, ST.amt, ST.opt, ST.cust, ME.pb, ME.org, DATA.at]);
+    var m = model(), sig = JSON.stringify([kind, ST.sel, ST.amt, ST.opt, ST.cust, ME.pb, ME.org, ME.sim, DATA.at]);
     if (READY[kind] && READY[kind].sig === sig){ var R = READY[kind]; shareBlob(R.blob, R.name, R.mime); return; }   // 두 번째 누름 = 저장·공유 (아이폰은 누른 순간에만 공유창이 열림)
     if (ST.busy) return; ST.busy = true;
     var st = document.getElementById("ppst"), old = btn.innerHTML;
@@ -1192,7 +1282,7 @@
     b.innerHTML = BTNL[b.dataset.mk]; }); var st = document.getElementById("ppst"); if (st) st.textContent = ""; }
 
   // 시험·다른 화면에서 쓰도록
-  window.PROPOSE = {load: load, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.opt) ST.opt = o.opt; },
+  window.PROPOSE = {load: load, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.sim != null) ME.sim = o.sim; if (o.opt) ST.opt = o.opt; },
     png: function(){ return ensureReasons().then(function(){ return makePng(model()); }); }, pdf: function(){ return ensureReasons().then(function(){ return makePdf(model()); }); },
     ppt: function(){ return ensureReasons().then(function(){ return makePpt(model()); }); }, pptimg: function(){ return ensureReasons().then(function(){ return makePptImg(model()); }); }, reasons: function(){ return ensureReasons().then(function(){ return RS; }); }, onePage: function(){ return onePage(model()); }, pages: function(){ return fullPages(model()); }};
 
