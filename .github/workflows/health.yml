@@ -3,7 +3,7 @@ name: health
 # 🩺 앱 건강검진 (10/10 앱 업그레이드 ⑩) — 매일 16:30 KST · 일요일 08:05 KST 「이번 주 고친 것」
 on:
   schedule:
-    - cron: "30 7 * * *"     # 16:30 KST (17:47 자가 업그레이드 전에)
+    - cron: "52 6 * * *"     # 15:52 KST (10/29 깊은 검진 35분 → 16:47 자가 업그레이드 전에 끝나게)
     - cron: "5 23 * * 6"     # 일요일 08:05 KST
   workflow_dispatch:
 
@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: health
-  cancel-in-progress: true
+  cancel-in-progress: false   # 10/29 긴 검진을 두 번째 실행이 끊지 않게
 
 jobs:
   check:

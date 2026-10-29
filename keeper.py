@@ -34,7 +34,7 @@ JOBS += [(f"{h:02d}:47", "watch.yml", True, None, 20) for h in (22, 23, 0, 1, 2,
 JOBS += [("23:21", "oppdf.yml", False, None, 20), ("00:11", "oppdf-all.yml", False, None, 180), ("00:21", "opnews.yml", False, None, 180), ("02:41", "opest.yml", False, None, 120)]
 JOBS += [(f"{h:02d}:12", "feedback.yml", False, None, 30) for h in list(range(5, 24)) + [0, 1, 2, 3, 4]]   # 의견함 (ntfy 첨부는 3시간만 보관)
 # 🩺 건강검진: 예약 16:30 이 자주 빠짐(10/11 은 23:15 에 뜸 · 10/12 은 안 뜸) → 16:47 자가 업그레이드 전에 끝나도록 16:25 직접
-JOBS += [("16:25", "health.yml", False, None, 120)]
+JOBS += [("16:00", "health.yml", False, None, 120)]   # 10/29 깊은 검진은 35분쯤 걸림 → 16:00 에 켜야 16:47 자가 업그레이드 전에 끝남
 # 🎲 시장확률: 매시 예약이 새벽에 자주 빠짐(10/15 05:12 뒤로 안 뜸) → 한국·아시아 장 열기 전 두 번 + 마감 직후 직접
 JOBS += [("07:42", "prob.yml", True, None, 25), ("08:38", "prob.yml", True, None, 25), ("15:52", "prob.yml", True, None, 15), ("17:22", "prob.yml", True, None, 15)]
 # 10/19 사용자 「08:38 기준이 장중 9:46까지 남아 있어 — 일일이 말 안 해도 되게」: 매시 12분 예약이 통째로 빠짐(09:12 안 뜸)
