@@ -15,6 +15,94 @@
   var EQ = {kr_stock: 1, gl_stock: 1, pension: 1, dc: 1, irp: 1};
   var MCOL = ["#c9962b", "#b5651d", "#8e44ad", "#16a085", "#c0392b", "#2c3e50"];
   function opt(k){ ST.opt[k] = ST.opt[k] || {mode: "krw", must: []}; if (!ST.opt[k].must) ST.opt[k].must = []; return ST.opt[k]; }
+  /* 🔎 추천 이유 — 앱이 이미 모아 둔 자료(종목리포트 d/ · ETF x/ · 뉴스 n/ · 시세 p/ · 시황 테마 · ETF 속 회사)로 규칙대로 씀 (10/29 사용자 「넌 이유를 찾아서 넣어」) */
+  var RS = {}, RSP = {};
+  function rkey(m){ return (m.sym || m.code || m.name || "").toUpperCase(); }
+  var OPDX = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/";
+  function oj(path){ return (typeof getJSON === "function" ? getJSON(OPDX + path, {ttl: 3600e3}) : fetch(OPDX + path).then(function(r){ if (!r.ok) throw 0; return r.json(); })).catch(function(){ return null; }); }
+  function ofile(sym){ return sym.replace(/[^A-Za-z0-9.-]/g, "_"); }
+  function shard(sym){ try { if (typeof opShard === "function") return opShard(sym); } catch(x) {} return null; }
+  function resolveSym(m){
+    if (m.sym) return Promise.resolve(m.sym);
+    if (typeof opLoadIdx !== "function") return Promise.resolve(null);
+    return opLoadIdx().then(function(ix){
+      var c = String(m.code || "").toUpperCase(), n = String(m.name || "").replace(/\s/g, "").toLowerCase();
+      var hit = ix.filter(function(r){ return c && (r.sym.toUpperCase() === c || r.sym.toUpperCase() === c + ".KS" || r.sym.toUpperCase() === c + ".KQ"); })[0] ||
+                ix.filter(function(r){ return r.name.replace(/\s/g, "").toLowerCase() === n; })[0];
+      return hit ? hit.sym : null;
+    }).catch(function(){ return null; });
+  }
+  var SECKO = {CONSUMER_STAPLES: "필수소비재", consumer_defensive: "필수소비재", HEALTHCARE: "헬스케어", healthcare: "헬스케어", ENERGY: "에너지", energy: "에너지", IT: "IT", technology: "IT",
+    INDUSTRIALS: "산업재", industrials: "산업재", FINANCIALS: "금융", financial_services: "금융", CONSUMER_DISCRETIONARY: "경기소비재", consumer_cyclical: "경기소비재", UTILITIES: "유틸리티", utilities: "유틸리티",
+    MATERIALS: "소재", basic_materials: "소재", COMMUNICATION: "통신", communication_services: "통신", REAL_ESTATE: "부동산", realestate: "부동산"};
+  var SEC2THEME = {"에너지": "에너지", "유틸리티": "전력·인프라", "IT": "반도체 (HBM)", "금융": "금융", "필수소비재": "필수소비재"};
+  function nfmt(v, cur){ if (v == null) return "–"; return cur === "KRW" ? Math.round(v).toLocaleString("ko-KR") + "원" : (cur === "USD" ? "$" : "") + (+v).toLocaleString("ko-KR", {maximumFractionDigits: v < 100 ? 2 : 0}) + (cur && cur !== "USD" && cur !== "KRW" ? " " + cur : ""); }
+  function first(t, n){ t = String(t || "").replace(/<[^>]+>/g, " ").replace(/^[-\s·]+/, "").replace(/\s+/g, " ").trim();
+    var c = t.search(/[.。]\s|다\./); if (c > 0) t = t.slice(0, c + 1);
+    t = t.replace(/하고 있습니다\.?$/, "하고 있음").replace(/있습니다\.?$/, "있음").replace(/합니다\.?$/, "함").replace(/됩니다\.?$/, "됨").replace(/입니다\.?$/, "임").replace(/[.。]$/, "");
+    return t.length > n ? t.slice(0, n - 1) + "…" : t; }
+  function bizLine(d){   // 「○○ 주식회사는 …에서 …를 운영하고 있습니다」 → 「…를 운영하고 있음」
+    var t = String(d.business_summary_ko || "");
+    t = t.replace(/^[^,.]{0,40}?(은|는)\s/, "").replace(/^(미국|한국|일본|중국|대만|홍콩|유럽|전 세계)[^.]{0,60}?(에서|적으로)\s/, "");
+    return first(t, 70); }
+  function capTxt(d, px){ var c = d.market_cap; if (!c) return ""; if (px && d.price) c = c * px / d.price;   /* 지금 값으로 다시 계산 */ return d.currency === "KRW" ? "시가총액 " + Math.round(c / 1e12).toLocaleString("ko-KR") + "조원" : d.currency === "USD" ? "시가총액 $" + (c >= 1e12 ? (c / 1e12).toFixed(1) + "T" : Math.round(c / 1e9) + "B") : ""; }
+  function growth(fin){ fin = (fin || []).filter(function(x){ return x && x.revenue; }); if (fin.length < 2) return null; var a = fin[fin.length - 2], b = fin[fin.length - 1];
+    return {p: b.period, rev: (b.revenue / a.revenue - 1) * 100, op: a.operating_income > 0 && b.operating_income != null ? (b.operating_income / a.operating_income - 1) * 100 : null}; }
+  function buildReason(m, sym, d, x, n, p, ctx){
+    var L = [], tag = [], nm = m.name;
+    var px = p && p[1], hi = p && p[3], lo = p && p[4], r1y = p && p[6] && p[6][0] ? (p[1] / p[6][0] - 1) * 100 : null;
+    if (x){   // ETF
+      var what = x.index ? "「" + x.index + "」 지수를 따라감" : x.category ? (x.name_en || x.name) + " — 유형: " + x.category : first(x.desc, 70);
+      L.push("📌 " + what + (x.issuer ? " · " + x.issuer : "") + (x.fee != null ? " · 보수 연 " + x.fee + "%" : ""));
+      var rr = x.returns || {}, y1 = rr["1년"] != null ? rr["1년"] : (x.r1y != null ? x.r1y * 100 : r1y), y3 = rr["3년(연)"] != null ? rr["3년(연)"] : (x.r3y != null ? x.r3y * 100 : null);
+      if (y1 != null || y3 != null) L.push("📈 1년 " + sgn(y1, 1) + (y3 != null ? " · 3년 연평균 " + sgn(y3, 1) : "") + (x.div_yield ? " · 분배(배당) 연 " + (+x.div_yield).toFixed(2) + "%" : ""));
+      var h = (x.holdings || []).slice(0, 3).map(function(q){ return (q.name || q.code) + " " + (+q.w).toFixed(1) + "%"; }), sec = (x.sectors || []).slice().sort(function(a, b){ return b.w - a.w; })[0];
+      if (h.length) L.push("🧺 주로 담는 곳: " + h.join(" · ") + (x.n_hold ? " 등 " + x.n_hold + "개" : "") + (sec ? " · 가장 큰 업종 " + (SECKO[sec.k] || sec.k) + " " + (+sec.w).toFixed(0) + "%" : ""));
+      var fit = [];
+      if (x.div_yield >= 2.5) fit.push("배당 연 " + (+x.div_yield).toFixed(1) + "%로 꾸준한 현금흐름을 더함");
+      if (sec && SEC2THEME[SECKO[sec.k]]){ var th = (ctx.themes || []).filter(function(t){ return t.name === SEC2THEME[SECKO[sec.k]]; })[0]; if (th) fit.push("오늘 시황 리포트가 고른 「" + th.name + "」 테마와 겹침(흐름 " + th.sig + ")"); }
+      if (x.aum && x.aum > (x.cur === "USD" ? 5e9 : 1e12)) fit.push("순자산 " + (x.cur === "USD" ? "$" + Math.round(x.aum / 1e9) + "B" : (x.aum / 1e12).toFixed(1) + "조원") + " 대형 ETF라 사고팔기 쉬움");
+      if (fit.length) L.push("🔗 " + fit.join(" · "));
+      tag.push("ETF");
+    } else if (d){   // 종목
+      var biz = bizLine(d), cp = capTxt(d, px);
+      L.push("📌 " + [d.industry_ko, cp].filter(Boolean).join(" · ") + (biz ? " — " + biz : ""));
+      var g = growth(d.financials);
+      if (g) L.push("📊 " + g.p + "년 매출 " + sgn(g.rev, 0) + (g.op != null ? " · 영업이익 " + sgn(g.op, 0) : "") + (d.pe ? " · PER " + (+d.pe).toFixed(1) + "배" : "") + (d.dividend_yield ? " · 배당 " + (d.dividend_yield * 100).toFixed(1) + "%" : ""));
+      var an = d.analyst || {};
+      if (an.n_analysts){ var buy = Math.round(((an.strong_buy || 0) + (an.buy || 0)) / an.n_analysts * 100), cur = px || d.price, up = an.target_mean && cur ? (an.target_mean / cur - 1) * 100 : null;
+        if (up != null && (up > 80 || up < -50)) up = null;   // 오래된 목표가·액면분할 등으로 튀는 값은 안 씀
+        L.push("💡 애널리스트 " + an.n_analysts + "명 중 " + buy + "%가 매수 의견" + (up != null ? " · 평균 목표가 " + nfmt(an.target_mean, d.currency) + " (지금보다 " + sgn(up, 0) + ")" : "") + (d.as_of ? " · " + String(d.as_of).slice(5).replace("-", "/") + " 기준" : "")); }
+      var link = [];
+      (ctx.themes || []).forEach(function(t){ if ((t.stocks || []).some(function(s2){ return nm.indexOf(s2) >= 0 || s2.indexOf(nm) >= 0; })) link.push("시황 리포트 「" + t.name + "」 테마 대표 종목(흐름 " + t.sig + ")"); });
+      var lk = ctx.look; if (lk && lk.top){ var j = -1; lk.top.forEach(function(t, i){ if (j < 0 && (t.t === sym || t.n === nm)) j = i; }); if (j >= 0) link.push("S&P500·나스닥 칸 안에서도 비중 " + (j + 1) + "위 — 직접 더 담아 비중을 키움"); }
+      (ctx.hot || []).forEach(function(hh){ if ((hh.lead || []).indexOf(nm) >= 0) link.push("오늘 돈이 몰린 「" + hh.name + "」 업종 대표 종목"); });
+      if (link.length) L.push("🔗 " + link.slice(0, 2).join(" · "));
+      tag.push(d.industry_ko || "종목");
+    }
+    if (px && hi && lo && hi > lo) L.push("📍 지금 " + nfmt(px, (x || d || {}).currency || (x || {}).cur) + " · 52주 범위의 " + Math.round((px - lo) / (hi - lo) * 100) + "% 위치 (고점 대비 " + sgn((px / hi - 1) * 100, 0) + ")" + (r1y != null && !x ? " · 1년 " + sgn(r1y, 0) : ""));
+    var nw = (n || (d && d.news) || []).filter(function(q){ return q && q.title; })[0];
+    if (nw) L.push("📰 " + first(nw.title, 60) + (nw.date ? " (" + String(nw.date).slice(5).replace("-", "/") + ")" : "") + (nw.publisher ? " · " + nw.publisher : ""));
+    return {lines: L.slice(0, 5), short: L.length ? L[0].replace(/^📌 /, "").slice(0, 60) : "", tag: tag[0] || ""};
+  }
+  function reasonFor(m, ctx){
+    var key = rkey(m); if (RS[key]) return Promise.resolve(RS[key]); if (RSP[key]) return RSP[key];
+    RSP[key] = resolveSym(m).then(function(sym){
+      if (!sym){ RS[key] = {lines: [], short: ""}; return RS[key]; }
+      m.sym = sym; var sh = shard(sym);
+      return Promise.all([oj("d/" + ofile(sym) + ".json"), oj("x/" + ofile(sym) + ".json"), oj("n/" + ofile(sym) + ".json"), sh ? oj("p/" + sh + ".json") : Promise.resolve(null)]).then(function(r){
+        RS[key] = buildReason(m, sym, r[0], r[1], r[2], r[3] && r[3][sym], ctx); return RS[key]; });
+    }).catch(function(){ RS[key] = {lines: [], short: ""}; return RS[key]; });
+    return RSP[key];
+  }
+  // 고른 종목들의 이유를 모두 받아 둠 (만들기·미리 보기 전에)
+  function ensureReasons(){
+    var jobs = [];
+    ST.sel.forEach(function(k){ if (!EQ[k]) return; var f0 = form(k) || {}, o = ST.opt[k] || {};
+      var ctx = {themes: f0.themes || ((f0.alt || {}).usd || {}).themes || [], look: (f0.sim || {}).look, hot: f0.kr_hot || []};
+      (o.must || []).forEach(function(m){ if (m && m.name) jobs.push(reasonFor(m, ctx).then(function(){ if (m.sym) keep(); })); }); });
+    return Promise.all(jobs);
+  }
   // 고른 방식(원화/환전) + 꼭 넣을 종목을 기본폼에 덧입힌 「이 고객용」 폼
   var RET = {dc: 1, irp: 1};
   var MCOL2 = ["#c9962b", "#b5651d", "#8e44ad", "#16a085", "#c0392b", "#2c3e50", "#d35400", "#7f8c8d", "#27ae60", "#9b59b6"];
@@ -39,7 +127,7 @@
     }
     var after = base.map(function(a){ var b = JSON.parse(JSON.stringify(a)); b.was = a.pct; b.pct = r1(a.pct * (fr[a.kind] != null ? fr[a.kind] : fr["위험"])); return b; });
     var ins = items.map(function(x, i){ var m = x.m; return {k: "must", pct: r1(x.pct), was: 0, name: "⭐ " + m.name, inst: m.name + (m.mkt ? " · " + m.mkt : ""), code: m.code || null, kind: x.safe ? "안전" : "위험",
-      color: MCOL2[i % MCOL2.length], why: "고객님 요청으로 꼭 담는 " + (m.etf ? "ETF" : m.code ? "종목" : "상품") + (x.safe ? " (안전자산으로 분류)" : "")}; });
+      color: MCOL2[i % MCOL2.length], why: ((RS[rkey(m)] || {}).short || "PB 추천 " + (m.etf ? "ETF" : "종목")) + (x.safe ? " (안전자산으로 분류)" : ""), reason: (RS[rkey(m)] || {}).lines || [], sym: m.sym || ""}; });
     var all = ins.concat(after), diff = r1(100 - all.reduce(function(s2, a){ return s2 + a.pct; }, 0));
     if (diff){ var big = after.slice().sort(function(a, b){ return b.pct - a.pct; })[0] || ins[0]; if (big) big.pct = r1(big.pct + diff); }
     if (RET[k]){   // 반올림으로 70.1% 같은 것이 나오지 않게 — 넘친 만큼 위험 칸 → 안전 칸
@@ -61,9 +149,9 @@
     (f.themes || []).forEach(function(t){ t.w = r1(t.w * (tf ? ta / tf : 0)); });
     f.alloc = P.ins.concat(P.after.filter(function(a){ return a.pct > 0; }));
     f.must = P.ins; f.mustPlan = P;
-    f.headline = "⭐ 고객 지정 " + pc(P.M) + " + 기본 포트 " + pc(r1(100 - P.M)) + " — 기본 포트는 원래 비율 그대로 줄여 합계 100%로 맞춘 제안임";
-    f.points = ["⭐ 고객님이 꼭 원하신 " + P.ins.map(function(a){ return a.inst.split(" · ")[0] + " " + pc(a.pct); }).join(" · ") + "를 먼저 담고, 기본 포트는 원래 비율 그대로 " + pc(r1(100 - P.M)) + "로 줄여 합계 100%를 맞춤"].concat(RET[k] ? ["위험자산 합계 " + pc(P.risky) + " (법정 한도 70% 안)"] : []).concat(f.points || []);
-    if (f.sim && f.sim.note) f.sim.note += " · ⭐ 고객 지정 종목은 과거 계산에서 빼고 기본 포트 비율로 계산";
+    f.headline = "⭐ 추천 종목 " + pc(P.M) + " + " + f.headline.replace(/^⭐ 추천 종목 [^+]*\+ /, "");
+    f.points = ["⭐ 추천 종목 " + P.ins.map(function(a){ return a.inst.split(" · ")[0] + " " + pc(a.pct); }).join(" · ") + " — 담는 이유는 아래 「추천 종목」 칸 · 나머지 " + pc(r1(100 - P.M)) + "는 기본 포트 비율 그대로"].concat(RET[k] ? ["위험자산 합계 " + pc(P.risky) + " (법정 한도 70% 안)"] : []).concat(f.points || []);
+    if (f.sim && f.sim.note) f.sim.note += " · ⭐ 추천 종목은 과거 계산에서 빼고 기본 포트 비율로 계산";
     return f;
   }
   var FONT = '"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR",sans-serif';
@@ -290,8 +378,10 @@
   function onePageExtra(f, amt, multi){
     var S = f.sim; if (!S || !amt || multi) return "";
     var o = "";
-    if (f.must && f.must.length) o += '<div style="margin:0 26px 16px;background:#fffaee;border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:8px">⭐ 고객님이 꼭 원하신 종목·ETF</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
-      f.must.map(function(a){ return '<span style="background:#fff;border:1px solid ' + LINE + ';border-left:6px solid ' + a.color + ';border-radius:12px;padding:8px 12px;font-size:22px"><b>' + e(a.inst.split(" · ")[0]) + '</b> ' + pc(a.pct) + ' <span style="color:' + NAVY + ';font-weight:800">' + man(amt * a.pct / 100) + '</span></span>'; }).join("") + '</div></div>';
+    if (f.must && f.must.length) o += '<div style="margin:0 26px 16px;background:#fffaee;border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:8px">⭐ 추천 종목·ETF</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      f.must.map(function(a){ var r0 = (a.reason || []).filter(function(t){ return /^(🔗|📈|📊|💡)/.test(t); })[0] || (a.reason || [])[0] || "";
+        return '<div style="flex:1 1 45%;background:#fff;border:1px solid ' + LINE + ';border-left:6px solid ' + a.color + ';border-radius:12px;padding:8px 12px;font-size:22px"><b>' + e(a.inst.split(" · ")[0]) + '</b> ' + pc(a.pct) + ' <span style="color:' + NAVY + ';font-weight:800">' + man(amt * a.pct / 100) + '</span>' +
+          (r0 ? '<div style="font-size:17px;color:' + SUB + ';line-height:1.4;margin-top:3px">' + e(r0) + '</div>' : '') + '</div>'; }).join("") + '</div></div>';
     if (f.mode) o += '<div style="margin:0 26px 16px;font-size:21px;color:' + INK + '">' + (f.mode === "usd" ? "💵 <b>환전해서</b> 미국 상장 ETF로 — 매매차익 분리과세 22%(250만원 공제)" : "💴 <b>원화로</b> 국내 상장 ETF로 — 환전 없이 바로 · 배당소득세 15.4%") + '</div>';
     if (f.themes && f.themes.length) o += '<div style="margin:0 26px 16px;background:#fff7ef;border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:8px">🧭 시황 테마 칸 — 리포트가 고른 「돈이 몰리는 곳」</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
       f.themes.map(function(t){ return '<span style="background:#fff;border:1px solid ' + LINE + ';border-left:6px solid ' + t.color + ';border-radius:12px;padding:8px 12px;font-size:21px"><b>' + e(t.name) + '</b> ' + pc(t.w) + ' <span style="color:' + NAVY + ';font-weight:800">' + man(amt * t.w / 100) + '</span><br><span style="font-size:17px;color:' + SUB + '">' + e(t.pick.name) + '</span></span>'; }).join("") + '</div></div>';
@@ -421,15 +511,19 @@
     return '<div style="display:flex;gap:10px">' + c.map(function(x){ return '<div style="flex:1;border:1.5px solid ' + LINE + ';border-top:4px solid ' + x[2] + ';border-radius:12px;padding:10px 13px;color:' + INK + '"><div style="font-size:12.5px;color:' + SUB + ';font-weight:700">' + e(x[0]) + '</div><div style="font-size:25px;font-weight:800;color:' + x[2] + ';letter-spacing:-0.6px">' + e(x[1]) + '</div><div style="font-size:11.5px;color:' + SUB + '">' + e(x[3]) + '</div></div>'; }).join("") + '</div>';
   }
   function pkn(p){ return p.name.indexOf(p.code) >= 0 ? p.name : p.name + " (" + p.code + ")"; }
-  // ⭐ 고객 지정 · 💱 원화 vs 환전
+  // ⭐ 추천 종목 · 💱 원화 vs 환전
   function mustBlocks(f, x){
     var B = [], A = x.amt;
     if (f.must && f.must.length){ var Mt = Math.round(f.must.reduce(function(s2, a){ return s2 + a.pct; }, 0) * 10) / 10;
-      B.push('<!--K-->' + secT("⭐ 고객님이 꼭 원하신 종목·ETF " + pc(Mt) + (A ? " · " + man(A * Mt / 100) : ""), f.color) +
-        '<div style="display:flex;gap:10px;flex-wrap:wrap">' + f.must.map(function(a){ return '<div style="flex:1 1 30%;min-width:180px;border:1px solid ' + LINE + ';border-top:5px solid ' + a.color + ';border-radius:12px;padding:10px 12px;color:' + INK + '"><div style="font-size:15px;font-weight:800">' + e(a.inst.split(" · ")[0]) + '</div>' +
-          '<div style="font-size:11.5px;color:' + SUB + '">' + e([a.code, a.inst.split(" · ")[1]].filter(Boolean).join(" · ") || "직접 입력") + '</div><div style="display:flex;justify-content:space-between;margin-top:6px"><b style="font-size:20px;color:' + a.color + '">' + pc(a.pct) + '</b>' + (A ? '<b style="font-size:15px;color:' + NAVY + '">' + man(A * a.pct / 100) + '</b>' : '') + '</div></div>'; }).join("") + '</div>' +
-        (f.mustPlan ? '<div style="display:flex;gap:12px;align-items:flex-start;margin-top:10px"><div style="flex:1.4;min-width:0">' + tbl({cols: ["칸", "원래 기본 포트", "지정 넣은 뒤", "금액"], rows: f.mustPlan.ins.concat(f.mustPlan.after).map(function(a){ return [a.name, a.k === "must" ? "–" : pc(a.was), pc(a.pct), A ? man(A * a.pct / 100) : "–"]; }).concat([["합계", "100%", "100%", A ? man(A) : "–"]])}, 11.5, {right: true, pad: "4px 8px", hl: function(r){ return r[0] === "합계" || r[0].indexOf("⭐") === 0; }}) + '</div>' +
-          '<div style="flex:1;min-width:0">' + box('<div style="font-size:13px;font-weight:800;margin-bottom:6px">이렇게 맞춤</div><div style="font-size:12.5px;line-height:1.6">① 고객님이 정한 비중(' + pc(f.mustPlan.M) + ')을 먼저 담음<br>② 기본 포트는 칸마다 원래 비율 그대로 ' + pc(r1(100 - f.mustPlan.M)) + '로 줄임<br>③ 합계 100%' + (RET[f.key] ? '<br>④ 위험자산 ' + pc(f.mustPlan.risky) + ' — 법정 한도 70% 안' : '') + '</div>' +
+      var cardsM = f.must.map(function(a){ var rs = a.reason || [];
+        return '<div style="border:1px solid ' + LINE + ';border-left:6px solid ' + a.color + ';border-radius:12px;padding:10px 13px;color:' + INK + ';display:flex;gap:14px">' +
+          '<div style="flex:none;width:150px"><div style="font-size:15px;font-weight:800;line-height:1.3">' + e(a.inst.split(" · ")[0]) + '</div><div style="font-size:11.5px;color:' + SUB + '">' + e([a.code, a.inst.split(" · ")[1]].filter(Boolean).join(" · ")) + '</div>' +
+          '<div style="font-size:22px;font-weight:900;color:' + a.color + ';margin-top:4px">' + pc(a.pct) + '</div>' + (A ? '<div style="font-size:14px;font-weight:800;color:' + NAVY + '">' + man(A * a.pct / 100) + '</div>' : '') + '</div>' +
+          '<div style="flex:1;min-width:0;font-size:12.5px;line-height:1.55">' + (rs.length ? '<div style="font-size:12px;font-weight:800;color:' + SUB + ';margin-bottom:2px">왜 담나</div>' + rs.map(function(t){ return '<div style="padding:2px 0">' + e(t) + '</div>'; }).join("") : '<div style="color:' + SUB + '">' + e(a.why) + '</div>') + '</div></div>'; });
+      B.push('<!--K-->' + secT("⭐ 추천 종목·ETF " + pc(Mt) + (A ? " · " + man(A * Mt / 100) : "") + " — 왜 담나", f.color) + (cardsM[0] || ""));
+      cardsM.slice(1).forEach(function(c){ B.push(c); });
+      B.push((f.mustPlan ? '<div style="display:flex;gap:12px;align-items:flex-start;margin-top:2px"><div style="flex:1.4;min-width:0">' + tbl({cols: ["칸", "기본 포트", "추천 종목 넣은 뒤", "금액"], rows: f.mustPlan.ins.concat(f.mustPlan.after).map(function(a){ return [a.name, a.k === "must" ? "–" : pc(a.was), pc(a.pct), A ? man(A * a.pct / 100) : "–"]; }).concat([["합계", "100%", "100%", A ? man(A) : "–"]])}, 11.5, {right: true, pad: "4px 8px", hl: function(r){ return r[0] === "합계" || r[0].indexOf("⭐") === 0; }}) + '</div>' +
+          '<div style="flex:1;min-width:0">' + box('<div style="font-size:13px;font-weight:800;margin-bottom:6px">이렇게 맞춤</div><div style="font-size:12.5px;line-height:1.6">① 추천 종목 ' + pc(f.mustPlan.M) + '를 먼저 담음<br>② 기본 포트는 칸마다 원래 비율 그대로 ' + pc(r1(100 - f.mustPlan.M)) + '로 줄임<br>③ 합계 100%' + (RET[f.key] ? '<br>④ 위험자산 ' + pc(f.mustPlan.risky) + ' — 법정 한도 70% 안' : '') + '</div>' +
           (f.mustPlan.warn.length ? '<div style="font-size:12px;color:' + UP + ';margin-top:6px">⚠️ ' + f.mustPlan.warn.map(e).join(" · ") + '</div>' : ''), "padding:12px 13px") + '</div></div>' : '') +
         '<div style="font-size:12px;color:' + SUB + ';margin-top:6px;line-height:1.5">개별 종목은 한 회사 소식에 크게 흔들리므로 비중을 너무 키우지 않는 것을 권함</div>');
     }
@@ -830,9 +924,10 @@
             colChart(s, "해마다 수익률 (%)", b.years.map(function(y){ return {l: String(y[0]).slice(2), v: y[1]}; }), 7.1, 4.75, 5.7, 2.1);
           }
         }
-        if ((f.must && f.must.length) || f.taxbox){ s = P.addSlide(); head(s, (f.must && f.must.length ? "⭐ 고객 지정 종목 · " : "") + "💱 " + (f.mode === "usd" ? "환전해서 투자 (미국 상장)" : "원화로 투자 (국내 상장)"), "세금·거래 방식", f.color);
+        if ((f.must && f.must.length) || f.taxbox){ s = P.addSlide(); head(s, (f.must && f.must.length ? "⭐ 추천 종목 · " : "") + "💱 " + (f.mode === "usd" ? "환전해서 투자 (미국 상장)" : "원화로 투자 (국내 상장)"), "세금·거래 방식", f.color);
           var yy2 = 1.4;
-          if (f.must && f.must.length){ s.addTable([th(["종목·ETF", "코드 · 시장", "비중", "금액"])].concat(f.must.map(function(a){ return [{text: a.inst.split(" · ")[0], options: {bold: true, color: hx(a.color)}}, [a.code, a.inst.split(" · ")[1]].filter(Boolean).join(" · ") || "직접 입력", pc(a.pct), A ? man(A * a.pct / 100) : "–"]; })), {x: 0.6, y: yy2, w: 12.1, colW: [4.2, 3.5, 1.6, 2.8], fontFace: F, fontSize: 11, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"}); yy2 += 0.42 * (f.must.length + 1) + 0.3; }
+          if (f.must && f.must.length){ s.addTable([th(["종목·ETF", "비중", "금액", "왜 담나"])].concat(f.must.map(function(a){ return [{text: a.inst.split(" · ")[0] + "\n" + [a.code, a.inst.split(" · ")[1]].filter(Boolean).join(" · "), options: {bold: true, color: hx(a.color)}}, pc(a.pct), A ? man(A * a.pct / 100) : "–", (a.reason || []).slice(0, 4).join("\n") || a.why]; })),
+            {x: 0.6, y: yy2, w: 12.1, colW: [2.6, 0.8, 1.2, 7.5], fontFace: F, fontSize: 9, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"}); yy2 += Math.min(4.2, 0.85 * f.must.length + 0.45) + 0.25; }
           if (f.taxbox){ rbox(s, 0.6, yy2, 12.1, Math.min(3.2, 6.9 - yy2), "#EEF4FF"); T(s, [{text: (f.mode === "usd" ? "환전해서 미국 상장 ETF로" : "원화로 국내 상장 ETF로"), options: {bold: true, breakLine: true, color: hx(NAVY)}}].concat(f.taxbox.map(function(t){ return {text: t, options: {bullet: true, breakLine: true}}; })).concat([{text: "금융소득 연 2,000만원 넘는 분·매매차익이 큰 분은 환전(분리과세)이, 연금 계좌·소액·원화 편의는 원화가 유리함", options: {color: "5B6576"}}]), {x: 0.8, y: yy2 + 0.15, w: 11.7, h: Math.min(3.2, 6.9 - yy2) - 0.3, fontSize: 12, paraSpaceAfter: 5}); }
         }
         if (f.themes && f.themes.length){ s = P.addSlide(); var tpp = ((f.alloc || []).filter(function(a){ return a.k === "theme"; })[0] || {}).pct || 0;
@@ -916,7 +1011,7 @@
       '<button type="button" data-mk="pptimg">' + BTNL.pptimg + '</button></div>' +
       '<div id="ppst" class="mut pp-st"></div>' + pptHelp() + '<div class="pp-pv-h">👀 한 장 미리 보기</div><div id="pppv" class="pp-pv"></div></section>';
     w.innerHTML = h;
-    bind(); preview();
+    bind(); preview(); ensureReasons().then(function(){ preview(); });
   }
   var MKT = {KR: "한국", US: "미국", JP: "일본", CN: "중국", HK: "홍콩"};
   function optUI(k, f){
@@ -925,7 +1020,7 @@
     if (k === "gl_stock") h2 += '<div class="pp-ol">💱 해외 투자는 어떻게?</div><div class="pp-md">' +
       [["krw", "💴 원화로", "국내 상장 ETF · 환전 없음"], ["usd", "💵 환전해서", "미국 상장 ETF · 달러로"]].map(function(x){ return '<button type="button" data-md="' + x[0] + '" data-mk2="' + k + '"' + (o.mode === x[0] ? ' class="on"' : '') + '><b>' + x[1] + '</b><small>' + x[2] + '</small></button>'; }).join("") + '</div>';
     var only = {pension: 1, dc: 1, irp: 1}[k], A = amtOf(k);
-    h2 += '<div class="pp-ol">⭐ 꼭 넣을 종목·ETF <span class="mut">(고객 요청 · 여러 개 가능)</span></div>' +
+    h2 += '<div class="pp-ol">⭐ 추천 종목·ETF 넣기 <span class="mut">(여러 개 가능 · 이유는 자동으로 찾아 넣음)</span></div>' +
       (o.must || []).map(function(m, i){ return '<div class="pp-mu"><span class="pp-mn"><b>' + e(m.name) + '</b>' + (m.code ? ' <small>' + e(m.code) + (m.mkt ? " · " + e(m.mkt) : "") + '</small>' : ' <small>직접 입력</small>') +
         (A ? '<em class="pp-mw" id="ppmw_' + k + '_' + i + '">' + (+m.pct ? man(A * m.pct / 100) : "") + '</em>' : '') + '</span>' +
         (RET[k] ? '<label class="pp-sf"><input type="checkbox" data-mf="' + k + '" data-mi="' + i + '"' + (m.safe ? ' checked' : '') + '>안전형</label>' : '') +
@@ -965,10 +1060,11 @@
     if ({pension: 1, dc: 1, irp: 1}[k] && ((m.mkt && m.mkt !== "한국") || m.etf === false)) toast("연금·퇴직연금은 국내 상장 ETF만 담을 수 있어요 — 확인 후 쓰세요");
     if ((o.must || []).some(function(x){ return x.name === m.name && (x.code || "") === (m.code || ""); })){ toast("이미 넣은 종목이에요"); return; }
     var safe = RET[k] && /채권|국채|회사채|TDF|금리|단기|머니마켓|MMF|CD/i.test(m.name);
-    o.must = (o.must || []).concat([{name: m.name, code: m.code || "", mkt: m.mkt || "", etf: !!m.etf, pct: 10, safe: safe}]).slice(0, 20); keep(); resetBtns();
+    o.must = (o.must || []).concat([{name: m.name, code: m.code || "", mkt: m.mkt || "", etf: !!m.etf, pct: 10, safe: safe, sym: m.sym || ""}]).slice(0, 20); keep(); resetBtns();
+    ensureReasons().then(function(){ preview(); });
     var y = window.scrollY; draw(); window.scrollTo(0, y);
   }
-  function pickR(r){ return {name: r.name, code: r.sym.replace(/\.(KS|KQ)$/, ""), mkt: MKT[r.mkt] || r.mkt, etf: r.etf}; }
+  function pickR(r){ return {name: r.name, code: r.sym.replace(/\.(KS|KQ)$/, ""), mkt: MKT[r.mkt] || r.mkt, etf: r.etf, sym: r.sym}; }
   var pvT = null;
   function preview(){
     clearTimeout(pvT); pvT = setTimeout(function(){
@@ -1041,7 +1137,7 @@
     if (ST.busy) return; ST.busy = true;
     var st = document.getElementById("ppst"), old = btn.innerHTML;
     btn.disabled = true; btn.innerHTML = "⏳ 만드는 중…<small>몇 초 걸려요</small>"; if (st) st.textContent = "";
-    var p = kind === "png" ? makePng(m) : kind === "pdf" ? makePdf(m) : kind === "pptimg" ? makePptImg(m) : makePpt(m);
+    var p = ensureReasons().then(function(){ m = model(); return kind === "png" ? makePng(m) : kind === "pdf" ? makePdf(m) : kind === "pptimg" ? makePptImg(m) : makePpt(m); });
     var mime = kind === "png" ? "image/png" : kind === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.presentationml.presentation";
     p.then(function(blob){
       var name = kind === "pptimg" ? fname(m, "pptx").replace(/\.pptx$/, "_그림판.pptx") : fname(m, kind === "png" ? "png" : kind === "pdf" ? "pdf" : "pptx");
@@ -1061,7 +1157,8 @@
 
   // 시험·다른 화면에서 쓰도록
   window.PROPOSE = {load: load, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.opt) ST.opt = o.opt; },
-    png: function(){ return makePng(model()); }, pdf: function(){ return makePdf(model()); }, ppt: function(){ return makePpt(model()); }, pptimg: function(){ return makePptImg(model()); }, onePage: function(){ return onePage(model()); }, pages: function(){ return fullPages(model()); }};
+    png: function(){ return ensureReasons().then(function(){ return makePng(model()); }); }, pdf: function(){ return ensureReasons().then(function(){ return makePdf(model()); }); },
+    ppt: function(){ return ensureReasons().then(function(){ return makePpt(model()); }); }, pptimg: function(){ return ensureReasons().then(function(){ return makePptImg(model()); }); }, reasons: function(){ return ensureReasons().then(function(){ return RS; }); }, onePage: function(){ return onePage(model()); }, pages: function(){ return fullPages(model()); }};
 
   var css = document.createElement("style");
   css.textContent =
