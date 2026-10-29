@@ -575,6 +575,28 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                     M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["move_err"] = str(e)[:120]
+    # 💵 달러지수 5일 급변 꼬리 (10/29 09시 #23 · probe/dxy_bt.py · 강달러 = 신흥 아시아 자금 이탈) — 한국·중국·홍콩, 꼬리에서만
+    #   DX-Y.NYB 5일 로그 변화의 1년 백분위 · 미국 날짜 값 → 다음 아시아 장. 2000~, 2015-11 기준 앞/뒤 · 걸어가며 사전 100 브라이어
+    #   홍콩 ≥90% 다음 날 −9.8·−10.6%p(n 320·326) · ≤10% +3.3·+3.1 · 브라이어 0.25083→0.24681 · 0.25082→0.24462 · 최근5년 0.25164→0.24096 ✅ · 5일 뒤도 0.25069→0.24969 · 0.24861→0.24752 ✅
+    #   한국 ≥90% −4.2·−10.4%p(n 315·324) · ≤10% +1.9·+6.0 · 브라이어 0.25155→0.25033 · 0.24901→0.24379 ✅(다음 날만, 5일 뒤 앞 기간 나빠짐) · 원/달러 💱 와 겹쳐 w 작게
+    #   중국 ≥90% −6.3·−3.2%p · ≤10% +2.3·+1.9 · 브라이어 0.25153→0.25063 · 0.2503→0.24925 ✅(다음 날만) · 일본·미국 ❌ · 20일 변화는 5일과 겹쳐 안 씀
+    dxw = {"HK": 0.6, "KR": 0.4, "CN": 0.4}
+    dxs = _c(H, "DX-Y.NYB")
+    if mk in dxw and dxs is not None:
+        try:
+            dxs = dxs[dxs > 0].dropna()
+            r5_ = np.log(dxs).diff(5)
+            rk = align(rank252(r5_), idx); cv = rk.iloc[-1]
+            research["dxy"] = {"d": str(dxs.index[-1].date()), "dxy": round(float(dxs.iloc[-1]), 2), "r5": round(float(r5_.iloc[-1]) * 100, 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+            if not pd.isna(cv) and (cv >= 0.9 or cv <= 0.1):
+                hi = cv >= 0.9
+                m = cond(d, ((rk >= 0.9) if hi else (rk <= 0.1)).fillna(False), "달러지수 5일 " + ("급등(1년 상위 10%)" if hi else "급락(1년 하위 10%)"))
+                add("dxy", "💵", "달러지수 급변", "자금", m, dxw[mk],
+                    f"달러지수 5일 {float(r5_.iloc[-1])*100:+.1f}% (1년 백분위 {cv*100:.0f}%) — " + ("달러가 급히 강해지면 아시아에서 돈이 빠져 다음 날이 평소보다 덜 오름" if hi else "달러가 급히 약해지면 아시아로 돈이 들어와 다음 날이 평소보다 잘 오름") + ("" if mk == "HK" else "(다음 날만)"))
+                if mk != "HK" and M and M[-1]["k"] == "dxy":
+                    M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["dxy_err"] = str(e)[:120]
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
