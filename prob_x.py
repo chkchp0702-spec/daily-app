@@ -22,7 +22,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
-XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE"]
+XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F"]
 FX = {"KR": ("KRW=X", "원/달러"), "JP": ("JPY=X", "엔/달러"), "CN": ("CNY=X", "위안/달러"), "HK": ("CNY=X", "위안/달러"), "US": ("DX-Y.NYB", "달러 인덱스")}
 
 
@@ -614,6 +614,28 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                     M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["dxy_err"] = str(e)[:120]
+    # 🥇 금/은 비율 5일 급등 꼬리(≥90% 한쪽만) — 미국 「일주일」만, w 0.3(➖ 작게) (10/29 16시 #28 · probe/gsr_bt.py · 금=안전자산, 은=경기 금속)
+    #   금(GC=F)÷은(SI=F) 5일 로그 변화의 1년 백분위 ≥90%(금이 은보다 급히 강함 = 위험 회피) · 2000-08~, 2013-11 기준 앞/뒤
+    #   미국 5일 뒤 오름 +2.1·+4.4%p(n 351·355) · 걸어가며 사전 100 브라이어(5일) 0.24635→0.24628 · 0.24002→0.23989 · 최근5년 0.24437→0.24412 ✅
+    #   교차 로지스틱(구리/금·달러·S&P 5일 꼬리 위) 앞→뒤 0.24079→0.24073 · 뒤→앞 0.24797→0.24791, 계수 +0.08 두 번 같은 쪽 · 다만 칸 곱하기(겹침) 위에선 나빠져 w 작게
+    #   다음 날 ❌(−2.5·+0.3 엇갈림) · 한·일·중·홍 ❌(혼자 좋아도 기존 꼬리 위에서 나빠짐 · 일본 −2.1·−7.7 은 교차 한쪽 나빠짐 ➖) · ≤10%·20일 ❌
+    if us:
+        try:
+            gs_, sv_ = _c(H, "GC=F"), _c(H, "SI=F")
+            if gs_ is not None and sv_ is not None:
+                gr = pd.concat([gs_, sv_], axis=1, keys=["g", "s"]).dropna()
+                gr = gr[(gr > 0).all(axis=1)]
+                lg = np.log(gr["g"] / gr["s"]).diff(5)
+                rk = rank252(lg).reindex(idx).ffill(limit=3); cv = rk.iloc[-1]
+                research["gsr"] = {"d": str(lg.index[-1].date()), "ratio": round(float(gr["g"].iloc[-1] / gr["s"].iloc[-1]), 1), "r5": round(float(lg.iloc[-1]) * 100, 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv >= 0.9:
+                    m = cond(d, (rk >= 0.9).fillna(False), "금/은 5일 급등(1년 상위 10%)")
+                    add("gsr", "🥇", "금/은 비율 급등", "자금", m, 0.3,
+                        f"금÷은 5일 {float(lg.iloc[-1])*100:+.1f}% (1년 백분위 {cv*100:.0f}%) — 안전자산 금이 은보다 급히 강해지는 위험 회피 뒤 미국 일주일은 평소보다 조금 잘 오름(다음 날엔 안 씀)")
+                    if M and M[-1]["k"] == "gsr":
+                        M[-1]["p1"] = None
+        except Exception as e:
+            research["gsr_err"] = str(e)[:120]
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
