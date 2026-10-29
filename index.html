@@ -420,7 +420,7 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
   <div style="font-size:14px;line-height:1.5;font-weight:600;color:#8a735a;letter-spacing:-.4px;text-align:center;max-width:320px">앱은 매일 새로워져요 — 새 버전은 저절로 반영돼요</div>
 </div>
 <style>@keyframes kshop{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}@media (prefers-reduced-motion:reduce){#kidsplash img{animation:none}}</style>
-<script>(function(){var s=document.getElementById("kidsplash");if(!s)return;var done=false;function go(){if(done)return;done=true;s.style.opacity="0";setTimeout(function(){s.remove();},460);}setTimeout(go,5000);s.addEventListener("click",go);})();</script>
+<script>(function(){var s=document.getElementById("kidsplash");if(!s)return;if(/[?&]embed=1/.test(location.search)){s.remove();return;}/* 10/29 창(미리 보기) 안에서는 인사 화면 안 띄움 */var done=false;function go(){if(done)return;done=true;s.style.opacity="0";setTimeout(function(){s.remove();},460);}setTimeout(go,5000);s.addEventListener("click",go);})();</script>
 <header>
   <div class="top">
     <div class="brand"><span id="brandDot">CH</span> Investing</div>
@@ -1517,7 +1517,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261029L";
+var APPV = "20261029M";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1629,7 +1629,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="iconz.js?v=3"></script>   <!-- 🔣 10/22 아이콘 풀이 -->
 <script defer src="today.js?v=9"></script>   <!-- 🏠 10/22 오늘 탭 10가지 -->
 <script defer src="vidmap.js?v=7"></script>   <!-- 🎬 조이 설명 영상 목록(자동 생성) -->
-<script defer src="guide.js?v=30"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
+<script defer src="guide.js?v=31"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
 <script defer src="easy.js?v=3"></script>   <!-- 🗣 10/28 쉬운 말 (끄기: localStorage easy=off) -->
 <script defer src="design.js?v=3"></script>   <!-- 🎨 10/22 디자인 한 벌 — 늘 맨 마지막 -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
