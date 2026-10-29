@@ -1009,7 +1009,7 @@
       '<button type="button" data-mk="pdf">' + BTNL.pdf + '</button>' +
       '<button type="button" data-mk="ppt">' + BTNL.ppt + '</button>' +
       '<button type="button" data-mk="pptimg">' + BTNL.pptimg + '</button></div>' +
-      '<div id="ppst" class="mut pp-st"></div>' + pptHelp() + '<div class="pp-pv-h">👀 한 장 미리 보기</div><div id="pppv" class="pp-pv"></div></section>';
+      '<div id="ppst" class="mut pp-st"></div>' + pptHelp() + pdfHelp() + '<div class="pp-pv-h">👀 한 장 미리 보기</div><div id="pppv" class="pp-pv"></div></section>';
     w.innerHTML = h;
     bind(); preview(); ensureReasons().then(function(){ preview(); });
   }
@@ -1099,6 +1099,9 @@
       var bx = document.getElementById("ppsg_" + k), r = bx && bx._r && bx._r[0];
       addMust(k, r ? pickR(r) : {name: v}); }; });
     [].forEach.call(w.querySelectorAll(".pp-sg"), function(bx){ bx.onclick = function(ev){ var t = ev.target.closest && ev.target.closest("[data-sk]"); if (!t || !bx._r) return; var r = bx._r[+t.dataset.si]; if (r) addMust(t.dataset.sk, pickR(r)); }; });
+    var cp2 = document.getElementById("ppprc2"); if (cp2) cp2.onclick = function(){ var ok = function(){ cp2.textContent = "✓ 복사했어요"; setTimeout(function(){ cp2.textContent = "📋 문구 복사"; }, 2000); };
+      try { navigator.clipboard.writeText(PDF_PROMPT).then(ok, function(){ fb(); }); } catch(x) { fb(); }
+      function fb(){ var ta = document.createElement("textarea"); ta.value = PDF_PROMPT; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch(y) {} ta.remove(); } };
     var cp = document.getElementById("ppprc"); if (cp) cp.onclick = function(){ var t = PPT_PROMPT, ok = function(){ cp.textContent = "✓ 복사했어요"; setTimeout(function(){ cp.textContent = "📋 문구 복사"; }, 2000); };
       try { navigator.clipboard.writeText(t).then(ok, function(){ fallback(); }); } catch(x) { fallback(); }
       function fallback(){ var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch(y) {} ta.remove(); } };
@@ -1128,6 +1131,34 @@
       '<li><b>ChatGPT · Claude</b>: PPT 파일을 올리고 아래 문구 붙여넣기</li></ul>' +
       '<div class="pp-pr"><pre id="pppr">' + e(PPT_PROMPT) + '</pre><button type="button" id="ppprc">📋 문구 복사</button></div>' +
       '<p class="mut" style="margin:6px 0 0">⚠️ AI가 숫자를 바꾸는 일이 있으니 다듬은 뒤 금액·비중·금리는 꼭 한 번 대조할 것</p></div></details>';
+  }
+  // 10/29 사용자 「PDF를 PPT로 변환해서 쓰는 방법에 대한 탭」
+  var PDF_PROMPT = "첨부한 PDF는 고객에게 줄 투자 제안서입니다. 쪽마다 16:9 슬라이드 한 장으로 옮겨 .pptx 파일로 만들어 주세요.\n" +
+    "1) 숫자·상품명·비중·금액·날짜는 한 글자도 바꾸지 마세요.\n" +
+    "2) 쪽 전체가 그림이면 글자를 읽어서(OCR) 고칠 수 있는 글 상자로 넣어 주세요.\n" +
+    "3) 표는 PPT 표로, 막대·도넛·선 그래프는 PPT 차트로 다시 만들어 주세요.\n" +
+    "4) 글꼴은 전부 맑은 고딕, 머리줄은 남색(#14304F) 바탕에 흰 글씨로 해 주세요.\n" +
+    "5) 문장 끝 「~임」체는 그대로 두고, 슬라이드마다 여백을 고르게 맞춰 주세요.";
+  function pdfHelp(){
+    return '<details class="pp-help no-clp" data-xc="1" data-cz="done"><summary>ⓘ PDF를 PPT로 바꿔 쓰는 법</summary>' +
+      '<div class="pp-hb no-clp" data-xc="1" data-cz="done"><b>먼저 알아 둘 점</b><ul>' +
+      '<li>이 앱의 PDF는 <b>쪽마다 그림</b>으로 만들어짐 — 그래서 어디서 열어도 똑같이 보이지만, 변환기에 넣으면 글자가 아닌 <b>그림 슬라이드</b>로 바뀌는 경우가 많음</li>' +
+      '<li>글자·숫자를 고치려면 변환기에서 <b>OCR(글자 인식)</b>을 켜야 함 — 아니면 처음부터 <b>📊 PPT (고칠 수 있는 판)</b>을 받는 것이 가장 빠름</li>' +
+      '<li>보기만 하면 되면 <b>🖼️ 그림판 PPT</b>가 이미 PDF와 똑같은 PPT임</li></ul>' +
+      '<b>방법 ① 무료 변환 사이트</b><ul>' +
+      '<li><b>Adobe Acrobat 온라인</b> (acrobat.adobe.com → 「PDF를 PPT로」) — 글자 인식이 가장 정확한 편 · 무료는 횟수 제한</li>' +
+      '<li><b>iLovePDF · Smallpdf</b> (「PDF to PowerPoint」) — 무료 · 그림 PDF는 「OCR」 선택 필요</li>' +
+      '<li><b>알PDF</b>(PC 프로그램) — 「변환 → PPT」 · 한글 인식이 무난함</li></ul>' +
+      '<b>방법 ② 파워포인트에서 바로</b><ul>' +
+      '<li>PC 파워포인트에서 <b>「삽입 → 그림」</b>으로 쪽 그림을 넣어 그 위에 글 상자를 덧씌움 — 표지·한 장 요약만 고칠 때 편함</li>' +
+      '<li>워드(Word)로 PDF를 열면 글자로 바뀜 → 필요한 글만 복사해 PPT에 붙여넣기</li></ul>' +
+      '<b>방법 ③ AI 도구</b><ul>' +
+      '<li><b>Gamma</b> — 「가져오기(Import) → PDF」 하면 슬라이드로 다시 짜 줌 → PPTX로 내보내기</li>' +
+      '<li><b>Canva</b> — PDF를 올리면 편집 가능한 디자인으로 열림 → 「공유 → 다운로드 → PPTX」</li>' +
+      '<li><b>ChatGPT · Claude</b> — PDF를 올리고 아래 문구를 붙여넣으면 .pptx 파일로 만들어 줌</li>' +
+      '<li><b>파워포인트 Copilot</b> — 「파일에서 프레젠테이션 만들기」 (회사 계정에서 쓸 수 있을 때)</li></ul>' +
+      '<div class="pp-pr"><pre>' + e(PDF_PROMPT) + '</pre><button type="button" id="ppprc2">📋 문구 복사</button></div>' +
+      '<p class="mut" style="margin:6px 0 0">⚠️ 고객 이름·금액이 든 파일을 외부 사이트에 올릴 땐 회사 보안 규정을 먼저 확인 · 변환 뒤 숫자는 원본 PDF와 꼭 한 번 대조</p></div></details>';
   }
   var READY = {};
   function make(kind, btn){
