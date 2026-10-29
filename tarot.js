@@ -16,7 +16,7 @@
   function load(){
     if (LOAD) return LOAD;
     var j = function(u){ return fetch(u).then(function(r){ if (!r.ok) throw new Error(u); return r.json(); }); };
-    LOAD = Promise.all([j("tarot/deck.json?v=1"), j("tarot/topics.json?v=1")]).then(function(a){ DECK = a[0]; TOP = a[1]; return true; }, function(err){ LOAD = null; throw err; });
+    LOAD = Promise.all([j("tarot/deck.json?v=1"), j("tarot/topics.json?v=2")]).then(function(a){ DECK = a[0]; TOP = a[1]; return true; }, function(err){ LOAD = null; throw err; });
     return LOAD;
   }
   var WIKI = "https://commons.wikimedia.org/wiki/Special:FilePath/";
@@ -170,7 +170,7 @@
     concl.strong = best.pos + "의 " + best.c.nm + (best.r ? "(역)" : "") + josa(best.c.nm, "이", "가") + " 가장 든든한 힘이에요 — " + best.one;
     var subj = obj ? "「" + obj + "」" : "이 질문";
     concl.head = Q.kind === "choice" && concl.choice ? (concl.choice.win ? "카드는 「" + concl.choice.win + "」 쪽에 더 힘을 실어요" : "두 갈래의 힘이 비슷해요 — 기준을 하나 정하면 답이 보여요")
-      : Q.kind === "when" && concl.time ? subj + "은(는) " + concl.time.note.split(" — ")[1] + (concl.time.late ? ", 조금 늦게" : "") + " 움직여요"
+      : Q.kind === "when" && concl.time ? subj + (obj ? josa(obj, "은", "는") : "은") + " " + concl.time.note.split(" — ")[1] + (concl.time.late ? ", 조금 늦게" : "") + " 움직여요"
       : Q.kind === "how" ? subj + "의 열쇠는 「" + cards[cards.length - 1].c.nm + (cards[cards.length - 1].r ? "(역)" : "") + "」 — " + cards[cards.length - 1].act
       : concl.invLbl ? subj + " — 카드의 판단은 「" + concl.invLbl + "」 쪽이에요"
       : subj + "에 대한 답은 「" + verdict.split(" — ")[0] + "」이에요";
