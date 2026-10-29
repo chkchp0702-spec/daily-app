@@ -1,6 +1,21 @@
 /* 🧠 시황 두뇌 카드 (10/9) — 매시간 검토가 쌓는 brain/state.json 을 피드·포트 탭 위에 보여 준다 */
 (function(){
   var U = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/brain/state.json";
+  // 10/29 사용자 「여기도 맨날 안 바뀌는 거 같아」 — 두뇌(state.json)는 매시간 쓰지만 선제 아이디어의 진행·채점은 10/27 뒤로 옮겨 적지 않아 멈춰 보였음.
+  //   시세 채점은 GitHub Actions(bets_score.json)가 매시간 하므로, 화면에서 그 값을 바로 덮어씀 + 승패도 닫힌 기록에서 직접 셈
+  var USC = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/bets_score.json";
+  function pctOf(res){ var m = String(res || "").match(/([+\-−]\s?\d+(?:\.\d+)?)\s*%/); return m ? parseFloat(m[1].replace("−", "-").replace(/\s/g, "")) : null; }
+  function merge(B, S){
+    if (!B) return B;
+    var live = {}, closedS = {};
+    ((S && S.bets) || []).forEach(function(x){ if (x.st === "열림" || x.st === "대기") live[x.id || x.t] = x; else closedS[x.id || x.t] = x; });
+    (B.bets || []).forEach(function(b){ var x = live[b.id] || live[b.t]; if (x && b.status === "열림"){ b.res = x.res; b.now = x.now; b.r = x.r; b._live = 1; }
+      var c = closedS[b.id]; if (c && b.status === "열림"){ b.status = "닫힘"; b.res = c.res; } });
+    var rs = []; (B.bets || []).forEach(function(b){ if (b.status === "닫힘"){ var r = pctOf(b.res); if (r != null) rs.push(r); } });
+    if (rs.length){ B.scorecard = B.scorecard || {}; B.scorecard.bets = {made: (B.bets || []).filter(function(b){ return b.t; }).length, win: rs.filter(function(r){ return r > 0; }).length, loss: rs.filter(function(r){ return r < 0; }).length, avg: Math.round(rs.reduce(function(a, b){ return a + b; }, 0) / rs.length * 10) / 10}; }
+    B._scAt = S && S.at;
+    return B;
+  }
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
   function card(B, full){
     if (!B || !B.last_review) return '<section class="card br"><div class="br-h">🧠 지금 생각 <small>매시간 검토 · 첫 검토 준비 중</small></div></section>';
@@ -14,8 +29,9 @@
       return '<div class="br-ti"><div class="br-bar"><i style="width:' + c + '%"></i></div><div><b>' + e(t.t) + '</b> <small>' + c + '%</small>' +
         (full ? '<em>' + e(t.why || "") + (t.breaks ? ' · 깨지면: ' + e(t.breaks) : '') + '</em>' : '') + '</div></div>'; }).join("") + '</div>';
     var bets = (B.bets || []).filter(function(x){ return x.status === "열림"; }).slice(0, full ? 5 : 2), bs = (sc.bets || {});
-    if (bets.length || bs.made) h += '<div class="br-b"><div class="br-bh">⚡ 선제 아이디어 <small>채점 ' + (bs.win || 0) + '승 ' + (bs.loss || 0) + '패' + (bs.avg != null ? ' · 평균 ' + (bs.avg > 0 ? '+' : '') + bs.avg + '%' : '') + '</small></div>' +
+    if (bets.length || bs.made) h += '<div class="br-b"><div class="br-bh">⚡ 선제 아이디어 <small>채점 ' + (bs.win || 0) + '승 ' + (bs.loss || 0) + '패' + (bs.avg != null ? ' · 평균 ' + (bs.avg > 0 ? '+' : '') + bs.avg + '%' : '') + (B._scAt ? ' · 시세 ' + e(String(B._scAt).slice(5).replace("-", "/")) : '') + '</small></div>' +
       bets.map(function(x){ return '<div class="br-bi"' + (x.t ? ' data-op="' + e(x.t) + '"' : '') + '><b>' + e(x.name || x.t) + (x.t ? ' <i class="po-go">›</i>' : '') + '</b> <span class="' + (x.dir === "오름" ? "up" : "dn") + '">' + e(x.dir) + '</span> <small>' + e(x.entry) + ' → ' + e(x.target) + ' · 손절 ' + e(x.stop) + ' · ' + e(x.horizon) + '</small>' +
+        (x.res ? '<div style="font-size:12.5px;margin-top:2px"><b class="' + ((x.r != null ? x.r : pctOf(x.res)) >= 0 ? "up" : "dn") + '">' + e(String(x.res).replace(/^진행/, "지금")) + '</b>' + (x.now ? ' <small>· 현재가 ' + e(x.now) + '</small>' : '') + '</div>' : '') +
         (full ? '<em>' + e(x.edge || x.why || "") + '</em>' : '') + '</div>'; }).join("") + '</div>';
     var pi = B.port_ideas || [];
     if (pi.length) h += '<div class="br-p">💼 포트 제안 · ' + pi.slice(0, 4).map(function(p){ return '<b>' + e(p["칸"] || p.k || "") + '</b> ' + e(p["제안"] || p.s || "") + (p["얼마"] && +p["얼마"] !== 0 ? ' ' + e((+p["얼마"] > 0 ? '+' : '') + p["얼마"]) + '%p' : ''); }).join(" · ") + '</div>';
@@ -28,7 +44,8 @@
   });
   window.brainCard = function(box, full){
     if (!box) return;
-    fetch(U + "?" + Date.now()).then(function(r){ return r.ok ? r.json() : null; }).then(function(B){ box.innerHTML = card(B, full); }).catch(function(){});
+    var j = function(u){ return fetch(u + "?" + Date.now()).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }); };
+    Promise.all([j(U), j(USC)]).then(function(a){ box.innerHTML = card(merge(a[0], a[1]), full); }).catch(function(){});
   };
   var css = document.createElement("style");
   css.textContent =
