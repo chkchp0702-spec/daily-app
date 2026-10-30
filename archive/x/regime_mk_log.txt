@@ -4,24 +4,18 @@ See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace 
 /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
   quotes.sort_index(inplace=True)
-/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
-See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
-  quotes.sort_index(inplace=True)
 /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:585: Pandas4Warning: The inplace keyword in DataFrame.set_index is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
   dividends.set_index("date", inplace=True)
 /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:587: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
   dividends.sort_index(inplace=True)
-/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:604: Pandas4Warning: The inplace keyword in DataFrame.set_index is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
-  quotes.sort_index(inplace=True)
-/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
+  splits.set_index("date", inplace=True)
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:606: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
-  quotes.sort_index(inplace=True)
-/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
-See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
-  quotes.sort_index(inplace=True)
+  splits.sort_index(inplace=True)
 /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
   quotes.sort_index(inplace=True)
@@ -64,22 +58,28 @@ See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace 
 /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
   quotes.sort_index(inplace=True)
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
+See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
+  quotes.sort_index(inplace=True)
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
+See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
+  quotes.sort_index(inplace=True)
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
+See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
+  quotes.sort_index(inplace=True)
 /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:585: Pandas4Warning: The inplace keyword in DataFrame.set_index is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
   dividends.set_index("date", inplace=True)
 /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:587: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
   dividends.sort_index(inplace=True)
-/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:604: Pandas4Warning: The inplace keyword in DataFrame.set_index is deprecated and will be removed in a future version (PDEP-8).
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:568: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
-  splits.set_index("date", inplace=True)
-/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/utils.py:606: Pandas4Warning: The inplace keyword in DataFrame.sort_index is deprecated and will be removed in a future version (PDEP-8).
-See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
-  splits.sort_index(inplace=True)
+  quotes.sort_index(inplace=True)
 /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/yfinance/multi.py:220: Pandas4Warning: The inplace keyword in DataFrame.rename is deprecated and will be removed in a future version (PDEP-8).
 See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
   data.rename(columns=ctx.isins, inplace=True)
-🇺🇸 미국 · 경기 90 · 시장 20 · 상승 국면 · 신호 16
+🇺🇸 미국 · 경기 90 · 시장 -20 · 경기 속 조정 · 신호 16
     yc       w=0.5 6개월 좋음 [858, 4.5, 75.0, 23.0] 경고 [437, 4.3, 65.0, 33.0] 위험차 10.0
     credit   w=2.0 6개월 좋음 [653, 5.3, 78.0, 15.0] 경고 [318, 0.2, 48.0, 55.0] 위험차 40.0
     nfci     w=2.0 6개월 좋음 [947, 4.9, 76.0, 22.0] 경고 [153, 0.6, 50.0, 52.0] 위험차 29.0
@@ -91,37 +91,37 @@ See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace 
     mom      w=2.0 3개월 좋음 [934, 2.1, 72.0, 9.0] 경고 [215, 0.5, 54.0, 38.0] 위험차 28.0
     cycdef   w=1.0 3개월 좋음 [648, 2.0, 69.0, 12.0] 경고 [396, 1.0, 63.0, 24.0] 위험차 12.0
     inner    w=1.0 3개월 좋음 [324, 3.1, 77.0, 10.0] 경고 [204, 2.3, 63.0, 22.0] 위험차 12.0
-    semi     w=2.0 3개월 좋음 [785, 2.7, 76.0, 7.0] 경고 [369, 0.5, 56.0, 36.0] 위험차 29.0
-    vix      w=0.0 3개월 좋음 [780, 1.9, 70.0, 11.0] 경고 [122, 5.2, 77.0, 14.0] 위험차 3.0
-🇰🇷 한국 · 경기 57 · 시장 -33 · 경기 속 조정 · 신호 13
+    semi     w=2.0 3개월 좋음 [784, 2.7, 76.0, 7.0] 경고 [370, 0.5, 56.0, 36.0] 위험차 29.0
+    vix      w=0.0 3개월 좋음 [779, 1.9, 70.0, 11.0] 경고 [122, 5.2, 77.0, 14.0] 위험차 3.0
+🇰🇷 한국 · 경기 57 · 시장 -73 · 경기 속 조정 · 신호 13
     cli      w=1.5 6개월 좋음 [530, 10.1, 70.0, 28.0] 경고 [593, -0.1, 47.0, 49.0] 위험차 21.0
-    exports  w=0.0 6개월 좋음 [801, 3.4, 53.0, 43.0] 경고 [415, 8.3, 66.0, 32.0] 위험차 -11.0
+    exports  w=0.0 6개월 좋음 [801, 3.3, 53.0, 43.0] 경고 [415, 8.3, 66.0, 32.0] 위험차 -11.0
     yc       w=0.5 6개월 좋음 [939, 4.3, 57.0, 36.0] 경고 [311, 9.2, 60.0, 42.0] 위험차 6.0
     credit   w=1.5 6개월 좋음 [653, 5.5, 61.0, 29.0] 경고 [318, 5.7, 53.0, 53.0] 위험차 24.0
     trend    w=0.5 3개월 좋음 [845, 3.0, 60.0, 21.0] 경고 [555, 1.8, 59.0, 30.0] 위험차 9.0
     mom      w=1.5 3개월 좋음 [701, 3.4, 61.0, 19.0] 경고 [344, 1.4, 56.0, 44.0] 위험차 25.0
     fx       w=1.0 3개월 좋음 [568, 3.3, 67.0, 11.0] 경고 [339, 2.7, 57.0, 27.0] 위험차 16.0
-    semi     w=1.5 3개월 좋음 [785, 3.0, 61.0, 17.0] 경고 [369, 2.7, 61.0, 36.0] 위험차 19.0
+    semi     w=1.5 3개월 좋음 [784, 3.0, 61.0, 17.0] 경고 [370, 2.7, 61.0, 36.0] 위험차 19.0
     rvol     w=0.0 3개월 좋음 [763, 1.3, 57.0, 25.0] 경고 [283, 6.4, 70.0, 27.0] 위험차 2.0
-🇯🇵 일본 · 경기 100 · 시장 18 · 시장 우위 · 신호 12
-    cli      w=0.5 6개월 좋음 [494, -0.4, 48.0, 41.0] 경고 [490, 6.9, 65.0, 45.0] 위험차 4.0
+🇯🇵 일본 · 경기 100 · 시장 -36 · 시장 약세 · 신호 12
+    cli      w=0.5 6개월 좋음 [494, -0.3, 48.0, 41.0] 경고 [490, 6.9, 65.0, 45.0] 위험차 4.0
     exports  w=0.0 6개월 좋음 [655, 0.5, 51.0, 44.0] 경고 [573, 6.4, 64.0, 39.0] 위험차 -5.0
     yc       w=0.0 6개월 좋음 [1001, 4.9, 60.0, 40.0] 경고 [251, 6.6, 68.0, 26.0] 위험차 -14.0
     credit   w=2.0 6개월 좋음 [653, 5.4, 61.0, 32.0] 경고 [318, -2.5, 43.0, 65.0] 위험차 33.0
     trend    w=0.5 3개월 좋음 [827, 2.2, 58.0, 22.0] 경고 [573, 0.9, 53.0, 31.0] 위험차 9.0
     mom      w=1.0 3개월 좋음 [664, 2.3, 56.0, 24.0] 경고 [356, 0.2, 49.0, 38.0] 위험차 14.0
     fx       w=0.0 3개월 좋음 [424, 1.3, 52.0, 28.0] 경고 [356, 2.4, 63.0, 27.0] 위험차 -1.0
-    semi     w=1.5 3개월 좋음 [785, 3.1, 62.0, 21.0] 경고 [369, -1.3, 44.0, 40.0] 위험차 19.0
+    semi     w=1.5 3개월 좋음 [784, 3.1, 62.0, 21.0] 경고 [370, -1.3, 44.0, 40.0] 위험차 19.0
     rvol     w=0.5 3개월 좋음 [691, 2.0, 58.0, 24.0] 경고 [310, 3.1, 62.0, 28.0] 위험차 4.0
-🇨🇳 중국 · 경기 33 · 시장 -20 · 시장 약세 · 신호 11
-    cli      w=0.5 6개월 좋음 [570, 4.1, 48.0, 39.0] 경고 [643, 2.8, 52.0, 45.0] 위험차 6.0
-    exports  w=0.0 6개월 좋음 [962, 4.7, 51.0, 42.0] 경고 [307, 2.6, 58.0, 37.0] 위험차 -5.0
-    credit   w=1.0 6개월 좋음 [653, 5.1, 52.0, 40.0] 경고 [318, -2.6, 48.0, 53.0] 위험차 13.0
+🇨🇳 중국 · 경기 33 · 시장 -40 · 시장 약세 · 신호 11
+    cli      w=0.5 6개월 좋음 [570, 4.1, 48.0, 39.0] 경고 [643, 2.7, 52.0, 46.0] 위험차 7.0
+    exports  w=0.0 6개월 좋음 [962, 4.7, 51.0, 43.0] 경고 [307, 2.6, 58.0, 37.0] 위험차 -6.0
+    credit   w=1.0 6개월 좋음 [653, 5.1, 52.0, 40.0] 경고 [318, -2.6, 48.0, 53.0] 위험차 12.0
     trend    w=0.5 3개월 좋음 [736, 3.0, 52.0, 20.0] 경고 [664, 0.3, 50.0, 30.0] 위험차 10.0
-    mom      w=1.0 3개월 좋음 [567, 3.8, 51.0, 18.0] 경고 [443, 0.5, 52.0, 33.0] 위험차 15.0
-    fx       w=0.0 3개월 좋음 [843, 2.1, 49.0, 27.0] 경고 [158, 0.6, 53.0, 13.0] 위험차 -14.0
+    mom      w=1.0 3개월 좋음 [567, 3.8, 51.0, 18.0] 경고 [444, 0.5, 52.0, 33.0] 위험차 15.0
+    fx       w=0.0 3개월 좋음 [843, 2.1, 49.0, 27.0] 경고 [158, 0.6, 53.0, 13.0] 위험차 -13.0
     copper   w=0.5 3개월 좋음 [662, 0.8, 51.0, 22.0] 경고 [413, 2.0, 47.0, 32.0] 위험차 11.0
-    rvol     w=1.0 3개월 좋음 [769, 2.2, 52.0, 20.0] 경고 [276, 2.6, 54.0, 31.0] 위험차 11.0
+    rvol     w=1.0 3개월 좋음 [769, 2.2, 52.0, 20.0] 경고 [276, 2.6, 54.0, 31.0] 위험차 12.0
 🇭🇰 홍콩 · 경기 67 · 시장 -45 · 경기 속 조정 · 신호 12
     cli      w=0.5 6개월 좋음 [570, 4.2, 56.0, 42.0] 경고 [643, -0.4, 50.0, 51.0] 위험차 9.0
     exports  w=0.5 6개월 좋음 [962, 1.8, 56.0, 44.0] 경고 [307, 2.7, 50.0, 50.0] 위험차 6.0
