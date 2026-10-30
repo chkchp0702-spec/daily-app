@@ -22,7 +22,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
-XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F"]
+XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF"]
 FX = {"KR": ("KRW=X", "원/달러"), "JP": ("JPY=X", "엔/달러"), "CN": ("CNY=X", "위안/달러"), "HK": ("CNY=X", "위안/달러"), "US": ("DX-Y.NYB", "달러 인덱스")}
 
 
@@ -614,6 +614,27 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                     M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["dxy_err"] = str(e)[:120]
+    # 🌏 신흥국 달러채 약세 꼬리 — 한국 「내일」만, w 0.4 (10/30 11시 #35 · probe/emb_bt.py · 신흥국 신용 스프레드 확대 = 아시아 위험 회피)
+    #   log(EMB/IEF) 5일 변화의 1년 백분위 ≤10%(신흥국 달러채가 미 국채보다 크게 빠짐) · 미국 날짜 값 → 다음 아시아 장 · 2008-06~, 2017-07 기준 앞/뒤
+    #   한국 다음 날 오름 −10.5·−16.0%p(n 212·239) · 크레딧·달러·S&P 5일 꼬리 칸 위 브라이어 0.24861→0.24827 · 0.24601→0.24578 · 최근5년 0.24535→0.24472 ✅
+    #   교차 로지스틱 앞→뒤 0.24622→0.24527 · 뒤→앞 0.24939→0.24925(계수 −0.25·−0.53 같은 쪽) ✅ · 약세일 451 중 204일 크레딧 꼬리와 겹쳐 w 작게
+    #   ≥90% 쪽·5일 뒤(교차 나빠짐)·일본(뒤 기간 나빠짐 ➖)·중·홍·미 ❌
+    if mk == "KR":
+        try:
+            em_, if_ = _c(H, "EMB"), _c(H, "IEF")
+            if em_ is not None and if_ is not None:
+                bb = pd.concat([em_[em_ > 0], if_[if_ > 0]], axis=1, keys=["e", "i"], sort=True).dropna()
+                r5e = np.log(bb["e"] / bb["i"]).diff(5)
+                rk = align(rank252(r5e), idx); cv = rk.iloc[-1]
+                research["emb"] = {"d": str(bb.index[-1].date()), "r5": round(float(r5e.iloc[-1]) * 100, 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv <= 0.1:
+                    m = cond(d, (rk <= 0.1).fillna(False), "신흥국 달러채 5일 급약세(1년 하위 10%)")
+                    add("emb", "🌏", "신흥국 달러채 약세", "자금", m, 0.4,
+                        f"신흥국 달러채(EMB) − 미 국채(IEF) 5일 {float(r5e.iloc[-1])*100:+.1f}%p (1년 백분위 {cv*100:.0f}%) — 신흥국 채권에서 돈이 급히 빠지면 한국 다음 날이 평소보다 덜 오름(다음 날만)")
+                    if M and M[-1]["k"] == "emb":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["emb_err"] = str(e)[:120]
     # 🥇 금/은 비율 5일 급등 꼬리(≥90% 한쪽만) — 미국 「일주일」만, w 0.3(➖ 작게) (10/29 16시 #28 · probe/gsr_bt.py · 금=안전자산, 은=경기 금속)
     #   금(GC=F)÷은(SI=F) 5일 로그 변화의 1년 백분위 ≥90%(금이 은보다 급히 강함 = 위험 회피) · 2000-08~, 2013-11 기준 앞/뒤
     #   미국 5일 뒤 오름 +2.1·+4.4%p(n 351·355) · 걸어가며 사전 100 브라이어(5일) 0.24635→0.24628 · 0.24002→0.23989 · 최근5년 0.24437→0.24412 ✅
