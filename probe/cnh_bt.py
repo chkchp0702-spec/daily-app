@@ -5,17 +5,13 @@ import numpy as np, pandas as pd
 sys.path.insert(0, os.getcwd())
 import prob, prob_x
 
-syms = sorted({c["ix"] for c in prob.MK.values()} | {"CNH=X", "CNY=X", "DX-Y.NYB", "^GSPC"})
+syms = sorted({c["ix"] for c in prob.MK.values()} | {"CNY=X", "DX-Y.NYB", "^GSPC"})
 H = prob.load_hist(syms)
 def cs(s):
     x = H[s]["Close"].dropna(); return x[x > 0]
 dx, sp = cs("DX-Y.NYB"), cs("^GSPC")
-cl = cs("CNH=X")
-cny = cs("CNY=X") if "CNY=X" in H else None
-if cny is not None:
-    print("CNY", cny.index[0].date(), len(cny))
-    if cl.index[0] > pd.Timestamp("2012-01-01"):   # 역외 이력이 짧으면 앞은 역내(CNY)로 이음
-        cl = pd.concat([cny[cny.index < cl.index[0]], cl])
+cl = cs("CNY=X")   # 10/30 야후 CNH=X 이력 0건 → 역내 위안(CNY=X, 2001~) 사용
+print("CNY", cl.index[0].date(), cl.index[-1].date(), len(cl), float(cl.iloc[-1]))
 print("CNH", cl.index[0].date(), cl.index[-1].date(), len(cl), float(cl.iloc[-1]))
 
 
