@@ -43,7 +43,8 @@ jobs:
           CP=$(ls archive/sector/*/compass.json | sort | tail -1); echo "$CP" > /tmp/cp.txt
           python opdb/ixlive.py "$CP" archive/x || echo "나침반 덧입히기 실패"
           # 👔 10/28 PB 한 장 — 장중 매시간(각 시 첫 실행) 갱신 · 알림은 아침 한 번만(brief.yml)
-          M=$(TZ=Asia/Seoul date +%M); if [ "$M" -lt 15 ] || [ -n "$FORCE" ]; then python pbbrief.py || echo "PB 한 장 실패"; python proposal.py || echo "📝 제안서 기본폼 실패"; fi
+          # 🩺 10/30: 15:40 장 끝 ~ 16:04 첫 갱신 사이 「15:03 장중 코스피 −4.8%」가 마감(−3.5%) 뒤에도 남던 것 → 15:41~15:59 에도 한 번 더(마감판)
+          M=$(TZ=Asia/Seoul date +%M); HM=$(TZ=Asia/Seoul date +%H%M); if [ "$M" -lt 15 ] || { [ "$HM" -ge 1541 ] && [ "$HM" -le 1559 ]; } || [ -n "$FORCE" ]; then python pbbrief.py || echo "PB 한 장 실패"; python proposal.py || echo "📝 제안서 기본폼 실패"; fi
           python wl_live.py || echo "⭐ 관심종목 시세 실패"   # 10/28 고객 한 장용 실시간 시세·뉴스
       - name: 저장
         run: |

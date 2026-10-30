@@ -83,7 +83,9 @@ def _n(s):
 
 
 def _r1(x):
-    return round(float(x) + 1e-9, 1)
+    # 🩺 10/30: 소수 한 자리로 미리 반올림하면 −2.25 가 파이썬 −2.2 ↔ 화면(JS toFixed) −2.3 으로 갈려 「숫자 틀림」 가짜 경보
+    # → 원래 값 그대로 두고 chk 허용 0.051(화면 반올림 최대 0.05)로 비교
+    return round(float(x), 4)
 
 
 def facts(texts, src, now):
@@ -178,12 +180,12 @@ def sweep(pg, url, tab, cap=45):
             pg.wait_for_timeout(250)
             info = pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); if(!e||!e.isConnected) return null; var r=e.getBoundingClientRect(); return [Math.round(r.top),((e.innerText||e.getAttribute('aria-label')||'').trim().slice(0,22).replace(/\\s+/g,' ')), document.body.innerHTML.length, !!e.closest('[data-j]')]}})()""")
             if not info: continue
-            h0 = pg.evaluate("location.hash"); ne = len(errs)
+            h0 = pg.evaluate("location.hash + '|' + history.length"); ne = len(errs)   # 🩺 10/30 history.length: #onepager 종목 단추(opShow)는 해시 그대로 pushState 로 리포트를 엶 — 이동이지 튐 아님
             top0 = pg.evaluate("((document.getElementById('main')||{}).innerText||'').slice(0,80)")
             pg.evaluate(f"""document.querySelector('[data-au="{i}"]').click()""")
             pg.wait_for_timeout(450)
             if len(errs) > ne: errs[-1] = f"「{info[1]}」 누르면 → " + errs[-1]
-            h1 = pg.evaluate("location.hash"); peek = pg.evaluate("!!document.getElementById('peek')")
+            h1 = pg.evaluate("location.hash + '|' + history.length"); peek = pg.evaluate("!!document.getElementById('peek')")
             top1 = pg.evaluate("((document.getElementById('main')||{}).innerText||'').slice(0,80)")
             if h1 != h0 or peek or info[3] or top1 != top0:   # 다른 화면으로 감(종목 화면 열기 등) — 튐 아님, 돌아와서 계속
                 pg.goto(url, wait_until="domcontentloaded", timeout=45000); pg.wait_for_timeout(2200); pg.evaluate(LIST_JS, SEL); continue
