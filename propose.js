@@ -380,6 +380,72 @@
       return {big: "연 " + S.bt.cagr + "%", lab: S.bt.from.slice(0, 4) + "년부터 이 비중이었다면 (연평균)", sub: "1년 뒤 보통 " + man(Q.y1[1].won) + " · 나쁜 해 " + man(Q.y1[0].won) + " · 최대 하락 " + S.bt.mdd + "%"}; }
     return null;
   }
+  /* ───────── 🎯 목표에서 거꾸로 (A10/30-1) ─────────
+     처음 한 번에 · 매달 · 기간 · 목표 금액을 넣으면 → 폼마다 「과거에 이 기간을 매달 시작했다고 치면 몇 번 목표에 닿았나」
+     주식·연금 폼 = proposal.json sim.bt.growth(매달 말 값)로 휴대폰에서 셈 · 채권 = 지금 금리(세후·환율 그대로) 그대로일 때 · ELS = 3년 안에 끝나 계산 밖
+     매달 넣는 돈은 그달 첫날 넣는다고 침 · 배당·세금·수수료 빼고 · 과거 계산 · 보장 아님 · 입력은 이 휴대폰에만(propgoal) */
+  var GL = (function(){ try { return JSON.parse(localStorage.getItem("propgoal") || "{}") || {}; } catch(x) { return {}; } })();
+  function gkeep(){ try { localStorage.setItem("propgoal", JSON.stringify(GL)); } catch(x) {} }
+  function gIn(){ return {L: (+GL.l || 0) * 1e4, M: (+GL.m || 0) * 1e4, H: Math.round((+GL.y || 0) * 12), G: (+GL.g || 0) * 1e4}; }
+  function gOn(){ var q = gIn(); return q.H > 0 && q.G > 0 && (q.L > 0 || q.M > 0); }
+  function gFv(q, r){ var a = Math.pow(1 + r, 1 / 12), v = q.L * Math.pow(a, q.H); for (var j = 0; j < q.H; j++) v += q.M * Math.pow(a, q.H - j); return v; }
+  function gNeed(){   // 목표에 닿으려면 필요한 연 수익률
+    var q = gIn(), put = q.L + q.M * q.H;
+    if (put >= q.G) return {r: 0, put: put, enough: true};
+    if (gFv(q, 1) < q.G) return {r: Infinity, put: put};
+    var lo = -0.5, hi = 1; for (var i = 0; i < 50; i++){ var m = (lo + hi) / 2; if (gFv(q, m) >= q.G) hi = m; else lo = m; }
+    return {r: hi * 100, put: put};
+  }
+  function gEq(bt){
+    var g = bt && bt.growth, v = g && g.vals, lb = g && g.labels; if (!v || v.length < 24) return null;
+    var q = gIn(), n = v.length - q.H; if (n < 12) return {few: 1, n: Math.max(0, n)};
+    var hit = 0, worst = null, wi = 0, all = [];
+    for (var i = 0; i < n; i++){ var end = v[i + q.H], val = q.L * end / v[i]; for (var j = 0; j < q.H; j++) val += q.M * end / v[i + j];
+      all.push(val); if (val >= q.G) hit++; if (worst == null || val < worst){ worst = val; wi = i; } }
+    all.sort(function(a, b){ return a - b; });
+    return {n: n, hit: hit, pct: Math.round(hit / n * 100), worst: worst, wfrom: lb[wi], med: all[Math.floor(n / 2)], from: lb[0]};
+  }
+  function gOf(f){   // 폼 하나 → 배지 재료
+    if (!f || !f.sim || !gOn()) return null;
+    var S = f.sim, nd = gNeed();
+    if (S.kind === "equity"){ var R = gEq(S.bt); if (!R) return null; R.kind = "eq"; return R; }
+    if (S.kind === "bond"){ var B = bondCalc(S, 1e8), y = B.cagr; if (!isFinite(y)) return null;
+      return {kind: "bond", y: y, ok: nd.enough || y >= nd.r, fx: S.cur !== "KRW", val: gFv(gIn(), y / 100), yrs: B.yrs}; }
+    if (S.kind === "els") return {kind: "els"};
+    return null;
+  }
+  function gBadge(f){
+    var R = gOf(f); if (!R) return {c: "", h: ""};
+    if (R.kind === "els") return {c: "na", h: '<b>⚪ 계산 밖</b><small>3년 안에 끝나는 상품</small>'};
+    var sh = function(v){ return v >= 1e8 ? (v / 1e8).toFixed(1).replace(/\.0$/, "") + "억" : Math.round(v / 1e4).toLocaleString("ko-KR") + "만"; };
+    if (R.kind === "bond") return {c: R.ok ? "ok" : "no", h: '<b>' + (R.ok ? "🟢 닿음" : "⚪ 모자람") + '</b><small>지금 금리 연 ' + R.y.toFixed(1) + '%' + (R.fx ? ' · 환율 그대로' : ' · 세후') + '</small>'};
+    if (R.few) return {c: "na", h: '<b>⚪ 못 셈</b><small>기간이 길어 과거 ' + R.n + '번뿐</small>'};
+    return {c: R.pct >= 70 ? "ok" : R.pct >= 40 ? "mid" : "no", h: '<b>' + (R.pct >= 70 ? "🟢" : R.pct >= 40 ? "🟡" : "⚪") + ' ' + R.pct + '% 닿음</b><small>' + R.n + '번 중 ' + R.hit + '번 · 최악 ' + sh(R.worst) + '</small>'};
+  }
+  function gWho(){ var q = gIn(); return [q.L ? "처음 " + man(q.L) : "", q.M ? "매달 " + man(q.M) : ""].filter(Boolean).join(" + ") + " · " + (+GL.y) + "년 · 목표 " + man(q.G); }
+  function gSum(){
+    if (!gOn()) return '<span class="mut">처음 넣을 돈이나 매달 넣을 돈 중 하나 + 기간 + 목표를 채우면 아래 폼마다 「과거에 닿았던 비율」이 붙어요</span>';
+    var nd = gNeed(), q = gIn();
+    return '넣는 돈 합계 <b>' + man(nd.put) + '</b> → 목표 <b>' + man(q.G) + '</b> · ' +
+      (nd.enough ? '<b>넣은 돈만으로 닿음</b> (수익 0%여도)' : nd.r === Infinity ? '<b>연 100% 넘게 벌어야</b> — 목표를 다시 보세요' : '필요한 연 수익률 약 <b>' + nd.r.toFixed(1) + '%</b>') +
+      '<br><span class="mut">주식·연금 폼 = 2006~07년부터 매달 시작했다고 치고 센 과거 계산 · 매달 돈은 그달 첫날 · 배당·세금·수수료 빼고 · 채권 = 지금 금리가 내내 그대로일 때 · 보장 아님</span>';
+  }
+  function gUpd(){
+    var s = document.getElementById("ppgs"); if (s) s.innerHTML = gSum();
+    ((DATA && DATA.forms) || []).forEach(function(f0){ var el = document.getElementById("ppgb_" + f0.key); if (!el) return; var B = gBadge(f0); el.className = "pp-gb " + B.c; el.innerHTML = B.h; });
+  }
+  function gLine(f){   // 한 장·📲·PDF 표지에 넣는 한 줄 (고객용 — 매수 권유 말 없음)
+    var R = gOf(f); if (!R || R.kind === "els" || R.few) return "";
+    if (R.kind === "bond") return "🎯 " + gWho() + " → 지금 금리(연 " + R.y.toFixed(1) + "%" + (R.fx ? ", 환율 그대로" : ", 세후") + ")가 그대로면 약 " + man(R.val) + " · 금리·환율은 바뀔 수 있음";
+    return "🎯 " + gWho() + " → " + String(R.from).slice(0, 4) + "년부터 과거 " + R.n + "번 중 " + R.hit + "번 닿음(" + R.pct + "%) · 가운데 " + man(R.med) + " · 가장 나쁠 때 " + man(R.worst) + " · 과거 계산 · 보장 아님";
+  }
+  function gUI(){
+    var inp = function(k, lab, ph, unit){ return '<label>' + lab + '<span class="pp-ar"><input inputmode="numeric" data-gk="' + k + '" placeholder="' + ph + '" value="' + e(GL[k] || "") + '"><span>' + unit + '</span></span></label>'; };
+    return '<details class="pp-gl no-clp" data-xc="1" data-cz="done"' + (gOn() ? ' open' : '') + '><summary>🎯 목표에서 거꾸로 <small>매달 얼마 · 몇 년 · 목표 금액 → 폼마다 과거에 닿았던 비율</small></summary>' +
+      '<div class="pp-gi">' + inp("l", "처음 한 번에", "예: 5000", "만원") + inp("m", "매달", "예: 100", "만원") + inp("y", "기간", "예: 10", "년") + inp("g", "목표", "예: 30000", "만원") + '</div>' +
+      '<div class="pp-q pp-gq">' + [3, 5, 10, 15].map(function(y){ return '<button type="button" data-gy="' + y + '"' + (+GL.y === y ? ' class="on"' : '') + '>' + y + '년</button>'; }).join("") +
+      '<button type="button" data-gx="1">지우기</button></div><div id="ppgs" class="pp-gs">' + gSum() + '</div></details>';
+  }
   function model(){
     var items = ST.sel.map(function(k){ var f = formX(k); return f ? {f: f, amt: amtOf(k)} : null; }).filter(Boolean);
     return {cust: (ST.cust || "").trim(), pb: (ME.pb || "").trim(), org: (ME.org || "").trim(), date: dlabel(), items: items,
@@ -455,7 +521,8 @@
       '<div style="position:absolute;right:-150px;top:-140px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.06)"></div>' +
       '<div style="font-size:24px;opacity:.85;font-weight:700;letter-spacing:1px;color:#fff">INVESTMENT PROPOSAL · ' + e(m.date) + '</div>' +
       '<div style="font-size:52px;font-weight:800;letter-spacing:-1.5px;margin-top:14px;line-height:1.2;color:#fff">' + e(custName(m)) + '을 위한<br>' + e(titleOf(m)) + '</div>' +
-      (m.total ? '<div style="display:inline-block;margin-top:22px;background:rgba(255,255,255,.14);border-radius:16px;padding:12px 22px;font-size:28px;color:#fff">제안 금액 <b style="font-size:36px">' + man(m.total) + '</b></div>' : '') + '</div></div>';
+      (m.total ? '<div style="display:inline-block;margin-top:22px;background:rgba(255,255,255,.14);border-radius:16px;padding:12px 22px;font-size:28px;color:#fff">제안 금액 <b style="font-size:36px">' + man(m.total) + '</b></div>' : '') +
+      (function(){ var gl = m.items.length === 1 ? gLine(m.items[0].f) : ""; return gl ? '<div style="margin-top:16px;font-size:22px;line-height:1.5;color:#fff;opacity:.95">' + e(gl) + '</div>' : ''; })() + '</div></div>';
     if (multi){
       var parts = m.items.map(function(x){ return {pct: m.total ? x.amt / m.total * 100 : 100 / m.items.length, color: x.f.color}; });
       h += '<div style="padding:30px 44px 0"><div style="font-size:31px;font-weight:800;margin-bottom:14px;color:' + INK + '">🧺 전체 나눠 담기</div><div style="background:#fff;border:1px solid ' + LINE + ';border-radius:22px;padding:24px;display:flex;gap:26px;align-items:center">' +
@@ -753,6 +820,7 @@
       '<div style="font-size:24px;margin-top:40px;opacity:.92">' + e(custName(m)) + '을 위한</div><div style="font-size:46px;font-weight:800;letter-spacing:-1.5px;line-height:1.25;margin-top:8px;color:#fff">' + e(titleOf(m)) + '<br>투자 제안서</div>' +
       '<div style="width:70px;height:5px;background:#f0b43c;margin:34px 0"></div>' +
       (m.total ? '<div style="font-size:18px;opacity:.88">제안 금액</div><div style="font-size:40px;font-weight:800;margin-top:4px;color:#fff">' + man(m.total) + '</div>' : '') +
+      (function(){ var gl = m.items.length === 1 ? gLine(m.items[0].f) : ""; return gl ? '<div style="margin-top:14px;font-size:16px;line-height:1.55;color:#fff;opacity:.92;max-width:640px">' + e(gl) + '</div>' : ''; })() +
       '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:30px">' + m.items.map(function(x){ return '<span style="background:rgba(255,255,255,.16);border-radius:99px;padding:8px 16px;font-size:16px;font-weight:700;color:#fff">' + e(x.f.icon + " " + x.f.short) + (x.amt ? " · " + man(x.amt) : "") + '</span>'; }).join("") + '</div>' +
       '<div style="margin-top:46px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:600px">' + (m.items.length <= 2 ? m.items : []).map(function(x){ var sl = simLine(x.f, x.amt); return '<div style="background:rgba(255,255,255,.1);border-radius:14px;padding:14px 16px;color:#fff"><div style="font-size:13px;opacity:.85">' + e(x.f.short) + (sl ? " · " + e(sl.lab) : "") + '</div><div style="font-size:22px;font-weight:800;margin-top:2px">' + e(sl ? sl.big : x.f.headline.slice(0, 20)) + '</div></div>'; }).join("") + '</div></div>' +
       '<div style="position:absolute;left:70px;right:70px;bottom:70px;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,.3);padding-top:22px;color:#fff"><div><div style="font-size:14px;opacity:.8">제안</div><div style="font-size:24px;font-weight:800;margin-top:4px">' + e(byLine(m) || "담당 PB") + '</div></div><div style="font-size:16px;opacity:.88">' + e(m.date) + '</div></div></div></div>';
@@ -1215,8 +1283,8 @@
     var M = DATA.market || {};
     var h = '<section data-xc="1" class="card pp-top"><h3>📋 오늘의 기본폼</h3>' + notes(JOY.forms()) + '<p class="pp-tip" style="margin-top:-4px">' + e(DATA.basis || "") + '</p>' +
       '<div class="pp-reg"><span class="' + (M.us_up ? "ok" : "no") + '">🇺🇸 ' + (M.us_up ? "상승 추세" : "조심") + '</span><span class="' + (M.kr_up ? "ok" : "no") + '">🇰🇷 ' + (M.kr_up ? "상승 추세" : "회복 전") + '</span><span class="mut">' + e(String(DATA.at || "").slice(5).replace("-", "/")) + ' 갱신</span></div>' +
-      '<p class="pp-tip">고를 상품을 누르세요 · 여러 개 함께 골라도 됨</p><div class="pp-grid">' + DATA.forms.map(function(f){ var on = ST.sel.indexOf(f.key) >= 0;
-        return '<button type="button" class="pp-f' + (on ? " on" : "") + '" data-k="' + f.key + '" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small>' + e(f.headline.replace(/ 제안임$/, "")) + '</small>' + (on ? '<em>✓</em>' : '') + '</button>'; }).join("") + '</div></section>';
+      gUI() + '<p class="pp-tip">고를 상품을 누르세요 · 여러 개 함께 골라도 됨</p><div class="pp-grid">' + DATA.forms.map(function(f){ var on = ST.sel.indexOf(f.key) >= 0, GB = gBadge(f);
+        return '<button type="button" class="pp-f' + (on ? " on" : "") + '" data-k="' + f.key + '" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small>' + e(f.headline.replace(/ 제안임$/, "")) + '</small>' + (on ? '<em>✓</em>' : '') + '<span class="pp-gb ' + GB.c + '" id="ppgb_' + f.key + '">' + GB.h + '</span></button>'; }).join("") + '</div></section>';
     h += '<section data-xc="1" class="card"><h3>✍️ 누구에게 · 누가</h3>' + notes(JOY.who) + '<div class="pp-in">' +
       '<label>고객 이름<input id="ppcust" maxlength="20" placeholder="예: 홍길동" value="' + e(ST.cust) + '"></label>' +
       '<label>제안자 이름<input id="pppb" maxlength="20" placeholder="예: 김OO PB" value="' + e(ME.pb || "") + '"></label>' +
@@ -1315,7 +1383,13 @@
   }
   function bind(){
     var w = document.getElementById("ppw");
-    [].forEach.call(w.querySelectorAll(".pp-f"), function(b){ b.onclick = function(){ var k = b.dataset.k, i = ST.sel.indexOf(k); if (i >= 0) ST.sel.splice(i, 1); else ST.sel.push(k); keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    [].forEach.call(w.querySelectorAll(".pp-f"), function(b){ b.onclick = function(){ var k = b.dataset.k, i = ST.sel.indexOf(k); if (i >= 0) ST.sel.splice(i, 1); else { ST.sel.push(k); if (gOn() && !+ST.amt[k] && +GL.l) ST.amt[k] = +GL.l; } keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    // 🎯 목표에서 거꾸로 — 입력은 다시 그리지 않고 배지만 바꿈(입력 칸 초점 유지)
+    [].forEach.call(w.querySelectorAll("[data-gk]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d.]/g, ""); if (inp.value !== v) inp.value = v; GL[inp.dataset.gk] = v; gkeep(); gUpd();
+      if (inp.dataset.gk === "y") [].forEach.call(w.querySelectorAll("[data-gy]"), function(x){ x.classList.toggle("on", +x.dataset.gy === +v); }); resetBtns(); preview(); }; });
+    [].forEach.call(w.querySelectorAll("[data-gy]"), function(b){ b.onclick = function(){ GL.y = b.dataset.gy; gkeep(); var yi = w.querySelector('[data-gk="y"]'); if (yi) yi.value = GL.y;
+      [].forEach.call(w.querySelectorAll("[data-gy]"), function(x){ x.classList.toggle("on", x === b); }); gUpd(); resetBtns(); preview(); }; });
+    [].forEach.call(w.querySelectorAll("[data-gx]"), function(b){ b.onclick = function(){ GL = {}; gkeep(); resetBtns(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     var cu = document.getElementById("ppcust"), pb = document.getElementById("pppb"), og = document.getElementById("pporg");
     if (cu) cu.oninput = function(){ ST.cust = cu.value; preview(); };
     if (pb) pb.oninput = function(){ ME.pb = pb.value.trim(); keep(); preview(); };
@@ -1522,6 +1596,7 @@
     var S = f.sim || {}, kind = S.kind, f0 = form(k), o = opt(k), cur = o.tier || "normal";
     var cover = '<section class="px-s"><div class="px-in px-cv" style="--fc:' + f.color + '"><p class="px-for">' + e(ST.cust ? ST.cust.trim() + " 고객님을 위한" : "고객님을 위한") + '</p><h1>' + e(f.icon) + ' ' + e(f.title) + '</h1>' +
       '<div class="px-amt">' + man(A) + '</div>' + (EQ[k] && cur !== "normal" ? '<div class="px-tg">' + TIER[cur] + ' 단계</div>' : '') +
+      (function(){ var gl = gLine(f); return gl ? '<p class="px-goal">' + e(gl) + '</p>' : ''; })() +
       '<p class="px-hl">' + e(String(f.headline || "").replace(/ 제안임$/, "")) + '</p>' + (f.fit ? '<p class="px-fit">이런 분께 · ' + e(f.fit) + '</p>' : '') +
       '<p class="px-sw">옆으로 넘겨 보세요 →</p></div></section>';
     var body = kind === "equity" ? slidesEq(f, A) : kind === "bond" ? slidesBond(f, A) : kind === "els" ? slidesEls(f, A) : [];
@@ -1668,6 +1743,12 @@
     ".px-ft{padding:6px 14px 10px;text-align:center}.px-dots{display:flex;justify-content:center;gap:7px;margin-bottom:6px}.px-dots i{width:8px;height:8px;border-radius:4px;background:var(--line);transition:width .2s}.px-dots i.on{width:22px;background:var(--text)}" +
     ".px-ft p{margin:0;font-size:13.5px;color:var(--sub)}" +
     "@media (min-width:560px){.px-s h2{font-size:32px}}" +
+    ".pp-gl{margin:10px 0 12px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:10px 12px}.pp-gl summary{font-weight:800;font-size:14.5px;cursor:pointer;list-style:none}.pp-gl summary::-webkit-details-marker{display:none}.pp-gl summary small{display:block;font-weight:600;font-size:12px;color:var(--sub);margin-top:2px}" +
+    ".pp-gi{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-top:10px}.pp-gi label{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--sub);font-weight:700}.pp-gi .pp-ar{margin:0}.pp-gi input{background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;font-size:16px;padding:8px 10px;width:100%;min-width:0;box-sizing:border-box}" +
+    ".pp-gq{margin-top:8px;--fc:#3a7bd5}.pp-gs{margin-top:8px;font-size:13px;line-height:1.55}.pp-gs .mut{font-size:11.5px}" +
+    ".pp-gb{display:block;width:100%;margin-top:5px;padding:4px 6px;border-radius:8px;font-size:11px;line-height:1.3;box-sizing:border-box}.pp-gb:empty{display:none}.pp-gb b{display:block;font-size:12px;letter-spacing:-.3px}.pp-gb small{display:block;-webkit-line-clamp:2!important;font-size:10px!important}" +
+    ".pp-gb.ok{background:rgba(46,180,120,.16)}.pp-gb.mid{background:rgba(240,180,60,.18)}.pp-gb.no{background:rgba(150,160,175,.16)}.pp-gb.na{background:rgba(150,160,175,.10);opacity:.8}" +
+    ".px-goal{font-size:16px;line-height:1.55;margin:14px 0 0;padding:10px 12px;border-radius:12px;background:var(--panel2);font-weight:700}" +
     "@media (min-width:560px){.pp-grid{grid-template-columns:repeat(5,1fr)}.pp-go{grid-template-columns:repeat(2,1fr)}}";
   document.head.appendChild(css);
 })();

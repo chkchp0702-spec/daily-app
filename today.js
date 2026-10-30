@@ -133,7 +133,8 @@
     else if (P.d1_spy != null) mini.push(["🇺🇸 S&P500", P.d1_spy, md(P.d1_date)]);
     if (P.d1 != null) mini.push(["💼 내 포트", P.d1, md(P.d1_date)]);
     var BG = badges(H);
-    var h = '<div class="tz-sky ' + S.wx + '">' + (S.wx === "rain" || S.wx === "storm" ? '<i class="tz-rain" aria-hidden="true"></i>' : S.wx === "sun" ? '<i class="tz-sun" aria-hidden="true"></i>' : '') + bgLine(S.line) +
+    var rw = !!(b && b.krx && S.line && S.line.length >= 4);   // 🎞 되감기 (A10/30-3)
+    var h = '<div class="tz-sky ' + S.wx + (rw ? ' tz-rwok' : '') + '">' + (S.wx === "rain" || S.wx === "storm" ? '<i class="tz-rain" aria-hidden="true"></i>' : S.wx === "sun" ? '<i class="tz-sun" aria-hidden="true"></i>' : '') + bgLine(S.line) +
       '<div class="tz-top"><span class="tz-wx">' + W.ic + ' <b>' + W.w + '</b></span><span class="tz-sl">' + sl[0] + ' ' + sl[1] + '</span></div>' +
       '<div class="tz-main">' +
         '<div class="tz-kid" style="background-image:url(' + (S.slot === "night" && S.wx !== "storm" ? "img/kid_night.jpg?v=1" : W.kid) + ')"' + ' aria-hidden="true">' + (W.acc ? '<i>' + W.acc + '</i>' : '') + '</div>' +
@@ -143,10 +144,49 @@
       '<div class="tz-say"><b>' + e(S.say) + '</b>' + (S.say2 ? '<small>' + e(S.say2) + '</small>' : '') + '</div>' +
       (mini.length ? '<div class="tz-mini">' + mini.map(function(m){ return '<div><small>' + m[0] + '</small><b class="tz-cnt" data-v="' + m[1] + '">' + sg(m[1], 2) + '%</b><em>' + e(m[2]) + '</em></div>'; }).join("") + '</div>' : '') +
       (BG.length ? '<div class="tz-bdg">' + BG.map(function(x){ return '<span title="' + e(x[2]) + '" data-why="' + e(x[2]) + '">' + x[0] + ' ' + e(x[1]) + '</span>'; }).join("") + '</div>' : '') +
-      '<div class="tz-hint">👆 카드를 길게 누르면 조이가 요약해 줘요</div>' +
+      '<div class="tz-hint">' + (rw ? '⏪ 카드를 옆으로 밀면 오늘 하루가 되감겨요' : '👆 카드를 길게 누르면 조이가 요약해 줘요') + '</div>' +
     '</div>';
     return h;
   }
+  /* ── 🎞 오늘 하루 되감기 (A10/30-3 · 10/30 사용자 「1,3번 진행해」) ──
+     장중 선이 깔린 큰 카드를 옆으로 밀면 그 시각(10분마다 저장된 snaps)의 코스피 % · 오른/내린 종목 수 · 코스닥 · 가장 센/약한 업종으로 바뀜
+     손을 떼면 지금으로 돌아옴 · 세로로 움직이면 그냥 스크롤 · 숫자는 live_kr.json snaps 그대로(지어내지 않음) */
+  var RWX = 0;
+  function rewind(d, LK){
+    var sky = d.querySelector(".tz-sky.tz-rwok"); if (!sky || !LK || LK.date !== today()) return;
+    var sn = (LK.snaps || []).filter(function(x){ return x && x[3] != null && !isNaN(+x[3]); }); if (sn.length < 4) return;
+    var nb = sky.querySelector(".tz-num b"), lab = sky.querySelector(".tz-num small"), sub = sky.querySelector(".tz-num em"); if (!nb || !lab) return;
+    var L = sn.map(function(x){ return +x[3]; }), mn = Math.min.apply(null, L.concat([0])), mx = Math.max.apply(null, L.concat([0])), rr = (mx - mn) || 1, last = sn[sn.length - 1];
+    var cur = document.createElement("i"); cur.className = "tz-rwc"; cur.innerHTML = '<i class="tz-rwd"></i>'; sky.appendChild(cur);
+    var tip = document.createElement("div"); tip.className = "tz-rwt"; sky.appendChild(tip);
+    var o = null, st = null, idx = -1;
+    function show(i){
+      if (i === idx) return; idx = i; var s = sn[i], v = +s[3], n = sn.length;
+      if (!o) o = {nb: nb.textContent, nc: nb.className, lab: lab.innerHTML, sub: sub ? sub.innerHTML : ""};
+      nb.textContent = sg(v, 2) + "%"; nb.className = "tz-cnt " + cl(v);
+      lab.textContent = "⏪ " + s[0] + " 코스피";
+      var tot = (+s[1] || 0) + (+s[2] || 0);
+      if (sub) sub.textContent = "오른 종목 " + s[1] + " · 내린 " + s[2] + (tot ? " (오른 비율 " + Math.round(s[1] / tot * 100) + "%)" : "") + " · 코스닥 " + sg(+s[4], 1) + "%";
+      var x = n > 1 ? i / (n - 1) * 100 : 50, y = 58 + (8 + (mx - v) / rr * 74) / 90 * 42;
+      cur.style.left = x + "%"; cur.firstChild.style.top = y + "%"; sky.classList.add("tz-rwon");
+      var aft = +last[3] - v;
+      tip.innerHTML = (s[5] ? '<span>🔥 ' + e(s[5]) + ' <b>' + sg(+s[6], 1) + '%</b></span><span>🧊 ' + e(s[7]) + ' <b>' + sg(+s[8], 1) + '%</b></span>' : '') +
+        (i < n - 1 ? '<span>그 뒤 ' + e(last[0]) + '까지 <b>' + sg(aft, 1) + '%p</b></span>' : '<span>지금</span>');
+      try { navigator.vibrate && navigator.vibrate(4); } catch(z) {}
+    }
+    function back(){ if (!o) return; nb.textContent = o.nb; nb.className = o.nc; lab.innerHTML = o.lab; if (sub) sub.innerHTML = o.sub; o = null; idx = -1; sky.classList.remove("tz-rwon"); }
+    function at(ev){ var r = sky.getBoundingClientRect(), f = Math.max(0, Math.min(1, (ev.clientX - r.left) / (r.width || 1))); return Math.round(f * (sn.length - 1)); }
+    sky.addEventListener("pointerdown", function(ev){ if (ev.button > 0) return; st = {x: ev.clientX, y: ev.clientY, m: null, id: ev.pointerId}; });
+    sky.addEventListener("pointermove", function(ev){
+      if (!st || ev.pointerId !== st.id) return;
+      var dx = ev.clientX - st.x, dy = ev.clientY - st.y;
+      if (!st.m){ if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)){ st.m = "rw"; try { sky.setPointerCapture(ev.pointerId); } catch(z) {} } else if (Math.abs(dy) > 12){ st = null; return; } }
+      if (st.m === "rw"){ ev.preventDefault(); show(at(ev)); }
+    });
+    function end(ev){ if (st && st.m === "rw"){ RWX = Date.now(); setTimeout(back, 900); } st = null; }
+    sky.addEventListener("pointerup", end); sky.addEventListener("pointercancel", end);
+  }
+
   /* ── ③ 카운트업 ── */
   function countUp(root){
     [].forEach.call(root.querySelectorAll(".tz-cnt:not([data-done])"), function(el){
@@ -253,9 +293,10 @@
       d.innerHTML = hero(a[0] || {}, a[1], a[2], a[3], a[4]);
       if (old) old.replaceWith(d); else b2.insertBefore(d, b2.firstChild);
       d.onclick = function(ev){ var bd = ev.target.closest && ev.target.closest(".tz-bdg span"); ev.stopPropagation();
+        if (Date.now() - RWX < 700) return;   // 되감기 손을 뗀 직후의 눌림은 무시
         if (bd){ if (window.gdSay) gdSay("🏆 오늘의 배지", [bd.textContent, bd.dataset.why], "", "img/kid_joy.jpg?v=1"); return; }
         if (window.goTo) goTo("market", "live"); else if (window.go) go("market"); };
-      countUp(d); if (H0) race(H0);
+      countUp(d); try { rewind(d, a[1]); } catch(z) {} if (H0) race(H0);
     }, function(){ busy = 0; });
   }
   var tm = null;
@@ -294,6 +335,10 @@
     ".tz-bdg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.tz-bdg span{background:rgba(255,255,255,.95);color:#1d2433;border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.12);animation:tdPop .5s cubic-bezier(.2,1.6,.4,1) both}" +
     ".tz-bdg span:nth-child(2){animation-delay:.12s}.tz-bdg span:nth-child(3){animation-delay:.24s}@keyframes tdPop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}" +
     ".tz-hint{margin-top:9px;font-size:12.5px;opacity:.75;text-align:right}" +
+    ".tz-sky.tz-rwok{touch-action:pan-y;-webkit-user-select:none;user-select:none}" +
+    ".tz-rwc{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed rgba(255,255,255,.85);z-index:2;pointer-events:none;display:none}.tz-rwd{position:absolute;left:-6px;width:11px;height:11px;margin-top:-5px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}" +
+    ".tz-rwt{position:absolute;top:8px;left:10px;right:10px;z-index:3;pointer-events:none;display:none;flex-wrap:wrap;gap:2px 10px;background:rgba(10,14,30,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:10px;padding:6px 9px;font-size:11.5px;line-height:1.35}.tz-rwt b{font-weight:800}" +
+    ".tz-rwon .tz-rwc{display:block}.tz-rwon .tz-rwt{display:flex}.tz-rwon .tz-bg{opacity:.85}" +
     // ④ 세 컷
     ".tz-ch b{display:block;font-size:16px;font-weight:800}.tz-ch small{color:var(--sub);font-size:12.5px}" +
     ".tz-now{margin:8px 0 4px;padding:9px 11px;border-radius:12px;background:rgba(255,80,80,.10);border:1px solid rgba(255,80,80,.35);font-size:14px;font-weight:700;line-height:1.45}.tz-now b{font-size:16px}.tz-now small{display:block;font-weight:500;opacity:.75;font-size:12.5px;margin-top:2px}" +

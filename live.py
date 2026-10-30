@@ -178,7 +178,9 @@ def main():
     tv = sorted(rows, key=lambda x: -x["v"])[:12]
     t = NOW.strftime("%H:%M")
     snaps = old.get("snaps", []) if old.get("date") == NOW.strftime("%Y-%m-%d") else []
-    snaps = [s for s in snaps if s[0] != t] + [[t, up, dn, ix[0]["chg"], ix[1]["chg"]]]
+    # 🎞 되감기(A10/30-3): [시각, 오른 수, 내린 수, 코스피 %, 코스닥 %, 가장 센 업종, %, 가장 약한 업종, %] — 앞 다섯 칸은 그대로
+    sw = [pool[0]["name"], pool[0]["r"], pool[-1]["name"], pool[-1]["r"]] if len(pool) >= 2 else []
+    snaps = [s for s in snaps if s[0] != t] + [[t, up, dn, ix[0]["chg"], ix[1]["chg"]] + sw]
     out = {"date": NOW.strftime("%Y-%m-%d"), "t": t, "total": len(rows), "up": up, "down": dn, "flat": len(rows) - up - dn,
            "median": round(statistics.median(x["r"] for x in rows), 2), "limit_up": sum(1 for x in rows if x["r"] >= 29.5),
            "limit_dn": sum(1 for x in rows if x["r"] <= -29.5), "index": ix, "sectors": sectors, "strong": pool[:6],

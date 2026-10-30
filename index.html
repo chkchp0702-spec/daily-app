@@ -1517,7 +1517,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261029N";
+var APPV = "20261030a";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1578,7 +1578,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="saju.js?v=8"></script>   <!-- 🔮📜 10/28 오늘의 운세 · 사주 리포트 -->
 <script defer src="tarot.js?v=3"></script>   <!-- 🃏 10/29 타로 (질문 맞춤 해석 · API 없음) -->
 <script defer src="lotto.js?v=1"></script>   <!-- 🎱 10/29 로또 (덜 겹치는 조합 · 전 회차 분석) -->
-<script defer src="propose.js?v=22"></script>
+<script defer src="propose.js?v=23"></script>
 <script defer src="els_design.js?v=4"></script>
 <script defer src="extras.js?v=11"></script>
 <script defer src="burst.js?v=2"></script>   <!-- ⚠️ 10/28 거래폭발 = 따라 사지 마세요 -->
@@ -1627,7 +1627,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1026.js?v=2"></script>   <!-- 🎯📐🗺 10/26 A10/26-1·2·3 -->
 <script defer src="voices.js?v=2"></script>   <!-- 🗣 10/27 A10/27-1 목소리 경주 -->
 <script defer src="iconz.js?v=3"></script>   <!-- 🔣 10/22 아이콘 풀이 -->
-<script defer src="today.js?v=9"></script>   <!-- 🏠 10/22 오늘 탭 10가지 -->
+<script defer src="today.js?v=10"></script>   <!-- 🏠 10/22 오늘 탭 10가지 -->
 <script defer src="vidmap.js?v=7"></script>   <!-- 🎬 조이 설명 영상 목록(자동 생성) -->
 <script defer src="guide.js?v=31"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
 <script defer src="easy.js?v=3"></script>   <!-- 🗣 10/28 쉬운 말 (끄기: localStorage easy=off) -->
