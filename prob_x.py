@@ -657,6 +657,29 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p1"] = None
         except Exception as e:
             research["gsr_err"] = str(e)[:120]
+    # 🌙 밤 수익률(시가÷전날 종가) 5일 누적 상위 10% — 일본 「일주일」만, w 0.3(➖ 작게) (10/30 16시 #40 · probe/night_bt.py · 밤 수익률 = 투자 심리)
+    #   닛케이 자기 Open·Close · log(시가/전날 종가) 5일 합의 1년 백분위 ≥90% · 2000-07~ 6,441일, 2013-08 기준 앞/뒤
+    #   5일 뒤 오름 +5.3·+6.3%p(n 363·308) · 자기 5일 등락·S&P 5일 꼬리 칸 위 걸어가며 브라이어 0.25148→0.25189(앞 나빠짐) · 0.24525→0.24505 · 최근5년 0.24563→0.24479
+    #   교차 로지스틱 앞→뒤 0.2455→0.24532 · 뒤→앞 0.24941→0.24933(계수 +0.19·+0.25 같은 쪽) → ➖ 작게 · 다음 날(+0.2·−2.4 엇갈림)·한·중·홍·미 ❌
+    if mk == "JP":
+        try:
+            px_ = H.get("^N225")
+            if px_ is not None and "Open" in px_:
+                o_, c_ = px_["Open"].astype(float), px_["Close"].astype(float); pc_ = c_.shift(1)
+                bad_ = (o_ <= 0) | o_.isna() | ((o_ - pc_).abs() < 1e-9 * pc_) | ((o_ - c_).abs() < 1e-9 * c_)
+                ng_ = np.log(o_ / pc_).where(~bad_)
+                ng_ = ng_.where(ng_.abs() < 0.15).reindex(idx)
+                n5_ = ng_.rolling(5, min_periods=5).sum().dropna()
+                rk = rank252(n5_).reindex(idx); cv = rk.iloc[-1]
+                research["night"] = {"d": str(n5_.index[-1].date()), "n5": round(float(n5_.iloc[-1]) * 100, 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv >= 0.9:
+                    m = cond(d, (rk >= 0.9).fillna(False), "닛케이 밤 수익률 5일 누적(1년 상위 10%)")
+                    add("night", "🌙", "밤 수익률 강함", "심리", m, 0.3,
+                        f"닛케이 최근 5일 「밤 사이」(시가÷전날 종가) 합 {float(n5_.iloc[-1])*100:+.1f}% (1년 백분위 {cv*100:.0f}%) — 장 밖에서 사려는 마음이 강할 때 일본 일주일은 평소보다 조금 잘 오름(다음 날엔 안 씀)")
+                    if M and M[-1]["k"] == "night":
+                        M[-1]["p1"] = None
+        except Exception as e:
+            research["night_err"] = str(e)[:120]
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
