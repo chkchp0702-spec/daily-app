@@ -994,6 +994,14 @@ def sig_names():
                 n = names.get(k) or names.get(k.split(".")[0] if c.get("mkt") == "US" else "")
                 if n and not re.match(r"^[가-힣]", c.get("name") or ""):
                     out[k] = n
+    # 🏠 10/31 오늘 v2: 큰손(고래) 종목·실적 일정 종목도 한글 이름으로 (홈 스토리·발견 카드)
+    wx = jl(os.path.join(OUT, "whale_x.json"), {}) or {}
+    wp = (jl(os.path.join(OUT, "whale_pick.json"), {}) or {}).get("pick") or {}
+    ks = [c.get("t") for k in ("consensus", "cheap", "big", "follow") for c in (wx.get(k) or []) if isinstance(c, dict)] + [wp.get("s")]
+    ks += [x.get("s") for x in (jl(os.path.join(OUT, "earn_cal.json"), {}) or {}).get("items") or []]
+    for k in ks:
+        if k and k not in out and names.get(k):
+            out[k] = names[k]
     json.dump(out, open(os.path.join(OUT, "sig_names.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("sig_names", len(out))
 
