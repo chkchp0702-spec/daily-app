@@ -1,5 +1,5 @@
 /* CH Investing — 🏠 오늘 v2 시안 (10/31 사용자: 「오늘 카테고리 임팩트가 약해 — 우와 소리 나고, 오늘이 좋아서 다른 카테고리도 열어 보게」)
-   켜기: 주소 끝에 ?home2=1 (끄기 ?home2=0) · 설정은 이 휴대폰에만 저장. 꺼져 있으면 아무것도 안 함.
+   10/31 13:00 「싹 바꿔서 적용」 → 모든 사람 기본으로 켬 · 예전 홈으로 돌아가기: 주소 끝에 ?home2=0 (다시 켜기 ?home2=1)
    ① 📍 스토리 링 — 맨 위 동그라미 8개(밤사이 미국 · 한국 · 돈 몰리는 곳 · 큰손 · 차트 신호 · 상품 · 내 포트 · 운세).
       오늘 안 본 건 무지개 테두리. 누르면 꽉 찬 화면 스토리(넘기기·자동 6초) → 마지막에 「○○ 탭에서 자세히」
    ② 🌏 5개 시장 타일 — 큰 숫자 + 5일 흐름 · 누르면 나침반
@@ -9,7 +9,7 @@
 (function(){
   var ON_K = "home2";
   try { var qm = /[?&]home2=(\d)/.exec(location.search); if (qm) localStorage.setItem(ON_K, qm[1]); } catch(x) {}
-  function on(){ try { return localStorage.getItem(ON_K) === "1"; } catch(x) { return false; } }
+  function on(){ try { return localStorage.getItem(ON_K) !== "0"; } catch(x) { return true; } }   // 10/31 13:00 사용자 「이렇게 싹 바꿔서 적용」 → 모두 기본으로 켬 (예전 홈은 ?home2=0)
   window.home2On = on;
   var RAWM = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/";
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }

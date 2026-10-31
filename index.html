@@ -1539,7 +1539,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261031a";
+var APPV = "20261031b";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1646,10 +1646,10 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="iconz.js?v=3"></script>   <!-- 🔣 10/22 아이콘 풀이 -->
 <script defer src="today.js?v=12"></script>   <!-- 🏠 10/22 오늘 탭 10가지 -->
 <script defer src="vidmap.js?v=7"></script>   <!-- 🎬 조이 설명 영상 목록(자동 생성) -->
-<script defer src="guide.js?v=32"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
+<script defer src="guide.js?v=33"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
 <script defer src="easy.js?v=3"></script>   <!-- 🗣 10/28 쉬운 말 (끄기: localStorage easy=off) -->
 <script defer src="habit.js?v=1"></script>   <!-- 🏠 10/31 다시 오게: 홈 접기·1탭 예측·배지·운세 다리·장중 바뀐 것·이번 주 한 장·본 뒤 바뀐 것 -->
-<script defer src="home2.js?v=1"></script>   <!-- 🏠 10/31 오늘 v2 시안 (?home2=1 로 켬 · 꺼져 있으면 아무것도 안 함) -->
+<script defer src="home2.js?v=2"></script>   <!-- 🏠 10/31 오늘 v2 — 기본으로 켬 (예전 홈 ?home2=0) -->
 <script defer src="design.js?v=3"></script>   <!-- 🎨 10/22 디자인 한 벌 — 늘 맨 마지막 -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>
