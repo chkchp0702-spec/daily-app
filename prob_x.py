@@ -680,6 +680,32 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p1"] = None
         except Exception as e:
             research["night_err"] = str(e)[:120]
+    # 🌗 밤·낮 엇갈림 「밤 내리고 낮 오름」 — 일본 「내일」만, w 0.5 (10/31 13시 #48 · probe/odd_bt.py · 한국 밤 수익률 반응 연구 https://scholar.xjtlu.edu.cn:443/en/publications/how-do-investors-react-to-overnight-returns-evidence-from-korea)
+    #   닛케이 밤 = log(시가/전날 종가) 1년 백분위 ≤30% 이면서 낮 = log(종가/시가) ≥70% · 2000~ 6,449일, 2013-08 기준 앞/뒤
+    #   다음 날 오름 −4.9·−4.1%p(n 244·254) · 자기 1일·S&P 5일 꼬리 칸 위 걸어가며 브라이어 0.24769→0.2476 · 0.24462→0.2445 · 최근5년 0.24406→0.24388 ✅
+    #   교차 로지스틱 앞→뒤 0.24434→0.24432 · 뒤→앞 0.246→0.24596(계수 −0.10·−0.07 같은 쪽) ✅ · 낮 오름이 1일 등락과 겹쳐(상관 0.78) w 0.5
+    #   반대(밤↑낮↓ +4.7·+4.3%p)는 교차만 좋아지고 걸어가기 세 기간 나빠짐 ➖ · 한국(칸 뒤집힘)·중국·홍콩 5일 ➖ · 미국 ❌ · 5일 ❌
+    if mk == "JP":
+        try:
+            px_ = H.get("^N225")
+            if px_ is not None and "Open" in px_:
+                o_, c_ = px_["Open"].astype(float), px_["Close"].astype(float); pc_ = c_.shift(1)
+                bad_ = (o_ <= 0) | o_.isna() | ((o_ - pc_).abs() < 1e-9 * pc_) | ((o_ - c_).abs() < 1e-9 * c_)
+                ng_ = np.log(o_ / pc_).where(~bad_); ng_ = ng_.where(ng_.abs() < 0.15).reindex(idx)
+                dy_ = np.log(c_ / o_).reindex(idx).where(ng_.notna())
+                rn_ = rank252(ng_.dropna()).reindex(idx); rd_ = rank252(dy_.dropna()).reindex(idx)
+                cn, cdv = rn_.iloc[-1], rd_.iloc[-1]
+                research["odd"] = {"d": str(idx[-1].date()), "night": None if pd.isna(ng_.iloc[-1]) else round(float(ng_.iloc[-1]) * 100, 2),
+                                   "day": None if pd.isna(dy_.iloc[-1]) else round(float(dy_.iloc[-1]) * 100, 2),
+                                   "rn": None if pd.isna(cn) else round(float(cn), 3), "rd": None if pd.isna(cdv) else round(float(cdv), 3)}
+                if not pd.isna(cn) and not pd.isna(cdv) and cn <= 0.3 and cdv >= 0.7:
+                    m = cond(d, ((rn_ <= 0.3) & (rd_ >= 0.7)).fillna(False), "닛케이 밤 내리고 낮 오름(1년 하위 30%·상위 30%)")
+                    add("odd", "🌗", "밤 내리고 낮 오름", "심리", m, 0.5,
+                        f"오늘 닛케이 밤 사이 {float(ng_.iloc[-1])*100:+.1f}%(백분위 {cn*100:.0f}%) 뒤 장중 {float(dy_.iloc[-1])*100:+.1f}%(백분위 {cdv*100:.0f}%) — 밤에 빠진 걸 낮에 되찾은 날 다음 날은 평소보다 덜 오름(다음 날만)")
+                    if M and M[-1]["k"] == "odd":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["odd_err"] = str(e)[:120]
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
