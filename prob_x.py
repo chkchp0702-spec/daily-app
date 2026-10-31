@@ -706,6 +706,28 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["odd_err"] = str(e)[:120]
+    # 🔀 일본 「혼자 약함」 — 닛케이 5일 − S&P 5일(간밤 미국 하루 뺀 같은 창) 1년 백분위 ≤10% → 일본 「내일」만, w 0.5 (10/31 16시 #51 · probe/rs51_bt.py · #49 ➖ 다시)
+    #   2000~ 6,400여 일, 2014-06 기준 앞/뒤 · 다음 날 오름 +8.8·+4.1%p(n 297·336) · 사건 첫날만 +10.2·+5.5%p(n 118·129) · 최근5년 +1.6%p(n 134, 작아짐)
+    #   덧셈형(기존 자기5·S&P5 꼬리·간밤 3칸 걸어가기 로짓 + 약함 칸 몫×0.5) 브라이어 앞 0.23139→0.23099 · 뒤 0.22339→0.22314 · 최근5년 0.21687→0.21677 ✅(w 0.3·1.0 도 세 기간 개선)
+    #   교차 로지스틱 앞→뒤 0.21698→0.21662 · 뒤→앞 0.21869→0.21806(계수 +0.47·+0.44 같은 쪽) ✅ · 칸 곱하기는 칸이 쪼개져 나빠짐 → 결합(덧셈)으로만 · 5일·한·중·홍 ❌(#49)
+    if mk == "JP":
+        try:
+            sp_ = _c(H, "^GSPC")
+            if sp_ is not None:
+                sp_ = sp_[sp_ > 0]
+                own5_ = np.log(d["c"].astype(float)).diff(5)
+                sp5_ = align(np.log(sp_).diff(5).shift(1), idx)
+                rel_ = (own5_ - sp5_).dropna()
+                rk = rank252(rel_).reindex(idx); cv = rk.iloc[-1]
+                research["rs_jp"] = {"d": str(rel_.index[-1].date()), "rel5": round(float(rel_.iloc[-1]) * 100, 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv <= 0.1:
+                    m = cond(d, (rk <= 0.1).fillna(False), "닛케이 5일이 S&P 보다 크게 뒤처짐(1년 하위 10%)")
+                    add("rs_jp", "🔀", "일본 혼자 약함", "흐름", m, 0.5,
+                        f"최근 5일 닛케이가 S&P 보다 {float(rel_.iloc[-1])*100:+.1f}%p (1년 백분위 {cv*100:.0f}%) — 미국은 괜찮은데 일본만 뒤처진 날 다음 날은 평소보다 잘 오름(따라잡기, 다음 날만 · 최근 5년은 효과 작음)")
+                    if M and M[-1]["k"] == "rs_jp":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["rs_jp_err"] = str(e)[:120]
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
