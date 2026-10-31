@@ -3,11 +3,11 @@
    · 앱 파일(js·css·그림, ?v= 붙은 것): 한 번 받으면 버전이 바뀔 때까지 저장본 → 두 번째부터 바로 뜸
    · 첫 화면(index.html): 새로 받기, 끊기면 저장본
    · 10/11: 저장본을 보여 줄 땐 X-From-Cache·X-Saved-At 머리표 + 화면에 메시지 → 위쪽 「⚠ 연결이 느려 HH:MM 저장본」 띠 · 앱 파일 저장소 이름에 버전 */
-var VER = "20261030a";                                  // 앱 버전과 같이 올림 → 옛 ?v= 파일 저장본은 activate 때 지움
+var VER = "20261031a";                                  // 앱 버전과 같이 올림 → 옛 ?v= 파일 저장본은 activate 때 지움
 try { importScripts("easy.js?v=3"); } catch(x) {}         // 🗣 10/28 쉬운 말 — 푸시 알림 글도 (못 불러와도 알림은 그대로)
 var DC = "ch-data-v1", SC = "ch-static-" + VER;
 self.addEventListener("install", function(){ self.skipWaiting(); });
-self.addEventListener("activate", function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return [DC, SC, "ch-page", "ch-lib"].indexOf(k) < 0; }).map(function(k){ return caches.delete(k); })); }).then(function(){ return self.clients.claim(); })); });
+self.addEventListener("activate", function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return [DC, SC, "ch-page", "ch-lib", "ch-badge"].indexOf(k) < 0; }).map(function(k){ return caches.delete(k); })); }).then(function(){ return self.clients.claim(); })); });
 // 화면에 알리기: 저장본을 보여 줌(stale) · 새 것이 옴(fresh) · 끝내 못 받음(fail) → 앱 위쪽 띠 (10/11)
 function tell(id, msg){ if (!id) return; self.clients.get(id).then(function(c){ if (c) c.postMessage(msg); }).catch(function(){}); }
 // 저장할 때 받은 시각을 붙여 둠 → 저장본을 보여 줄 때 「HH:MM 저장본」
@@ -53,15 +53,23 @@ self.addEventListener("fetch", function(e){
   if (/cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com/.test(u.hostname)) { e.respondWith(cacheFirst(r, "ch-lib")); return; }   // 주소에 버전이 박힌 외부 도구 — 앱 버전과 무관
   if (same && /\.(js|css|png|webmanifest)$/.test(u.pathname) && u.search) { e.respondWith(cacheFirst(r, SC)); return; }
 });
+/* 📛 10/31 C2 앱 아이콘 숫자 배지 — 알림이 올 때마다 +1 (앱을 열어 홈을 보면 0으로). 숫자는 ch-badge 저장소에 */
+function badgeN(){ return caches.open("ch-badge").then(function(c){ return c.match("n").then(function(m){ return m ? m.text() : "0"; }); }).then(function(t){ return +t || 0; }).catch(function(){ return 0; }); }
+function badgeSet(n){ return caches.open("ch-badge").then(function(c){ return c.put("n", new Response(String(n))); }).catch(function(){}).then(function(){
+  try { if (self.navigator && self.navigator.setAppBadge) return n > 0 ? self.navigator.setAppBadge(n) : self.navigator.clearAppBadge(); } catch(x) {} }).catch(function(){}); }
 self.addEventListener("push", function(e){
   var d = {};
   try { d = e.data ? e.data.json() : {}; } catch(x) { d = {body: e.data ? e.data.text() : ""}; }
   var ez = self.easyText || function(v){ return v; };
-  e.waitUntil(self.registration.showNotification(ez(d.title || "CH Investing"), {
-    body: ez(d.body || ""), icon: "icon.png?v=2", badge: "icon.png?v=2", tag: d.tag || undefined, renotify: !!d.tag,
-    data: {url: d.url || "./"}
-  }));
+  e.waitUntil(Promise.all([
+    self.registration.showNotification(ez(d.title || "CH Investing"), {
+      body: ez(d.body || ""), icon: "icon.png?v=2", badge: "icon.png?v=2", tag: d.tag || undefined, renotify: !!d.tag,
+      data: {url: d.url || "./"}
+    }),
+    badgeN().then(function(n){ return badgeSet(Math.min(99, n + 1)); })
+  ]));
 });
+self.addEventListener("message", function(e){ if (e.data && e.data.t === "badge") e.waitUntil(badgeSet(+e.data.n || 0)); });
 self.addEventListener("notificationclick", function(e){
   e.notification.close();
   var url = (e.notification.data && e.notification.data.url) || "./";

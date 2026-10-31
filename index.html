@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#0b0f17">
 <link rel="manifest" href="app.webmanifest">
 <link rel="apple-touch-icon" href="icon.png?v=2">
-<link rel="icon" href="icon.png?v=2">
+<link rel="icon" href="icon-192.png?v=2">   <!-- ⚡ 10/31 B10 탭 아이콘은 작은 그림(165KB→작게) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <!-- marked·pdf.js 는 처음 쓸 때만 받음 (10/11: 첫 화면이 300KB 덜 기다림) — loadLib() -->
 <style>
@@ -619,6 +619,28 @@ window.addEventListener("popstate", function(ev){
   updBack();
 });
 
+/* ⚡ 10/31 B10 무거운 탭은 열 때만 받기 — 첫 화면에서 운세·사주·타로·로또·제안서 파일(약 570KB)을 안 받음 */
+var LAZY = {luck: ["saju_core.js?v=4", "saju_txt.js?v=4", "saju.js?v=9", "tarot.js?v=3", "lotto.js?v=1"], prop: ["propose.js?v=23"]};
+LAZY.saju = LAZY.tarot = LAZY.lotto = LAZY.luck;
+var LAZYP = {};
+function needMod(key){
+  var L = LAZY[key]; if (!L) return Promise.resolve();
+  var id = L.join("|"); if (LAZYP[id]) return LAZYP[id];
+  LAZYP[id] = L.reduce(function(p, src){ return p.then(function(){ return new Promise(function(ok){
+    var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = function(){ delete LAZYP[id]; ok(); }; document.body.appendChild(s); }); }); }, Promise.resolve());
+  return LAZYP[id];
+}
+window.needMod = needMod;
+function lazyTab(key, h, view, init){
+  var ready = function(){ return typeof window[view] === "function"; };
+  if (ready()){ $("main").innerHTML = h + window[view](key); window[init](key); window.scrollTo(0, 0); return; }
+  $("main").innerHTML = h + '<div class="loading">불러오는 중…</div>'; window.scrollTo(0, 0);
+  needMod(key).then(function(){ if (cur !== key) return; if (!ready()){ $("main").innerHTML = h + '<div class="empty">잠시 뒤 다시 눌러 주세요 (인터넷이 느려요)</div>'; return; }
+    $("main").innerHTML = h + window[view](key); window[init](key); });
+}
+// 앱이 쉬는 틈에 미리 받아 두기 (첫 화면이 다 그려진 뒤 — 탭을 누를 땐 바로 열리게)
+(window.requestIdleCallback || function(f){ setTimeout(f, 4000); })(function(){ setTimeout(function(){ needMod("luck"); needMod("prop"); }, 6000); });
+
 function go(key, id){
   navPush({t: "go", key: key, id: id || null});
   cur = key; store.tab = key; save();
@@ -641,11 +663,11 @@ function go(key, id){
   if (key === "feed") { $("main").innerHTML = h + feedView(); feedInit(); window.scrollTo(0, 0); return; }
   if (key === "prob") { $("main").innerHTML = h + probView(); probInit(); window.scrollTo(0, 0); return; }
   if (key === "bond" || key === "fund" || key === "els") { $("main").innerHTML = h + prodView(key); prodInit(key); window.scrollTo(0, 0); return; }
-  if (key === "luck") { $("main").innerHTML = h + (window.luckView ? luckView() : '<div class="loading">불러오는 중…</div>'); if (window.luckInit) luckInit(); window.scrollTo(0, 0); return; }
-  if (key === "lotto") { $("main").innerHTML = h + (window.lottoView ? lottoView() : '<div class="loading">불러오는 중…</div>'); if (window.lottoInit) lottoInit(); window.scrollTo(0, 0); return; }
-  if (key === "tarot") { $("main").innerHTML = h + (window.tarotView ? tarotView() : '<div class="loading">불러오는 중…</div>'); if (window.tarotInit) tarotInit(); window.scrollTo(0, 0); return; }
-  if (key === "saju") { $("main").innerHTML = h + (window.sajuView ? sajuView() : '<div class="loading">불러오는 중…</div>'); if (window.sajuInit) sajuInit(); window.scrollTo(0, 0); return; }
-  if (key === "prop") { $("main").innerHTML = h + propView(); propInit(); window.scrollTo(0, 0); return; }
+  if (key === "luck") { lazyTab(key, h, "luckView", "luckInit"); return; }
+  if (key === "lotto") { lazyTab(key, h, "lottoView", "lottoInit"); return; }
+  if (key === "tarot") { lazyTab(key, h, "tarotView", "tarotInit"); return; }
+  if (key === "saju") { lazyTab(key, h, "sajuView", "sajuInit"); return; }
+  if (key === "prop") { lazyTab(key, h, "propView", "propInit"); return; }
   if (!items.length) {
     h += '<div class="empty"><div class="big">🗂️</div>아직 모인 자료가 없어요.<br>' +
          "다음 자동 수집 때 채워져요." + '</div>';
@@ -1517,7 +1539,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261030a";
+var APPV = "20261031a";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1571,14 +1593,9 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ixchart.js?v=8"></script>
 <script defer src="compass.js?v=25"></script>
 <script defer src="problive.js?v=3"></script>
-<script defer src="prob.js?v=24"></script>
+<script defer src="prob.js?v=25"></script>
 <script defer src="products.js?v=28"></script>
-<script defer src="saju_core.js?v=4"></script>   <!-- 🔮 10/28 사주 계산 엔진(만세력·별자리) -->
-<script defer src="saju_txt.js?v=4"></script>   <!-- 🔮 10/28 사주·운세 문장 창고 -->
-<script defer src="saju.js?v=8"></script>   <!-- 🔮📜 10/28 오늘의 운세 · 사주 리포트 -->
-<script defer src="tarot.js?v=3"></script>   <!-- 🃏 10/29 타로 (질문 맞춤 해석 · API 없음) -->
-<script defer src="lotto.js?v=1"></script>   <!-- 🎱 10/29 로또 (덜 겹치는 조합 · 전 회차 분석) -->
-<script defer src="propose.js?v=23"></script>
+<!-- ⚡ 10/31 B10: 운세·사주·타로·로또·제안서(약 570KB)는 그 탭을 열 때만 받음 — 아래 LAZY -->
 <script defer src="els_design.js?v=4"></script>
 <script defer src="extras.js?v=11"></script>
 <script defer src="burst.js?v=2"></script>   <!-- ⚠️ 10/28 거래폭발 = 따라 사지 마세요 -->
@@ -1586,8 +1603,8 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="plus.js?v=5"></script>
 <script defer src="cpin.js?v=1"></script>   <!-- 📌 10/28 내 고객 상품 -->
 <script defer src="onepage.js?v=19"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
-<script defer src="pbcard.js?v=4"></script>   <!-- 👔 10/28 PB 한 장 카드(장중 매시간) -->
-<script defer src="plus2.js?v=2"></script>
+<script defer src="pbcard.js?v=5"></script>   <!-- 👔 10/28 PB 한 장 카드(장중 매시간) -->
+<script defer src="plus2.js?v=3"></script>
 <script defer src="plus3.js?v=19"></script>
 <script defer src="plus4.js?v=5"></script>
 <script defer src="plus5.js?v=9"></script>
@@ -1602,19 +1619,19 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="simple.js?v=18"></script>
 <script defer src="pdfx.js?v=9"></script>
 <script defer src="honest.js?v=1"></script>
-<script defer src="up10.js?v=26"></script>
-<script defer src="nav2.js?v=31"></script>
+<script defer src="up10.js?v=27"></script>
+<script defer src="nav2.js?v=32"></script>
 <script defer src="clamp.js?v=5"></script>
 <script defer src="ticker.js?v=3"></script>
 <script defer src="ux1013.js?v=4"></script>
 <script defer src="story.js?v=2"></script>
 <script defer src="ux1014.js?v=5"></script>
 <script defer src="ux1014b.js?v=2"></script>
-<script defer src="ux1014c.js?v=2"></script>
+<script defer src="ux1014c.js?v=3"></script>
 <script defer src="ux1015.js?v=3"></script>
 <script defer src="ux1015b.js?v=2"></script>
 <script defer src="ux1015c.js?v=3"></script>
-<script defer src="ux1019.js?v=9"></script>
+<script defer src="ux1019.js?v=11"></script>
 <script defer src="ux1019b.js?v=2"></script>
 <script defer src="port_design.js?v=4"></script>
 <script defer src="twin.js?v=2"></script>
@@ -1627,10 +1644,11 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1026.js?v=2"></script>   <!-- 🎯📐🗺 10/26 A10/26-1·2·3 -->
 <script defer src="voices.js?v=2"></script>   <!-- 🗣 10/27 A10/27-1 목소리 경주 -->
 <script defer src="iconz.js?v=3"></script>   <!-- 🔣 10/22 아이콘 풀이 -->
-<script defer src="today.js?v=10"></script>   <!-- 🏠 10/22 오늘 탭 10가지 -->
+<script defer src="today.js?v=12"></script>   <!-- 🏠 10/22 오늘 탭 10가지 -->
 <script defer src="vidmap.js?v=7"></script>   <!-- 🎬 조이 설명 영상 목록(자동 생성) -->
-<script defer src="guide.js?v=31"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
+<script defer src="guide.js?v=32"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
 <script defer src="easy.js?v=3"></script>   <!-- 🗣 10/28 쉬운 말 (끄기: localStorage easy=off) -->
+<script defer src="habit.js?v=1"></script>   <!-- 🏠 10/31 다시 오게: 홈 접기·1탭 예측·배지·운세 다리·장중 바뀐 것·이번 주 한 장·본 뒤 바뀐 것 -->
 <script defer src="design.js?v=3"></script>   <!-- 🎨 10/22 디자인 한 벌 — 늘 맨 마지막 -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
 </body>

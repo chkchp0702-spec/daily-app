@@ -30,7 +30,7 @@
       el.innerHTML = card("📅 이번 주 일정판 <span class='mut'>시장 일정 + 내 종목·신호 종목 실적</span>",
         (ev.length ? '<div class="tl">' + ev.map(function(s){ return '<div class="tl-i"><span class="tl-w">' + e(s.w) + '</span><div><b>' + V.rich(s.t) + '</b>' + (s.then ? '<small>→ ' + V.rich(s.then) + '</small>' : '') + '</div></div>'; }).join("") + '</div>' : '') +
         (ec.length ? '<div class="sub2">실적·배당락 (7일 안)</div><div class="xt">' + ec.slice(0, 12).map(function(x){
-          return '<div class="xr' + (wl[kn(x.s)] ? " star" : "") + '"><b class="dday">' + dd(x.d) + '</b>' + opA(x.s, (wl[kn(x.s)] ? "★ " : "") + '<b>' + e(String(x.n).slice(0, 16)) + '</b>') +
+          return '<div class="xr' + (wl[kn(x.s)] ? " star" : "") + '"><b class="dday">' + dd(x.d) + '</b>' + opA(x.s, (wl[kn(x.s)] ? "★ " : "") + '<b>' + e(x.ko || String(x.n).split(/,| Inc\b| Corp\b| - /)[0].slice(0, 16)) + '</b> <em class="tk">' + e(V.cd(x.s)) + '</em>') +
             '<span class="mut">' + e(x.kind) + ' ' + md(x.d) + '</span><span class="mut">' + e((x.why || []).join("·")) + '</span></div>'; }).join("") + '</div>' : '') +
         '<p class="note">★ = 내 관심종목. 실적 날짜는 매주 토요일에 새로 받아요 (회사 사정으로 바뀔 수 있음).</p>');
     });

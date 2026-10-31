@@ -2,9 +2,11 @@ name: brief
 # ☀️ PB 한 장 — 매일 아침 8시 고정 (10/28 사용자 「동료 PB」). GitHub 예약이 늦을 수 있어 07:50 부터 세 번 시도, 같은 key 라 한 번만 감.
 on:
   schedule:
-    - cron: "50 22 * * 1-5"   # KST 07:50
-    - cron: "58 22 * * 1-5"   # KST 07:58
-    - cron: "10 23 * * 1-5"   # KST 08:10 (예비)
+    # 🩺 10/31: 「* * 1-5」는 UTC 요일이라 한국 화~토 아침에 돌고 월요일 아침이 빠져 있었음 → 0-4 (= 한국 월~금)
+    - cron: "50 22 * * 0-4"   # KST 07:50 월~금
+    - cron: "58 22 * * 0-4"   # KST 07:58
+    - cron: "10 23 * * 0-4"   # KST 08:10 (예비)
+    - cron: "50 22 * * 5,6"   # KST 토·일 07:50 — 🗓 주말판 오늘 한 장만 새로 씀 (알림 없음)
   workflow_dispatch:
 permissions:
   contents: write
@@ -24,6 +26,7 @@ jobs:
       - name: ☀️ PB 한 장
         run: |
           python pbbrief.py || echo "아침판 실패"
+          if [ "$(TZ=Asia/Seoul date +%u)" -ge 6 ]; then echo "주말 — 주말판만 쓰고 알림·제안서는 쉼"; exit 0; fi
           python proposal.py || echo "📝 제안서 기본폼 실패"   # 10/28 아침 시황에 맞춘 제안서 9종
           python plus.py brief
       - name: 저장 (보낸 기록)

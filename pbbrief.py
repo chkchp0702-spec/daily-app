@@ -48,17 +48,106 @@ def regime_line():
     return " · ".join(f"{m['flag']}{m['regime'][:2]}" for k, m in ms.items())
 
 
-def events(d):
+WDK = ["월", "화", "수", "목", "금", "토", "일"]
+
+
+def md_past(txt):
+    """「10/30 (금)」·「11/2~11/3」 같은 앞머리 날짜가 오늘보다 지났으면 True (10/31 A3: 주말에 금요일 일정이 남던 것)"""
+    m = re.search(r"(\d{1,2})/(\d{1,2})(?:\s*~\s*(\d{1,2})/(\d{1,2}))?", txt or "")
+    if not m:
+        return False
+    mo, da = (int(m.group(3)), int(m.group(4))) if m.group(3) else (int(m.group(1)), int(m.group(2)))
+    y = NOW.year + (1 if NOW.month == 12 and mo == 1 else 0)
+    try:
+        return dt.date(y, mo, da) < NOW.date()
+    except ValueError:
+        return False
+
+
+def ko_name(sym, raw, ko=""):
+    """🔤 10/31 A6: 「CHUGIN FINANCI, Arthur J. Gall」처럼 잘린 영어 이름 대신 한글 이름 + 티커 (미국 종목은 늘 티커 같이)"""
+    sn = jl(os.path.join(X, "sig_names.json"), {}) or {}
+    tk = str(sym or "").replace(".T", "").replace(".HK", "")
+    ko = ko or sn.get(sym)
+    if ko:
+        return f"{ko}({tk})"
+    return tk or re.split(r",| Inc\b| Corp\b", str(raw or ""))[0].strip()[:12]
+
+
+def events(d, weekend=False):
     ev = []
-    for sc in (d.get("schedule") or [])[:1]:
-        ev.append(strip(sc.get("what"))[:70])
+    if not weekend:
+        for sc in (d.get("schedule") or [])[:1]:
+            w = strip(sc.get("what"))[:70]
+            if w and not md_past(strip(sc.get("when"))):
+                ev.append(w)
     ec = jl(os.path.join(X, "earn_cal.json"), {}) or {}
-    soon = [x for x in ec.get("items") or [] if x.get("kind") == "실적" and x.get("d", "") <= (NOW.date() + dt.timedelta(days=1)).isoformat()]
+    upto = NOW.date() + dt.timedelta(days=4 if weekend else 1)
+    soon = [x for x in ec.get("items") or [] if x.get("kind") == "실적" and NOW.date().isoformat() <= x.get("d", "") <= upto.isoformat()]
+    # 한글 이름이 있는(앱이 아는) 종목 먼저
+    sn = jl(os.path.join(X, "sig_names.json"), {}) or {}
+    soon.sort(key=lambda x: (x.get("d", ""), not (x.get("ko") or x.get("s") in sn)))
     if soon:
-        # 🩺 10/29 「실적 Blackbaud,, SIMPLEX HL, Everforth,」 — 회사 이름 뒤 「, Inc.」를 10자로 자르다 쉼표가 남던 것
-        nm = [re.split(r",| Inc\b| Corp\b| Co\.?,? Ltd", str(x.get("n") or ""))[0].strip()[:14].strip() for x in soon[:3]]
-        ev.append("실적 " + ", ".join(n for n in nm if n))
+        nm = [ko_name(x.get("s"), x.get("n"), x.get("ko") or "") for x in soon[:3]]
+        lab = "실적" if not weekend else "다음 주 실적"
+        ev.append(lab + " " + " · ".join(n for n in nm if n))
     return ev
+
+
+def closed_view(d):
+    """🗓 10/31 A3: 주말·휴장엔 「10/30 아침」 대신 5개 시장 마지막 마감으로 다시 씀"""
+    U = jl(os.path.join(X, "live_us.json"), {}) or {}
+    L = jl(os.path.join(X, "live_kr.json"), {}) or {}
+    rows, talk, moves = [], [], []
+    def ix(J, n):
+        return next((x for x in (J.get("index") or []) if x.get("name") == n), {}) or {}
+    def us_day(J):   # live_us 날짜는 한국 시각 → 미국 날짜는 하루 전(새벽 마감)
+        try:
+            t = dt.date.fromisoformat(J.get("date"))
+            if (J.get("t") or "12:00") < "12:00":
+                t -= dt.timedelta(days=1)
+            return t
+        except Exception:
+            return None
+    ud = us_day(U)
+    sp, nq = ix(U, "S&P500"), ix(U, "나스닥")
+    if sp.get("chg") is not None:
+        tot = U.get("total") or 0
+        talk.append(f"미국({WDK[ud.weekday()] if ud else ''}) 마감: S&P500 {sp.get('last', 0):,.0f}({sg(sp.get('chg'))}) · 나스닥 {sg(nq.get('chg'))}"
+                    + (f" · S&P 종목 {U.get('up')}/{tot} 상승" if tot else ""))
+        moves.append(("미국", sp.get("chg")))
+    ks, kq = ix(L, "코스피"), ix(L, "코스닥")
+    if ks.get("chg") is not None:
+        try:
+            kd = dt.date.fromisoformat(L.get("date"))
+        except Exception:
+            kd = None
+        tot = L.get("total") or 0
+        talk.append(f"한국({WDK[kd.weekday()] if kd else ''}) 마감: 코스피 {ks.get('last', 0):,.0f}({sg(ks.get('chg'))}) · 코스닥 {sg(kq.get('chg'))}"
+                    + (f" · 오른 종목 {round((L.get('up') or 0) / tot * 100)}%" if tot else ""))
+        moves.append(("한국", ks.get("chg")))
+    asia = []
+    for f, n, lab in (("live_jp.json", "닛케이 225", "일본"), ("live_cn.json", "상해종합", "중국"), ("live_hk.json", "항셍", "홍콩")):
+        J = jl(os.path.join(X, f), {}) or {}
+        v = ix(J, n).get("chg")
+        if v is not None:
+            asia.append(f"{lab} {sg(v)}")
+            moves.append((lab, v))
+    if asia:
+        talk.append("아시아 마감: " + " · ".join(asia))
+    dn = [m for m in moves if m[1] is not None and m[1] < 0]
+    up = [m for m in moves if m[1] is not None and m[1] > 0]
+    if moves and len(dn) >= 4:
+        one = f"마지막 장 5개 시장 중 {len(dn)}곳 하락" + (f" — {'·'.join(m[0] for m in up)}만 올랐어요." if up else " — 모두 내렸어요.")
+    elif moves and len(up) >= 4:
+        one = f"마지막 장 5개 시장 중 {len(up)}곳 상승" + (f" — {'·'.join(m[0] for m in dn)}만 내렸어요." if dn else " — 모두 올랐어요.")
+    elif moves:
+        one = "마지막 장은 시장마다 엇갈렸어요 — " + " · ".join(f"{m[0]} {sg(m[1])}" for m in moves[:5])
+    else:
+        one = strip(d.get("one_liner"))[:90]
+    base = ud or NOW.date()
+    lab = f"주말판 · {base.month}/{base.day}({WDK[base.weekday()]}) 마감 기준" if NOW.weekday() >= 5 else f"휴장 · {base.month}/{base.day} 마감 기준"
+    return {"label": lab, "one": one, "talk": talk[:4]}
 
 
 def intraday(d):
@@ -205,6 +294,9 @@ def main():
         # 🩺 10/29 장중엔 아침 한 줄의 코스피 숫자는 어제 것 — 「어제」를 붙여 오늘 숫자로 안 보이게
         one = " ".join(("어제 " + x if re.match(r"코스피|코스닥", x) else x) for x in re.split(r"(?<=[.!?])\s+", one) if x)
         out = {"mode": "장중", "asof": f"{TODAY} {live['t']}", "label": f"{live['t']} 장중", "regime": reg, "one": one, "talk": live["talk"], "events": events(d)}
+    elif NOW.weekday() >= 5 or (d.get("date") and d.get("date") < TODAY and not (NOW.weekday() < 5 and hh < 9)):
+        cv = closed_view(d)
+        out = {"mode": "주말" if NOW.weekday() >= 5 else "휴장", "asof": f"{TODAY} {NOW.strftime('%H:%M')}", "label": cv["label"], "regime": reg, "one": cv["one"], "talk": cv["talk"], "events": events(d, weekend=True)}
     else:
         close = NOW.weekday() < 5 and hh >= 15
         L = jl(os.path.join(X, "live_kr.json"), {}) or {}
@@ -221,6 +313,9 @@ def main():
         out = {"mode": lab, "asof": f"{TODAY} {NOW.strftime('%H:%M')}", "label": f"{d.get('date', TODAY)[5:].replace('-', '/')} {lab}", "regime": reg, "one": one, "talk": talk, "events": events(d)}
     try:
         out["advice"] = advice(d)
+        out["advice"]["watch"] = [w for w in out["advice"].get("watch") or [] if not md_past(w[0])]
+        if out["mode"] in ("주말", "휴장"):
+            out["advice"]["read"] = out["one"]
     except Exception as e:
         print("코멘트 실패", e)
     out["at"] = NOW.strftime("%Y-%m-%d %H:%M")

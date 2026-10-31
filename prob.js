@@ -67,7 +67,8 @@
   function ep(v){ return v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1) + "%p"; }
   // 10/15 사용자 「확률에 마이너스가 말이 되니?」 — 큰 숫자는 확률 그대로(31%), 평소와의 차이는 말로(「평소 54%보다 23%p 낮음」)
   function gapTx(v, pb){ if (v == null) return ""; var a = Math.abs(v).toFixed(Math.abs(v) >= 10 ? 0 : 1); if (Math.abs(v) < 0.5) return "평소" + (pb != null ? "(" + pc(pb) + ")" : "") + "와 비슷"; return (pb != null ? "평소 " + pc(pb) + "보다 " : "평소보다 ") + a + "%p " + (v > 0 ? "높음 ▲" : "낮음 ▼"); }
-  function arw(v){ return v == null ? "" : Math.abs(v) < 0.5 ? "평소쯤" : (v > 0 ? "▲" : "▼") + Math.abs(v).toFixed(Math.abs(v) >= 10 ? 0 : 1) + "%p"; }
+  // 10/31 사용자 A5: 칸마다 「▼28%p」 대신 말로 — 평소보다 높음/낮음/평소쯤
+  function arw(v){ return v == null ? "" : Math.abs(v) < 3 ? "평소쯤" : Math.abs(v) < 10 ? (v > 0 ? "평소보다 ↑" : "평소보다 ↓") : (v > 0 ? "평소보다 크게 ↑" : "평소보다 크게 ↓"); }
   function ecls(v){ return v == null ? "" : v >= 1 ? "up" : v <= -1 ? "dn" : ""; }
   var STR = {"강": "🔥 강한 신호", "보통": "👀 보통 신호", "약": "💤 약한 신호"};
   // 확대 막대: 40~60% 구간만 그려 작은 차이도 보이게 (평소 = 점선)
@@ -95,7 +96,7 @@
   function strip(D){
     return '<div class="pr5">' + ORDER.filter(function(k){ return D.markets[k]; }).map(function(k){ var m = D.markets[k];
       return '<button class="pr5c' + (k === SEL ? " on" : "") + '" data-m="' + k + '"><b>' + m.flag + ' ' + e(m.name) + '</b>' +
-        '<span class="pr5p ' + ecls(m.e1) + '">' + Math.round(m.p1 * 100) + '<small>%</small></span>' + (m.pb1 != null ? zbar(m.p1, m.pb1).split('<div class="zl">')[0] : pbar(m.p1)) + '<small class="' + ecls(m.e1) + '">' + (Math.abs(m.e1) < 0.5 ? "평소쯤" : (m.e1 > 0 ? "▲" : "▼") + Math.abs(m.e1).toFixed(0) + "%p") + '</small></button>'; }).join("") + '</div>';
+        '<span class="pr5p ' + ecls(m.e1) + '">' + Math.round(m.p1 * 100) + '<small>%</small></span>' + (m.pb1 != null ? zbar(m.p1, m.pb1).split('<div class="zl">')[0] : pbar(m.p1)) + '<small class="' + ecls(m.e1) + '">' + (Math.abs(m.e1) < 3 ? "평소쯤" : m.e1 > 0 ? "평소↑" : "평소↓") + '</small></button>'; }).join("") + '</div>';
   }
   // 10/14 사용자 「각 시장 밑에 오르고 내릴 섹터 확률도, 그 안에 종목들 확률도」 → archive/x/prob_sec.json (prob_sec.yml)
   var SECX = null, SOPEN = {}, SALL = {}, REGM = null;
@@ -204,7 +205,7 @@
     var CB = m.comb && m.comb.p1;
     h += '<button class="fold pr-f' + (open ? " open" : "") + '" data-f="' + m.mk + '">🧩 왜 이 숫자인가 — 방법 ' + (m.methods || []).length + '가지 <i class="fchev">▾</i></button>' +
       '<div class="pr-ms" style="' + (open ? "" : "display:none") + '">' +
-      (CB ? '<div class="pr-cb">⚖️ 근거 <b>' + CB.m + '</b>개 → 서로 겹치는 정도를 빼면 독립 근거 <b>' + CB.meff + '</b>개 몫 → 평소보다 <b class="' + ecls(m.e1) + '">' + ep(m.e1) + '</b></div>' : '') +
+      (CB ? '<div class="pr-cb">⚖️ 근거 <b>' + CB.m + '</b>개 → 서로 겹치는 정도를 빼면 독립 근거 <b>' + CB.meff + '</b>개 몫 → <b class="' + ecls(m.e1) + '">' + gapTx(m.e1, m.pb1) + '</b></div>' : '') +
       rows + '<p class="note">큰 숫자 = 그 방법만 보면 평소보다 몇 %p. 「믿음」= 표본이 많을수록 높음 (n ÷ (n+150)) — 표본이 적은 극단 통계가 혼자 흔들지 못하게. 결합은 아래 📖 설명의 ⚖️ 칸.</p></div>';
     // 채점 (시장별)
     var S = D.score && D.score[m.mk];

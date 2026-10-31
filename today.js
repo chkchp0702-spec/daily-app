@@ -79,14 +79,28 @@
     // 장중 선 (코스피 등락 % — snaps 네 번째 칸)
     S.line = LK && LK.date === td && (LK.snaps || []).length > 3 ? LK.snaps.map(function(x){ return +x[3]; }).filter(function(v){ return !isNaN(v); }) : null;
     // 내일 확률(저녁·주말) — 실전 성적이 쌓이기 전이라 말은 약하게
-    if ((s === "eve" || s === "week") && krp && krp.p1 != null) S.prob = {p: Math.round(krp.p1 * 100), tone: krp.tone1 || ""};
+    if ((s === "eve" || s === "week") && krp && krp.p1 != null){
+      var hit = PB.score && PB.score.all && PB.score.all.d1 ? PB.score.all.d1.hit : null;
+      S.prob = {p: Math.round(krp.p1 * 100), tone: krp.tone1 || "", day: nextLab(krp.next_day), hit: hit, weak: hit != null && hit < 50}; }
     // 꼬마 한마디
     var W = WX[S.wx], b = S.big;
     var lead = s === "morn" ? "좋은 아침이에요! " : s === "eve" ? "오늘 장 끝! " : s === "night" ? "밤이에요 🌙 " : s === "week" ? "주말이에요 🗓 " : "";
     S.say = lead + (b ? b.sh + " " + sg(b.v, 1) + "% · " : "") + W.say;
     if (s === "morn" && (H.focus || []).length) S.say2 = "오늘 볼 곳: " + H.focus.map(function(t){ return t.name; }).slice(0, 2).join(" · ");
-    else if (S.prob) S.say2 = "내일 코스피 오를 확률 " + S.prob.p + "% (" + S.prob.tone + " · 아직 검증 중)";
+    else if (S.prob && !S.prob.weak) S.say2 = S.prob.day + " 코스피 오를 확률 " + S.prob.p + "% (" + S.prob.tone + " · 아직 검증 중)";
+    else if (S.prob) S.say2 = S.prob.day + " 코스피는 " + S.prob.tone + " · 실전 적중 " + Math.round(S.prob.hit) + "%라 참고만";   // 10/31 A4: 성적 낮을 땐 숫자 빼고 회색으로
     return S;
+  }
+
+  /* 10/31 A2: 「내일」이 주말·휴장이면 실제 다음 장 요일로 */
+  function nextLab(nd){
+    if (!nd) return "다음 장";
+    var t = Date.parse(today() + "T00:00:00Z"), n = Date.parse(nd + "T00:00:00Z");
+    if (isNaN(n)) return "다음 장";
+    var dd = Math.round((n - t) / 864e5);
+    if (dd === 1) return "내일";
+    if (dd === 0) return "오늘";
+    return ["일", "월", "화", "수", "목", "금", "토"][new Date(n).getUTCDay()] + "요일(" + nd.slice(5).replace("-", "/") + ")";
   }
 
   /* ── ⑧ 배지 ── */
@@ -128,9 +142,11 @@
   function hero(H, LK, US, PB, K){
     var S = scene(H, LK, US, PB), W = WX[S.wx], P = S.P, sl = SLOT[S.slot], b = S.big;
     var mini = [];
-    if (S.kr) mini.push(["🇰🇷 코스피", S.kr.chg, S.kr.status === "CLOSE" ? "마감" : "지금"]);
-    if (S.es && S.slot !== "morn") mini.push(["🇺🇸 S&P 선물", S.es.chg, "지금"]);
-    else if (P.d1_spy != null) mini.push(["🇺🇸 S&P500", P.d1_spy, md(P.d1_date)]);
+    if (S.kr && !(b && b.krx)) mini.push(["🇰🇷 코스피", S.kr.chg, S.kr.status === "CLOSE" ? "마감" : "지금"]);   // 10/31 A2: 큰 숫자와 같은 건 작은 칸에서 뺌
+    var bigUS = b && /S&P/.test(b.sh || "");
+    if (S.es && S.slot !== "morn" && S.slot !== "week" && !/선물/.test(b && b.sh || "")) mini.push(["🇺🇸 S&P 선물", S.es.chg, "지금"]);
+    else if (P.d1_spy != null && !bigUS) mini.push(["🇺🇸 S&P500", P.d1_spy, md(P.d1_date)]);
+    if (bigUS && P.d1_qqq != null) mini.push(["🇺🇸 나스닥", P.d1_qqq, md(P.d1_date)]);
     if (P.d1 != null) mini.push(["💼 내 포트", P.d1, md(P.d1_date)]);
     var BG = badges(H);
     var rw = !!(b && b.krx && S.line && S.line.length >= 4);   // 🎞 되감기 (A10/30-3)

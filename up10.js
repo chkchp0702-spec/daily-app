@@ -335,8 +335,13 @@
     var pcard = d1.n ? '<section class="card sc-c" data-goto="prob"><div class="sc-h"><span class="hm-i">🎲</span><div><b>시장확률 — 다음 날 방향</b><small>홈 「오늘 한 줄」이 얼마나 맞나 · 5개 시장 합산</small></div>' +
       '<div class="sc-rate ' + (d1.hit >= 55 ? "up" : d1.hit < 45 ? "dn" : "") + '">' + Math.round(d1.hit) + '%<small>맞음</small></div><span class="hm-go">보기 ›</span></div>' + bar(okN, d1.n - okN) +
       '<p class="note">' + d1.n + '번 중 ' + okN + '번 맞음. ' + (proven ? '20번 넘게 채점해 55%를 넘어서, 홈에서 「세게」 말해요.' : '<b>아직 동전보다 확실히 낫지 않아요</b> — 20번 넘게 채점해 55%를 넘기 전까지 홈에서는 「약간 오를 쪽」처럼 약하게만 말해요. 이 숫자로 사고팔지 마세요.') + '</p></section>' : '';
-    var h = pcard + '<section class="card sc-top sc-c" data-goto="port~pokick"><div class="sc-gb"><div><b>✅ 이기는 것</b>' + ((S.good || []).length ? S.good.map(function(x){ return '<span>' + e(x) + '</span>'; }).join("") : '<span class="mut">표본 쌓는 중</span>') + '</div>' +
-      '<div><b>❌ 지는 것</b>' + ((S.bad || []).length ? S.bad.map(function(x){ return '<span>' + e(x) + '</span>'; }).join("") : '<span class="mut">없음</span>') + '</div></div>' +
+    /* 📊 10/31 B9 「번 돈÷잃은 돈 1.6 (비용 뺀 36건)」 글자 벽 → 막대 그림 — 가운데 선 = 본전(1배), 오른쪽 초록 = 버는 쪽, 왼쪽 빨강 = 잃는 쪽 */
+    var pfRow = function(x, good){ var m = /^(.*?)\s*손익비\s*([\d.]+)\s*(?:\((.*)\))?/.exec(String(x)); if (!m) return '<div class="pf-r"><span class="pf-n">' + e(x) + '</span></div>';
+      var v = +m[2], L = Math.min(1, Math.abs(Math.log(Math.max(v, 0.05))) / Math.log(4)) * 50, sub = (m[3] || "").replace(/비용 뺀\s*/, "").replace(/비용 전\s*([\d.]+)/, "비용 빼기 전 $1배");
+      return '<div class="pf-r"><span class="pf-n">' + e(m[1]) + (sub ? '<small>' + e(sub) + '</small>' : '') + '</span><span class="pf-t"><i class="pf-z"></i><i class="pf-b ' + (v >= 1 ? "g" : "r") + '" style="' + (v >= 1 ? "left:50%" : "right:50%") + ';width:' + L.toFixed(1) + '%"></i></span><b class="pf-v ' + (v >= 1 ? "g" : "r") + '">' + v.toFixed(v >= 10 ? 0 : 1) + '배</b></div>'; };
+    var pfAll = (S.good || []).map(function(x){ return pfRow(x, 1); }).concat((S.bad || []).map(function(x){ return pfRow(x, 0); }));
+    var h = pcard + '<section class="card sc-top sc-c" data-goto="port~pokick"><div class="sc-h"><span class="hm-i">⚖️</span><div><b>신호별 번 돈 ÷ 잃은 돈</b><small>가운데 선 = 본전(1배) · 오른쪽으로 길수록 잘 버는 신호</small></div></div>' +
+      (pfAll.length ? '<div class="pf-l">' + pfAll.join("") + '</div>' : '<p class="mut">표본 쌓는 중</p>') +
       '<p class="note">매시간 자동 채점 · ' + e(String(S.at || "").slice(5)) + ' · 매일 저녁 자가 업그레이드가 이 숫자로 규칙을 고쳐요(지는 건 줄이고 이기는 건 늘림).</p></section>';
     (S.rows || []).forEach(function(r){
       var top = '<div class="sc-h"><span class="hm-i">' + r.ic + '</span><div><b>' + e(r.t) + '</b><small>' + e(r.note || "") + '</small></div>' +
@@ -484,6 +489,9 @@
     ".sc-bt-t{width:100%;border-collapse:collapse;font-size:12.5px}.sc-bt-t td,.sc-bt-t th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:right}.sc-bt-t td:first-child,.sc-bt-t th:first-child{text-align:left}.sc-bt-t tr.kp td{font-weight:800}",
     ".hm-chip[data-op]:active,.hm-chip[data-goto]:active,.sc-c:active{opacity:.7}.sc-c{cursor:pointer}",
     /* 성적표 */
+    ".pf-l{margin-top:8px}.pf-r{display:grid;grid-template-columns:minmax(0,1.25fr) 1fr auto;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line)}.pf-r:first-child{border-top:0}.pf-n{font-size:13.5px;font-weight:700;line-height:1.35;min-width:0}.pf-n small{display:block;font-size:11.5px;font-weight:500;color:var(--sub)}" +
+    ".pf-t{position:relative;height:14px;background:var(--panel2);border-radius:7px;overflow:hidden}.pf-z{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--sub);opacity:.6}.pf-b{position:absolute;top:2px;bottom:2px;border-radius:5px}.pf-b.g{background:#2f9e44}.pf-b.r{background:#d6453d}" +
+    ".pf-v{font-size:14px;font-weight:800;min-width:42px;text-align:right}.pf-v.g{color:#2f9e44}.pf-v.r{color:#d6453d}",
     ".sc-gb{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sc-gb>div{background:var(--panel2);border-radius:12px;padding:9px}.sc-gb b{display:block;font-size:13px;margin-bottom:4px}.sc-gb span{display:block;font-size:12.5px;line-height:1.5}",
     ".sc-h{display:flex;align-items:center;gap:10px}.sc-h>div:nth-child(2){flex:1;min-width:0}.sc-h b{font-size:15px}.sc-h small{display:block;font-size:12.5px;color:var(--sub)}",
     ".sc-rate{font-size:22px;font-weight:900;text-align:right;line-height:1.05}.sc-rate small{display:block;font-size:12.5px;color:var(--sub);font-weight:600}",

@@ -15,9 +15,9 @@
     var old = j.asof && j.asof.slice(0, 10) !== kst();
     return '<section class="card pbc no-clp" id="pbcard" data-xc="1" data-cz="done" data-sig="' + e(j.at || "") + '"><h3>☀️ 오늘 한 장 <span class="mut">' + e(j.label || "") + (old ? ' · 지난 자료' : '') + '</span></h3>' +
       (j.regime ? '<div class="pb-reg">🧭 ' + e(j.regime) + (j.one ? ' — ' + e(j.one) : '') + '</div>' : '') +
-      '<div class="pb-talk"><small>💬 고객에게 할 말</small>' + (j.talk || []).map(function(t){ return '<p>· ' + e(t) + '</p>'; }).join("") + '</div>' +
+      '<div class="pb-talk"><small>' + (j.mode === "주말" || j.mode === "휴장" ? "🗓 지난 장 마감 정리" : "💬 고객에게 할 말") + '</small>' + (j.talk || []).map(function(t){ return '<p>· ' + e(t) + '</p>'; }).join("") + '</div>' +
       (j.events && j.events.length ? '<div class="pb-ev">📅 ' + e(j.events.join(" · ")) + '</div>' : '') +
-      '<div class="pb-ft"><button type="button" data-pbsend="1">📨 이 내용 보내기</button><span class="mut">장중 매시간 새로 써요 · 알림은 아침 한 번</span></div></section>';
+      '<div class="pb-ft"><button type="button" data-pbsend="1">📨 이 내용 보내기</button><span class="mut">' + (j.mode === "주말" || j.mode === "휴장" ? "장이 쉬는 날엔 마지막 마감으로 정리해요" : "장중 매시간 새로 써요 · 알림은 아침 한 번") + '</span></div></section>';
   }
   function mount(){
     var b = document.getElementById("hmbody"); if (!b) return;

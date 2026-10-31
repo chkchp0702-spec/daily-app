@@ -195,6 +195,15 @@ def earn_cal(U):
         res = dict(ex.map(one, syms))
     today = dt.date.today()
     items = []
+    # 🔤 10/31 A6: 한글 이름 붙이기 (opdata names_ko — 「CHUGIN FINANCI」처럼 잘린 영어 대신)
+    try:
+        KO = hjson(OPD + "names_ko.json", timeout=30) or {}
+    except Exception:
+        KO = {}
+    try:
+        KO.update(X.jl(os.path.join(X.OUT, "sig_names.json"), {}) or {})
+    except Exception:
+        pass
     for s, j in res.items():
         cal = (j or {}).get("cal") or {}
         for d in cal.get("earn") or []:
@@ -203,14 +212,14 @@ def earn_cal(U):
             except Exception:
                 continue
             if -1 <= (dd - today).days <= 45:
-                items.append({"s": s, "n": S[s]["n"], "d": dd.isoformat(), "why": sorted(S[s]["why"]), "kind": "실적"})
+                items.append({"s": s, "n": S[s]["n"], "ko": KO.get(s) or KO.get(s.split(".")[0]) or "", "d": dd.isoformat(), "why": sorted(S[s]["why"]), "kind": "실적"})
                 break
         ex_ = cal.get("exdiv")
         if ex_:
             try:
                 dd = dt.date.fromisoformat(ex_[:10])
                 if 0 <= (dd - today).days <= 30:
-                    items.append({"s": s, "n": S[s]["n"], "d": dd.isoformat(), "why": sorted(S[s]["why"]), "kind": "배당락"})
+                    items.append({"s": s, "n": S[s]["n"], "ko": KO.get(s) or KO.get(s.split(".")[0]) or "", "d": dd.isoformat(), "why": sorted(S[s]["why"]), "kind": "배당락"})
             except Exception:
                 pass
     items.sort(key=lambda x: (x["d"], x["kind"]))
@@ -1072,6 +1081,19 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import extras as _X
     X = _X
+    if len(sys.argv) > 1 and sys.argv[1] == "week1":          # 📨 10/31 C7 금요일 16시 — 「이번 주 한 장」 준비됐어요
+        import glob as _g
+        cs = sorted(_g.glob(os.path.join("archive", "sector", "20*", "compass.json")))
+        C = X.jl(cs[-1], {}) if cs else {}
+        parts = []
+        for k, lab in (("KR", "코스피"), ("US", "S&P500"), ("JP", "닛케이"), ("CN", "상해"), ("HK", "항셍")):
+            ix = ((C.get("markets") or {}).get(k) or {}).get("index") or []
+            v = ix[0].get("chg5") if ix else None
+            if v is not None:
+                parts.append(f"{lab} {v:+.1f}%".replace("+-", "−").replace("-", "−"))
+        msg = ("이번 주 " + " · ".join(parts) + "\n" if parts else "") + "고객에게 보낼 「이번 주 한 장」이 준비됐어요 — 홈에서 눌러 바로 보내기"
+        X.push("brief", "📨 이번 주 한 장", msg, "home~wk1", f"week1:{X.TODAY}", tags="incoming_envelope", quiet=None, level="mid")
+        sys.exit(0)
     if len(sys.argv) > 1 and sys.argv[1] == "brief":          # brief.yml: 07:58 PB 한 장만
         U = {}
         try:

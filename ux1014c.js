@@ -56,10 +56,10 @@
 
   /* ---------- A15-4 오늘 날씨 색 ---------- */
   var MOOD = {
-    sun:  {ic: "☀️", w: "맑음", c: "#4dd47a", lc: "#1f9d4f", why: "경기·시장 점수가 둘 다 좋은 쪽"},
-    cloud:{ic: "⛅", w: "흐림", c: "#e9b949", lc: "#b07d00", why: "두 점수가 엇갈림"},
-    rain: {ic: "🌧", w: "비",   c: "#ff6b6b", lc: "#cc3b3b", why: "두 점수가 나쁜 쪽"},
-    fog:  {ic: "🌫", w: "보류", c: "#8a94a8", lc: "#6b7486", why: "점수에 든 신호가 적어 판단 보류"}
+    sun:  {ic: "🧭", w: "분위기 좋음", c: "#4dd47a", lc: "#1f9d4f", why: "경기·시장 점수가 둘 다 좋은 쪽"},
+    cloud:{ic: "🧭", w: "엇갈림", c: "#e9b949", lc: "#b07d00", why: "두 점수가 엇갈림"},
+    rain: {ic: "🧭", w: "분위기 나쁨", c: "#ff6b6b", lc: "#cc3b3b", why: "두 점수가 나쁜 쪽"},
+    fog:  {ic: "🧭", w: "판단 보류", c: "#8a94a8", lc: "#6b7486", why: "점수에 든 신호가 적어 판단 보류"}
   };
   var M = null;
   function act(sigs){ return (sigs || []).filter(function(s){ return s.st != null && s.w > 0 && !(s.id === "thrust" && s.st === 0); }); }
@@ -83,7 +83,7 @@
       b.appendChild(d);
     }
     var dd = document.getElementById("moodDot");
-    if (dd){ dd.setAttribute("aria-label", "오늘 시장 날씨 " + m.w + " — 국면 신호판 보기"); dd.title = m.ic + " " + m.w + " · " + M.label; }
+    if (dd){ dd.setAttribute("aria-label", "장 분위기 " + m.w + " — 국면 신호판 보기"); dd.title = m.ic + " " + m.w + " · " + M.label; }
     var day = document.querySelector("#hmbody .hm-day");
     if (day && !day.querySelector(".hm-mood")){
       var s = document.createElement("span"); s.className = "hm-mood"; s.setAttribute("role", "button");

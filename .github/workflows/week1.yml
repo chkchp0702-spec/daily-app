@@ -1,0 +1,29 @@
+name: week1
+# 📨 10/31 C7 금요일 16시 — 「이번 주 한 장」(고객에게 보낼 주간 요약) 알림 한 번
+on:
+  schedule:
+    - cron: "0 7 * * 5"    # KST 금 16:00
+    - cron: "20 7 * * 5"   # KST 금 16:20 (예비 · 같은 key 라 한 번만 감)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: brief
+  cancel-in-progress: false
+jobs:
+  week1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python plus.py week1
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
+      - name: 저장 (보낸 기록)
+        run: |
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          bash scripts/push.sh "week1 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/sent.json archive/x/push_log.json

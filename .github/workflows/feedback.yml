@@ -16,10 +16,11 @@ jobs:
       - uses: actions/checkout@v4
       - run: python3 feedback.py
       - run: python3 usage.py          # 📈 사용 현황(익명 열림 신호)
+      - run: python3 vote.py || echo "🎯 예측 게임 모으기 실패"   # 10/31 C1 아침 1탭 예측
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT: ${{ secrets.TG_CHAT }}
       - name: 저장
         run: |
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/ideas.json archive/fb archive/x/usage.json
+          bash scripts/push.sh "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/ideas.json archive/fb archive/x/usage.json archive/x/vote.json

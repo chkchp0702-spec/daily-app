@@ -102,6 +102,7 @@
       ".qtools button small{display:block;font-weight:500;font-size:11px;color:#6b7488}",
       ".sjr .pdfbar{margin:0 0 12px}",
       /* 우와 업그레이드 */
+      ".lk-mw{display:flex;align-items:center;gap:10px;margin:10px 0 4px;padding:12px 14px;border-radius:16px;background:var(--panel2);border:1px solid var(--line);cursor:pointer}.lk-mw .lk-mwi{font-size:22px}.lk-mw div{flex:1;min-width:0}.lk-mw small{display:block;font-size:12px;color:var(--sub)}.lk-mw b{display:block;font-size:14.5px;line-height:1.4}.lk-mw i{font-style:normal;color:var(--sub);font-size:18px}" +
       ".lk-hero{position:relative;overflow:hidden;border-radius:24px;padding:18px 18px 16px;color:#fff;margin-bottom:12px;box-shadow:0 10px 28px rgba(40,20,90,.22)}",
       ".lk-hero .tw{position:absolute;border-radius:50%;background:#fff;animation:sjtw 2.6s ease-in-out infinite}@keyframes sjtw{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:.95;transform:scale(1.15)}}",
       ".lk-hero .ani{position:absolute;right:-6px;top:-10px;font-size:120px;opacity:.22;transform:rotate(12deg);line-height:1;pointer-events:none}",
@@ -388,7 +389,7 @@
       '<div style="grid-column:1/-1"><small>오늘 기운과 어울리는 업종 (오행)</small><b style="font-size:13.5px">' + IV.secs.map(function(k){ return t.INV_SECTOR[k][0] + ' ' + t.INV_SECTOR[k][1]; }).join("<br>") + '</b><small style="margin-top:3px">한 박자 쉬어 볼 쪽 — ' + t.INV_SECTOR[IV.avoidSec][0] + ' ' + t.INV_SECTOR[IV.avoidSec][1] + '</small></div></div>' +
       '<div style="margin-top:10px"><div class="lk-tip"><span>✅</span><span>' + e(IV.d.ok) + '</span></div><div class="lk-tip"><span>🚫</span><span>' + e(IV.d.no) + '</span></div>' + IV.tips.map(function(x){ return '<div class="lk-tip"><span>⚠️</span><span>' + e(x) + '</span></div>'; }).join("") + '</div>' +
       '<div style="text-align:center;font-weight:800;font-size:15px;margin:10px 0 4px">💬 「' + e(IV.word) + '」</div>' +
-      '<div class="sj-btns" style="margin-top:8px"><button class="sj-btn g" id="lkMkt">🌐 진짜 시장은 시황에서 보기</button></div>' +
+      '<div class="lk-mw" id="lkMkt" role="button"><span class="lk-mwi">🌐</span><div><small>오늘 진짜 시장 날씨</small><b id="lkMktT">불러오는 중…</b></div><i>›</i></div>' +
       '<p class="sj-note">⚠️ 사주로 본 재미 운세예요. 업종은 오행에 맞춘 놀이일 뿐 추천이 아니고, 실제 투자 판단은 시황 · 포트 · 상품 정보를 보고 하세요.</p></div>';
     h += '<div class="card"><h3>오늘의 이야기</h3>' + D.story.map(function(x){ return '<p style="margin:0 0 8px;font-size:14.5px;line-height:1.65">' + e(x) + '</p>'; }).join("") +
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"><span class="lk-g" style="background:var(--panel2);color:var(--sub)">오늘 글자 ' + D.L.p + '</span><span class="lk-g" style="background:var(--panel2);color:var(--sub)">' + t.EL_KO[D.L.gEl] + ' · ' + t.EL_KO[D.L.bEl] + ' 기운</span><span class="lk-g" style="background:var(--panel2);color:var(--sub)">내게 ' + t.grpShort(D.gG, R.sex) + ' 글자</span></div></div>';
@@ -441,13 +442,18 @@
     [].forEach.call(root.querySelectorAll(".lk-all [data-id]"), function(b){ b.onclick = function(){ ls("sj_sel", b.dataset.id); renderLuck(); window.scrollTo({top: 0, behavior: "smooth"}); }; });
     var rp = root.querySelector("#lkRep"); if (rp) rp.onclick = function(){ if (window.go) go("saju"); };
     countUp(root.querySelector("#lkSc"), D.sc);
-    var mk = root.querySelector("#lkMkt"); if (mk) mk.onclick = function(){ if (window.go) go("market"); };
+    var mk = root.querySelector("#lkMkt"); if (mk){ mk.onclick = function(){ if (window.go) go("home"); };   // 🔮→🏠 10/31 C5 운세 보러 온 사람을 시장으로
+      if (window.mktWeather) mktWeather().then(function(w){ var t = root.querySelector("#lkMktT"); if (t && w) t.textContent = w.ic + " " + w.w + " — " + w.line; }).catch(function(){}); }
     var fl = root.querySelector("#lkFlip"); if (fl) fl.onclick = function(){ fl.classList.toggle("on"); ls(flipKey, fl.classList.contains("on") ? 1 : 0); try { if (navigator.vibrate) navigator.vibrate(12); } catch(x) {} };
     var txt = "🔮 " + p.name + " 님의 " + dd.m + "월 " + dd.d + "일 운세\n" + D.sc + "점 · " + t.GRADE(D.sc) + "\n" + D.head + "\n\n" + D.areas.map(function(a){ return a[0] + " " + a[1] + " " + a[2] + "점 — " + (a[3] || ""); }).join("\n") +
       "\n\n📈 투자운 " + D.inv.v + "점 · " + D.inv.style.ic + " " + D.inv.style.n + " 모드 — " + D.inv.d.m + "\n💬 「" + D.inv.word + "」" + "\n\n🍀 행운의 색 " + D.col + " · 숫자 " + D.num + " · 방향 " + D.dir + "\n" + CD.ic + " 오늘의 카드: " + CD.n + " — " + CD.m + "\n💬 「" + D.word + "」\n\n(재미로 보는 운세 · CH Investing)";
     var sh = root.querySelector("#lkShare"); if (sh) sh.onclick = function(){ if (navigator.share){ navigator.share({title: "오늘의 운세", text: txt}).catch(function(){}); } else copyText(txt, sh); };
     var cp = root.querySelector("#lkCopy"); if (cp) cp.onclick = function(){ copyText(txt, cp); };
   }
+  /* 🔮 10/31 C5 홈에 「오늘 투자운 N점」 칩 — 생일이 이 휴대폰에 저장된 사람만 (계산은 휴대폰 안에서) */
+  window.luckToday = function(){
+    try { var p = sel(); if (!p || !ready()) return null; var D = luckData(calcOf(p), 0); return {name: p.name, sc: D.sc, inv: D.inv && D.inv.v, word: D.inv && D.inv.word}; } catch(x) { return null; }
+  };
   window.luckView = function(){ return '<div id="sjL" class="no-clp tidy-x ez-no" data-noemo="1"><div class="loading">불러오는 중…</div></div>'; };
   window.luckInit = function(){ LK.off = 0; renderLuck(); };
 

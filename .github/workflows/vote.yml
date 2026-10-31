@@ -1,0 +1,24 @@
+name: vote
+# 🎯 10/31 C1 아침 1탭 예측 — 마감 직전(08:50)에 표를 모으고, 장 끝(15:45·16:30)에 바로 채점해 순위를 새로 씀
+on:
+  schedule:
+    - cron: "50 23 * * 0-4"   # KST 08:50 월~금 (장 시작 전 마지막 표)
+    - cron: "45 6 * * 1-5"    # KST 15:45 월~금 (마감 채점)
+    - cron: "30 7 * * 1-5"    # KST 16:30 (예비)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: feedback
+  cancel-in-progress: false
+jobs:
+  vote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 vote.py
+      - name: 저장
+        run: |
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          bash scripts/push.sh "vote $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/vote.json

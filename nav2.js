@@ -455,7 +455,19 @@
     "#main .dates{margin-bottom:10px}#main .date{padding:5px 11px!important;border-radius:999px!important;font-size:12.5px!important;line-height:1.3}" +
     "#main .date b{display:inline!important;font-size:13.5px!important;margin-right:3px}" +
     "#backbtn.root{display:none!important}#backbtn{padding:9px 14px!important;font-size:14px!important}" +
+    // 🫥 10/31 B7: 읽으려고 아래로 내리는 동안엔 「보내기」「뒤로」를 아래로 숨김 — 글자를 가리지 않게 (위로 살짝 올리거나 맨 위·맨 아래면 다시)
+    "#backbtn,#opbtn{transition:transform .25s ease,opacity .25s ease!important}" +
+    "html.fab-hide #backbtn,html.fab-hide #opbtn{transform:translateY(140%)!important;opacity:0!important;pointer-events:none!important}" +
     "";
   document.head.appendChild(css);
+  (function(){
+    var D = document.documentElement, lastY = window.scrollY;
+    window.addEventListener("scroll", function(){
+      var y = window.scrollY, dy = y - lastY, end = y + window.innerHeight >= document.documentElement.scrollHeight - 40;
+      if (y < 80 || end || dy < -6) D.classList.remove("fab-hide");
+      else if (dy > 6) D.classList.add("fab-hide");
+      if (Math.abs(dy) > 6) lastY = y;
+    }, {passive: true});
+  })();
   if (window.cur) try { window.drawTabs(); } catch(x) {}
 })();
