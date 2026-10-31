@@ -1,44 +1,42 @@
 {
- "at": "2026-10-31 16:01",
- "ok": false,
- "problems": [
-  "#danta 글 깨짐: 「🙋 자신 있는 알람만 알림으로 가요 — 오늘 2건은 증거가 모자라 기록만 했어요(). 성」"
- ],
+ "at": "2026-10-31 17:07",
+ "ok": true,
+ "problems": [],
  "data": [
   {
    "name": "💼 포트",
    "ok": true,
-   "age_h": 7.9,
+   "age_h": 9.0,
    "lim": 27
   },
   {
    "name": "⚡ 킥",
    "ok": true,
-   "age_h": 6.1,
+   "age_h": 7.2,
    "lim": 27
   },
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 6.1,
+   "age_h": 7.2,
    "lim": 27
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 6.1,
+   "age_h": 7.2,
    "lim": 27
   },
   {
    "name": "🌏 동종주",
    "ok": true,
-   "age_h": 6.1,
+   "age_h": 7.2,
    "lim": 27
   },
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 6.1,
+   "age_h": 7.2,
    "lim": 80
   },
   {
@@ -50,31 +48,31 @@
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.4,
+   "age_h": 0.5,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 0.4,
+   "age_h": 1.5,
    "lim": 80
   },
   {
    "name": "📱 앱 목록",
    "ok": true,
-   "age_h": 0.7,
+   "age_h": 0.6,
    "lim": 30
   },
   {
    "name": "🎲 시장확률",
    "ok": true,
-   "age_h": 1.4,
+   "age_h": 0.9,
    "lim": 2
   },
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 15.6,
+   "age_h": 16.7,
    "lim": 80
   }
  ],
@@ -83,7 +81,7 @@
    "tab": "home",
    "s": 0.6,
    "cards": 9,
-   "len": 2208,
+   "len": 2220,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -92,14 +90,14 @@
    "tab": "market",
    "s": 0.3,
    "cards": 29,
-   "len": 1601,
+   "len": 1572,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "sector",
-   "s": 0.7,
+   "s": 0.6,
    "cards": 40,
    "len": 1463,
    "bad": [],
@@ -110,14 +108,14 @@
    "tab": "prob",
    "s": 0.5,
    "cards": 6,
-   "len": 449,
+   "len": 421,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "port",
-   "s": 0.9,
+   "s": 0.7,
    "cards": 14,
    "len": 798,
    "bad": [],
@@ -126,7 +124,7 @@
   },
   {
    "tab": "score",
-   "s": 0.7,
+   "s": 0.4,
    "cards": 10,
    "len": 3011,
    "bad": [],
@@ -135,9 +133,9 @@
   },
   {
    "tab": "whale",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 21,
-   "len": 1428,
+   "len": 1413,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -146,7 +144,7 @@
    "tab": "cup",
    "s": 0.3,
    "cards": 12,
-   "len": 3491,
+   "len": 3487,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -155,7 +153,7 @@
    "tab": "gap",
    "s": 0.3,
    "cards": 17,
-   "len": 2570,
+   "len": 2575,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -216,7 +214,7 @@
   },
   {
    "tab": "luck",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 1,
    "len": 136,
    "bad": [],
@@ -234,7 +232,7 @@
   },
   {
    "tab": "tarot",
-   "s": 0.3,
+   "s": 0.4,
    "cards": 4,
    "len": 734,
    "bad": [],
@@ -243,7 +241,7 @@
   },
   {
    "tab": "lotto",
-   "s": 0.4,
+   "s": 0.5,
    "cards": 4,
    "len": 1763,
    "bad": [],
@@ -254,7 +252,7 @@
    "tab": "feed",
    "s": 0.5,
    "cards": 1,
-   "len": 4551,
+   "len": 4553,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -279,9 +277,9 @@
   },
   {
    "tab": "danta",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 12,
-   "len": 1427,
+   "len": 1281,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -371,7 +369,7 @@
     },
     {
      "tab": "market",
-     "buttons": 53,
+     "buttons": 52,
      "errs": [],
      "jumps": []
     },
@@ -401,7 +399,7 @@
     },
     {
      "tab": "whale",
-     "buttons": 57,
+     "buttons": 56,
      "errs": [],
      "jumps": []
     },
@@ -514,7 +512,7 @@
      "jumps": []
     }
    ],
-   "buttons": 848
+   "buttons": 846
   },
   {
    "tab": "숫자 맞추기",
@@ -549,7 +547,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 2208,
+     "len": 2220,
      "cards": 9
     },
     "market": {
@@ -562,7 +560,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 1601,
+     "len": 1572,
      "cards": 29
     },
     "sector": {
@@ -588,7 +586,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 449,
+     "len": 421,
      "cards": 6
     },
     "port": {
@@ -627,7 +625,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 1428,
+     "len": 1413,
      "cards": 21
     },
     "cup": {
@@ -640,7 +638,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 3491,
+     "len": 3487,
      "cards": 12
     },
     "gap": {
@@ -653,7 +651,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 2570,
+     "len": 2575,
      "cards": 17
     },
     "screen": {
@@ -796,7 +794,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 4551,
+     "len": 4553,
      "cards": 1
     },
     "accum": {
@@ -828,16 +826,14 @@
     "danta": {
      "bad": [],
      "ids": [],
-     "glitch": [
-      "🙋 자신 있는 알람만 알림으로 가요 — 오늘 2건은 증거가 모자라 기록만 했어요(). 성"
-     ],
+     "glitch": [],
      "img": [],
      "empty": [],
      "dup": [],
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 1427,
+     "len": 1281,
      "cards": 12
     },
     "alarm": {
@@ -874,13 +870,13 @@
    "repo": "daily-app",
    "job": "pages-build-deployment",
    "ok": true,
-   "when": "2026-10-31T07:14"
+   "when": "2026-10-31T08:19"
   },
   {
    "repo": "daily-app",
    "job": "collect",
    "ok": true,
-   "when": "2026-10-31T06:18"
+   "when": "2026-10-31T07:33"
   },
   {
    "repo": "daily-app",
@@ -952,19 +948,19 @@
    "repo": "daily-app",
    "job": "keeper",
    "ok": true,
-   "when": "2026-10-31T06:46"
+   "when": "2026-10-31T08:21"
   },
   {
    "repo": "daily-app",
    "job": "feedback",
    "ok": true,
-   "when": "2026-10-31T07:12"
+   "when": "2026-10-31T08:12"
   },
   {
    "repo": "daily-app",
    "job": "oppdf",
    "ok": true,
-   "when": "2026-10-31T01:04"
+   "when": "2026-10-31T07:31"
   },
   {
    "repo": "daily-app",
@@ -982,7 +978,7 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-10-30T13:39"
+   "when": "2026-10-31T07:00"
   },
   {
    "repo": "daily-app",
@@ -994,7 +990,7 @@
    "repo": "daily-app",
    "job": "prob",
    "ok": true,
-   "when": "2026-10-31T07:12"
+   "when": "2026-10-31T08:14"
   },
   {
    "repo": "daily-app",
@@ -1250,6 +1246,7 @@
   }
  ],
  "week_fixed": [
+  "10/31 📊 세로 막대 그래프(viz.cols): 막대 10개 넘고 부른 쪽이 라벨을 안 골랐으면 맨 끝부터 k칸(=",
   "10/30 🩺 ① 「☀️ 오늘 한 장」 마감판을 15:41~15:59 에도 만듦(live.yml — 전엔 매시 0~14",
   "10/29 🧺 pv_hold: DART 첫 화면이 안 열리면 매번 새 창(새 쿠키·연결)으로 4번까지 다시(쉬는 시간 ",
   "10/28 📰 「월가 IB 전략」 피드(gn_us_ib): 구글뉴스 받기 창 1일 → 3일 · 남기기 2일 → 7일(S",
