@@ -432,7 +432,7 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
 <footer>※ 참고용 자료입니다. 투자 판단과 책임은 본인에게 있습니다.</footer>
 
 <script src="livepx.js?v=1"></script>
-<script src="viz.js?v=12"></script>
+<script src="viz.js?v=13"></script>
 <script>
 /* ---------- ⚠ 저장본 알림 띠 (10/11) — 서비스 워커가 느려서 마지막 저장본을 보여 주면 위쪽에 잠깐 ---------- */
 (function(){
@@ -1539,7 +1539,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261031b";
+var APPV = "20261031c";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1589,7 +1589,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 })();
 </script>
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
-<script defer src="views.js?v=35"></script>
+<script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
 <script defer src="compass.js?v=25"></script>
 <script defer src="problive.js?v=3"></script>

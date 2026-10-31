@@ -197,7 +197,7 @@
       }
       h += '<div id="bt"></div>' + sec("알람 " + rows.length + "건");
       var qn = rows.filter(function(x){ return x.sent === false; }).length;
-      if (qn) h += '<div class="note mut" style="margin:4px 0 8px;font-size:12.5px">🙋 자신 있는 알람만 알림으로 가요 — 오늘 ' + qn + '건은 증거가 모자라 기록만 했어요(📝). 성적이 쌓여 이기는 자리로 확인되면 저절로 알림이 켜져요.</div>';
+      if (qn) h += '<div class="note mut" style="margin:4px 0 8px;font-size:12.5px">🙋 자신 있는 알람만 알림으로 가요 — 오늘 ' + qn + '건은 증거가 모자라 📝 기록만 했어요. 성적이 쌓여 이기는 자리로 확인되면 저절로 알림이 켜져요.</div>';
       if (!rows.length) h += '<div class="empty"><div class="big">⚡</div>오늘은 아직 알람이 없어요.<br><small class="mut">텔레그램으로 알람이 오면 1~5분 안에 여기에도 떠요. 새로고침 해보세요.</small></div>';
       h += '<div class="list">' + rows.map(function(x){
         var ex = x.exit ? chip(e(x.exit), /손절|이탈/.test(x.exit) ? "cool" : "hot") : "";

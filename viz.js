@@ -139,7 +139,11 @@ var V = (function(){
     var P = 16, plot = H - P * 2;
     var Y = function(v){ return P + (hi - v) / rng * plot; };
     var z = Y(0);
-    return '<div class="vc" style="height:' + H + 'px"><span class="vc-z" style="top:' + z.toFixed(1) + 'px"></span>' + rows.map(function(r){
+    // 10/31: 막대가 많으면(390px 화면에 20개 → 칸 13px, 「10/01」 글자 36px) 날짜·값 글자가 서로 겹쳐 못 읽음 → 맨 끝부터 k칸마다 하나만 글자(누르면 data-tip 으로 전부)
+    //        부른 쪽이 이미 라벨을 골라 비운 경우(나침반 5칸마다)는 그대로
+    var n = rows.length, K = (n > 10 && rows.every(function(r){ return r.label; })) ? Math.ceil(n / 7) : 1;
+    return '<div class="vc" style="height:' + H + 'px"><span class="vc-z" style="top:' + z.toFixed(1) + 'px"></span>' + rows.map(function(r, i){
+      if (K > 1 && (n - 1 - i) % K) r = {label: "", v: r.v, tip: r.tip || (r.label + (r.top ? " " + r.top : "")), color: r.color};
       var v = r.v || 0, y1 = Y(v), top = Math.min(z, y1), h = Math.max(1, Math.abs(y1 - z));
       var lab = r.top ? '<span class="vc-n" style="top:' + (v >= 0 ? (top - 14) : (top + h + 2)).toFixed(1) + 'px">' + e(r.top) + '</span>' : '';
       return '<div class="vc-c"' + (r.tip ? ' data-tip="' + e(r.tip) + '"' : '') + '><div class="vc-b" style="top:' + top.toFixed(1) + 'px;height:' + h.toFixed(1) + 'px;background:' + (r.color || (v >= 0 ? UP : DN)) + '"></div>' +
