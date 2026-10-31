@@ -1,0 +1,1 @@
+{"estimates": [{"period": "2026", "rev": 0.0, "rev_lo": 0.0, "rev_hi": 0.0, "rev_g": null, "n": 2, "eps": -0.625, "eps_lo": -0.73, "eps_hi": -0.52, "eps_g": 0.569}, {"period": "2027", "rev": 0.0, "rev_lo": 0.0, "rev_hi": 0.0, "rev_g": 0.0, "n": 2, "eps": -0.66, "eps_lo": -0.85, "eps_hi": -0.47, "eps_g": -0.055999998}], "ltg": null, "cal": {}, "surp": []}
