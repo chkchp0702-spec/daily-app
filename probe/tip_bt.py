@@ -9,6 +9,16 @@ import prob, prob_x
 
 syms = sorted({c["ix"] for c in prob.MK.values()} | {"TIP", "IEF", "^TNX", "^MOVE", "^GSPC"})
 H = prob.load_hist(syms)
+import time, yfinance as yf
+for s_ in ("^TNX", "^MOVE", "TIP", "IEF", "^GSPC"):
+    for _ in range(3):
+        if s_ in H and len(H[s_]) > 1000: break
+        time.sleep(3)
+        try:
+            x_ = yf.Ticker(s_).history(start="2000-01-01", auto_adjust=False)[["Open", "Close"]]
+            x_.index = pd.to_datetime(x_.index).tz_localize(None); H[s_] = x_
+        except Exception as e: print("재시도 실패", s_, e)
+    print("자료", s_, len(H.get(s_, [])))
 def cs(s):
     x = H[s]["Close"].dropna(); return x[x > 0]
 tip, ief, tnx, mv, sp = cs("TIP"), cs("IEF"), cs("^TNX"), cs("^MOVE"), cs("^GSPC")
