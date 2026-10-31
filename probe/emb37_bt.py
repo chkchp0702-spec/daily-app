@@ -8,6 +8,14 @@ from night_bt_lib import wf, score, lab, one, logit_fit
 
 cfg = prob.MK["JP"]
 H = prob.load_hist([cfg["ix"], "EMB", "IEF", "HYG", "LQD", "DX-Y.NYB", "^GSPC"])
+import yfinance as yf, time
+for s_ in ["EMB", "IEF", "HYG", "LQD", "DX-Y.NYB", "^GSPC", cfg["ix"]]:
+    for _t in range(3):
+        if s_ in H and len(H[s_]) > 600: break
+        time.sleep(2); o = yf.download(s_, start="2000-01-01", interval="1d", auto_adjust=False, progress=False)
+        if isinstance(o.columns, pd.MultiIndex): o.columns = o.columns.get_level_values(0)
+        o = o[["Open", "Close"]].dropna(subset=["Close"]); o.index = pd.to_datetime(o.index).tz_localize(None); H[s_] = o
+    print("자료", s_, len(H.get(s_, [])))
 def cs(s):
     x = H[s]["Close"].dropna(); return x[x > 0]
 b = pd.concat([cs("EMB"), cs("IEF")], axis=1, keys=["e", "i"]).dropna(); sprd = np.log(b["e"] / b["i"])
