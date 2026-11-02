@@ -187,8 +187,8 @@
   }
   function formX(k){
     var f = baseX(k); if (!f) return null;
-    if (!EQ[k]) return f;
-    var P = mustPlan(k, f); if (!P) return f;
+    if (!EQ[k]) return brand(f);
+    var P = mustPlan(k, f); if (!P) return brand(f);
     var tf = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct, ta = (P.after.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
     (f.themes || []).forEach(function(t){ t.w = r1(t.w * (tf ? ta / tf : 0)); });
     f.alloc = P.all.filter(function(a){ return a.pct > 0; });
@@ -198,10 +198,17 @@
     f.headline = "⭐ 추천 종목 " + pc(P.M) + " + " + P.after.filter(function(a){ return a.pct > 0; }).map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" + ") + " 제안임";
     f.points = ["⭐ 추천 종목 " + P.ins.map(function(a){ return a.inst.split(" · ")[0] + " " + pc(a.pct); }).join(" · ") + " — 담는 이유는 아래 「추천 종목」 칸 · 나머지 " + pc(r1(100 - P.M)) + "는 기본 포트 비율 그대로 (아래 설명의 % 숫자는 추천 종목 넣기 전 기본 포트 기준)"].concat(RET[k] ? ["위험자산 합계 " + pc(P.risky) + " (법정 한도 70% 안)"] : []).concat(f.points || []);
     if (f.sim && f.sim.note) f.sim.note += " · ⭐ 추천 종목은 과거 계산에서 빼고 기본 포트 비율로 계산";
-    return f;
+    return brand(f);
   }
   var FONT = '"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR",sans-serif';
-  var NAVY = "#14304f", INK = "#1d2533", SUB = "#5b6576", LINE = "#e3e7ee", BG = "#f5f7fb", UP = "#d6402f", DN = "#2a62c9";
+  // 🟠 11/02 사용자 「이 폼으로 다 적용」 — 미래에셋증권 투자제안서 폼(A4 가로 · 주황 F58220 · 남색 003863/00427A · 표 머리 FAB072 · 차트 색 순서)
+  var NAVY = "#003863", INK = "#2f3237", SUB = "#666b73", LINE = "#e2e4e8", BG = "#f4f6f8", UP = "#d6402f", DN = "#2a62c9", ORG = "#F58220", NV2 = "#00427A", THB = "#FAB072";
+  var MCH = ["#F1820F", "#003863", "#F8B66C", "#00A8DA", "#007ABB", "#B66347", "#8CC0DF", "#D75F1A", "#A9ABA6", "#CB6015", "#0D2D4F", "#F58220"];
+  var PCOL = {kr_stock: "#F1820F", gl_stock: "#007ABB", pension: "#D75F1A", dc: "#003863", irp: "#0086B8", ktb: "#00427A", ust: "#182C4D", brl: "#B66347", els: "#CB6015"};
+  var DISC0 = "본 자료는 미래에셋증권이 제작한 것이며, 투자권유를 위한 광고물로 활용될 수 없고, 투자자에게 배포될 수 없습니다. 본 자료에 수록된 내용은 신뢰할만한 자료 및 정보로부터 얻어진 것이나 당사는 그 정확상이나 안정성을 보장할 수 없습니다. 따라서 어떠한 경우에도 본 자료는 고객의 투자 결과에 대한 법적 책임소재에 대한 증빙자료로 사용될 수 없습니다.";
+  var LOGO = "img/mirae_logo.png", LOGO_R = 1000 / 351, LOGO64 = null;
+  function logo64(){ if (LOGO64) return Promise.resolve(LOGO64); return fetch(LOGO).then(function(r){ return r.blob(); }).then(function(b){ return new Promise(function(ok){ var fr = new FileReader(); fr.onload = function(){ LOGO64 = fr.result; ok(LOGO64); }; fr.readAsDataURL(b); }); }).catch(function(){ return null; }); }
+  function brand(f){ if (!f) return f; f.color = PCOL[f.key] || f.color; (f.alloc || []).forEach(function(a, i){ a.color = MCH[i % MCH.length]; }); (f.themes || []).forEach(function(t, i){ t.color = MCH[(i + 2) % MCH.length]; }); (f.must || []).forEach(function(a){ var j = (f.alloc || []).indexOf(a); }); return f; }
 
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function toast(m){ var d = document.createElement("div"); d.className = "ch-toast"; d.setAttribute("role", "status"); d.textContent = m; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2600); }
@@ -480,7 +487,7 @@
     if (!t || !t.rows || !t.rows.length) return "";
     opt = opt || {};
     return (t.title ? '<div style="font-size:' + (fs + 2) + 'px;font-weight:800;margin:4px 0 8px;color:' + INK + '">' + e(t.title) + '</div>' : '') + '<table style="width:100%;border-collapse:collapse;font-size:' + fs + 'px;color:' + INK + '">' +
-      '<tr>' + t.cols.map(function(c, i){ return '<th style="text-align:' + (i && opt.right ? "right" : "left") + ';background:' + NAVY + ';color:#fff;padding:7px 8px;font-weight:700">' + e(c) + '</th>'; }).join("") + '</tr>' +
+      '<tr>' + t.cols.map(function(c, i){ return '<th style="text-align:' + (i && opt.right ? "right" : "left") + ';background:' + THB + ';color:#2f3237;padding:7px 8px;font-weight:800">' + e(c) + '</th>'; }).join("") + '</tr>' +
       t.rows.map(function(r, i){ var hl = opt.hl && opt.hl(r, i); return '<tr style="background:' + (hl ? "#fff6e8" : i % 2 ? "#f7f9fc" : "#fff") + '">' + r.map(function(c, j){ return '<td style="padding:' + (opt.pad || "6px 8px") + ';border-bottom:1px solid ' + LINE + ';vertical-align:top;color:' + INK + ';' + (opt.nowrap ? 'white-space:nowrap;' : '') + 'text-align:' + (j && opt.right ? "right" : "left") + (hl || (opt.bold && opt.bold(j)) ? ';font-weight:800' : '') + '">' + (opt.raw ? c : e(c)) + '</td>'; }).join("") + '</tr>'; }).join("") + '</table>' +
       (t.src ? '<div style="font-size:' + (fs - 1) + 'px;color:' + SUB + ';margin-top:4px">자료: ' + e(t.src) + '</div>' : '');
   }
@@ -517,12 +524,14 @@
   function onePage(m){
     var W = 1080, multi = m.items.length > 1;
     var h = '<div class="ppx" style="width:' + W + 'px;background:' + BG + ';font-family:' + FONT + '">' + '<div style="color:' + INK + ';padding-bottom:28px">';
-    h += '<div style="background:linear-gradient(135deg,' + NAVY + ' 0%,#24508a 100%);padding:52px 56px 46px;position:relative;overflow:hidden"><div style="color:#fff;position:relative">' +
-      '<div style="position:absolute;right:-150px;top:-140px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.06)"></div>' +
-      '<div style="font-size:24px;opacity:.85;font-weight:700;letter-spacing:1px;color:#fff">INVESTMENT PROPOSAL · ' + e(m.date) + '</div>' +
-      '<div style="font-size:52px;font-weight:800;letter-spacing:-1.5px;margin-top:14px;line-height:1.2;color:#fff">' + e(custName(m)) + '을 위한<br>' + e(titleOf(m)) + '</div>' +
-      (m.total ? '<div style="display:inline-block;margin-top:22px;background:rgba(255,255,255,.14);border-radius:16px;padding:12px 22px;font-size:28px;color:#fff">제안 금액 <b style="font-size:36px">' + man(m.total) + '</b></div>' : '') +
-      (function(){ var gl = m.items.length === 1 ? gLine(m.items[0].f) : ""; return gl ? '<div style="margin-top:16px;font-size:22px;line-height:1.5;color:#fff;opacity:.95">' + e(gl) + '</div>' : ''; })() + '</div></div>';
+    h += '<div style="background:#fff;padding:40px 56px 34px;position:relative"><div style="color:' + INK + ';position:relative">' +
+      '<img src="' + LOGO + '" style="position:absolute;right:0;top:0;width:200px;height:auto">' +
+      '<div style="font-size:22px;color:#48535B;font-weight:700">투자 제안서 · ' + e(m.date) + '</div>' +
+      '<div style="width:64px;height:5px;background:' + ORG + ';margin:22px 0 18px"></div>' +
+      '<div style="font-size:50px;font-weight:800;letter-spacing:-1.5px;line-height:1.22;color:' + NAVY + '">' + e(custName(m)) + '을 위한<br>' + e(titleOf(m)) + '</div>' +
+      (m.total ? '<div style="display:inline-block;margin-top:20px;background:#fff4ea;border-radius:16px;padding:12px 22px;font-size:28px;color:' + INK + '">제안 금액 <b style="font-size:36px;color:' + NAVY + '">' + man(m.total) + '</b></div>' : '') +
+      (function(){ var gl = m.items.length === 1 ? gLine(m.items[0].f) : ""; return gl ? '<div style="margin-top:16px;font-size:22px;line-height:1.5;color:#48535B">' + e(gl) + '</div>' : ''; })() + '</div></div>' +
+      '<div style="height:6px;background:' + ORG + '"></div>';
     if (multi){
       var parts = m.items.map(function(x){ return {pct: m.total ? x.amt / m.total * 100 : 100 / m.items.length, color: x.f.color}; });
       h += '<div style="padding:30px 44px 0"><div style="font-size:31px;font-weight:800;margin-bottom:14px;color:' + INK + '">🧺 전체 나눠 담기</div><div style="background:#fff;border:1px solid ' + LINE + ';border-radius:22px;padding:24px;display:flex;gap:26px;align-items:center">' +
@@ -548,7 +557,8 @@
     h += '<div style="margin:22px 44px 0;padding:18px 24px;border:1.5px solid #d5dbe5;border-radius:16px;background:#fafbfd;color:#4a5363">' +
       '<div style="font-size:19px;font-weight:800;color:' + NAVY + ';margin-bottom:6px">⚖️ 투자위험 고지</div>' +
       '<div style="font-size:15.5px;line-height:1.6">' + shortDisc(D).map(function(t){ return '<div style="display:flex;gap:8px"><span style="color:' + NAVY + '">·</span><span>' + e(t) + '</span></div>'; }).join("") + '</div>' +
-      (sl ? '<div style="font-size:15px;color:' + SUB + ';text-align:right;margin-top:6px">' + e(sl) + '</div>' : '') + '</div></div></div>';
+      (sl ? '<div style="font-size:15px;color:' + SUB + ';text-align:right;margin-top:6px">' + e(sl) + '</div>' : '') + '</div>' +
+      '<div style="margin:16px 48px 0;font-size:14px;line-height:1.6;color:#7a7f87">' + e(DISC0) + '</div></div></div>';
     return h;
   }
 
@@ -556,11 +566,12 @@
   var PW = 794, PH = 1123, CW = PW - 96;
   function page(inner, n, of, m, color){
     return '<div class="ppx" style="width:' + PW + 'px;height:' + PH + 'px;background:#fff;font-family:' + FONT + ';position:relative;overflow:hidden"><div style="color:' + INK + ';width:' + PW + 'px;height:' + PH + 'px;position:relative">' +
-      '<div style="height:8px;background:' + (color || NAVY) + '"></div>' +
-      '<div style="padding:30px 48px 0;color:' + INK + '">' + inner + '</div>' +
+      '<div style="height:62px;position:relative"><div style="position:absolute;left:48px;top:24px;font-size:13px;font-weight:700;color:' + NV2 + '">| ' + e(m.doc || (custName(m) + " · " + titleOf(m) + " 투자 제안서")) + '</div></div>' +
+      '<div style="height:4px;background:' + ORG + ';box-shadow:0 2px 3px rgba(0,0,0,.16)"></div>' +
+      '<div style="padding:18px 48px 0;color:' + INK + '">' + inner + '</div>' +
       '<div style="position:absolute;left:48px;right:48px;bottom:24px;display:flex;justify-content:space-between;font-size:11px;color:#8a93a3;border-top:1px solid ' + LINE + ';padding-top:9px"><span>' + e(m.foot || custName(m) + ' 투자 제안 · ' + m.date) + '</span><span>' + e(byLine(m)) + '</span><span>' + n + ' / ' + of + '</span></div></div></div>';
   }
-  function hTitle(t, sub, color){ return '<div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid ' + (color || NAVY) + '"><div style="font-size:24px;font-weight:800;letter-spacing:-0.8px;color:' + (color || NAVY) + '">' + t + '</div>' + (sub ? '<div style="font-size:13.5px;color:' + SUB + ';padding-bottom:3px">' + e(sub) + '</div>' : '') + '</div>'; }
+  function hTitle(t, sub, color){ return '<div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid ' + ORG + '"><div style="font-size:24px;font-weight:800;letter-spacing:-0.8px;color:' + (color || NAVY) + '">' + t + '</div>' + (sub ? '<div style="font-size:13.5px;color:' + SUB + ';padding-bottom:3px">' + e(sub) + '</div>' : '') + '</div>'; }
   function secT(t, c){ return '<div style="display:flex;align-items:center;gap:8px;font-size:17.5px;font-weight:800;margin:14px 0 9px;color:' + INK + '"><span style="width:5px;height:19px;border-radius:3px;background:' + (c || NAVY) + '"></span>' + t + '</div>'; }
 
   // 10/28 사용자 「레이아웃에 좀 더 신경쓰자 여백이 너무 많아」 — 쪽을 미리 나누지 않고 덩어리(블록)를 재서 A4에 빈틈없이 채움
@@ -813,17 +824,29 @@
     if (f.table && f.table.rows && f.table.rows.length && !/^(ktb|ust|brl|els)$/.test(f.key) && !(f.themes && f.themes.length)) B.push(tbl({title: f.table.title, cols: f.table.cols, rows: f.table.rows.slice(0, 8)}, 12));
     return B;
   }
+  function ym(){ var d = new Date(Date.now() + 9 * 3600e3); return d.getUTCFullYear() + "." + ("0" + (d.getUTCMonth() + 1)).slice(-2); }
   function coverPage(m){
-    return '<div class="ppx" style="width:' + PW + 'px;height:' + PH + 'px;background:linear-gradient(160deg,' + NAVY + ' 0%,#1f4d86 60%,#2b6cb0 100%);font-family:' + FONT + ';position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;width:' + PW + 'px;height:' + PH + 'px;color:#fff">' +
-      '<div style="position:absolute;right:-160px;top:-120px;width:520px;height:520px;border-radius:50%;background:rgba(255,255,255,.06)"></div><div style="position:absolute;left:-120px;bottom:-160px;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,.05)"></div>' +
-      '<div style="padding:120px 70px 0;position:relative;color:#fff"><div style="font-size:16px;letter-spacing:4px;opacity:.8;font-weight:700">INVESTMENT PROPOSAL</div>' +
-      '<div style="font-size:24px;margin-top:40px;opacity:.92">' + e(custName(m)) + '을 위한</div><div style="font-size:46px;font-weight:800;letter-spacing:-1.5px;line-height:1.25;margin-top:8px;color:#fff">' + e(titleOf(m)) + '<br>투자 제안서</div>' +
-      '<div style="width:70px;height:5px;background:#f0b43c;margin:34px 0"></div>' +
-      (m.total ? '<div style="font-size:18px;opacity:.88">제안 금액</div><div style="font-size:40px;font-weight:800;margin-top:4px;color:#fff">' + man(m.total) + '</div>' : '') +
-      (function(){ var gl = m.items.length === 1 ? gLine(m.items[0].f) : ""; return gl ? '<div style="margin-top:14px;font-size:16px;line-height:1.55;color:#fff;opacity:.92;max-width:640px">' + e(gl) + '</div>' : ''; })() +
-      '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:30px">' + m.items.map(function(x){ return '<span style="background:rgba(255,255,255,.16);border-radius:99px;padding:8px 16px;font-size:16px;font-weight:700;color:#fff">' + e(x.f.icon + " " + x.f.short) + (x.amt ? " · " + man(x.amt) : "") + '</span>'; }).join("") + '</div>' +
-      '<div style="margin-top:46px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:600px">' + (m.items.length <= 2 ? m.items : []).map(function(x){ var sl = simLine(x.f, x.amt); return '<div style="background:rgba(255,255,255,.1);border-radius:14px;padding:14px 16px;color:#fff"><div style="font-size:13px;opacity:.85">' + e(x.f.short) + (sl ? " · " + e(sl.lab) : "") + '</div><div style="font-size:22px;font-weight:800;margin-top:2px">' + e(sl ? sl.big : x.f.headline.slice(0, 20)) + '</div></div>'; }).join("") + '</div></div>' +
-      '<div style="position:absolute;left:70px;right:70px;bottom:70px;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,.3);padding-top:22px;color:#fff"><div><div style="font-size:14px;opacity:.8">제안</div><div style="font-size:24px;font-weight:800;margin-top:4px">' + e(byLine(m) || "담당 PB") + '</div></div><div style="font-size:16px;opacity:.88">' + e(m.date) + '</div></div></div></div>';
+    var sl = simNo(m), gl = m.items.length === 1 ? gLine(m.items[0].f) : "";
+    return '<div class="ppx" style="width:' + PW + 'px;height:' + PH + 'px;background:#fff;font-family:' + FONT + ';position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;width:' + PW + 'px;height:' + PH + 'px;color:' + INK + '">' +
+      (sl ? '<div style="position:absolute;left:66px;top:46px;font-size:12px;color:#48535B">' + e(sl) + '</div>' : '') +
+      '<div style="position:absolute;left:66px;right:66px;top:250px">' +
+        '<div style="font-size:20px;color:#48535B">' + e(custName(m)) + '을 위한</div>' +
+        '<div style="font-size:40px;font-weight:800;letter-spacing:-1.2px;line-height:1.28;margin-top:10px;color:' + NAVY + '">' + e(titleOf(m)) + '<br>투자 제안서</div>' +
+        (m.total ? '<div style="margin-top:26px;font-size:16px;color:#48535B">제안 금액 <b style="font-size:26px;color:' + NAVY + ';margin-left:6px">' + man(m.total) + '</b></div>' : '') +
+        (gl ? '<div style="margin-top:10px;font-size:14.5px;line-height:1.6;color:#48535B;max-width:600px">' + e(gl) + '</div>' : '') +
+        '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:20px">' + m.items.map(function(x){ return '<span style="border:1px solid ' + LINE + ';border-radius:99px;padding:6px 14px;font-size:13.5px;font-weight:700;color:' + INK + '"><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + x.f.color + ';margin-right:6px"></i>' + e(x.f.short) + (x.amt ? " · " + man(x.amt) : "") + '</span>'; }).join("") + '</div>' +
+      '</div>' +
+      '<div style="position:absolute;left:72px;top:735px;width:62px;height:4px;background:' + ORG + '"></div>' +
+      '<div style="position:absolute;left:66px;top:768px;font-size:19px;font-weight:700;color:#48535B">' + e(byLine(m) || "담당 PB") + '</div>' +
+      '<div style="position:absolute;left:66px;top:806px;font-size:16px;color:#48535B">' + ym() + '</div>' +
+      '<div style="position:absolute;left:66px;bottom:62px;width:470px;font-size:9.5px;line-height:1.65;color:#48535B">' + e(DISC0) + '</div>' +
+      '<img src="' + LOGO + '" style="position:absolute;right:56px;bottom:58px;width:190px;height:auto">' +
+    '</div></div>';
+  }
+  function closePage(){
+    return '<div class="ppx" style="width:' + PW + 'px;height:' + PH + 'px;background:#fff;font-family:' + FONT + ';position:relative;overflow:hidden">' +
+      '<div style="position:absolute;left:0;right:0;top:470px;text-align:center;font-size:34px;font-weight:700;color:' + ORG + '">감사합니다</div>' +
+      '<img src="' + LOGO + '" style="position:absolute;left:' + Math.round((PW - 170) / 2) + 'px;bottom:110px;width:170px;height:auto"></div>';
   }
   function summaryBlocks(m){
     var parts = m.items.map(function(x){ return {pct: m.total ? x.amt / m.total * 100 : 100 / m.items.length, color: x.f.color}; });
@@ -896,7 +919,7 @@
     return {ok: true, cls: left != null && left <= 30 ? "warn" : "ok", t: left != null && left <= 30 ? "⏳ 심의필 " + left + "일 남음" : "✅ 심의필 등록됨", why: ""};
   }
   function simText(){ var no = (ME.simNo || "").trim(); return no ? (/^제/.test(no) ? no : "제 " + no) + (/호$/.test(no) ? "" : "호") + (ME.simFrom || ME.simTo ? " (" + ymd(ME.simFrom) + "~" + ymd(ME.simTo) + ")" : "") : ""; }
-  function simNo(m){ return simState().ok ? "준법감시인 심의필 " + simText() : ""; }
+  function simNo(m){ return simState().ok ? "미래에셋증권 준법감시인 심사필 " + simText() : ""; }
   // 한 장 요약용 줄임 문구 (한 장·심의 요청서 둘 다 씀)
   function shortDisc(D){ return [
         "본 자료는 투자 판단을 돕기 위한 참고 자료이며 수익을 보장하지 않음 · 투자 판단과 결과의 책임은 투자자 본인에게 있음",
@@ -905,7 +928,7 @@
         "가입 전 (간이)투자설명서·상품설명서를 반드시 읽고 충분한 설명을 들으셔야 함 · 투자자성향에 맞지 않으면 권유할 수 없음",
         "금융소비자보호법상 청약철회권·위법계약해지권·자료열람요구권이 있음 · 민원 금융감독원 1332"
       ].concat(D.P.map(function(g){ return g.ic + " " + g.t + ": " + g.l[0]; })); }
-  function allModel(){ return {cust: "", pb: (ME.pb || "").trim(), org: (ME.org || "").trim(), date: dlabel(), items: ((DATA && DATA.forms) || []).map(function(f){ return {f: f, amt: 0}; }), total: 0, notice: [], basis: (DATA && DATA.basis) || "", foot: "준법감시 심의 요청 · 위험고지 문구 " + DISC_VER}; }
+  function allModel(){ return {cust: "", pb: (ME.pb || "").trim(), org: (ME.org || "").trim(), date: dlabel(), items: ((DATA && DATA.forms) || []).map(function(f){ return {f: f, amt: 0}; }), total: 0, notice: [], basis: (DATA && DATA.basis) || "", foot: "준법감시 심의 요청 · 위험고지 문구 " + DISC_VER, doc: "준법감시 심의 요청서 — 투자 제안서 위험고지 문구"}; }
   function discText(){
     var D = discOf(allModel(), true), n = 0, o = ["[CH Investing 투자 제안서 — 투자위험 고지 문구 · 버전 " + DISC_VER + "]", "", "■ 공통 사항"];
     D.C.forEach(function(t){ o.push((++n) + ". " + t); });
@@ -947,7 +970,7 @@
     return discBlocks(m).concat([signBlock(m)]);
   }
   // 덩어리 높이를 재서 쪽에 채움 · 남는 높이는 덩어리 사이 간격으로 고르게 나눔(너무 벌어지지 않게 최대 26px)
-  var BODY_H = PH - 8 - 26 - 70, GAP = 14;
+  var BODY_H = PH - 66 - 18 - 70, GAP = 14;
   function measure(blocks){
     var H = host(); H.innerHTML = '<div style="width:' + CW + 'px;font-family:' + FONT + ';color:' + INK + '">' + blocks.map(function(b){ return '<div class="ppb" style="width:' + CW + 'px">' + b + '</div>'; }).join("") + '</div>';
     var hs = [].map.call(H.querySelectorAll(".ppb"), function(n){ return Math.ceil(n.getBoundingClientRect().height); }); H.innerHTML = ""; return hs;
@@ -971,7 +994,7 @@
   function pageFrom(p, n, of, m){
     var free = BODY_H - p.used, k = p.items.length > 1 ? Math.min(26, GAP + free / (p.items.length - 1) * 0.5) : GAP;
     if (free > BODY_H * 0.45) k = GAP;   // 반 넘게 비면(마지막 쪽) 벌리지 않음
-    return page(p.items.join(gap(Math.round(k))), n, of, m, p.color).replace('padding:30px 48px 0', 'padding:26px 48px 0');
+    return page(p.items.join(gap(Math.round(k))), n, of, m, p.color);
   }
   function fullPages(m){
     var groups = [];
@@ -982,7 +1005,7 @@
       groups.push({color: f.color, blocks: propBlocks(f, x).concat(mustBlocks(f, x)).concat(themeBlocks(f, x)).concat(cardBlocks(f, x)).concat(mb).concat(simBlocks(f, x.amt)).concat(detailBlocks(f, x)).concat(careBlocks(f))}); });
     groups.push({color: NAVY, blocks: noticeBlocks(m)});
     var pages = pack(groups), of = pages.length + 1;
-    return [coverPage(m)].concat(pages.map(function(p, i){ return pageFrom(p, i + 2, of, m); }));
+    return [coverPage(m)].concat(pages.map(function(p, i){ return pageFrom(p, i + 2, of, m); })).concat([closePage()]);
   }
 
   /* ───────── 그림 찍기 ───────── */
@@ -1052,21 +1075,26 @@
   /* ═════════ ③ PPT (16:9 · 맑은 고딕 · PPT 안에서 고칠 수 있는 진짜 차트) ═════════ */
   function hx(c){ return String(c || "#14304f").replace("#", "").toUpperCase(); }
   function makePpt(m){
-    return needPpt().then(function(){
-      var P = new PptxGenJS(), F = "맑은 고딕";
-      P.layout = "LAYOUT_WIDE"; P.theme = {headFontFace: F, bodyFontFace: F};
-      var _add = P.addSlide.bind(P);
-      P.addSlide = function(){ var sl = _add(), at = sl.addText.bind(sl), tb = sl.addTable.bind(sl), ch = sl.addChart.bind(sl);
-        sl.addText = function(t, o){ return at(noEmo(t), o); };
-        sl.addTable = function(r, o){ return tb(noEmo(r), Object.assign({autoPage: false}, o || {})); };
-        sl.addChart = function(tp, d, o){ if (o && o.title) o.title = noEmo(o.title); return ch(tp, (d || []).map(function(z){ var y = {}; for (var k in z) y[k] = z[k]; if (y.labels) y.labels = noEmo(y.labels); if (y.name) y.name = noEmo(y.name); return y; }), o); };
+    return needPpt().then(logo64).then(function(){
+      var P = new PptxGenJS(), F = "맑은 고딕", K = 10.833 / 13.333, NOSC = false;
+      P.defineLayout({name: "MIRAE_A4", width: 10.833, height: 7.5}); P.layout = "MIRAE_A4"; P.theme = {headFontFace: F, bodyFontFace: F};
+      var sc = function(o, fs){ if (!o || NOSC) return o; o = Object.assign({}, o); if (o.x != null) o.x *= K; if (o.w != null) o.w *= K; if (o.colW) o.colW = o.colW.map(function(v){ return v * K; });
+        if (fs && o.fontSize) o.fontSize = Math.round(o.fontSize * 0.92 * 2) / 2; return o; };
+      var _add = P.addSlide.bind(P), NS = 0;
+      P.addSlide = function(){ var sl = _add(), at = sl.addText.bind(sl), tb = sl.addTable.bind(sl), ch = sl.addChart.bind(sl), sh = sl.addShape.bind(sl), im = sl.addImage.bind(sl); NS++;
+        sl.addText = function(t, o){ return at(noEmo(t), sc(o, 1)); };
+        sl.addShape = function(tp, o){ return sh(tp, sc(o)); };
+        sl.addImage = function(o){ return im(sc(o)); };
+        sl.addTable = function(r, o){ return tb(noEmo(r), Object.assign({autoPage: false}, sc(o || {}, 1))); };
+        sl.addChart = function(tp, d, o){ if (o && o.title) o.title = noEmo(o.title); return ch(tp, (d || []).map(function(z){ var y = {}; for (var k in z) y[k] = z[k]; if (y.labels) y.labels = noEmo(y.labels); if (y.name) y.name = noEmo(y.name); return y; }), sc(o)); };
         return sl; }; P.title = custName(m) + " 투자 제안서"; P.author = byLine(m) || "PB";
       function T(s, text, o){ var d = {fontFace: F, fontSize: 14, color: "1D2533", valign: "top", margin: 0}; for (var k in o) d[k] = o[k]; s.addText(text, d); }
-      function head(s, t, sub, color){ s.background = {color: "FFFFFF"}; s.addShape(P.ShapeType.rect, {x: 0, y: 0, w: 13.333, h: 0.12, fill: {color: hx(color || NAVY)}, line: {color: hx(color || NAVY)}});
-        T(s, t, {x: 0.6, y: 0.32, w: 10, h: 0.6, fontSize: 25, bold: true, color: hx(color || NAVY)}); if (sub) T(s, sub, {x: 0.6, y: 0.92, w: 12, h: 0.35, fontSize: 12, color: "5B6576"});
-        T(s, custName(m) + " 투자 제안 · " + m.date + (byLine(m) ? " · " + byLine(m) : ""), {x: 0.6, y: 7.08, w: 12.1, h: 0.28, fontSize: 9, color: "8A93A3"}); }
+      function head(s, t, sub, color){ s.background = {color: "FFFFFF"};   // 폼의 본문 쪽: 제목(남색) + 아래 주황 줄
+        T(s, t, {x: 0.6, y: 0.3, w: 12.1, h: 0.6, fontSize: 24, bold: true, color: hx(NAVY)}); if (sub) T(s, sub, {x: 0.6, y: 0.88, w: 12.1, h: 0.34, fontSize: 12, color: "666B73"});
+        s.addShape(P.ShapeType.rect, {x: 0, y: 1.27, w: 13.333, h: 0.05, fill: {color: "F58220"}, line: {color: "F58220", width: 0}, shadow: {type: "outer", color: "000000", opacity: 0.18, blur: 2, offset: 1, angle: 90}});
+        T(s, custName(m) + " 투자 제안 · " + m.date + (byLine(m) ? " · " + byLine(m) : ""), {x: 0.6, y: 7.1, w: 10, h: 0.26, fontSize: 9, color: "8A93A3"}); T(s, String(NS), {x: 11.7, y: 7.1, w: 1, h: 0.26, fontSize: 9, color: "8A93A3", align: "right"}); }
       function rbox(s, x, y, w, h, fill){ s.addShape(P.ShapeType.roundRect, {x: x, y: y, w: w, h: h, fill: {color: hx(fill || BG)}, line: {color: hx(fill || BG)}, rectRadius: 0.1}); }
-      function th(cols){ return cols.map(function(c){ return {text: c, options: {bold: true, color: "FFFFFF", fill: {color: hx(NAVY)}}}; }); }
+      function th(cols){ return cols.map(function(c){ return {text: c, options: {bold: true, color: "2F3237", fill: {color: "FAB072"}}}; }); }
       function kpis(s, kp, x, y, w, cols){ kp = (kp || []).filter(function(k){ return k && k.value && k.value !== "–"; }); var cw = (w - 0.15 * (cols - 1)) / cols; (kp || []).forEach(function(k, i){ var xx = x + (i % cols) * (cw + 0.15), yy = y + Math.floor(i / cols) * 1.12;
         rbox(s, xx, yy, cw, 1.0); T(s, k.label, {x: xx + 0.12, y: yy + 0.08, w: cw - 0.2, h: 0.26, fontSize: 9.5, color: "5B6576", bold: true});
         T(s, k.value, {x: xx + 0.12, y: yy + 0.32, w: cw - 0.2, h: 0.38, fontSize: 17, bold: true, color: k.tone > 0 ? "1A8A5A" : k.tone < 0 ? hx(UP) : "1D2533"});
@@ -1088,16 +1116,19 @@
           chartColors: items.map(function(i){ return i.v >= 0 ? "22A06B" : "E0533D"; }), showValue: true, dataLabelFormatCode: '#,##0', dataLabelFontFace: F, dataLabelFontSize: 8, catAxisLabelFontFace: F, catAxisLabelFontSize: 8.5, valAxisHidden: true, valGridLine: {style: "none"}, showLegend: false});
       }
       // 표지
-      var s = P.addSlide(); s.background = {color: hx(NAVY)};
-      s.addShape(P.ShapeType.ellipse, {x: 9.3, y: -1.6, w: 5.6, h: 5.6, fill: {color: "FFFFFF", transparency: 93}, line: {color: "FFFFFF", transparency: 100}});
-      T(s, "INVESTMENT PROPOSAL", {x: 0.9, y: 1.1, w: 8, h: 0.4, fontSize: 13, color: "C9D6EA", bold: true, charSpacing: 4});
-      T(s, custName(m) + "을 위한", {x: 0.9, y: 1.9, w: 11, h: 0.5, fontSize: 20, color: "E6EDF7"});
-      T(s, titleOf(m) + " 투자 제안서", {x: 0.9, y: 2.45, w: 11.5, h: 1.3, fontSize: 36, bold: true, color: "FFFFFF"});
-      s.addShape(P.ShapeType.rect, {x: 0.9, y: 3.95, w: 0.8, h: 0.07, fill: {color: "F0B43C"}, line: {color: "F0B43C"}});
-      if (m.total) { T(s, "제안 금액", {x: 0.9, y: 4.3, w: 4, h: 0.35, fontSize: 13, color: "C9D6EA"}); T(s, man(m.total), {x: 0.9, y: 4.65, w: 6, h: 0.7, fontSize: 32, bold: true, color: "FFFFFF"}); }
-      T(s, m.items.map(function(x){ return x.f.short + (x.amt ? " " + man(x.amt) : ""); }).join("   ·   "), {x: 0.9, y: 5.55, w: 11.5, h: 0.4, fontSize: 13, color: "E6EDF7"});
-      T(s, "제안  " + (byLine(m) || "담당 PB"), {x: 0.9, y: 6.55, w: 8, h: 0.4, fontSize: 16, bold: true, color: "FFFFFF"});
-      T(s, m.date, {x: 8.9, y: 6.6, w: 3.6, h: 0.35, fontSize: 12, color: "C9D6EA", align: "right"});
+      var s = P.addSlide(); s.background = {color: "FFFFFF"}; NOSC = true;
+      var sln = simNo(m);
+      if (sln) T(s, sln, {x: 0.698, y: 0.421, w: 6.5, h: 0.4, fontSize: 10, color: "48535B"});
+      T(s, custName(m) + "을 위한", {x: 0.698, y: 1.25, w: 9.2, h: 0.45, fontSize: 18, color: "48535B"});
+      T(s, titleOf(m) + " 투자 제안서", {x: 0.698, y: 1.763, w: 9.4, h: 1.3, fontSize: 32, bold: true, color: "003863"});
+      if (m.total) T(s, [{text: "제안 금액  ", options: {fontSize: 14, color: "48535B"}}, {text: man(m.total), options: {fontSize: 22, bold: true, color: "003863"}}], {x: 0.698, y: 3.2, w: 9, h: 0.5});
+      T(s, m.items.map(function(x){ return x.f.short + (x.amt ? " " + man(x.amt) : ""); }).join("   ·   "), {x: 0.698, y: 3.75, w: 9.4, h: 0.4, fontSize: 12, color: "48535B"});
+      s.addShape(P.ShapeType.line, {x: 0.795, y: 4.917, w: 0.802, h: 0, line: {color: "F58220", width: 2.5}});
+      T(s, byLine(m) || "담당 PB", {x: 0.698, y: 5.25, w: 5.06, h: 0.375, fontSize: 16, bold: true, color: "48535B"});
+      T(s, ym(), {x: 0.698, y: 5.665, w: 5.06, h: 0.375, fontSize: 14, color: "48535B"});
+      T(s, DISC0, {x: 0.698, y: 6.43, w: 7.32, h: 0.6, fontSize: 7, color: "48535B", valign: "bottom"});
+      if (LOGO64) s.addImage({data: LOGO64, x: 8.32, y: 6.21, w: 2.161, h: 2.161 / LOGO_R});
+      NOSC = false;
       if (m.items.length > 1){ s = P.addSlide(); head(s, "🧺 제안 한눈에", "상품별 금액");
         s.addChart(P.ChartType.doughnut, [{name: "금액", labels: m.items.map(function(x){ return x.f.short; }), values: m.items.map(function(x){ return x.amt || 1; })}],
           {x: 0.5, y: 1.4, w: 5, h: 5.3, holeSize: 58, chartColors: m.items.map(function(x){ return hx(x.f.color); }), showPercent: true, showLegend: true, legendPos: "b", legendFontFace: F, legendFontSize: 11, dataLabelColor: "FFFFFF", dataLabelFontFace: F, dataLabelFontSize: 11});
@@ -1217,6 +1248,10 @@
           T(s, g.ic + " " + g.t + " 투자 시 위험", {x: gx + 0.15, y: gy + 0.08, w: 5.8, h: 0.32, fontSize: 11, bold: true, color: "B3372A"});
           T(s, g.l.map(function(t){ return {text: t, options: {bullet: true, breakLine: true}}; }), {x: gx + 0.15, y: gy + 0.42, w: 5.8, h: 2.2, fontSize: 10.5, paraSpaceAfter: 4, valign: "top"}); }); }
       T(s, ["작성일 " + m.date + (m.org ? " · " + m.org : ""), simNo(m)].filter(Boolean).join("   |   "), {x: 0.5, y: 6.72, w: 12.3, h: 0.28, fontSize: 9.5, color: "5B6576", align: "right"});
+      s = P.addSlide(); s.background = {color: "FFFFFF"}; NOSC = true;   // 폼 마지막 쪽
+      T(s, "감사합니다", {x: 0.8125, y: 3.18, w: 9.21, h: 1.0, fontSize: 30, bold: true, color: "F58125", align: "center", valign: "middle"});
+      if (LOGO64) s.addImage({data: LOGO64, x: 4.594, y: 6.223, w: 1.87, h: 1.87 / LOGO_R});
+      NOSC = false;
       return P.write({outputType: "blob"});
     });
   }
