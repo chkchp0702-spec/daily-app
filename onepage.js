@@ -947,14 +947,18 @@
   document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-opstk]"); if (!b) return; ev.stopPropagation(); goMany([{kind: "stock", id: b.dataset.opstk, nm: b.dataset.nm || ""}], false); }, true);
   // 🔧 11/02 보내기 진단 — 어느 단계에서 막히는지 화면에 그대로 보여 줌 (사진 한 장이면 원인을 바로 앎)
   var DG = [];
-  function dg(m){ var d = new Date(); DG.push(("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2) + " " + m); if (DG.length > 40) DG.shift(); try { localStorage.setItem("opdiag", DG.join("\n")); } catch(x) {} }
-  function dgShow(head){ var o = document.getElementById("opdiag"); if (o) o.remove(); o = document.createElement("div"); o.id = "opdiag";
+  function dgLive(){ var o = document.getElementById("oplive"); if (!o) return; o.textContent = "📨 만드는 중 · 앱 " + (window.APPV || "?") + "\n" + DG.slice(-6).join("\n"); }
+  function dg(m){ var d = new Date(); setTimeout(dgLive, 0); DG.push(("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2) + " " + m); if (DG.length > 40) DG.shift(); try { localStorage.setItem("opdiag", DG.join("\n")); } catch(x) {} }
+  function dgShow(head){ var lv0 = document.getElementById("oplive"); if (lv0) lv0.remove(); var o = document.getElementById("opdiag"); if (o) o.remove(); o = document.createElement("div"); o.id = "opdiag";
     o.style.cssText = "position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 80px);z-index:100010;background:#111;color:#e8e8e8;border:2px solid #fee500;border-radius:12px;padding:10px 12px;font:12px/1.45 monospace;max-height:50vh;overflow:auto;white-space:pre-wrap";
     o.textContent = "🔧 " + head + "\n앱 " + (window.APPV || "?") + " · " + (navigator.userAgent.match(/OS [\d_]+/) || [""])[0] + "\n" + DG.join("\n") + "\n\n(이 화면을 캡처해 보내 주세요 · 누르면 닫힘)";
     o.onclick = function(){ o.remove(); }; document.body.appendChild(o); }
   function goMany(L, withMkt){   // 10/28 14:25 「종목만 따로 보낼 수 있게 — 반드시 시황과 같이가 아닌」 → withMkt=false 면 시황 빼고
     if (withMkt === undefined) withMkt = true;
     toast((withMkt ? "시장 한 장 + " : "") + L.length + "장 만드는 중…");
+    var lv = document.getElementById("oplive"); if (lv) lv.remove(); lv = document.createElement("div"); lv.id = "oplive";
+    lv.style.cssText = "position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 70px);z-index:100009;background:rgba(17,17,17,.92);color:#e8e8e8;border:2px solid #fee500;border-radius:12px;padding:8px 10px;font:12px/1.45 monospace;white-space:pre-wrap;pointer-events:none";
+    document.body.appendChild(lv);
     DG = []; dg("시작 · 시황 " + (withMkt ? "넣음" : "뺌") + " · " + L.map(function(it){ return it.kind + ":" + (it.id || it.nm || ""); }).join(", "));
     var nm = pbname(), done = false;
     // 11/02 「만드는 중…」에서 멈춘 채 아무것도 안 뜨던 것 — 자료 받기·그림 굽기 어디서든 멈추면 25초 뒤 진단을 띄움
@@ -1004,6 +1008,7 @@
      그림을 만드는 동안(자료 받기·그림 굽기) 그 순간이 지나가 공유창이 막혔던 것 → 다 만든 뒤 「카톡·문자로 보내기」 단추를 한 번 더 누르게(그 누름에서 바로 공유창). */
   function esc0(t){ return String(t || "").replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function readySheet(fs, title){
+    var lv0 = document.getElementById("oplive"); if (lv0) lv0.remove();
     var old = document.getElementById("opready"); if (old) old.remove();
     var box = document.createElement("div"); box.id = "opready";
     var urls = fs.map(function(f){ return URL.createObjectURL(f); });
