@@ -1542,11 +1542,11 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261102p";
+var APPV = "20261102q";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
-    if (v && v !== APPV){ var k = "reloaded_" + v; try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, 1); } catch(e) {}
+    if (v && v !== APPV){ var k = "reloaded_" + v; try { var nk = +(sessionStorage.getItem(k) || 0); if (nk >= 3) return; sessionStorage.setItem(k, nk + 1); } catch(e) {}   // 11/02: 한 번 다시 열어도 옛 화면이면 두 번 더 시도
       // 10/28: 입력 중(의견함·메모 등)이면 다음 기회에
       var ae = document.activeElement; if (ae && /^(INPUT|TEXTAREA)$/.test(ae.tagName) && ae.value) return;
       location.replace(location.pathname + "?v=" + v + location.hash); }

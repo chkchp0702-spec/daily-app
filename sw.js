@@ -3,7 +3,7 @@
    · 앱 파일(js·css·그림, ?v= 붙은 것): 한 번 받으면 버전이 바뀔 때까지 저장본 → 두 번째부터 바로 뜸
    · 첫 화면(index.html): 새로 받기, 끊기면 저장본
    · 10/11: 저장본을 보여 줄 땐 X-From-Cache·X-Saved-At 머리표 + 화면에 메시지 → 위쪽 「⚠ 연결이 느려 HH:MM 저장본」 띠 · 앱 파일 저장소 이름에 버전 */
-var VER = "20261102p";                                  // 앱 버전과 같이 올림 → 옛 ?v= 파일 저장본은 activate 때 지움
+var VER = "20261102q";                                  // 앱 버전과 같이 올림 → 옛 ?v= 파일 저장본은 activate 때 지움
 try { importScripts("easy.js?v=3"); } catch(x) {}         // 🗣 10/28 쉬운 말 — 푸시 알림 글도 (못 불러와도 알림은 그대로)
 var DC = "ch-data-v1", SC = "ch-static-" + VER;
 self.addEventListener("install", function(){ self.skipWaiting(); });
@@ -47,7 +47,8 @@ self.addEventListener("fetch", function(e){
   var u = new URL(r.url);
   if (u.hostname === "ntfy.sh" || /version\.txt$/.test(u.pathname) || /\.pdf$/.test(u.pathname)) return;
   var same = u.origin === self.location.origin;
-  if (r.mode === "navigate") { e.respondWith(netFirst(r, "ch-page", 4000)); return; }
+  // 11/02: 새 버전으로 다시 열 때(주소에 ?v=)는 느려도 새 화면을 기다림 — 4초 만에 옛 화면을 내줘서 고친 것이 폰에 안 들어가던 것
+  if (r.mode === "navigate") { e.respondWith(netFirst(r, "ch-page", /[?&]v=/.test(u.search) ? 20000 : 4000)); return; }
   // 10/19: 자료(JSON)는 브라우저 HTTP 캐시(GitHub Pages 10분)를 건너뛰고 늘 서버에 확인 — 장중 10분마다 바뀌는 파일이 옛것으로 보이던 문제
   if (u.hostname === "raw.githubusercontent.com" || (same && /\.json$/.test(u.pathname))) { e.respondWith(netFirst(new Request(r, {cache: "no-cache"}), DC, 3500, e.clientId)); return; }
   if (/cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com/.test(u.hostname)) { e.respondWith(cacheFirst(r, "ch-lib")); return; }   // 주소에 버전이 박힌 외부 도구 — 앱 버전과 무관
