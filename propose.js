@@ -517,8 +517,8 @@
       '<div class="pp-q pp-gq">' + [3, 5, 10, 15].map(function(y){ return '<button type="button" data-gy="' + y + '"' + (+GL.y === y ? ' class="on"' : '') + '>' + y + '년</button>'; }).join("") +
       '<button type="button" data-gx="1">지우기</button></div><div id="ppgs" class="pp-gs">' + gSum() + '</div></details>';
   }
-  function model(){
-    var items = ST.sel.map(function(k){ var f = formX(k); return f ? {f: f, amt: amtOf(k)} : null; }).filter(Boolean);
+  function model(keys){
+    var items = (keys || ST.sel).map(function(k){ var f = formX(k); return f ? {f: f, amt: amtOf(k)} : null; }).filter(Boolean);
     return {cust: (ST.cust || "").trim(), pb: (ME.pb || "").trim(), org: (ME.org || "").trim(), date: dlabel(), items: items,
             total: items.reduce(function(s, x){ return s + x.amt; }, 0), notice: DATA.notice || [], basis: DATA.basis || ""};
   }
@@ -923,11 +923,12 @@
   }
   /* ───────── ⚖️ 투자위험 고지 (10/29 사용자 「실제 심의필에 필적할 위험고지를 모든 제안서 마지막에」) ─────────
      금융소비자보호법·금융투자협회 표준 안내 항목을 따름 · 고른 상품에 맞는 항목만 덧붙임 */
-  var EQK = {kr_stock: 1, gl_stock: 1, pension: 1, dc: 1, irp: 1}, FXK = {gl_stock: 1, ust: 1, brl: 1, pension: 1, dc: 1, irp: 1};
-  var DISC_VER = "2026.10.29-1";   // 문구를 고치면 이 값을 바꿈 → 예전 심의필은 자동으로 「다시 심의」
+  var EQK = {kr_stock: 1, gl_stock: 1, pension: 1, dc: 1, irp: 1}, FXK = {gl_stock: 1, ust: 1, brl: 1, pension: 1, dc: 1, irp: 1}, RETK = {pension: 1, dc: 1, irp: 1}, BONDK = {ktb: 1, ust: 1, brl: 1};
+  var DISC_VER = "2026.11.02-1";   // 문구를 고치면 이 값을 바꿈 → 예전 심의필은 자동으로 「다시 심의」
   function discOf(m, all){
     var ks = {}; m.items.forEach(function(x){ ks[x.f.key] = x.f; });
     var has = function(o){ for (var q in ks) if (o[q]) return true; return false; };
+    var only = function(o){ var n = 0; for (var q in ks){ if (!o[q]) return false; n++; } return n > 0 && !all; };
     var stock = all || m.items.some(function(x){ return (x.f.must || []).some(function(a){ return !a.etf && !a.safe && a.kind !== "안전"; }); });
     var usd = ks.gl_stock && (all || ks.gl_stock.mode === "usd");
     var C = [
@@ -938,8 +939,13 @@
       "투자자는 금융상품판매업자로부터 상품의 내용·위험·보수·수수료 등에 대해 충분한 설명을 받을 권리가 있음. 가입 전 (간이)투자설명서·상품설명서·약관을 반드시 읽어 보아야 함",
       "투자자성향 진단 결과에 맞지 않는 상품은 권유할 수 없음(적합성·적정성 원칙). 65세 이상 고령 투자자, 투자 경험이 적은 투자자는 녹취·숙려기간 등 추가 보호 절차가 적용될 수 있음",
       "금융소비자는 「금융소비자보호법」에 따라 청약철회권(대상 상품에 한함), 위법계약해지권(계약일로부터 5년 이내, 위법 사실을 안 날부터 1년 이내), 자료열람요구권을 가짐",
-      "매매수수료·ETF 총보수·환전 수수료·계좌 수수료 등이 발생하며, 이는 실제 수익률을 낮춤",
-      "세금 안내는 작성일 현재 세법 기준이며 세법 개정, 금융소득종합과세(이자·배당 연 2천만원 초과) 등 개인별 상황에 따라 달라질 수 있음. 구체적 세무 판단은 세무 전문가와 상의 필요",
+      // 11/02 사용자 「DC 제안서면 DC 관련 내용만 · 상품마다 따로」 — 수수료·세금 줄도 고른 상품에 맞춤
+      (only(RETK) ? "연금 계좌 안에서도 ETF 총보수·매매 비용과 계좌 운용·자산관리 수수료가 발생할 수 있으며, 이는 실제 수익률을 낮춤"
+        : only(BONDK) ? "채권은 사고팔 때 호가 차이(스프레드)와 매매 비용이 있고, 외화 채권은 환전 비용이 발생하며, 이는 실제 수익률을 낮춤"
+        : only({els: 1}) ? "상품 가격에는 발행·운용 비용이 포함돼 있으며, 만기 전 중도상환 시 별도 비용이 차감될 수 있음"
+        : "매매수수료·ETF 총보수·환전 수수료·계좌 수수료 등이 발생하며, 이는 실제 수익률을 낮춤"),
+      (only(RETK) ? "세금 안내는 작성일 현재 세법 기준임 · 연금 계좌 안의 운용 수익은 연금을 받을 때까지 과세가 미뤄지며, 받는 방법(연금·일시금)과 세법 개정에 따라 세금이 달라질 수 있음"
+        : "세금 안내는 작성일 현재 세법 기준이며 세법 개정, 금융소득종합과세(이자·배당 연 2천만원 초과) 등 개인별 상황에 따라 달라질 수 있음. 구체적 세무 판단은 세무 전문가와 상의 필요"),
       "본 자료의 시장 정보·전망·종목 정보는 신뢰할 만한 공개 자료를 바탕으로 작성했으나 정확성·완전성을 보장하지 않으며, 시장 상황에 따라 예고 없이 바뀔 수 있음",
       "회사는 제안 상품의 판매·운용과 관련해 보수·수수료를 받을 수 있으며, 회사 또는 계열사가 해당 상품을 발행·운용·보유할 수 있음",
       "본 자료는 고객 본인에게만 제공되며 무단 복제·배포를 금함. 민원·분쟁은 회사 고객센터 또는 금융감독원(국번 없이 1332)에 신청할 수 있음"
@@ -960,7 +966,7 @@
     if (ks.pension) Pd.push({ic: "🛡", t: "연금저축", l: [
       "연금 외로 찾으면 세액공제받은 원금과 운용수익에 기타소득세 16.5%가 부과됨 · 연금으로 받으면 연금소득세 3.3~5.5%(나이에 따라)",
       "사적연금 수령액이 연 1,500만원을 넘으면 종합과세 또는 16.5% 분리과세 중 선택해야 함 · 세액공제 한도·공제율은 세법 개정으로 바뀔 수 있음"]});
-    if (ks.dc || ks.irp) Pd.push({ic: "🏦", t: "퇴직연금 (DC·IRP)", l: [
+    if (ks.dc || ks.irp) Pd.push({ic: "🏦", t: "퇴직연금 (" + [ks.dc ? "DC" : "", ks.irp ? "IRP" : ""].filter(Boolean).join("·") + ")", l: [
       "퇴직연금 감독규정에 따라 위험자산 투자 한도는 적립금의 70%임 · 운용 결과에 대한 책임은 가입자 본인에게 있음",
       "중도인출은 무주택자 주택 구입, 6개월 이상 요양 등 법에서 정한 사유에만 가능함 · 연금 외 수령 시 퇴직소득세·기타소득세가 부과됨" + (ks.irp ? " · IRP는 운용·자산관리 수수료가 발생할 수 있음" : "")]});
     if (ks.ktb || ks.ust || ks.brl) Pd.push({ic: "🏛", t: "채권", l: [
@@ -997,7 +1003,7 @@
       ].concat(D.P.map(function(g){ return g.ic + " " + g.t + ": " + g.l[0]; })); }
   function allModel(){ return {cust: "", pb: (ME.pb || "").trim(), org: (ME.org || "").trim(), date: dlabel(), items: ((DATA && DATA.forms) || []).map(function(f){ return {f: f, amt: 0}; }), total: 0, notice: [], basis: (DATA && DATA.basis) || "", foot: "준법감시 심의 요청 · 위험고지 문구 " + DISC_VER, doc: "준법감시 심의 요청서 — 투자 제안서 위험고지 문구"}; }
   function discText(){
-    var D = discOf(allModel(), true), n = 0, o = ["[CH Investing 투자 제안서 — 투자위험 고지 문구 · 버전 " + DISC_VER + "]", "", "■ 공통 사항"];
+    var mm = ST.sel.length ? model() : allModel(), D = discOf(mm, !ST.sel.length), n = 0, o = ["[투자 제안서 — 투자위험 고지 문구 · " + (ST.sel.length ? mm.items.map(function(x){ return x.f.short; }).join(" · ") : "전체 상품") + " · 버전 " + DISC_VER + "]", "", "■ 공통 사항"];
     D.C.forEach(function(t){ o.push((++n) + ". " + t); });
     D.P.forEach(function(g){ o.push("", "■ " + g.t + " 투자 시 위험 (해당 상품을 제안할 때만 들어감)"); g.l.forEach(function(t){ o.push((++n) + ". " + t); }); });
     o.push("", "■ 한 장 요약(카톡 전송용)에 들어가는 줄임 문구"); shortDisc(D).forEach(function(t){ o.push("· " + t); });
@@ -1362,9 +1368,9 @@
       '<div class="pp-hb no-clp" data-xc="1" data-cz="done">' +
       '<p id="ppsimwhy" class="pp-tip" style="margin:0 0 8px' + (S.why ? '' : ';display:none') + '">' + e(S.why) + '</p>' +
       '<ol class="pp-steps"><li><b>① 문구 확인</b><span>모든 제안서 맨 끝에 들어가는 위험고지 원문을 아래에서 읽어 봄</span></li>' +
-      '<li><b>② 심의 요청</b><span>제안서를 만들면 「📤 만들기」의 「📝 이 제안서 심의 요청서」로 그 제안서 상품 문구만 + 제안서 별첨을 한 파일로 받아 제출 (아래 버튼은 전체 문구용)</span></li>' +
+      '<li><b>② 심의 요청</b><span>「📤 만들기」 아래 「📝 ○○ 심의 요청서」를 상품마다 눌러 받음 — 그 상품 문구만 + 그 상품 제안서 별첨 한 파일씩</span></li>' +
       '<li><b>③ 번호 넣기</b><span>받은 심의필 번호·유효기간을 넣으면 한 장·PDF·PPT 모두에 자동으로 찍힘</span></li></ol>' +
-      '<div class="pp-go" style="margin:10px 0"><button type="button" data-mk="disc" class="main">' + BTNL.disc + '</button><button type="button" id="ppdcp">📋 문구 전체 복사<small>메일·메신저로 보낼 때</small></button></div>' +
+      '<div class="pp-go" style="margin:10px 0"><button type="button" id="ppdcp">📋 고른 상품 문구 복사<small>메일·메신저로 보낼 때</small></button></div>' +
       '<div class="pp-dv">문구 버전 <b>' + DISC_VER + '</b> · 상품별 항목은 그 상품을 제안할 때만 들어감</div>' +
       '<div class="pp-dl"><div class="pp-dg">공통 사항</div><ul>' + D.C.map(li).join("") + '</ul>' +
       D.P.map(function(g){ return '<div class="pp-dg r">' + g.ic + ' ' + e(g.t) + ' 투자 시 위험</div><ul>' + g.l.map(li).join("") + '</ul>'; }).join("") +
@@ -1433,7 +1439,8 @@
       '<button type="button" data-mk="pdf">' + BTNL.pdf + '</button>' +
       '<button type="button" data-mk="ppt">' + BTNL.ppt + '</button>' +
       '<button type="button" data-mk="pptimg">' + BTNL.pptimg + '</button>' +
-      '<button type="button" data-mk="rev">' + BTNL.rev + '</button></div>' +
+      '</div>' + (ST.sel.length ? '<div class="pp-rv"><div class="pp-rvh">📝 심의 요청서 — 상품마다 따로 (그 상품 문구만 + 그 상품 제안서 별첨)</div><div class="pp-go">' +
+        ST.sel.map(function(k){ return '<button type="button" data-mk="rev:' + k + '">' + mkLab("rev:" + k) + '</button>'; }).join("") + '</div></div>' : '') +
       '<div id="ppst" class="mut pp-st"></div>' + pptHelp() + pdfHelp() + '<div class="pp-pv-h">👀 한 장 미리 보기</div><div id="pppv" class="pp-pv"></div></section>';
     w.innerHTML = h;
     bind(); preview(); ensureReasons().then(function(){ preview(); });
@@ -1558,6 +1565,7 @@
   }
   function upAmt(k){ try { var pl = document.getElementById("pppl_" + k); if (pl) pl.innerHTML = planHTML(k); (opt(k).must || []).forEach(function(m, i){ var mw = document.getElementById("ppmw_" + k + "_" + i); if (mw) mw.textContent = amtOf(k) && +m.pct ? man(amtOf(k) * m.pct / 100) : ""; }); } catch(x) {}
     var s = document.getElementById("ppw_" + k); if (s) s.textContent = ST.amt[k] ? man(ST.amt[k] * 10000) : ""; var t = document.getElementById("pptot"); if (t) t.textContent = total() ? man(total()) : "–"; mixUpd(); preview(); }
+  function mkLab(mk){ if (mk.indexOf("rev:") === 0){ var f = form(mk.slice(4)) || {}; return "📝 " + e((f.icon || "") + " " + (f.short || "")) + " 심의 요청서<small>" + e(f.short || "") + " 문구만 + 제안서 별첨</small>"; } return BTNL[mk]; }
   var BTNL = {disc: "📝 심의 요청서 PDF <small>전체 문구 · 준법감시 부서 제출용</small>", rev: "📝 이 제안서 심의 요청서 <small>고른 상품 문구만 + 제안서 별첨</small>", png: "📱 한 장 <small>카톡 전송용 그림</small>", pdf: "📄 풀버전 PDF <small>표지·시장·상품별 자세히 · 가장 안 깨짐</small>",
     ppt: "📊 PPT (고칠 수 있는 판) <small>맑은 고딕 · 글·표·차트를 PPT에서 직접 수정</small>", pptimg: "🖼️ PPT (안 깨지는 그림판) <small>PDF 그대로 한 쪽 = 한 장 · 어디서 열어도 똑같음</small>"};
   // 10/28 사용자 「PPT는 깨지더라 — 왜 깨지는지 설명 · 다른 AI 도구로 어떻게 고치면 좋은지 문구도」
@@ -1612,20 +1620,20 @@
   }
   var READY = {};
   function make(kind, btn){
-    if (!ST.sel.length && kind !== "disc"){ toast("상품을 먼저 골라 주세요"); return; }
-    if (kind === "rev" && !ST.sel.length){ toast("상품을 먼저 골라 주세요"); return; }
-    var m = model(), sig = JSON.stringify([kind, ST.sel, ST.amt, ST.opt, ST.cust, ME.pb, ME.org, ME.simNo, ME.simFrom, ME.simTo, DATA.at]);
+    if (!ST.sel.length){ toast("상품을 먼저 골라 주세요"); return; }
+    var rk = kind.indexOf("rev:") === 0 ? kind.slice(4) : null;
+    var m = model(rk ? [rk] : null), sig = JSON.stringify([kind, ST.sel, ST.amt, ST.opt, ST.cust, ME.pb, ME.org, ME.simNo, ME.simFrom, ME.simTo, DATA.at]);
     if (READY[kind] && READY[kind].sig === sig){ var R = READY[kind]; shareBlob(R.blob, R.name, R.mime); return; }   // 두 번째 누름 = 저장·공유 (아이폰은 누른 순간에만 공유창이 열림)
     if (ST.busy) return; ST.busy = true;
     var st = document.getElementById("ppst"), old = btn.innerHTML;
     btn.disabled = true; btn.innerHTML = "⏳ 만드는 중…<small>몇 초 걸려요</small>"; if (st) st.textContent = "";
-    var p = kind === "disc" ? makePdf(allModel(), reviewPages()) : kind === "rev" ? ensureReasons().then(function(){ m = model(); return makePdf(m, reviewFor(m)); }) : ensureReasons().then(function(){ m = model(); return kind === "png" ? makePng(m) : kind === "pdf" ? makePdf(m) : kind === "pptimg" ? makePptImg(m) : makePpt(m); });
-    var mime = kind === "png" ? "image/png" : kind === "pdf" || kind === "disc" || kind === "rev" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    var p = kind === "disc" ? makePdf(allModel(), reviewPages()) : rk ? ensureReasons().then(function(){ m = model([rk]); return makePdf(m, reviewFor(m)); }) : ensureReasons().then(function(){ m = model(); return kind === "png" ? makePng(m) : kind === "pdf" ? makePdf(m) : kind === "pptimg" ? makePptImg(m) : makePpt(m); });
+    var mime = kind === "png" ? "image/png" : kind === "pdf" || kind === "disc" || rk ? "application/pdf" : "application/vnd.openxmlformats-officedocument.presentationml.presentation";
     p.then(function(blob){
-      var name = kind === "rev" ? fname(m, "pdf").replace(/\.pdf$/, "_심의요청.pdf") : kind === "disc" ? ("심의요청_제안서위험고지_" + DISC_VER + (ME.pb ? "_" + ME.pb : "")).replace(/[\\/:*?"<>|\s·]+/g, "_") + ".pdf" : kind === "pptimg" ? fname(m, "pptx").replace(/\.pptx$/, "_그림판.pptx") : fname(m, kind === "png" ? "png" : kind === "pdf" ? "pdf" : "pptx");
+      var name = rk ? fname(m, "pdf").replace(/\.pdf$/, "_심의요청.pdf") : kind === "disc" ? ("심의요청_제안서위험고지_" + DISC_VER + (ME.pb ? "_" + ME.pb : "")).replace(/[\\/:*?"<>|\s·]+/g, "_") + ".pdf" : kind === "pptimg" ? fname(m, "pptx").replace(/\.pptx$/, "_그림판.pptx") : fname(m, kind === "png" ? "png" : kind === "pdf" ? "pdf" : "pptx");
       READY[kind] = {sig: sig, blob: blob, name: name, mime: mime};
       btn.disabled = false; btn.classList.add("ready");
-      btn.innerHTML = "⬇️ " + (kind === "png" ? "한 장" : kind === "disc" ? "심의 요청서" : kind === "rev" ? "심의 요청서" : kind === "pdf" ? "PDF" : kind === "pptimg" ? "그림판 PPT" : "PPT") + " 저장·보내기<small>" + e(name) + " · " + Math.max(1, Math.round(blob.size / 1024)) + "KB</small>";
+      btn.innerHTML = "⬇️ " + (kind === "png" ? "한 장" : kind === "disc" ? "심의 요청서" : rk ? ((form(rk) || {}).short || "") + " 심의 요청서" : kind === "pdf" ? "PDF" : kind === "pptimg" ? "그림판 PPT" : "PPT") + " 저장·보내기<small>" + e(name) + " · " + Math.max(1, Math.round(blob.size / 1024)) + "KB</small>";
       if (st) st.textContent = "✓ 다 만들었어요 — 버튼을 한 번 더 누르면 저장·공유 창이 떠요";
       try { if (window.ntfyUse) ntfyUse("propose_" + kind); } catch(x) {}
     }).catch(function(err){ btn.disabled = false; btn.innerHTML = old; if (st) st.textContent = "만들지 못했어요 · " + String((err && (err.message || err)) || "").slice(0, 80); try { console.error(err); } catch(x) {} })
@@ -1635,7 +1643,7 @@
   document.addEventListener("input", function(ev){ if (ev.target && ev.target.closest && ev.target.closest("#ppw")) resetBtns(); });
   document.addEventListener("click", function(ev){ if (ev.target && ev.target.closest && ev.target.closest("#ppw .pp-q button, #ppw .pp-f")) resetBtns(); }, true);
   function resetBtns(){ READY = {}; [].forEach.call(document.querySelectorAll("#ppw [data-mk].ready"), function(b){ b.classList.remove("ready");
-    b.innerHTML = BTNL[b.dataset.mk]; }); var st = document.getElementById("ppst"); if (st) st.textContent = ""; }
+    b.innerHTML = mkLab(b.dataset.mk); }); var st = document.getElementById("ppst"); if (st) st.textContent = ""; }
 
   /* ───────── 📲 고객에게 보여 주기 (10/29 A10/29-1 「건네기 모드」) ─────────
      상담 자리에서 PB 폰을 고객에게 돌려 보여 주는 화면 — 큰 글씨 카드를 좌우로 넘김.
@@ -1852,6 +1860,7 @@
     ".pp-steps{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}.pp-steps li{display:flex;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.45}.pp-steps b{flex:none;min-width:74px}" +
     ".pp-dv{font-size:12px;color:var(--mut,#9aa3b2);margin:4px 0 6px}.pp-dl{max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12.5px;line-height:1.55}" +
     ".pp-dl ul{list-style:none;margin:2px 0 8px;padding:0}.pp-dl li{margin:3px 0}.pp-dg{font-weight:800;margin-top:6px;color:#8fb8ff}.pp-dg.r{color:#ff9a8e}" +
+    ".pp-rv{margin-top:10px;border:1px dashed var(--line);border-radius:12px;padding:8px 10px}.pp-rvh{font-size:12.5px;font-weight:800;margin:0 0 6px;color:var(--mut,#9aa3b2)}" +
     ".pp-help{margin:10px 0 2px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font-size:13px}.pp-help summary{padding:10px 0;font-weight:800;cursor:pointer}" +
     ".pp-hb{padding:0 0 12px;line-height:1.55}.pp-hb ul{margin:4px 0 10px;padding-left:18px}.pp-hb li{margin:3px 0}" +
     ".pp-pr{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}.pp-pr pre{white-space:pre-wrap;margin:0 0 8px;font:inherit;font-size:12px;line-height:1.5}" +
