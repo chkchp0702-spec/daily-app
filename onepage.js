@@ -956,13 +956,40 @@
     if (withMkt === undefined) withMkt = true;
     toast((withMkt ? "시장 한 장 + " : "") + L.length + "장 만드는 중…");
     DG = []; dg("시작 · 시황 " + (withMkt ? "넣음" : "뺌") + " · " + L.map(function(it){ return it.kind + ":" + (it.id || it.nm || ""); }).join(", "));
-    var nm = pbname();
-    var jobs = (withMkt ? [mkMarket()] : []).concat(L.map(function(it){ return it.kind === "stock" ? mkStock(it.id, it.nm) : it.kind === "myels" ? mkMyEls(it.it) : mkPin(it.pin); }));
-    Promise.all(jobs.map(function(p_, j){ return p_.then(function(C){ dg("자료 " + (j + 1) + " " + (C ? (C.refuse ? "거절" : "ok " + (C.title || "")) : "없음(null)")); return C; }, function(e){ dg("자료 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); return null; }); })).then(function(Cs){
+    var nm = pbname(), done = false;
+    // 11/02 「만드는 중…」에서 멈춘 채 아무것도 안 뜨던 것 — 자료 받기·그림 굽기 어디서든 멈추면 25초 뒤 진단을 띄움
+    var wd = setTimeout(function(){ if (!done){ dg("⏰ 25초 넘게 안 끝남"); dgShow("멈춤 — 시간 초과"); } }, 25000);
+    var jobs = (withMkt ? [mkMarket] : []).concat(L.map(function(it){ return function(){ return it.kind === "stock" ? mkStock(it.id, it.nm) : it.kind === "myels" ? mkMyEls(it.it) : mkPin(it.pin); }; }));
+    // 자료는 같이 받되 한 가지가 멈춰도 15초면 그것만 빼고 감
+    Promise.all(jobs.map(function(fn, j){ return withTO(Promise.resolve().then(fn), 15000).then(function(C){ dg("자료 " + (j + 1) + " " + (C ? (C.refuse ? "거절" : "ok " + (C.title || "")) : "없음(null)")); return C; }, function(e){ dg("자료 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); return null; }); })).then(function(Cs){
       var ok = Cs.filter(function(C){ return C && !C.refuse; }), miss = Cs.length - ok.length;
-      if (!ok.length){ toast("자료를 못 가져왔어요"); dgShow("자료를 못 가져옴"); return; }
-      return shareMany(ok.map(function(C, j){ var c; try { c = safeDraw(C, nm); dg("그림 " + (j + 1) + " " + c.width + "x" + c.height + (C.img ? " 사진있음" : "") + (tainted(c) ? " ⚠오염" : "")); } catch(e){ dg("그림 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); throw e; } return {c: c, t: C.title}; })).then(function(){ if (miss) toast(miss + "개는 자료가 없어 뺐어요"); });
-    }).catch(function(e){ console.warn(e); dg("멈춤 " + ((e && (e.name + ": " + e.message)) || e)); toast("만들지 못했어요 (" + ((e && e.name) || "?") + ")"); dgShow("만들기 실패"); });
+      if (!ok.length){ done = true; clearTimeout(wd); toast("자료를 못 가져왔어요"); dgShow("자료를 못 가져옴"); return; }
+      // 그림은 한 장씩: 그리고 → 파일로 → 그림판 비우고 → 다음 (아이폰 그림판 메모리 한도)
+      var fs = [];
+      return ok.reduce(function(p, C, j){ return p.then(function(){
+        var c; try { c = safeDraw(C, nm); dg("그림 " + (j + 1) + " " + c.width + "x" + c.height + (C.img ? " 사진있음" : "") + (tainted(c) ? " ⚠오염" : "")); } catch(e){ dg("그림 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); return; }
+        return blobOf(c).then(function(b){ try { c.width = c.height = 0; } catch(x) {}
+          dg("파일 " + (j + 1) + " " + (b ? Math.round(b.size / 1024) + "KB " + b.type : "못 만듦"));
+          if (b) fs.push(new File([b], (j + 1) + "_" + (C.title || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 24) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + (b.type === "image/jpeg" ? ".jpg" : ".png"), {type: b.type || "image/png"})); });
+      }); }, Promise.resolve()).then(function(){
+        done = true; clearTimeout(wd);
+        if (!fs.length){ dgShow("파일을 못 만듦"); toast("만들지 못했어요"); return; }
+        dg("준비 창 열기 · " + fs.length + "장 · canShare " + (function(){ try { return navigator.canShare ? navigator.canShare({files: fs}) : "없음"; } catch(e){ return "오류 " + e.name; } })());
+        readySheet(fs, "시장 한 장" + (fs.length > 1 ? " 외 " + (fs.length - 1) + "장" : ""));
+        if (miss) toast(miss + "개는 자료가 없어 뺐어요");
+      });
+    }).catch(function(e){ done = true; clearTimeout(wd); console.warn(e); dg("멈춤 " + ((e && (e.name + ": " + e.message)) || e)); toast("만들지 못했어요 (" + ((e && e.name) || "?") + ")"); dgShow("만들기 실패"); });
+  }
+  function withTO(p, ms){ return new Promise(function(ok, no){ var t = setTimeout(function(){ var e = new Error(ms / 1000 + "초 안에 안 끝남"); e.name = "Timeout"; no(e); }, ms); p.then(function(v){ clearTimeout(t); ok(v); }, function(e){ clearTimeout(t); no(e); }); }); }
+  // 그림 → 파일: toBlob 이 아이폰에서 답을 안 주는 경우가 있어 6초 뒤엔 toDataURL 로 직접 바꿈 · 그래도 안 되면 JPEG
+  function blobOf(c){
+    return new Promise(function(ok){
+      var fin = false, end = function(b){ if (!fin){ fin = true; ok(b); } };
+      var viaURL = function(type, q){ try { var u = c.toDataURL(type, q), bs = atob(u.split(",")[1]), a = new Uint8Array(bs.length); for (var i = 0; i < bs.length; i++) a[i] = bs.charCodeAt(i); return a.length > 1000 ? new Blob([a], {type: type}) : null; } catch(e){ dg("dataURL 실패 " + e.name); return null; } };
+      setTimeout(function(){ if (!fin){ dg("toBlob 응답 없음 → 직접 변환"); end(viaURL("image/png") || viaURL("image/jpeg", 0.9)); } }, 6000);
+      try { c.toBlob(function(b){ if (b && b.size > 1000) end(b); else { dg("toBlob 빈 결과 → JPEG"); end(viaURL("image/jpeg", 0.9)); } }, "image/png"); }
+      catch(e){ dg("toBlob 오류 " + e.name); end(viaURL("image/jpeg", 0.9)); }
+    });
   }
   function tainted(c){ try { c.getContext("2d").getImageData(0, 0, 1, 1); return false; } catch(e){ return true; } }
   function safeDraw(C, nm){ var c = draw(C, nm); if (!tainted(c)) return c; try { c.width = c.height = 0; } catch(x) {} var C2 = {}; for (var k in C){ var v = C[k]; C2[k] = (v && (v instanceof HTMLImageElement || v instanceof HTMLCanvasElement || (v.c && v.c instanceof HTMLCanvasElement))) ? null : v; } return draw(C2, nm); }
@@ -1398,9 +1425,9 @@
   }
   /* ───────────── 공유 ───────────── */
   function share(c, title){
-    return new Promise(function(res){ c.toBlob(function(b){ res(b); }, "image/png"); }).then(function(b){
+    return blobOf(c).then(function(b){
       if (!b) throw new Error("blob");
-      var f = new File([b], (title || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 30) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + ".png", {type: "image/png"});
+      var f = new File([b], (title || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 30) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + (b.type === "image/jpeg" ? ".jpg" : ".png"), {type: b.type || "image/png"});
       readySheet([f], title || "한 장");
     });
   }
