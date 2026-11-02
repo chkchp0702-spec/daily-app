@@ -962,7 +962,7 @@
     DG = []; dg("시작 · 시황 " + (withMkt ? "넣음" : "뺌") + " · " + L.map(function(it){ return it.kind + ":" + (it.id || it.nm || ""); }).join(", "));
     var nm = pbname(), done = false;
     // 11/02 「만드는 중…」에서 멈춘 채 아무것도 안 뜨던 것 — 자료 받기·그림 굽기 어디서든 멈추면 25초 뒤 진단을 띄움
-    var wd = setTimeout(function(){ if (!done){ dg("⏰ 25초 넘게 안 끝남"); dgShow("멈춤 — 시간 초과"); } }, 25000);
+    var wd = setTimeout(function(){ if (!done){ dg("⏰ 45초 넘게 안 끝남"); dgShow("멈춤 — 시간 초과"); } }, 45000);
     var jobs = (withMkt ? [mkMarket] : []).concat(L.map(function(it){ return function(){ return it.kind === "stock" ? mkStock(it.id, it.nm) : it.kind === "myels" ? mkMyEls(it.it) : mkPin(it.pin); }; }));
     // 자료는 같이 받되 한 가지가 멈춰도 15초면 그것만 빼고 감
     Promise.all(jobs.map(function(fn, j){ return withTO(Promise.resolve().then(fn), 15000).then(function(C){ dg("자료 " + (j + 1) + " " + (C ? (C.refuse ? "거절" : "ok " + (C.title || "")) : "없음(null)")); return C; }, function(e){ dg("자료 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); return null; }); })).then(function(Cs){
@@ -1008,7 +1008,7 @@
      그림을 만드는 동안(자료 받기·그림 굽기) 그 순간이 지나가 공유창이 막혔던 것 → 다 만든 뒤 「카톡·문자로 보내기」 단추를 한 번 더 누르게(그 누름에서 바로 공유창). */
   function esc0(t){ return String(t || "").replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function readySheet(fs, title){
-    var lv0 = document.getElementById("oplive"); if (lv0) lv0.remove();
+    var lv0 = document.getElementById("oplive"); if (lv0) lv0.remove(); var dg0 = document.getElementById("opdiag"); if (dg0) dg0.remove();   // 늦게라도 다 되면 진단 상자는 치움
     var old = document.getElementById("opready"); if (old) old.remove();
     var box = document.createElement("div"); box.id = "opready";
     var urls = fs.map(function(f){ return URL.createObjectURL(f); });
