@@ -953,6 +953,34 @@
     var pages = pack([{color: NAVY, blocks: [head].concat(discBlocks(m, true)).concat([sh, res])}]);
     return pages.map(function(p, i){ return pageFrom(p, i + 1, pages.length, m); });
   }
+  // 📝 11/02 사용자 「자료를 만들면 그 자료에 맞게 심의 요청서를 · 다 모든 걸 쓰지 말고」 — 고른 상품의 문구만 + 제안서 전체를 별첨
+  function maskN(n){ n = String(n || "").trim(); return n ? n.charAt(0) + new Array(n.length).join("○") : "–"; }
+  var KLAB = {png: "한 장 요약 그림", pdf: "풀버전 PDF", ppt: "편집용 PPT", pptimg: "그림판 PPT"};
+  function reviewFor(m){
+    var D = discOf(m), made = Object.keys(READY).filter(function(k){ return KLAB[k]; }).map(function(k){ return KLAB[k]; });
+    var must = [].concat.apply([], m.items.map(function(x){ return (x.f.must || []).map(function(a){ return a.inst.split(" · ")[0] + " " + pc(a.pct); }); }));
+    var rm = {cust: m.cust, pb: m.pb, org: m.org, date: m.date, items: m.items, total: m.total, notice: m.notice, basis: m.basis,
+              doc: "준법감시 심의 요청서 — " + titleOf(m) + " 투자 제안서", foot: "준법감시 심의 요청 · " + maskN(m.cust) + " 고객 제안서 · " + m.date};
+    var head = hTitle("📝 준법감시 심의 요청서", titleOf(m) + " 투자 제안서") +
+      tbl({cols: ["항목", "내용"], rows: [["요청자", byLine(m) || "–"], ["요청일", m.date], ["고객", maskN(m.cust) + " 고객님"],
+        ["대상 상품", m.items.map(function(x){ return x.f.short + (x.amt ? " " + man(x.amt) : ""); }).join(" · ") + (m.total ? " (합계 " + man(m.total) + ")" : "")]]
+        .concat(must.length ? [["PB 추천 종목", must.join(" · ")]] : [])
+        .concat([["자료 종류", (made.length ? made.join(" · ") : "풀버전 PDF") + " — 내용은 모두 같은 원본에서 만듦"], ["별첨", "제안서 전체(표지~마지막 쪽)를 이 요청서 뒤에 붙임"],
+                 ["시장 자료 기준", m.basis || "–"], ["위험고지 문구", "버전 " + DISC_VER + " · 이 제안서 상품에 해당하는 항목만"],
+                 ["요청 사항", "별첨 제안서와 아래 문구를 검토해 주시고, 이상 없으면 심사필 번호와 유효기간을 부여해 주시기 바람"]])}, 12.5, {pad: "6px 10px"});
+    var sum = secT("심의 받을 핵심 내용", NAVY) + m.items.map(function(x){ var sl = simLine(x.f, x.amt);
+        return box('<div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:800;color:' + x.f.color + '"><span>' + e(x.f.short) + '</span><span>' + (x.amt ? man(x.amt) : "") + '</span></div>' +
+          '<div style="font-size:12px;line-height:1.55;margin-top:4px;color:' + INK + '"><b>제안 문구</b> · ' + e(x.f.headline) + '</div>' +
+          (sl ? '<div style="font-size:12px;line-height:1.55;margin-top:3px;color:' + INK + '"><b>수익·위험 숫자</b> · ' + e(sl.lab + " " + sl.big + (sl.sub ? " · " + sl.sub : "")) + '</div>' : '') +
+          ((x.f.sim || {}).note ? '<div style="font-size:11px;line-height:1.5;margin-top:3px;color:' + SUB + '">근거: ' + e(x.f.sim.note) + '</div>' : ''), "padding:10px 14px;margin-bottom:8px"); }).join("");
+    var res = box('<div style="font-size:14px;font-weight:800;margin-bottom:10px;color:' + NAVY + '">✍️ 심의 결과 (준법감시 부서 기재)</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 22px;font-size:13px;color:' + INK + '">' +
+      ["심사필 번호", "유효기간", "심의 의견 (승인 · 수정 후 승인 · 반려)", "심의자 / 서명"].map(function(t){ return '<div><div style="color:' + SUB + ';margin-bottom:4px">' + t + '</div><div style="border-bottom:1px solid #9aa3b2;height:30px"></div></div>'; }).join("") + '</div>', "padding:14px 18px");
+    var sh = box('<div style="font-size:13px;font-weight:800;margin-bottom:6px;color:' + NAVY + '">📱 한 장 요약에 들어가는 줄임 문구</div>' +
+      shortDisc(D).map(function(t){ return '<div style="display:flex;gap:8px;font-size:11.5px;line-height:1.55;color:' + INK + '"><span>·</span><span>' + e(t) + '</span></div>'; }).join(""), "padding:12px 16px");
+    var pages = pack([{color: NAVY, blocks: [head, sum].concat(discBlocks(m)).concat([sh, res])}]);
+    return pages.map(function(p, i){ return pageFrom(p, i + 1, pages.length, rm); }).concat(fullPages(m));
+  }
   function discBlocks(m, all){
     var D = discOf(m, all), n = 0;
     var row = function(t){ n++; return '<div style="display:flex;gap:8px;font-size:11.5px;line-height:1.55;padding:4px 0;color:' + INK + '"><b style="color:' + NAVY + ';min-width:18px">' + n + '.</b><span>' + e(t) + '</span></div>'; };
@@ -1267,7 +1295,7 @@
       '<div class="pp-hb no-clp" data-xc="1" data-cz="done">' +
       '<p id="ppsimwhy" class="pp-tip" style="margin:0 0 8px' + (S.why ? '' : ';display:none') + '">' + e(S.why) + '</p>' +
       '<ol class="pp-steps"><li><b>① 문구 확인</b><span>모든 제안서 맨 끝에 들어가는 위험고지 원문을 아래에서 읽어 봄</span></li>' +
-      '<li><b>② 심의 요청</b><span>「📝 심의 요청서 PDF」를 받아 준법감시 부서에 제출 (결과 기재 칸 포함)</span></li>' +
+      '<li><b>② 심의 요청</b><span>제안서를 만들면 「📤 만들기」의 「📝 이 제안서 심의 요청서」로 그 제안서 상품 문구만 + 제안서 별첨을 한 파일로 받아 제출 (아래 버튼은 전체 문구용)</span></li>' +
       '<li><b>③ 번호 넣기</b><span>받은 심의필 번호·유효기간을 넣으면 한 장·PDF·PPT 모두에 자동으로 찍힘</span></li></ol>' +
       '<div class="pp-go" style="margin:10px 0"><button type="button" data-mk="disc" class="main">' + BTNL.disc + '</button><button type="button" id="ppdcp">📋 문구 전체 복사<small>메일·메신저로 보낼 때</small></button></div>' +
       '<div class="pp-dv">문구 버전 <b>' + DISC_VER + '</b> · 상품별 항목은 그 상품을 제안할 때만 들어감</div>' +
@@ -1336,7 +1364,8 @@
       '<button type="button" data-mk="png" class="main">📱 한 장 <small>카톡 전송용 그림</small></button>' +
       '<button type="button" data-mk="pdf">' + BTNL.pdf + '</button>' +
       '<button type="button" data-mk="ppt">' + BTNL.ppt + '</button>' +
-      '<button type="button" data-mk="pptimg">' + BTNL.pptimg + '</button></div>' +
+      '<button type="button" data-mk="pptimg">' + BTNL.pptimg + '</button>' +
+      '<button type="button" data-mk="rev">' + BTNL.rev + '</button></div>' +
       '<div id="ppst" class="mut pp-st"></div>' + pptHelp() + pdfHelp() + '<div class="pp-pv-h">👀 한 장 미리 보기</div><div id="pppv" class="pp-pv"></div></section>';
     w.innerHTML = h;
     bind(); preview(); ensureReasons().then(function(){ preview(); });
@@ -1461,7 +1490,7 @@
   }
   function upAmt(k){ try { var pl = document.getElementById("pppl_" + k); if (pl) pl.innerHTML = planHTML(k); (opt(k).must || []).forEach(function(m, i){ var mw = document.getElementById("ppmw_" + k + "_" + i); if (mw) mw.textContent = amtOf(k) && +m.pct ? man(amtOf(k) * m.pct / 100) : ""; }); } catch(x) {}
     var s = document.getElementById("ppw_" + k); if (s) s.textContent = ST.amt[k] ? man(ST.amt[k] * 10000) : ""; var t = document.getElementById("pptot"); if (t) t.textContent = total() ? man(total()) : "–"; preview(); }
-  var BTNL = {disc: "📝 심의 요청서 PDF <small>준법감시 부서 제출용</small>", png: "📱 한 장 <small>카톡 전송용 그림</small>", pdf: "📄 풀버전 PDF <small>표지·시장·상품별 자세히 · 가장 안 깨짐</small>",
+  var BTNL = {disc: "📝 심의 요청서 PDF <small>전체 문구 · 준법감시 부서 제출용</small>", rev: "📝 이 제안서 심의 요청서 <small>고른 상품 문구만 + 제안서 별첨</small>", png: "📱 한 장 <small>카톡 전송용 그림</small>", pdf: "📄 풀버전 PDF <small>표지·시장·상품별 자세히 · 가장 안 깨짐</small>",
     ppt: "📊 PPT (고칠 수 있는 판) <small>맑은 고딕 · 글·표·차트를 PPT에서 직접 수정</small>", pptimg: "🖼️ PPT (안 깨지는 그림판) <small>PDF 그대로 한 쪽 = 한 장 · 어디서 열어도 똑같음</small>"};
   // 10/28 사용자 「PPT는 깨지더라 — 왜 깨지는지 설명 · 다른 AI 도구로 어떻게 고치면 좋은지 문구도」
   var PPT_PROMPT = "첨부한 PPT는 고객에게 줄 투자 제안서입니다. 숫자·상품명·비중·금액은 절대 바꾸지 말고 디자인만 다듬어 주세요.\n" +
@@ -1516,18 +1545,19 @@
   var READY = {};
   function make(kind, btn){
     if (!ST.sel.length && kind !== "disc"){ toast("상품을 먼저 골라 주세요"); return; }
+    if (kind === "rev" && !ST.sel.length){ toast("상품을 먼저 골라 주세요"); return; }
     var m = model(), sig = JSON.stringify([kind, ST.sel, ST.amt, ST.opt, ST.cust, ME.pb, ME.org, ME.simNo, ME.simFrom, ME.simTo, DATA.at]);
     if (READY[kind] && READY[kind].sig === sig){ var R = READY[kind]; shareBlob(R.blob, R.name, R.mime); return; }   // 두 번째 누름 = 저장·공유 (아이폰은 누른 순간에만 공유창이 열림)
     if (ST.busy) return; ST.busy = true;
     var st = document.getElementById("ppst"), old = btn.innerHTML;
     btn.disabled = true; btn.innerHTML = "⏳ 만드는 중…<small>몇 초 걸려요</small>"; if (st) st.textContent = "";
-    var p = kind === "disc" ? makePdf(allModel(), reviewPages()) : ensureReasons().then(function(){ m = model(); return kind === "png" ? makePng(m) : kind === "pdf" ? makePdf(m) : kind === "pptimg" ? makePptImg(m) : makePpt(m); });
-    var mime = kind === "png" ? "image/png" : kind === "pdf" || kind === "disc" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    var p = kind === "disc" ? makePdf(allModel(), reviewPages()) : kind === "rev" ? ensureReasons().then(function(){ m = model(); return makePdf(m, reviewFor(m)); }) : ensureReasons().then(function(){ m = model(); return kind === "png" ? makePng(m) : kind === "pdf" ? makePdf(m) : kind === "pptimg" ? makePptImg(m) : makePpt(m); });
+    var mime = kind === "png" ? "image/png" : kind === "pdf" || kind === "disc" || kind === "rev" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.presentationml.presentation";
     p.then(function(blob){
-      var name = kind === "disc" ? ("심의요청_제안서위험고지_" + DISC_VER + (ME.pb ? "_" + ME.pb : "")).replace(/[\\/:*?"<>|\s·]+/g, "_") + ".pdf" : kind === "pptimg" ? fname(m, "pptx").replace(/\.pptx$/, "_그림판.pptx") : fname(m, kind === "png" ? "png" : kind === "pdf" ? "pdf" : "pptx");
+      var name = kind === "rev" ? fname(m, "pdf").replace(/\.pdf$/, "_심의요청.pdf") : kind === "disc" ? ("심의요청_제안서위험고지_" + DISC_VER + (ME.pb ? "_" + ME.pb : "")).replace(/[\\/:*?"<>|\s·]+/g, "_") + ".pdf" : kind === "pptimg" ? fname(m, "pptx").replace(/\.pptx$/, "_그림판.pptx") : fname(m, kind === "png" ? "png" : kind === "pdf" ? "pdf" : "pptx");
       READY[kind] = {sig: sig, blob: blob, name: name, mime: mime};
       btn.disabled = false; btn.classList.add("ready");
-      btn.innerHTML = "⬇️ " + (kind === "png" ? "한 장" : kind === "disc" ? "심의 요청서" : kind === "pdf" ? "PDF" : kind === "pptimg" ? "그림판 PPT" : "PPT") + " 저장·보내기<small>" + e(name) + " · " + Math.max(1, Math.round(blob.size / 1024)) + "KB</small>";
+      btn.innerHTML = "⬇️ " + (kind === "png" ? "한 장" : kind === "disc" ? "심의 요청서" : kind === "rev" ? "심의 요청서" : kind === "pdf" ? "PDF" : kind === "pptimg" ? "그림판 PPT" : "PPT") + " 저장·보내기<small>" + e(name) + " · " + Math.max(1, Math.round(blob.size / 1024)) + "KB</small>";
       if (st) st.textContent = "✓ 다 만들었어요 — 버튼을 한 번 더 누르면 저장·공유 창이 떠요";
       try { if (window.ntfyUse) ntfyUse("propose_" + kind); } catch(x) {}
     }).catch(function(err){ btn.disabled = false; btn.innerHTML = old; if (st) st.textContent = "만들지 못했어요 · " + String((err && (err.message || err)) || "").slice(0, 80); try { console.error(err); } catch(x) {} })
@@ -1703,7 +1733,7 @@
 
   // 시험·다른 화면에서 쓰도록
   window.PROPOSE = {load: load, _tierAlloc: function(al, t, cap, cdT){ return tierAlloc(al, t, cap, cdT); }, _code: function(){ return settingCode(); }, show: function(){ showOpen(); }, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.sim != null){ ME.simNo = o.sim; ME.simVer = DISC_VER; } if (o.simTo != null) ME.simTo = o.simTo; if (o.simFrom != null) ME.simFrom = o.simFrom; if (o.opt) ST.opt = o.opt; },
-    review: function(){ return makePdf(allModel(), reviewPages()); }, discText: function(){ return discText(); }, simState: function(){ return simState(); },
+    review: function(){ return makePdf(allModel(), reviewPages()); }, reviewFor: function(){ return ensureReasons().then(function(){ var m = model(); return makePdf(m, reviewFor(m)); }); }, discText: function(){ return discText(); }, simState: function(){ return simState(); },
     png: function(){ return ensureReasons().then(function(){ return makePng(model()); }); }, pdf: function(){ return ensureReasons().then(function(){ return makePdf(model()); }); },
     ppt: function(){ return ensureReasons().then(function(){ return makePpt(model()); }); }, pptimg: function(){ return ensureReasons().then(function(){ return makePptImg(model()); }); }, reasons: function(){ return ensureReasons().then(function(){ return RS; }); }, onePage: function(){ return onePage(model()); }, pages: function(){ return fullPages(model()); }};
 
