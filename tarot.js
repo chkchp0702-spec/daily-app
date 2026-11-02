@@ -1,7 +1,7 @@
 /* CH Investing — 🃏 타로 (10/29 사용자: 「타로점 넣자 · 꿈보다 해몽이라 질문에 맞게 해석하는 게 관건 · 돈 안 들게 · 투자 말고도 다 촘촘하게」)
    돈 안 드는 구조: ① 질문을 휴대폰 안에서 읽음(주제 10가지 + 묻는 방식 5가지 + 대상 이름) → ② 카드 78장 × 주제 11개 × 정/역 해석 창고(tarot/topics.json)에서 고름
    → ③ 세 장(또는 1·5장)의 흐름·무늬·숫자·메이저 수·역방향 수로 결론(예·아니오 / 시기 / 방법 / A·B 선택 / 투자 판단)
-   ④ 더 깊게: 「✨ Claude 심화 해석 문구」 복사 → Claude 채팅에 붙여 넣기(구독 안, API 비용 없음)
+   ④ 더 깊게: 「✨ AI에 붙여 심화 해석 듣기」 복사 → Claude·ChatGPT·Gemini 등 아무 AI 채팅에 붙여 넣기(API 비용 없음 · 11/2 기준·형식 고정으로 AI 가 달라도 비슷한 풀이)
    카드 그림: 라이더-웨이트(1909, 저작권 만료) · 위키미디어 공용에서 불러옴, 실패하면 글자 카드
    데이터: tarot/deck.json(기본 뜻) · tarot/topics.json(주제별 해석) — 탭을 열 때만 받음 */
 (function(){
@@ -366,9 +366,9 @@
     h += '<div class="card"><h3>그래서, 이렇게 해 보세요</h3>' + C.todo.map(function(t){ return '<div class="lk-tip"><span>✅</span><span>' + e(t) + '</span></div>'; }).join("") +
       (res.sj ? '<div style="margin-top:10px;padding:11px;border-radius:12px;background:var(--panel2);font-size:13.5px;line-height:1.55"><b>🔮 사주와 함께 보면</b> (' + e(res.sj.name) + ' 님 · 오늘 운세 ' + res.sj.today + '점)<br>' + e(res.sj.line) + '</div>' : "") +
       (Q.topic === "투자" ? '<p class="sj-note" style="margin-top:10px">📈 투자 질문은 카드보다 숫자가 먼저예요. 실제 판단은 🌐 시황 · 종목리포트를 꼭 함께 보세요.</p>' : Q.topic === "건강" ? '<p class="sj-note" style="margin-top:10px">🩺 몸이 걱정되면 카드보다 병원 상담이 먼저예요.</p>' : "") + '</div>';
-    h += '<div class="tr-act"><button class="k" id="trShare">💬 카톡으로 보내기</button><button class="c" id="trClaude">✨ Claude 심화 해석 문구</button><button id="trCopy">📋 글로 복사</button><button id="trAgain">🔄 새로 묻기</button></div>' +
+    h += '<div class="tr-act"><button class="k" id="trShare">💬 카톡으로 보내기</button><button class="c" id="trClaude">✨ AI에 붙여 심화 해석 듣기</button><button id="trCopy">📋 글로 복사</button><button id="trAgain">🔄 새로 묻기</button></div>' +
       (Q.topic === "투자" ? '<div class="sj-btns" style="margin-bottom:12px"><button class="sj-btn g" id="trMkt">🌐 진짜 시장은 시황에서 보기</button></div>' : "") +
-      '<p class="sj-note">✨ 「Claude 심화 해석 문구」를 눌러 Claude 채팅에 붙여 넣으면, 질문 문장 그대로 더 깊은 맞춤 해석을 받을 수 있어요(쓰고 있는 Claude 안에서 · API 비용 없음). 타로는 재미와 자기 성찰용이에요.</p>';
+      '<p class="sj-note">✨ 「AI에 붙여 심화 해석 듣기」를 누르면 문구가 복사돼요. Claude · ChatGPT · Gemini 등 쓰는 AI 채팅에 붙여 넣으면 질문 문장 그대로 깊은 맞춤 해석을 받아요(API 비용 없음). 해석 기준과 답 형식이 문구에 들어 있어서 어느 AI에 붙여도 비슷한 틀로 답해요. 타로는 재미와 자기 성찰용이에요.</p>';
     R.innerHTML = h;
     var txt = plain(), b = function(id, f){ var x = R.querySelector(id); if (x) x.onclick = f; };
     b("#trShare", function(){ if (navigator.share) navigator.share({title: "타로", text: txt}).catch(function(){}); else copy(txt, this); });
@@ -383,15 +383,42 @@
       res.cards.map(function(x, i){ return (i + 1) + ". " + x.pos + " — " + x.c.nm + (x.r ? " (역)" : "") + "\n   " + x.body; }).join("\n") +
       "\n\n✅ " + C.todo.join("\n✅ ") + "\n⚠️ " + C.caution + "\n\n(재미로 보는 타로 · CH Investing)";
   }
+  /* 11/2 사용자 「Claude 말고 다른 AI 에 붙여도 결과가 비슷하게」 — 어떤 AI(Claude·ChatGPT·Gemini 등)에 붙여도
+     같은 틀·같은 기준으로 답하게: 덱 기준·역방향 규칙·판정 3단계·사주 비중·답 형식을 문구에 못 박는다 */
   function prompt(){
-    var res = ST.res, Q = res.Q;
-    return "타로 리딩을 해석해 줘. 내 질문 문장에 딱 맞춰서, 카드 자리(포지션) 의미와 카드끼리의 흐름까지 엮어 깊게 풀어 줘. 쉬운 말로, 마지막엔 결론 한 줄 · 해야 할 일 3가지 · 조심할 것 1가지.\n\n" +
-      "[질문] " + (Q.q || "(질문 없음 — 오늘의 흐름)") + "\n[주제] " + Q.topic + " / [묻는 방식] " + KIND_KO[Q.kind] + "\n[펼치기] " + res.sp.nm.replace(/💹 /, "") + "\n" +
-      res.cards.map(function(x, i){ return "[" + (i + 1) + ". " + x.pos + "] " + x.c.nm + " (" + x.c.en + ")" + (x.r ? " — 역방향" : " — 정방향"); }).join("\n") +
-      (res.sj ? "\n[참고] 내 사주 용신 기운과의 관계: " + res.sj.line : "") + (Q.topic === "투자" ? "\n※ 투자 질문이니 재미 해석과 함께, 실제 확인해야 할 체크리스트도 같이 알려 줘." : "");
+    var res = ST.res, Q = res.Q, yn = Q.kind === "yn", inv = Q.topic === "투자";
+    var L = [];
+    L.push("너는 경험 많은 타로 리더야. 아래 타로 리딩을 내 질문 문장에 딱 맞춰 해석해 줘.");
+    L.push("");
+    L.push("[해석 기준 — 꼭 지켜 줘]");
+    L.push("1. 카드 뜻은 라이더-웨이트(Rider-Waite) 덱의 표준 뜻을 쓴다. 카드 그림 속 상징도 한두 개 짚어 준다.");
+    L.push("2. 역방향은 「그 카드의 기운이 막히거나 · 약해지거나 · 안으로 숨는다」로 읽는다. 정반대 뜻으로 뒤집지 않는다.");
+    L.push("3. 각 카드는 반드시 그 카드가 놓인 자리(포지션)의 뜻으로 읽는다. 같은 카드도 자리가 다르면 다르게 읽는다.");
+    L.push("4. 카드 한 장씩 따로 끝내지 말고, 1번→마지막 카드로 이어지는 흐름(이야기)을 한 문단으로 엮는다.");
+    L.push("5. 카드에 없는 사실(사람의 속마음, 날짜, 금액 등)을 지어내지 않는다.");
+    L.push("6. [참고]의 사주 줄은 분위기를 보태는 정도로만 한 줄 쓰고, 판정을 바꾸는 근거로 쓰지 않는다.");
+    if (yn) L.push("7. 이 질문은 예·아니오 질문이다. 맨 앞에 판정을 「예 / 조건부 예 / 아니오」 셋 중 하나로만 먼저 말하고 이유를 한 줄 붙인다. 애매하게 흐리지 않는다.");
+    L.push("");
+    L.push("[답 형식 — 이 순서 그대로]");
+    L.push((yn ? "① 판정: 예 / 조건부 예 / 아니오 + 이유 한 줄" : "① 한 줄 답: 질문에 대한 핵심 답 한 문장"));
+    L.push("② 카드별 풀이: 자리 이름 — 카드 이름(정·역) → 이 자리에서의 뜻 → 내 질문에 대입하면 (각 3~4줄)");
+    L.push("③ 카드끼리의 흐름: 「A → B → C」 한 줄 요약 + 한 문단");
+    L.push("④ 결론 한 줄");
+    L.push("⑤ 해야 할 일 3가지 (바로 할 수 있는 구체적 행동)");
+    L.push("⑥ 조심할 것 1가지");
+    if (inv) L.push("⑦ 투자 질문이므로: 카드와 별개로 실제로 확인해야 할 체크리스트 3가지 (가격·뉴스·비중 등). 매수·매도를 권하지 않는다.");
+    L.push("");
+    L.push("[말투] 중학생도 알아듣는 쉬운 우리말, 「~해요」체. 어려운 타로 용어는 풀어서. 전체 길이는 휴대폰 두세 화면 정도.");
+    L.push("");
+    L.push("[질문] " + (Q.q || "(질문 없음 — 오늘의 흐름)"));
+    L.push("[주제] " + Q.topic + " / [묻는 방식] " + KIND_KO[Q.kind]);
+    L.push("[펼치기] " + res.sp.nm.replace(/💹 /, "") + " (" + res.cards.length + "장)");
+    res.cards.forEach(function(x, i){ L.push("[" + (i + 1) + ". " + x.pos + "] " + x.c.nm + " (" + x.c.en + ")" + (x.r ? " — 역방향" : " — 정방향")); });
+    if (res.sj) L.push("[참고] 내 사주 용신 기운과의 관계: " + res.sj.line);
+    return L.join("\n");
   }
   function copy(t, btn){
-    var ok = function(){ if (btn){ var o = btn.innerHTML; btn.innerHTML = "✅ 복사됐어요"; setTimeout(function(){ btn.innerHTML = o; }, 2200); } };
+    var ok = function(){ if (btn){ var o = btn.innerHTML; btn.innerHTML = "✅ 복사됐어요 · AI 채팅에 붙여 넣기"; setTimeout(function(){ btn.innerHTML = o; }, 2200); } };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, fb); else fb();
     function fb(){ var a = document.createElement("textarea"); a.value = t; a.style.cssText = "position:fixed;left:-9999px"; document.body.appendChild(a); a.select(); try { document.execCommand("copy"); ok(); } catch(x) {} a.remove(); }
   }

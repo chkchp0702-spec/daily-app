@@ -620,7 +620,7 @@ window.addEventListener("popstate", function(ev){
 });
 
 /* ⚡ 10/31 B10 무거운 탭은 열 때만 받기 — 첫 화면에서 운세·사주·타로·로또·제안서 파일(약 570KB)을 안 받음 */
-var LAZY = {luck: ["saju_core.js?v=4", "saju_txt.js?v=4", "saju.js?v=9", "tarot.js?v=3", "lotto.js?v=1"], prop: ["propose.js?v=23"]};
+var LAZY = {luck: ["saju_core.js?v=4", "saju_txt.js?v=4", "saju.js?v=10", "tarot.js?v=4", "lotto.js?v=1"], prop: ["propose.js?v=23"]};
 LAZY.saju = LAZY.tarot = LAZY.lotto = LAZY.luck;
 var LAZYP = {};
 function needMod(key){
@@ -1539,7 +1539,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261102a";
+var APPV = "20261102b";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1646,7 +1646,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="iconz.js?v=3"></script>   <!-- 🔣 10/22 아이콘 풀이 -->
 <script defer src="today.js?v=13"></script>   <!-- 🏠 10/22 오늘 탭 10가지 -->
 <script defer src="vidmap.js?v=7"></script>   <!-- 🎬 조이 설명 영상 목록(자동 생성) -->
-<script defer src="guide.js?v=34"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
+<script defer src="guide.js?v=35"></script>   <!-- 🧒 10/22 꼬마 안내원 -->
 <script defer src="easy.js?v=3"></script>   <!-- 🗣 10/28 쉬운 말 (끄기: localStorage easy=off) -->
 <script defer src="habit.js?v=1"></script>   <!-- 🏠 10/31 다시 오게: 홈 접기·1탭 예측·배지·운세 다리·장중 바뀐 것·이번 주 한 장·본 뒤 바뀐 것 -->
 <script defer src="home2.js?v=2"></script>   <!-- 🏠 10/31 오늘 v2 — 기본으로 켬 (예전 홈 ?home2=0) -->

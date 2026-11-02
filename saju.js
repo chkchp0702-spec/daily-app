@@ -2,7 +2,7 @@
    ① 계산은 휴대폰 안(saju_core.js) — 서버·API 없음, 생일은 이 휴대폰에만 저장(localStorage "sj_people")
    ② 문장은 미리 써 둔 창고(saju_txt.js)에서 조합
    ③ 리포트는 예전 「나를 읽는 리포트」 모양 그대로(밝은 종이) · 📄 PDF 저장(pdfx.js 화면 그대로)
-   ④ 더 깊은 글이 필요하면 「Claude 심화판 문구 복사」 → Claude 채팅에 붙여 넣기 (API 비용 없음) */
+   ④ 더 깊은 글이 필요하면 「AI에 붙여 심화판 받기」 복사 → 아무 AI 채팅에 붙여 넣기 (API 비용 없음) */
 (function(){
   var S = function(){ return window.SJ; }, T = function(){ return window.SJT; };
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
@@ -872,12 +872,13 @@
       '<p style="font-size:11.5px;color:#7a8396;line-height:1.6">안내 · 이 리포트는 전통 명리학 및 서양 점성술 이론에 따른 해석이며, 과학적으로 검증된 예측이 아닙니다. 재물 · 투자 판단이나 건강 · 진로 · 결혼의 결론을 이 내용으로 대신하지 마세요. 배우자 · 자녀 서술은 특정 인물을 규정하는 것이 아니라 관계를 돌아보는 참고입니다. 「주의」로 표시된 시기도 불운이 일어난다는 뜻이 아니라, 명리 이론상 필요한 기운과 어긋난다는 의미입니다. 중요한 결정은 전문가 조언과 본인 판단이 우선입니다. · 작성일 ' + now.y + '년 ' + now.m + '월 ' + now.d + '일 · CH Investing 앱이 휴대폰 안에서 계산함</p>');
     return h;
   }
-  /* Claude 채팅용 심화판 문구 (API 비용 없음 — 사용자가 Claude 앱에 붙여 넣음) */
+  /* AI 채팅용 심화판 문구 (API 비용 없음 — 사용자가 Claude·ChatGPT·Gemini 등에 붙여 넣음 · 11/2 기준 고정) */
   function prompt(R){
     var t = T(), s = S(), DL = s.daeunLuck(R), now = s.todayKST(), YL = []; for (var y = now.y; y < now.y + 10; y++) YL.push(s.yearLuck(R, y));
     var L = [];
-    L.push("아래 계산값으로 「사주·별자리 — 나를 읽는 리포트」 종합 심화판 PDF를 만들어 줘.");
-    L.push("형식: 예전에 만든 리포트와 같게 — 표지(남색, 8글자 카드, 한 줄 요약) · 1 한눈에 보기(레이더·네 문장·별점표) · 2 8글자/숨은 글자/12운성 · 관계도 · 3 간판(격국·신강약) · 4 가장 필요한 것(용신) · 5 특별한 표시(신살) · 6 다섯 기운 · 7 재물운 · 8 10년 대운 그래프 · 9 연도별 10년 · 10 올해 월별 · 11 배우자·자녀 · 12 별자리 · 13 생활(일·색·방향·건강) · 14 정리 · 부록(계산 근거·면책). 중학생도 이해할 쉬운 말, 「~입니다」체, 한자는 괄호로만, 차트 많이.");
+    L.push("너는 명리학과 서양 점성술을 함께 아는 상담가야. 아래 계산값으로 「사주·별자리 — 나를 읽는 리포트」 종합 심화판을 만들어 줘.");
+    L.push("기준: 계산값(8글자·십성·용신·대운 등)은 이미 맞게 계산된 것이니 다시 계산하거나 바꾸지 말고 그대로 해석만 한다. 값에 없는 사실은 지어내지 않는다. 좋은 점과 주의할 점을 균형 있게, 겁주는 말은 쓰지 않는다. 파일(PDF)을 만들 수 없는 AI 면 같은 순서의 글로 써 준다.");
+    L.push("형식(이 순서 그대로): 표지(남색, 8글자 카드, 한 줄 요약) · 1 한눈에 보기(레이더·네 문장·별점표) · 2 8글자/숨은 글자/12운성 · 관계도 · 3 간판(격국·신강약) · 4 가장 필요한 것(용신) · 5 특별한 표시(신살) · 6 다섯 기운 · 7 재물운 · 8 10년 대운 그래프 · 9 연도별 10년 · 10 올해 월별 · 11 배우자·자녀 · 12 별자리 · 13 생활(일·색·방향·건강) · 14 정리 · 부록(계산 근거·면책). 중학생도 이해할 쉬운 말, 「~입니다」체, 한자는 괄호로만, 차트 많이.");
     L.push("");
     L.push("[인적] " + (R.name || "") + " · " + (R.sex === "M" ? "남" : "여") + " · 양력 " + R.solar.y + "-" + R.solar.m + "-" + R.solar.d + " " + (R.noHour ? "시간 모름" : R.solar.hh + ":" + ("0" + R.solar.mi).slice(-2)) + " · " + (R.lunar ? "음력 " + R.lunar.y + "-" + (R.lunar.leap ? "윤" : "") + R.lunar.m + "-" + R.lunar.d : "") + " · " + R.city + (R.tz.dst ? " · 서머타임" : ""));
     L.push("[8글자] 시 " + (R.P.h || "?") + " · 일 " + R.P.d + " · 월 " + R.P.m + " · 년 " + R.P.y + " (경도 보정 " + R.lmt.corr + "분, 실제 해시각 " + R.lmt.h + ":" + ("0" + R.lmt.m).slice(-2) + ")");
@@ -895,7 +896,7 @@
     return L.join("\n");
   }
   function copyText(txt, btn){
-    var done = function(){ if (btn){ var o = btn.innerHTML; btn.innerHTML = "✅ 복사됐어요<small>Claude 채팅에 붙여 넣기</small>"; setTimeout(function(){ btn.innerHTML = o; }, 2500); } };
+    var done = function(){ if (btn){ var o = btn.innerHTML; btn.innerHTML = "✅ 복사됐어요<small>AI 채팅에 붙여 넣기</small>"; setTimeout(function(){ btn.innerHTML = o; }, 2500); } };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fb); else fb();
     function fb(){ var ta = document.createElement("textarea"); ta.value = txt; ta.style.cssText = "position:fixed;left:-9999px"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch(x) {} ta.remove(); }
   }
@@ -935,8 +936,8 @@
     var R; try { R = calcOf(p); } catch(x) { root.innerHTML = frame("saju", '<div class="card">계산하지 못했어요: ' + e(x.message || x) + '</div>'); bindPpl(root, renderSaju); return; }
     var body; try { body = report(R); } catch(x) { try { console.error(x); } catch(z) {} body = '<section class="qsjp">리포트를 만들다 멈췄어요: ' + e(x.message || x) + '</section>'; }
     root.innerHTML = frame("saju", '<div class="sjr-tools sjr" style="padding:10px;margin-bottom:10px"><div class="qtools" style="margin:0">' +
-      '<button id="sjPdf">📄 PDF로 저장<small>리포트 그대로 · 공유 가능</small></button><button id="sjCp">✨ Claude 심화판 문구<small>복사 → Claude 채팅에 붙여 넣기</small></button></div><div id="sjPdfBar"></div></div>' +
-      '<div class="sjr no-clp tidy-x ez-no" id="sjRep">' + body + '</div><p class="sj-note">📜 계산은 모두 이 휴대폰 안에서 했어요(인터넷 · API 비용 없음). 더 길고 깊은 글이 필요하면 「Claude 심화판 문구」를 복사해 Claude 채팅에 붙여 넣으면 예전 리포트처럼 써 줘요.</p>');
+      '<button id="sjPdf">📄 PDF로 저장<small>리포트 그대로 · 공유 가능</small></button><button id="sjCp">✨ AI에 붙여 심화판 받기<small>복사 → Claude·ChatGPT·Gemini 등에 붙여 넣기</small></button></div><div id="sjPdfBar"></div></div>' +
+      '<div class="sjr no-clp tidy-x ez-no" id="sjRep">' + body + '</div><p class="sj-note">📜 계산은 모두 이 휴대폰 안에서 했어요(인터넷 · API 비용 없음). 더 길고 깊은 글이 필요하면 「AI에 붙여 심화판 받기」로 복사해 쓰는 AI 채팅(Claude · ChatGPT · Gemini 등)에 붙여 넣으면 같은 순서의 리포트로 써 줘요.</p>');
     bindPpl(root, renderSaju);
     root.querySelector("#sjCp").onclick = function(){ copyText(prompt(R), this); };
     root.querySelector("#sjPdf").onclick = function(){
