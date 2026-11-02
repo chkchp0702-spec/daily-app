@@ -387,6 +387,70 @@
       return {big: "연 " + S.bt.cagr + "%", lab: S.bt.from.slice(0, 4) + "년부터 이 비중이었다면 (연평균)", sub: "1년 뒤 보통 " + man(Q.y1[1].won) + " · 나쁜 해 " + man(Q.y1[0].won) + " · 최대 하락 " + S.bt.mdd + "%"}; }
     return null;
   }
+  /* ───────── 🧪 섞으면 어땠나 (11/2 A11/2-1) ─────────
+     폼을 둘 넘게 고르면 → 고른 금액 비율 그대로 섞은 포트를 과거에 굴려 봄(해마다 1월에 처음 비율로 다시 맞춤)
+     주식·연금 폼 = proposal.json sim.bt.growth(매달 말 값) · 채권 폼 = 지금 금리(세후 · 환율 그대로)가 내내 그대로였다고 친 곧은 선(과거 실제 채권값 아님)
+     ELS = 계산 밖(그 몫 빼고 셈) · 같은 기간(가장 늦게 시작한 폼부터)으로 따로 들었을 때와 나란히 · 배당·세금·수수료 빼고 · 과거 계산 · 보장 아님 */
+  function mixStat(lb, v){
+    var n = v.length, peak = v[0], pk = 0, mdd = 0, mi = 0, mp = 0, yr = {}, worst = null;
+    for (var i = 0; i < n; i++){ if (v[i] > peak){ peak = v[i]; pk = i; } var d = v[i] / peak - 1; if (d < mdd){ mdd = d; mi = i; mp = pk; } }
+    lb.forEach(function(l, i){ if (l.slice(5) === "12") yr[+l.slice(0, 4)] = v[i]; });
+    Object.keys(yr).forEach(function(y){ var p = yr[+y - 1]; if (p){ var r = (yr[y] / p - 1) * 100; if (worst == null || r < worst.r) worst = {y: +y, r: r}; } });
+    return {cagr: (Math.pow(v[n - 1] / v[0], 12 / (n - 1)) - 1) * 100, mdd: mdd * 100, at: lb[mi], from: lb[mp], worst: worst};
+  }
+  function mixCalc(items){
+    var parts = [], els = [];
+    items.forEach(function(x){ var S = x.f.sim; if (!S) return;
+      if (S.kind === "equity" && S.bt && S.bt.growth && S.bt.growth.vals && S.bt.growth.vals.length > 24) parts.push({x: x, g: S.bt.growth});
+      else if (S.kind === "bond"){ var y = bondCalc(S, 1e8).cagr; if (isFinite(y)) parts.push({x: x, y: y}); }
+      else if (S.kind === "els") els.push(x.f.short); });
+    if (parts.length < 2 || !parts.some(function(p){ return p.g; })) return null;
+    var eqs = parts.filter(function(p){ return p.g; });
+    var t0 = eqs.reduce(function(m, p){ return p.g.labels[0] > m ? p.g.labels[0] : m; }, ""), t1 = eqs.reduce(function(m, p){ var l = p.g.labels[p.g.labels.length - 1]; return !m || l < m ? l : m; }, "");
+    var lb = eqs[0].g.labels.filter(function(l){ return l >= t0 && l <= t1; }); if (lb.length < 25) return null;
+    parts.forEach(function(p){ if (p.g){ var ix = {}; p.g.labels.forEach(function(l, i){ ix[l] = i; }); p.v = lb.map(function(l){ return p.g.vals[ix[l]]; }); }
+      else { var a = Math.pow(1 + p.y / 100, 1 / 12); p.v = lb.map(function(_, i){ return Math.pow(a, i); }); } });
+    if (parts.some(function(p){ return p.v.some(function(q){ return !(q > 0); }); })) return null;
+    var A = parts.reduce(function(s, p){ return s + (p.x.amt || 0); }, 0);
+    parts.forEach(function(p){ p.w = A ? (p.x.amt || 0) / A : 1 / parts.length; });
+    parts = parts.filter(function(p){ return p.w > 0; }); if (parts.length < 2) return null;
+    var V = 1, h = parts.map(function(p){ return p.w / p.v[0]; }), mv = [1];
+    for (var i = 1; i < lb.length; i++){ V = parts.reduce(function(s, p, j){ return s + h[j] * p.v[i]; }, 0); mv.push(V);
+      if (lb[i].slice(5) === "01") h = parts.map(function(p){ return p.w * V / p.v[i]; }); }
+    parts.forEach(function(p){ p.st = mixStat(lb, p.v); if (!p.g) p.st.worst = null; });
+    var M = mixStat(lb, mv), wst = parts.reduce(function(m, p){ return !m || p.st.mdd < m.st.mdd ? p : m; }, null);
+    return {lb: lb, parts: parts, mix: M, mv: mv, A: A, els: els, worst: wst, from: lb[0], hasBond: parts.some(function(p){ return !p.g; })};
+  }
+  function ym(l){ return String(l || "").replace("-", "."); }
+  function mixSay(R){   // 한 문장 (고객용 — 매수 권유 말 없음)
+    var w = R.worst;
+    return "따로 들면 가장 크게 빠졌던 " + w.x.f.short + " " + sgn(w.st.mdd, 1) + "(" + ym(w.st.at) + ") → 섞으면 " + sgn(R.mix.mdd, 1) + "(" + ym(R.mix.at) + ")" + (R.A ? " · " + man(R.A) + "이면 잠깐 줄어든 돈 " + man(Math.abs(R.A * R.mix.mdd / 100)) : "");
+  }
+  function mixNote(R){ return ym(R.from) + "~지금 매달 값 · 고른 금액 비율 그대로 · 해마다 1월에 처음 비율로 다시 맞춘다고 침" + (R.hasBond ? " · 채권 = 지금 금리(세후·환율 그대로)가 내내 그대로였다고 친 선(실제 과거 채권값 아님)" : "") + (R.els.length ? " · " + R.els.join("·") + "는 계산 밖(그 몫 빼고 셈)" : "") + " · 배당·세금·수수료 빼고 · 과거 계산 · 보장 아님"; }
+  function mixRows(R){ return R.parts.map(function(p){ return {n: p.x.f.icon + " " + p.x.f.short, c: p.x.f.color, w: p.w * 100, st: p.st}; }).concat([{n: "🧪 섞으면", c: "#7c5cff", w: 100, st: R.mix, mix: 1}]); }
+  function mixUI(){   // 화면 (고르기 칸 밑)
+    if (!DATA || ST.sel.length < 2) return "";
+    var R = mixCalc(model().items);
+    if (!R) return '<div class="pp-mx"><b>🧪 섞으면 어땠나</b><p class="mut">주식·연금 폼을 하나 넘게 넣어 둘 이상 고르면 섞은 과거가 여기 나와요' + (ST.sel.some(function(k){ var f = form(k); return f && f.sim && f.sim.kind === "els"; }) ? " (ELS는 계산 밖)" : "") + '</p></div>';
+    var rows = mixRows(R), mx = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.st.mdd); }).concat([1]));
+    return '<div class="pp-mx"><div class="pp-mxh"><b>🧪 섞으면 어땠나</b><small>' + ym(R.from) + '~지금 · 같은 기간</small></div>' +
+      '<p class="pp-mxs">' + e(mixSay(R)) + '</p>' +
+      rows.map(function(r){ return '<div class="pp-mxr' + (r.mix ? " mix" : "") + '"><div class="pp-mx1"><i style="background:' + r.c + '"></i><b>' + e(r.n) + '</b>' + (r.mix ? '' : '<small>' + pc(r1(r.w)) + '</small>') + '<span>연평균 <b>' + sgn(r.st.cagr, 1) + '</b></span></div>' +
+        '<div class="pp-mx2"><span class="pp-mxb"><em style="width:' + Math.max(1.5, Math.abs(r.st.mdd) / mx * 100).toFixed(1) + '%"></em></span><b class="dn">' + sgn(r.st.mdd, 1) + '</b><small>' + (r.st.worst ? "최악의 해 " + r.st.worst.y + " " + sgn(r.st.worst.r, 1) : r.st.mdd === 0 ? "곧은 선(지금 금리)" : "") + '</small></div></div>'; }).join("") +
+      '<p class="pp-mxk">막대 = 가장 크게 빠졌을 때(고점 → 바닥)</p>' +
+      '<p class="pp-mxn">' + e(mixNote(R)) + '</p></div>';
+  }
+  function mixUpd(){ var el = document.getElementById("ppmix"); if (el) el.innerHTML = mixUI(); }
+  function mixPrint(R, fs, wPx){   // 한 장·PDF 공용 (흰 바탕 · 글자색 박음)
+    var rows = mixRows(R), mx = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.st.mdd); }).concat([1])), bw = Math.round(wPx * 0.3);
+    return '<div style="color:' + INK + '"><div style="font-size:' + Math.round(fs * 1.05) + 'px;font-weight:800;color:' + NAVY + ';line-height:1.45;margin-bottom:8px">' + e(mixSay(R)) + '</div>' +
+      '<div style="display:flex;font-size:' + Math.round(fs * 0.75) + 'px;color:' + SUB + ';font-weight:700;padding:4px 0;border-bottom:1px solid ' + LINE + '"><span style="flex:1.4"></span><span style="flex:.6;text-align:right">연평균</span><span style="width:' + (bw + 80) + 'px;text-align:right">가장 크게 빠졌을 때</span><span style="flex:.8;text-align:right">최악의 해</span></div>' +
+      rows.map(function(r){ return '<div style="display:flex;align-items:center;font-size:' + fs + 'px;padding:' + Math.round(fs * 0.3) + 'px 0;border-bottom:1px solid ' + LINE + (r.mix ? ';font-weight:800;background:#f3f0ff' : '') + '"><span style="flex:1.4;display:flex;align-items:center;gap:8px"><i style="display:inline-block;width:' + Math.round(fs * 0.55) + 'px;height:' + Math.round(fs * 0.55) + 'px;border-radius:3px;background:' + r.c + '"></i>' + e(r.n) + (r.mix ? '' : ' <span style="color:' + SUB + ';font-size:' + Math.round(fs * 0.8) + 'px">' + pc(r1(r.w)) + '</span>') + '</span>' +
+        '<span style="flex:.6;text-align:right">' + sgn(r.st.cagr, 1) + '</span>' +
+        '<span style="width:' + (bw + 80) + 'px;display:flex;align-items:center;justify-content:flex-end;gap:8px"><span style="display:inline-block;height:' + Math.round(fs * 0.5) + 'px;width:' + Math.round(Math.abs(r.st.mdd) / mx * bw) + 'px;background:' + (r.mix ? "#7c5cff" : DN) + ';border-radius:3px"></span><b style="color:' + DN + ';min-width:' + Math.round(fs * 4.2) + 'px;text-align:right;white-space:nowrap">' + sgn(r.st.mdd, 1) + '</b></span>' +
+        '<span style="flex:.8;text-align:right;white-space:nowrap">' + (r.st.worst ? sgn(r.st.worst.r, 1) + ' <span style="color:' + SUB + ';font-size:' + Math.round(fs * 0.8) + 'px">' + r.st.worst.y + '</span>' : "–") + '</span></div>'; }).join("") +
+      '<div style="font-size:' + Math.round(fs * 0.72) + 'px;color:' + SUB + ';line-height:1.5;margin-top:8px">' + e(mixNote(R)) + '</div></div>';
+  }
   /* ───────── 🎯 목표에서 거꾸로 (A10/30-1) ─────────
      처음 한 번에 · 매달 · 기간 · 목표 금액을 넣으면 → 폼마다 「과거에 이 기간을 매달 시작했다고 치면 몇 번 목표에 닿았나」
      주식·연금 폼 = proposal.json sim.bt.growth(매달 말 값)로 휴대폰에서 셈 · 채권 = 지금 금리(세후·환율 그대로) 그대로일 때 · ELS = 3년 안에 끝나 계산 밖
@@ -537,6 +601,8 @@
       h += '<div style="padding:30px 44px 0"><div style="font-size:31px;font-weight:800;margin-bottom:14px;color:' + INK + '">🧺 전체 나눠 담기</div><div style="background:#fff;border:1px solid ' + LINE + ';border-radius:22px;padding:24px;display:flex;gap:26px;align-items:center">' +
         donut(parts, 250, 50, "합계", m.total ? man(m.total) : m.items.length + "개") + '<div style="flex:1">' +
         m.items.map(function(x){ return '<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid ' + LINE + ';font-size:26px;color:' + INK + '"><span style="width:20px;height:20px;border-radius:4px;background:' + x.f.color + '"></span><b style="flex:1">' + e(x.f.icon + " " + x.f.short) + '</b><span style="font-weight:800">' + (m.total ? pc(x.amt / m.total * 100) : "") + '</span><span style="width:170px;text-align:right;color:' + NAVY + ';font-weight:800">' + man(x.amt) + '</span></div>'; }).join("") + '</div></div></div>';
+      var MX = mixCalc(m.items);
+      if (MX) h += '<div style="padding:24px 44px 0"><div style="font-size:31px;font-weight:800;margin-bottom:12px;color:' + INK + '">🧪 섞으면 어땠나 <span style="font-size:21px;color:' + SUB + ';font-weight:700">' + ym(MX.from) + '~지금 · 같은 기간</span></div><div style="background:#fff;border:1px solid ' + LINE + ';border-radius:22px;padding:22px 26px">' + mixPrint(MX, 24, 980) + '</div></div>';
     }
     m.items.forEach(function(x){
       var f = x.f, ls = lines(f, x.amt), mk = f.mkt || {}, sl = simLine(f, x.amt), ch = (mk.charts || [])[0];
@@ -852,7 +918,8 @@
     var parts = m.items.map(function(x){ return {pct: m.total ? x.amt / m.total * 100 : 100 / m.items.length, color: x.f.color}; });
     return [hTitle("🧺 제안 한눈에", "상품별 금액과 핵심") + '<div style="display:flex;gap:28px;align-items:center">' + donut(parts, 210, 42, "합계", m.total ? man(m.total) : "") +
       '<div style="flex:1">' + m.items.map(function(x){ return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid ' + LINE + ';font-size:14.5px;color:' + INK + '"><span style="width:14px;height:14px;border-radius:3px;background:' + x.f.color + '"></span><b style="flex:1">' + e(x.f.icon + " " + x.f.title) + '</b><span style="font-weight:800">' + (m.total ? pc(x.amt / m.total * 100) : "") + '</span><span style="width:120px;text-align:right;color:' + NAVY + ';font-weight:800">' + man(x.amt) + '</span></div>'; }).join("") + '</div></div>',
-      m.items.map(function(x){ var sl = simLine(x.f, x.amt); return '<div style="display:flex;gap:10px;font-size:13px;line-height:1.5;padding:8px 12px;margin-bottom:6px;background:' + BG + ';border-radius:10px;border-left:5px solid ' + x.f.color + ';color:' + INK + '"><b style="flex:none;width:92px;color:' + x.f.color + '">' + e(x.f.short) + '</b><span style="flex:1">' + e(x.f.headline) + (sl ? '<br><span style="color:' + NAVY + ';font-weight:700">🧮 ' + e(sl.lab) + ' ' + e(sl.big) + '</span>' : '') + '</span></div>'; }).join("")];
+      m.items.map(function(x){ var sl = simLine(x.f, x.amt); return '<div style="display:flex;gap:10px;font-size:13px;line-height:1.5;padding:8px 12px;margin-bottom:6px;background:' + BG + ';border-radius:10px;border-left:5px solid ' + x.f.color + ';color:' + INK + '"><b style="flex:none;width:92px;color:' + x.f.color + '">' + e(x.f.short) + '</b><span style="flex:1">' + e(x.f.headline) + (sl ? '<br><span style="color:' + NAVY + ';font-weight:700">🧮 ' + e(sl.lab) + ' ' + e(sl.big) + '</span>' : '') + '</span></div>'; }).join("")].concat((function(){ var MX = m.items.length > 1 && mixCalc(m.items);
+      return MX ? [secT("🧪 섞으면 어땠나 · " + ym(MX.from) + "~지금") + mixPrint(MX, 14, CW)] : []; })());
   }
   /* ───────── ⚖️ 투자위험 고지 (10/29 사용자 「실제 심의필에 필적할 위험고지를 모든 제안서 마지막에」) ─────────
      금융소비자보호법·금융투자협회 표준 안내 항목을 따름 · 고른 상품에 맞는 항목만 덧붙임 */
@@ -1320,6 +1387,7 @@
         "주식·개인연금 폼은 시황 리포트 배분표(미국 지수 + 한국 + 시황 테마 + 금)를 그대로 따르고, DC·IRP는 위험자산 법정 한도 70% 안에서 같은 비율로 담아요.",
         "국고채·미국채·브라질국채는 미래에셋이 지금 파는 채권 중 기간별로 세금 뗀 수익률이 가장 좋은 것을, ELS는 원금지급형 ELB에 지수형 ELS 2개를 섞어요.",
         "카드를 누르면 고르기, 한 번 더 누르면 빼기예요. 여러 개를 함께 고르면 한 제안서에 같이 들어가요.",
+        "둘 넘게 고르면 바로 밑에 「🧪 섞으면 어땠나」 — 고른 금액 비율대로 섞어 과거에 굴렸을 때 가장 크게 빠진 폭·연평균·최악의 해를 따로 들었을 때와 나란히 보여 줘요(한 장·PDF·📲 에도 같이).",
         "오늘 폼 한 줄씩:"].concat(DATA.forms.map(function(f){ var al = (f.alloc || []).filter(function(a){ return +a.pct > 0; });
           return f.icon + " " + f.short + " — " + (EQ[f.key] ? al.map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" · ") : String(f.headline || "").replace(/ 제안임$/, "")); })); },
     who: ["고객 이름은 표지와 인사말에만 들어가요. 이 휴대폰 밖(서버·동료 링크)으로는 나가지 않아요. 비워 두면 「고객님」으로 나와요.",
@@ -1347,7 +1415,7 @@
     var h = '<section data-xc="1" class="card pp-top"><h3>📋 오늘의 기본폼</h3>' + notes(JOY.forms()) + '<p class="pp-tip" style="margin-top:-4px">' + e(DATA.basis || "") + '</p>' +
       '<div class="pp-reg"><span class="' + (M.us_up ? "ok" : "no") + '">🇺🇸 ' + (M.us_up ? "상승 추세" : "조심") + '</span><span class="' + (M.kr_up ? "ok" : "no") + '">🇰🇷 ' + (M.kr_up ? "상승 추세" : "회복 전") + '</span><span class="mut">' + e(String(DATA.at || "").slice(5).replace("-", "/")) + ' 갱신</span></div>' +
       gUI() + '<p class="pp-tip">고를 상품을 누르세요 · 여러 개 함께 골라도 됨</p><div class="pp-grid">' + DATA.forms.map(function(f){ var on = ST.sel.indexOf(f.key) >= 0, GB = gBadge(f);
-        return '<button type="button" class="pp-f' + (on ? " on" : "") + '" data-k="' + f.key + '" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small>' + e(f.headline.replace(/ 제안임$/, "")) + '</small>' + (on ? '<em>✓</em>' : '') + '<span class="pp-gb ' + GB.c + '" id="ppgb_' + f.key + '">' + GB.h + '</span></button>'; }).join("") + '</div></section>';
+        return '<button type="button" class="pp-f' + (on ? " on" : "") + '" data-k="' + f.key + '" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small>' + e(f.headline.replace(/ 제안임$/, "")) + '</small>' + (on ? '<em>✓</em>' : '') + '<span class="pp-gb ' + GB.c + '" id="ppgb_' + f.key + '">' + GB.h + '</span></button>'; }).join("") + '</div><div id="ppmix">' + mixUI() + '</div></section>';
     h += '<section data-xc="1" class="card"><h3>✍️ 누구에게 · 누가</h3>' + notes(JOY.who) + '<div class="pp-in">' +
       '<label>고객 이름<input id="ppcust" maxlength="20" placeholder="예: 홍길동" value="' + e(ST.cust) + '"></label>' +
       '<label>제안자 이름<input id="pppb" maxlength="20" placeholder="예: 김OO PB" value="' + e(ME.pb || "") + '"></label>' +
@@ -1489,7 +1557,7 @@
       function fallback(){ var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch(y) {} ta.remove(); } };
   }
   function upAmt(k){ try { var pl = document.getElementById("pppl_" + k); if (pl) pl.innerHTML = planHTML(k); (opt(k).must || []).forEach(function(m, i){ var mw = document.getElementById("ppmw_" + k + "_" + i); if (mw) mw.textContent = amtOf(k) && +m.pct ? man(amtOf(k) * m.pct / 100) : ""; }); } catch(x) {}
-    var s = document.getElementById("ppw_" + k); if (s) s.textContent = ST.amt[k] ? man(ST.amt[k] * 10000) : ""; var t = document.getElementById("pptot"); if (t) t.textContent = total() ? man(total()) : "–"; preview(); }
+    var s = document.getElementById("ppw_" + k); if (s) s.textContent = ST.amt[k] ? man(ST.amt[k] * 10000) : ""; var t = document.getElementById("pptot"); if (t) t.textContent = total() ? man(total()) : "–"; mixUpd(); preview(); }
   var BTNL = {disc: "📝 심의 요청서 PDF <small>전체 문구 · 준법감시 부서 제출용</small>", rev: "📝 이 제안서 심의 요청서 <small>고른 상품 문구만 + 제안서 별첨</small>", png: "📱 한 장 <small>카톡 전송용 그림</small>", pdf: "📄 풀버전 PDF <small>표지·시장·상품별 자세히 · 가장 안 깨짐</small>",
     ppt: "📊 PPT (고칠 수 있는 판) <small>맑은 고딕 · 글·표·차트를 PPT에서 직접 수정</small>", pptimg: "🖼️ PPT (안 깨지는 그림판) <small>PDF 그대로 한 쪽 = 한 장 · 어디서 열어도 똑같음</small>"};
   // 10/28 사용자 「PPT는 깨지더라 — 왜 깨지는지 설명 · 다른 AI 도구로 어떻게 고치면 좋은지 문구도」
@@ -1669,7 +1737,12 @@
       (function(){ var L = simLine(f, A); return L ? '<div class="px-big">' + e(L.big) + '</div><p class="px-cap">' + e(L.lab) + '</p><p class="px-note">' + e(L.sub) + '</p>' : ''; })() +
       '<div class="px-go"><button type="button" data-mk="png" class="main">📨 이 안 카톡으로 받기<small>한 장 그림으로 만들어 보내 드림</small></button>' +
       '<button type="button" id="pxlink">🔗 동료 PB에게 이 세팅 보내기<small>고른 상품·금액·위험 정도·추천 종목만 · 고객 이름은 안 담김</small></button></div></div></section>';
-    var slides = [cover].concat(body).concat([link]);
+    var MX = ST.sel.length > 1 ? mixCalc(model().items) : null, mixS = [];
+    if (MX){ var mr = mixRows(MX), mmx = Math.max.apply(null, mr.map(function(r){ return Math.abs(r.st.mdd); }).concat([1]));
+      mixS.push(slide("섞으면 어땠나", (MX.A ? '<div class="px-big dn">' + signWon(MX.A * MX.mix.mdd / 100) + '</div><p class="px-cap">섞은 ' + man(MX.A) + '이 가장 크게 잠깐 줄었을 때 (' + ym(MX.mix.at) + ')</p>' : '') +
+        mr.map(function(r){ return barRow(e(r.n), "연평균 " + sgn(r.st.cagr, 1) + (r.st.worst ? " · 최악의 해 " + r.st.worst.y + " " + sgn(r.st.worst.r, 1) : ""), sgn(r.st.mdd, 1), Math.abs(r.st.mdd) / mmx, r.mix ? "#7c5cff" : r.c, r.mix ? "" : pc(r1(r.w))); }).join("") +
+        '<p class="px-note">' + e(mixNote(MX)) + '</p>', "고른 상품을 이 비율로 같이 들고 있었다면 · 가장 크게 빠졌을 때")); }
+    var slides = [cover].concat(body).concat(mixS).concat([link]);
     var n = slides.length; PX.i = Math.min(PX.i, n - 1);
     var chips = ST.sel.length > 1 ? '<div class="px-fs">' + ST.sel.map(function(q){ var g = form(q); return g ? '<button type="button" data-pf="' + q + '"' + (q === k ? ' class="on"' : '') + ' style="--fc:' + g.color + '">' + e(g.icon) + ' ' + e(g.short) + '</button>' : ''; }).join("") + '</div>' : '';
     var tiers = EQ[k] && f0.sim ? '<div class="px-seg">' + ["safe", "normal", "bold"].map(function(t){ return '<button type="button" data-pt="' + t + '"' + (cur === t ? ' class="on"' : '') + (tierOK(f0, t) ? '' : ' disabled') + '>' + TIER[t] + '</button>'; }).join("") + '</div>' : '';
@@ -1732,7 +1805,7 @@
   }
 
   // 시험·다른 화면에서 쓰도록
-  window.PROPOSE = {load: load, _tierAlloc: function(al, t, cap, cdT){ return tierAlloc(al, t, cap, cdT); }, _code: function(){ return settingCode(); }, show: function(){ showOpen(); }, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.sim != null){ ME.simNo = o.sim; ME.simVer = DISC_VER; } if (o.simTo != null) ME.simTo = o.simTo; if (o.simFrom != null) ME.simFrom = o.simFrom; if (o.opt) ST.opt = o.opt; },
+  window.PROPOSE = {load: load, mix: function(){ return mixCalc(model().items); }, _tierAlloc: function(al, t, cap, cdT){ return tierAlloc(al, t, cap, cdT); }, _code: function(){ return settingCode(); }, show: function(){ showOpen(); }, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.sim != null){ ME.simNo = o.sim; ME.simVer = DISC_VER; } if (o.simTo != null) ME.simTo = o.simTo; if (o.simFrom != null) ME.simFrom = o.simFrom; if (o.opt) ST.opt = o.opt; },
     review: function(){ return makePdf(allModel(), reviewPages()); }, reviewFor: function(){ return ensureReasons().then(function(){ var m = model(); return makePdf(m, reviewFor(m)); }); }, discText: function(){ return discText(); }, simState: function(){ return simState(); },
     png: function(){ return ensureReasons().then(function(){ return makePng(model()); }); }, pdf: function(){ return ensureReasons().then(function(){ return makePdf(model()); }); },
     ppt: function(){ return ensureReasons().then(function(){ return makePpt(model()); }); }, pptimg: function(){ return ensureReasons().then(function(){ return makePptImg(model()); }); }, reasons: function(){ return ensureReasons().then(function(){ return RS; }); }, onePage: function(){ return onePage(model()); }, pages: function(){ return fullPages(model()); }};
@@ -1742,6 +1815,14 @@
     ".pp-reg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 8px}.pp-reg span{font-size:12.5px;padding:3px 9px;border-radius:99px;border:1px solid var(--line)}" +
     ".pp-reg .ok{background:rgba(34,160,107,.14);color:#2fbf7f;border-color:transparent;font-weight:700}.pp-reg .no{background:rgba(224,83,61,.14);color:#ff7a66;border-color:transparent;font-weight:700}.pp-reg .mut{border:0}" +
     ".pp-tip{font-size:12.5px;color:var(--sub);margin:4px 0 8px}" +
+    ".pp-mx{margin-top:10px;padding:11px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}.pp-mxh{display:flex;align-items:baseline;gap:8px}.pp-mxh b{font-size:14.5px}.pp-mxh small{color:var(--sub);font-size:12px;margin-left:auto}" +
+    ".pp-mx p.mut{font-size:12.5px;margin:6px 0 0}.pp-mxs{font-size:13.5px;font-weight:700;line-height:1.5;margin:6px 0 8px}" +
+    ".pp-mxr{padding:6px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}.pp-mxr.mix{background:rgba(124,92,255,.10);border-radius:10px;padding:6px 8px;margin-top:4px;border-top:0}" +
+    ".pp-mx1{display:flex;align-items:center;gap:6px;font-size:13.5px;min-width:0}.pp-mx1 i{flex:none;width:10px;height:10px;border-radius:3px}.pp-mx1>b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.pp-mx1 small{color:var(--sub);font-size:12px;flex:none}" +
+    ".pp-mx1 span{margin-left:auto;flex:none;font-size:12.5px;color:var(--sub)}.pp-mx1 span b{color:var(--text);font-size:13.5px}" +
+    ".pp-mx2{display:flex;align-items:center;gap:8px;margin-top:4px}.pp-mxb{flex:1;min-width:40px;height:8px;border-radius:4px;background:rgba(127,127,127,.15);overflow:hidden}.pp-mxb em{display:block;height:100%;border-radius:4px;background:#4f7fe0}.pp-mxr.mix .pp-mxb em{background:#7c5cff}" +
+    ".pp-mx2 b.dn{flex:none;min-width:52px;text-align:right;font-size:13.5px;color:#4f86ff}.pp-mx2 small{flex:none;width:118px;font-size:11.5px;color:var(--sub);text-align:right;white-space:nowrap}.pp-mxk{font-size:11px;color:var(--sub);margin:6px 0 0}" +
+    ".pp-mxn{font-size:11px;color:var(--sub);line-height:1.5;margin:7px 0 0}" +
     ".pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}" +
     ".pp-f{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:var(--panel2);border:1.5px solid var(--line);border-radius:14px;padding:10px 9px 9px;color:var(--text);font:inherit;min-width:0}" +
     ".pp-f .pp-i{font-size:20px;line-height:1}.pp-f b{font-size:13.5px;letter-spacing:-.3px}.pp-f small{font-size:10.5px;color:var(--sub);line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}" +
