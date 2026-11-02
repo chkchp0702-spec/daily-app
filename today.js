@@ -310,7 +310,7 @@
       if (old) old.replaceWith(d); else b2.insertBefore(d, b2.firstChild);
       d.onclick = function(ev){ var bd = ev.target.closest && ev.target.closest(".tz-bdg span"); ev.stopPropagation();
         if (Date.now() - RWX < 700) return;   // 되감기 손을 뗀 직후의 눌림은 무시
-        if (bd){ if (window.gdSay) gdSay("🏆 오늘의 배지", [bd.textContent, bd.dataset.why], "", "img/kid_joy.jpg?v=1"); return; }
+        if (bd){ if (window.gdSay) gdSay("🏆 오늘의 배지", [bd.textContent, bd.dataset.why], "", "img/kid_gift.jpg?v=1"); return; }
         if (window.goTo) goTo("market", "live"); else if (window.go) go("market"); };
       countUp(d); try { rewind(d, a[1]); } catch(z) {} if (H0) race(H0);
     }, function(){ busy = 0; });
