@@ -945,22 +945,31 @@
   }
   // 🔍 종목리포트 화면에서 그 종목 한 장만 바로 (10/28 14:25)
   document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-opstk]"); if (!b) return; ev.stopPropagation(); goMany([{kind: "stock", id: b.dataset.opstk, nm: b.dataset.nm || ""}], false); }, true);
+  // 🔧 11/02 보내기 진단 — 어느 단계에서 막히는지 화면에 그대로 보여 줌 (사진 한 장이면 원인을 바로 앎)
+  var DG = [];
+  function dg(m){ var d = new Date(); DG.push(("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2) + " " + m); if (DG.length > 40) DG.shift(); try { localStorage.setItem("opdiag", DG.join("\n")); } catch(x) {} }
+  function dgShow(head){ var o = document.getElementById("opdiag"); if (o) o.remove(); o = document.createElement("div"); o.id = "opdiag";
+    o.style.cssText = "position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 80px);z-index:100010;background:#111;color:#e8e8e8;border:2px solid #fee500;border-radius:12px;padding:10px 12px;font:12px/1.45 monospace;max-height:50vh;overflow:auto;white-space:pre-wrap";
+    o.textContent = "🔧 " + head + "\n앱 " + (window.APPV || "?") + " · " + (navigator.userAgent.match(/OS [\d_]+/) || [""])[0] + "\n" + DG.join("\n") + "\n\n(이 화면을 캡처해 보내 주세요 · 누르면 닫힘)";
+    o.onclick = function(){ o.remove(); }; document.body.appendChild(o); }
   function goMany(L, withMkt){   // 10/28 14:25 「종목만 따로 보낼 수 있게 — 반드시 시황과 같이가 아닌」 → withMkt=false 면 시황 빼고
     if (withMkt === undefined) withMkt = true;
     toast((withMkt ? "시장 한 장 + " : "") + L.length + "장 만드는 중…");
+    DG = []; dg("시작 · 시황 " + (withMkt ? "넣음" : "뺌") + " · " + L.map(function(it){ return it.kind + ":" + (it.id || it.nm || ""); }).join(", "));
     var nm = pbname();
     var jobs = (withMkt ? [mkMarket()] : []).concat(L.map(function(it){ return it.kind === "stock" ? mkStock(it.id, it.nm) : it.kind === "myels" ? mkMyEls(it.it) : mkPin(it.pin); }));
-    Promise.all(jobs.map(function(p_){ return p_.catch(function(){ return null; }); })).then(function(Cs){
+    Promise.all(jobs.map(function(p_, j){ return p_.then(function(C){ dg("자료 " + (j + 1) + " " + (C ? (C.refuse ? "거절" : "ok " + (C.title || "")) : "없음(null)")); return C; }, function(e){ dg("자료 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); return null; }); })).then(function(Cs){
       var ok = Cs.filter(function(C){ return C && !C.refuse; }), miss = Cs.length - ok.length;
-      if (!ok.length){ toast("자료를 못 가져왔어요"); return; }
-      return shareMany(ok.map(function(C){ return {c: safeDraw(C, nm), t: C.title}; })).then(function(){ if (miss) toast(miss + "개는 자료가 없어 뺐어요"); });
-    }).catch(function(e){ console.warn(e); toast("만들지 못했어요 (" + ((e && e.name) || "?") + ")"); });
+      if (!ok.length){ toast("자료를 못 가져왔어요"); dgShow("자료를 못 가져옴"); return; }
+      return shareMany(ok.map(function(C, j){ var c; try { c = safeDraw(C, nm); dg("그림 " + (j + 1) + " " + c.width + "x" + c.height + (C.img ? " 사진있음" : "") + (tainted(c) ? " ⚠오염" : "")); } catch(e){ dg("그림 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); throw e; } return {c: c, t: C.title}; })).then(function(){ if (miss) toast(miss + "개는 자료가 없어 뺐어요"); });
+    }).catch(function(e){ console.warn(e); dg("멈춤 " + ((e && (e.name + ": " + e.message)) || e)); toast("만들지 못했어요 (" + ((e && e.name) || "?") + ")"); dgShow("만들기 실패"); });
   }
   function tainted(c){ try { c.getContext("2d").getImageData(0, 0, 1, 1); return false; } catch(e){ return true; } }
   function safeDraw(C, nm){ var c = draw(C, nm); if (!tainted(c)) return c; try { c.width = c.height = 0; } catch(x) {} var C2 = {}; for (var k in C){ var v = C[k]; C2[k] = (v && (v instanceof HTMLImageElement || v instanceof HTMLCanvasElement || (v.c && v.c instanceof HTMLCanvasElement))) ? null : v; } return draw(C2, nm); }
   function shareMany(arr){
-    return Promise.all(arr.map(function(a, i){ return new Promise(function(res){ a.c.toBlob(function(b){ try { a.c.width = a.c.height = 0; } catch(x) {} res(b ? new File([b], (i + 1) + "_" + (a.t || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 24) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + ".png", {type: "image/png"}) : null); }, "image/png"); }); })).then(function(fs){
+    return Promise.all(arr.map(function(a, i){ return new Promise(function(res){ a.c.toBlob(function(b){ dg("파일 " + (i + 1) + " " + (b ? Math.round(b.size / 1024) + "KB" : "못 만듦(null)")); try { a.c.width = a.c.height = 0; } catch(x) {} res(b ? new File([b], (i + 1) + "_" + (a.t || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 24) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + ".png", {type: "image/png"}) : null); }, "image/png"); }); })).then(function(fs){
       fs = fs.filter(Boolean); if (!fs.length) throw new Error("blob");
+      dg("준비 창 열기 · " + fs.length + "장 · canShare " + (function(){ try { return navigator.canShare ? navigator.canShare({files: fs}) : "없음"; } catch(e){ return "오류 " + e.name; } })());
       readySheet(fs, "시장 한 장" + (fs.length > 1 ? " 외 " + (fs.length - 1) + "장" : ""));
     });
   }
@@ -982,20 +991,23 @@
       (can && fs.length > 1 ? '<p class="opr-n">한꺼번에 안 열리면 그림 아래 「💬 이 장 보내기」로 한 장씩 보내 주세요</p>' : '') +
       '<button class="opr-sv" type="button">' + (img ? (can ? "⬇️ 사진으로 저장" : "⬇️ 그림 저장 (사진에서 보내기)") : "⬇️ 파일 저장") + '</button>' +
       (img ? '<p class="opr-n">그림을 길게 눌러도 저장·공유할 수 있어요</p>' : '') +
-      '<button class="opr-x" type="button">닫기</button></div>';
+      '<button class="opr-x" type="button">닫기</button><button class="opr-dg" type="button" style="display:block;margin:8px auto 0;background:none;border:0;color:var(--sub);font:inherit;font-size:12px;text-decoration:underline">🔧 안 되면 눌러서 진단 보기</button></div>';
     function close(){ box.remove(); setTimeout(function(){ urls.forEach(function(u){ URL.revokeObjectURL(u); }); }, 60000); }
     box.addEventListener("click", function(ev){
       var t = ev.target;
       if (t === box || t.closest(".opr-x")) return close();
+      if (t.closest(".opr-dg")) return dgShow("진단 (준비 창)");
       var one = t.closest(".opr-one");
       if (one){   // 11/02 「종목 같이 누르니까 안 돼」 — 아이폰은 여러 장을 한꺼번에 넘기면 공유창이 안 뜨는 경우가 있어 한 장씩도 보낼 수 있게
         var f1 = fs[+one.dataset.i], p1; try { p1 = navigator.share({files: [f1]}); } catch(e){ p1 = Promise.reject(e); }
-        p1.then(function(){ one.textContent = "✓ 보냈어요"; one.classList.add("done"); }).catch(function(e){ if (e && e.name === "AbortError") return; toast("공유창을 못 열었어요 (" + ((e && e.name) || "?") + ") — 그림을 길게 눌러 저장해 주세요"); });
+        dg("한 장 보내기 누름 · " + f1.name + " " + Math.round(f1.size / 1024) + "KB");
+        p1.then(function(){ dg("한 장 공유 성공"); one.textContent = "✓ 보냈어요"; one.classList.add("done"); }).catch(function(e){ dg("한 장 공유 실패 " + ((e && (e.name + ": " + e.message)) || e)); if (e && e.name === "AbortError") return; dgShow("한 장 공유 실패"); toast("공유창을 못 열었어요 (" + ((e && e.name) || "?") + ") — 그림을 길게 눌러 저장해 주세요"); });
         return;
       }
       if (t.closest(".opr-go")){
         var p; try { p = navigator.share({files: fs}); } catch(e){ p = Promise.reject(e); }
-        p.then(close).catch(function(e){ if (e && e.name === "AbortError") return; console.warn(e); try { localStorage.setItem("share_err", (e && (e.name + ": " + e.message)) || "?"); } catch(x) {}
+        dg("모두 보내기 누름 · " + fs.length + "장");
+        p.then(function(){ dg("공유 끝(성공)"); close(); }).catch(function(e){ dg("공유 실패 " + ((e && (e.name + ": " + e.message)) || e)); if (e && e.name === "AbortError") return; console.warn(e); dgShow("공유 실패"); try { localStorage.setItem("share_err", (e && (e.name + ": " + e.message)) || "?"); } catch(x) {}
           toast(fs.length > 1 ? "한꺼번에는 안 열려요 (" + ((e && e.name) || "?") + ") — 그림 아래 「💬 이 장 보내기」로 한 장씩 보내 주세요" : "공유창을 못 열었어요 (" + ((e && e.name) || "?") + ") — 「사진으로 저장」 뒤 카톡에서 보내 주세요"); });
         return;
       }
