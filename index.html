@@ -1387,7 +1387,7 @@ function opSearch(q){
   var out = [];
   OPIDX.forEach(function(r){
     var sc = 0;
-    if (r.s1 === q || r.n1 === q || r.alts.indexOf(q) >= 0) sc = 100;
+    if (r.s1 === q) sc = 120; else if (r.n1 === q) sc = 110; else if (r.alts.indexOf(q) >= 0) sc = 100;   // 11/02 티커가 정확히 같은 종목이 맨 위
     else if (r.n1.indexOf(q) === 0 || r.s1.indexOf(q) === 0) sc = 60;
     else if (r.key.indexOf(q) >= 0) sc = 30;
     if (sc) out.push([sc + (r.built ? 5 : 0) - r.name.length / 100, r]);
@@ -1425,7 +1425,10 @@ function opInit(first){
 }
 function opFind(code){
   var c = norm(code);
-  for (var i = 0; i < OPIDX.length; i++){ var r = OPIDX[i]; if (r.s1 === c || r.n1 === c || r.alts.indexOf(c) >= 0) return r; }
+  // 11/02 사용자 「트렉스(TREX)를 눌렀더니 티렉스 바이오(TRXB)가 나와 · 선코어(SU)도 엄한 종목」 — 예전엔 목록 순서대로 「티커·이름·별칭」 중 하나만 맞아도 바로 골라서,
+  //   다른 종목 영문 이름 조각(TRex Bio → trex, SU Group → su)이 먼저 걸렸음 → 티커가 정확히 같은 종목 → (한국 등) 거래소 꼬리만 다른 티커 → 이름 → 별칭 순서로
+  var i, r, pass = [function(r){ return r.s1 === c; }, function(r){ return /^\d{6}$/.test(c) && (r.s1 === c + "ks" || r.s1 === c + "kq"); }, function(r){ return r.n1 === c; }, function(r){ return r.alts.indexOf(c) >= 0; }];
+  for (var k = 0; k < pass.length; k++) for (i = 0; i < OPIDX.length; i++){ r = OPIDX[i]; if (pass[k](r)) return r; }
   return null;
 }
 function opPicks(){
@@ -1539,7 +1542,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261102d";
+var APPV = "20261102e";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
