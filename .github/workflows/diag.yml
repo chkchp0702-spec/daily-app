@@ -2,8 +2,6 @@ name: diag
 # 🔧 11/02 보내기 진단 모으기 — 앱이 ntfy 진단 주제(chkchp-ch-diag-p4k9)로 보낸 단계 기록을 archive/x/diag.json 에 저장 (손으로·자동 실행)
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/30 * * * *"
 permissions:
   contents: write
 concurrency:

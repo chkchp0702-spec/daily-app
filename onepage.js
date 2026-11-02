@@ -931,7 +931,8 @@
         '<p class="note">⭐ 관심종목이나 📌 담아 둔 상품이 아직 없어요. 종목 화면의 ☆, 상품 카드의 「📌 담아 두기」, ELS 관제탑으로 담아 주세요.</p>') + '</div>' +
       '<button class="opc-x" data-x="1">닫기</button></div>';
     document.body.appendChild(box);
-    var sel = function(){ return [].filter.call(box.querySelectorAll('input[type=checkbox]'), function(c){ return c.checked; }).map(function(c){ return all[+c.dataset.i]; }); };
+    // 11/02 진짜 원인: 「📊 시황 한 장도 같이」 스위치도 체크박스라 고른 목록에 빈 항목으로 끼어들어 → 만들기 첫 줄에서 오류로 멈춤(시황만·종목 화면에서 보내기는 됨)
+    var sel = function(){ return [].filter.call(box.querySelectorAll('input[type=checkbox][data-i]'), function(c){ return c.checked; }).map(function(c){ return all[+c.dataset.i]; }).filter(Boolean); };
     var withM = function(){ var c = document.getElementById("opcwm"); return !c || c.checked; };
     var upd = function(){ var b = document.getElementById("opcgo"); if (!b) return; var n = sel().length, wm = withM(); b.disabled = !n; b.textContent = n ? (wm ? "시장 한 장 + " + n + "장 = " + (n + 1) + "장 만들기" : n + "장만 만들기 (시황 없이)") : "골라 주세요"; };
     box.addEventListener("change", function(ev){ if (ev.target && ev.target.id === "opcwm") ls("opc_wm", ev.target.checked ? "1" : "0"); upd(); });
@@ -939,7 +940,7 @@
     box.addEventListener("click", function(ev){
       var t = ev.target; if (t === box || t.closest("[data-x]")){ box.remove(); return; }
       var m = t.closest("[data-m]"); if (m){ if (m.dataset.m === "mkt"){ box.remove(); go(null); } else { document.getElementById("opcl").hidden = false; m.classList.add("on"); } return; }
-      if (t.closest("[data-all]")){ var cs = box.querySelectorAll('input[type=checkbox]'), on = [].some.call(cs, function(c){ return !c.checked; }); [].forEach.call(cs, function(c){ c.checked = on; }); upd(); return; }
+      if (t.closest("[data-all]")){ var cs = box.querySelectorAll('input[type=checkbox][data-i]'), on = [].some.call(cs, function(c){ return !c.checked; }); [].forEach.call(cs, function(c){ c.checked = on; }); upd(); return; }
       if (t.closest("#opcgo")){ var L = sel(), wm = withM(); box.remove(); goMany(L, wm); }
     });
   }
@@ -956,7 +957,8 @@
     o.style.cssText = "position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 80px);z-index:100010;background:#111;color:#e8e8e8;border:2px solid #fee500;border-radius:12px;padding:10px 12px;font:12px/1.45 monospace;max-height:50vh;overflow:auto;white-space:pre-wrap";
     o.innerHTML = '<pre style="margin:0;font:inherit;white-space:pre-wrap;color:#e8e8e8">' + esc0("🔧 " + head + "\n앱 " + (window.APPV || "?") + " · " + (navigator.userAgent.match(/OS [\d_]+/) || [""])[0] + "\n" + DG.join("\n") + "\n\n(이 화면을 캡처해 보내 주세요 · 누르면 닫힘)") + '</pre>';
     o.onclick = function(){ o.remove(); }; document.body.appendChild(o); }
-  function goMany(L, withMkt){   // 10/28 14:25 「종목만 따로 보낼 수 있게 — 반드시 시황과 같이가 아닌」 → withMkt=false 면 시황 빼고
+  function goMany(L, withMkt){ L = (L || []).filter(Boolean); return goMany0(L, withMkt); }
+  function goMany0(L, withMkt){   // 10/28 14:25 「종목만 따로 보낼 수 있게 — 반드시 시황과 같이가 아닌」 → withMkt=false 면 시황 빼고
     if (withMkt === undefined) withMkt = true;
     toast((withMkt ? "시장 한 장 + " : "") + L.length + "장 만드는 중…");
     var lv = document.getElementById("oplive"); if (lv) lv.remove(); lv = document.createElement("div"); lv.id = "oplive"; lv.className = "no-clp"; lv.setAttribute("data-xc", "1"); lv.setAttribute("data-cz", "done");
