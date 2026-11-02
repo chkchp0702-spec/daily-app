@@ -34,7 +34,7 @@
     wrap.id = "peek";
     wrap.innerHTML = '<div class="pk-bg"></div><div class="pk-sh"><div class="pk-top"><i class="pk-grip"></i>' +
       '<b class="pk-t">' + (LAB[tab] || "") + '</b><button type="button" class="pk-full">전체 화면 ⤢</button><button type="button" class="pk-x" aria-label="닫기">✕</button></div>' +
-      '<div class="pk-load"><i></i></div><iframe class="pk-f" src="index.html?embed=1#' + encodeURIComponent(tab) + (p[1] ? "~" + encodeURIComponent(p[1]) : "") + '"></iframe></div>';
+      '<div class="pk-load"><i></i></div><iframe class="pk-f" src="index.html?embed=1&v=' + encodeURIComponent(window.APPV || "") + '#' + encodeURIComponent(tab) + (p[1] ? "~" + encodeURIComponent(p[1]) : "") + '"></iframe></div>';
     document.body.appendChild(wrap);
     D.classList.add("peek-on");
     var f = wrap.querySelector(".pk-f");
