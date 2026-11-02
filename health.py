@@ -177,7 +177,8 @@ def app_checks():
                     pg.wait_for_timeout(3500)
                     if pg.evaluate("(()=>{var s=document.getElementById('kidsplash');return !!(s&&s.isConnected&&getComputedStyle(s).opacity>0.1)})()"):
                         probs.append("#home 🧒 인사 화면이 7초 넘게 안 사라짐")
-                pg.evaluate("(()=>{var s=document.getElementById('kidsplash');if(s)s.remove()})()")
+                # 11/2: 새 브라우저라 🏠 첫 탭에 「👋 조이 인사」 창(#gdq, 2.9초 뒤 자동)이 떠서 home_1 사진이 인사 영상만 찍힘 → 사진 전에 닫음
+                pg.evaluate("(()=>{var s=document.getElementById('kidsplash');if(s)s.remove();var q=document.getElementById('gdq');if(q)q.remove()})()")
                 try:
                     # 휴대폰에서 보는 그대로 첫 화면·두 번째 화면 (전체 캡처는 아래 고정 메뉴가 가운데 찍힘)
                     pg.evaluate("window.scrollTo(0,0)"); pg.wait_for_timeout(300)
