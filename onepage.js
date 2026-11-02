@@ -951,7 +951,7 @@
   // 진단을 사용자 화면 캡처 없이 받기 위해 익명 진단 주제로도 보냄 (앱 버전·기기·단계 기록만 · 개인 정보 없음)
   var DGT = "chkchp-ch-diag-p4k9", dgSid = Math.random().toString(36).slice(2, 8), dgTm = null;
   function dgSend(){ dgTm = null; try { fetch("https://ntfy.sh/" + DGT, {method: "POST", keepalive: true, body: JSON.stringify({sid: dgSid, v: window.APPV || "", ua: (navigator.userAgent.match(/OS [\d_]+|Android [\d.]+/) || [""])[0] + (navigator.standalone ? " 홈앱" : ""), log: DG.slice(-25)})}).catch(function(){}); } catch(x) {} }
-  function dg(m){ var d = new Date(); setTimeout(dgLive, 0); if (!dgTm) dgTm = setTimeout(dgSend, 1500); DG.push(("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2) + " " + m); if (DG.length > 40) DG.shift(); try { localStorage.setItem("opdiag", DG.join("\n")); } catch(x) {} }
+  function dg(m){ var d = new Date(); setTimeout(dgLive, 0); if (!dgTm) dgTm = setTimeout(dgSend, DG.length ? 700 : 0); DG.push(("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2) + " " + m); if (DG.length > 40) DG.shift(); try { localStorage.setItem("opdiag", DG.join("\n")); } catch(x) {} }
   function dgShow(head){ var lv0 = document.getElementById("oplive"); if (lv0) lv0.remove(); var o = document.getElementById("opdiag"); if (o) o.remove(); o = document.createElement("div"); o.id = "opdiag"; o.className = "no-clp"; o.setAttribute("data-xc", "1"); o.setAttribute("data-cz", "done");
     o.style.cssText = "position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 80px);z-index:100010;background:#111;color:#e8e8e8;border:2px solid #fee500;border-radius:12px;padding:10px 12px;font:12px/1.45 monospace;max-height:50vh;overflow:auto;white-space:pre-wrap";
     o.innerHTML = '<pre style="margin:0;font:inherit;white-space:pre-wrap;color:#e8e8e8">' + esc0("🔧 " + head + "\n앱 " + (window.APPV || "?") + " · " + (navigator.userAgent.match(/OS [\d_]+/) || [""])[0] + "\n" + DG.join("\n") + "\n\n(이 화면을 캡처해 보내 주세요 · 누르면 닫힘)") + '</pre>';
@@ -962,7 +962,7 @@
     var lv = document.getElementById("oplive"); if (lv) lv.remove(); lv = document.createElement("div"); lv.id = "oplive"; lv.className = "no-clp"; lv.setAttribute("data-xc", "1"); lv.setAttribute("data-cz", "done");
     lv.style.cssText = "position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 70px);z-index:100009;background:rgba(17,17,17,.92);color:#e8e8e8;border:2px solid #fee500;border-radius:12px;padding:8px 10px;font:12px/1.45 monospace;white-space:pre-wrap;pointer-events:none";
     document.body.appendChild(lv);
-    DG = []; dg("시작 · 시황 " + (withMkt ? "넣음" : "뺌") + " · " + L.map(function(it){ return it.kind + ":" + (it.id || it.nm || ""); }).join(", "));
+    DG = []; dgSid = Math.random().toString(36).slice(2, 8); dg("시작 · 시황 " + (withMkt ? "넣음" : "뺌") + " · " + L.map(function(it){ return it.kind + ":" + (it.id || it.nm || ""); }).join(", ")); dgSend();
     var nm = pbname(), done = false;
     // 11/02 「만드는 중…」에서 멈춘 채 아무것도 안 뜨던 것 — 자료 받기·그림 굽기 어디서든 멈추면 25초 뒤 진단을 띄움
     var wd = setTimeout(function(){ if (!done){ dg("⏰ 45초 넘게 안 끝남"); dgShow("멈춤 — 시간 초과"); } }, 45000);
