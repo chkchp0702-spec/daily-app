@@ -948,7 +948,10 @@
   // 🔧 11/02 보내기 진단 — 어느 단계에서 막히는지 화면에 그대로 보여 줌 (사진 한 장이면 원인을 바로 앎)
   var DG = [];
   function dgLive(){ var o = document.getElementById("oplive"); if (!o) return; o.innerHTML = '<pre style="margin:0;font:inherit;white-space:pre-wrap;color:#e8e8e8">' + esc0("📨 만드는 중 · 앱 " + (window.APPV || "?") + "\n" + DG.slice(-6).join("\n")) + '</pre>'; }
-  function dg(m){ var d = new Date(); setTimeout(dgLive, 0); DG.push(("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2) + " " + m); if (DG.length > 40) DG.shift(); try { localStorage.setItem("opdiag", DG.join("\n")); } catch(x) {} }
+  // 진단을 사용자 화면 캡처 없이 받기 위해 익명 진단 주제로도 보냄 (앱 버전·기기·단계 기록만 · 개인 정보 없음)
+  var DGT = "chkchp-ch-diag-p4k9", dgSid = Math.random().toString(36).slice(2, 8), dgTm = null;
+  function dgSend(){ dgTm = null; try { fetch("https://ntfy.sh/" + DGT, {method: "POST", keepalive: true, body: JSON.stringify({sid: dgSid, v: window.APPV || "", ua: (navigator.userAgent.match(/OS [\d_]+|Android [\d.]+/) || [""])[0] + (navigator.standalone ? " 홈앱" : ""), log: DG.slice(-25)})}).catch(function(){}); } catch(x) {} }
+  function dg(m){ var d = new Date(); setTimeout(dgLive, 0); if (!dgTm) dgTm = setTimeout(dgSend, 1500); DG.push(("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2) + " " + m); if (DG.length > 40) DG.shift(); try { localStorage.setItem("opdiag", DG.join("\n")); } catch(x) {} }
   function dgShow(head){ var lv0 = document.getElementById("oplive"); if (lv0) lv0.remove(); var o = document.getElementById("opdiag"); if (o) o.remove(); o = document.createElement("div"); o.id = "opdiag"; o.className = "no-clp"; o.setAttribute("data-xc", "1"); o.setAttribute("data-cz", "done");
     o.style.cssText = "position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 80px);z-index:100010;background:#111;color:#e8e8e8;border:2px solid #fee500;border-radius:12px;padding:10px 12px;font:12px/1.45 monospace;max-height:50vh;overflow:auto;white-space:pre-wrap";
     o.innerHTML = '<pre style="margin:0;font:inherit;white-space:pre-wrap;color:#e8e8e8">' + esc0("🔧 " + head + "\n앱 " + (window.APPV || "?") + " · " + (navigator.userAgent.match(/OS [\d_]+/) || [""])[0] + "\n" + DG.join("\n") + "\n\n(이 화면을 캡처해 보내 주세요 · 누르면 닫힘)") + '</pre>';
@@ -965,13 +968,18 @@
     var wd = setTimeout(function(){ if (!done){ dg("⏰ 45초 넘게 안 끝남"); dgShow("멈춤 — 시간 초과"); } }, 45000);
     var jobs = (withMkt ? [mkMarket] : []).concat(L.map(function(it){ return function(){ return it.kind === "stock" ? mkStock(it.id, it.nm) : it.kind === "myels" ? mkMyEls(it.it) : mkPin(it.pin); }; }));
     // 자료는 같이 받되 한 가지가 멈춰도 15초면 그것만 빼고 감
-    Promise.all(jobs.map(function(fn, j){ return withTO(Promise.resolve().then(fn), 15000).then(function(C){ dg("자료 " + (j + 1) + " " + (C ? (C.refuse ? "거절" : "ok " + (C.title || "")) : "없음(null)")); return C; }, function(e){ dg("자료 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); return null; }); })).then(function(Cs){
+    new Promise(function(r){ setTimeout(r, 80); }).then(function(){ dg("자료 받는 중…"); return Promise.all(jobs.map(function(fn, j){ return withTO(new Promise(function(r){ setTimeout(r, 30 * j); }).then(fn), 15000).then(function(C){ dg("자료 " + (j + 1) + " " + (C ? (C.refuse ? "거절" : "ok " + (C.title || "")) : "없음(null)")); return C; }, function(e){ dg("자료 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); return null; }); })); }).then(function(Cs){
       var ok = Cs.filter(function(C){ return C && !C.refuse; }), miss = Cs.length - ok.length;
       if (!ok.length){ done = true; clearTimeout(wd); toast("자료를 못 가져왔어요"); dgShow("자료를 못 가져옴"); return; }
       // 그림은 한 장씩: 그리고 → 파일로 → 그림판 비우고 → 다음 (아이폰 그림판 메모리 한도)
       var fs = [];
-      return ok.reduce(function(p, C, j){ return p.then(function(){
-        var c; try { c = safeDraw(C, nm); dg("그림 " + (j + 1) + " " + c.width + "x" + c.height + (C.img ? " 사진있음" : "") + (tainted(c) ? " ⚠오염" : "")); } catch(e){ dg("그림 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); return; }
+      dg("자료 끝 · 그림 " + ok.length + "장 시작");
+      return ok.reduce(function(p, C, j){ return p.then(function(){ return new Promise(function(r){ setTimeout(r, 60); }); }).then(function(){   // 단계마다 화면에 한 번 숨 쉬게(진행판이 그려지게)
+        dg("그림 " + (j + 1) + " 그리는 중… (" + (C.kind || "") + " " + (C.title || "") + ")");
+        return new Promise(function(r){ setTimeout(r, 60); });
+      }).then(function(){
+        var t0 = Date.now(), c; try { c = safeDraw(C, nm); dg("그림 " + (j + 1) + " " + c.width + "x" + c.height + " · " + (Date.now() - t0) + "ms" + (C.img ? " 사진있음" : "") + (tainted(c) ? " ⚠오염" : "")); } catch(e){ dg("그림 " + (j + 1) + " 실패 " + ((e && (e.name + ": " + e.message)) || e)); return; }
+        dg("파일 " + (j + 1) + " 바꾸는 중…");
         return blobOf(c).then(function(b){ try { c.width = c.height = 0; } catch(x) {}
           dg("파일 " + (j + 1) + " " + (b ? Math.round(b.size / 1024) + "KB " + b.type : "못 만듦"));
           if (b) fs.push(new File([b], (j + 1) + "_" + (C.title || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 24) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + (b.type === "image/jpeg" ? ".jpg" : ".png"), {type: b.type || "image/png"})); });
