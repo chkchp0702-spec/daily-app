@@ -947,16 +947,16 @@
   document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-opstk]"); if (!b) return; ev.stopPropagation(); goMany([{kind: "stock", id: b.dataset.opstk, nm: b.dataset.nm || ""}], false); }, true);
   // 🔧 11/02 보내기 진단 — 어느 단계에서 막히는지 화면에 그대로 보여 줌 (사진 한 장이면 원인을 바로 앎)
   var DG = [];
-  function dgLive(){ var o = document.getElementById("oplive"); if (!o) return; o.textContent = "📨 만드는 중 · 앱 " + (window.APPV || "?") + "\n" + DG.slice(-6).join("\n"); }
+  function dgLive(){ var o = document.getElementById("oplive"); if (!o) return; o.innerHTML = '<pre style="margin:0;font:inherit;white-space:pre-wrap;color:#e8e8e8">' + esc0("📨 만드는 중 · 앱 " + (window.APPV || "?") + "\n" + DG.slice(-6).join("\n")) + '</pre>'; }
   function dg(m){ var d = new Date(); setTimeout(dgLive, 0); DG.push(("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2) + " " + m); if (DG.length > 40) DG.shift(); try { localStorage.setItem("opdiag", DG.join("\n")); } catch(x) {} }
-  function dgShow(head){ var lv0 = document.getElementById("oplive"); if (lv0) lv0.remove(); var o = document.getElementById("opdiag"); if (o) o.remove(); o = document.createElement("div"); o.id = "opdiag";
+  function dgShow(head){ var lv0 = document.getElementById("oplive"); if (lv0) lv0.remove(); var o = document.getElementById("opdiag"); if (o) o.remove(); o = document.createElement("div"); o.id = "opdiag"; o.className = "no-clp"; o.setAttribute("data-xc", "1"); o.setAttribute("data-cz", "done");
     o.style.cssText = "position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 80px);z-index:100010;background:#111;color:#e8e8e8;border:2px solid #fee500;border-radius:12px;padding:10px 12px;font:12px/1.45 monospace;max-height:50vh;overflow:auto;white-space:pre-wrap";
-    o.textContent = "🔧 " + head + "\n앱 " + (window.APPV || "?") + " · " + (navigator.userAgent.match(/OS [\d_]+/) || [""])[0] + "\n" + DG.join("\n") + "\n\n(이 화면을 캡처해 보내 주세요 · 누르면 닫힘)";
+    o.innerHTML = '<pre style="margin:0;font:inherit;white-space:pre-wrap;color:#e8e8e8">' + esc0("🔧 " + head + "\n앱 " + (window.APPV || "?") + " · " + (navigator.userAgent.match(/OS [\d_]+/) || [""])[0] + "\n" + DG.join("\n") + "\n\n(이 화면을 캡처해 보내 주세요 · 누르면 닫힘)") + '</pre>';
     o.onclick = function(){ o.remove(); }; document.body.appendChild(o); }
   function goMany(L, withMkt){   // 10/28 14:25 「종목만 따로 보낼 수 있게 — 반드시 시황과 같이가 아닌」 → withMkt=false 면 시황 빼고
     if (withMkt === undefined) withMkt = true;
     toast((withMkt ? "시장 한 장 + " : "") + L.length + "장 만드는 중…");
-    var lv = document.getElementById("oplive"); if (lv) lv.remove(); lv = document.createElement("div"); lv.id = "oplive";
+    var lv = document.getElementById("oplive"); if (lv) lv.remove(); lv = document.createElement("div"); lv.id = "oplive"; lv.className = "no-clp"; lv.setAttribute("data-xc", "1"); lv.setAttribute("data-cz", "done");
     lv.style.cssText = "position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 70px);z-index:100009;background:rgba(17,17,17,.92);color:#e8e8e8;border:2px solid #fee500;border-radius:12px;padding:8px 10px;font:12px/1.45 monospace;white-space:pre-wrap;pointer-events:none";
     document.body.appendChild(lv);
     DG = []; dg("시작 · 시황 " + (withMkt ? "넣음" : "뺌") + " · " + L.map(function(it){ return it.kind + ":" + (it.id || it.nm || ""); }).join(", "));
@@ -1010,7 +1010,7 @@
   function readySheet(fs, title){
     var lv0 = document.getElementById("oplive"); if (lv0) lv0.remove(); var dg0 = document.getElementById("opdiag"); if (dg0) dg0.remove();   // 늦게라도 다 되면 진단 상자는 치움
     var old = document.getElementById("opready"); if (old) old.remove();
-    var box = document.createElement("div"); box.id = "opready";
+    var box = document.createElement("div"); box.id = "opready"; box.className = "no-clp"; box.setAttribute("data-xc", "1"); box.setAttribute("data-cz", "done");
     var urls = fs.map(function(f){ return URL.createObjectURL(f); });
     // 11/02 사용자 「보내기 한 다음 연결 프로그램이 안 나와」 — 아이폰은 파일과 제목(글)을 같이 넘기면 카톡 등이 목록에서 빠지거나 공유창이 안 뜨는 경우가 있어
     //   파일만 넘김 · canShare 가 거짓이어도 공유 단추는 보여 주고(아이폰 일부에서 잘못 거짓), 실패하면 이유를 같이 알려 줌
