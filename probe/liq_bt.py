@@ -8,25 +8,65 @@ sys.path.insert(0, os.getcwd())
 import prob, prob_x
 
 
+import re, zipfile
+def get(u, t=25):
+    req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64)"})
+    return urllib.request.urlopen(req, timeout=t).read()
+
+
 def fred(i):
-    for u in (f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={i}", f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={i}&cosd=2002-01-01"):
+    for u in (f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={i}", f"https://alfred.stlouisfed.org/graph/alfredgraph.csv?id={i}"):
         try:
-            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
-            t = urllib.request.urlopen(req, timeout=40).read().decode()
-            df = pd.read_csv(io.StringIO(t))
+            df = pd.read_csv(io.StringIO(get(u, 20).decode()))
             s = pd.to_numeric(df.iloc[:, 1], errors="coerce"); s.index = pd.to_datetime(df.iloc[:, 0])
-            s = s.dropna(); print("FRED", i, s.index[0].date(), s.index[-1].date(), len(s), float(s.iloc[-1])); return s
+            s = s.dropna(); print("FRED", i, u, s.index[0].date(), s.index[-1].date(), len(s)); return s
         except Exception as e:
             print("FRED 실패", i, u, e)
     return None
 
 
-wal = fred("WALCL"); tga = fred("WDTGAL")
-if tga is None: tga = fred("WTREGEN")
-rrp = fred("RRPONTSYD")
+def ddp():
+    """연준 Data Download Program H.4.1 통째 zip → 설명으로 계열 고르기"""
+    for u in ("https://www.federalreserve.gov/datadownload/Output.aspx?rel=H41&filetype=zip",):
+        try:
+            z = zipfile.ZipFile(io.BytesIO(get(u, 90))); print("DDP zip", z.namelist())
+        except Exception as e:
+            print("DDP 실패", u, e); continue
+        x = "".join(z.read(n).decode("utf-8", "ignore") for n in z.namelist() if "data" in n.lower() and n.endswith(".xml"))
+        out = {}
+        for m in re.finditer(r"<kf:Series(.*?)</kf:Series>", x, re.S):
+            blk = m.group(1); nm = re.search(r'SERIES_NAME="([^"]+)"', blk)
+            if not nm: continue
+            desc = " / ".join(re.findall(r"<common:AnnotationText[^>]*>(.*?)</common:AnnotationText>", blk, re.S))[:300]
+            obs = re.findall(r'TIME_PERIOD="([^"]+)"\s+OBS_VALUE="([^"]+)"', blk) or [(b, a) for a, b in re.findall(r'OBS_VALUE="([^"]+)"\s+TIME_PERIOD="([^"]+)"', blk)]
+            out[nm.group(1)] = (desc, obs)
+        print("DDP 계열 수", len(out))
+        return out
+    return {}
+
+
+def pick(D, must, ban=()):
+    c = [(k, v) for k, v in D.items() if all(re.search(p, v[0], re.I) for p in must) and not any(re.search(p, v[0], re.I) for p in ban) and k.endswith(".WW") or False]
+    c = [(k, v) for k, v in D.items() if all(re.search(p, v[0], re.I) for p in must) and not any(re.search(p, v[0], re.I) for p in ban)]
+    for k, v in c[:8]: print("  후보", k, len(v[1]), v[0][:160])
+    if not c: return None
+    k, v = max(c, key=lambda kv: len(kv[1][1]))
+    s = pd.Series({pd.Timestamp(a): pd.to_numeric(b, errors="coerce") for a, b in v[1]}).dropna().sort_index()
+    print("고름", k, s.index[0].date(), s.index[-1].date(), len(s), float(s.iloc[-1])); return s
+
+
+wal = fred("WALCL"); tga = fred("WDTGAL"); rrp = fred("RRPONTSYD")
+if rrp is not None: rrp = rrp * 1000
+if wal is None or tga is None or rrp is None:
+    D = ddp()
+    if wal is None: wal = pick(D, [r"total assets", r"wednesday"], [r"week.?average", r"change"])
+    if tga is None: tga = pick(D, [r"treasury,? general account|general account", r"wednesday"], [r"week.?average", r"change"])
+    if rrp is None: rrp = pick(D, [r"reverse repurchase", r"wednesday"], [r"week.?average", r"change", r"foreign"])
+if wal is None or tga is None or rrp is None:
+    print("자료 못 구함 — 끝"); sys.exit(0)
 wk = wal.index
 T = tga.reindex(tga.index.union(wk)).ffill().reindex(wk)
-R = (rrp * 1000).reindex(rrp.index.union(wk)).ffill().reindex(wk).fillna(0)   # 십억 → 백만
+R = rrp.reindex(rrp.index.union(wk)).ffill().reindex(wk).fillna(0)   # 십억 → 백만
 net = wal - T - R
 print("순유동성(조$) 최근", [(str(a.date()), round(b / 1e6, 3)) for a, b in net.tail(5).items()])
 ch4 = (net - net.shift(4)) / wal; ch13 = (net - net.shift(13)) / wal
