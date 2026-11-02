@@ -955,7 +955,7 @@
     }).catch(function(e){ console.warn(e); toast("만들지 못했어요"); });
   }
   function shareMany(arr){
-    return Promise.all(arr.map(function(a, i){ return new Promise(function(res){ a.c.toBlob(function(b){ res(b ? new File([b], (i + 1) + "_" + (a.t || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 24) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + ".png", {type: "image/png"}) : null); }, "image/png"); }); })).then(function(fs){
+    return Promise.all(arr.map(function(a, i){ return new Promise(function(res){ a.c.toBlob(function(b){ try { a.c.width = a.c.height = 0; } catch(x) {} res(b ? new File([b], (i + 1) + "_" + (a.t || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 24) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + ".png", {type: "image/png"}) : null); }, "image/png"); }); })).then(function(fs){
       fs = fs.filter(Boolean); if (!fs.length) throw new Error("blob");
       readySheet(fs, "시장 한 장" + (fs.length > 1 ? " 외 " + (fs.length - 1) + "장" : ""));
     });
@@ -971,9 +971,11 @@
     //   파일만 넘김 · canShare 가 거짓이어도 공유 단추는 보여 주고(아이폰 일부에서 잘못 거짓), 실패하면 이유를 같이 알려 줌
     var can = !!navigator.share;
     var img = /^image\//.test(fs[0].type);
-    box.innerHTML = '<div class="opr-s"><h3>📨 ' + (img ? "한 장이" : "파일이") + ' 준비됐어요</h3>' +
-      '<div class="opr-im">' + urls.map(function(u, i){ return /^image\//.test(fs[i].type) ? '<img src="' + u + '" alt="">' : '<div class="opr-f">📄 ' + esc0(fs[i].name) + '</div>'; }).join("") + '</div>' +
-      (can ? '<button class="opr-go" type="button">💬 카톡·문자로 보내기</button>' : '') +
+    box.innerHTML = '<div class="opr-s"><h3>📨 ' + (img ? (fs.length > 1 ? fs.length + "장이" : "한 장이") : "파일이") + ' 준비됐어요</h3>' +
+      '<div class="opr-im">' + urls.map(function(u, i){ return '<div class="opr-c">' + (/^image\//.test(fs[i].type) ? '<img src="' + u + '" alt="">' : '<div class="opr-f">📄 ' + esc0(fs[i].name) + '</div>') +
+        (can && fs.length > 1 ? '<button class="opr-one" type="button" data-i="' + i + '">💬 이 장 보내기</button>' : '') + '</div>'; }).join("") + '</div>' +
+      (can ? '<button class="opr-go" type="button">💬 카톡·문자로 ' + (fs.length > 1 ? "모두 보내기 (" + fs.length + "장)" : "보내기") + '</button>' : '') +
+      (can && fs.length > 1 ? '<p class="opr-n">한꺼번에 안 열리면 그림 아래 「💬 이 장 보내기」로 한 장씩 보내 주세요</p>' : '') +
       '<button class="opr-sv" type="button">' + (img ? (can ? "⬇️ 사진으로 저장" : "⬇️ 그림 저장 (사진에서 보내기)") : "⬇️ 파일 저장") + '</button>' +
       (img ? '<p class="opr-n">그림을 길게 눌러도 저장·공유할 수 있어요</p>' : '') +
       '<button class="opr-x" type="button">닫기</button></div>';
@@ -981,10 +983,16 @@
     box.addEventListener("click", function(ev){
       var t = ev.target;
       if (t === box || t.closest(".opr-x")) return close();
+      var one = t.closest(".opr-one");
+      if (one){   // 11/02 「종목 같이 누르니까 안 돼」 — 아이폰은 여러 장을 한꺼번에 넘기면 공유창이 안 뜨는 경우가 있어 한 장씩도 보낼 수 있게
+        var f1 = fs[+one.dataset.i], p1; try { p1 = navigator.share({files: [f1]}); } catch(e){ p1 = Promise.reject(e); }
+        p1.then(function(){ one.textContent = "✓ 보냈어요"; one.classList.add("done"); }).catch(function(e){ if (e && e.name === "AbortError") return; toast("공유창을 못 열었어요 (" + ((e && e.name) || "?") + ") — 그림을 길게 눌러 저장해 주세요"); });
+        return;
+      }
       if (t.closest(".opr-go")){
         var p; try { p = navigator.share({files: fs}); } catch(e){ p = Promise.reject(e); }
         p.then(close).catch(function(e){ if (e && e.name === "AbortError") return; console.warn(e); try { localStorage.setItem("share_err", (e && (e.name + ": " + e.message)) || "?"); } catch(x) {}
-          toast("공유창을 못 열었어요 (" + ((e && e.name) || "?") + ") — 「사진으로 저장」 뒤 카톡에서 보내 주세요"); });
+          toast(fs.length > 1 ? "한꺼번에는 안 열려요 (" + ((e && e.name) || "?") + ") — 그림 아래 「💬 이 장 보내기」로 한 장씩 보내 주세요" : "공유창을 못 열었어요 (" + ((e && e.name) || "?") + ") — 「사진으로 저장」 뒤 카톡에서 보내 주세요"); });
         return;
       }
       if (t.closest(".opr-sv")){
@@ -1425,7 +1433,7 @@
     ".opc-h{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;font-size:13px;color:var(--sub,#aab)}.opc-h button{font:inherit;font-size:12.5px;background:none;border:1px solid var(--line);color:var(--text);border-radius:999px;padding:3px 10px}" +
     ".opc-list{display:flex;flex-direction:column;gap:4px;max-height:40vh;overflow:auto}.opc-r{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;background:var(--panel2);font-size:14px}.opc-r b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.opc-r small{color:var(--mut,#8a94a8);font-size:11.5px}.opc-r input{width:18px;height:18px}" +
     ".opc-go{display:block;width:100%;margin-top:10px;font:inherit;font-size:15px;font-weight:800;padding:13px;border-radius:14px;border:0;background:var(--acc,#7c9cff);color:#fff}.opc-go:disabled{opacity:.45}.opc-x{display:block;width:100%;margin-top:8px;font:inherit;font-size:14px;padding:10px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--text)}" +
-    "#opready{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}.opr-s{width:100%;max-width:520px;max-height:90vh;overflow:auto;background:var(--panel);color:var(--text);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom) + 18px);box-sizing:border-box}.opr-s h3{margin:0 0 10px;font-size:17px}.opr-im{display:flex;gap:8px;overflow-x:auto;margin:0 0 12px}.opr-f{flex:1;padding:16px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-weight:700;font-size:14px;word-break:break-all}.opr-im img{flex:none;height:min(42vh,360px);width:auto;border-radius:12px;border:1px solid var(--line);-webkit-touch-callout:default}.opr-go{display:block;width:100%;font:inherit;font-size:17px;font-weight:800;padding:15px;border-radius:14px;border:0;background:#fee500;color:#191919;margin:0 0 8px}.opr-sv{display:block;width:100%;font:inherit;font-size:15px;font-weight:700;padding:12px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel2);color:var(--text)}.opr-n{margin:8px 0 4px;font-size:12.5px;color:var(--sub,#aab);text-align:center}.opr-x{display:block;width:100%;margin-top:6px;font:inherit;font-size:14px;padding:10px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--text)}" +
+    "#opready{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}.opr-s{width:100%;max-width:520px;max-height:90vh;overflow:auto;background:var(--panel);color:var(--text);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom) + 18px);box-sizing:border-box}.opr-s h3{margin:0 0 10px;font-size:17px}.opr-im{display:flex;gap:8px;overflow-x:auto;margin:0 0 12px}.opr-f{flex:1;padding:16px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-weight:700;font-size:14px;word-break:break-all}.opr-c{flex:none;display:flex;flex-direction:column;gap:6px;align-items:stretch}.opr-one{font:inherit;font-size:13.5px;font-weight:800;padding:9px 8px;border-radius:10px;border:0;background:#fee500;color:#191919}.opr-one.done{background:var(--panel2);color:var(--sub)}.opr-im img{flex:none;height:min(42vh,360px);width:auto;border-radius:12px;border:1px solid var(--line);-webkit-touch-callout:default}.opr-go{display:block;width:100%;font:inherit;font-size:17px;font-weight:800;padding:15px;border-radius:14px;border:0;background:#fee500;color:#191919;margin:0 0 8px}.opr-sv{display:block;width:100%;font:inherit;font-size:15px;font-weight:700;padding:12px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel2);color:var(--text)}.opr-n{margin:8px 0 4px;font-size:12.5px;color:var(--sub,#aab);text-align:center}.opr-x{display:block;width:100%;margin-top:6px;font:inherit;font-size:14px;padding:10px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--text)}" +
     "#opbtn.onsheet{z-index:100001}#opch{z-index:100002!important}#opbtn span{font-size:14px}:root[data-ui=light] #opbtn{background:#fff;color:#141a26;border-color:#dde2ea}#opbtn:active{transform:scale(.96)}.op-row{margin-top:8px}";
   document.head.appendChild(css);
   var T = null;
