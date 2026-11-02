@@ -717,7 +717,9 @@
     return L.map(function(p){ return {kind: p.k === "fund" ? "fund" : "bond", k: p.k, id: p.id, nm: p.nm, pin: p}; }).concat(E.map(function(e){ return {kind: "myels", id: e.id, nm: e.nm, it: e}; }));
   }
   // 종목 한 장 (10/28 13:02 「디자인·그림·가독성 · 주가랑 뉴스가 어제꺼」 → 사진 머리 · 실시간 가격(wl_live.json, 10분마다) · 한눈에 4칸 · 오늘 뉴스 · 코멘트 · 점수·증권사)
-  function loadImg(url){ return new Promise(function(res){ if (!url) return res(null); var im = new Image(); im.crossOrigin = "anonymous"; var t = setTimeout(function(){ res(null); }, 3500); im.onload = function(){ clearTimeout(t); res(im); }; im.onerror = function(){ clearTimeout(t); res(null); }; im.src = url; }); }
+  // 11/02 「종목 같이 누르니까 안 돼」 — 아이폰 사파리는 같은 사진을 앞서 종목 화면에서(허락 표시 없이) 본 적이 있으면 그 저장본을 써서
+  //   그림판이 「오염」돼 그림 파일로 못 꺼냄(SecurityError) → 사진 주소 뒤에 표시를 붙여 늘 새로 받고, 그래도 오염되면 사진 빼고 다시 그림(safeDraw)
+  function loadImg(url){ if (url) url += (url.indexOf("?") >= 0 ? "&" : "?") + "chx=1"; return new Promise(function(res){ if (!url) return res(null); var im = new Image(); im.crossOrigin = "anonymous"; var t = setTimeout(function(){ res(null); }, 3500); im.onload = function(){ clearTimeout(t); res(im); }; im.onerror = function(){ clearTimeout(t); res(null); }; im.src = url; }); }
   function shortAbout(t){   // 「○○는 자회사를 통해 한국, 중국…에서 X의 개발·판매에 참여하고 있습니다」 → 「X의 개발·판매를 해요」
     var a = String(t || "").split(/\.\s/)[0].replace(/\s+/g, " ").trim(); if (!a) return "";
     a = a.replace(/^.*?(?:는|은)\s+/, "").replace(/자회사(?:들)?[을를]? 통해\s*/, "");
@@ -951,9 +953,11 @@
     Promise.all(jobs.map(function(p_){ return p_.catch(function(){ return null; }); })).then(function(Cs){
       var ok = Cs.filter(function(C){ return C && !C.refuse; }), miss = Cs.length - ok.length;
       if (!ok.length){ toast("자료를 못 가져왔어요"); return; }
-      return shareMany(ok.map(function(C){ return {c: draw(C, nm), t: C.title}; })).then(function(){ if (miss) toast(miss + "개는 자료가 없어 뺐어요"); });
-    }).catch(function(e){ console.warn(e); toast("만들지 못했어요"); });
+      return shareMany(ok.map(function(C){ return {c: safeDraw(C, nm), t: C.title}; })).then(function(){ if (miss) toast(miss + "개는 자료가 없어 뺐어요"); });
+    }).catch(function(e){ console.warn(e); toast("만들지 못했어요 (" + ((e && e.name) || "?") + ")"); });
   }
+  function tainted(c){ try { c.getContext("2d").getImageData(0, 0, 1, 1); return false; } catch(e){ return true; } }
+  function safeDraw(C, nm){ var c = draw(C, nm); if (!tainted(c)) return c; try { c.width = c.height = 0; } catch(x) {} var C2 = {}; for (var k in C){ var v = C[k]; C2[k] = (v && (v instanceof HTMLImageElement || v instanceof HTMLCanvasElement || (v.c && v.c instanceof HTMLCanvasElement))) ? null : v; } return draw(C2, nm); }
   function shareMany(arr){
     return Promise.all(arr.map(function(a, i){ return new Promise(function(res){ a.c.toBlob(function(b){ try { a.c.width = a.c.height = 0; } catch(x) {} res(b ? new File([b], (i + 1) + "_" + (a.t || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 24) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + ".png", {type: "image/png"}) : null); }, "image/png"); }); })).then(function(fs){
       fs = fs.filter(Boolean); if (!fs.length) throw new Error("blob");
@@ -1400,7 +1404,7 @@
     p.then(function(C){
       if (!C){ toast("자료를 못 가져왔어요"); return; }
       if (C.refuse){ toast(C.refuse); return; }
-      var nm = pbname(); return share(draw(C, nm), C.title);
+      var nm = pbname(); return share(safeDraw(C, nm), C.title);
     }).catch(function(e){ console.warn(e); toast("만들지 못했어요"); });
   }
 
@@ -1440,6 +1444,6 @@
   function soon(){ if (!T) T = setTimeout(function(){ T = null; try { fab(); } catch(x) {} try { rowBtns(); } catch(x) {} }, 300); }
   try { new MutationObserver(soon).observe(document.body, {childList: true, subtree: true}); } catch(x) {}
   window.addEventListener("hashchange", soon);
-  window.__onepage = {ready: readySheet, screens: SCREENS, dom: domScreen, sendChooser: sendChooser, go: go, draw: draw, chooser: chooser, _mkStock: mkStock, _mkMyEls: mkMyEls, _mkPin: mkPin, _goMany: goMany, _mkProduct: mkProduct, _mkPort: mkPort, _mkMarket: mkMarket};
+  window.__onepage = {_safeDraw: function(C, nm){ return safeDraw(C, nm); }, _tainted: function(c){ return tainted(c); }, ready: readySheet, screens: SCREENS, dom: domScreen, sendChooser: sendChooser, go: go, draw: draw, chooser: chooser, _mkStock: mkStock, _mkMyEls: mkMyEls, _mkPin: mkPin, _goMany: goMany, _mkProduct: mkProduct, _mkPort: mkPort, _mkMarket: mkMarket};
   soon();
 })();
