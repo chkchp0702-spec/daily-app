@@ -55,13 +55,21 @@ def pick(D, must, ban=()):
     print("고름", k, s.index[0].date(), s.index[-1].date(), len(s), float(s.iloc[-1])); return s
 
 
-wal = fred("WALCL"); tga = fred("WDTGAL"); rrp = fred("RRPONTSYD")
+wal = tga = rrp = None   # 11/2: FRED 는 Actions 에서 매번 시간 초과 → 연준 DDP 로 바로
 if rrp is not None: rrp = rrp * 1000
 if wal is None or tga is None or rrp is None:
     D = ddp()
-    if wal is None: wal = pick(D, [r"total assets", r"wednesday"], [r"week.?average", r"change"])
-    if tga is None: tga = pick(D, [r"treasury,? general account|general account", r"wednesday"], [r"week.?average", r"change"])
-    if rrp is None: rrp = pick(D, [r"reverse repurchase", r"wednesday"], [r"week.?average", r"change", r"foreign"])
+    BAN = [r"week.?average", r"change", r"district", r"maturing", r"memo", r"face value", r"collateral"]
+    for k in ("RESPPA_N.WW", "RESPPLLDT_N.WW", "RESPPLLR_N.WW", "RESPPLLDTXAW_N.WW", "RESPPAX_N.WW"):
+        if k in D: print("이름", k, len(D[k][1]), D[k][0][:200])
+    def byname(k):
+        if k not in D: return None
+        s = pd.Series({pd.Timestamp(a): pd.to_numeric(b, errors="coerce") for a, b in D[k][1]}).dropna().sort_index()
+        print("고름(이름)", k, s.index[0].date(), s.index[-1].date(), len(s), float(s.iloc[-1])); return s
+    wal = byname("RESPPA_N.WW"); tga = byname("RESPPLLDT_N.WW"); rrp = byname("RESPPLLR_N.WW")
+    if wal is None: wal = pick(D, [r"total assets", r"wednesday"], BAN)
+    if tga is None: tga = pick(D, [r"treasury,? general account", r"wednesday"], BAN)
+    if rrp is None: rrp = pick(D, [r"reverse repurchase", r"wednesday"], BAN + [r"foreign"])
 if wal is None or tga is None or rrp is None:
     print("자료 못 구함 — 끝"); sys.exit(0)
 wk = wal.index
