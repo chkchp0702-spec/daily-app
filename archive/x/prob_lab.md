@@ -58,10 +58,17 @@
 | 50 | 홍콩 「밤↓낮↑」 5일 다시 — 5일 간격 표본(시작점 5개)·사건 솎기 · 걸어가기 5일 간격 날만 채점 · 5일 간격 교차 로지스틱 | #48 ➖ · probe/odd2_bt.py — 야후 ^HSI Open·Close·^GSPC 2000~ 6,485일 | 홍콩 | ❌ 10/31 15시 기각 — 사건 솎으면 −4.5·−1.6%p(n 206·215, 뒤 2%p 아래) · 5일 간격 시작점별 방향 뒤집힘(시작1 −8.4·+6.9) · 걸어가기 앞·최근5년 나빠짐 · 교차 두 방향 나빠짐(#48 의 「교차 좋아짐」은 겹친 5일 표본 탓) |
 | 52 | 연준 순유동성(총자산 − 재무부 TGA − 역레포) 4·13주 변화 꼬리 → 5개 시장 다음 날·5일 | 유동성이 위험자산을 끌어올림 https://eco3min.fr/liquidite-nette-us-indice-fed-tga-rrp/ · FRED 는 Actions 에서 시간 초과(fredgraph·alfredgraph 둘 다) → **연준 DDP H.4.1 통째 zip** https://www.federalreserve.gov/datadownload/Output.aspx?rel=H41&filetype=zip (RESPPA_N.WW·RESPPLLDT_N.WW·RESPPLLR_N.WW 수요일 값, 2002-12~ 1,246주) · 공표 시차로 수요일+2일부터 · probe/liq_bt.py | 5개 시장 | ❌ 11/2 10시 아시아 기각 · ➖ 미국 5일 「급감」(4주 −9.4·−3.7%p n 271·284(86~92주) · 13주 −5.1·−4.7%p — 기존 칸 위 걸어가기 4주는 세 기간 좋아지나 교차 로지스틱 두 방향 나빠짐, 13주는 그 반대) → 붙이지 않음 · 다음: 미국만 5일 간격·주 단위 표본으로 다시 |
 | 53 | 미 신규 실업수당 청구(전국 최초 청구, 계절조정 전) 4주 평균 1년 전 대비 · 그 13주 변화 꼬리 → 5개 시장 다음 날·5일 | 경기 꺾임 조기 신호 · FRED 막힘 → 노동부 ETA 539 https://oui.doleta.gov/unemploy/csv/ar539.csv (주정부별 1986-02~2026-10-24, 전국 합계 2,124주 · 토요일 주말 → 금요일부터 사용) · probe/clm_bt.py · 걸어가며 브라이어(사전 100) 2016-05 기준 앞/뒤·최근5년 + 달러·S&P 5일 꼬리 위 + 교차 로지스틱 | 5개 시장 | ❌ 11/2 11시 기각 — 칸 대부분 앞/뒤 뒤집힘 · 같은 쪽(미국 4주 급증 다음 날 −2.6·−2.0%p n 610·523, 일본 +0.9·+3.9)도 기존 칸 위 한 기간 이상 나빠짐·교차 나빠짐 · ➖ 홍콩 13주 급증 다음 날(+0.9·+4.7, 교차 두 방향 아주 조금 좋아짐 · 걸어가기 앞 나빠짐) |
-| 54 | 한국 1~10일·1~20일 수출 잠정치 발표일 반응 | 관세청 열흘 수출 = 한국 반도체 경기 선행 · 자료 주소 찾기(관세청·공공데이터포털) | 한국 | ⏳ 다음 |
+| 54 | 한국 1~10일·1~20일 수출 잠정치 / 월별 수출 증가율 | 관세청 열흘 수출 = 반도체 경기 선행 · 11/2 13시 주소 시험: 관세청 게시판 https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362 200(「10월 1일~10월 20일 수출입 현황 [잠정치]」 글 · selectNttInfo.do 본문·첨부) · e-나라지표 idx_cd=1066 200(표는 iframe showStblGams + 엑셀 /unity/potal/com/IntgrIdxExcelDown.do · 월별 PDF 73개) · tradedata.go.kr·unipass ets 200(앱 껍데기) · ECOS sample 200(10행 제한, 901Y011 자료 없음) · FRED·DBnomics 시간 초과 | 한국 | 🔬 11/2 13시 길 찾음 · 다음: 게시판 currPage 1~N 돌며 열흘 글 본문 숫자 긁기 또는 나라지표 iframe 주소 |
 | 14 | 결합 손잡이(N0·RHO·CAP) 보정 · auto_w 점검 | prob_hist.json 채점 60건 넘으면 | 5개 시장 | ⏳ (10/30 FAKE 채점표 d1 n 64 → 다음 시간 실제 prob_hist 로 확인 · mp 에 방법별 n 없음) |
 
 ## 실행 기록
+
+### 11/2 13시 — 🚢 한국 수출 자료 길 찾기 (#54)
+- 자료: 관세청 게시판 https://www.customs.go.kr/kcs/na/ntt/selectNttList.do?mi=2891&bbsId=1362 200 — 「2026년 10월 1일~10월 20일 수출입 현황 [잠정치]」(10/21)·「2026년 10월 수출입 현황」(11/2) 글 있음, 숫자는 글 본문(selectNttInfo.do)·첨부 · e-나라지표 https://www.index.go.kr/unity/potal/main/EachDtlPageDetail.do?idx_cd=1066 200 — 월별 1995~ 표는 iframe(showStblGams)·엑셀(/unity/potal/com/IntgrIdxExcelDown.do)로만, 쪽 안 JSON 없음 · tradedata.go.kr·unipass ets 200(앱 껍데기) · ECOS sample 200(10행 제한) · FRED·DBnomics 시간 초과 (Actions probe_tmp 2번 · run 41386742256·41387247682, 끝나고 지움).
+- 검증: 아직 못 함 — 숫자 이력을 못 뽑음(n 0).
+- 판정: 🔬 진행(붙이지 않음) · 코드 변경 없음 · probe/exp_bt.py(구조 보기) 남김.
+- 지금 확률 변화 없음(내일 한국 76.4%·일본 31.9%·중국 68.2%·홍콩 57.1%·미국 76.7% · e1 한국 +22.7·일본 −20.0·중국 +15.5·홍콩 +5.9·미국 +23.1).
+- 다음: #54 이어서 — 관세청 게시판 쪽 넘기며 열흘·월간 글 본문 숫자(수출 증감률) 긁기 → 2015~ 약 300건이면 발표일 반응 검증 · 안 되면 #14 결합 손잡이.
 
 ### 11/2 12시 — 🏦 대차잔고 seibro 이어서 (#34)
 - 자료: https://m.seibro.or.kr/cnts/loan/selectStockLoanState.do (Actions probe_tmp 2번 · run 41381377434·41381587109, 끝나고 지움) → 본문 표·highcharts 에 시장 전체 주식 대차 **월별 12개월**(2025-11~2026-10, 잔고 금액 928,861 → 1,462,916 백만원 · 잔고 주수 31.5억 주) · selectLoanRank.do = 종목 5개 순위 · 짐작 ajax 주소 6개(…StateList·…StateAjax·…StateChart·getStockLoanState·LoanRankList·LoanRankAjax) 모두 오류 쪽.
