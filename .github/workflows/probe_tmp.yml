@@ -11,4 +11,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q requests yfinance pandas numpy holidays
-      - run: python probe/exp2_bt.py
+      - run: python probe/exp3_bt.py
