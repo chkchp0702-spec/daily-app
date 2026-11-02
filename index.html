@@ -620,7 +620,7 @@ window.addEventListener("popstate", function(ev){
 });
 
 /* ⚡ 10/31 B10 무거운 탭은 열 때만 받기 — 첫 화면에서 운세·사주·타로·로또·제안서 파일(약 570KB)을 안 받음 */
-var LAZY = {luck: ["saju_core.js?v=4", "saju_txt.js?v=4", "saju.js?v=10", "tarot.js?v=4", "lotto.js?v=1"], prop: ["propose.js?v=27"]};
+var LAZY = {luck: ["saju_core.js?v=4", "saju_txt.js?v=4", "saju.js?v=10", "tarot.js?v=4", "lotto.js?v=1"], prop: ["propose.js?v=28"]};
 LAZY.saju = LAZY.tarot = LAZY.lotto = LAZY.luck;
 var LAZYP = {};
 function needMod(key){
@@ -1542,7 +1542,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261102f";
+var APPV = "20261102g";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1605,7 +1605,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="usage.js?v=1"></script>   <!-- 📈 10/28 사용 현황(익명) -->
 <script defer src="plus.js?v=5"></script>
 <script defer src="cpin.js?v=1"></script>   <!-- 📌 10/28 내 고객 상품 -->
-<script defer src="onepage.js?v=19"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
+<script defer src="onepage.js?v=20"></script>   <!-- 📨 10/28 고객에게 보내기 한 장 -->
 <script defer src="pbcard.js?v=5"></script>   <!-- 👔 10/28 PB 한 장 카드(장중 매시간) -->
 <script defer src="plus2.js?v=3"></script>
 <script defer src="plus3.js?v=19"></script>
@@ -1630,7 +1630,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1013.js?v=4"></script>
 <script defer src="story.js?v=2"></script>
 <script defer src="ux1014.js?v=5"></script>
-<script defer src="ux1014b.js?v=2"></script>
+<script defer src="ux1014b.js?v=3"></script>
 <script defer src="ux1014c.js?v=3"></script>
 <script defer src="ux1015.js?v=3"></script>
 <script defer src="ux1015b.js?v=2"></script>

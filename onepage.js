@@ -967,7 +967,9 @@
     var old = document.getElementById("opready"); if (old) old.remove();
     var box = document.createElement("div"); box.id = "opready";
     var urls = fs.map(function(f){ return URL.createObjectURL(f); });
-    var can = !!(navigator.share && navigator.canShare && navigator.canShare({files: fs}));
+    // 11/02 사용자 「보내기 한 다음 연결 프로그램이 안 나와」 — 아이폰은 파일과 제목(글)을 같이 넘기면 카톡 등이 목록에서 빠지거나 공유창이 안 뜨는 경우가 있어
+    //   파일만 넘김 · canShare 가 거짓이어도 공유 단추는 보여 주고(아이폰 일부에서 잘못 거짓), 실패하면 이유를 같이 알려 줌
+    var can = !!navigator.share;
     var img = /^image\//.test(fs[0].type);
     box.innerHTML = '<div class="opr-s"><h3>📨 ' + (img ? "한 장이" : "파일이") + ' 준비됐어요</h3>' +
       '<div class="opr-im">' + urls.map(function(u, i){ return /^image\//.test(fs[i].type) ? '<img src="' + u + '" alt="">' : '<div class="opr-f">📄 ' + esc0(fs[i].name) + '</div>'; }).join("") + '</div>' +
@@ -980,8 +982,9 @@
       var t = ev.target;
       if (t === box || t.closest(".opr-x")) return close();
       if (t.closest(".opr-go")){
-        var p; try { p = navigator.share({files: fs, title: title}); } catch(e){ p = Promise.reject(e); }
-        p.then(close).catch(function(e){ if (e && e.name === "AbortError") return; console.warn(e); toast("공유창을 못 열었어요 — 「사진으로 저장」 뒤 카톡에서 보내 주세요"); });
+        var p; try { p = navigator.share({files: fs}); } catch(e){ p = Promise.reject(e); }
+        p.then(close).catch(function(e){ if (e && e.name === "AbortError") return; console.warn(e); try { localStorage.setItem("share_err", (e && (e.name + ": " + e.message)) || "?"); } catch(x) {}
+          toast("공유창을 못 열었어요 (" + ((e && e.name) || "?") + ") — 「사진으로 저장」 뒤 카톡에서 보내 주세요"); });
         return;
       }
       if (t.closest(".opr-sv")){

@@ -94,7 +94,7 @@
     d.querySelector(".shi-bk").onclick = close; d.querySelector(".shi-x").onclick = close;
     d.querySelector(".shi-txt").onclick = function(){ close(); if (TXT) TXT(title, text, hash); };
     d.querySelector(".shi-img").onclick = function(){
-      if (canFile){ navigator.share({files: [file], title: title || "CH Investing"}).then(close).catch(function(e){ if (e && e.name !== "AbortError") toast("그림 보내기가 안 됐어요 — 길게 눌러 저장해 주세요"); }); return; }
+      if (canFile){ navigator.share({files: [file]}).then(close).catch(function(e){ if (e && e.name !== "AbortError") toast("그림 보내기가 안 됐어요 — 길게 눌러 저장해 주세요"); }); return; }
       var a = document.createElement("a"); a.href = url; a.download = fn; document.body.appendChild(a); a.click(); a.remove(); toast("그림을 저장했어요");
     };
   }
