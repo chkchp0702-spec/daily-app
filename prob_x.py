@@ -22,7 +22,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
-XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF"]
+XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF", "^VVIX"]
 FX = {"KR": ("KRW=X", "원/달러"), "JP": ("JPY=X", "엔/달러"), "CN": ("CNY=X", "위안/달러"), "HK": ("CNY=X", "위안/달러"), "US": ("DX-Y.NYB", "달러 인덱스")}
 
 
@@ -681,6 +681,28 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p1"] = None
         except Exception as e:
             research["gsr_err"] = str(e)[:120]
+    # 🌀 VVIX÷VIX 낮음 꼬리(≤10% 한쪽만) — 미국 「일주일」만, w 0.3(➖ 작게) (11/3 12시 #59 · probe/vvix_bt.py · 「VIX 의 변동성」이 VIX 에 비해 낮음 = 공포가 이미 높고 더 튈 여지 작음)
+    #   ^VVIX÷^VIX 1년 백분위 ≤10% · 2008~, 2017-05 기준 앞/뒤 · S&P 5일 뒤 오름 −6.9·−2.6%p(n 284·327)
+    #   VIX 수준·S&P 5일·VIX 기간구조·간밤 S&P 꼬리 칸 위 걸어가며 사전 100 브라이어(5일) 0.24663→0.24646 · 0.23979→0.2395 · 최근5년 0.24562→0.2454 ✅
+    #   교차 로지스틱 앞→뒤 0.23973→0.23989 나빠짐 · 뒤→앞 0.24506→0.24426 좋아짐(계수 −0.52·−0.22 같은 쪽) → ➖ 작게 · 낮음일 611 중 359일 VIX ≥90% 와 겹침
+    #   다음 날·VVIX 수준·5일 변화·아시아 ❌(아시아 칸은 크나 간밤 미국·VIX 칸 위에서 나빠짐)
+    if us:
+        try:
+            vv_, vx2_ = _c(H, "^VVIX"), _c(H, "^VIX")
+            if vv_ is not None and vx2_ is not None:
+                vr = pd.concat([vv_, vx2_], axis=1, keys=["a", "b"]).dropna()
+                vr = vr[(vr > 0).all(axis=1)]
+                q = (vr["a"] / vr["b"])
+                rk = rank252(q).reindex(idx).ffill(limit=3); cv = rk.iloc[-1]
+                research["vvix"] = {"d": str(q.index[-1].date()), "vvix": round(float(vr["a"].iloc[-1]), 1), "ratio": round(float(q.iloc[-1]), 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv <= 0.1:
+                    m = cond(d, (rk <= 0.1).fillna(False), "VVIX÷VIX 낮음(1년 하위 10%)")
+                    add("vvix", "🌀", "VVIX÷VIX 낮음", "심리", m, 0.3,
+                        f"VVIX÷VIX {float(q.iloc[-1]):.2f} (1년 백분위 {cv*100:.0f}%) — VIX 자체의 흔들림이 VIX 에 비해 작을 때 미국 일주일은 평소보다 조금 덜 오름(다음 날엔 안 씀)")
+                    if M and M[-1]["k"] == "vvix":
+                        M[-1]["p1"] = None
+        except Exception as e:
+            research["vvix_err"] = str(e)[:120]
     # 🌙 밤 수익률(시가÷전날 종가) 5일 누적 상위 10% — 일본 「일주일」만, w 0.3(➖ 작게) (10/30 16시 #40 · probe/night_bt.py · 밤 수익률 = 투자 심리)
     #   닛케이 자기 Open·Close · log(시가/전날 종가) 5일 합의 1년 백분위 ≥90% · 2000-07~ 6,441일, 2013-08 기준 앞/뒤
     #   5일 뒤 오름 +5.3·+6.3%p(n 363·308) · 자기 5일 등락·S&P 5일 꼬리 칸 위 걸어가며 브라이어 0.25148→0.25189(앞 나빠짐) · 0.24525→0.24505 · 최근5년 0.24563→0.24479
