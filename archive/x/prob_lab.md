@@ -71,10 +71,19 @@
 | 61 | VKOSPI(코스피200 변동성) 수준·5일 급등 꼬리 → 한국 | https://www.nisc.co.za/products/abstracts/22076/asymmetric-and-negative-return-volatility-relationship-the-case-of-the-vkospi · 네이버·다음·KRX 공개 주소 찾기 · VIX 칸 위 겹침 | 한국 | ➖ 11/3 16시 주소 13곳 시험 — 네이버 fchart(VKOSPI·KPI200VOL·VKOSPI200 빈 응답)·api.stock.naver.com(빈 [])·m.stock.naver.com(409 Not Found)·finance.naver.com sise_index_day(410)·다음 quotes·market_index(500)·야후 ^VKOSPI(404)·stooq(JS 막힘)·KRX(LOGOUT) 모두 없음 · 다음 길: investing.com·KRX 정보데이터 OTP 다운로드 |
 | 62 | 금(GC=F) 혼자 5일 급등 꼬리(위험 회피) → 아시아 다음 날 | 구리/금·금/은과 다른 몫인지 · probe/gold_bt.py — 야후 GC=F 2000-08~ 6,570일 · 걸어가며 브라이어(사전 100) 앞/뒤·최근5년 · 달러지수·S&P 5일 꼬리 칸 위 + 교차 로지스틱 | 5개 시장 | ✅ 11/3 16시 일본 내일(5일 ≥90%, w 0.5) · ➖ 한국 5일(앞 +1.5%p 작음·교차 한쪽 나빠짐) · 홍콩 급락 다음 날(칸 위 앞 나빠짐) · 중·미·20일 ❌ |
 | 60b | 중국 「A 프리미엄 5일 급등」(≥90) 다음 5일 — 5일 간격 표본·덧셈형·사건 솎기 | #60 ➖ · probe/ah2_bt.py — A/H 12쌍 직접 계산 + 야후 000001.SS·^GSPC 2007-07~ 4,683일 · 2017-03 기준 앞/뒤·최근5년 · 5일 간격 시작점 5개 걸어가기 + 교차 로지스틱 | 중국 | ❌ 11/3 15시 닫음 — 5일 간격 시작0·1 뒤 +5.7·+0.9 뒤집힘 · 솎으면 −4.1·−4.7(n 87·103, 앞 <100) · 교차 두 방향 나빠짐(0.2522→0.25326 · 0.25149→0.25224) · 걸어가기 칸곱 평균은 세 기간 조금 좋아지나 시작0 뒤·최근5년 나빠짐 · 덧셈형 앞 나빠짐 |
-| 63 | 남향 자금(Stock Connect 본토→홍콩 순매수) 5·20일 꼬리 → 홍콩 | HKMA RM12/2019 https://www.hkma.gov.hk/media/eng/publication-and-research/research/research-memorandums/2019/RM12-2019.pdf · 자료: 홍콩거래소·동방재부(eastmoney) 공개 주소 찾기 | 홍콩 | ⏳ |
+| 63 | 남향 자금(Stock Connect 본토→홍콩 순매수) 1·5·20일 합 1년 백분위 꼬리 → 홍콩·중국 | HKMA RM12/2019 https://www.hkma.gov.hk/media/eng/publication-and-research/research/research-memorandums/2019/RM12-2019.pdf · **동방재부 datacenter https://datacenter-web.eastmoney.com/api/data/v1/get?reportName=RPT_MUTUAL_DEAL_HISTORY&filter=(MUTUAL_TYPE=\"006\")** NET_DEAL_AMT 2014-11-17~2026-11-02 2,741일 · probe/sb_find.py·sb_bt.py | 홍콩·중국 | ➖ 11/3 17시 홍콩 20일 합 「적음」(≤10) 5일만 같은 쪽(−11.2·−3.2%p n 115·203) · 교차 두 방향 좋아짐이나 걸어가기 뒤·최근3년 나빠짐 → 붙이지 않음 · 1·5일 합·중국 ❌(앞/뒤 뒤집힘) → #63b |
+| 63b | 홍콩 남향 20일 합 적음(≤10) 5일 다시 — 5일 간격 표본·덧셈형·사건 솎기 | #63 ➖ · probe/sb.csv 같은 주소 | 홍콩 | ⏳ |
 | 14 | 결합 손잡이(N0·RHO·CAP) 보정 · auto_w 점검 | prob_hist.json 채점 60건 넘으면 | 5개 시장 | ⏳ (10/30 FAKE 채점표 d1 n 64 → 다음 시간 실제 prob_hist 로 확인 · mp 에 방법별 n 없음) |
 
 ## 실행 기록
+
+### 11/3 17시 — 🇭🇰 남향 자금(港股通 순매수) 꼬리 (#63)
+- 자료: 동방재부 datacenter RPT_MUTUAL_DEAL_HISTORY MUTUAL_TYPE=006(남향 합계) NET_DEAL_AMT 2014-11-17~2026-11-02 2,741일 (push2his kamt·HKEX 일별 js 도 시험) · probe/sb_find.py·sb_bt.py (Actions probe_tmp run 41601164810, 끝나고 워크플로 지움). 지금 1일 백분위 0.147 · 5일 합 0.067 · 20일 합 0.004(1년 중 가장 적은 쪽).
+- 검증 홍콩(2021-02 기준 앞/뒤): 20일 합 ≤10 → 5일 −11.2·−3.2%p(n 115·203) · 다음 날 −1.7·−5.1 · 자기·S&P 5일 꼬리 칸 위 걸어가기 5일 앞 0.25354→0.25342 · 뒤 0.25066→0.2508 · 최근3년 0.2485→0.24919(나빠짐) · 교차 앞→뒤 0.25256→0.25167 · 뒤→앞 0.25466→0.25365(계수 −0.38·−0.19).
+- 나머지: 홍콩 5일 합 ≤10 5일 −8.1·+3.1 뒤집힘 · 1일 ≥90 다음 날 +5.3·−6.3 뒤집힘 · 중국 1·5·20일 모두 앞/뒤 뒤집히거나 기존 위 나빠짐 ❌.
+- 판정: ➖ 홍콩 20일 합 적음 → 5일(걸어가기 뒤 기간 나빠짐 · 표본 12년뿐) → 붙이지 않음 · 코드 변경 없음.
+- 지금 확률: 변화 없음(16:11 기준 내일 한국 52.3%·일본 14.0%·중국 51.6%·홍콩 79.9%·미국 29.7% · 일주일 55.0·53.1·51.8·51.5·59.2%).
+- 다음: #63b 남향 20일 합 적음 5일 간격 다시(지금 꼬리 안이라 붙으면 바로 몫) → #61 VKOSPI 다른 길 · #14 결합 손잡이.
 
 ### 11/3 16시 — 🥇 금 5일 급등 → 일본 내일 (#62) · VKOSPI 주소 찾기 (#61)
 - 자료: 야후 GC=F 2000-08-30~2026-11-03 6,570일(지금 3,921.9) · probe/gold_bt.py · VKOSPI 주소 13곳(네이버 fchart·api·모바일·PC, 다음 2곳, 야후, stooq, KRX) 모두 자료 없음(빈 응답·404·409·410·500·LOGOUT) (Actions probe_tmp run 41594280001, 끝나고 워크플로 지움).
