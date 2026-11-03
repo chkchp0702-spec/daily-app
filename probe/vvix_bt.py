@@ -54,8 +54,8 @@ out = {}
 for mk, cfg in prob.MK.items():
     d = prob.feats(H[cfg["ix"]]); d = d[d.index >= "2008-01-01"].copy()
     A = (lambda s: prob_x.align(prob_x.rank252(s), d.index)) if mk != "US" else (lambda s: prob_x.rank252(s).reindex(d.index).ffill())
-    rv = A(vx); rs = A(np.log(sp).diff(5)); rt = A((vx / v3).dropna())
-    oth = lab(rv, "vh", "vl") + "|" + lab(rs, "sh", "sl") + "|" + lab(rt, "th", "tl")
+    rv = A(vx); rs = A(np.log(sp).diff(5)); rt = A((vx / v3).dropna()); r1 = A(np.log(sp).diff())
+    oth = lab(rv, "vh", "vl") + "|" + lab(rs, "sh", "sl") + "|" + lab(rt, "th", "tl") + "|" + lab(r1, "oh", "ol")
     R = {}
     for fn, ser in (("수준", sk), ("VVIX÷VIX", (sk / vx).dropna()), ("5일변화", np.log(sk).diff(5))):
         rg = A(ser); dv = d.index[rg.notna()]; mid = dv[len(dv) // 2]; cells = {}
@@ -71,12 +71,12 @@ for mk, cfg in prob.MK.items():
         r = {"mid": str(mid.date()), "cur_rank": None if pd.isna(rg.iloc[-1]) else round(float(rg.iloc[-1]), 3), "칸(n,y1차,y5차)": cells, "겹침": ov}
         for ycol, h in (("y1", 1), ("y5", 5)):
             P = {"평소": wf(d, gb, ycol, h)[1], "높음": wf(d, gh, ycol, h)[0], "낮음": wf(d, gl, ycol, h)[0],
-                 "기존(VIX·S&P·기간)": wf(d, oth, ycol, h)[0], "기존+높음": wf(d, oth + "|" + gh, ycol, h)[0],
+                 "기존": wf(d, oth, ycol, h)[0], "기존+높음": wf(d, oth + "|" + gh, ycol, h)[0],
                  "기존+낮음": wf(d, oth + "|" + gl, ycol, h)[0], "기존+양쪽": wf(d, oth + "|" + gb, ycol, h)[0]}
             r[ycol] = score(d, ycol, P)
         # 교차 로지스틱
-        D = pd.DataFrame({"c": 1.0, "vh": rv >= .9, "vl": rv <= .1, "sh": rs >= .9, "sl": rs <= .1, "th": rt >= .9, "tl": rt <= .1, "gh": rg >= .9, "gl": rg <= .1}, index=d.index).astype(float)
-        ok = rv.notna() & rs.notna() & rt.notna() & rg.notna() & (d.index >= "2008-01-01")
+        D = pd.DataFrame({"c": 1.0, "vh": rv >= .9, "vl": rv <= .1, "sh": rs >= .9, "sl": rs <= .1, "th": rt >= .9, "tl": rt <= .1, "oh": r1 >= .9, "ol": r1 <= .1, "gh": rg >= .9, "gl": rg <= .1}, index=d.index).astype(float)
+        ok = rv.notna() & rs.notna() & rt.notna() & r1.notna() & rg.notna() & (d.index >= "2008-01-01")
         X = {}
         for ycol in ("y1", "y5"):
             m = ok & d[ycol].notna(); idx = d.index[m]; md = idx[len(idx) // 2]
@@ -84,7 +84,7 @@ for mk, cfg in prob.MK.items():
             xr = {}
             for nm, tr, te in (("앞→뒤", a, b), ("뒤→앞", b, a)):
                 s = {}
-                for k, cols in (("기존", [0, 1, 2, 3, 4, 5, 6]), ("+높음", [0, 1, 2, 3, 4, 5, 6, 7]), ("+낮음", [0, 1, 2, 3, 4, 5, 6, 8])):
+                for k, cols in (("기존", list(range(9))), ("+높음", list(range(9)) + [9]), ("+낮음", list(range(9)) + [10])):
                     w = logit_fit(Xa[tr][:, cols], y[tr]); p = 1 / (1 + np.exp(-Xa[te][:, cols] @ w))
                     s[k] = round(float(((p - y[te]) ** 2).mean()), 5)
                     if k != "기존": s[k + "계수"] = round(float(w[-1]), 3)
@@ -92,6 +92,8 @@ for mk, cfg in prob.MK.items():
             X[ycol] = xr
         r["교차"] = X
         R[fn] = r
-        print(mk, fn, json.dumps(r, ensure_ascii=False))
+        c=r["칸(n,y1차,y5차)"]; print("##", mk, fn, "now", r["cur_rank"], "| 칸", json.dumps(c, ensure_ascii=False))
+        for yc in ("y1","y5"):
+            print("  ", yc, "WF 기존/+높/+낮", [(h_, r[yc][h_]["기존"], r[yc][h_]["기존+높음"], r[yc][h_]["기존+낮음"]) for h_ in ("앞","뒤","최근5년")], "교차", json.dumps(r["교차"][yc], ensure_ascii=False))
     out[mk] = R
 json.dump(out, open("probe/vvix_bt.json", "w"), ensure_ascii=False, indent=1)
