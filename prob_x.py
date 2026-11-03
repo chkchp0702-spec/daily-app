@@ -554,6 +554,23 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                     M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["cug_err"] = str(e)[:120]
+    # 🥇 금 혼자 5일 급등 (11/3 16시 #62 · probe/gold_bt.py · 위험 회피) — 일본 「다음 날」만, 급등 꼬리(≥90%)에서만
+    #   금(GC=F) 5일 로그 변화의 1년 백분위 · 미국 날짜 값 → 다음 아시아 장. 2000-08~, 2013-05 기준 앞/뒤 · 걸어가며 사전 100 브라이어
+    #   일본 ≥90% 다음 날 −5.3·−2.2%p(n 322·354) · 달러·S&P 5일 꼬리 칸 위 0.24881→0.24858 · 0.24526→0.24507 · 최근5년 0.24509→0.24495 ✅
+    #   교차 로지스틱 앞→뒤 0.24441→0.24433 · 뒤→앞 0.24626→0.24611(계수 −0.17·−0.13 같은 쪽) ✅ · ≤10%·5일 뒤·20일 변화·한·중·홍·미 ❌
+    if mk == "JP" and gd_ is not None:
+        try:
+            gl_ = np.log(gd_[gd_ > 0])
+            rk = align(rank252(gl_.diff(5)), idx); cv = rk.iloc[-1]
+            research["gold5"] = {"d": str(gl_.index[-1].date()), "r5": round(float(gl_.diff(5).iloc[-1]) * 100, 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+            if not pd.isna(cv) and cv >= 0.9:
+                m = cond(d, (rk >= 0.9).fillna(False), "금 5일 급등(1년 상위 10%)")
+                add("gold5", "🥇", "금 급등", "자금", m, 0.5,
+                    f"금 5일 {float(gl_.diff(5).iloc[-1])*100:+.1f}% (1년 백분위 {cv*100:.0f}%) — 안전자산 금이 급히 오르면(위험 회피) 닛케이 다음 날이 평소보다 덜 오름(다음 날만)")
+                if M and M[-1]["k"] == "gold5":
+                    M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["gold5_err"] = str(e)[:120]
     # 🏛️ 채권 공포 대 주식 공포 (10/28 15시 #19 · probe/move_bt.py) — 한국·일본 「다음 날」만, 꼬리에서만
     #   (MOVE 1년 백분위 − VIX 1년 백분위)의 1년 백분위 · 미국 날짜 값 → 다음 아시아 장. 2002-11~, 2016 기준 앞/뒤 · 걸어가며 사전 100 브라이어
     #   한국 ≤10%(주식 공포가 채권보다 훨씬 큼) 다음 날 −9.2·−5.0%p(n 330·433) · ≥90% +1.4·+2.5 · 브라이어 0.25151→0.24909 · 0.24998→0.24857 · 최근5년 0.25051→0.24703 ✅
