@@ -22,7 +22,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
-XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF", "^VVIX"]
+XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF", "^VVIX", "^SKEW"]
 FX = {"KR": ("KRW=X", "원/달러"), "JP": ("JPY=X", "엔/달러"), "CN": ("CNY=X", "위안/달러"), "HK": ("CNY=X", "위안/달러"), "US": ("DX-Y.NYB", "달러 인덱스")}
 
 
@@ -703,6 +703,25 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p1"] = None
         except Exception as e:
             research["vvix_err"] = str(e)[:120]
+    # 🦢 CBOE SKEW 높음 꼬리(≥90% 한쪽만) — 중국 「내일」만, w 0.3(➖ 작게) (11/3 13시 #58b · probe/skew2_bt.py · 옵션 시장이 꼬리 급락 보험을 비싸게 매김)
+    #   ^SKEW 1년 백분위 ≥90% · 미국 날짜 값 → 다음 중국 장 · 2000~, 2013-09 기준 앞/뒤 · 상해 다음 날 오름 +3.8·+2.9%p(n 453·608) · 최근5년 +1.4(197)
+    #   VIX 수준·S&P 5일 꼬리 칸 위 덧셈형 w0.3 브라이어 0.24949→0.24943 · 0.24795→0.24786 · 최근5년 0.24929→0.2493(그대로) · 교차 로지스틱 0.24837→0.24823 · 0.2492→0.24897(계수 +0.19·+0.15 같은 쪽)
+    #   다만 칸 곱하기는 뒤·최근5년 나빠짐 · 사건 솎기(5일 안 뺌) 앞 +7.2·뒤 +0.6 → 뒤 기간 효과는 높은 SKEW 가 이어진 날들 몫 → ➖ 작게 · 한·일·홍·미·5일 ❌ · 홍콩 5일 급락 5일 ❌(솎으면 뒤집힘)
+    if mk == "CN":
+        try:
+            sk_ = _c(H, "^SKEW")
+            if sk_ is not None:
+                sk_ = sk_[sk_ > 0]
+                rk = align(rank252(sk_), idx); cv = rk.iloc[-1]
+                research["skew"] = {"d": str(sk_.index[-1].date()), "v": round(float(sk_.iloc[-1]), 1), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv >= 0.9:
+                    m = cond(d, (rk >= 0.9).fillna(False), "CBOE SKEW 높음(1년 상위 10%)")
+                    add("skew", "🦢", "CBOE SKEW 높음", "심리", m, 0.3,
+                        f"CBOE SKEW {float(sk_.iloc[-1]):.1f} (1년 백분위 {cv*100:.0f}%) — 미국 옵션 시장이 급락 보험을 비싸게 살 때 상해 다음 날은 평소보다 조금 더 오름(다음 날만 · 효과 작음)")
+                    if M and M[-1]["k"] == "skew":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["skew_err"] = str(e)[:120]
     # 🌙 밤 수익률(시가÷전날 종가) 5일 누적 상위 10% — 일본 「일주일」만, w 0.3(➖ 작게) (10/30 16시 #40 · probe/night_bt.py · 밤 수익률 = 투자 심리)
     #   닛케이 자기 Open·Close · log(시가/전날 종가) 5일 합의 1년 백분위 ≥90% · 2000-07~ 6,441일, 2013-08 기준 앞/뒤
     #   5일 뒤 오름 +5.3·+6.3%p(n 363·308) · 자기 5일 등락·S&P 5일 꼬리 칸 위 걸어가며 브라이어 0.25148→0.25189(앞 나빠짐) · 0.24525→0.24505 · 최근5년 0.24563→0.24479
