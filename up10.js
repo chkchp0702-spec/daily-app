@@ -188,7 +188,7 @@
       '<div class="hm-big"><div data-goto="port~pohero"><small>기본</small><b class="' + cls(P.base) + '" data-num="' + P.base + '" data-k="base">' + sg(P.base, 1) + '</b></div>' +
         '<div data-goto="port~pokick"><small>공격(킥)</small><b class="' + cls(P.kick) + '" data-num="' + P.kick + '" data-k="kick">' + sg(P.kick, 1) + '</b></div>' +
         (P.conc != null ? '<div data-goto="port~poconc"><small>집중</small><b class="' + cls(P.conc) + '" data-num="' + P.conc + '" data-k="conc">' + sg(P.conc, 1) + '</b></div>' : '') + '</div>' +
-      '<div class="hm-l">S&amp;P500 <b class="' + cls(P.spy) + '">' + sg(P.spy, 1) + '</b> · <a data-goto="port~pocmp" class="hm-nw">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 ›</a></div>' +
+      '<div class="hm-l">S&amp;P500 <b class="' + cls(P.spy) + '">' + sg(P.spy, 1) + '</b> · <a data-goto="port~pocmp" class="hm-nw">시장 ' + P.n_bench + '곳 중 <b>' + P.beat_kick + '</b>곳 앞섬 <small>(공격)</small> ›</a></div>' +
       '<div class="hm-sp">' + spark + '</div>' +
       (P.change ? '<div class="hm-alert" data-goto="port~pofollow">🔁 ' + md(P.change.date) + ' 비중·상품 바뀜 — <b>따라하기에서 맞추기 ›</b></div>' : '') + kickLine, "포트");
     // 🎯 집중

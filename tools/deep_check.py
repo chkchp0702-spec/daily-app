@@ -114,7 +114,7 @@ def facts(texts, src, now):
         if m:
             chk("🏠 S&P500", _n(m.group(1)), _r1(H.get("spy")))
             chk("🏠 시장 n곳 중", float(m.group(2)), float(H.get("n_bench") or 0), 0.1)
-            chk("🏠 앞선 곳 수", float(m.group(3)), float(H.get("beat_base") or 0), 0.1)
+            chk("🏠 앞선 곳 수(공격)", float(m.group(3)), float(H.get("beat_kick") or 0), 0.1)  # 11/3 화면은 beat_kick(공격) — 전엔 beat_base 와 비교해 +9↔+8 거짓 경보
         m = re.search(r"(\d{2})/(\d{2}) 미국 종가", t)
         if m and H.get("asof"): chk("🏠 기준일(미국 종가)", float(m.group(1) + m.group(2)), float(H["asof"][5:7] + H["asof"][8:10]), 0.1)
         m = re.search(r"(\d+)일 중 (\d+)일 이김", t)
