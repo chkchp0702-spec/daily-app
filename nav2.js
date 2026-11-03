@@ -464,9 +464,10 @@
     var D = document.documentElement, lastY = window.scrollY;
     window.addEventListener("scroll", function(){
       var y = window.scrollY, dy = y - lastY, end = y + window.innerHeight >= document.documentElement.scrollHeight - 40;
-      if (y < 80 || end || dy < -6) D.classList.remove("fab-hide");
-      else if (dy > 6) D.classList.add("fab-hide");
-      if (Math.abs(dy) > 6) lastY = y;
+      if (y < 0 || y > document.documentElement.scrollHeight - window.innerHeight - 4) return;   // 11/03 맨 위·아래 튕김 구간은 무시(단추가 들락날락 흔들리던 것)
+      if (y < 80 || end || dy < -30) D.classList.remove("fab-hide");
+      else if (dy > 30) D.classList.add("fab-hide");
+      if (Math.abs(dy) > 30) lastY = y;
     }, {passive: true});
   })();
   if (window.cur) try { window.drawTabs(); } catch(x) {}

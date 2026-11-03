@@ -143,10 +143,13 @@
   sp.style.display = "none";
   window.addEventListener("scroll", function(){
     var y = window.scrollY || 0, d = y - lastY; lastY = y;
+    // 11/03 「스크롤할 때 위아래 고정 칸이 흔들려」 — 맨 위·맨 아래에서 아이폰이 튕길 때(값이 오르내림) 머리가 접혔다 펴졌다 하던 것 → 튕기는 구간은 무시 · 기준도 조금 크게
+    var maxY = (document.documentElement.scrollHeight || 0) - window.innerHeight;
+    if (y < 0 || y > maxY - 4) return;
     if ((d > 0) !== (acc > 0)) acc = 0;
     acc += d;
-    if (y < 80 || acc < -24) set(false);
-    else if (y > 160 && acc > 24) set(true);
+    if (y < 80 || acc < -40) set(false);
+    else if (y > 160 && acc > 40) set(true);
   }, {passive: true});
   window.addEventListener("hashchange", function(){ set(false); });
   window.addEventListener("resize", function(){ setTimeout(setHH, 50); });

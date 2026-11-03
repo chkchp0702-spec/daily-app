@@ -17,6 +17,7 @@
   window.addEventListener("scroll", function(){
     var b = document.getElementById("backbtn"); if (!b) return;
     var y = window.scrollY || 0, d = y - lastY; lastY = y;
+    if (y < 0 || y > document.documentElement.scrollHeight - window.innerHeight - 4) return;   // 11/03 튕김 구간 무시
     if ((d > 0) !== (acc > 0)) acc = 0;
     acc += d;
     var nearEnd = y + window.innerHeight >= document.documentElement.scrollHeight - 40;

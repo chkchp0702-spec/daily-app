@@ -25,10 +25,16 @@
     if (b !== lb){ lb = b; D.style.setProperty("--vvb", b + "px"); }
     if (t !== lt){ lt = t; D.style.setProperty("--vvt", t + "px"); }
   }
-  function soon(){ if (!raf) raf = requestAnimationFrame(up); }
-  vv.addEventListener("resize", soon);
-  vv.addEventListener("scroll", soon);
-  window.addEventListener("scroll", soon, {passive: true});
+  // 11/03 사용자 「스크롤할 때 위아래 고정 칸이 흔들려」 — 스크롤 중엔 아이폰이 주소창·튕김 때문에 보이는 영역 값을 잠깐씩 바꿔
+  //   그때마다 따라 움직이던 것이 흔들림이었음 → 스크롤 중엔 손대지 않고, 멈춘 뒤 0.35초 지나 「계속 어긋나 있을 때만」 한 번 맞춤
+  var st = null, moving = false;
+  function settle(){ st = null; moving = false; var b1 = gap(); setTimeout(function(){ if (!moving && Math.abs(gap() - b1) < 2) soon(); }, 150); }
+  function gap(){ return Math.round(vv.offsetTop + vv.height - window.innerHeight); }
+  function soon(){ if (moving) return; if (!raf) raf = requestAnimationFrame(up); }
+  function onScroll(){ moving = true; clearTimeout(st); st = setTimeout(settle, 350); }
+  vv.addEventListener("resize", onScroll);
+  vv.addEventListener("scroll", onScroll);
+  window.addEventListener("scroll", onScroll, {passive: true});
   window.addEventListener("orientationchange", function(){ setTimeout(up, 400); });
   // 키보드가 닫힌 직후: 화면을 한 번 제자리로 다시 맞추고(같은 위치로 스크롤) 다시 잼
   document.addEventListener("focusout", function(){

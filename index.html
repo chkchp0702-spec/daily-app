@@ -1542,7 +1542,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261103a";
+var APPV = "20261103b";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1623,13 +1623,13 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="pdfx.js?v=9"></script>
 <script defer src="honest.js?v=1"></script>
 <script defer src="up10.js?v=27"></script>
-<script defer src="nav2.js?v=32"></script>
-<script defer src="vvfix.js?v=1"></script>   <!-- 📱 11/02 iOS 26 키보드 뒤 아래 탭 바·위 띠 떠 보임 바로잡기 -->
+<script defer src="nav2.js?v=33"></script>
+<script defer src="vvfix.js?v=2"></script>   <!-- 📱 11/02 iOS 26 키보드 뒤 아래 탭 바·위 띠 떠 보임 바로잡기 -->
 <script defer src="clamp.js?v=5"></script>
 <script defer src="ticker.js?v=3"></script>
-<script defer src="ux1013.js?v=4"></script>
+<script defer src="ux1013.js?v=5"></script>
 <script defer src="story.js?v=2"></script>
-<script defer src="ux1014.js?v=5"></script>
+<script defer src="ux1014.js?v=6"></script>
 <script defer src="ux1014b.js?v=3"></script>
 <script defer src="ux1014c.js?v=3"></script>
 <script defer src="ux1015.js?v=3"></script>
