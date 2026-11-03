@@ -68,13 +68,21 @@
 | 58b | SKEW 다시 — 중국 수준 ≥90 덧셈형 · 홍콩 5일 급락 5일 간격 표본 | #58 ➖ · probe/skew2_bt.py — 야후 ^SKEW·000001.SS·^HSI 2000~ · 사건 솎기 · 덧셈형 걸어가기(사전 100) · 교차 로지스틱 · 5일 간격 시작점 5개 | 중국·홍콩 | ➖ 11/3 13시 중국 내일 작게(w 0.3) — 덧셈형 w0.3 앞·뒤 좋아짐·최근5년 그대로 · 교차 두 방향 좋아짐 · 솎으면 뒤 +0.6 · 홍콩 5일 ❌(솎으면 앞 −13.1·뒤 +1.9 뒤집힘, 교차 앞→뒤 나빠짐) |
 | 59 | VVIX(^VVIX, VIX 의 변동성) 꼬리 · VVIX÷VIX → 다음 날·5일 | https://www.cxoadvisory.com/volatility-effects/expected-volatility-of-stock-market-volatility-as-a-predictor/ · probe/vvix_bt.py — 야후 ^VVIX 2007-01~ 4,981일 · 2008~ 걸어가며 브라이어(사전 100) 2017-06 기준 앞/뒤·최근5년 · VIX 수준·S&P 5일·VIX 기간구조·간밤 S&P 꼬리 칸 위 + 교차 로지스틱 | 5개 시장 | ➖ 11/3 12시 미국 일주일만 작게(VVIX÷VIX ≤10%, w 0.3) · 아시아 칸은 크나(VVIX 5일 급등 → 다음 날 한국 −10.1·−16.1%p) 간밤 미국·VIX 칸 위 나빠짐 ❌ |
 | 60 | 항셍 AH 프리미엄 수준·5·20일 변화 꼬리 → 홍콩·중국 | https://atlantis-press.com/proceedings/msea-22/125982584 · 야후 ^HSAHP 이력 0건 → **A/H 동시상장 12쌍 직접 계산**(log(A÷(H×HKDCNY=X)) 평균, 6쌍 이상 날) 2007-01~ 4,678일 · probe/ah_bt.py · 자기 5일·S&P 5일 꼬리 칸 위 + 교차 로지스틱 | 홍콩·중국 | ❌ 11/3 14시 홍콩 전부·중국 다음 날 기각 · 중국 5일(5일 변화 ≥90) ➖ → #60b |
-| 61 | VKOSPI(코스피200 변동성) 수준·5일 급등 꼬리 → 한국 | https://www.nisc.co.za/products/abstracts/22076/asymmetric-and-negative-return-volatility-relationship-the-case-of-the-vkospi · 네이버·다음·KRX 공개 주소 찾기 · VIX 칸 위 겹침 | 한국 | ⏳ |
-| 62 | 금(GC=F) 혼자 5일 급등 꼬리(위험 회피) → 아시아 다음 날 | 구리/금·금/은과 다른 몫인지 · 야후 GC=F 2000~ · 달러·S&P 5일 꼬리 위 | 5개 시장 | ⏳ |
+| 61 | VKOSPI(코스피200 변동성) 수준·5일 급등 꼬리 → 한국 | https://www.nisc.co.za/products/abstracts/22076/asymmetric-and-negative-return-volatility-relationship-the-case-of-the-vkospi · 네이버·다음·KRX 공개 주소 찾기 · VIX 칸 위 겹침 | 한국 | ➖ 11/3 16시 주소 13곳 시험 — 네이버 fchart(VKOSPI·KPI200VOL·VKOSPI200 빈 응답)·api.stock.naver.com(빈 [])·m.stock.naver.com(409 Not Found)·finance.naver.com sise_index_day(410)·다음 quotes·market_index(500)·야후 ^VKOSPI(404)·stooq(JS 막힘)·KRX(LOGOUT) 모두 없음 · 다음 길: investing.com·KRX 정보데이터 OTP 다운로드 |
+| 62 | 금(GC=F) 혼자 5일 급등 꼬리(위험 회피) → 아시아 다음 날 | 구리/금·금/은과 다른 몫인지 · probe/gold_bt.py — 야후 GC=F 2000-08~ 6,570일 · 걸어가며 브라이어(사전 100) 앞/뒤·최근5년 · 달러지수·S&P 5일 꼬리 칸 위 + 교차 로지스틱 | 5개 시장 | ✅ 11/3 16시 일본 내일(5일 ≥90%, w 0.5) · ➖ 한국 5일(앞 +1.5%p 작음·교차 한쪽 나빠짐) · 홍콩 급락 다음 날(칸 위 앞 나빠짐) · 중·미·20일 ❌ |
 | 60b | 중국 「A 프리미엄 5일 급등」(≥90) 다음 5일 — 5일 간격 표본·덧셈형·사건 솎기 | #60 ➖ · probe/ah2_bt.py — A/H 12쌍 직접 계산 + 야후 000001.SS·^GSPC 2007-07~ 4,683일 · 2017-03 기준 앞/뒤·최근5년 · 5일 간격 시작점 5개 걸어가기 + 교차 로지스틱 | 중국 | ❌ 11/3 15시 닫음 — 5일 간격 시작0·1 뒤 +5.7·+0.9 뒤집힘 · 솎으면 −4.1·−4.7(n 87·103, 앞 <100) · 교차 두 방향 나빠짐(0.2522→0.25326 · 0.25149→0.25224) · 걸어가기 칸곱 평균은 세 기간 조금 좋아지나 시작0 뒤·최근5년 나빠짐 · 덧셈형 앞 나빠짐 |
 | 63 | 남향 자금(Stock Connect 본토→홍콩 순매수) 5·20일 꼬리 → 홍콩 | HKMA RM12/2019 https://www.hkma.gov.hk/media/eng/publication-and-research/research/research-memorandums/2019/RM12-2019.pdf · 자료: 홍콩거래소·동방재부(eastmoney) 공개 주소 찾기 | 홍콩 | ⏳ |
 | 14 | 결합 손잡이(N0·RHO·CAP) 보정 · auto_w 점검 | prob_hist.json 채점 60건 넘으면 | 5개 시장 | ⏳ (10/30 FAKE 채점표 d1 n 64 → 다음 시간 실제 prob_hist 로 확인 · mp 에 방법별 n 없음) |
 
 ## 실행 기록
+
+### 11/3 16시 — 🥇 금 5일 급등 → 일본 내일 (#62) · VKOSPI 주소 찾기 (#61)
+- 자료: 야후 GC=F 2000-08-30~2026-11-03 6,570일(지금 3,921.9) · probe/gold_bt.py · VKOSPI 주소 13곳(네이버 fchart·api·모바일·PC, 다음 2곳, 야후, stooq, KRX) 모두 자료 없음(빈 응답·404·409·410·500·LOGOUT) (Actions probe_tmp run 41594280001, 끝나고 워크플로 지움).
+- 검증 일본(2013-05 기준 앞/뒤): 금 5일 ≥90% 다음 날 −5.3·−2.2%p(n 322·354) · 달러·S&P 5일 꼬리 칸 위 걸어가기 앞 0.24881→0.24858 · 뒤 0.24526→0.24507 · 최근5년 0.24509→0.24495 · 교차 앞→뒤 0.24441→0.24433 · 뒤→앞 0.24626→0.24611(계수 −0.17·−0.13) — 모두 개선.
+- 나머지: 한국 5일 뒤 +1.5·+10.8(앞 작음, 교차 뒤→앞 나빠짐) ➖ · 홍콩 급락 다음 날 −6.9·−5.6 이나 칸 위 앞 0.2474→0.24766 나빠짐 ➖ · 일본 ≤10%·5일 뒤·20일 변화·중·미 ❌(앞/뒤 엇갈림).
+- 판정: ✅ 일본 내일만 붙임 — prob_x.methods() 「🥇 금 급등」(w 0.5, 급등 꼬리에서만) · prob.py how 한 줄. prob.yml run 41594594887 정상 · research.gold5 rk 0.317(지금 꼬리 아님 → 이번엔 안 켜짐).
+- 지금 확률: 꼬리 아니라 변화 없음(16:11 장중 기준 한국 52.3%·일본 14.0%·중국 51.6%·홍콩 79.9%·미국 29.7% — 시간 흐름 탓) · 일주일 55.0·53.1·51.8·51.5·59.2%.
+- 다음: #63 남향 자금(Stock Connect) → #61 VKOSPI 다른 길(investing·KRX OTP) · #14 결합 손잡이(채점 d1 n 74).
 
 ### 11/3 15시 — 🇨🇳 A 프리미엄 급등 → 중국 5일 다시 (#60b)
 - 자료: #60 과 같은 A/H 동시상장 12쌍(야후 일봉 + HKDCNY=X) 직접 계산 · 000001.SS·^GSPC 2007-07-20~2026-11-03 4,683일 · 급등일 455 · 솎은 사건 190 · probe/ah2_bt.py (Actions probe_tmp run 41588066806, 끝나고 워크플로 지움).
