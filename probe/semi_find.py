@@ -1,35 +1,28 @@
-"""#57 반도체 수출 자료 찾기 (임시)."""
-import re, html, urllib.request, urllib.parse
+"""#57 반도체 수출 자료 찾기 2 (임시) — 지표누리 A0002 반도체 산업 동향."""
+import re, html, urllib.request
 H_ = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36"}
-def get(u, t=40, data=None):
+def get(u, t=40):
     try:
-        r = urllib.request.urlopen(urllib.request.Request(u, headers=H_, data=data), timeout=t); return r.status, r.read().decode("utf-8", "ignore")
+        r = urllib.request.urlopen(urllib.request.Request(u, headers=H_), timeout=t); return r.status, r.read().decode("utf-8", "ignore")
     except Exception as e: return str(e)[:80], ""
 def txt(t): return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html.unescape(t))).strip()
-kw = urllib.parse.quote("반도체 수출")
-for u in ["https://www.index.go.kr/unity/potal/main/EachDtlPageDetail.do?idx_cd=1066",
-          f"https://www.index.go.kr/unity/potal/search/search.do?query={kw}",
-          f"https://www.index.go.kr/unity/potal/search/totalSearch.do?searchWord={kw}",
-          f"https://www.index.go.kr/unity/potal/search/search.do?searchKeyword={kw}",
-          "https://www.index.go.kr/unity/potal/main/EachDtlPageDetail.do?idx_cd=1155",
-          "https://www.index.go.kr/unity/potal/main/EachDtlPageDetail.do?idx_cd=1342",
-          "https://www.index.go.kr/unity/potal/main/EachDtlPageDetail.do?idx_cd=2808",
-          "https://www.index.go.kr/unity/potal/main/EachDtlPageDetail.do?idx_cd=1236"]:
-    st, s = get(u); t = re.search(r"<title>(.*?)</title>", s, re.S)
-    print("\n==", st, u, "|", txt(t.group(1)) if t else "", len(s))
-    for m in set(re.findall(r"stts_cd=(\d+)", s)): print("  stts_cd", m)
-    for m in re.finditer(r"반도체", s):
-        seg = s[max(0, m.start()-300): m.end()+200]
-        ids = re.findall(r"idx_cd[=\"':\s]+(\d{3,5})", seg)
-        print("  반도체 →", ids[:5], txt(seg)[:160]); 
-        if len(ids) > 30: break
-# 1066 의 다른 stts_cd 표 머리 보기
-for sc in ["106601", "106602", "106603", "106604", "106605", "106606"]:
-    st, s = get(f"https://www.index.go.kr/unity/potal/eNara/sub/showStblGams3.do?stts_cd={sc}&idx_cd=1066&freq=M&period=202401:202610")
-    labs = [txt(r)[:60] for r in re.findall(r"<tr.*?</tr>", s, re.S)][:12]
-    print("\n## 1066", sc, st, len(s), labs)
-# 산업부 ICT 수출 (idx 후보)
-for ic in ["1155", "1342", "2808", "1236", "1158", "1340", "1341"]:
-    st, s = get(f"https://www.index.go.kr/unity/potal/eNara/sub/showStblGams3.do?stts_cd={ic}01&idx_cd={ic}&freq=M&period=202401:202610")
-    labs = [txt(r)[:50] for r in re.findall(r"<tr.*?</tr>", s, re.S)][:8]
-    print("## idx", ic, st, len(s), labs)
+for ic in ["A0002", "A0003"]:
+    st, s = get(f"https://www.index.go.kr/unity/potal/main/EachDtlPageDetail.do?idx_cd={ic}")
+    print("==", ic, st, len(s))
+    print("  stts:", sorted(set(re.findall(r"stts_cd[=\"':\s]+([A-Z0-9]+)", s))))
+    print("  src:", sorted(set(re.findall(r"(showStbl\w+\.do[^\"'\s<>]*)", s)))[:10])
+    for m in re.finditer(r"수출", s):
+        print("   ·", txt(s[max(0, m.start()-120): m.end()+120])[:200])
+    import itertools
+cands = []
+for ic in ["A0002"]:
+    for k in range(1, 7):
+        sc = f"{ic}0{k}"
+        for fq in ["M", "Q", "Y"]:
+            u = f"https://www.index.go.kr/unity/potal/eNara/sub/showStblGams3.do?stts_cd={sc}&idx_cd={ic}&freq={fq}&period=199001:202612"
+            st, s = get(u); rows = re.findall(r"<tr.*?</tr>", s, re.S)
+            if rows:
+                labs = [txt(r)[:90] for r in rows][:10]
+                print("##", sc, fq, st, len(s), "행", len(rows)); [print("    ", l) for l in labs]
+                hdr = re.findall(r"((?:19|20)\d\d\.?\s?\d\d월?)", s); print("    기간", hdr[:2], hdr[-2:], len(hdr))
+                break
