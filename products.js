@@ -845,8 +845,8 @@
     P().then(function(D){
       var root = document.getElementById("pdroot"); if (!root || root.dataset.k !== key) return; DATA = D;
       var full = function(){ var r = document.getElementById("pdroot"); if (!r || r.dataset.k !== key) return;
-        r.innerHTML = (D.errors && D.errors.length ? '<p class="note" style="margin:0 0 8px">⚠️ 일부 자료를 못 받았어요: ' + e(D.errors.join(" · ").slice(0, 200)) + ' — 지난 값을 보여 줘요.</p>' : '') + (window.threeWay ? '<div id="pd3w"></div>' : '') + VIEW[key](D);
-        if (window.threeWay) try { threeWay(document.getElementById("pd3w"), D); } catch(x) {}   // ⚖️ 10/21 A10/21-3 세 갈래 길
+        r.innerHTML = (D.errors && D.errors.length ? '<p class="note" style="margin:0 0 8px">⚠️ 일부 자료를 못 받았어요: ' + e(D.errors.join(" · ").slice(0, 200)) + ' — 지난 값을 보여 줘요.</p>' : '') + (window.threeWay && key === "bond" ? '<div id="pd3w"></div>' : '') + VIEW[key](D);   // 🎨 11/04: 세 갈래 길은 상품 첫 화면(채권)에만 — 채권·펀드 중복 카드 분리
+        if (window.threeWay && key === "bond") try { threeWay(document.getElementById("pd3w"), D); } catch(x) {}   // ⚖️ 10/21 A10/21-3 세 갈래 길
         bindSeg("pdseg", function(k){ SEL[key] = k; keep(); redraw(); }); bindInner(); };
       window.__pdRedraw = function(){ redraw(); };
       var redraw = function(){ var b = document.getElementById("pdbody"); if (!b) return; var y = b.getBoundingClientRect().top; b.innerHTML = BODY[key](D, SEL[key] || {bond: "gov", fund: "pv", els: "open"}[key]); holdAt("#pdbody", y); bindInner(); };

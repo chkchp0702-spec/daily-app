@@ -52,7 +52,9 @@
 
   // ⑦ 뒤로: 홈이 아니면 늘 보이게 (알림 링크로 종목 화면을 바로 열었을 때도) — 더 돌아갈 기록이 없으면 보던 탭 → 오늘로
   window.updBack = function(){ var b = document.getElementById("backbtn"); if (!b) return; b.classList.add("on");
-    b.classList.toggle("root", !(navD() > 0 || !!document.getElementById("sheet") || (window.cur && cur !== "home"))); };
+    // 🎨 11/04: 아래 탭으로 가는 첫 화면(돌아갈 기록 없음)에선 숨김 — 종목리포트처럼 탭에 없는 화면은 보임
+    var tabbed = !!(window.cur && document.querySelector("#bnav") && ["home","market","sector","prob","port","score","whale","cup","gap","screen","sigmore","bond","fund","els","prop","luck","saju","tarot","lotto","feed"].indexOf(cur) >= 0);
+    b.classList.toggle("root", !(navD() > 0 || !!document.getElementById("sheet") || (window.cur && cur !== "home" && !tabbed))); };
   var _goBack = window.goBack;
   window.goBack = function(){
     if (document.getElementById("sheet") || navD() > 0) return _goBack();

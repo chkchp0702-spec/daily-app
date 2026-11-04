@@ -7,7 +7,7 @@
   var TEXT_TAGS = {DIV:1, P:1, SPAN:1, B:1, I:1, EM:1, STRONG:1, SMALL:1, A:1, BR:1, UL:1, OL:1, LI:1, SUP:1, SUB:1, MARK:1, U:1, S:1, CODE:1};
   var SKIP = "button,svg,canvas,table,img,input,select,textarea,details,iframe,video,[data-op],[data-pf],[data-foc],[data-goto],[role=button],.bar,.chip,.pill";
   var OPEN = {};                 // 펼친 글
-  var SHOW = 3, MIN = 6;         // 10/15: 2줄에서 자르니 어색(「오늘의 판단」 두 줄도 접혔음) → 6줄 넘을 때만, 3줄 보이게
+  var SHOW = 3, MIN = 4;   // 🎨 11/04 우와: 4줄 넘으면 3줄만 (사용자 「긴 글은 3줄까지만」)         // 10/15: 2줄에서 자르니 어색(「오늘의 판단」 두 줄도 접혔음) → 6줄 넘을 때만, 3줄 보이게
 
   function key(el){ return (el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 40); }
   function isText(el){

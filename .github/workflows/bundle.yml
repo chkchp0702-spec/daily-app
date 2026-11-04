@@ -1,0 +1,25 @@
+name: bundle
+# 📦 11/04: .js 나 index.html 이 바뀌어 push 되면 app.bundle.js 를 다시 합쳐 올림 (tools/bundle.py)
+on:
+  push:
+    branches: [main]
+    paths: ["*.js", "index.html", "tools/bundle.py"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: bundle
+  cancel-in-progress: true
+jobs:
+  b:
+    if: github.actor != 'github-actions[bot]' || !contains(github.event.head_commit.message, '📦 묶음')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - run: python3 tools/bundle.py
+      - name: 저장
+        run: |
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          bash scripts/push.sh "📦 묶음 $(TZ=Asia/Seoul date '+%F %H:%M')" app.bundle.js index.html

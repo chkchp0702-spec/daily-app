@@ -8,7 +8,8 @@
   var D = document.documentElement;
 
   /* ---------- A15-2 · A15-3 글자 ---------- */
-  var ORIG = new WeakMap(), F = 1, FLOOR = 11.5;
+  var ORIG = new WeakMap(), F = 1, FLOOR = 13;   // 🎨 11/04 우와: 바닥 11.5 → 13 · 작은 글자일수록 더 키움(BUMP) — 사용자 「가독성 좋게」
+  function BUMP(px){ return px <= 16 ? px + 1.5 : px <= 20 ? px + 2 : px <= 30 ? px + 3 : px; }
   function sysF(){
     try {
       if (!(window.CSS && CSS.supports && CSS.supports("font", "-apple-system-body"))) return 1;
@@ -30,7 +31,7 @@
       }
       if (!o) continue;
       if (o.chrome == null) o.chrome = /header|\.stamp|\.brand|#bnav|#uibtn|#gsbtn|#wlbtn|\.tabs?\b/.test(r.selectorText || "");   // 머리·아래 탭 바는 크기 그대로(한 줄 유지)
-      var v = Math.round(Math.max(o.px, FLOOR) * (o.chrome ? 1 : F) * 10) / 10;
+      var v = Math.round((o.chrome ? o.px : o.px < 11 ? o.px : BUMP(Math.max(o.px, FLOOR))) * (o.chrome ? 1 : F) * 10) / 10;   // 11px 미만은 그림 눈금 글자 → 그대로
       if (r.style.fontSize !== v + "px") r.style.setProperty("font-size", v + "px", o.imp);
     }
   }

@@ -75,7 +75,7 @@
     var b = window.easyBack ? easyBack(title) : title; if (b !== title && (r = vid1(b))) return r;
     return window.easyBackTerms ? vid1(easyBackTerms(b)) : ""; }
   function vidScreen(){ var c = (typeof cur !== "undefined" && cur) || "", k = VID["m_" + (MORE_ALIAS[c] || c)] ? "m_" + (MORE_ALIAS[c] || c) : "t_" + curGrp(); return VID[k] ? "vid/" + k + ".mp4?v=" + VIDV : ""; }
-  function vidHtml(vs, wait){ return vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted' + (wait ? '' : ' autoplay') + ' playsinline preload="' + (wait ? 'metadata' : 'auto') + '" controls disablepictureinpicture></video></div>' : ""; }
+  function vidHtml(vs, wait){ return vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted playsinline preload="metadata" controls disablepictureinpicture></video></div>' : ""; }   // 🎨 11/04: 자동 재생 안 함(56MB) — ▶ 누를 때만
   var MORE_NAME = {home: "🏠 오늘", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", feed: "📰 피드", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또"};
   function ls(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); } catch(x) { return null; } }
   function seen(){ return ls("gd_seen") || {}; }
@@ -128,7 +128,7 @@
     var pz = POSE[g] || (mk && (MKPOSE[mk] || faceFor((MORE[MORE_ALIAS[mk] || mk] || []).slice(-1)) || POSE[GRP[mk] || ""]));
     var vs = vidOf(g, mk) || (g === "intro" ? vidFor("👋 조이 인사") : "") || vidOf(curGrp()); var fb = "";
     q.innerHTML = '<div class="gd-sh' + (mk ? ' gd-more' : '') + (vs ? ' gd-hasv' : '') + '" role="dialog" aria-label="안내자 조이">' +
-      (vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted autoplay playsinline preload="auto" controls disablepictureinpicture></video></div>' : '') +
+      (vs ? '<div class="gd-vw"><video class="gd-v" src="' + vs + '" muted playsinline preload="metadata" controls disablepictureinpicture></video></div>' : '') +
       '<div class="gd-row"><div class="gd-kid" aria-hidden="true"' + (pz ? ' style="background-image:url(' + pz + ')"' : '') + '></div><div class="gd-bub"><div class="gd-t">' + (mk ? (MORE_NAME[mk] || "") + ' 자세히' : NAME[g] + ' 설명') + '</div>' +
       L.map(function(s){ return '<p class="gd-l">' + s + '</p>'; }).join("") + '</div></div><div class="gd-ft">' +
       (mk ? '' : ["home", "mkt", "inv", "sig", "prod", "feed"].map(function(k){ return '<button data-g="' + k + '"' + (k === g ? ' class="on"' : '') + '>' + NAME[k] + '</button>'; }).join("")) +
@@ -302,7 +302,7 @@
   }
   function init(){
     addBtn(); hook();
-    if (!ls("gd_intro") && !/[?&]embed=1/.test(location.search)) setTimeout(function(){ if (document.getElementById("gdq")) return; ls("gd_intro", 1); open("intro"); }, 2900);   // 인사 화면(2초) 뒤
+    if (!ls("gd_intro") && !/[?&]embed=1/.test(location.search)) setTimeout(function(){ if (document.getElementById("gdq") || ls("gd_intro") || document.getElementById("wowob")) return; ls("gd_intro", 1); open("intro"); }, 2900);   // 🎨 11/04: wow.js 3장 안내가 대신   // 인사 화면(2초) 뒤
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
   setTimeout(function(){ addBtn(); hook(); }, 900);

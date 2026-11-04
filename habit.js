@@ -161,6 +161,7 @@
       if (v.length) rows.push('<b>💰 돈이 몰린 종목</b> ' + v.map(function(s){ return '<a data-op="' + e(s.s) + '">' + e(s.n) + '</a> <span class="' + cls(s.r) + '">' + sg(s.r) + '</span>'; }).join(" · "));
       var fx = W && W.fx; if (fx && fx.p && String(fx.t || "").slice(0, 10) === today()){ var dw = fx.prev ? fx.p - fx.prev : null; rows.push('<b>💱 원/달러</b> ' + (Math.round(fx.p * 10) / 10).toLocaleString() + '원' + (dw != null ? ' <span class="' + cls(dw) + '">' + (dw > 0 ? "▲" : dw < 0 ? "▼" : "") + Math.abs(dw).toFixed(1) + '원</span>' : '')); }
       if (!rows.length) return;
+      ex = ex || document.getElementById("hblive");   // 🎨 11/04: 동시에 두 번 불리면 카드가 둘 생기던 것
       if (!ex){ ex = document.createElement("section"); ex.id = "hblive"; ex.className = "card hb-live"; }
       ex.innerHTML = '<div class="hb-lh"><b>⚡ 지금 바뀐 것</b><span class="mut">' + e(L.t || "") + ' 기준 · 10분마다</span></div>' + rows.map(function(x){ return '<div class="hb-lr">' + x + '</div>'; }).join("");
       var after = document.getElementById("hbsince") || document.getElementById("tdhero");

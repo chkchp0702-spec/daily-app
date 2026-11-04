@@ -42,10 +42,10 @@
       gj("archive/x/live_cn.json" + q5(), 120000), gj("archive/x/live_hk.json" + q5(), 120000),
       gj(RAWM + "market/home.json" + q5()), sec ? gj("archive/sector/" + sec.id + "/compass.json") : null,
       gj("archive/x/whale_pick.json" + q5()), gj("archive/x/whale_x.json" + q5()), arc("cup", "cards.json"), arc("gap", "cards.json"),
-      gj("archive/x/products.json" + q5(), 600000), gj("archive/x/prob.json" + q5()), gj(RAWM + "feeds/hot.json" + q5()), null,
+      gj("archive/x/products.json" + q5(), 600000), gj("archive/x/prob.json" + q5()), gj(RAWM + "feeds/hot.json" + q5()), gj("archive/x/pbbrief.json" + q5(), 300000),   // 🎨 11/04: 오늘 한 줄(pbbrief)
       window.SIGNMP || null
     ]).then(function(r){
-      D = {kr: r[0], us: r[1], jp: r[2], cn: r[3], hk: r[4], H: r[5] || {}, C: r[6], wp: r[7], wx: r[8], cup: r[9], gap: r[10], pd: r[11], pb: r[12], hot: r[13], feed: r[14]};
+      D = {kr: r[0], us: r[1], jp: r[2], cn: r[3], hk: r[4], H: r[5] || {}, C: r[6], wp: r[7], wx: r[8], cup: r[9], gap: r[10], pd: r[11], pb: r[12], hot: r[13], brief: r[14]};
       DT = Date.now(); return D;
     });
   }
@@ -174,13 +174,40 @@
     }, 100);
   }
 
+  /* ───────── ⑰ 오늘의 숫자 — 그날 제일 중요한 숫자 하나 + 한 줄 이유 (🎨 11/04 사용자 「오늘 한 줄을 맨 위 큰 글씨로」) ─────────
+     한국 장중 = 코스피 지금 · 장 끝난 뒤 = 코스피 마감 · 아침 9시 전 = 밤사이 S&P500. 오를 확률이 70% 넘거나 30% 아래면 그게 더 눈에 띄니 그걸로. 한 줄은 pbbrief(오늘 한 장)의 one 그대로 */
+  function numHtml(d){
+    var ks = ix(d.kr, "코스피"), sp = ix(d.us, "S&P500"), h = kst().getUTCHours() + kst().getUTCMinutes() / 60, wk = [0, 6].indexOf(kst().getUTCDay()) < 0;
+    var pk = d.pb && d.pb.markets && d.pb.markets.KR, p1 = pk && pk.p1 != null ? Math.round(pk.p1 * 100) : null;
+    try { var lv_ = pk && window.probLive && probLive(pk, d.kr, d.pb); if (lv_ && lv_.p1 != null) p1 = Math.round(lv_.p1 * 100); } catch(x) {}   // 🎲 오를 확률 화면과 같은 숫자(장중 다시 계산)
+    var pick = null;
+    if (p1 != null && (p1 >= 70 || p1 <= 30)) pick = {k: "prob", lab: "🇰🇷 " + (pk.open_now ? "오늘 코스피 오를 확률" : "다음 장 코스피 오를 확률"), v: p1 + "%", c: p1 >= 50 ? "up" : "dn", go: "prob"};
+    else if (ks && wk && h >= 8.9 && h < 15.6 && liveNow(d.kr)) pick = {k: "kr", lab: "🇰🇷 코스피 지금 · " + d.kr.t, v: sg(ks.chg), c: cls(ks.chg), go: "sector"};
+    else if (sp && (h < 9 || !ks)) pick = {k: "us", lab: "🇺🇸 밤사이 S&P500", v: sg(sp.chg), c: cls(sp.chg), go: "sector"};
+    else if (ks) pick = {k: "kr", lab: "🇰🇷 코스피 " + md(d.kr.date) + " 마감", v: sg(ks.chg), c: cls(ks.chg), go: "sector"};
+    if (!pick) return "";
+    var one = d.brief && d.brief.one ? String(d.brief.one) : "";
+    var sub = [];
+    if (pick.k !== "kr" && ks) sub.push("코스피 " + sg(ks.chg)); if (pick.k !== "us" && sp) sub.push("S&P500 " + sg(sp.chg)); if (pick.k !== "prob" && p1 != null) sub.push("오를 확률 " + p1 + "%");
+    return '<section class="card h2-num wow-big" data-goto="' + pick.go + '"><small>' + e(pick.lab) + '</small><b class="' + pick.c + '">' + e(pick.v) + '</b>' + (one ? '<p>' + e(one) + '</p>' : '') + (sub.length ? '<div class="h2-nsub">' + sub.map(function(x){ return '<span>' + e(x) + '</span>'; }).join("") + '</div>' : '') + '</section>';
+  }
+  /* ⑳ 하루 흐름 작은 선 — live_*.json 의 snaps([시각, 오른 수, 내린 수, 지수 등락, …]) */
+  function spark(J){
+    var S = J && J.snaps; if (!S || S.length < 3) return "";
+    var v = S.map(function(s){ return +s[3]; }).filter(function(x){ return !isNaN(x); }); if (v.length < 3) return "";
+    var mn = Math.min.apply(null, v.concat([0])), mx = Math.max.apply(null, v.concat([0])), rg = (mx - mn) || 1, W = 100, H = 28;
+    var pts = v.map(function(x, i){ return (i / (v.length - 1) * W).toFixed(1) + "," + (H - 2 - (x - mn) / rg * (H - 4)).toFixed(1); }).join(" ");
+    var zero = (H - 2 - (0 - mn) / rg * (H - 4)).toFixed(1);
+    return '<svg class="h2-sp" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="' + zero + '" x2="100" y2="' + zero + '"/><polyline points="' + pts + '"/></svg>';
+  }
+
   /* ───────── ② 5개 시장 타일 ───────── */
   function worldHtml(d){
     var C = d.C && d.C.markets || {};
     var MK = [["KR", "🇰🇷", "코스피", d.kr, "코스피"], ["US", "🇺🇸", "S&P500", d.us, "S&P500"], ["JP", "🇯🇵", "닛케이", d.jp, "닛케이 225"], ["CN", "🇨🇳", "상해", d.cn, "상해종합"], ["HK", "🇭🇰", "항셍", d.hk, "항셍"]];
     var t = MK.map(function(m){ var x = ix(m[3], m[4]), c = C[m[0]], c5 = c && (c.index || [])[0] && c.index[0].chg5; if (!x) return "";
       var lv = liveNow(m[3]) && m[0] !== "US";
-      return '<button type="button" class="h2-w' + (m[0] === "KR" || m[0] === "US" ? " big" : "") + '" data-goto="sector" style="background:' + heatBg(x.chg) + '"><span class="f">' + m[1] + '</span><small>' + m[2] + '</small><b>' + sg(x.chg) + '</b><em>' + (lv ? "● " + e(m[3].t) : wd(m[0] === "US" && m[3].t < "12:00" ? new Date(Date.parse(m[3].date + "T00:00:00Z") - 864e5).toISOString() : m[3].date) + " 마감") + '</em>' + (c5 != null ? '<em>5일 ' + sg(c5) + '</em>' : '') + '</button>'; }).join("");
+      return '<button type="button" class="h2-w' + (m[0] === "KR" || m[0] === "US" ? " big" : "") + '" data-goto="sector" style="background:' + heatBg(x.chg) + '"><span class="f">' + m[1] + '</span><small>' + m[2] + '</small><b>' + sg(x.chg) + '</b><em>' + (lv ? "● " + e(m[3].t) : wd(m[0] === "US" && m[3].t < "12:00" ? new Date(Date.parse(m[3].date + "T00:00:00Z") - 864e5).toISOString() : m[3].date) + " 마감") + '</em>' + (c5 != null ? '<em>5일 ' + sg(c5) + '</em>' : '') + (lv ? spark(m[3]) : '') + '</button>'; }).join("");
     return '<section class="card h2-world"><div class="h2-hd"><b>🌏 5개 시장 지금</b><span class="mut">누르면 시장 흐름 ›</span></div><div class="h2-wg">' + t + '</div></section>';
   }
 
@@ -225,13 +252,33 @@
   function mapHtml(d){
     var useKr = d.kr && d.kr.sectors && (liveNow(d.kr) || !(d.us && d.us.sectors) || (kst().getUTCHours() >= 9 && kst().getUTCHours() < 22 && [0, 6].indexOf(kst().getUTCDay()) < 0));
     var J = useKr ? d.kr : d.us; if (!J || !J.sectors) return "";
-    var it = J.sectors.filter(function(s){ return s.n >= 5; }).map(function(s){ return {n: s.name.replace(/\(.*?\)/g, ""), ic: s.icon || "", v: s.r, w: Math.pow(s.n, 0.8)}; }).sort(function(a, b){ return b.w - a.w; }).slice(0, 15);
+    var it = J.sectors.filter(function(s){ return s.n >= 5; }).map(function(s){ return {n: s.name.replace(/\(.*?\)/g, ""), ic: s.icon || "", v: s.r, w: Math.pow(s.n, 0.8), big: (s.big || []).slice(0, 3), up: s.up, down: s.down}; }).sort(function(a, b){ return b.w - a.w; }).slice(0, 15);
     if (it.length < 6) return "";
     var W = 100, Hh = 78, R = squarify(it, 0, 0, W, Hh);
-    var cells = R.map(function(r){ var big = r.w * r.h > 380, mid = r.w * r.h > 150;
-      return '<div class="h2-tm" style="left:' + r.x.toFixed(2) + '%;top:' + (r.y / Hh * 100).toFixed(2) + '%;width:' + r.w.toFixed(2) + '%;height:' + (r.h / Hh * 100).toFixed(2) + '%;background:' + heatBg(r.it.v) + '">' + (mid ? '<span>' + (big ? e(r.it.ic) + " " : "") + e(r.it.n.split("·")[0]) + '</span>' : '') + (r.w * r.h > 70 && r.w > 9 ? '<b>' + sg(r.it.v) + '</b>' : '') + '</div>'; }).join("");
+    var cells = R.map(function(r, k){ var big = r.w * r.h > 380, mid = r.w * r.h > 150;
+      return '<div class="h2-tm" data-k="' + k + '" style="left:' + r.x.toFixed(2) + '%;top:' + (r.y / Hh * 100).toFixed(2) + '%;width:' + r.w.toFixed(2) + '%;height:' + (r.h / Hh * 100).toFixed(2) + '%;background:' + heatBg(r.it.v) + '">' + (mid ? '<span>' + (big ? e(r.it.ic) + " " : "") + e(r.it.n.split("·")[0]) + '</span>' : '') + (r.w * r.h > 70 && r.w > 9 ? '<b>' + sg(r.it.v) + '</b>' : '') + '</div>'; }).join("");
     var when = useKr ? (liveNow(d.kr) ? "지금 " + d.kr.t : md(d.kr.date) + " 마감") : "미국 " + (d.us.t && d.us.t < "12:00" ? md(new Date(Date.parse(d.us.date + "T00:00:00Z") - 864e5).toISOString()) : md(d.us.date)) + " 마감";
-    return '<section class="card h2-map" data-goto="sector"><div class="h2-hd"><b>🗺 ' + (useKr ? "🇰🇷 한국" : "🇺🇸 미국") + ' 업종 지도</b><span class="mut">' + e(when) + ' · 넓이 = 종목 수</span></div><div class="h2-tmw">' + cells + '</div><div class="h2-lg"><span class="dn">■ 내림</span><span>색이 진할수록 많이 움직임</span><span class="up">오름 ■</span></div></section>';
+    MAPIT = R.map(function(r){ return r.it; });
+    return '<section class="card h2-map"><div class="h2-hd" data-goto="sector"><b>🗺 ' + (useKr ? "🇰🇷 한국" : "🇺🇸 미국") + ' 업종 지도</b><span class="mut">' + e(when) + ' · 넓이 = 종목 수</span></div><div class="h2-tmw">' + cells + '</div><div class="h2-pick" id="h2pick"></div><div class="h2-lg"><span class="dn">■ 내림</span><span>색이 진할수록 많이 움직임</span><span class="up">오름 ■</span></div><p class="note" style="margin:6px 0 0">칸을 누르면 그 업종 대표 종목 · 제목을 누르면 시장 흐름</p></section>';
+  }
+  var MAPIT = [];
+  function mapPick(k){   // ⑲ 🎨 11/04 업종 칸 터치 → 대표 종목 3개 (사용자 「지금은 보기만 함」)
+    var it = MAPIT[k], box = document.getElementById("h2pick"); if (!it || !box) return;
+    [].forEach.call(document.querySelectorAll(".h2-tm.on"), function(x){ x.classList.remove("on"); });
+    if (box.dataset.k === String(k)){ box.innerHTML = ""; box.dataset.k = ""; return; }
+    var t = document.querySelector('.h2-tm[data-k="' + k + '"]'); if (t) t.classList.add("on");
+    box.dataset.k = String(k);
+    box.innerHTML = '<div class="h2-ph"><b>' + e(it.ic + " " + it.n) + ' <span class="' + cls(it.v) + '">' + sg(it.v) + '</span></b><small>오른 ' + (it.up || 0) + ' · 내린 ' + (it.down || 0) + '</small></div>' +
+      (it.big.length ? it.big.map(function(x){ return '<button type="button" class="h2-pr" data-op="' + e(x.s) + '"><b>' + e(x.n) + '</b><em>' + e(String(x.s).replace(/\.(KS|KQ)$/, "")) + '</em><span class="' + cls(x.r) + '">' + sg(x.r) + '</span></button>'; }).join("") : '<p class="note">대표 종목 자료가 없어요.</p>');
+  }
+  document.addEventListener("click", function(ev){ var t = ev.target.closest && ev.target.closest(".h2-tm[data-k]"); if (!t || !t.closest("#h2map")) return; ev.stopPropagation(); ev.preventDefault(); mapPick(+t.dataset.k); }, true);
+  /* ㉑ 고객에게 보낼 한 장 미리보기 — 홈에서 바로 「보내기」 (onepage.js 의 고르기 창을 엶) */
+  function clientHtml(d){
+    var b = d.brief; if (!b || !b.one) return "";
+    var tk = (b.talk || []).slice(0, 2);
+    return '<section class="card h2-cl"><div class="h2-hd"><b>📨 오늘 고객에게 보낼 한 장</b><span class="mut">' + e(b.label || "") + '</span></div>' +
+      '<div class="h2-clp"><div class="h2-clt">' + e(b.one) + '</div>' + (tk.length ? '<ul>' + tk.map(function(x){ return '<li>' + e(x) + '</li>'; }).join("") + '</ul>' : '') + (b.advice && b.advice.read ? '<p>' + e(b.advice.read) + '</p>' : '') + '</div>' +
+      '<button type="button" class="h2-clb" id="h2clb">📨 카톡으로 보내기 — 한 장 고르기</button></section>';
   }
 
   /* ───────── 붙이기 ───────── */
@@ -245,14 +292,17 @@
     load().then(function(d){
       BUSY = false; if (!d || cur !== "home") return;
       var S = stories(d); CUR_S = S;
-      ["h2rings", "h2world", "h2disc", "h2map"].forEach(function(id){ var x = document.getElementById(id); if (x) x.remove(); });
+      ["h2rings", "h2world", "h2disc", "h2map", "h2num", "h2cl"].forEach(function(id){ var x = document.getElementById(id); if (x) x.remove(); });
       var mk = function(id, html){ var w = document.createElement("div"); w.id = id; w.innerHTML = html; return w; };
       var rings = mk("h2ringsw", ringsHtml(S)); rings.id = "h2ringsw";
       var old = document.getElementById("h2ringsw"); if (old) old.remove();
       b.insertBefore(rings, b.firstChild);
-      var world = mk("h2world", worldHtml(d)), disc = mk("h2disc", discHtml(d)), map = mk("h2map", mapHtml(d));
-      hero.insertAdjacentElement("afterend", world); world.insertAdjacentElement("afterend", disc);
-      var pl = b.querySelector("section.card.pl"); (pl || disc).insertAdjacentElement("afterend", map);
+      var num = mk("h2num", numHtml(d)); b.insertBefore(num, b.firstChild);   // ⑰ 오늘의 숫자 맨 위
+      var world = mk("h2world", worldHtml(d)), disc = mk("h2disc", discHtml(d)), map = mk("h2map", mapHtml(d)), cl = mk("h2cl", clientHtml(d));
+      rings.insertAdjacentElement("afterend", world); world.insertAdjacentElement("afterend", hero);   // 날씨판은 타일 아래로
+      hero.insertAdjacentElement("afterend", disc);
+      var pl = b.querySelector("section.card.pl"); (pl || disc).insertAdjacentElement("afterend", map); map.insertAdjacentElement("afterend", cl);
+      var cb = document.getElementById("h2clb"); if (cb) cb.onclick = function(ev){ ev.stopPropagation(); var ob = document.getElementById("opbtn"); if (ob) ob.click(); else if (window.goTo) goTo("home"); };
       b.setAttribute("data-h2", String(DT));
       [].forEach.call(rings.querySelectorAll("[data-st]"), function(x){ x.onclick = function(ev){ ev.stopPropagation(); openStory(S, +x.dataset.st); }; });
       reorder(b);
@@ -261,6 +311,8 @@
   function reorder(b){   // v2에선 「오늘 한 장」·「바뀐 것」·5개 시장과 겹치는 띠는 아래로 / 숨김
     var hm = document.getElementById("hmlive"); if (hm) hm.classList.add("h2-hide");
     var more = b.querySelector(".hm-more"); if (more) more.classList.add("h2-hide");   // 아래 바로가기 줄 → 「오늘의 발견」이 대신
+    var nm_ = document.getElementById("h2num"); if (nm_ && b.firstElementChild !== nm_) b.insertBefore(nm_, b.firstChild);
+    var hz = document.getElementById("tdhero"), wz = document.getElementById("h2world"); if (hz && wz && wz.nextElementSibling !== hz) wz.insertAdjacentElement("afterend", hz);
     var pb = document.getElementById("pbcard"), mp = document.getElementById("h2map");
     if (pb && mp && pb.previousElementSibling !== mp && pb.compareDocumentPosition(mp) & Node.DOCUMENT_POSITION_FOLLOWING) mp.insertAdjacentElement("afterend", pb);
   }
@@ -274,6 +326,17 @@
   var css = document.createElement("style");
   css.textContent =
     ".h2-hide{display:none!important}html.h2-lock{overflow:hidden}" +
+    /* ⑰ 오늘의 숫자 */
+    ".h2-num{cursor:pointer;padding:22px 20px 18px!important}.h2-num small{display:block;font-size:14px;font-weight:700;color:var(--sub);letter-spacing:-.2px}.h2-num b{display:block;font-size:clamp(40px,12vw,54px);font-weight:900;letter-spacing:-2px;line-height:1.05;margin:4px 0 6px}" +
+    ".h2-num b.up{color:var(--up,#f04452)}.h2-num b.dn{color:var(--down,#3182f6)}.h2-num p{margin:0;font-size:16.5px;line-height:1.5;font-weight:600;word-break:keep-all;text-wrap:pretty}.h2-nsub{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.h2-nsub span{font-size:13px;font-weight:700;color:var(--sub);background:var(--panel2);border-radius:999px;padding:4px 10px}" +
+    /* ⑳ 타일 안 하루 흐름 */
+    ".h2-w{position:relative;overflow:hidden}.h2-sp{position:absolute;left:0;right:0;bottom:0;width:100%;height:30%;opacity:.5}.h2-sp line{stroke:#fff;stroke-width:.6;stroke-dasharray:2 2;vector-effect:non-scaling-stroke}.h2-sp polyline{fill:none;stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}" +
+    /* ⑲ 지도 터치 */
+    ".h2-tm.on{outline:3px solid #fff;outline-offset:-3px;z-index:2}.h2-pick{margin-top:8px}.h2-ph{display:flex;justify-content:space-between;align-items:baseline;padding:8px 2px 4px}.h2-ph b{font-size:16.5px}.h2-ph small{color:var(--sub);font-size:13px}" +
+    ".h2-pr{display:flex;align-items:center;gap:8px;width:100%;font:inherit;text-align:left;padding:10px 4px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--text)}.h2-pr b{font-size:15.5px;font-weight:700}.h2-pr em{font-style:normal;font-size:13px;color:var(--dim)}.h2-pr span{margin-left:auto;font-weight:800;font-size:15.5px}" +
+    /* ㉑ 고객 한 장 */
+    ".h2-clp{background:var(--panel2);border-radius:14px;padding:14px 16px;margin-bottom:12px}.h2-clt{font-size:17px;font-weight:800;letter-spacing:-.3px;line-height:1.4;margin-bottom:8px}.h2-clp ul{margin:0;padding-left:18px;font-size:14px;line-height:1.55;color:var(--sub)}.h2-clp p{margin:8px 0 0;font-size:14px;line-height:1.55;color:var(--sub)}" +
+    ".h2-clb{display:block;width:100%;font:inherit;font-size:16px;font-weight:800;padding:14px;border-radius:14px;border:0;background:#fee500;color:#191600}" +
     ".h2-hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 2px 10px}.h2-hd b{font-size:16.5px;letter-spacing:-.3px}.h2-hd .mut{font-size:12px}" +
     /* 링 */
     ".h2-rings{display:flex;gap:12px;overflow-x:auto;padding:4px 4px 12px;margin:0 -4px;scrollbar-width:none}.h2-rings::-webkit-scrollbar{display:none}" +

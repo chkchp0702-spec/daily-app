@@ -172,6 +172,7 @@
       "<b>쓰는 법</b> — 알람은 <b>출발 신호</b>일 뿐이에요. 거래대금이 크고, 알람 뒤 눌림에서 버티는 종목만 보세요. 손절 자리를 먼저 정하고 들어가는 게 원칙.",
       "<b>보는 법</b> — 종목 이름을 누르면 종목리포트. 잘 맞는 시간대·업종 통계도 아래 「더 보기」에 있어요."]];
   function addHelp(){
+    if (document.documentElement.hasAttribute("data-wow")) return;   // 🎨 11/04: 칩 줄 다이어트 — 제목·조이 얼굴이 같은 설명을 엶
     var h = HELP[cur]; if (!h) return;
     var body = document.getElementById("body"); if (!body || body.querySelector(":scope > .xp-card, :scope > .xp-mini")) return;
     var d = document.createElement("details"); d.className = "xp-mini no-clp"; d.dataset.xs = "keep";
