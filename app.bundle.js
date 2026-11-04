@@ -3166,7 +3166,15 @@
     box.addEventListener("click", function(ev){ if (ev.target === box) box.remove(); });
     document.body.appendChild(box);
     fetch("archive/x/usage.json?" + Math.floor(Date.now() / 600000)).then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(J){ if (J && J.ct && J.k){ if (!window.__opOpen) throw "locked"; return window.__opOpen(J); } return J && J.days ? J : null; })   // 🔒 11/04 운영자 전용
+      .then(function(J){   // 🔒 11/04 운영자 전용 — 잠근 몫(parts)을 하나씩 열어 더함
+        if (!J) return null; if (J.days) return J;
+        if (!J.parts) return null; if (!window.__opOpen) throw "locked";
+        return Promise.all(J.parts.map(function(p){ return window.__opOpen(p).catch(function(x){ if (x === "locked") throw x; return null; }); })).then(function(L){
+          var U = {days: {}, at: J.at};
+          L.forEach(function(P){ if (!P || !P.days) return; Object.keys(P.days).forEach(function(d){ var S = P.days[d], T = U.days[d] || (U.days[d] = {dev: {}, tabs: {}, opens: 0, ver: {}, taps: {}, views: {}, tapdev: {}});
+            ["dev", "tabs", "ver", "taps", "views"].forEach(function(f){ var o = S[f] || {}; Object.keys(o).forEach(function(k){ T[f][k] = (T[f][k] || 0) + o[k]; }); });
+            T.opens += S.opens || 0; var W = S.tapdev || {}; Object.keys(W).forEach(function(k){ var a = T.tapdev[k] || (T.tapdev[k] = {}); Object.keys(W[k] || {}).forEach(function(x){ a[x] = 1; }); }); }); });
+          return U; }); })
       .then(function(U){
       var s = box.firstChild;
       if (!U || !U.days){ s.innerHTML = '<h3>📈 사용 현황</h3><p class="note">아직 모인 기록이 없어요. 2시간마다 모아요.</p><button class="btn" id="usgc">닫기</button>'; return; }

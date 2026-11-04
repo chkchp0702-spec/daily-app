@@ -11,15 +11,11 @@ import os
 import urllib.request
 
 TOPIC = "chkchp-ch-open"
-OUT = os.path.join("archive", "x", "usage.json")       # 🔒 11/04: 운영자 공개키로 잠근 사본(휴대폰에서 운영자 비밀번호로만 열림)
-STATE = os.path.join("archive", "x", "usage.state")    # 🔒 서버가 다음 번에 이어 쓰는 원본 — 비밀값(USAGE_KEY 또는 TG_TOKEN)에서 만든 열쇠로 잠금
+OUT = os.path.join("archive", "x", "usage.json")
+KST = dt.timezone(dt.timedelta(hours=9))       # 🔒 11/04: 운영자 공개키로 잠근 사본(휴대폰에서 운영자 비밀번호로만 열림)
 #   사용자 11/04 「물론 나만 볼 수 있는 거겠지?」 → 저장소(공개)에 평문을 남기지 않음.
-
-
-def _key():
-    import hashlib
-    sec = os.environ.get("USAGE_KEY") or os.environ.get("TG_TOKEN") or ""
-    return hashlib.sha256(("ch-usage-v1|" + sec).encode()).digest() if sec else None
+#   🔒 11/04 v3: 서버 비밀값 없이 — 매번 「이번에 새로 모은 몫」만 운영자 공개키로 잠가 parts 에 덧붙임(서버는 못 열고, 휴대폰이 열어서 더함).
+#   seen(ntfy 신호 번호)·날짜 목록만 평문. 35일 넘은 몫은 지움(화면은 14일만 씀).
 
 
 def _pub():
@@ -30,48 +26,27 @@ def _pub():
     return serialization.load_der_public_key(base64.b64decode(m.group(1)))
 
 
-def load_state():
-    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-    k = _key()
-    if os.path.exists(STATE) and k:
-        j = json.load(open(STATE, encoding="utf-8"))
-        return json.loads(AESGCM(k).decrypt(base64.b64decode(j["iv"]), base64.b64decode(j["ct"]), None))
-    try:   # 처음 한 번: 예전 평문 usage.json 을 옮겨 옴
-        U = json.load(open(OUT, encoding="utf-8"))
-        if "days" in U:
-            return U
-    except Exception:
-        pass
-    return {"days": {}}
-
-
-def save_state(U):
+def seal(obj):
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
     from cryptography.hazmat.primitives.asymmetric import padding
     from cryptography.hazmat.primitives import hashes
-    raw = json.dumps(U, ensure_ascii=False, separators=(",", ":")).encode()
-    k = _key()
-    if not k:
-        print("⚠️ USAGE_KEY/TG_TOKEN 비밀값이 없어 저장 안 함(평문을 공개 저장소에 남기지 않음)"); return False
-    iv = os.urandom(12)
-    json.dump({"v": 1, "iv": base64.b64encode(iv).decode(), "ct": base64.b64encode(AESGCM(k).encrypt(iv, raw, None)).decode()}, open(STATE, "w"))
-    # 휴대폰용: seen(신호 번호)은 빼고 — AES 열쇠를 운영자 RSA 공개키로 잠금 (plus7.js 의견함과 같은 방식)
-    V = {k_: v_ for k_, v_ in U.items() if k_ != "seen"}
-    ak = AESGCM.generate_key(bit_length=256); iv2 = os.urandom(12)
+    ak = AESGCM.generate_key(bit_length=256); iv = os.urandom(12)
     wk = _pub().encrypt(ak, padding.OAEP(mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
-    ct = AESGCM(ak).encrypt(iv2, json.dumps(V, ensure_ascii=False, separators=(",", ":")).encode(), None)
-    json.dump({"v": 2, "lock": "운영자 전용", "at": U.get("at"), "k": base64.b64encode(wk).decode(), "iv": base64.b64encode(iv2).decode(), "ct": base64.b64encode(ct).decode()}, open(OUT, "w"))
-    return True
-KST = dt.timezone(dt.timedelta(hours=9))
+    ct = AESGCM(ak).encrypt(iv, json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode(), None)
+    return {"k": base64.b64encode(wk).decode(), "iv": base64.b64encode(iv).decode(), "ct": base64.b64encode(ct).decode()}
 
 
 def main():
     try:
-        U = load_state()
-    except Exception as e:   # 열쇠가 바뀌었거나 파일이 깨짐 → 덮어쓰지 않고 멈춤(기록 보존) · 다른 단계(vote·push)는 계속
-        print("⚠️ 사용 현황 원본을 못 열어 이번엔 건너뜀:", e); return
-    days = U.setdefault("days", {})
-    seen = set(U.get("seen") or [])
+        J = json.load(open(OUT, encoding="utf-8"))
+    except Exception:
+        J = {}
+    parts = J.get("parts") or []
+    if "days" in J:   # 처음 한 번: 예전 평문을 통째로 잠가 첫 몫으로
+        parts.append(dict(seal({"days": J["days"]}), days=sorted(J["days"]), at=J.get("at")))
+    seen = set(J.get("seen") or [])
+    U = {"days": {}}
+    days = U["days"]
     try:
         req = urllib.request.Request(f"https://ntfy.sh/{TOPIC}/json?poll=1&since=14h", headers={"User-Agent": "ch-investing-usage"})
         raw = urllib.request.urlopen(req, timeout=60).read().decode("utf-8", errors="ignore")
@@ -113,14 +88,14 @@ def main():
             seen.add(mid); n += 1
         except Exception:
             continue
-    cut = (dt.datetime.now(KST) - dt.timedelta(days=90)).strftime("%Y-%m-%d")
-    for k in [k for k in days if k < cut]:
-        del days[k]
-    U["seen"] = sorted(seen)[-3000:]
-    U["at"] = dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M")
+    at = dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M")
+    if n:
+        parts.append(dict(seal(U), days=sorted(days), at=at))
+    cut = (dt.datetime.now(KST) - dt.timedelta(days=35)).strftime("%Y-%m-%d")
+    parts = [p for p in parts if not p.get("days") or max(p["days"]) >= cut]
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    save_state(U)
-    print("새 신호", n, "· 날짜", len(days))
+    json.dump({"v": 3, "lock": "운영자 전용 — 휴대폰에서 운영자 비밀번호로만 열림", "at": at, "seen": sorted(seen)[-3000:], "parts": parts}, open(OUT, "w"), ensure_ascii=False, separators=(",", ":"))
+    print("새 신호", n, "· 몫", len(parts))
 
 
 if __name__ == "__main__":
