@@ -179,7 +179,9 @@
   st.textContent = [
     // ② 접힌 카드
     ".card.cz{position:relative}.cz-h{display:none}.cz-f{display:block;margin:10px auto 0;background:none;border:0;color:var(--sub);font-size:12.5px;padding:4px 10px;cursor:pointer}",
-    ".cz.cz-on{padding:12px 14px!important;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:16px;margin-bottom:12px}.cz.cz-on>*{display:none!important}.cz.cz-on>.cz-h{display:flex!important}",
+    ".cz.cz-on{padding:12px 14px!important;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:16px;margin-bottom:12px}.cz.cz-on>*{display:none!important}.cz.cz-on>.cz-h{display:flex!important}" +
+    // 11/05 사용자 「빈칸 뭐니」: 펼쳐 있을 때 너무 길어 「전체 보기」(xs-clamp) 처리된 카드가 접히면, 아래를 흐리게 덮던 150px 막(::after)이 제목 줄까지 덮어 빈 카드로 보였음 → 접힌 카드엔 덮개·높이 제한 없음
+    ".cz.cz-on::after{display:none!important}.cz.cz-on.xs-clamp{max-height:none!important;overflow:visible!important}",
     ".cz-h{align-items:center;gap:8px;font-weight:700;font-size:14.5px;line-height:1.35}.cz-h span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cz-h i{flex:none;font-style:normal;font-weight:400;font-size:12.5px;color:var(--sub)}",
     // 포트 탭 묶음(.fold)이 다른 「.fold」 단추 모양을 물려받아 상자 안 상자로 보이던 것 정리
     ".cz-st{float:right;font-style:normal;font-weight:400;font-size:12.5px;color:var(--sub);margin-left:8px}",
