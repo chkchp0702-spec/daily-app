@@ -17363,6 +17363,7 @@ window.VIDC = {
     /* ㉘ 깨진 곳 — 제목 긴 보조글 · 제안서 카드 글 잘림 · 발견 카드 */
     R + " .pp-c small," + R + " .pp-card small," + R + " .h2-d em{display:-webkit-box;-webkit-line-clamp:3!important;-webkit-box-orient:vertical;overflow:hidden;white-space:normal!important}" +
     R + " h3,h2{word-break:keep-all;overflow-wrap:anywhere}" +
+    R + " .gchips{grid-template-columns:repeat(auto-fit,minmax(78px,1fr))!important}" + R + " .gc{min-width:0;overflow:hidden}" +   /* 375px 에서 간밤 글로벌 칩이 7px 삐져나가던 것 */
     R + " .mknow-h{flex-wrap:wrap;row-gap:4px;font-size:var(--fs-cap)}" + R + " .mknow-h b{flex:1 1 auto;min-width:0}" + R + " .mknow-h button{flex:none;white-space:nowrap;margin-left:auto}" +
     R + " .pp-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}" + R + " .pp-f{padding:12px 12px 11px!important}" + R + " .pp-f small{-webkit-line-clamp:4!important}" +
     /* ㉛ 화면 전환 */
