@@ -733,10 +733,12 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
     #   닛케이 5일 뒤 오름 +7.2·+5.2%p(n 294·353, 2016-02 기준 앞/뒤) · 목요일(발표일)만 +9.1·+2.5(n 62·72)
     #   자기·S&P 5일 꼬리 칸 위 걸어가며 사전 100 브라이어(5일) 0.25399→0.25304 · 0.24513→0.24463 · 최근5년 0.24553→0.2445 ✅
     #   교차 로지스틱 앞→뒤 0.24513→0.24458 · 뒤→앞 0.24869→0.24786(계수 +0.36·+0.26 같은 쪽) ✅ · 다음 날·1주 값·≤10%·한·중·홍·미 ❌
+    #   #64b(11/4 11시 · probe/mof2_bt.py) 겹치지 않게 다시: 5일 간격 시작점 5개 모두 앞·뒤 같은 쪽(+4.2~+14.5 · +5.0~+8.1%p, 각 n 58~73)
+    #   사건 솎기 +13.8·+6.2(n 63·78) · 순수(자기 ≥90 뺌) +6.2·+6.3 · 5일 간격 걸어가기 덧셈형 w0.5 시작점 5개 × 앞·뒤·최근5년 모두 개선 ✅ · 교차 11/12 개선(계수 모두 +)
     if mk == "JP":
         try:
             mw = mof_week()
-            av = mw.copy(); av.index = av.index + pd.Timedelta(days=4)
+            av = mw.copy(); av.index = av.index + pd.Timedelta(days=5)  # 11/4 11시 #64b: 발표일(목)부터만 — +4 보다 보수적·검증도 더 강함
             r4 = av.rolling(4).sum().rolling(52, min_periods=40).rank(pct=True)
             rk = align(r4, idx)
             src = align(pd.Series(r4.index, index=r4.index), idx)
