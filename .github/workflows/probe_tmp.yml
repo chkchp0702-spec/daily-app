@@ -11,5 +11,5 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q yfinance pandas numpy lxml requests
-      - run: python probe/mof_find.py
+      - run: python probe/mof_find.py | grep -E "SAVED|NOTHING|URL"
       - run: test -f probe/mof_bt.py && python probe/mof_bt.py || echo NO_BT
