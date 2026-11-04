@@ -64,7 +64,8 @@ def logit_fit(X, y, l2=1.0, it=100):
 
 def stale_align(s, idx, maxd=10):
     a = prob_x.align(s, idx); src = prob_x.align(pd.Series(s.index, index=s.index), idx)
-    return a.where((idx - pd.to_datetime(src)).days <= maxd) if len(idx) else a
+    gap = (pd.Series(idx, index=idx) - pd.to_datetime(src)).dt.days
+    return a.where(gap <= maxd)
 
 
 out = {}
@@ -73,7 +74,7 @@ for mk, cfg in prob.MK.items():
     own = prob_x.rank252(np.log(H[cfg["ix"]]["Close"].dropna()).diff(5)).reindex(d.index)
     rs = prob_x.align(prob_x.rank252(np.log(sp).diff(5)), d.index) if mk != "US" else prob_x.rank252(np.log(sp).diff(5)).reindex(d.index)
     oth = lab(own, "oh", "ol") + "|" + lab(rs, "sh", "sl")
-    thu = pd.Series(d.index.dayofweek == 3, index=d.index)
+    thu = pd.Series(d.index.day_of_week == 3, index=d.index)
     R = {}
     for fn, rr in (("1주", r1), ("4주합", r4)):
         rg = stale_align(rr, d.index); mid = d.index[len(d) // 2]; cells = {}
