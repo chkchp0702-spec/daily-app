@@ -149,6 +149,8 @@ def facts(texts, src, now):
         for m in re.finditer(pat, t):
             pre = t[max(0, m.start() - 8):m.start()]
             if re.search(r"이틀|사흘|한 달|주간|1주|5일|20일|어제", pre): continue
+            dm = re.search(r"(?<!\d)(\d{1,2})/(\d{1,2})\D*$", t[max(0, m.start() - 14):m.start()])   # 🔧 11/04: 「11/3 코스피 −3.6% — 그날 팔았다면?」처럼 날짜를 단 지난 숫자는 오늘 숫자가 아님
+            if dm and (int(dm.group(1)), int(dm.group(2))) != (now.month, now.day): continue
             seen.append(_n(m.group(1)))
     if seen:
         if ks and L.get("date") == today and now.weekday() < 5 and (now.hour, now.minute) >= (15, 40):

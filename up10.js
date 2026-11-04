@@ -497,7 +497,7 @@
     ".sc-rate{font-size:22px;font-weight:900;text-align:right;line-height:1.05}.sc-rate small{display:block;font-size:12.5px;color:var(--sub);font-weight:600}",
     ".sc-bar{display:flex;height:16px;border-radius:8px;overflow:hidden;margin:9px 0 4px;font-size:12.5px;font-weight:800}.sc-bar .w{background:#3fae6a;color:#fff;padding-left:6px}.sc-bar .l{background:#d0574f;color:#fff;text-align:right;padding-right:6px}",
     ".sc-li{font-size:12.5px;padding:5px 0;border-top:1px dashed var(--line)}.sc-v{font-size:12.5px;font-weight:800;border-radius:5px;padding:0 5px;margin-right:5px;background:var(--panel2)}.sc-v.w{background:rgba(77,212,122,.18);color:#4dd47a}.sc-v.l{background:rgba(230,103,103,.18);color:#ff8a8a}",
-    ".sc-sig{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}.sc-sig>div{border-radius:10px;padding:7px 9px;background:var(--panel2)}.sc-sig b{display:block;font-size:13px}.sc-sig small{font-size:12.5px;color:var(--sub)}",
+    ".sc-sig{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:9px}.sc-sig .hon-chip{width:auto;max-width:100%;flex-wrap:wrap}.sc-sig .hon-tag,.sc-sig .sc-hon{white-space:normal}.sc-sig>div{min-width:0;overflow-wrap:anywhere;border-radius:10px;padding:7px 9px;background:var(--panel2)}.sc-sig b{display:block;font-size:13px}.sc-sig small{font-size:12.5px;color:var(--sub)}",
     ".sc-sig .on{background:rgba(77,212,122,.12)}.sc-sig .tr{background:rgba(255,184,77,.12)}.sc-sig .sh{background:rgba(124,156,255,.1)}",
     ".sc-few{font-size:12.5px;color:var(--sub);margin-top:6px}",
     ".lrn .st-강함{color:#4dd47a}.lrn .st-관찰{color:#ffb84d}.lrn .st-닫힘{color:var(--dim)}",

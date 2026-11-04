@@ -182,7 +182,7 @@
 
   function openCard(c, t){
     if (window.closeSheet && document.getElementById("sheet")) closeSheet();
-    var ph = document.createComment("xs"); c.parentNode.insertBefore(ph, c);
+    var ph = document.createComment("xs"); if (c.parentNode) c.parentNode.insertBefore(ph, c);   // 🔧 11/04: 화면이 다시 그려져 카드가 떨어져 나간 뒤 줄을 누르면 insertBefore 오류 → 그래도 시트로 엶
     var sh = document.createElement("div"); sh.id = "sheet";
     sh.innerHTML = '<div class="sh-top"><button aria-label="닫기" class="sh-x" onclick="goBack()">✕</button><b></b></div><div class="sh-body"></div>';
     sh.querySelector("b").textContent = t;

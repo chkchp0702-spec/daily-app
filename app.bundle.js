@@ -8269,7 +8269,7 @@
     var fj = b.querySelector(".fold-jump");
     if (fj){ var st = document.createElement("div"); st.className = "po-stk"; fj.parentNode.insertBefore(st, fj);
       var mini = document.createElement("button"); mini.className = "po-mini"; mini.type = "button";
-      mini.innerHTML = PF.map(function(f){ return '<span>' + f.ic + ' <b class="' + cls(f.ret) + '">' + sg(f.ret) + '</b></span>'; }).join("") + '<span class="sp">S&P <b class="' + cls(spN) + '">' + sg(spN) + '</b></span><i>▲</i>';
+      mini.innerHTML = PF.map(function(f){ return '<span>' + f.ic + '<b class="' + cls(f.ret) + '">' + sg(f.ret) + '</b></span>'; }).join("") + '<span class="sp">S&P <b class="' + cls(spN) + '">' + sg(spN) + '</b></span><i>▲</i>';
       mini.onclick = function(){ var t = document.getElementById("posum"); if (t){ var y = t.getBoundingClientRect().top + window.scrollY - ((document.querySelector("header") || {}).offsetHeight || 0) - 8; window.scrollTo({top: Math.max(0, y), behavior: "smooth"}); } };
       st.appendChild(mini); st.appendChild(fj);
       var sm = document.getElementById("posum"), upd = function(){ if (!st.isConnected) return window.removeEventListener("scroll", upd);
@@ -9006,8 +9006,8 @@
     ".po-vd{font-size:12.5px;color:var(--sub);line-height:1.6}.po-vd:not(:empty){background:var(--panel2);border-radius:10px;padding:8px 10px;margin:4px 0 6px}.po-vd b{color:var(--text)}" +
     ".po-stk{position:sticky;top:var(--hh,140px);z-index:6;margin:0 -16px 10px;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}" +
     ".po-stk .fold-jump{position:static!important;margin:0!important;background:none!important;backdrop-filter:none!important}" +
-    ".po-mini{display:none;width:100%;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);font:inherit;font-size:12px;padding:6px 8px;gap:4px;justify-content:space-between;align-items:center;cursor:pointer;white-space:nowrap;overflow:hidden}" +
-    ".po-stk.mini-on .po-mini{display:flex}.po-mini b{font-weight:900}.po-mini .sp{color:var(--sub)}.po-mini i{margin-left:0;flex:none;font-style:normal;color:var(--dim);font-size:12px}.po-mini span{flex:0 1 auto;min-width:0;letter-spacing:-.2px}" +
+    ".po-mini{display:none;width:100%;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);font:inherit;font-size:11px;padding:6px 4px;gap:2px;justify-content:space-between;align-items:center;cursor:pointer;white-space:nowrap;overflow:hidden}" +
+    ".po-stk.mini-on .po-mini{display:flex}.po-mini b{font-weight:900}.po-mini .sp{color:var(--sub)}.po-mini i{margin-left:0;flex:none;font-style:normal;color:var(--dim);font-size:12px}.po-mini span{flex:0 0 auto;letter-spacing:-.4px}@media(max-width:430px){.po-mini i{display:none}.po-mini span{letter-spacing:-.6px}}" +
     ".po-inf{padding:0!important;margin:0 0 10px}.po-inf>summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:800;font-size:14px;display:flex;justify-content:space-between;align-items:center}.po-inf>summary::-webkit-details-marker{display:none}" +
     ".po-inf>summary small{font-weight:400;color:var(--sub);font-size:12.5px}.po-inf>summary:after{content:'▾';color:var(--dim);margin-left:6px}.po-inf[open]>summary:after{content:'▴'}" +
     ".po-infb{padding:0 14px 12px;font-size:13.5px;line-height:1.65}.po-infb>div{padding:8px 10px;border-radius:10px;margin-top:6px;background:var(--panel2);border-left:3px solid #e9c46a}.po-infb>div.k{border-left-color:#ff6b6b}.po-infb>div.c{border-left-color:#4dd47a}.po-infb>div.m{border-left-color:#f472b6}.po-infb u{text-decoration:none;font-weight:800}" +
@@ -9221,7 +9221,7 @@
 
   function openCard(c, t){
     if (window.closeSheet && document.getElementById("sheet")) closeSheet();
-    var ph = document.createComment("xs"); c.parentNode.insertBefore(ph, c);
+    var ph = document.createComment("xs"); if (c.parentNode) c.parentNode.insertBefore(ph, c);   // 🔧 11/04: 화면이 다시 그려져 카드가 떨어져 나간 뒤 줄을 누르면 insertBefore 오류 → 그래도 시트로 엶
     var sh = document.createElement("div"); sh.id = "sheet";
     sh.innerHTML = '<div class="sh-top"><button aria-label="닫기" class="sh-x" onclick="goBack()">✕</button><b></b></div><div class="sh-body"></div>';
     sh.querySelector("b").textContent = t;
@@ -10049,7 +10049,7 @@
     ".sc-rate{font-size:22px;font-weight:900;text-align:right;line-height:1.05}.sc-rate small{display:block;font-size:12.5px;color:var(--sub);font-weight:600}",
     ".sc-bar{display:flex;height:16px;border-radius:8px;overflow:hidden;margin:9px 0 4px;font-size:12.5px;font-weight:800}.sc-bar .w{background:#3fae6a;color:#fff;padding-left:6px}.sc-bar .l{background:#d0574f;color:#fff;text-align:right;padding-right:6px}",
     ".sc-li{font-size:12.5px;padding:5px 0;border-top:1px dashed var(--line)}.sc-v{font-size:12.5px;font-weight:800;border-radius:5px;padding:0 5px;margin-right:5px;background:var(--panel2)}.sc-v.w{background:rgba(77,212,122,.18);color:#4dd47a}.sc-v.l{background:rgba(230,103,103,.18);color:#ff8a8a}",
-    ".sc-sig{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}.sc-sig>div{border-radius:10px;padding:7px 9px;background:var(--panel2)}.sc-sig b{display:block;font-size:13px}.sc-sig small{font-size:12.5px;color:var(--sub)}",
+    ".sc-sig{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:9px}.sc-sig .hon-chip{width:auto;max-width:100%;flex-wrap:wrap}.sc-sig .hon-tag,.sc-sig .sc-hon{white-space:normal}.sc-sig>div{min-width:0;overflow-wrap:anywhere;border-radius:10px;padding:7px 9px;background:var(--panel2)}.sc-sig b{display:block;font-size:13px}.sc-sig small{font-size:12.5px;color:var(--sub)}",
     ".sc-sig .on{background:rgba(77,212,122,.12)}.sc-sig .tr{background:rgba(255,184,77,.12)}.sc-sig .sh{background:rgba(124,156,255,.1)}",
     ".sc-few{font-size:12.5px;color:var(--sub);margin-top:6px}",
     ".lrn .st-강함{color:#4dd47a}.lrn .st-관찰{color:#ffb84d}.lrn .st-닫힘{color:var(--dim)}",
@@ -17675,8 +17675,8 @@ window.VIDC = {
   var GN = {mkt: "시장", inv: "포트", sig: "신호", prod: "상품", prop: "제안서", feed: "피드", luck: "운세", home: "오늘"};
   function grpOf(k){ for (var g in GT) if (GT[g].indexOf(k) >= 0) return g; return null; }
   function newest(g){
-    var M = window.M && M.cats || {}, mx = "";
-    GT[g].forEach(function(k){ var it = (M[k] || [])[0]; if (it && it.id && it.id > mx) mx = String(it.id); });
+    var C = (window.M && window.M.cats) || {}, mx = "";   // 🔧 11/04: 지역 var M 이 전역 M 을 가려 'cats' 오류 나던 것
+    GT[g].forEach(function(k){ var it = (C[k] || [])[0]; if (it && it.id && it.id > mx) mx = String(it.id); });
     if (g === "prod" && window.__pdAt) mx = String(window.__pdAt);
     return mx;
   }
@@ -17765,7 +17765,8 @@ window.VIDC = {
     ["img/kid_think.jpg?v=1", "궁금하면 제 얼굴을 누르세요", "맨 위 제 얼굴이나 작은 ⓘ를 누르면 그 화면을 설명해요.<br>숫자를 <b>꾹 누르면</b> 뜻도 알려 드려요."]
   ];
   function onboard(){
-    if (ls("wow_ob") || /[?&]embed=1/.test(location.search)) return;
+    if (navigator.webdriver){ ls("gd_intro", 1); return; }   // 🔧 11/04: 자동 검진(로봇 브라우저)엔 첫 안내·조이 인사가 화면을 덮어 탭 클릭이 막힘(#market→섹터 30초 멈춤) → 사람에게만
+    if (ls("wow_ob") || /[?&]embed=1/.test(location.search)) return;   // 🔧 11/04: 자동 검진(로봇 브라우저)엔 첫 방문 안내가 화면을 덮어 탭 클릭이 막힘 → 사람에게만
     ls("gd_intro", 1);   // guide.js 의 옛 인사 카드(영상 자동 재생)는 안 띄움
     var k = 0, box = document.createElement("div"); box.id = "wowob"; document.body.appendChild(box);
     function draw(){ var o = OB[k];

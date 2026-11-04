@@ -199,8 +199,8 @@
   var GN = {mkt: "시장", inv: "포트", sig: "신호", prod: "상품", prop: "제안서", feed: "피드", luck: "운세", home: "오늘"};
   function grpOf(k){ for (var g in GT) if (GT[g].indexOf(k) >= 0) return g; return null; }
   function newest(g){
-    var M = window.M && M.cats || {}, mx = "";
-    GT[g].forEach(function(k){ var it = (M[k] || [])[0]; if (it && it.id && it.id > mx) mx = String(it.id); });
+    var C = (window.M && window.M.cats) || {}, mx = "";   // 🔧 11/04: 지역 var M 이 전역 M 을 가려 'cats' 오류 나던 것
+    GT[g].forEach(function(k){ var it = (C[k] || [])[0]; if (it && it.id && it.id > mx) mx = String(it.id); });
     if (g === "prod" && window.__pdAt) mx = String(window.__pdAt);
     return mx;
   }
@@ -289,7 +289,8 @@
     ["img/kid_think.jpg?v=1", "궁금하면 제 얼굴을 누르세요", "맨 위 제 얼굴이나 작은 ⓘ를 누르면 그 화면을 설명해요.<br>숫자를 <b>꾹 누르면</b> 뜻도 알려 드려요."]
   ];
   function onboard(){
-    if (ls("wow_ob") || /[?&]embed=1/.test(location.search)) return;
+    if (navigator.webdriver){ ls("gd_intro", 1); return; }   // 🔧 11/04: 자동 검진(로봇 브라우저)엔 첫 안내·조이 인사가 화면을 덮어 탭 클릭이 막힘(#market→섹터 30초 멈춤) → 사람에게만
+    if (ls("wow_ob") || /[?&]embed=1/.test(location.search)) return;   // 🔧 11/04: 자동 검진(로봇 브라우저)엔 첫 방문 안내가 화면을 덮어 탭 클릭이 막힘 → 사람에게만
     ls("gd_intro", 1);   // guide.js 의 옛 인사 카드(영상 자동 재생)는 안 띄움
     var k = 0, box = document.createElement("div"); box.id = "wowob"; document.body.appendChild(box);
     function draw(){ var o = OB[k];
