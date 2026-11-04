@@ -243,6 +243,30 @@ def _hyg_vol():
     return v
 
 
+_BDI = {}
+def bdi_daily():
+    """11/4 17시 #70: 발틱 건화물 운임지수(BDI) 일별 — investing.com 과거 자료 API(pair 940793, domain-id 머리글). 5,000줄 제한이라 기간 나눠 받음."""
+    if "s" in _BDI:
+        return _BDI["s"]
+    s = None
+    try:
+        import prob
+        if not prob.FAKE:
+            parts = {}
+            for a, b in (("2010-01-01", "2019-12-31"), ("2020-01-01", pd.Timestamp.today().strftime("%Y-%m-%d"))):
+                u = f"https://api.investing.com/api/financialdata/historical/940793?start-date={a}&end-date={b}&time-frame=Daily&add-missing-rows=false"
+                req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36", "domain-id": "www"})
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    for x in json.loads(r.read().decode("utf-8")).get("data", []):
+                        parts[pd.Timestamp(str(x["rowDateTimestamp"])[:10])] = float(str(x["last_closeRaw"]).replace(",", ""))
+            if len(parts) > 600:
+                s = pd.Series(parts).sort_index()
+    except Exception:
+        s = None
+    _BDI["s"] = s
+    return s
+
+
 def rank252(x):
     return x.rolling(252, min_periods=120).rank(pct=True)
 
@@ -728,6 +752,32 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["hygvol_err"] = str(e)[:120]
+    # 🚢 발틱 건화물 운임지수(BDI) 급등 꼬리 → 미국만 (11/4 17시 #70 · probe/bdi_bt.py · 운임 급등 = 원가·물가 압력)
+    #   investing.com API(pair 940793) 2000-01~2026-11 6,692일 · 로그 변화의 1년 백분위 ≥90% · 2013-12 기준 앞/뒤 · 걸어가며 사전 100 브라이어(달러·S&P 5일 꼬리 칸 위)
+    #   「내일」 = 20일 급등: S&P 다음 날 −6.1·−3.8%p(n 406·286) · 0.24905→0.2488 · 0.24868→0.24866 · 최근5년 0.24995→0.24989 · 교차 0.2491→0.24891 · 0.24896→0.24847(계수 −0.27·−0.17) → w 0.4(뒤 기간 개선 작음)
+    #   「일주일」 = 5일 급등: S&P 5일 −7.1·−3.3%p(n 383·326) · 0.24989→0.24965 · 0.24178→0.24142 · 최근5년 0.24499→0.24408 · 교차 0.24335→0.24327 · 0.25065→0.25011(계수 −0.32·−0.17) → w 0.5
+    #   운임 급락(≤10%)·한·일·홍 ❌(기존 칸 위 한 기간 이상 나빠짐) · 중국 5일 급등 다음 날 −3.1·−2.8 ➖(뒤 기간 그대로)
+    if us:
+        try:
+            bd = bdi_daily()
+            if bd is not None:
+                lb = np.log(bd[bd > 0])
+                research["bdi"] = {"d": str(lb.index[-1].date()), "v": round(float(bd.iloc[-1]), 0)}
+                for k_, h_, w_, nm_ in (("bdi20", 20, 0.4, "내일"), ("bdi5", 5, 0.5, "일주일")):
+                    rk = rank252(lb.diff(h_)).reindex(idx).ffill(limit=3); cv = rk.iloc[-1]
+                    research["bdi"]["rk" + str(h_)] = None if pd.isna(cv) else round(float(cv), 3)
+                    research["bdi"]["r" + str(h_)] = round(float(lb.diff(h_).iloc[-1]) * 100, 1)
+                    if not pd.isna(cv) and cv >= 0.9:
+                        m = cond(d, (rk >= 0.9).fillna(False), f"BDI {h_}일 급등(1년 상위 10%)")
+                        add(k_, "🚢", f"해운 운임 급등({h_}일)", "자금", m, w_,
+                            f"발틱 건화물 운임지수 {h_}일 {float(lb.diff(h_).iloc[-1])*100:+.0f}% (1년 백분위 {cv*100:.0f}%) — 운임이 급히 오르면(원가·물가 압력) S&P {nm_}이 평소보다 덜 오름({nm_}만)")
+                        if M and M[-1]["k"] == k_:
+                            if h_ == 20:
+                                M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+                            else:
+                                M[-1]["p1"] = None
+        except Exception as e:
+            research["bdi_err"] = str(e)[:120]
     # 🌏 신흥국 달러채 약세 꼬리 — 한국 「내일」만, w 0.4 (10/30 11시 #35 · probe/emb_bt.py · 신흥국 신용 스프레드 확대 = 아시아 위험 회피)
     #   log(EMB/IEF) 5일 변화의 1년 백분위 ≤10%(신흥국 달러채가 미 국채보다 크게 빠짐) · 미국 날짜 값 → 다음 아시아 장 · 2008-06~, 2017-07 기준 앞/뒤
     #   한국 다음 날 오름 −10.5·−16.0%p(n 212·239) · 크레딧·달러·S&P 5일 꼬리 칸 위 브라이어 0.24861→0.24827 · 0.24601→0.24578 · 최근5년 0.24535→0.24472 ✅
