@@ -220,6 +220,29 @@ def _c(H, s):
     return None if x is None or not len(x) else x["Close"].astype(float)
 
 
+_HYGV = {}
+def _hyg_vol():
+    """11/4 16시 #68: HYG 거래대금(종가×거래량) — load_hist 는 Open·Close 만 받으므로 따로 한 번 받아 둠."""
+    if "v" in _HYGV:
+        return _HYGV["v"]
+    v = None
+    try:
+        import prob
+        if not prob.FAKE:
+            import yfinance as yf
+            V = yf.download("HYG", start="2007-01-01", interval="1d", auto_adjust=False, progress=False)
+            if isinstance(V.columns, pd.MultiIndex):
+                V.columns = V.columns.get_level_values(0)
+            V.index = pd.to_datetime(V.index).tz_localize(None)
+            V = V[~V.index.duplicated(keep="last")].dropna(subset=["Close"])
+            if len(V) > 300:
+                v = V[["Close", "Volume"]].astype(float)
+    except Exception:
+        v = None
+    _HYGV["v"] = v
+    return v
+
+
 def rank252(x):
     return x.rolling(252, min_periods=120).rank(pct=True)
 
@@ -683,6 +706,28 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                     M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["dxy_err"] = str(e)[:120]
+    # 💳 하이일드 거래대금 급증 + HYG 오름 → 홍콩 「내일」만, w 0.3(➖ 작게) (11/4 16시 #68 · probe/hygvol_bt.py · 정크본드에 돈이 몰려 사는 날 = 위험 선호)
+    #   HYG 거래대금 5일 평균 ÷ 60일 평균 의 1년 백분위 ≥90% 이면서 HYG 5일 등락 ≥0 · 미국 날짜 값 → 다음 아시아 장 · 2008~, 2017-06 기준 앞/뒤
+    #   홍콩 다음 날 오름 +7.0·+7.5%p(n 95·58, 합 153) · 크레딧·달러·S&P 5일 꼬리 칸 위 브라이어 0.24813→0.24797 · 0.24907→0.24891 · 최근5년 0.24948→0.24916
+    #   교차 로지스틱 뒤→앞 0.24735→0.24722 이나 앞→뒤 0.24985→0.24989(조금 나빠짐) → ➖ w 0.3 · 5일 ❌
+    #   급증+HYG 하락(투매) 한국 −14.1·−11.5%p(n 143·178)는 칸 위 앞·뒤 나빠짐(투매일 321 중 129일 S&P 5일 급락과 겹침) ➖ · 일·중·미 ❌
+    if mk == "HK":
+        try:
+            V = _hyg_vol()
+            if V is not None:
+                dv = (V["Close"] * V["Volume"]).replace(0, np.nan)
+                vr = dv.rolling(5).mean() / dv.rolling(60).mean()
+                up5 = (np.log(V["Close"]).diff(5) >= 0).astype(float).where(V["Close"].notna())
+                rk = align(rank252(vr), idx); ua = align(up5, idx); cv = rk.iloc[-1]
+                research["hygvol"] = {"d": str(V.index[-1].date()), "vr": None if pd.isna(vr.iloc[-1]) else round(float(vr.iloc[-1]), 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv >= 0.9 and ua.iloc[-1] > 0.5:
+                    m = cond(d, ((rk >= 0.9) & (ua > 0.5)).fillna(False), "하이일드 거래대금 급증(1년 상위 10%) + HYG 5일 오름")
+                    add("hygvol", "💳", "정크본드 매수 몰림", "자금", m, 0.3,
+                        f"하이일드 채권(HYG) 거래대금 5일÷60일 {float(vr.iloc[-1]):.2f}배 (1년 백분위 {cv*100:.0f}%) · 값은 오름 — 정크본드에 돈이 몰려 사는 날 다음 홍콩 장이 평소보다 잘 오름(다음 날만)")
+                    if M and M[-1]["k"] == "hygvol":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["hygvol_err"] = str(e)[:120]
     # 🌏 신흥국 달러채 약세 꼬리 — 한국 「내일」만, w 0.4 (10/30 11시 #35 · probe/emb_bt.py · 신흥국 신용 스프레드 확대 = 아시아 위험 회피)
     #   log(EMB/IEF) 5일 변화의 1년 백분위 ≤10%(신흥국 달러채가 미 국채보다 크게 빠짐) · 미국 날짜 값 → 다음 아시아 장 · 2008-06~, 2017-07 기준 앞/뒤
     #   한국 다음 날 오름 −10.5·−16.0%p(n 212·239) · 크레딧·달러·S&P 5일 꼬리 칸 위 브라이어 0.24861→0.24827 · 0.24601→0.24578 · 최근5년 0.24535→0.24472 ✅
