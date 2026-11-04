@@ -80,12 +80,12 @@
   function fold(dd){
     var rows = dd.querySelectorAll(".xs-row"), n = rows.length, k = cur, open = !!MORE_OPEN[k];
     var b = dd.querySelector(".xs-all");
-    if (n <= 6){ if (b) b.remove(); [].forEach.call(rows, function(r){ r.hidden = false; }); return; }
-    [].forEach.call(rows, function(r, i){ r.hidden = !open && i >= 5; });
+    if (n <= 6){ if (b) b.remove(); [].forEach.call(rows, function(r){ if (r.hidden) r.hidden = false; }); return; }
+    [].forEach.call(rows, function(r, i){ var v = !open && i >= 5; if (r.hidden !== v) r.hidden = v; });   // 🎨 11/04: 같은 값은 다시 안 씀(DOM 변경 폭주 → 떨림 예방)
     if (!b){ b = document.createElement("button"); b.type = "button"; b.className = "xs-all clp-btn"; dd.appendChild(b);
       b.onclick = function(){ MORE_OPEN[cur] = !MORE_OPEN[cur]; fold(dd); }; }
     else dd.appendChild(b);
-    b.textContent = open ? "접기 ▴" : "전체 " + n + "개 보기 ▾";
+    var bt = open ? "접기 ▴" : "전체 " + n + "개 보기 ▾"; if (b.textContent !== bt) b.textContent = bt;
   }
 
   // 나침반 묶음 만들기
@@ -106,8 +106,8 @@
     GROUPS.forEach(function(g){
       var o = by[g.k]; if (!o) return;
       n++;
-      if (o.main){ o.main.dataset.xs = "keep"; o.main.classList.remove("xs-hid"); }
-      o.subs.forEach(function(x){ x.c.dataset.xs = "hide"; x.c.classList.add("xs-hid"); });
+      if (o.main && o.main.dataset.xs !== "keep"){ o.main.dataset.xs = "keep"; o.main.classList.remove("xs-hid"); }
+      o.subs.forEach(function(x){ if (x.c.dataset.xs !== "hide"){ x.c.dataset.xs = "hide"; x.c.classList.add("xs-hid"); } });   // 🎨 11/04: 같은 값은 다시 안 씀
       var anchor = o.main || (o.subs[0] && o.subs[0].c); if (!anchor) return;
       var h = anchor.previousElementSibling && anchor.previousElementSibling.classList.contains("cg-h") ? anchor.previousElementSibling : null;
       [].forEach.call(body.querySelectorAll('.cg-h[data-g="' + g.k + '"]'), function(x){ if (x !== h) x.remove(); });   // 자리 바뀐 옛 머리 지우기

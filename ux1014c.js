@@ -31,7 +31,8 @@
       }
       if (!o) continue;
       if (o.chrome == null) o.chrome = /header|\.stamp|\.brand|#bnav|#uibtn|#gsbtn|#wlbtn|\.tabs?\b/.test(r.selectorText || "");   // 머리·아래 탭 바는 크기 그대로(한 줄 유지)
-      var v = Math.round((o.chrome ? o.px : o.px < 11 ? o.px : BUMP(Math.max(o.px, FLOOR))) * (o.chrome ? 1 : F) * 10) / 10;   // 11px 미만은 그림 눈금 글자 → 그대로
+      if (o.pic == null) o.pic = o.px < 11 && /svg|text|tick|axis|\.t3-|\.ix|\.viz|chart|legend/.test(r.selectorText || "");   // 그림 눈금 글자만 그대로
+      var v = Math.round((o.chrome || o.pic ? o.px : BUMP(Math.max(o.px, FLOOR))) * (o.chrome ? 1 : F) * 10) / 10;
       if (r.style.fontSize !== v + "px") r.style.setProperty("font-size", v + "px", o.imp);
     }
   }

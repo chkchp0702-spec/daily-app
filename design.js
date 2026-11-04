@@ -19,7 +19,7 @@
     /* 색·글자 변수 */
     R + "{--bg:#0d1117;--panel:#161b24;--panel2:#1e2531;--line:#262e3b;--text:#eef1f6;--sub:#a3acbd;--dim:#8a93a5;--fs-cap:12.5px;--fs-s:13.5px;--fs-b:15px;--fs-h:17px;--fs-t:22px;--fs-d:28px}" +
     R + "[data-ui=light]{--bg:#f2f4f6;--panel:#ffffff;--panel2:#f2f4f6;--line:#e8ebef;--text:#191f28;--sub:#4e5968;--dim:#636d7b;--up:#f04452;--down:#3182f6}" +
-    ":where(html[data-ds]) :where(small){font-size:max(12.5px,.833em)}" +
+    ":where(html[data-ds]) :where(small){font-size:max(13.5px,.833em)}" +   // 🎨 11/04: 12.5 → 13.5
     /* 10/27 점검 — 팝업 스크롤이 뒤 화면으로 안 새게 · 누르는 곳 포커스 표시 · 두 번 탭 확대 지연 없애기 */
     ":where(#sheet,#peek,#gdq,#gloss,#gsq,#hmst,#icz,#lpv,#shimg),:where(#sheet,#peek,#gdq,#gloss,#gsq,#hmst,#icz,#lpv,#shimg) *{overscroll-behavior:contain}" +
     ":where(button,a,[role=button],summary,input,select,textarea,[tabindex]):focus-visible{outline:2px solid var(--acc,#3182f6);outline-offset:2px;border-radius:8px}" +

@@ -18,7 +18,7 @@
   function md(s){ return s ? String(s).slice(5, 10).replace("-", "/") : ""; }
   var WDK = ["일", "월", "화", "수", "목", "금", "토"];
   function wd(d){ return d ? WDK[new Date(String(d).slice(0, 10) + "T00:00:00Z").getUTCDay()] : ""; }
-  function sg(v, d){ return v == null || isNaN(v) ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(+v).toFixed(d == null ? 1 : d) + "%"; }
+  function sg(v, d){ if (v == null || isNaN(v)) return "–"; var k = d == null ? 1 : d, a = Math.abs(+v).toFixed(k); return (+a === 0 ? "" : v > 0 ? "+" : "−") + a + "%"; }   // 🎨 11/04: 「−0.0%」 안 나오게
   function cls(v){ return v > 0 ? "up" : v < 0 ? "dn" : ""; }
   function q5(){ return "?" + Math.floor(Date.now() / 300000); }
   function gj(u, ttl){ return (window.getJSON ? getJSON(u, {ttl: ttl || 300000}) : fetch(u).then(function(r){ return r.json(); })).catch(function(){ return null; }); }

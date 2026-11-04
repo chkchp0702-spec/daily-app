@@ -9055,12 +9055,12 @@
   function fold(dd){
     var rows = dd.querySelectorAll(".xs-row"), n = rows.length, k = cur, open = !!MORE_OPEN[k];
     var b = dd.querySelector(".xs-all");
-    if (n <= 6){ if (b) b.remove(); [].forEach.call(rows, function(r){ r.hidden = false; }); return; }
-    [].forEach.call(rows, function(r, i){ r.hidden = !open && i >= 5; });
+    if (n <= 6){ if (b) b.remove(); [].forEach.call(rows, function(r){ if (r.hidden) r.hidden = false; }); return; }
+    [].forEach.call(rows, function(r, i){ var v = !open && i >= 5; if (r.hidden !== v) r.hidden = v; });   // 🎨 11/04: 같은 값은 다시 안 씀(DOM 변경 폭주 → 떨림 예방)
     if (!b){ b = document.createElement("button"); b.type = "button"; b.className = "xs-all clp-btn"; dd.appendChild(b);
       b.onclick = function(){ MORE_OPEN[cur] = !MORE_OPEN[cur]; fold(dd); }; }
     else dd.appendChild(b);
-    b.textContent = open ? "접기 ▴" : "전체 " + n + "개 보기 ▾";
+    var bt = open ? "접기 ▴" : "전체 " + n + "개 보기 ▾"; if (b.textContent !== bt) b.textContent = bt;
   }
 
   // 나침반 묶음 만들기
@@ -9081,8 +9081,8 @@
     GROUPS.forEach(function(g){
       var o = by[g.k]; if (!o) return;
       n++;
-      if (o.main){ o.main.dataset.xs = "keep"; o.main.classList.remove("xs-hid"); }
-      o.subs.forEach(function(x){ x.c.dataset.xs = "hide"; x.c.classList.add("xs-hid"); });
+      if (o.main && o.main.dataset.xs !== "keep"){ o.main.dataset.xs = "keep"; o.main.classList.remove("xs-hid"); }
+      o.subs.forEach(function(x){ if (x.c.dataset.xs !== "hide"){ x.c.dataset.xs = "hide"; x.c.classList.add("xs-hid"); } });   // 🎨 11/04: 같은 값은 다시 안 씀
       var anchor = o.main || (o.subs[0] && o.subs[0].c); if (!anchor) return;
       var h = anchor.previousElementSibling && anchor.previousElementSibling.classList.contains("cg-h") ? anchor.previousElementSibling : null;
       [].forEach.call(body.querySelectorAll('.cg-h[data-g="' + g.k + '"]'), function(x){ if (x !== h) x.remove(); });   // 자리 바뀐 옛 머리 지우기
@@ -11328,7 +11328,8 @@
       }
       if (!o) continue;
       if (o.chrome == null) o.chrome = /header|\.stamp|\.brand|#bnav|#uibtn|#gsbtn|#wlbtn|\.tabs?\b/.test(r.selectorText || "");   // 머리·아래 탭 바는 크기 그대로(한 줄 유지)
-      var v = Math.round((o.chrome ? o.px : o.px < 11 ? o.px : BUMP(Math.max(o.px, FLOOR))) * (o.chrome ? 1 : F) * 10) / 10;   // 11px 미만은 그림 눈금 글자 → 그대로
+      if (o.pic == null) o.pic = o.px < 11 && /svg|text|tick|axis|\.t3-|\.ix|\.viz|chart|legend/.test(r.selectorText || "");   // 그림 눈금 글자만 그대로
+      var v = Math.round((o.chrome || o.pic ? o.px : BUMP(Math.max(o.px, FLOOR))) * (o.chrome ? 1 : F) * 10) / 10;
       if (r.style.fontSize !== v + "px") r.style.setProperty("font-size", v + "px", o.imp);
     }
   }
@@ -16747,7 +16748,7 @@ window.VIDC = {
   function md(s){ return s ? String(s).slice(5, 10).replace("-", "/") : ""; }
   var WDK = ["일", "월", "화", "수", "목", "금", "토"];
   function wd(d){ return d ? WDK[new Date(String(d).slice(0, 10) + "T00:00:00Z").getUTCDay()] : ""; }
-  function sg(v, d){ return v == null || isNaN(v) ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(+v).toFixed(d == null ? 1 : d) + "%"; }
+  function sg(v, d){ if (v == null || isNaN(v)) return "–"; var k = d == null ? 1 : d, a = Math.abs(+v).toFixed(k); return (+a === 0 ? "" : v > 0 ? "+" : "−") + a + "%"; }   // 🎨 11/04: 「−0.0%」 안 나오게
   function cls(v){ return v > 0 ? "up" : v < 0 ? "dn" : ""; }
   function q5(){ return "?" + Math.floor(Date.now() / 300000); }
   function gj(u, ttl){ return (window.getJSON ? getJSON(u, {ttl: ttl || 300000}) : fetch(u).then(function(r){ return r.json(); })).catch(function(){ return null; }); }
@@ -17125,7 +17126,7 @@ window.VIDC = {
     /* 색·글자 변수 */
     R + "{--bg:#0d1117;--panel:#161b24;--panel2:#1e2531;--line:#262e3b;--text:#eef1f6;--sub:#a3acbd;--dim:#8a93a5;--fs-cap:12.5px;--fs-s:13.5px;--fs-b:15px;--fs-h:17px;--fs-t:22px;--fs-d:28px}" +
     R + "[data-ui=light]{--bg:#f2f4f6;--panel:#ffffff;--panel2:#f2f4f6;--line:#e8ebef;--text:#191f28;--sub:#4e5968;--dim:#636d7b;--up:#f04452;--down:#3182f6}" +
-    ":where(html[data-ds]) :where(small){font-size:max(12.5px,.833em)}" +
+    ":where(html[data-ds]) :where(small){font-size:max(13.5px,.833em)}" +   // 🎨 11/04: 12.5 → 13.5
     /* 10/27 점검 — 팝업 스크롤이 뒤 화면으로 안 새게 · 누르는 곳 포커스 표시 · 두 번 탭 확대 지연 없애기 */
     ":where(#sheet,#peek,#gdq,#gloss,#gsq,#hmst,#icz,#lpv,#shimg),:where(#sheet,#peek,#gdq,#gloss,#gsq,#hmst,#icz,#lpv,#shimg) *{overscroll-behavior:contain}" +
     ":where(button,a,[role=button],summary,input,select,textarea,[tabindex]):focus-visible{outline:2px solid var(--acc,#3182f6);outline-offset:2px;border-radius:8px}" +
