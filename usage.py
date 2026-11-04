@@ -41,6 +41,17 @@ def main():
             if not d or len(day) != 10:
                 continue
             D = days.setdefault(day, {"dev": {}, "tabs": {}, "opens": 0, "ver": {}})
+            if b.get("k") == "tap":   # 🎯 11/04 누른 것·본 화면 (사용자 「어디를 제일 많이 봤니」)
+                T = D.setdefault("taps", {}); V = D.setdefault("views", {}); W = D.setdefault("tapdev", {})
+                for k_, c_ in list((b.get("taps") or {}).items())[:60]:
+                    k_ = str(k_)[:28]; c_ = max(0, min(int(c_ or 0), 200))
+                    T[k_] = T.get(k_, 0) + c_; W.setdefault(k_, {})[d] = 1
+                for k_, c_ in list((b.get("views") or {}).items())[:30]:
+                    k_ = str(k_)[:14]; c_ = max(0, min(int(c_ or 0), 200)); V[k_] = V.get(k_, 0) + c_
+                if len(T) > 400:
+                    for k_ in sorted(T, key=lambda x: T[x])[:len(T) - 400]: T.pop(k_, None); W.pop(k_, None)
+                seen.add(mid); n += 1
+                continue
             D["dev"][d] = D["dev"].get(d, 0) + 1
             tab = str(b.get("tab") or "home")[:12]
             D["tabs"][tab] = D["tabs"].get(tab, 0) + 1
