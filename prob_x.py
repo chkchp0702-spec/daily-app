@@ -33,6 +33,36 @@ def _get(url, timeout=30):
         return json.loads(r.read().decode("utf-8"))
 
 
+_MOF = {}
+def mof_week():
+    """일본 재무성 주간 대내 증권투자 — 외국인(비거주자)의 일본 주식·투자펀드 지분 순취득(억엔). 주(일~토) 끝 날짜 → 값"""
+    if "s" in _MOF:
+        return _MOF["s"]
+    import csv, io, re, unicodedata
+    u = "https://www.mof.go.jp/policy/international_policy/reference/itn_transactions_in_securities/week.csv"
+    b = urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=30).read()
+    for enc in ("utf-8-sig", "cp932"):
+        try:
+            t = b.decode(enc); break
+        except UnicodeDecodeError:
+            continue
+    rows = {}
+    for raw in csv.reader(io.StringIO(t)):
+        c = [unicodedata.normalize("NFKC", x).replace(",", "").strip() for x in raw]
+        if len(c) < 15:
+            continue
+        m = re.match(r"(\d{4})\.(\d{1,2})\.(\d{1,2})\s*~\s*(?:(\d{4})\.)?(\d{1,2})\.(\d{1,2})", c[0].replace(" ", ""))
+        if not m:
+            continue
+        y, mo = int(m[1]), int(m[2]); ey = int(m[4]) if m[4] else (y + 1 if int(m[5]) < mo else y)
+        try:
+            rows[pd.Timestamp(ey, int(m[5]), int(m[6]))] = float(c[14].replace("−", "-").replace("▲", "-"))
+        except ValueError:
+            continue
+    _MOF["s"] = pd.Series(rows).sort_index()
+    return _MOF["s"]
+
+
 def load_ext(fake=False):
     """밖에서 받는 심리 지수 (실패하면 빈 것)"""
     out = {}
@@ -698,6 +728,28 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p1"] = None
         except Exception as e:
             research["gsr_err"] = str(e)[:120]
+    # 🇯🇵 외국인의 일본 주식 순매수 4주 합 많음(≥90% 한쪽만) — 일본 「일주일」만, w 0.5 (11/4 10시 #64 · probe/mof_bt.py)
+    #   재무성 주간 대내 증권투자(株式・投資ファンド持分 ネット, 억엔) 2005-01~ 1,138주 · 주(일~토) 끝 + 4일(목 08:50 JST 발표)부터 · 4주 합의 52주 백분위
+    #   닛케이 5일 뒤 오름 +7.2·+5.2%p(n 294·353, 2016-02 기준 앞/뒤) · 목요일(발표일)만 +9.1·+2.5(n 62·72)
+    #   자기·S&P 5일 꼬리 칸 위 걸어가며 사전 100 브라이어(5일) 0.25399→0.25304 · 0.24513→0.24463 · 최근5년 0.24553→0.2445 ✅
+    #   교차 로지스틱 앞→뒤 0.24513→0.24458 · 뒤→앞 0.24869→0.24786(계수 +0.36·+0.26 같은 쪽) ✅ · 다음 날·1주 값·≤10%·한·중·홍·미 ❌
+    if mk == "JP":
+        try:
+            mw = mof_week()
+            av = mw.copy(); av.index = av.index + pd.Timedelta(days=4)
+            r4 = av.rolling(4).sum().rolling(52, min_periods=40).rank(pct=True)
+            rk = align(r4, idx)
+            src = align(pd.Series(r4.index, index=r4.index), idx)
+            rk = rk.where((pd.Series(idx, index=idx) - pd.to_datetime(src)).dt.days <= 10); cv = rk.iloc[-1]
+            research["mof4"] = {"wk": str(mw.index[-1].date()), "net1": round(float(mw.iloc[-1])), "net4": round(float(mw.iloc[-4:].sum())), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+            if not pd.isna(cv) and cv >= 0.9:
+                m = cond(d, (rk >= 0.9).fillna(False), "외국인 일본 주식 4주 순매수 많음(1년 상위 10%)")
+                add("mof4", "🌏", "외국인 순매수", "자금", m, 0.5,
+                    f"재무성 주간: 외국인 일본 주식 4주 순매수 {float(mw.iloc[-4:].sum())/10000:+.1f}조엔 (1년 백분위 {cv*100:.0f}%) — 외국인이 몰려 사면 닛케이 일주일이 평소보다 잘 오름(다음 날엔 안 씀)")
+                if M and M[-1]["k"] == "mof4":
+                    M[-1]["p1"] = None
+        except Exception as e:
+            research["mof4_err"] = str(e)[:120]
     # 🌀 VVIX÷VIX 낮음 꼬리(≤10% 한쪽만) — 미국 「일주일」만, w 0.3(➖ 작게) (11/3 12시 #59 · probe/vvix_bt.py · 「VIX 의 변동성」이 VIX 에 비해 낮음 = 공포가 이미 높고 더 튈 여지 작음)
     #   ^VVIX÷^VIX 1년 백분위 ≤10% · 2008~, 2017-05 기준 앞/뒤 · S&P 5일 뒤 오름 −6.9·−2.6%p(n 284·327)
     #   VIX 수준·S&P 5일·VIX 기간구조·간밤 S&P 꼬리 칸 위 걸어가며 사전 100 브라이어(5일) 0.24663→0.24646 · 0.23979→0.2395 · 최근5년 0.24562→0.2454 ✅
