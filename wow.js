@@ -11,7 +11,7 @@
 (function(){
   try { if (localStorage.getItem("wow") === "off") return; } catch(x) {}
   var D = document.documentElement; D.setAttribute("data-wow", "1");
-  var R = "html[data-wow]";
+  var R = "html[data-wow][data-wow]";   // 속성 두 번 = design.js(html[data-ds]) 보다 우선 — <style> 순서 싸움(떨림의 원인) 대신
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function ls(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); } catch(x) {} return null; }
   function cur(){ return (typeof window.cur !== "undefined" && window.cur) || ""; }
@@ -62,7 +62,11 @@
     R + " #backbtn.root{display:none!important}" +
     R + " #opbtn{position:static!important;width:38px;height:38px;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:var(--text)!important;display:inline-flex!important;align-items:center;justify-content:center;font-size:20px!important;margin:0 0 0 2px;order:5}" +
     R + " #opbtn span{display:none!important}" +
-    R + " header .top{display:flex;align-items:center}" +
+    R + " header .top{display:flex;align-items:center;flex-wrap:nowrap;min-width:0;overflow:hidden;gap:2px}" +
+    R + " header .brand{white-space:nowrap;flex:none}" + R + " #stamp{white-space:nowrap}" +
+    "@media (max-width:430px){" + R + " #stamp{display:none!important}}" +
+    R + " html,body{overflow-x:hidden!important;max-width:100vw}" + R + " #main{overflow-x:clip}" +
+    R + " #opbtn{width:34px;height:34px;flex:none;font-size:19px!important}" +
     R + " #main{padding-bottom:96px!important}" +
     /* ⑫ 조이 얼굴은 화면당 1개 — 카드 안·칩 안의 얼굴은 작은 ⓘ 점으로 (누르면 똑같이 조이 설명) */
     R + " h3.tt-h>.gd-b," + R + " .mk-lab.tt-h>.gd-b{width:20px!important;height:20px!important;background:var(--panel2)!important;box-shadow:inset 0 0 0 1.5px var(--line)!important;vertical-align:-3px!important;margin-left:6px!important;text-align:center;line-height:20px;color:var(--sub);font:italic 700 12px/20px Georgia,serif}" +
@@ -105,6 +109,7 @@
     /* ㉘ 깨진 곳 — 제목 긴 보조글 · 제안서 카드 글 잘림 · 발견 카드 */
     R + " .pp-c small," + R + " .pp-card small," + R + " .h2-d em{display:-webkit-box;-webkit-line-clamp:3!important;-webkit-box-orient:vertical;overflow:hidden;white-space:normal!important}" +
     R + " h3,h2{word-break:keep-all;overflow-wrap:anywhere}" +
+    R + " .mknow-h{flex-wrap:wrap;row-gap:4px;font-size:var(--fs-cap)}" + R + " .mknow-h b{flex:1 1 auto;min-width:0}" + R + " .mknow-h button{flex:none;white-space:nowrap;margin-left:auto}" +
     R + " .pp-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}" + R + " .pp-f{padding:12px 12px 11px!important}" + R + " .pp-f small{-webkit-line-clamp:4!important}" +
     /* ㉛ 화면 전환 */
     "@keyframes wowin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}" +
@@ -118,8 +123,7 @@
     "#wowob h2{margin:0 0 8px;font-size:24px;letter-spacing:-.6px;text-align:center;line-height:1.3}#wowob p{margin:0;text-align:center;font-size:16.5px;line-height:1.6;color:var(--sub)}" +
     "#wowob .ob-row{display:flex;gap:8px;margin-top:18px}#wowob .ob-row button{flex:1;font:inherit;font-size:16px;font-weight:800;padding:14px;border-radius:14px;border:0;background:var(--panel2);color:var(--text)}#wowob .ob-row button.go{background:var(--acc);color:#fff;flex:2}";
   var st = document.createElement("style"); st.id = "wow-css"; st.textContent = css;
-  function put(){ document.head.appendChild(st); }
-  put();
+  document.head.appendChild(st);   // 한 번만 (매번 맨 뒤로 옮기면 design.js 와 번갈아 옮기며 화면이 떨림)
 
   /* ───────────── ① 인라인 style 글자도 한 단계 (ux1014c 는 <style> 규칙만 고침) ───────────── */
   var BUMP = function(px){ return px <= 12.5 ? px + 1.5 : px <= 16 ? px + 1.5 : px <= 20 ? px + 2 : px <= 30 ? px + 3 : px; };
@@ -181,10 +185,12 @@
     if (isNaN(tgt) || tgt > 9999999 || rest.length > 12) { el.classList.add("wow-pop"); return; }
     var hasComma = m[2].indexOf(",") >= 0, dp = dec ? dec.length - 1 : 0, t0 = Date.now(), dur = 520, fin = sign + m[2] + dec + rest;
     el.classList.add("wow-pop");
+    if (!(el.childNodes.length === 1 && el.firstChild.nodeType === 3)) return;   // 글자 하나짜리만
+    var tn = el.firstChild;
     (function tick(){ var p = Math.min(1, (Date.now() - t0) / dur), q = 1 - Math.pow(1 - p, 3), v = tgt * q;
       var s = v.toFixed(dp); if (hasComma) s = (+s).toLocaleString("en-US", {minimumFractionDigits: dp, maximumFractionDigits: dp});
-      el.textContent = p < 1 ? sign + s + rest : fin; if (p < 1) setTimeout(tick, 16); })();
-    setTimeout(function(){ el.textContent = fin; }, dur + 80);
+      if (tn.parentNode !== el) return; tn.nodeValue = p < 1 ? sign + s + rest : fin; if (p < 1) setTimeout(tick, 40); })();
+    setTimeout(function(){ if (tn.parentNode === el) tn.nodeValue = fin; }, dur + 80);
   }
 
   /* ───────────── ㉒ 바뀐 탭 점 — 마지막으로 그 묶음을 본 뒤 새 자료가 올라왔으면 ───────────── */
@@ -304,7 +310,7 @@
   /* ───────────── 돌리기 ───────────── */
   var q = 0;
   function tick(){ q = 0; var m = document.getElementById("main");
-    try { inlineFs(m); heads(m); dates(); opToHead(); pop(m); empties(m); elsTables(m); hookGo(); if (st.nextSibling) put(); } catch(x) { try { console.warn("wow", x); } catch(y) {} } }
+    try { inlineFs(m); heads(m); dates(); opToHead(); pop(m); empties(m); elsTables(m); hookGo(); } catch(x) { try { console.warn("wow", x); } catch(y) {} } }
   function soon(){ if (!q) q = setTimeout(tick, 80); }
   function start(){
     tick(); dots();
