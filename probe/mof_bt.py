@@ -7,14 +7,15 @@ import numpy as np, pandas as pd
 sys.path.insert(0, os.getcwd())
 import prob, prob_x
 
+import csv
 rows = []
-for line in open("probe/mof_week.csv").read().splitlines():
-    c = [unicodedata.normalize("NFKC", x).replace('"', "").replace(",", "").strip() for x in pd.read_csv(io.StringIO(line), header=None, dtype=str).iloc[0].fillna("").tolist()] if line.strip() else []
-    if not c: continue
+for raw in csv.reader(open("probe/mof_week.csv", newline="")):
+    c = [unicodedata.normalize("NFKC", x).replace(",", "").strip() for x in raw]
+    if len(c) < 15: continue
     m = re.match(r"(\d{4})\.(\d{1,2})\.(\d{1,2})\s*~\s*(?:(\d{4})\.)?(\d{1,2})\.(\d{1,2})", c[0].replace(" ", ""))
-    if not m or len(c) < 15: continue
+    if not m: continue
     y, mo, dd = int(m[1]), int(m[2]), int(m[3]); ey = int(m[4]) if m[4] else (y + 1 if int(m[5]) < mo else y)
-    try: v = float(c[14])
+    try: v = float(c[14].replace("−", "-").replace("▲", "-"))
     except ValueError: continue
     rows.append((pd.Timestamp(ey, int(m[5]), int(m[6])), v))
 W = pd.Series({a: b for a, b in rows}).sort_index()
