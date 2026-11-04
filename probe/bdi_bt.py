@@ -16,17 +16,25 @@ def yser(t):
         V.index = pd.to_datetime(V.index).tz_localize(None); s = V["Close"].dropna(); return s[s > 0]
     except Exception as e:
         print("SRC", t, "err", str(e)[:80]); return pd.Series(dtype=float)
-for t in ("^BDI", "BDIY", "^BDIY", "BDI", "BDRY"):
+for t in ("BDRY",):
     s = yser(t); print("SRC yahoo", t, len(s), s.index[0].date() if len(s) else "", s.index[-1].date() if len(s) else ""); cand["y:" + t] = s
-for u in ("https://stooq.com/q/d/l/?s=bdi&i=d", "https://stooq.com/q/d/l/?s=^bdi&i=d", "https://stooq.com/q/d/l/?s=bdiy&i=d"):
+for u in ():
     try:
         r = requests.get(u, headers=UA, timeout=20); print("SRC", u, r.status_code, r.text[:80].replace("\n", " "))
         if r.ok and r.text.startswith("Date"):
             df = pd.read_csv(io.StringIO(r.text), parse_dates=["Date"]).set_index("Date"); cand["stooq:" + u] = df["Close"].dropna()
     except Exception as e: print("SRC", u, "err", str(e)[:80])
-for u, h in (("https://api.investing.com/api/financialdata/historical/940793?start-date=2000-01-01&end-date=2026-11-04&time-frame=Daily&add-missing-rows=false", {**UA, "domain-id": "www"}),
-             ("https://www.investing.com/indices/baltic-dry-historical-data", UA),
-             ("https://tradingeconomics.com/commodity/baltic", UA)):
+parts = []
+for a, b in (("2000-01-01", "2009-12-31"), ("2010-01-01", "2019-12-31"), ("2020-01-01", "2026-11-04")):
+    try:
+        r = requests.get(f"https://api.investing.com/api/financialdata/historical/940793?start-date={a}&end-date={b}&time-frame=Daily&add-missing-rows=false", headers={**UA, "domain-id": "www"}, timeout=30)
+        js = r.json().get("data", []); s_ = pd.Series({pd.Timestamp(x["rowDateTimestamp"][:10]): float(str(x["last_closeRaw"])) for x in js})
+        print("SRC investing", a, b, r.status_code, len(s_)); parts.append(s_)
+    except Exception as e: print("SRC investing", a, "err", str(e)[:80])
+if parts:
+    s_ = pd.concat(parts).sort_index(); cand["inv"] = s_[~s_.index.duplicated()]
+for u, h in (
+             ):
     try:
         r = requests.get(u, headers=h, timeout=20); print("SRC", u[:70], r.status_code, len(r.text), r.text[:100].replace("\n", " "))
         if r.ok and u.startswith("https://api.investing"):
@@ -80,7 +88,7 @@ def logit_fit(X, y, l2=1.0, it=100):
 
 out = {}
 for mk, cfg in prob.MK.items():
-    d = prob.feats(H[cfg["ix"]]); d = d[d.index >= max(pd.Timestamp("1995-01-01"), sk.index[0] + pd.Timedelta(days=400))].copy()
+    d = prob.feats(H[cfg["ix"]]); d = d[(d.index >= max(pd.Timestamp("1995-01-01"), sk.index[0] + pd.Timedelta(days=400))) & (d.index <= sk.index[-1] + pd.Timedelta(days=5))].copy()
     A = (lambda s: prob_x.align(prob_x.rank252(s), d.index)) if mk != "US" else (lambda s: prob_x.rank252(s).reindex(d.index).ffill())
     rv = A(np.log(vx).diff(5)); rs = A(np.log(sp).diff(5))
     oth = lab(rv, "vh", "vl") + "|" + lab(rs, "sh", "sl")
