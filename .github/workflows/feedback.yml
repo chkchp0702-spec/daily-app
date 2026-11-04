@@ -15,7 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 feedback.py
-      - run: python3 usage.py          # 📈 사용 현황(익명 열림 신호)
+      - run: pip install -q cryptography
+      - run: python3 usage.py          # 📈 사용 현황(익명 열림·누른 것) — 🔒 11/04 잠가서 저장(운영자만)
+        env:
+          USAGE_KEY: ${{ secrets.USAGE_KEY }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
       - run: python3 vote.py || echo "🎯 예측 게임 모으기 실패"   # 10/31 C1 아침 1탭 예측
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
@@ -23,4 +27,4 @@ jobs:
       - name: 저장
         run: |
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/ideas.json archive/fb archive/x/usage.json archive/x/vote.json
+          bash scripts/push.sh "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/ideas.json archive/fb archive/x/usage.json archive/x/usage.state archive/x/vote.json

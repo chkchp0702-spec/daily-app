@@ -4,21 +4,72 @@
   ntfy 는 12시간만 보관 → feedback.yml(2시간마다)에서 같이 돈다. 90일 넘은 날짜는 지움.
   python usage.py
 """
+import base64
 import datetime as dt
 import json
 import os
 import urllib.request
 
 TOPIC = "chkchp-ch-open"
-OUT = os.path.join("archive", "x", "usage.json")
+OUT = os.path.join("archive", "x", "usage.json")       # 🔒 11/04: 운영자 공개키로 잠근 사본(휴대폰에서 운영자 비밀번호로만 열림)
+STATE = os.path.join("archive", "x", "usage.state")    # 🔒 서버가 다음 번에 이어 쓰는 원본 — 비밀값(USAGE_KEY 또는 TG_TOKEN)에서 만든 열쇠로 잠금
+#   사용자 11/04 「물론 나만 볼 수 있는 거겠지?」 → 저장소(공개)에 평문을 남기지 않음.
+
+
+def _key():
+    import hashlib
+    sec = os.environ.get("USAGE_KEY") or os.environ.get("TG_TOKEN") or ""
+    return hashlib.sha256(("ch-usage-v1|" + sec).encode()).digest() if sec else None
+
+
+def _pub():
+    import re
+    src = open("plus7.js", encoding="utf-8").read()
+    m = re.search(r'var PUB = "([A-Za-z0-9+/=]+)"', src)
+    from cryptography.hazmat.primitives import serialization
+    return serialization.load_der_public_key(base64.b64decode(m.group(1)))
+
+
+def load_state():
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    k = _key()
+    if os.path.exists(STATE) and k:
+        j = json.load(open(STATE, encoding="utf-8"))
+        return json.loads(AESGCM(k).decrypt(base64.b64decode(j["iv"]), base64.b64decode(j["ct"]), None))
+    try:   # 처음 한 번: 예전 평문 usage.json 을 옮겨 옴
+        U = json.load(open(OUT, encoding="utf-8"))
+        if "days" in U:
+            return U
+    except Exception:
+        pass
+    return {"days": {}}
+
+
+def save_state(U):
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    from cryptography.hazmat.primitives.asymmetric import padding
+    from cryptography.hazmat.primitives import hashes
+    raw = json.dumps(U, ensure_ascii=False, separators=(",", ":")).encode()
+    k = _key()
+    if not k:
+        print("⚠️ USAGE_KEY/TG_TOKEN 비밀값이 없어 저장 안 함(평문을 공개 저장소에 남기지 않음)"); return False
+    iv = os.urandom(12)
+    json.dump({"v": 1, "iv": base64.b64encode(iv).decode(), "ct": base64.b64encode(AESGCM(k).encrypt(iv, raw, None)).decode()}, open(STATE, "w"))
+    # 휴대폰용: seen(신호 번호)은 빼고 — AES 열쇠를 운영자 RSA 공개키로 잠금 (plus7.js 의견함과 같은 방식)
+    V = {k_: v_ for k_, v_ in U.items() if k_ != "seen"}
+    ak = AESGCM.generate_key(bit_length=256); iv2 = os.urandom(12)
+    wk = _pub().encrypt(ak, padding.OAEP(mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
+    ct = AESGCM(ak).encrypt(iv2, json.dumps(V, ensure_ascii=False, separators=(",", ":")).encode(), None)
+    json.dump({"v": 2, "lock": "운영자 전용", "at": U.get("at"), "k": base64.b64encode(wk).decode(), "iv": base64.b64encode(iv2).decode(), "ct": base64.b64encode(ct).decode()}, open(OUT, "w"))
+    return True
 KST = dt.timezone(dt.timedelta(hours=9))
 
 
 def main():
     try:
-        U = json.load(open(OUT, encoding="utf-8"))
-    except Exception:
-        U = {"days": {}}
+        U = load_state()
+    except Exception as e:   # 열쇠가 바뀌었거나 파일이 깨짐 → 덮어쓰지 않고 멈춤(기록 보존) · 다른 단계(vote·push)는 계속
+        print("⚠️ 사용 현황 원본을 못 열어 이번엔 건너뜀:", e); return
     days = U.setdefault("days", {})
     seen = set(U.get("seen") or [])
     try:
@@ -68,7 +119,7 @@ def main():
     U["seen"] = sorted(seen)[-3000:]
     U["at"] = dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M")
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    json.dump(U, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    save_state(U)
     print("새 신호", n, "· 날짜", len(days))
 
 

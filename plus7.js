@@ -90,6 +90,14 @@
         .then(function(pk){ return C.importKey("pkcs8", pk, {name: "RSA-OAEP", hash: "SHA-256"}, false, ["decrypt"]); });
     });
   }
+  // 🔒 11/04 사용 현황(usage.js)도 같은 운영자 열쇠로 — 비밀번호가 이 폰에 있을 때만
+  window.__opOpen = function(x){
+    if (!store.fbpass || !C) return Promise.reject("locked");
+    return (PRIV ? Promise.resolve(PRIV) : unlock(store.fbpass).then(function(k){ PRIV = k; return k; })).then(function(pk){
+      return C.decrypt({name: "RSA-OAEP"}, pk, ub64(x.k)); }).then(function(raw){ return C.importKey("raw", raw, {name: "AES-GCM"}, false, ["decrypt"]); })
+      .then(function(K){ return C.decrypt({name: "AES-GCM", iv: ub64(x.iv)}, K, ub64(x.ct)); }).then(function(b){ return JSON.parse(TD.decode(b)); });
+  };
+  window.__opHas = function(){ return !!(store.fbpass && C); };
   function openItem(x){
     return C.decrypt({name: "RSA-OAEP"}, PRIV, ub64(x.k)).then(function(raw){ return C.importKey("raw", raw, {name: "AES-GCM"}, false, ["decrypt"]); }).then(function(K){
       return C.decrypt({name: "AES-GCM", iv: ub64(x.iv)}, K, ub64(x.ct)).then(function(b){

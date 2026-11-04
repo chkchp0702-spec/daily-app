@@ -63,7 +63,9 @@
     var box = document.createElement("div"); box.id = "usgx"; box.innerHTML = '<div class="usg-s"><div class="loading">사용 현황 불러오는 중…</div></div>';
     box.addEventListener("click", function(ev){ if (ev.target === box) box.remove(); });
     document.body.appendChild(box);
-    fetch("archive/x/usage.json?" + Math.floor(Date.now() / 600000)).then(function(r){ return r.ok ? r.json() : null; }).then(function(U){
+    fetch("archive/x/usage.json?" + Math.floor(Date.now() / 600000)).then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(J){ if (J && J.ct && J.k){ if (!window.__opOpen) throw "locked"; return window.__opOpen(J); } return J && J.days ? J : null; })   // 🔒 11/04 운영자 전용
+      .then(function(U){
       var s = box.firstChild;
       if (!U || !U.days){ s.innerHTML = '<h3>📈 사용 현황</h3><p class="note">아직 모인 기록이 없어요. 2시간마다 모아요.</p><button class="btn" id="usgc">닫기</button>'; return; }
       var days = Object.keys(U.days).sort(), last = days.slice(-14), w7 = days.slice(-7), p7 = days.slice(-14, -7);
@@ -86,10 +88,11 @@
             (pk.length ? '<h4 style="margin:14px 0 6px;font-size:15px">👆 많이 누른 것</h4><ol style="margin:0;padding-left:20px;font-size:14px;line-height:1.7">' + pk.map(function(k){ var nd = W[k] ? Object.keys(W[k]).length : 0; return '<li>' + e(k) + ' <b>' + P[k] + '번</b>' + (nd ? ' <span class="mut">· ' + nd + '명</span>' : '') + '</li>'; }).join("") + '</ol>' : ''); })() +
         '<p class="note">기기 번호(난수)·날짜·처음 연 화면만 모아요. 이름·관심종목·메모는 안 보내요. 목표: 4주 뒤 「주 3회 이상」 늘리기.</p><button class="btn" id="usgc">닫기</button>';
       var c = document.getElementById("usgc"); if (c) c.onclick = function(){ box.remove(); };
-    }).catch(function(){ box.firstChild.innerHTML = '<h3>📈 사용 현황</h3><p class="note">불러오지 못했어요.</p><button class="btn" onclick="document.getElementById(\'usgx\').remove()">닫기</button>'; });
+    }).catch(function(x){ box.firstChild.innerHTML = '<h3>📈 사용 현황</h3><p class="note">' + (x === "locked" ? '🔒 운영자만 볼 수 있어요. 💬 의견함 › 🔐 운영자에서 비밀번호를 넣은 휴대폰에서만 열려요.' : '불러오지 못했어요.') + '</p><button class="btn" onclick="document.getElementById(\'usgx\').remove()">닫기</button>'; });
   }
   document.addEventListener("click", function(ev){ var t = ev.target.closest && ev.target.closest("[data-usage]"); if (!t) return; ev.preventDefault(); ev.stopPropagation(); var s = document.getElementById("uiset"); if (s) s.remove(); show(); }, true);
   function addBtn(){ var g = document.querySelector("#uiset .us-go"); if (!g || g.querySelector("[data-usage]")) return;
+    if (!(window.__opHas && __opHas())) return;   // 🔒 11/04 운영자 비밀번호가 있는 폰에만 단추가 보임
     var b = document.createElement("button"); b.setAttribute("data-usage", "1"); b.textContent = "📈 사용 현황";
     var ic = g.querySelector("[data-icons]"); g.insertBefore(b, ic ? ic.nextSibling : g.firstChild); }
   new MutationObserver(function(){ if (document.getElementById("uiset")) addBtn(); }).observe(document.documentElement, {childList: true, subtree: true});
