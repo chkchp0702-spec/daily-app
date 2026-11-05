@@ -682,7 +682,7 @@
   function infHtml(){
     var R = (K && K.rules) || {}, CR = (CN && CN.rule) || {};
     var pc = function(v){ return v == null ? "–" : Math.round(v * 100) + "%"; };
-    return '<details class="card po-inf no-clp"' + (S.inf ? " open" : "") + '><summary>ⓘ 포트 4개, 뭐가 달라요? <small>눌러서 열고 닫기</small></summary><div class="po-infb">' +
+    return '<details class="card po-inf no-clp"><summary>ⓘ 포트 4개, 뭐가 달라요? <small>눌러서 열고 닫기</small></summary><div class="po-infb">' +
       '<div><b>💼 기본 포트</b> — 뼈대. S&P500·나스닥100 반반에 금 조금. 시장이 나빠지면 현금을 늘려요. 개별 종목은 없어요.</div>' +
       (K ? '<div class="k"><b>⚡ 킥 포트</b> — <u>기본 뼈대 + 개별 종목 양념</u>. 돈의 약 ' + pc(R.sleeve) + '는 ☕ 컵·📈 갭 같은 신호가 뜬 종목을 최대 ' + (R.slots || "–") + '개, 약 ' + pc(R.whale_sleeve) + '는 🐋 고래가 새로 산 종목 묶음에 담아요. 종목마다 ' +
         (R.stop != null ? Math.round(R.stop * 100) + '% 손절 · ' : '') + (R.take != null ? '+' + Math.round(R.take * 100) + '% 익절 · ' : '') + (R.time ? R.time + '거래일 지나면 정리' : '') + '. 사고파는 일이 잦고, 스캐너가 잘 맞히느냐에 성적이 걸려 있어요.</div>' : '') +
@@ -773,7 +773,7 @@
     h += PE.themes.map(function(T, ti){
       var et = T.etf || {}, all = T.rows || [], rows = all;
       var inP = rows.filter(function(r){ return held[r.t]; }).length;
-      return '<details' + (ti < 2 || inP ? ' open' : '') + '><summary><b>' + e(T.name) + '</b>' + (inP ? ' <span class="po-sg g">포트 ' + inP + '</span>' : '') +
+      return '<details><summary><b>' + e(T.name) + '</b>' + (inP ? ' <span class="po-sg g">포트 ' + inP + '</span>' : '') +
         '<em>' + (/^미국/.test(et.t || "") ? '' : '미국 기준 ') + e(et.t || "") + ' 3개월 <b class="' + cls(et.r3) + '">' + sg(et.r3, 0) + '</b></em></summary>' +
         rows.map(function(r, ri){ var mine = held[r.t];
           return '<div class="po-per' + (mine ? " mine" : "") + (ri >= 8 && !mine ? " more" : "") + (r.nobuy ? " nb" : "") + '" data-op="' + e(r.t) + '"><span class="n">' + flag(r.t) + ' ' + e(r.name) + (mine ? ' <span class="po-sg g">✓ 담음</span>' : '') +

@@ -18,13 +18,18 @@
     market: /오늘 할 일|아침판/,
     sector: /국면 신호판|장중 나침반/,
     port:   /부터 성적/,
+    score:  /^$/,             // 11/05 성적표(포트 묶음)도 전부 접음
     prob:   /오를 확률/,
     whale:  /TOP 10/,          // ⑥ 신호 탭: 오늘 볼 것 하나만 펼치고 나머지 상세는 한 단계 아래로
     cup:    /돌파 임박/,
     gap:    /오늘 갭 지도/
   };
-  var OPEN = {}; try { OPEN = JSON.parse(ls("czopen") || "{}") || {}; } catch(x) {}
-  function keepOpen(){ ls("czopen", JSON.stringify(OPEN)); }
+  // 11/05 사용자 「시장·포트에서 펼쳐져 있는 것들 처음엔 닫아 놓고 — 펼치기 했을 때만 보이게」
+  //   · 결론 카드(오늘 할 일·성적 등)도 처음엔 접음 · 펼친 기억은 이번 방문(sessionStorage) 동안만 → 다음에 앱을 열면 다시 전부 접힘
+  var ALL_FOLD = true;
+  var OPEN = {}; try { OPEN = JSON.parse(sessionStorage.getItem("czopen") || "{}") || {}; } catch(x) {}
+  try { localStorage.removeItem("czopen"); } catch(x) {}
+  function keepOpen(){ try { sessionStorage.setItem("czopen", JSON.stringify(OPEN)); } catch(x) {} }
   var EMO = /(?:\p{Extended_Pictographic}|\p{Regional_Indicator})[️‍\p{Extended_Pictographic}\p{Regional_Indicator}\p{Emoji_Modifier}]*/gu;
   function titleOf(c){
     var h = c.querySelector(":scope > h3, :scope > .hm-h b, :scope > .sc-h b, :scope > summary, :scope > .sec");
@@ -45,8 +50,8 @@
     cards.forEach(function(c){
       if (c.dataset.cz === "done" || c.classList.contains("xs-hid")) return;
       var t = titleOf(c);
-      if (!seen && re.test(t)){ seen = true; c.dataset.cz = "done"; return; }
-      if (re.test(t)){ c.dataset.cz = "done"; return; }
+      if (!ALL_FOLD && !seen && re.test(t)){ seen = true; c.dataset.cz = "done"; return; }
+      if (!ALL_FOLD && re.test(t)){ c.dataset.cz = "done"; return; }
       if (!t){ c.dataset.cz = "done"; return; }
       if (c.offsetHeight < 140) return;                                     // 아직 짧은(그리는 중일 수 있는) 카드는 다음에 다시 봄
       c.dataset.cz = "done"; var key = tab + ":" + t.replace(EMO, "").slice(0, 24);

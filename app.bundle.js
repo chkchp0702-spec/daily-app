@@ -8669,7 +8669,7 @@
   function infHtml(){
     var R = (K && K.rules) || {}, CR = (CN && CN.rule) || {};
     var pc = function(v){ return v == null ? "–" : Math.round(v * 100) + "%"; };
-    return '<details class="card po-inf no-clp"' + (S.inf ? " open" : "") + '><summary>ⓘ 포트 4개, 뭐가 달라요? <small>눌러서 열고 닫기</small></summary><div class="po-infb">' +
+    return '<details class="card po-inf no-clp"><summary>ⓘ 포트 4개, 뭐가 달라요? <small>눌러서 열고 닫기</small></summary><div class="po-infb">' +
       '<div><b>💼 기본 포트</b> — 뼈대. S&P500·나스닥100 반반에 금 조금. 시장이 나빠지면 현금을 늘려요. 개별 종목은 없어요.</div>' +
       (K ? '<div class="k"><b>⚡ 킥 포트</b> — <u>기본 뼈대 + 개별 종목 양념</u>. 돈의 약 ' + pc(R.sleeve) + '는 ☕ 컵·📈 갭 같은 신호가 뜬 종목을 최대 ' + (R.slots || "–") + '개, 약 ' + pc(R.whale_sleeve) + '는 🐋 고래가 새로 산 종목 묶음에 담아요. 종목마다 ' +
         (R.stop != null ? Math.round(R.stop * 100) + '% 손절 · ' : '') + (R.take != null ? '+' + Math.round(R.take * 100) + '% 익절 · ' : '') + (R.time ? R.time + '거래일 지나면 정리' : '') + '. 사고파는 일이 잦고, 스캐너가 잘 맞히느냐에 성적이 걸려 있어요.</div>' : '') +
@@ -8760,7 +8760,7 @@
     h += PE.themes.map(function(T, ti){
       var et = T.etf || {}, all = T.rows || [], rows = all;
       var inP = rows.filter(function(r){ return held[r.t]; }).length;
-      return '<details' + (ti < 2 || inP ? ' open' : '') + '><summary><b>' + e(T.name) + '</b>' + (inP ? ' <span class="po-sg g">포트 ' + inP + '</span>' : '') +
+      return '<details><summary><b>' + e(T.name) + '</b>' + (inP ? ' <span class="po-sg g">포트 ' + inP + '</span>' : '') +
         '<em>' + (/^미국/.test(et.t || "") ? '' : '미국 기준 ') + e(et.t || "") + ' 3개월 <b class="' + cls(et.r3) + '">' + sg(et.r3, 0) + '</b></em></summary>' +
         rows.map(function(r, ri){ var mine = held[r.t];
           return '<div class="po-per' + (mine ? " mine" : "") + (ri >= 8 && !mine ? " more" : "") + (r.nobuy ? " nb" : "") + '" data-op="' + e(r.t) + '"><span class="n">' + flag(r.t) + ' ' + e(r.name) + (mine ? ' <span class="po-sg g">✓ 담음</span>' : '') +
@@ -13365,13 +13365,18 @@
     market: /오늘 할 일|아침판/,
     sector: /국면 신호판|장중 나침반/,
     port:   /부터 성적/,
+    score:  /^$/,             // 11/05 성적표(포트 묶음)도 전부 접음
     prob:   /오를 확률/,
     whale:  /TOP 10/,          // ⑥ 신호 탭: 오늘 볼 것 하나만 펼치고 나머지 상세는 한 단계 아래로
     cup:    /돌파 임박/,
     gap:    /오늘 갭 지도/
   };
-  var OPEN = {}; try { OPEN = JSON.parse(ls("czopen") || "{}") || {}; } catch(x) {}
-  function keepOpen(){ ls("czopen", JSON.stringify(OPEN)); }
+  // 11/05 사용자 「시장·포트에서 펼쳐져 있는 것들 처음엔 닫아 놓고 — 펼치기 했을 때만 보이게」
+  //   · 결론 카드(오늘 할 일·성적 등)도 처음엔 접음 · 펼친 기억은 이번 방문(sessionStorage) 동안만 → 다음에 앱을 열면 다시 전부 접힘
+  var ALL_FOLD = true;
+  var OPEN = {}; try { OPEN = JSON.parse(sessionStorage.getItem("czopen") || "{}") || {}; } catch(x) {}
+  try { localStorage.removeItem("czopen"); } catch(x) {}
+  function keepOpen(){ try { sessionStorage.setItem("czopen", JSON.stringify(OPEN)); } catch(x) {} }
   var EMO = /(?:\p{Extended_Pictographic}|\p{Regional_Indicator})[️‍\p{Extended_Pictographic}\p{Regional_Indicator}\p{Emoji_Modifier}]*/gu;
   function titleOf(c){
     var h = c.querySelector(":scope > h3, :scope > .hm-h b, :scope > .sc-h b, :scope > summary, :scope > .sec");
@@ -13392,8 +13397,8 @@
     cards.forEach(function(c){
       if (c.dataset.cz === "done" || c.classList.contains("xs-hid")) return;
       var t = titleOf(c);
-      if (!seen && re.test(t)){ seen = true; c.dataset.cz = "done"; return; }
-      if (re.test(t)){ c.dataset.cz = "done"; return; }
+      if (!ALL_FOLD && !seen && re.test(t)){ seen = true; c.dataset.cz = "done"; return; }
+      if (!ALL_FOLD && re.test(t)){ c.dataset.cz = "done"; return; }
       if (!t){ c.dataset.cz = "done"; return; }
       if (c.offsetHeight < 140) return;                                     // 아직 짧은(그리는 중일 수 있는) 카드는 다음에 다시 봄
       c.dataset.cz = "done"; var key = tab + ":" + t.replace(EMO, "").slice(0, 24);
