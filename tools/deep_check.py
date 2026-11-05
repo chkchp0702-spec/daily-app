@@ -121,10 +121,10 @@ def facts(texts, src, now):
         if m and st: chk("🏠 S&P와 하루 승부 이긴 날", float(m.group(2)), float(st.get("win") or 0), 0.1)
     t = texts.get("port") or ""
     if t and st:
-        m = re.search(r"💼 기본 포트\n([+−-]?\d+\.\d\d)%", t)
+        m = re.search(r"💼 기본 포트(?: ▾)?\n([+−-]?\d+\.\d\d)%", t)
         chk("💼 기본 포트", _n(m.group(1)) if m else None, st.get("ret"), 0.006)
         if not m: p.append("💼 포트 「기본 포트」 숫자를 못 찾음")
-        m = re.search(r"⚡ 공격 포트\n([+−-]?\d+\.\d\d)%", t)
+        m = re.search(r"⚡ 공격 포트(?: ▾)?\n([+−-]?\d+\.\d\d)%", t)
         chk("💼 공격 포트", _n(m.group(1)) if m else None, K.get("kick"), 0.006)
         m = re.search(r"~ (\d{2})/(\d{2}) · (\d+)거래일", t)
         if m:
@@ -191,10 +191,10 @@ def sweep(pg, url, tab, cap=45):
             top1 = pg.evaluate("((document.getElementById('main')||{}).innerText||'').slice(0,80)")
             if h1 != h0 or peek or info[3] or top1 != top0:   # 다른 화면으로 감(종목 화면 열기 등) — 튐 아님, 돌아와서 계속
                 pg.goto(url, wait_until="domcontentloaded", timeout=45000); pg.wait_for_timeout(2200); pg.evaluate(LIST_JS, SEL); continue
-            aft = pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); if(!e||!e.isConnected) return [null, document.body.innerHTML.length]; return [Math.round(e.getBoundingClientRect().top), document.body.innerHTML.length]}})()""")
+            aft = pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); if(!e||!e.isConnected||!e.getClientRects().length) return [null, document.body.innerHTML.length]; return [Math.round(e.getBoundingClientRect().top), document.body.innerHTML.length]}})()""")
             if aft[0] is not None and abs(aft[0] - info[0]) > 150 and not EXPAND.search(info[1]):
                 jumps.append(f"「{info[1]}」 {info[0]}→{aft[0]}px")
-            if aft[0] is None: pg.evaluate(LIST_JS, SEL)
+            if aft[0] is None: pg.evaluate(LIST_JS, SEL)   # 🔧 11/05: 사라진 단추(카드 맨 아래 「접기 ▴」 — 접히면 숨음)는 튐이 아님
         except Exception:
             continue
     return {"tab": tab, "buttons": n, "errs": sorted(set(errs))[:5], "jumps": jumps[:5]}

@@ -15,6 +15,7 @@ async def main():
         out={}
         for tab in TABS:
             ctx=await b.new_context(viewport={"width":390,"height":844},is_mobile=True,has_touch=True)
+            await ctx.add_init_script("try{localStorage.setItem('ezmode','%s')}catch(e){}" % ("easy" if os.environ.get("UA_EZ") else "pro"))   # 🔧 11/05: 기본은 ☰ 전체 메뉴(쉬운 화면은 카드를 접어 숨김) · UA_EZ=1 이면 쉬운 화면
             pg=await ctx.new_page(); errs=[]; pg.on("pageerror",lambda e:errs.append(str(e)[:160]))
             async def route(r):
                 u=r.request.url

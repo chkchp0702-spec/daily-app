@@ -85,7 +85,7 @@
   // 카드·줄·칩 누르기 → 창 (종목 이름 data-op 은 지금처럼 종목 화면) · 같은 탭 안 이동은 그대로
   document.addEventListener("click", function(ev){
     if (ev.defaultPrevented || !ev.target.closest) return;
-    if (ev.target.closest("[data-op], a[href], input, select, label, textarea, [data-share], .hm-sh")) return;
+    if (ev.target.closest("[data-op], a[href], input, select, label, textarea, [data-share], .hm-sh, .cz.cz-on")) return;   // 🔧 11/05: 접힌 카드(calm.js)는 누르면 펼치기만 — 카드 자체가 data-goto 인 🏠 「내 포트」 띠는 펼침+💼 창이 같이 열렸음
     var t = ev.target.closest("[data-goto]"); if (!t) return;
     // 10/19: 카드 안의 단추·링크(접기·펼치기·전체 보기 등)를 누르면 카드 전체 이동(data-goto)을 하지 않음
     var ctl = ev.target.closest("button,a,summary,input,select,label,.fold"); if (ctl && !ctl.hasAttribute("data-goto") && t !== ctl && t.contains(ctl)) return;

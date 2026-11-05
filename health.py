@@ -128,7 +128,7 @@ def app_checks():
     with sync_playwright() as p:
         b = p.chromium.launch()
         ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, service_workers="block")
-        ctx.add_init_script("try{localStorage.setItem('userName','건강검진')}catch(e){}")
+        ctx.add_init_script("try{localStorage.setItem('userName','건강검진');localStorage.setItem('ezmode','pro')}catch(e){}")   # 🔧 11/05: 쉬운 화면(ux1105c, 기본)은 카드를 접어 숨겨 클릭·숫자 검사가 20초 멈춤 → 깊은 검진은 ☰ 전체 메뉴로, 쉬운 화면은 easy_check 가 따로
         ctx.route(re.compile(r"https://ntfy\.sh/.*"), lambda r: r.abort())
         if LOCAL:
             def _lr(r):
@@ -169,7 +169,8 @@ def app_checks():
                           loading: document.querySelectorAll('#main .loading').length};
                 }""")
                 # 🩺 10/29 내용 검사 · 화면 글 · 사진
-                texts[tab] = pg.evaluate("(document.getElementById('main')||{}).innerText||''")
+                # 🔧 11/05: 「처음엔 접어 두기」(calm.js — 홈 4장만 펼침·성적표 전부 접음)로 숫자가 접힌 카드 속에 숨음 → 글 읽을 때만 잠깐 펼쳤다 다시 접음
+                texts[tab] = pg.evaluate("(()=>{var z=[].slice.call(document.querySelectorAll('#main .cz.cz-on'));z.forEach(function(c){c.classList.remove('cz-on')});var t=(document.getElementById('main')||{}).innerText||'';z.forEach(function(c){c.classList.add('cz-on')});return t})()")
                 lints[tab] = pg.evaluate(DC.LINT_JS, {"ids": ids, "bad": DC.BAD_WORDS, "glitch": DC.GLITCH, "tabs": alltabs, "en": tab in ("feed", "onepager", "market", "sector")})
                 for x in DC.lint_probs(tab, lints[tab]):
                     if not (info["bad"] and "화면에" in x): probs.append(x)
@@ -209,8 +210,15 @@ def app_checks():
             pg = ctx.new_page(); pg.on("dialog", lambda d: d.dismiss())
             try:
                 pg.goto(APP + "?h=" + str(int(time.time())) + "#" + start, wait_until="domcontentloaded", timeout=45000)
-                pg.wait_for_selector(sel, timeout=20000); pg.wait_for_timeout(800)
-                pg.click(sel)
+                pg.wait_for_selector(sel, state="attached", timeout=20000); pg.wait_for_timeout(800)
+                # 🔧 11/05: 단추가 접힌 카드(.cz.cz-on) 속이면 사람처럼 카드 제목을 눌러 먼저 펼침
+                #   접기는 카드가 다 그려진 뒤(높이 140px↑) 늦게 붙으므로 펼치기·누르기를 3번까지 다시
+                for k in range(3):
+                    if pg.evaluate("(s)=>{var e=document.querySelector(s),c=e&&e.closest('.cz.cz-on');if(!c)return false;(c.querySelector('.cz-h')||c).click();return true}", sel): pg.wait_for_timeout(600)
+                    try: pg.click(sel, timeout=5000); break
+                    except Exception:
+                        if k == 2: raise
+                        pg.wait_for_timeout(1500)
                 # 10/19: 다른 탭 카드는 smooth.js 가 「창」(#peek iframe ?embed=1)으로 엶(10/15 사용자 「매끄럽게 열고 닫기」) — 창 속 화면도 정답으로 봄
                 JS = """(w)=>{var pk=document.getElementById('peek');
                   if(pk){var f=pk.querySelector('iframe');try{var fw=f.contentWindow;return ['창:'+(fw.cur||''), w?!!fw.document.getElementById(w):true];}catch(e){return ['창?',false];}}
@@ -262,6 +270,7 @@ def anchor_check(lints):
     if not gs: return probs
     with sync_playwright() as p:
         b = p.chromium.launch(); ctx = b.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
+        ctx.add_init_script("try{localStorage.setItem('ezmode','pro')}catch(e){}")
         ctx.route(re.compile(r"https://ntfy\.sh/.*"), lambda r: r.abort())
         if LOCAL:
             ctx.route("**/*", lambda r: (lambda f: r.fulfill(status=404, body="") if not f else r.fulfill(path=f))(local_path(r.request.url.replace("refs/heads/main", "main"))))
@@ -329,12 +338,50 @@ def week_fixed():
     return rows
 
 
+def easy_check():
+    """🔰 11/05 쉬운 화면(기본 첫 화면) — 신호등 한 장이 그려지나 · 「오늘 자세히 보기」 눌러 카드가 펼쳐지나 · 누른 단추가 안 튀나 · JS 오류"""
+    from playwright.sync_api import sync_playwright
+    probs = []
+    with sync_playwright() as p:
+        b = p.chromium.launch(); ctx = b.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
+        ctx.add_init_script("try{localStorage.setItem('userName','건강검진');localStorage.setItem('ezmode','easy')}catch(e){}")
+        ctx.route(re.compile(r"https://ntfy\.sh/.*"), lambda r: r.abort())
+        if LOCAL:
+            ctx.route("**/*", lambda r: (lambda f: r.fulfill(status=404, body="") if not f else r.fulfill(path=f))(local_path(r.request.url.replace("refs/heads/main", "main"))))
+        pg = ctx.new_page(); errs = []; pg.on("pageerror", lambda e: errs.append(str(e)[:80])); pg.on("dialog", lambda d: d.dismiss())
+        try:
+            pg.goto(APP + "?e=" + str(int(time.time())) + "#home", wait_until="domcontentloaded", timeout=45000)
+            ok = False
+            for _ in range(30):
+                pg.wait_for_timeout(500)
+                if pg.evaluate("!!document.querySelector('#ezhero .ez-light')"): ok = True; break
+            if not ok:
+                t = pg.evaluate("(document.getElementById('ezhero')||{}).innerText||'(쉬운 첫 화면 칸 없음)'")
+                probs.append("🔰 쉬운 첫 화면 신호등이 안 그려짐: " + t.strip()[:50])
+            r = pg.evaluate("""()=>{var b=document.querySelector('#ezmore .ez-open');if(!b)return null;b.scrollIntoView({block:'center'});var t0=b.getBoundingClientRect().top;b.click();return t0}""")
+            if r is None: probs.append("🔰 쉬운 첫 화면 「오늘 자세히 보기」 단추 없음")
+            else:
+                pg.wait_for_timeout(1200)
+                t1, op = pg.evaluate("()=>{var b=document.querySelector('#ezmore .ez-open');var h=document.getElementById('hmbody');return [b.getBoundingClientRect().top, !!(h&&h.classList.contains('ez-open')&&h.offsetHeight>100)]}")
+                if not op: probs.append("🔰 「오늘 자세히 보기」 눌러도 오늘 카드가 안 펼쳐짐")
+                if abs(t1 - r) > 150: probs.append(f"🔰 「오늘 자세히 보기」 누른 단추가 튐: {round(r)}→{round(t1)}px")
+            if errs: probs.append("🔰 쉬운 화면 JS 오류: " + errs[0])
+        except Exception as e:
+            probs.append(f"🔰 쉬운 화면 검사 실패: {str(e)[:60]}")
+        b.close()
+    return probs
+
+
 def main():
     data, p1 = data_checks()
     try:
         app, p2 = app_checks()
     except Exception as e:
         app, p2 = [], [f"브라우저 검사 실패: {str(e)[:100]}"]
+    try:
+        p2 = p2 + easy_check()
+    except Exception as e:
+        p2 = p2 + [f"🔰 쉬운 화면 검사 실패: {str(e)[:60]}"]
     jobs, p3 = job_checks() if not LOCAL else ([], [])
     probs = p1 + p2 + p3
     fixed = week_fixed()

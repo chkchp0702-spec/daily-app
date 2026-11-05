@@ -103,7 +103,7 @@
       more.innerHTML = '<button type="button" class="ez-open">▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small></button>' +
         '<div class="ez-drawer"><small>🎁 더보기</small><div>' + [["luck", "🔮", "운세"], ["saju", "📜", "사주"], ["tarot", "🃏", "타로"], ["lotto", "🎱", "로또"]].map(function(x){ return '<button type="button" data-ezgo="' + x[0] + '"><span>' + x[1] + '</span>' + x[2] + '</button>'; }).join("") + '</div></div>';
       h.insertAdjacentElement("afterend", more);
-      more.querySelector(".ez-open").onclick = function(){ var o = hb.classList.toggle("ez-open"); this.innerHTML = o ? "▴ 접기" : '▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small>'; if (o) setTimeout(function(){ hb.scrollIntoView({behavior: "smooth", block: "start"}); }, 60); };
+      more.querySelector(".ez-open").onclick = function(){ var o = hb.classList.toggle("ez-open"); this.innerHTML = o ? "▴ 접기" : '▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small>'; };   /* 🔧 11/05 자가 업그레이드: 펼칠 때 화면을 hb 맨 위로 끌어 「▴ 접기」가 화면 밖(383→−189px)으로 튀던 것 → 누른 단추 제자리, 내용은 바로 아래 */
     }
     if (Date.now() - HB > 60000){ HB = Date.now();
       brief().then(function(b){ var x = document.getElementById("ezhero"); if (!x) return; x.innerHTML = b && (b.one || b.talk) ? heroHtml(b) : '<div class="ez-load">아직 오늘 자료가 안 올라왔어요 · 아래 「오늘 자세히 보기」를 눌러 주세요</div>'; }); }
