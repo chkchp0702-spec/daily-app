@@ -143,8 +143,9 @@
   function ensureReasons(){
     var jobs = [];
     ST.sel.forEach(function(k){ if (!EQ[k]) return; var f0 = form(k) || {}, o = ST.opt[k] || {};
-      var ctx = {themes: f0.themes || ((f0.alt || {}).usd || {}).themes || [], look: (f0.sim || {}).look, hot: f0.kr_hot || []};
+      var cc0 = CORE_F[k] ? coreOf(k) : null, ctx = {themes: f0.themes || ((f0.alt || {}).usd || {}).themes || [], look: cc0 && !(cc0.spx && cc0.ndx) ? null : (f0.sim || {}).look, hot: f0.kr_hot || []};
       (o.must || []).forEach(function(m){ if (m && m.name) jobs.push(reasonFor(m, ctx).then(function(){ if (m.sym) keep(); })); }); });
+    jobs.push(coreReady());   // 🧩 고른 구성의 과거 계산이 끝난 뒤 만들기
     return Promise.all(jobs);
   }
   // 고른 방식(원화/환전) + 꼭 넣을 종목을 기본폼에 덧입힌 「이 고객용」 폼
@@ -208,12 +209,143 @@
       var d = r1(gt[1] - g.reduce(function(s2, a){ return s2 + a.pct; }, 0)); if (d){ var big = g.slice().sort(function(a, b){ return b.pct - a.pct; })[0]; big.pct = r1(big.pct + d); } });
     return al.sort(function(a, b){ return b.pct - a.pct; });
   }
+
+  /* 🧩 11/05 사용자 「제안서 안에서 나스닥·S&P500·금을 디폴트로 넣지 말고 취향에 따라 설정할 수 있게」
+     해외 주식·개인연금·DC·IRP 폼의 S&P500 · 나스닥100 · 금 칸은 처음엔 꺼 둠 → PB가 칩으로 켬
+     끈 칸의 몫은 같은 종류(위험/안전)의 남은 칸(시황 테마 칸 빼고)에 비율대로 나눔 · DC·IRP 위험 70% 한도는 그대로
+     「내 기본값으로」 = 이 휴대폰의 다음 제안서부터 같은 구성으로 시작 (localStorage pp_core)
+     과거 계산은 고른 구성으로 앱에서 다시 셈 — proposal_mkt.py backtest() 와 같은 규칙(같은 port_px 자료 · 매달 첫 거래일 비중 맞춤) */
+  var CORE = [["spx", "🇺🇸", "S&P500"], ["ndx", "💻", "나스닥100"], ["gold", "🥇", "금"]];
+  var CORE_F = {gl_stock: 1, pension: 1, dc: 1, irp: 1};
+  function coreDef(){ try { var d = JSON.parse(localStorage.getItem("pp_core") || "null"); if (d && typeof d === "object") return {spx: d.spx ? 1 : 0, ndx: d.ndx ? 1 : 0, gold: d.gold ? 1 : 0}; } catch(x) {} return {spx: 0, ndx: 0, gold: 0}; }
+  function coreOf(k){ var o = ST.opt[k]; return (o && o.core) || coreDef(); }
+  function coreAllOn(c){ return CORE.every(function(x){ return !!c[x[0]]; }); }
+  function coreTxt(c){ var on = CORE.filter(function(x){ return c[x[0]]; }).map(function(x){ return x[2]; }); return on.length ? on.join("·") : "지수·금 없음"; }
+  function coreAlloc(al, c){
+    al = al.map(function(a){ return JSON.parse(JSON.stringify(a)); });
+    var off = al.filter(function(a){ return CORE.some(function(x){ return x[0] === a.k; }) && !c[a.k] && +a.pct > 0; });
+    if (!off.length) return al;
+    var keep = al.filter(function(a){ return off.indexOf(a) < 0; });
+    ["위험", "안전"].forEach(function(kd){
+      var mv = off.filter(function(a){ return (a.kind || "위험") === kd; }).reduce(function(s2, a){ return s2 + a.pct; }, 0); if (!mv) return;
+      var to = keep.filter(function(a){ return (a.kind || "위험") === kd && a.k !== "theme" && a.pct > 0; });
+      if (!to.length) to = keep.filter(function(a){ return (a.kind || "위험") === kd && a.pct > 0; });
+      if (!to.length) to = keep.filter(function(a){ return a.pct > 0; });
+      var base = to.reduce(function(s2, a){ return s2 + a.pct; }, 0); if (!base) return;
+      to.forEach(function(a){ a.pct += mv * a.pct / base; });
+    });
+    keep.forEach(function(a){ a.pct = r1(a.pct); });
+    keep = keep.filter(function(a){ return a.pct > 0; });
+    var d = r1(100 - keep.reduce(function(s2, a){ return s2 + a.pct; }, 0));
+    if (d && keep.length){ var big = keep.filter(function(a){ return a.k !== "theme"; }).sort(function(a, b){ return b.pct - a.pct; })[0] || keep[0]; big.pct = r1(big.pct + d); }
+    return keep.sort(function(a, b){ return b.pct - a.pct; });
+  }
+  // ── 앱에서 다시 세는 과거 계산 (proposal_mkt.py backtest · window · underwater 와 같은 규칙) ──
+  var CSYM = {spx: "SPY", ndx: "QQQ", k200: "KOSPI", gold: "GLD", cd: "BIL", corp: "BIL"};
+  var CREG = {spx: "미국 주식", ndx: "미국 주식", k200: "한국 주식", gold: "금", cd: "현금·채권", corp: "현금·채권"};
+  var CRIS = [["2008 금융위기", "2008-05-19", "2009-03-09"], ["2011 미국 신용강등", "2011-04-29", "2011-10-03"], ["2018 미·중 무역분쟁", "2018-09-20", "2018-12-24"], ["2020 코로나 폭락", "2020-02-19", "2020-03-23"], ["2022 금리 쇼크", "2022-01-03", "2022-10-12"]];
+  var CPX = null, CPXP = null, CSIM = {}, CWAIT = {};
+  function dn(s){ return Math.round(Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) / 864e5); }
+  function ds(n){ return new Date(n * 864e5).toISOString().slice(0, 10); }
+  function cpxLoad(){
+    if (CPX) return Promise.resolve(CPX); if (CPXP) return CPXP;
+    var syms = ["SPY", "QQQ", "KOSPI", "GLD", "BIL"], out = {};
+    CPXP = Promise.all(syms.map(function(sym){ var u = "archive/x/port_px/" + sym + ".json?" + Math.floor(Date.now() / 3600e3);
+      return (typeof getJSON === "function" ? getJSON(u, {ttl: 3600e3}) : fetch(u).then(function(r){ return r.json(); })).then(function(j){
+        var m = {}, d = dn(j.d0); (j.dd || []).forEach(function(g, i){ d += g; var c = j.c[i]; if (c != null) m[d] = +c; }); out[sym] = m; }); }))
+      .then(function(){ CPX = out; return out; }).catch(function(){ CPXP = null; return null; });
+    return CPXP;
+  }
+  function cbt(al, raw, startAt){
+    var w = {}; al.forEach(function(a){ var sym = CSYM[a.k] || (/^sec/.test(a.k) ? "KOSPI" : null); if (sym) w[sym] = (w[sym] || 0) + a.pct / 100; });
+    var ks = Object.keys(w), tot = ks.reduce(function(s2, x){ return s2 + w[x]; }, 0) || 1; ks.forEach(function(x){ w[x] /= tot; });
+    if (!ks.length || ks.some(function(x){ return !CPX[x]; })) return null;
+    var S = {}; ks.forEach(function(x){ S[x] = CPX[x]; });
+    var start = Math.max.apply(null, ks.map(function(x){ return Math.min.apply(null, Object.keys(S[x]).map(Number)); }));
+    if (startAt) start = Math.max(start, startAt);
+    var dset = {}; ks.forEach(function(x){ for (var d in S[x]) dset[d] = 1; });
+    var days = Object.keys(dset).map(Number).filter(function(d){ return d >= start; }).sort(function(a, b){ return a - b; });
+    var lastp = {}, nav = [], val = 1, hold = null, mon = null;
+    days.forEach(function(d){
+      var px = {}, miss = false; ks.forEach(function(x){ if (S[x][d] != null) lastp[x] = S[x][d]; px[x] = lastp[x]; if (px[x] == null) miss = true; });
+      if (miss) return;
+      var mo = new Date(d * 864e5).getUTCMonth();
+      if (hold === null || mo !== mon){ if (hold !== null) val = ks.reduce(function(s2, x){ return s2 + hold[x] * px[x]; }, 0); hold = {}; ks.forEach(function(x){ hold[x] = val * w[x] / px[x]; }); mon = mo; }
+      val = ks.reduce(function(s2, x){ return s2 + hold[x] * px[x]; }, 0); nav.push([d, val]);
+    });
+    if (nav.length < 260 * 3) return null;
+    if (raw) return nav;
+    var vals = nav.map(function(x){ return x[1]; }), yrs = (nav[nav.length - 1][0] - nav[0][0]) / 365.25, cagr = Math.pow(vals[vals.length - 1] / vals[0], 1 / yrs) - 1;
+    var pk = vals[0], mdd = 0; vals.forEach(function(v){ pk = Math.max(pk, v); mdd = Math.min(mdd, v / pk - 1); });
+    var R1 = [], R5 = [], i; for (i = 252; i < vals.length; i++) R1.push(vals[i] / vals[i - 252] - 1); for (i = 252 * 5; i < vals.length; i++) R5.push(Math.pow(vals[i] / vals[i - 1260], 0.2) - 1);
+    var num = function(a, b){ return a - b; }; R1.sort(num); R5.sort(num);
+    var q = function(xs, p){ return xs[Math.min(xs.length - 1, Math.max(0, Math.floor(xs.length * p)))]; }, rr = function(v, n){ var m = Math.pow(10, n); return Math.round(v * m) / m; };
+    var lr = []; for (i = 1; i < vals.length; i++) lr.push(Math.log(vals[i] / vals[i - 1]));
+    var mu = lr.reduce(function(s2, x){ return s2 + x; }, 0) / lr.length, vol = Math.sqrt(Math.max(0, lr.reduce(function(s2, x){ return s2 + x * x; }, 0) / lr.length - mu * mu)) * Math.sqrt(252);
+    var Y = {}, yo = []; nav.forEach(function(x){ var y = new Date(x[0] * 864e5).getUTCFullYear(); if (!Y[y]){ Y[y] = [x[1], x[1]]; yo.push(y); } Y[y][1] = x[1]; });
+    var yr = [], py = null; yo.forEach(function(y){ var b0 = py || Y[y][0]; yr.push([y, rr((Y[y][1] / b0 - 1) * 100, 1)]); py = Y[y][1]; });
+    var ms = nav.filter(function(x, j){ return j === nav.length - 1 || new Date(nav[j + 1][0] * 864e5).getUTCMonth() !== new Date(x[0] * 864e5).getUTCMonth(); });
+    var pct = function(xs, p){ return rr(q(xs, p) * 100, 1); }, pos = function(xs){ return Math.round(xs.filter(function(x){ return x > 0; }).length / xs.length * 100); };
+    var W = {}; ks.forEach(function(x){ W[x] = rr(w[x] * 100, 1); });
+    return {from: ds(nav[0][0]), to: ds(nav[nav.length - 1][0]), yrs: rr(yrs, 1), cagr: rr(cagr * 100, 1), mdd: rr(mdd * 100, 1), vol: rr(vol * 100, 1),
+      y1: {p10: pct(R1, .1), p50: pct(R1, .5), p90: pct(R1, .9), pos: pos(R1)}, y5: R5.length ? {p10: pct(R5, .1), p50: pct(R5, .5), p90: pct(R5, .9), pos: pos(R5)} : null,
+      years: yr.slice(-12), growth: {labels: ms.map(function(x){ return ds(x[0]).slice(0, 7); }), vals: ms.map(function(x){ return rr(x[1] / vals[0], 4); })}, w: W};
+  }
+  function cwin(nav, a, b){
+    a = dn(a); b = dn(b); var xs = nav.filter(function(x){ return x[0] >= a && x[0] <= b; }); if (xs.length < 5) return null;
+    var pk = xs[0][1], mdd = 0; xs.forEach(function(x){ pk = Math.max(pk, x[1]); mdd = Math.min(mdd, x[1] / pk - 1); });
+    var rec = null; for (var i = 0; i < nav.length; i++){ if (nav[i][0] > b && nav[i][1] >= xs[0][1]){ rec = Math.round((nav[i][0] - b) / 30.4); break; } }
+    return {ret: Math.round((xs[xs.length - 1][1] / xs[0][1] - 1) * 1000) / 10, mdd: Math.round(mdd * 1000) / 10, rec: rec};
+  }
+  function cuw(nav){ var pk = nav[0][1], pkd = nav[0][0], lg = 0; nav.forEach(function(x){ if (x[1] >= pk){ lg = Math.max(lg, x[0] - pkd); pk = x[1]; pkd = x[0]; } }); lg = Math.max(lg, nav[nav.length - 1][0] - pkd); return Math.round(lg / 30.4); }
+  function csimCalc(k, al, sim0){
+    al = al.filter(function(a){ return +a.pct > 0; });
+    var bt = cbt(al); if (!bt) return null;
+    var nav = cbt(al, true), start = nav[0][0];
+    var cmp = [{name: "이 제안", me: 1, cagr: bt.cagr, mdd: bt.mdd, vol: bt.vol, pos: bt.y1.pos, uw: cuw(nav)}], navs = {"이 제안": nav};
+    [["코스피만", "k200"], ["S&P500만", "spx"], ["현금(단기채)만", "cd"]].forEach(function(z){ var one = [{k: z[1], pct: 100}], b1 = cbt(one, false, start), n1 = cbt(one, true, start);
+      if (b1 && n1){ cmp.push({name: z[0], cagr: b1.cagr, mdd: b1.mdd, vol: b1.vol, pos: b1.y1.pos, uw: cuw(n1)}); navs[z[0]] = n1; } });
+    var stress = []; CRIS.forEach(function(c){ var row = {name: c[0], from: c[1], to: c[2]}; for (var nm in navs){ var w = cwin(navs[nm], c[1], c[2]); if (w) row[nm] = w; } if (row["이 제안"]) stress.push(row); });
+    var reg = {}; al.forEach(function(a){ var g = CREG[a.k] || (/^sec/.test(a.k) ? "한국 주식" : "기타"); reg[g] = r1((reg[g] || 0) + a.pct); });
+    var look = null, L0 = sim0 && sim0.look;
+    if (L0 && L0.us_pct){ var sp = al.filter(function(a){ return a.k === "spx"; })[0], nd = al.filter(function(a){ return a.k === "ndx"; })[0];
+      if (sp && nd){ var us = r1(sp.pct + nd.pct), f2 = us / L0.us_pct; look = JSON.parse(JSON.stringify(L0)); look.us_pct = us;
+        look.top.forEach(function(t){ t.w = Math.round(t.w * f2 * 100) / 100; }); (look.sector || []).forEach(function(t){ t[1] = r1(t[1] * f2); }); } }
+    return {kind: "equity", bt: bt, cmp: cmp, stress: stress, region: Object.keys(reg).map(function(g){ return [g, reg[g]]; }).sort(function(a, b){ return b[1] - a[1]; }), look: look,
+      note: bt.from.slice(0, 7) + "~" + bt.to.slice(0, 7) + " 실제 지수로 이 비중을 매달 맞췄다면의 계산 · 달러 자산은 달러 기준 · 배당·수수료·세금 제외(보수적) · 🧭 시황 테마 칸은 테마가 자주 바뀌어 과거 계산에서 빼고 나머지 비중으로 계산함 · 🧩 PB가 고른 구성으로 다시 계산",
+      contrib: {pension: 600, irp: 900}[k] || null, risky: riskyOf(al), tier_cap: sim0 && sim0.tier_cap};
+  }
+  function csimKey(k, al){ return k + "|" + al.filter(function(a){ return +a.pct > 0; }).map(function(a){ return a.k + ":" + a.pct; }).sort().join(","); }
+  // 있으면 바로 돌려주고, 없으면 자료를 받아 센 뒤 화면을 다시 그림
+  function csim(k, al, sim0){
+    var key = csimKey(k, al); if (CSIM.hasOwnProperty(key)) return CSIM[key];
+    if (!CWAIT[key]){ CWAIT[key] = cpxLoad().then(function(px){ CSIM[key] = px ? csimCalc(k, al, sim0) : null; delete CWAIT[key];
+      if (window.cur === "prop"){ var y = window.scrollY; try { draw(); window.scrollTo(0, y); } catch(x) {} } }); }
+    return null;
+  }
+  function coreReady(){
+    var jobs = [];
+    ST.sel.forEach(function(k){ if (!CORE_F[k]) return; baseX(k); var key = Object.keys(CWAIT).filter(function(q){ return q.indexOf(k + "|") === 0; }); key.forEach(function(q){ jobs.push(CWAIT[q]); }); });
+    return Promise.all(jobs);
+  }
+  function coreUI(k){
+    if (!CORE_F[k]) return "";
+    var f0 = form(k); if (!f0 || !(f0.alloc || []).some(function(a){ return CORE.some(function(x){ return x[0] === a.k; }); })) return "";
+    var c = coreOf(k), d = coreDef(), same = CORE.every(function(x){ return !!c[x[0]] === !!d[x[0]]; });
+    var empty = k === "gl_stock" && !c.spx && !c.ndx && !((ST.opt[k] || {}).must || []).some(function(m){ return +m.pct > 0; });
+    return '<div class="pp-ol"><span data-tip="' + e(JOY.core) + '">🧩 기본 구성 고르기 ⓘ</span> <span class="mut">(누르면 켜고 끔)</span></div>' +
+      '<div class="pp-core">' + CORE.map(function(x){ return '<button type="button" data-ck="' + k + '" data-cv="' + x[0] + '"' + (c[x[0]] ? ' class="on"' : '') + '>' + x[1] + ' ' + x[2] + '<small>' + (c[x[0]] ? "넣음" : "안 넣음") + '</small></button>'; }).join("") + '</div>' +
+      (empty ? '<p class="pp-pw">💡 해외 주식인데 미국 지수가 빠져 있어요 — 위 칩을 켜거나 아래 ⭐ 추천 종목으로 해외 종목·ETF를 넣어 주세요</p>' : '') +
+      '<div class="pp-cs"><span class="mut">끈 칸의 몫은 남은 칸(코스피200 등)에 비율대로</span>' + (same ? '<span class="pp-cd">✓ 내 기본값</span>' : '<button type="button" data-cd="' + k + '">📌 이 구성을 내 기본값으로</button>') + '</div>';
+  }
   function riskyOf(al){ return r1(al.reduce(function(s2, a){ return s2 + (a.kind === "위험" ? +a.pct || 0 : 0); }, 0)); }
   // 원화/환전 + 위험 정도까지 입힌 폼 (⭐ 추천 종목 넣기 전)
   function baseX(k){
     var f0 = form(k); if (!f0) return null;
     var o = ST.opt[k] || {}, f = JSON.parse(JSON.stringify(f0));
     if (k === "gl_stock" && o.mode === "usd" && f.alt && f.alt.usd){ var u = f.alt.usd; for (var q in u) f[q] = u[q]; }
+    var cc = CORE_F[k] ? coreOf(k) : null;
+    if (cc && !coreAllOn(cc) && f.alloc.some(function(a){ return CORE.some(function(x){ return x[0] === a.k && !cc[a.k] && +a.pct > 0; }); })) return coreX(k, f, cc);
     var t = tierOf(k), T = EQ[k] && t !== "normal" && f.sim && f.sim.tiers && f.sim.tiers[t];
     if (EQ[k] && t !== "normal" && !T && KEEP[t] != null){   // 새 단계 과거 계산이 아직 없을 때(다음 갱신 전) — 비중만 바꾸고 과거 계산은 숨김
       var R00 = riskyOf(f.alloc), th00 = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
@@ -240,6 +372,29 @@
       f.points = [profPoint(t, R0, riskyOf(f.alloc), cap)].concat(f.points || []);
     }
     if (f.tier && !f.alloc.some(function(a){ return a.k === "theme"; })) f.themes = [];
+    return f;
+  }
+
+  // 🧩 고른 구성(S&P500·나스닥100·금 켜고 끔)으로 다시 짠 폼 — 성향 단계도 같은 규칙으로 덧입힘
+  function coreX(k, f, cc){
+    var sim0 = f.sim, thp = function(al){ return (al.filter(function(a){ return a.k === "theme"; })[0] || {}).pct || 0; }, th0 = thp(f.alloc);
+    var R00 = riskyOf(f.alloc);
+    f.alloc = coreAlloc(f.alloc, cc);
+    var t = (EQ[k] && profSet() && ST.prof) ? PTIER[ST.prof] : "normal", R0 = riskyOf(f.alloc);
+    if (t !== "normal"){
+      var cdT = null; try { cdT = ((sim0.tiers.safe || sim0.tiers.low || sim0.tiers.zero || {}).alloc || []).filter(function(a){ return a.k === "cd"; })[0] || null; } catch(x) {}
+      f.alloc = tierAlloc(f.alloc, t, sim0 && sim0.tier_cap, cdT); f.tier = t;
+    }
+    var th1 = thp(f.alloc);
+    (f.themes || []).forEach(function(x){ var rr = th0 ? th1 / th0 : 0; if (x.pct != null) x.pct = r1(x.pct * rr); if (x.w != null) x.w = r1(x.w * rr); });
+    if (!th1) f.themes = [];
+    f.sim = csim(k, f.alloc, sim0);
+    f.core = cc;
+    f.headline = f.alloc.map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" · ") + " 제안임";
+    var off = CORE.filter(function(x){ return !cc[x[0]]; }).map(function(x){ return x[2]; });
+    f.points = ["🧩 PB가 고른 구성 — " + coreTxt(cc) + (off.length ? " (" + off.join("·") + "은 넣지 않음)" : "") + " · 뺀 몫은 남은 칸에 비율대로 나눔" + (RET[k] ? " · 위험자산 법정 한도 70% 안" : "")]
+      .concat(f.tier ? [profPoint(t, R0, riskyOf(f.alloc), sim0 && sim0.tier_cap)] : [])
+      .concat((f.points || []).filter(function(p){ return !/S&P500|나스닥|금 /.test(p); }));
     return f;
   }
   function profPoint(t, R0, R1, cap){
@@ -1458,7 +1613,7 @@
     forms: function(){ var M = DATA.market || {};
       return ["매일 아침 시황 리포트가 나오면 9가지 제안서 틀(기본폼)이 저절로 다시 만들어져요. 장중에도 매시간 시세를 넣어 새로 고쳐요.",
         "🇺🇸 · 🇰🇷 칩은 지금 미국·한국 시장이 상승 추세(200일 평균선 위)인지예요. 지금은 미국 " + (M.us_up ? "상승 추세" : "조심") + " · 한국 " + (M.kr_up ? "상승 추세" : "회복 전") + "이라 주식 비중이 거기에 맞춰져 있어요.",
-        "주식·개인연금 폼은 시황 리포트 배분표(미국 지수 + 한국 + 시황 테마 + 금)를 그대로 따르고, DC·IRP는 위험자산 법정 한도 70% 안에서 같은 비율로 담아요.",
+        "주식·개인연금 폼은 시황 리포트 배분표(한국 + 시황 테마 · 미국 지수·금은 🧩 기본 구성에서 PB가 골라 넣음)를 따르고, DC·IRP는 위험자산 법정 한도 70% 안에서 같은 비율로 담아요.",
         "국고채·미국채·브라질국채는 미래에셋이 지금 파는 채권 중 기간별로 세금 뗀 수익률이 가장 좋은 것을, ELS는 원금지급형 ELB에 지수형 ELS 2개를 섞어요.",
         "카드를 누르면 고르기, 한 번 더 누르면 빼기예요. 여러 개를 함께 고르면 한 제안서에 같이 들어가요.",
         "둘 넘게 고르면 바로 밑에 「🧪 섞으면 어땠나」 — 고른 금액 비율대로 섞어 과거에 굴렸을 때 가장 크게 빠진 폭·연평균·최악의 해를 따로 들었을 때와 나란히 보여 줘요(한 장·PDF·📲 에도 같이).",
@@ -1478,6 +1633,7 @@
       "버튼을 한 번 누르면 만들고, 초록으로 바뀐 뒤 한 번 더 누르면 저장·공유 창이 떠요(아이폰은 누른 순간에만 공유 창이 열려서 그래요).",
       "모든 출력물 맨 끝에는 위험고지가 들어가요. 고객에게 드리기 전 숫자와 상품 조건을 한 번 더 확인해 주세요."],
     prof: "고객의 투자성향(미래에셋증권 투자자 유형 5단계)을 먼저 골라요.\n🔥 성장형 = 모든 상품(1등급까지) · 해외 주식·브라질국채도 가능해요.\n🚀 성장추구형 = 2·3등급까지 · 국내 주식·ELS 가능해요.\n⚖️ 위험중립형 = 4등급까지 · 미국채 가능해요.\n🌱 안정추구형 = 5등급까지.\n🛡 안정형 = 6등급만 · 국고채·현금성.\n고른 성향에 안 맞는 상품은 잠기고, 추천 종목도 등급이 안 맞으면 담을 수 없어요.\n주식·연금 폼의 주식(위험자산) 비중은 성향에 맞춰 저절로 정해져요: 성장형은 적극적으로, 성장추구형은 오늘 기본폼, 위험중립형은 절반, 안정추구형은 ¼, 안정형은 주식 없이 현금성으로.\n🆕 신규 고객은 성향을 아직 모르니 예외로 모두 열어 두고 오늘 기본폼으로 만들어요.\n국내 ETF 등급은 이름으로 추정한 것이라 운용사 표기를 꼭 확인해 주세요.",
+    core: "🧩 S&P500 · 나스닥100 · 금은 처음엔 넣지 않아요. 고객 취향에 맞게 칩을 눌러 켜고 끄세요.\n끈 칸의 몫은 같은 종류의 남은 칸(코스피200·현금성 등)에 비율대로 나눠요 · 시황 테마 칸은 그대로예요.\nDC·IRP는 위험자산 70% 한도를 그대로 지켜요.\n과거 계산(모의투자)은 고른 구성으로 앱에서 다시 셈해요.\n📌 「이 구성을 내 기본값으로」를 누르면 다음 제안서부터 같은 구성으로 시작해요.",
     fx: "💴 원화로 = 국내 상장 ETF(TIGER 미국S&P500 등)로 담아요. 환전이 없고, 팔아서 남은 돈은 배당소득으로 15.4% 세금(금융소득종합과세 대상)이에요.\n💵 환전해서 = 미국 상장 ETF(SPY·QQQ·GLD 등)를 달러로 담아요. 팔아서 남은 돈은 1년에 250만원까지 빼고 22% 양도세(분리과세)예요.\n고른 방식에 맞춰 담을 ETF와 세금 설명이 바뀌어요.",
     must: "고객에게 꼭 넣고 싶은 종목·ETF를 검색해서 % 를 적어요(여러 개 가능).\n넣은 % 만큼 나머지 기본 포트를 원래 비율 그대로 줄여서 합계 100%를 맞춰요. 막대에서 줄어든 칸은 옛 % 가 흐리게 보여요.\n왜 추천하는지는 종목리포트·ETF 구성·실적·애널리스트·뉴스·시황 테마로 자동으로 써 줘요.\n개인연금·DC·IRP는 국내 상장 ETF만 담을 수 있고, DC·IRP에서 채권형·TDF는 「안전형」에 체크하면 안전자산 칸에서 깎아요.",
     sim: "모든 제안서 맨 끝에 들어가는 위험고지 문구를 확인하고 심의필을 관리하는 칸이에요.\n① 아래 원문을 읽어 보고 ② 「심의 요청서 PDF」를 받아 준법감시 부서에 내요.\n③ 받은 심의필 번호와 유효기간을 넣으면 한 장·PDF·PPT 모두에 저절로 찍혀요.\n유효기간이 지나거나 문구가 바뀌면 번호가 자동으로 빠지고 여기서 알려 줘요. 번호는 꼭 회사에서 받은 것만 넣어 주세요."
@@ -1532,6 +1688,7 @@
     if (k === "gl_stock") h2 += '<div class="pp-ol"><span data-tip="' + e(JOY.fx) + '">💱 해외 투자는 어떻게? ⓘ</span></div><div class="pp-md">' +
       [["krw", "💴 원화로", "국내 상장 ETF · 환전 없음"], ["usd", "💵 환전해서", "미국 상장 ETF · 달러로"]].map(function(x){ return '<button type="button" data-md="' + x[0] + '" data-mk2="' + k + '"' + (o.mode === x[0] ? ' class="on"' : '') + '><b>' + x[1] + '</b><small>' + x[2] + '</small></button>'; }).join("") + '</div>';
     var only = {pension: 1, dc: 1, irp: 1}[k], A = amtOf(k);
+    h2 += coreUI(k);
     h2 += '<div class="pp-ol"><span data-tip="' + e(JOY.must) + '">⭐ 추천 종목·ETF 넣기 ⓘ</span> <span class="mut">(여러 개 가능 · 이유는 자동으로 찾아 넣음)</span></div>' +
       (o.must || []).map(function(m, i){ return '<div class="pp-mu"><span class="pp-mn"><b>' + e(m.name) + '</b>' + (m.code ? ' <small>' + e(m.code) + (m.mkt ? " · " + e(m.mkt) : "") + '</small>' : ' <small>직접 입력</small>') +
         (A ? '<em class="pp-mw" id="ppmw_' + k + '_' + i + '">' + (+m.pct ? man(A * m.pct / 100) : "") + '</em>' : '') + '</span>' +
@@ -1588,6 +1745,10 @@
   }
   function bind(){
     var w = document.getElementById("ppw");
+    [].forEach.call(w.querySelectorAll("[data-ck]"), function(b){ b.onclick = function(){ var k = b.dataset.ck, o = opt(k), c = JSON.parse(JSON.stringify(coreOf(k))); c[b.dataset.cv] = c[b.dataset.cv] ? 0 : 1; o.core = c; keep(); resetBtns(); preview();
+      var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    [].forEach.call(w.querySelectorAll("[data-cd]"), function(b){ b.onclick = function(){ var c = coreOf(b.dataset.cd); try { localStorage.setItem("pp_core", JSON.stringify(c)); } catch(x) {}
+      toast("📌 다음 제안서부터 「" + coreTxt(c) + "」로 시작해요"); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     [].forEach.call(w.querySelectorAll("[data-pr]"), function(b){ b.onclick = function(){ ST.prof = +b.dataset.pr; var gone = profFix(); keep(); resetBtns();
       if (gone.length) toast("🧭 " + profName() + "에 맞지 않아 뺐어요: " + gone.slice(0, 4).join(", ") + (gone.length > 4 ? " 외 " + (gone.length - 4) : ""));
       var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
@@ -1851,6 +2012,7 @@
     var o = {v: 1, s: ST.sel.slice(), a: {}, o: {}}; if (profSet()) o.p = ST.prof;
     ST.sel.forEach(function(k){ if (+ST.amt[k]) o.a[k] = +ST.amt[k]; var q = ST.opt[k]; if (!q) return; var y = {};
       if (q.mode && q.mode !== "krw") y.m = q.mode;
+      if (q.core) y.c = CORE.map(function(x){ return q.core[x[0]] ? 1 : 0; }).join("");
       if (q.must && q.must.length) y.u = q.must.map(function(m){ var z = {n: m.name, p: +m.pct || 0}; if (m.code) z.c = m.code; if (m.mkt) z.k = m.mkt; if (m.sym) z.y = m.sym; if (m.etf) z.e = 1; if (m.safe) z.f = 1; return z; });
       if (Object.keys(y).length) o.o[k] = y; });
     return b64e(JSON.stringify(o));
@@ -1873,6 +2035,7 @@
     ST.sel = sel; ST.amt = {}; ST.opt = {};
     sel.forEach(function(k){ var a = +((o.a || {})[k]); if (a > 0 && a < 1e7) ST.amt[k] = Math.round(a);
       var y = (o.o || {})[k] || {}, q = {mode: y.m === "usd" ? "usd" : "krw", must: []};
+      if (typeof y.c === "string" && /^[01]{3}$/.test(y.c)) q.core = {spx: +y.c[0], ndx: +y.c[1], gold: +y.c[2]};
       (Array.isArray(y.u) ? y.u : []).slice(0, 20).forEach(function(z){ if (!z || !z.n) return; var mm = {name: str(z.n), pct: Math.max(0, Math.min(100, +z.p || 0))};
         if (z.c) mm.code = str(z.c, 16); if (z.k) mm.mkt = str(z.k, 8); if (z.y) mm.sym = str(z.y, 20); if (z.e) mm.etf = true; if (z.f) mm.safe = true; q.must.push(mm); });
       ST.opt[k] = q; });
@@ -1881,13 +2044,16 @@
   }
 
   // 시험·다른 화면에서 쓰도록
-  window.PROPOSE = {load: load, mix: function(){ return mixCalc(model().items); }, _tierAlloc: function(al, t, cap, cdT){ return tierAlloc(al, t, cap, cdT); }, _code: function(){ return settingCode(); }, show: function(){ showOpen(); }, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.sim != null){ ME.simNo = o.sim; ME.simVer = DISC_VER; } if (o.simTo != null) ME.simTo = o.simTo; if (o.simFrom != null) ME.simFrom = o.simFrom; if (o.opt) ST.opt = o.opt; },
+  window.PROPOSE = {load: load, _csim: function(k, al){ return cpxLoad().then(function(){ return csimCalc(k, al || (form(k) || {}).alloc, (form(k) || {}).sim); }); }, _formX: function(k){ return formX(k); }, mix: function(){ return mixCalc(model().items); }, _tierAlloc: function(al, t, cap, cdT){ return tierAlloc(al, t, cap, cdT); }, _code: function(){ return settingCode(); }, show: function(){ showOpen(); }, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.sim != null){ ME.simNo = o.sim; ME.simVer = DISC_VER; } if (o.simTo != null) ME.simTo = o.simTo; if (o.simFrom != null) ME.simFrom = o.simFrom; if (o.opt) ST.opt = o.opt; },
     review: function(){ return makePdf(allModel(), reviewPages()); }, reviewFor: function(){ return ensureReasons().then(function(){ var m = model(); return makePdf(m, reviewFor(m)); }); }, discText: function(){ return discText(); }, simState: function(){ return simState(); },
     png: function(){ return ensureReasons().then(function(){ return makePng(model()); }); }, pdf: function(){ return ensureReasons().then(function(){ return makePdf(model()); }); },
     ppt: function(){ return ensureReasons().then(function(){ return makePpt(model()); }); }, pptimg: function(){ return ensureReasons().then(function(){ return makePptImg(model()); }); }, reasons: function(){ return ensureReasons().then(function(){ return RS; }); }, onePage: function(){ return onePage(model()); }, pages: function(){ return fullPages(model()); }};
 
   var css = document.createElement("style");
   css.textContent =
+    ".pp-core{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 6px}.pp-core button{font:inherit;font-size:14px;font-weight:700;color:var(--sub);background:var(--panel2,rgba(127,127,127,.08));border:1.5px dashed var(--line);border-radius:12px;padding:9px 4px;cursor:pointer;line-height:1.3}" +
+    ".pp-core button small{display:block;font-size:12px;font-weight:500}.pp-core button.on{color:var(--text);background:rgba(245,130,32,.12);border:1.5px solid #F58220}.pp-core button.on small{color:#F58220;font-weight:700}" +
+    ".pp-cs{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;margin:0 0 10px}.pp-cs button{font:inherit;font-size:12.5px;font-weight:700;color:#F58220;background:none;border:1px solid #F58220;border-radius:99px;padding:4px 10px;cursor:pointer;white-space:nowrap}.pp-cd{color:#1a8a5a;font-weight:700;white-space:nowrap}" +
     ".pp-reg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 8px}.pp-reg span{font-size:12.5px;padding:3px 9px;border-radius:99px;border:1px solid var(--line)}" +
     ".pp-reg .ok{background:rgba(34,160,107,.14);color:#2fbf7f;border-color:transparent;font-weight:700}.pp-reg .no{background:rgba(224,83,61,.14);color:#ff7a66;border-color:transparent;font-weight:700}.pp-reg .mut{border:0}" +
     ".pp-tip{font-size:12.5px;color:var(--sub);margin:4px 0 8px}" +
