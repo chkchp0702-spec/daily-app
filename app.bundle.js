@@ -927,7 +927,7 @@
           '<div class="cp-h"><span class="cp-f">' + m.flag + '</span><b>' + e(m.name) + '</b>' + regChip(rd(m)) +
           '<span class="cp-ix">' + (ix ? e(ix.name) + ' <b class="' + cls(ix.chg1) + '">' + pct(ix.chg1) + '</b>' : '') + '</span></div>' +
           bbar(m) +
-          '<div class="cp-n"><span class="up">▲ ' + num(m.up) + '</span><span class="mut">상승 비율 ' + r.toFixed(0) + '%</span><span class="dn">▼ ' + num(m.down) + '</span></div></button>';
+          '<div class="cp-n"><span class="up">▲ ' + num(m.up) + '</span><span class="mut"><i class="cp-lb">오른 비율 </i>' + r.toFixed(0) + '%</span><span class="dn">▼ ' + num(m.down) + '</span></div></button>';
       }).join("") + '</div>');
   }
 
@@ -17951,12 +17951,59 @@ window.VIDC = {
     step();
   }
 
+  /* ── 🩹 11/05 「옆에 짤림… 일일이 내가 다 얘기해야 하니」 — 넘침 자동 고침 ──
+     카드(또는 화면) 오른쪽 끝을 넘는 글·칸을 찾아, 그 칸부터 카드까지 거슬러 올라가며
+     ① 한 줄 고정(nowrap) → 줄바꿈 허용 ② 가로 줄(flex) → 다음 줄로 넘김 ③ 표 칸(grid) → 칸 폭 줄어들게 ④ 고정 폭 → 100%까지
+     를 차례로 풀어 줌. 가로로 밀어 보는 줄(스크롤)·그림·지도·제안서 미리보기는 손대지 않음. 화면을 그릴 때·카드를 펼칠 때마다 다시 봄 */
+  var HX = "svg,canvas,.ppx,.pp-pv,#ppx,.h2-tmw,.sv-bars,#uxob,.ixc,.h2-dc,[data-noheal]";
+  function scroller(el, stop){ for (var p = el; p && p !== stop && p !== document.body; p = p.parentElement){ var o = getComputedStyle(p).overflowX; if ((o === "auto" || o === "scroll") && p.scrollWidth > p.clientWidth + 2) return true; } return false; }
+  function loosen(n, stop){
+    for (var a = n; a && a !== stop && a !== document.body; a = a.parentElement){
+      var cs = getComputedStyle(a);
+      if (cs.position === "absolute" || cs.position === "fixed") return;
+      a.style.minWidth = "0";
+      // 짧은 덩어리(「▲ 348」「상승 71%」 같은 12자 이하)는 쪼개지 않고 통째로 다음 줄로 — 줄바꿈은 긴 글만
+      if ((cs.whiteSpace === "nowrap" || cs.whiteSpace === "pre") && (a.textContent || "").trim().length > 12){ a.style.whiteSpace = "normal"; a.style.overflowWrap = "anywhere"; }
+      if (cs.display.indexOf("flex") >= 0 && cs.flexWrap === "nowrap" && cs.flexDirection.indexOf("row") === 0) a.style.flexWrap = "wrap";
+      if (cs.display.indexOf("grid") >= 0){ var nC = cs.gridTemplateColumns.split(" ").filter(Boolean).length; if (nC > 1) a.style.gridTemplateColumns = "repeat(" + nC + ",minmax(0,1fr))"; }
+      if (/px$/.test(a.style.width || "") || (cs.width && parseFloat(cs.width) > stop.clientWidth)) a.style.maxWidth = "100%";
+      if (cs.flexShrink === "0") a.style.flexShrink = "1";
+    }
+  }
+  function heal(){
+    var vw = document.documentElement.clientWidth;
+    [document.getElementById("main"), document.getElementById("sheet")].forEach(function(root){
+      if (!root) return;
+      for (var pass = 0; pass < 3; pass++){
+        var n = 0, CR = new Map(), L = root.querySelectorAll("*");
+        var limOf = function(el){ var c = el.closest("button,.card"); if (c && c.tagName === "BUTTON" && c.getBoundingClientRect().width < 120) c = c.parentElement && c.parentElement.closest(".card"); if (!c || !root.contains(c)) c = root; var v = CR.get(c); if (v == null){ v = Math.min(c.getBoundingClientRect().right, vw); CR.set(c, v); } return [c, v]; };
+        for (var i = 0; i < L.length; i++){
+          var el = L[i]; if (!el.offsetParent || el.closest(HX)) continue;
+          var r = el.getBoundingClientRect(); if (!r.width || r.right <= vw * 0.5) continue;
+          var cl = limOf(el), lim = cl[1]; if (r.right <= lim + 1) continue;
+          var pe = el.parentElement; if (pe && pe !== cl[0] && pe.getBoundingClientRect().right > lim + 1) continue;   // 바깥쪽부터
+          if (scroller(el, cl[0])) continue;
+          loosen(el, cl[0]); n++;
+        }
+        if (!n) break;
+      }
+    });
+  }
+  window.__heal = heal;
+  var hT = 0; function healSoon(){ clearTimeout(hT); hT = setTimeout(function(){ try { heal(); } catch(x) {} }, 220); }
+  document.addEventListener("click", function(){ setTimeout(healSoon, 120); }, true);
+  document.addEventListener("toggle", healSoon, true);
+  window.addEventListener("resize", healSoon);
+
   /* ── 돌리기 ── */
   var q = 0;
   function tick(){ q = 0; var m = document.getElementById("main");
     try { luckRow(); } catch(x) {}
     try { fs13(m); fs13(document.getElementById("sheet")); } catch(x) {}
     try { thin(m); } catch(x) {}
+    // 「더 보기」로 따로 연 카드는 이미 고른 것이니 바로 펼쳐 보여 줌(접힌 채로 열려 한 번 더 눌러야 했음)
+    try { [].forEach.call(document.querySelectorAll("#sheet .cz.cz-on"), function(c){ c.classList.remove("cz-on"); }); } catch(x) {}
+    healSoon();
     try { if (onHome()) setTimeout(tour, 2500); } catch(x) {} }
   function soon(){ if (!q) q = setTimeout(tick, 250); }
   function start(){ tick(); try { new MutationObserver(soon).observe(document.body, {childList: true, subtree: true}); } catch(x) {} }
@@ -17966,6 +18013,11 @@ window.VIDC = {
   st.textContent =
     ".ux-luck{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 14px}.ux-luck button{display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;font-size:13px;font-weight:700;color:var(--sub);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 4px;cursor:pointer}.ux-luck button span{font-size:20px}" +
     ".ux-thin{display:flex!important;align-items:center;gap:8px;padding:9px 14px!important;margin:0 0 12px!important;font-size:13px!important;line-height:1.4!important;text-align:left!important;color:var(--sub);background:var(--panel2);border-radius:12px;min-height:0!important}.ux-thin .big{font-size:16px!important;margin:0!important}.ux-thin br{display:none}.ux-thin button,.ux-thin .btn{display:none!important}" +
+    /* 🩹 막대 그림 칸 이름: 맨 끝 칸은 안쪽으로 붙임 · 아래 구간 이름은 줄바꿈 */
+    ".vc-c:last-child .vc-n,.vc-c:last-child .vc-x{left:auto;right:0;transform:none;text-align:right}.vc-c:first-child .vc-n,.vc-c:first-child .vc-x{left:0;transform:none}" +
+    ".bins div{min-width:0}.bins small{white-space:normal!important;text-align:center;word-break:keep-all;line-height:1.2}" +
+    /* 🌏 5개 시장 한눈에(나침반) — 좁은 화면·큰 글씨에서도 한 칸 안에 */
+    ".cp-row .cp-h{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}.cp-row .cp-h>b{white-space:nowrap}.cp-row .cp-ix{margin-left:auto;white-space:nowrap}.cp-row .cp-n{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:baseline}.cp-row .cp-n span{white-space:nowrap}.cp-row .cp-n .mut{text-align:center;overflow:hidden;text-overflow:clip;font-size:.92em}.cp-lb{font-style:normal}@media (max-width:360px){.cp-lb{display:none}}" +
     /* C13 어두운 화면 대비 */
     ":root:not([data-ui=light]){--dim:#9aa3b5}.pp-f.lk{opacity:.62!important}.cz.cz-on .cz-h span{color:var(--text)}" +
     /* D17 */
