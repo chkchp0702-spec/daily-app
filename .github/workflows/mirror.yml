@@ -1,0 +1,25 @@
+name: mirror
+# 🪞 11/05 D15: market-strategy-report 의 앱용 JSON → archive/m/ (raw.githubusercontent 가 막힌 곳에서도 github.io 로 받게)
+on:
+  schedule:
+    - cron: "12,42 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mirror
+  cancel-in-progress: true
+jobs:
+  m:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 받기
+        run: |
+          git clone -q --depth 1 --filter=blob:none --sparse https://github.com/chkchp0702-spec/market-strategy-report /tmp/msr
+          git -C /tmp/msr sparse-checkout set --no-cone '/market/*.json' '/brain/state.json' '/feeds/*.json' '/ledger/ledger.json'
+          python3 tools/mirror.py /tmp/msr archive/m
+      - name: 저장
+        run: |
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          bash scripts/push.sh "🪞 mirror $(TZ=Asia/Seoul date '+%F %H:%M')" archive/m

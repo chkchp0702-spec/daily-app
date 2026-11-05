@@ -1,0 +1,602 @@
+{
+"at": "2026-11-04 11:27",
+"signals": [
+{
+"src": "pead",
+"code": "FISV",
+"name": "Fiserv, Inc.",
+"mkt": "US",
+"d": "2026-11-03",
+"vr": 3.0,
+"gap": 8.9,
+"px": 58.4,
+"score": 15.0
+},
+{
+"src": "pead",
+"code": "IBTA",
+"name": "Ibotta, Inc. Class A Common Stock",
+"mkt": "US",
+"d": "2026-11-03",
+"vr": 9.9,
+"gap": 17.3,
+"px": 60.35,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "SRAD",
+"name": "Sportradar Group AG - Class A Ordinary Shares",
+"mkt": "US",
+"d": "2026-11-03",
+"vr": 3.9,
+"gap": 14.5,
+"px": 14.2,
+"score": 19.5
+},
+{
+"src": "pead",
+"code": "TBBB",
+"name": "BBB Foods Inc. Class A Common Shares",
+"mkt": "US",
+"d": "2026-11-03",
+"vr": 3.8,
+"gap": 5.3,
+"px": 62.97,
+"score": 19.2
+}
+],
+"state": {
+"index_KR": {
+"sym": "^KS11",
+"above200": false,
+"d": "2026-11-04"
+},
+"scanned_KR": 2614,
+"us_source": "US.json 전 종목 5940 + ETF 4929 (2026-11-01)",
+"index_US": {
+"sym": "^GSPC",
+"above200": true,
+"d": "2026-11-03"
+},
+"scanned_US": 9143,
+"dip": {
+"sym": "QQQ",
+"d": "2026-11-03",
+"close": 685.28,
+"ma200": 679.01,
+"ma5": 699.56,
+"rsi2": 28.5,
+"th": 5.0,
+"signal": false
+},
+"trend": {
+"rule": "100일 고가 돌파 → 사고 · 50일 저가 이탈 → 팖",
+"assets": {
+"GLD": {
+"on": false,
+"since": "2026-03-23",
+"close": 359.26,
+"hi": 429.42,
+"lo": 354.67,
+"d": "2026-11-03"
+},
+"USO": {
+"on": true,
+"since": "2026-09-10",
+"close": 158.17,
+"hi": 171.82,
+"lo": 125.41,
+"d": "2026-11-03"
+},
+"TLT": {
+"on": false,
+"since": null,
+"close": 81.11,
+"hi": 86.78,
+"lo": 76.43,
+"d": "2026-11-03"
+},
+"UUP": {
+"on": true,
+"since": "2026-03-12",
+"close": 29.01,
+"hi": 29.25,
+"lo": 27.92,
+"d": "2026-11-03"
+},
+"SPY": {
+"on": true,
+"since": "2026-04-15",
+"close": 754.35,
+"hi": 781.62,
+"lo": 747.74,
+"d": "2026-11-03"
+},
+"QQQ": {
+"on": false,
+"since": "2026-10-30",
+"close": 685.28,
+"hi": 762.86,
+"lo": 680.33,
+"d": "2026-11-03"
+},
+"EFA": {
+"on": true,
+"since": "2026-07-06",
+"close": 103.08,
+"hi": 108.89,
+"lo": 102.0,
+"d": "2026-11-03"
+},
+"EEM": {
+"on": false,
+"since": "2026-07-29",
+"close": 61.1,
+"hi": 71.57,
+"lo": 60.58,
+"d": "2026-11-03"
+},
+"DBC": {
+"on": true,
+"since": "2026-09-01",
+"close": 32.44,
+"hi": 34.14,
+"lo": 30.27,
+"d": "2026-11-03"
+}
+}
+}
+},
+"errors": [],
+"log": [
+{
+"src": "nh52",
+"code": "HUM",
+"name": "HUM",
+"mkt": "US",
+"d": "2026-10-09",
+"vr": 4.2,
+"gap": 16.4,
+"px": 431.87,
+"score": 21.2
+},
+{
+"src": "pead",
+"code": "HUM",
+"name": "HUM",
+"mkt": "US",
+"d": "2026-10-09",
+"vr": 4.2,
+"gap": 16.4,
+"px": 431.87,
+"score": 21.2
+},
+{
+"src": "dip",
+"code": "QQQ",
+"name": "QQQ",
+"mkt": "US",
+"d": "2026-10-14",
+"px": 728.95,
+"score": 0,
+"rsi2": 3.3
+},
+{
+"src": "dip",
+"code": "QQQ",
+"name": "QQQ",
+"mkt": "US",
+"d": "2026-10-15",
+"px": 728.0,
+"score": 0,
+"rsi2": 3.0
+},
+{
+"src": "pead",
+"code": "ERIC",
+"name": "Ericsson - American Depositary Shares each representing 1 underlying Class B sha",
+"mkt": "US",
+"d": "2026-10-15",
+"vr": 4.8,
+"gap": 11.2,
+"px": 10.71,
+"score": 24.0
+},
+{
+"src": "dip",
+"code": "QQQ",
+"name": "QQQ",
+"mkt": "US",
+"d": "2026-10-16",
+"px": 709.8,
+"score": 0,
+"rsi2": 0.6
+},
+{
+"src": "pead",
+"code": "CLF",
+"name": "Cleveland-Cliffs Inc. Common Stock",
+"mkt": "US",
+"d": "2026-10-19",
+"vr": 5.7,
+"gap": 17.2,
+"px": 14.1,
+"score": 28.6
+},
+{
+"src": "pead",
+"code": "SLN",
+"name": "Silence Therapeutics Plc - American Depository Share",
+"mkt": "US",
+"d": "2026-10-19",
+"vr": 51.3,
+"gap": 125.6,
+"px": 19.58,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "BRZE",
+"name": "Braze, Inc.",
+"mkt": "US",
+"d": "2026-10-20",
+"vr": 25.6,
+"gap": 51.6,
+"px": 45.57,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "HAS",
+"name": "Hasbro, Inc.",
+"mkt": "US",
+"d": "2026-10-20",
+"vr": 4.8,
+"gap": 4.0,
+"px": 109.52,
+"score": 24.2
+},
+{
+"src": "pead",
+"code": "EGBN",
+"name": "Eagle Bancorp, Inc.",
+"mkt": "US",
+"d": "2026-10-22",
+"vr": 5.0,
+"gap": 4.3,
+"px": 32.97,
+"score": 25.0
+},
+{
+"src": "pead",
+"code": "SPOT",
+"name": "Spotify Technology S.A. Ordinary Shares",
+"mkt": "US",
+"d": "2026-10-22",
+"vr": 3.1,
+"gap": 6.8,
+"px": 583.66,
+"score": 15.5
+},
+{
+"src": "pead",
+"code": "RRC",
+"name": "Range Resources Corporation Common Stock",
+"mkt": "US",
+"d": "2026-10-26",
+"vr": 10.2,
+"gap": 11.6,
+"px": 53.56,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "SGRY",
+"name": "Surgery Partners, Inc.",
+"mkt": "US",
+"d": "2026-10-26",
+"vr": 25.5,
+"gap": 46.2,
+"px": 23.25,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "KNSA",
+"name": "Kiniksa Pharmaceuticals International, plc - Class A Ordinary Shares",
+"mkt": "US",
+"d": "2026-10-27",
+"vr": 4.0,
+"gap": 16.5,
+"px": 89.2,
+"score": 20.2
+},
+{
+"src": "pead",
+"code": "MFIC",
+"name": "MidCap Financial Investment Corporation - Closed End Fund",
+"mkt": "US",
+"d": "2026-10-27",
+"vr": 14.4,
+"gap": 22.0,
+"px": 10.26,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "BLCO",
+"name": "Bausch + Lomb Corporation Common Shares",
+"mkt": "US",
+"d": "2026-10-28",
+"vr": 8.9,
+"gap": 5.2,
+"px": 20.4,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "ICLR",
+"name": "ICON plc",
+"mkt": "US",
+"d": "2026-10-28",
+"vr": 4.5,
+"gap": 8.9,
+"px": 214.16,
+"score": 22.7
+},
+{
+"src": "pead",
+"code": "KIDS",
+"name": "OrthoPediatrics Corp.",
+"mkt": "US",
+"d": "2026-10-28",
+"vr": 7.9,
+"gap": 4.7,
+"px": 30.8,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "WING",
+"name": "Wingstop Inc.",
+"mkt": "US",
+"d": "2026-10-28",
+"vr": 3.1,
+"gap": 7.7,
+"px": 138.57,
+"score": 15.3
+},
+{
+"src": "pead",
+"code": "ADT",
+"name": "ADT Inc. Common Stock",
+"mkt": "US",
+"d": "2026-10-29",
+"vr": 22.0,
+"gap": 33.3,
+"px": 9.87,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "BHC",
+"name": "Bausch Health Companies Inc. Common Stock",
+"mkt": "US",
+"d": "2026-10-29",
+"vr": 14.6,
+"gap": 10.7,
+"px": 8.91,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "CROX",
+"name": "Crocs, Inc.",
+"mkt": "US",
+"d": "2026-10-29",
+"vr": 4.6,
+"gap": 17.0,
+"px": 150.26,
+"score": 23.0
+},
+{
+"src": "pead",
+"code": "DFIN",
+"name": "Donnelley Financial Solutions, Inc. Common Stock",
+"mkt": "US",
+"d": "2026-10-29",
+"vr": 3.1,
+"gap": 7.3,
+"px": 61.07,
+"score": 15.4
+},
+{
+"src": "pead",
+"code": "FCN",
+"name": "FTI Consulting, Inc. Common Stock",
+"mkt": "US",
+"d": "2026-10-29",
+"vr": 3.0,
+"gap": 7.6,
+"px": 181.24,
+"score": 15.2
+},
+{
+"src": "pead",
+"code": "GKOS",
+"name": "Glaukos Corporation Common Stock",
+"mkt": "US",
+"d": "2026-10-29",
+"vr": 6.1,
+"gap": 16.3,
+"px": 242.48,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "MAX",
+"name": "MediaAlpha, Inc. Class A Common Stock",
+"mkt": "US",
+"d": "2026-10-29",
+"vr": 3.6,
+"gap": 19.8,
+"px": 14.13,
+"score": 18.0
+},
+{
+"src": "pead",
+"code": "PRCH",
+"name": "Porch Group, Inc.",
+"mkt": "US",
+"d": "2026-10-29",
+"vr": 5.1,
+"gap": 19.4,
+"px": 20.89,
+"score": 25.5
+},
+{
+"src": "pead",
+"code": "TDOC",
+"name": "Teladoc Health, Inc. Common Stock",
+"mkt": "US",
+"d": "2026-10-29",
+"vr": 5.7,
+"gap": 15.1,
+"px": 8.73,
+"score": 28.3
+},
+{
+"src": "pead",
+"code": "WST",
+"name": "West Pharmaceutical Services, Inc. Common Stock",
+"mkt": "US",
+"d": "2026-10-29",
+"vr": 3.4,
+"gap": 4.2,
+"px": 416.67,
+"score": 16.8
+},
+{
+"src": "pead",
+"code": "GDYN",
+"name": "Grid Dynamics Holdings, Inc.",
+"mkt": "US",
+"d": "2026-10-30",
+"vr": 8.7,
+"gap": 10.3,
+"px": 13.36,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "MEOH",
+"name": "Methanex Corporation",
+"mkt": "US",
+"d": "2026-10-30",
+"vr": 4.0,
+"gap": 6.7,
+"px": 71.57,
+"score": 20.1
+},
+{
+"src": "pead",
+"code": "OSPN",
+"name": "OneSpan Inc.",
+"mkt": "US",
+"d": "2026-10-30",
+"vr": 6.8,
+"gap": 23.4,
+"px": 25.66,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "REGN",
+"name": "Regeneron Pharmaceuticals, Inc.",
+"mkt": "US",
+"d": "2026-10-30",
+"vr": 4.2,
+"gap": 6.2,
+"px": 927.89,
+"score": 20.9
+},
+{
+"src": "pead",
+"code": "IDXX",
+"name": "IDEXX Laboratories, Inc.",
+"mkt": "US",
+"d": "2026-11-02",
+"vr": 3.9,
+"gap": 13.4,
+"px": 671.64,
+"score": 19.4
+},
+{
+"src": "pead",
+"code": "MGRC",
+"name": "McGrath RentCorp",
+"mkt": "US",
+"d": "2026-11-02",
+"vr": 8.2,
+"gap": 4.4,
+"px": 129.44,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "PERI",
+"name": "Perion Network Ltd",
+"mkt": "US",
+"d": "2026-11-02",
+"vr": 19.6,
+"gap": 31.3,
+"px": 11.41,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "FISV",
+"name": "Fiserv, Inc.",
+"mkt": "US",
+"d": "2026-11-03",
+"vr": 3.0,
+"gap": 8.9,
+"px": 58.4,
+"score": 15.0
+},
+{
+"src": "pead",
+"code": "IBTA",
+"name": "Ibotta, Inc. Class A Common Stock",
+"mkt": "US",
+"d": "2026-11-03",
+"vr": 9.9,
+"gap": 17.3,
+"px": 60.35,
+"score": 30.0
+},
+{
+"src": "pead",
+"code": "SRAD",
+"name": "Sportradar Group AG - Class A Ordinary Shares",
+"mkt": "US",
+"d": "2026-11-03",
+"vr": 3.9,
+"gap": 14.5,
+"px": 14.2,
+"score": 19.5
+},
+{
+"src": "pead",
+"code": "TBBB",
+"name": "BBB Foods Inc. Class A Common Shares",
+"mkt": "US",
+"d": "2026-11-03",
+"vr": 3.8,
+"gap": 5.3,
+"px": 62.97,
+"score": 19.2
+}
+]
+}

@@ -22,22 +22,25 @@
     prob:   /오를 확률/,
     whale:  /TOP 10/,          // ⑥ 신호 탭: 오늘 볼 것 하나만 펼치고 나머지 상세는 한 단계 아래로
     cup:    /돌파 임박/,
-    gap:    /오늘 갭 지도/
+    gap:    /오늘 갭 지도/,
+    home:   /5개 시장|업종 지도|오늘의 한 장|1탭 예측/   // 🔍 11/05 A2 홈은 4장만 펼침(나머지는 제목 한 줄)
   };
   // 11/05 사용자 「시장·포트에서 펼쳐져 있는 것들 처음엔 닫아 놓고 — 펼치기 했을 때만 보이게」
   //   · 결론 카드(오늘 할 일·성적 등)도 처음엔 접음 · 펼친 기억은 이번 방문(sessionStorage) 동안만 → 다음에 앱을 열면 다시 전부 접힘
-  var ALL_FOLD = true;
+  var ALL_FOLD = {market: 1, sector: 1, prob: 1, port: 1, score: 1};   // 시장·포트 묶음만 결론 카드까지 접음
   var OPEN = {}; try { OPEN = JSON.parse(sessionStorage.getItem("czopen") || "{}") || {}; } catch(x) {}
   try { localStorage.removeItem("czopen"); } catch(x) {}
   function keepOpen(){ try { sessionStorage.setItem("czopen", JSON.stringify(OPEN)); } catch(x) {} }
   var EMO = /(?:\p{Extended_Pictographic}|\p{Regional_Indicator})[️‍\p{Extended_Pictographic}\p{Regional_Indicator}\p{Emoji_Modifier}]*/gu;
   function titleOf(c){
+    if (c.dataset && c.dataset.czt) return c.dataset.czt;
+    if (c.id === "tdhero") return "🌤 지금 시장 날씨";
     var h = c.querySelector(":scope > h3, :scope > .hm-h b, :scope > .sc-h b, :scope > summary, :scope > .sec");
     var t = (h ? h.textContent : String(c.innerText || "").split("\n").filter(function(x){ return x.trim(); })[0] || "").replace(/ⓘ/g, "").replace(/\s+/g, " ").trim();
     if (!t || /^[\d+\-−.,%\s]+$/.test(t)) return "";      // 숫자만 있는 타일은 제목 아님
     return t.length > 38 ? t.slice(0, 36) + "…" : t;
   }
-  var EXTRA = {port: ", #pohero, #podz"};   // 포트 탭은 카드 모양이 아닌 큰 덩어리도 접음
+  var EXTRA = {port: ", #pohero, #podz", home: ", #tdhero"};   // 포트 탭은 카드 모양이 아닌 큰 덩어리도 접음
   function topCards(root, tab){
     return [].filter.call(root.querySelectorAll(".card" + (EXTRA[tab] || "")), function(c){
       if (c.tagName === "DETAILS" || c.classList.contains("xs-more") || c.classList.contains("hero")) return false;
@@ -50,8 +53,8 @@
     cards.forEach(function(c){
       if (c.dataset.cz === "done" || c.classList.contains("xs-hid")) return;
       var t = titleOf(c);
-      if (!ALL_FOLD && !seen && re.test(t)){ seen = true; c.dataset.cz = "done"; return; }
-      if (!ALL_FOLD && re.test(t)){ c.dataset.cz = "done"; return; }
+      if (!ALL_FOLD[tab] && !seen && re.test(t)){ seen = true; c.dataset.cz = "done"; return; }
+      if (!ALL_FOLD[tab] && re.test(t)){ c.dataset.cz = "done"; return; }
       if (!t){ c.dataset.cz = "done"; return; }
       if (c.offsetHeight < 140) return;                                     // 아직 짧은(그리는 중일 수 있는) 카드는 다음에 다시 봄
       c.dataset.cz = "done"; var key = tab + ":" + t.replace(EMO, "").slice(0, 24);

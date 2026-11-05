@@ -1,0 +1,645 @@
+{
+ "items": [
+  {
+   "title": "히노호사, 텍사스 신규 데이터센터 승인 중단 요구 — 입법 전까지 멈춤",
+   "url": "https://www.fox7austin.com/news/hinojosa-urges-gov-abbott-pause-new-data-centers-until-lawmakers-act",
+   "press": "FOX 7 Austin",
+   "at": "2026-11-05 09:45",
+   "why": "AI 차입 가설 — 주지사 당선자의 데이터센터 중단 공약 원문(텍사스 = 2028 신규 용량 ~30%), 오늘 삼전닉스 급락 재료",
+   "summary": "민주당 히노호사가 입법부가 규칙을 정할 때까지 신규 데이터센터 중단을 요구. 기사 날짜는 선거 전(미확인) — 당선 뒤 실행 여부가 관건."
+  },
+  {
+   "title": "코스피 2% 하락, 美 반도체 약세에 삼성·SK하이닉스 급락",
+   "url": "https://www.pulse.bot/asia-stocks/news/kospi-slides-2-as-samsung-and-sk-hynix-tumble-on-us-semiconductor-weakness-aec3e1b2-1653-4087-96aa-f0c072f3a29b/",
+   "press": "pulse.bot",
+   "at": "2026-11-05 09:45",
+   "why": "반도체(HBM) 칸·한국 반도체 ETF(091160) — 美 지수 랠리와 한국 반도체 괴리",
+   "summary": "코스피 −2%대, 삼성·하이닉스 동반 급락. 기사 날짜 미확인 — 오늘 피드(머니투데이: 코스피 −2.3%·하닉 −6%대)와 같은 흐름."
+  },
+  {
+   "title": "Fiserv 3분기(FY2026) 실적 발표 8-K 원문",
+   "url": "https://www.sec.gov/Archives/edgar/data/0000798354/000079835426000039/fisvq326earningsrelease.htm",
+   "press": "SEC EDGAR",
+   "at": "2026-11-05 08:35",
+   "why": "열린 bet FISV(📈 PEAD 11/3) 근거 원문 — 진행 +3.4% 확인용",
+   "summary": "회사 공시 원문. 세부 숫자는 이번 검토에서 미확인 — 다음 검토에서 매출·가이던스 대조."
+  },
+  {
+   "title": "텐센트, 오라클서 AI칩 10만 개 70억달러 임대(10/1 보도) — 11/4 취소 보도의 원계약",
+   "url": "https://www.trendforce.com/news/2026/10/01/news-tencent-reportedly-signs-7b-deal-to-lease-100000-ai-chips-from-oracle-in-s",
+   "press": "TrendForce",
+   "at": "2026-11-05 07:40",
+   "why": "AI 차입 가설 — 11/4 오라클 하락 원인(계약 취소)의 규모 확인용",
+   "summary": "10/1 보도: 텐센트가 동남아 데이터센터에서 오라클 AI칩 10만 개를 70억달러에 임대. 11/4 이 계약 취소 보도로 오라클 하락(yahoo 피드)."
+  },
+  {
+   "title": "브렌트 「이날이 모든 걸 바꾼다」 — 유가 급락 차트 점검",
+   "url": "https://stock3.com/news/oelpreis-brent-dieser-tag-wird-alles-aendern-17308655",
+   "press": "stock3",
+   "at": "2026-11-05 06:40",
+   "why": "에너지 칸 brent_95 조건 — 11/4 마감 95.03(−8.27%)로 95 바로 위, 조건 미발동 경계",
+   "summary": "독일 기술적 분석: 브렌트 급락일의 추세 전환 여부 점검(날짜 미확인). 우리 시세: 브렌트 95.03·WTI 88.48(−7.9%) 11/4 마감 무렵(latest)."
+  },
+  {
+   "title": "美 재무부, 2027년까지 입찰 규모 유지 시사(리펀딩)",
+   "url": "https://www.pulse.bot/bonds/news/us-treasury-holds-auction-sizes-steady-through-2027-signaling-stable-borrowing-strategy-63300ae8-81d7-4d46-9b3c-a6e4aba9810c/",
+   "press": "pulse.bot",
+   "at": "2026-11-05 05:35",
+   "why": "고금리 정점 가설(0.50) — 장기물 공급 부담이 늘지 않으면 10년 4.9%↓ 유지에 +",
+   "summary": "쿠폰 입찰 규모 동결 기조(기사 날짜 미확인). 11/4 리펀딩 결과와 같은 건인지 원문 확인 필요."
+  },
+  {
+   "title": "비스트라 1년 −28% — 할인인가 경고인가",
+   "url": "https://www.tikr.com/blog/vistra-stock-is-down-28-over-the-past-year-discount-or-warning-sign",
+   "press": "TIKR",
+   "at": "2026-11-05 05:35",
+   "why": "VST(🐋 고래 10/29) — 11/4 민주당 스윕에 전력·에너지주 급락, 「과민반응」 의견(mw_top)과 대조",
+   "summary": "1년 −28%(기사 기준, 날짜 미확인). 데이터센터 전력 기대가 이미 주가에서 빠지는 중이라는 논지."
+  },
+  {
+   "title": "브렌트, 미·이란 평화 틀 보도에 100달러 붕괴",
+   "url": "https://bingx.com/en/flash-news/post/brent-crude-drops-intraday-slips-below-on-report-of-us-iran-peace-framework",
+   "press": "BingX 플래시",
+   "at": "2026-11-05 04:40",
+   "why": "에너지 칸 조건 brent_95 — 하락 원인이 「평화 틀」 보도(공급 리스크 해소)라 종가·다음날 시가 확인 필요",
+   "summary": "미·이란 평화 틀 보도에 브렌트 장중 100달러 아래. 기사 날짜·세부 숫자 원문 미확인(앱 시세 11/4 94.2달러, −9.1%)."
+  },
+  {
+   "title": "미 증시, 반도체 급락 — AI 투자 지출 우려",
+   "url": "https://www.tmgm.com/en/analysis/market-news/ai-meets-market-reality",
+   "press": "TMGM",
+   "at": "2026-11-05 04:40",
+   "why": "AI 차입 가설(0.92) — 빅테크 급등·반도체 하락 분리. 11/5 ideas 의 SOXX−SPY 괴리 그림자 채점과 이어짐",
+   "summary": "반도체가 하락하며 「AI 투자 현실 점검」 논리로 시장 주도가 바뀐다는 분석. 날짜 미확인(이번 선거 랠리 당일 기사인지 원문 확인 필요)."
+  },
+  {
+   "title": "브렌트, 이란 긴장 완화 조짐에 100달러 아래로",
+   "url": "https://inspenet.com/en/news/brent-crude-oil-falls-below-100-amid-signs-of-de-escalation-in-iran/",
+   "press": "Inspenet",
+   "at": "2026-11-05 03:35",
+   "why": "에너지 칸 13%·장부 조건 brent_95(→10) — 하락 이유가 공급 완화(이란)라 단기 반등 약할 수 있음",
+   "summary": "이란 긴장 완화 기대에 브렌트 100달러 하회. 앱 시세 기준 11/4 18:18 BST 94.2달러(−9.07%). 기사 날짜·세부 숫자 원문 미확인."
+  },
+  {
+   "title": "데이터센터 부채 매도세가 AI 건설을 막는다 (Distress Watch)",
+   "url": "https://news.bgov.com/bankruptcy-law/distress-watch-data-center-debt-selloff-snags-ai-buildouts",
+   "press": "Bloomberg Government",
+   "at": "2026-11-05 03:35",
+   "why": "AI 차입 가설 — 반도체(HBM)·전력·인프라 칸 수요 둔화 경로",
+   "summary": "데이터센터 관련 부채 매도가 AI 건설 자금 조달을 어렵게 한다는 분석. 날짜·숫자 원문 미확인(유료)."
+  },
+  {
+   "title": "색소 — 2026 美 중간선거 투자자 플레이북",
+   "url": "https://www.home.saxo/en-gb/content/articles/equities/us-midterms-investor-playbook-06102026",
+   "press": "Saxo",
+   "at": "2026-11-05 02:40",
+   "why": "선거 결과별 업종 지도 — 민주당 스윕 뒤 병원↑·AI 인프라↓ 쏠림이 각본대로인지 대조",
+   "summary": "10/6자 선거 전 시나리오 정리(원문 숫자 미확인). 오늘 실제: 병원·대형 테크↑, 엔비디아·네오클라우드↓."
+  },
+  {
+   "title": "코어위브, 채권 스트레스에 1주 −23% — CEO 「시장이 비합리적」",
+   "url": "https://www.tikr.com/blog/coreweave-sinks-23-in-a-week-on-bond-distress-its-ceo-says-the-market-acts-irrationally",
+   "press": "TIKR",
+   "at": "2026-11-05 01:40",
+   "why": "🧠 AI 차입(크레딧) 가설 — 네오클라우드 채권·주가 동반 약세 추적",
+   "summary": "코어위브 주가 1주 −23%, 채권 약세 동반(기사 날짜·숫자 원문 미확인). 오늘 블룸버그 「코어위브 채권 신저가 — 텍사스 데이터센터 규제 우려」와 같은 흐름."
+  },
+  {
+   "title": "시타델 증권 「4분기 美 주식 우호 — 5가지 순풍」",
+   "url": "https://investinglive.com/stock-market-update/citadel-securities-turns-constructive-on-us-stocks-for-q4-citing-five-tailwinds/",
+   "press": "investingLive",
+   "at": "2026-11-05 01:40",
+   "why": "🐻 하락장 판정·현금화 판단 — 연말 매수 주체(자사주·기관) 복귀 논리",
+   "summary": "시타델 증권 루브너, 4분기 미국 주식 우호 전환(계절성·자사주 등 5요인, 세부 숫자 원문 미확인). 오늘 피드 「Citadel sees year-end rally as biggest buyers return」와 같은 논지."
+  },
+  {
+   "title": "민주당 중간선거 우려에도 마이크론·샌디스크·SK하이닉스 프리마켓 상승 이유",
+   "url": "https://www.tipranks.com/news/why-micron-sandisk-and-sk-hynix-stocks-are-rising-in-premarket-despite-midterm-concerns-november-4",
+   "press": "TipRanks",
+   "at": "2026-11-05 00:34",
+   "why": "한국 반도체 ETF(091160)·하닉 — 선거 뒤 메모리주 방향이 프리마켓↑ vs 장중 경고로 엇갈림",
+   "summary": "11/4 프리마켓 메모리 3사 상승 배경 기사 — 원문 숫자 미확인. 같은 날 배런스는 「메모리 가격 경고 누적·MU 하락」 보도."
+  },
+  {
+   "title": "마이크론, 중간선거 결과가 AI 트레이드를 흐리며 하락",
+   "url": "https://moneycheck.com/micron-mu-stock-slips-as-midterm-results-cloud-the-ai-trade-heres-why",
+   "press": "MoneyCheck",
+   "at": "2026-11-05 00:34",
+   "why": "AI 차입·AI 안의 갈림 가설 — 지수 +2%대 랠리 속 메모리·네오클라우드만 약세",
+   "summary": "민주당 스윕 → AI 데이터센터 규제·전력 반발 우려로 MU 하락 — 원문 숫자 미확인."
+  },
+  {
+   "title": "美 재무부, 11월 리펀딩 — 쿠폰 입찰 규모 유지·발행 가이던스 손질",
+   "url": "https://marketnews.com/mni-brief-us-treasury-maintains-steady-issuance-guidance",
+   "press": "MNI",
+   "at": "2026-11-04 23:35",
+   "why": "고금리 정점 가설(중장기채·유틸리티) — 공급 충격 없음 확인",
+   "summary": "쿠폰 입찰 규모 동결, 「적어도 향후 몇 분기」 문구 손질(bbg_mkt 동일 보도). 발표 뒤 美 10년 4.92%·30년 5.30%(CNBC 23:18 KST). 세부 숫자 미확인."
+  },
+  {
+   "title": "재무부 차입 추정치 — 11/4 리펀딩이 정할 것(장기물 바이백)",
+   "url": "https://marketsandnews.com/rates/treasury-quarterly-refunding-november-4-2026-buybacks-yields/",
+   "press": "Markets and News",
+   "at": "2026-11-04 22:35",
+   "why": "고금리 정점 가설·美 10년 4.95 판정 — 오늘 리펀딩의 장기물 축소·바이백 확대 여부",
+   "summary": "11/4 분기 리펀딩 전 프리뷰: 장기물 바이백 확대 논의. 세부 숫자는 미확인."
+  },
+  {
+   "title": "민주당 의회 스윕에 대한 시장 분석가 반응 모음",
+   "url": "https://finance.yahoo.com/markets/stocks/articles/analysts-react-us-midterm-election-025738421.html",
+   "press": "Yahoo Finance",
+   "at": "2026-11-04 20:40",
+   "why": "🗳️ 중간선거 watch — 스윕 뒤 AI 규제·재정 경로에 대한 IB 해석 모음, 반도체·AI 소프트웨어 칸 판단 재료",
+   "summary": "민주당 상·하원 장악 후 월가 분석가 반응 정리(원문 숫자는 이 세션에서 미확인 — 제목·요지 기준)."
+  },
+  {
+   "title": "S&P500·나스닥 선물, 기술주 실적·중간선거 결과 주시하며 상승",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-04/us-equity-futures-inch-higher-as-investors-await-midterm-results",
+   "press": "Bloomberg",
+   "at": "2026-11-04 20:40",
+   "why": "오늘 밤 정규장 「정치 갭 되돌림」 판정 — 선물 방향 확인용",
+   "summary": "선거 결과·AMD 등 기술주 실적에 美 지수 선물 소폭 상승(세부 숫자 미확인)."
+  },
+  {
+   "title": "BofA: 민주당 상·하원 장악 시 美 증시 10% 넘게 빠질 수 있다",
+   "url": "https://cryptobriefing.com/bofa-democrats-sweep-congress-stocks-decline/",
+   "press": "Crypto Briefing(BofA 인용)",
+   "at": "2026-11-04 16:40",
+   "why": "스윕 확정 — 오늘 밤 美 정규장 갭 판정·🐻 하락장 watch 의 하방 시나리오 기준",
+   "summary": "BofA 전략가가 민주당 스윕을 증시 −10%↑ 위험 시나리오로 제시(기사 기준, 원 리포트 미확인)."
+  },
+  {
+   "title": "마벨, 루멘텀 인수설에 하루 시총 290억$ 증발(10/29)",
+   "url": "https://fourweekmba.com/ai-marvell-lost-29b-of-value-in-a-day-on-lumentum-deal-talks/",
+   "press": "FourWeekMBA",
+   "at": "2026-11-04 16:40",
+   "why": "AI 광통신 M&A 발 변동 — 테제 「AI 차입(크레딧)」과 같은 결: 인수자금·희석 부담을 시장이 벌함",
+   "summary": "10/29 MRVL −12~13%(인수 프리미엄·신주 희석·규제 우려). 11/4 피드 「마벨 30% 급락」은 루멘텀 쪽 수치인지 미확인."
+  },
+  {
+   "title": "美 증시 전망(11/4): AMD 가이던스 상회로 시간외 급등, 중간선거 개표에 선물 하락",
+   "url": "https://www.techflowpost.com/en-US/article/35085",
+   "press": "TechFlow",
+   "at": "2026-11-04 10:40",
+   "why": "킥 SPY·반도체 칸 — 칩 호재보다 선거(민주 스윕) 불확실성이 지수를 끌어내리는지",
+   "summary": "S&P 선물 −0.6%·나스닥100 −0.5%·다우 −252pt · AMD 4분기 매출 가이던스 ~170억$(예상 162.3억) 시간외 +9%→+4% · 칼시 민주 상원 90%·하원 97%, JP모건 스윕 66% · 10년 4.951%(+5.8bp)"
+  },
+  {
+   "title": "나스닥100 선물 1.5% 가까이 하락 — 민주당 스윕 확률 95%",
+   "url": "https://cryptobriefing.com/nasdaq-futures-drop-democratic-sweep-odds/",
+   "press": "Crypto Briefing",
+   "at": "2026-11-04 10:40",
+   "why": "🗳️ 선거 watch — 스윕 확률이 오를수록 기술주 선물 낙폭 확대(제목 기준, 본문 미확인)",
+   "summary": "제목: 나스닥100 선물 −1.5% 근접·스윕 확률 95% · 본문 열리지 않아 숫자 미확인"
+  },
+  {
+   "title": "민주당 하원 탈환 예상 — 개표 초반 격차는 불분명",
+   "url": "https://www.newsfromthestates.com/article/democrats-predicted-flip-us-house-margins-unclear-first-polls-close",
+   "press": "States Newsroom",
+   "at": "2026-11-04 09:40",
+   "why": "美 정책·재정 경로 — 분점 정부면 감세·재정 확대 제동 → 10년 금리·고금리 정점 가설(0.50)과 직결",
+   "summary": "첫 투표소 마감 시점 민주당 하원 탈환 예상, 의석 격차 미확정 · 美 선물 소폭 강세(bbg_mkt) · 최종 결과 미확인"
+  },
+  {
+   "title": "AI 군비 경쟁에 美 기술기업 회사채 조달 프리미엄 2003년 이후 최고",
+   "url": "https://wallstreetcn.com/articles/3785105",
+   "press": "华尔街见闻",
+   "at": "2026-11-04 08:40",
+   "why": "🧠 AI 크레딧 가설·반도체/AI 칸 — 빚 공급 과잉이 스프레드를 더 벌릴 수 있음",
+   "summary": "美 IG 기술기업 평균 조달 비용의 시장 대비 프리미엄 2003년 이후 최고 · BNP 「2027 유로존 IG 순발행 +83%」 전망 · 같은 밤 메타 150억$ 5트랜치 美 채권(investing_en)"
+  },
+  {
+   "title": "2026 美 중간선거 개표 실시간 — 의회 다수당 결과",
+   "url": "https://edition.cnn.com/2026/11/03/politics/live-news/midterm-election-congress",
+   "press": "CNN",
+   "at": "2026-11-04 08:40",
+   "why": "오늘 한국·미국 장 방향 — 결과 확정 전(미확인), 선물은 AI 랠리에 소폭↑",
+   "summary": "개표 진행 중, 다수당 판정 미확인(08:40 KST) · 美 선물 소폭↑(CNBC·블룸버그) · AI 전력주 일제히 급등(gn_kr_sector)"
+  },
+  {
+   "title": "AMD, 데이터센터 매출 거의 2배 — 시간외 +7%",
+   "url": "https://www.cnbc.com/2026/11/03/amd-amd-q3-earnings-report-2026-.html",
+   "press": "CNBC",
+   "at": "2026-11-04 06:40",
+   "why": "반도체 칸·한국 반도체 ETF — AI 칩 수요 확인, 오늘 한국 개장 갭 방향",
+   "summary": "3분기 예상 상회·AI 칩 판매 호조로 데이터센터 매출 거의 2배, 시간외 +7% · 같은 밤 SMCI 전망 상회·아리스타 상회 vs 스카이웍스 부진 전망 −12%(investing_kr)"
+  },
+  {
+   "title": "美 주요 지수 11/3 마감 — 빅테크 반등이 받친 혼조",
+   "url": "https://finance.yahoo.com/markets/world-indices/articles/major-us-stock-indexes-fared-211437939.html",
+   "press": "Yahoo Finance(AP)",
+   "at": "2026-11-04 06:40",
+   "why": "🐻 하락장 판정 watch — S&P 7,040 기준 대비 위치",
+   "summary": "S&P 7,568.92(+0.36%)·나스닥 25,372(+0.83%)·다우 51,787(−0.38%)·VIX 20.83 · 10년 4.966%(CNBC 마감) · 애플 약세"
+  },
+  {
+   "title": "美 증시: 다우 약세 속 S&P·나스닥 상승 — 칩 반등, AMD 실적 대기",
+   "url": "https://finance.yahoo.com/markets/live/stock-market-today-tuesday-november-3-dow-sp-500-nasdaq-midterms-amd-earnings-141143244.html",
+   "press": "Yahoo Finance",
+   "at": "2026-11-04 05:45",
+   "why": "🧭 미국·AI 칸 — 칩 반등이 지수를 받치지만 폭은 좁음, AMD 실적이 SMH D+1 방향 결정",
+   "summary": "S&P 7,566(+0.33%)·나스닥 25,360(+0.78%)·다우 −0.43%(CNBC 15:12 EST) · 엔비디아 +2.2%·마이크론 +1.9% · 10년 4.946%"
+  },
+  {
+   "title": "선거일: 주식 신호로 보는 1순위 쟁점(CNBC Investing Club)",
+   "url": "https://www.cnbc.com/investingclub/2026/11/03/election-day-here-is-the-no-1-issue-were-watching-as-a-signal-for-stocks.html",
+   "press": "CNBC",
+   "at": "2026-11-04 05:45",
+   "why": "중간선거 결과(블루웨이브 여부)가 AI 데이터센터·에너지 정책 기대와 이어짐 — 개표 뒤 첫날 반응 확인용",
+   "summary": "텍사스 등 결과가 AI 데이터센터 거래를 흔들 수 있다는 관측(cnbc_top) · 트럼프 지지율 바닥·68% 물가 불만(머니투데이)"
+  },
+  {
+   "title": "골드만삭스, 12월 브렌트 전망 105$로 상향 — 중동 위험 프리미엄 약 27$ 반영",
+   "url": "https://finance.yahoo.com/markets/commodities/articles/goldman-sachs-raises-december-brent-090000226.html",
+   "press": "Yahoo Finance",
+   "at": "2026-11-04 04:45",
+   "why": "에너지 칸·⚡ AR(☕ 컵 11/2) — IB 상향과 이란 외교 기대 유가 하락이 엇갈리는 구간",
+   "summary": "12월 브렌트 105$·WTI 94$로 상향(exchangerates.org.uk 11/3) · 위험 프리미엄 약 27$(biggo) · 공급 차질 지속 시 상단 140$ 경고(energynow)"
+  },
+  {
+   "title": "브렌트 외교 기대에 110$ 아래로 — 골드만은 140$ 위험 경고",
+   "url": "https://invezz.com/ng/news/2026/11/02/brent-drops-below-dollar110-on-diplomacy-hopes-but-goldman-sachs-flags-dollar140-warning/",
+   "press": "Invezz",
+   "at": "2026-11-04 04:45",
+   "why": "에너지 컵 bets 손절이 몰린 「지정학 왕복」 구간 확인 — 원유형 컵 bet 보류 규칙(ideas 11/03 04:35) 근거",
+   "summary": "미·이란 외교 기대로 브렌트 110$ 하회 · 골드만 꼬리위험 140$ · 현재 WTI 96$ 안팎(latest)"
+  },
+  {
+   "title": "엔비디아 등 빅테크가 월가 끌어올려 — 애플 하락 상쇄",
+   "url": "https://www.washingtontimes.com/news/2026/nov/3/nvidia-big-tech-stocks-lifting-wall-street-make-drop-apple/",
+   "press": "AP/Washington Times",
+   "at": "2026-11-04 04:45",
+   "why": "🐻 하락장 watch — 선거일 칩 반등이 지수를 받치는 구조(폭은 여전히 좁음)",
+   "summary": "S&P 7,577(+0.48%)·나스닥 25,398(+0.93%)·다우 −0.31%·VIX 20.6(CNBC 14:10 EST) · 10년 4.948%"
+  },
+  {
+   "title": "엔비디아, 11/6 네이버 1조원 지분 대금 납입 — 3대 주주로",
+   "url": "https://www.digitaltoday.co.kr/en/view/121589/nvidia-to-pay-1-billion-in-naver-equity-investment-on-nov-6-set-to-become-third-largest-shareholder",
+   "press": "디지털투데이",
+   "at": "2026-11-04 03:36",
+   "why": "한국 AI 소프트웨어 쪽 외국 전략자금 유입 날짜(11/6) — 코스피 하락장 속 외국인 매도 멈춤 판정(watch)과 별개로 보는 이벤트",
+   "summary": "엔비디아가 11/6 약 10억$(1.3조 원) 신주 대금을 납입해 지분 4%대·3대 주주가 된다. 7월 발표된 건의 납입 일정 확정."
+  },
+  {
+   "title": "네이버, 나머지 90억$ 브룩필드 주선 조달 추진 — 엔비디아 3대 주주",
+   "url": "https://www.koreaherald.com/article/10821497",
+   "press": "Korea Herald",
+   "at": "2026-11-04 03:36",
+   "why": "AI 인프라 조달 규모가 한국 기업까지 번짐 — AI 크레딧 가설(0.92)의 아시아 쪽 사례",
+   "summary": "엔비디아 10억$ 지분투자 외 나머지 약 90억$를 브룩필드 주선 자금으로 조달 추진. 대형 AI 투자 자금이 부채·외부 자본에 기대는 흐름."
+  },
+  {
+   "title": "코어위브 채권, 부실채권처럼 거래 — AI 지출이 재무구조를 앞질러",
+   "url": "https://investinglive.com/stocks/coreweave-bonds-trade-like-distressed-debt-as-ai-spending-outpaces-balance-sheets/",
+   "press": "investingLive",
+   "at": "2026-11-04 02:45",
+   "why": "🧠 AI 크레딧 가설(0.92)의 핵심 확인 지표 — 네오클라우드 부채 스트레스가 하이퍼스케일러 채권으로 번지는지",
+   "summary": "코어위브 회사채 수익률 15% 안팎·주가 13~16% 급락 보도. 사모신용의 AI 데이터센터 대출 위험이 부각."
+  },
+  {
+   "title": "골드만 집계: 올해 AI 관련 채권 발행 5,000억$, 연말 7,500억$ 페이스(FT)",
+   "url": "https://aiweekly.co/alerts/ft-goldman-sachs-tallies-500b-in-ai-linked-debt-issued-in-2026-track-to-hit",
+   "press": "AI Weekly(FT 인용)",
+   "at": "2026-11-04 02:45",
+   "why": "하이퍼스케일러 채권 발행 누적 = AI 칸 비중 신호(ideas 11/03 22:45)의 숫자 근거",
+   "summary": "2026년 AI 연계 부채 5,000억$ 발행, 연말 7,500억$ 예상. 메타 추가 200억$ 채권 계획 보도와 같은 줄기."
+  },
+  {
+   "title": "中 CSI 300, AI주 급락에 하락장 영역 진입",
+   "url": "https://www.investing.com/news/stock-market-news/chinas-csi-300-slips-into-bearmarket-territory-as-ai-rout-deepens-4964628",
+   "press": "Investing.com",
+   "at": "2026-11-04 01:40",
+   "why": "🐻 하락장 watch — 한국(코스피 −20%↓)·중국 동시 하락장, 아시아 AI 쏠림 해소 흐름",
+   "summary": "CSI 300 고점 대비 −20% 넘어 하락장 · AI·반도체 대형주 매도가 주도 · 같은 주 대만도 −3.8%"
+  },
+  {
+   "title": "중국 AI·테크 붐은 왜 증시를 못 살리나",
+   "url": "https://www.cnn.com/2026/10/30/markets/china-ai-stocks-selloff-intl-hnk",
+   "press": "CNN",
+   "at": "2026-11-04 01:40",
+   "why": "中 AI 거품 논쟁 — 한국 반도체 칸 수급(외국인 −1.5조)과 같은 뿌리인지 확인용",
+   "summary": "AI 관련 중국주 급락 배경 정리 · 수익 대비 과열된 밸류·당국 규제 강화 우려"
+  },
+  {
+   "title": "AMD +5%·인텔 +4% — AMD 실적 앞두고 칩주 반등",
+   "url": "https://247wallst.com/investing/2026/11/03/amd-advances-5-intel-rises-4-marvell-gains-2-as-chip-stocks-bounce-ahead-of-amd-earnings",
+   "press": "24/7 Wall St.",
+   "at": "2026-11-04 01:40",
+   "why": "반도체 칸 7% — 11/3 장 마감 뒤 AMD 실적이 칩 반등 지속 여부를 가른다",
+   "summary": "11/3 장중 AMD +5%·INTC +4%·MRVL +2% · AMD 3분기 실적 장 마감 뒤 발표(숫자 미확인)"
+  },
+  {
+   "title": "골드만 몰라비 「S&P 500 종목 60%가 하락장 영역」 — 지수는 고점 3% 안",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-03/goldman-s-molavi-says-60-of-s-p-500-is-in-bear-market-territory",
+   "press": "Bloomberg",
+   "at": "2026-11-04 00:01",
+   "why": "🐻 하락장 판정 watch·포트 미국 칸 — 지수(시총가중)와 종목 체력이 갈라진 정도",
+   "summary": "S&P 500 지수는 최고치 대비 약 3% 이내인데 구성 종목의 60%는 하락장(−20%↓) 영역 · 소수 대형주가 지수를 떠받치는 폭 붕괴 구간"
+  },
+  {
+   "title": "美 9월 구인 4개월 최고·해고 1년여 최저 — 노동 수요 다시 단단",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-03/us-job-openings-jump-to-highest-level-since-may-layoffs-fall",
+   "press": "Bloomberg",
+   "at": "2026-11-04 00:03",
+   "why": "美 10년 5% watch·고금리 정점 가설(0.55) 반대 재료 — 11/6 고용 앞 금리 상방",
+   "summary": "9월 JOLTS 구인 예상 밖 급증(5월 이후 최고)·해고 1년여 최저 · 장 초반 10년 4.94%(+4.7bp, CNBC 09:58 EST)"
+  },
+  {
+   "title": "헤지펀드, 한 주 만에 2년치 AI 순매수 지워 — 골드만 「디레버리징 이제 시작일 수도」",
+   "url": "https://www.itiger.com/news/1150649522",
+   "press": "Tiger Brokers(골드만 프라임북 인용)",
+   "at": "2026-11-03 23:40",
+   "why": "AI 크레딧 가설(0.92)·🧭 AI 칸 — 수급 청산이 진행 중인지 끝났는지 가르는 숫자",
+   "summary": "골드만 프라임북: 헤지펀드 AI 관련 순매수 2년치가 한 주에 소멸·AI 비중 2023 이후 첫 언더웨이트(yahoo 11/3) · AI 주 3주간 시총 약 5조$ 감소"
+  },
+  {
+   "title": "애플 新 CEO 터너스 첫 시험 — 세계 메모리 위기가 이익을 깎는다",
+   "url": "https://cnbc.com/2026/11/03/apple-earnings-john-ternus-faces-first-test-amid-high-memory-costs.html",
+   "press": "CNBC",
+   "at": "2026-11-03 22:45",
+   "why": "반도체 칸 — OEM 마진 압박 = 메모리 공급사 가격 결정력(MU·091160.KS 페어 관찰)",
+   "summary": "애플이 메모리 원가를 「전례 없는」 수준이라 부르며 마진 전망 약세. 시간외 시총 약 1,400억$ 증발(feed 헤드라인 기준, 세부 수치 미확인)."
+  },
+  {
+   "title": "11/3 증시: 美 중간선거 당일 선물 혼조 — 애플·팔란티어 실적 뒤 하락",
+   "url": "https://www.tipranks.com/news/stock-market-today-nov-3-futures-mixed-on-midterm-election-day-apple-and-palantir-shares-slide-after-earnings",
+   "press": "TipRanks",
+   "at": "2026-11-03 22:45",
+   "why": "🐻 하락장 판정 watch — 선거 결과·11/4 리펀딩·11/6 고용 전 美 지수 방향",
+   "summary": "선거 당일 선물 혼조, AAPL·PLTR 실적 뒤 약세. 다우 장중 −300P(IBD 헤드라인). 정확한 지수 숫자는 미확인."
+  },
+  {
+   "title": "애플, 실적 상회에도 마진 전망 약해 하락 · 팔란티어 실적 뒤 −8%",
+   "url": "https://www.cnbc.com/2026/11/03/apple-palantir-stock-earnings.html",
+   "press": "CNBC",
+   "at": "2026-11-03 20:40",
+   "why": "AI·대형 기술주 실적 반응이 「숫자 좋아도 하락」 — 반도체·AI 소프트웨어 칸 심리 점검",
+   "summary": "애플 4분기 실적은 예상 상회했으나 마진 가이던스 약세로 주가 하락. 팔란티어는 실적 뒤 약 8% 하락(제목 기준, 세부 미확인)."
+  },
+  {
+   "title": "애플, 메모리 가격 급등에 마진 압박 — 시간외 −2.7%, 마이크론·샌디스크는 소폭 상승",
+   "url": "https://stocktwits.com/news-articles/markets/equity/aapl-stock-tumbles-overnight-on-margin-pressure-from-surging-memory-prices-mu-sndk-inch-higher/cNGQxyuR95f",
+   "press": "Stocktwits",
+   "at": "2026-11-03 20:40",
+   "why": "메모리 원가가 완제품 업체 마진을 깎는다 = 메모리 공급사 가격 결정력 확인(반도체 칸)",
+   "summary": "12월 분기 총마진 45~46% 전망(직전 47.9%), CFO 「메모리 비용으로 약 1%p 하락」. AAPL 시간외 −2.7%, MU +0.8%·SNDK +1%. 메모리 비용 내년까지 상승 예상."
+  },
+  {
+   "title": "핌코, AI 관련 채권 수십억 달러 처분해 손실 회피",
+   "url": "https://www.advisorperspectives.com/articles/2026/10/28/pimco-offloads-billions-ai-debt-skirt-losses",
+   "press": "Advisor Perspectives(블룸버그 전재)",
+   "at": "2026-11-03 18:45",
+   "why": "AI 크레딧 가설(0.92) — 핌코 CEO 11/3 「AI 조달 과잉」 경고와 같은 줄기, 운용사가 실제로 AI 채권을 덜어냄",
+   "summary": "10/28 보도: 핌코가 AI 인프라 관련 회사채 수십억 달러 규모를 매각해 손실을 피함(제목 기준, 세부 금액 미확인). 11/3 CEO 「AI 금융이 너무 많아지는 길」 발언(블룸버그)으로 이어짐."
+  },
+  {
+   "title": "코스피, 외인·기관 동반 '팔자'에 낙폭 확대…5600선으로 후퇴",
+   "url": "https://www.g-enews.com/article/Securities/2026/11/202611031326047978923c501012_1",
+   "press": "글로벌이코노믹",
+   "at": "2026-11-03 13:26",
+   "why": "🐻 하락장선 5,665 판정 — 외인·기관 동반 매도 구조 확인",
+   "summary": "코스피 5,600선 후퇴, 외국인·기관 동시 순매도. 삼전·하닉 약세 주도."
+  },
+  {
+   "title": "코스피 5,630선까지 추락…외국인 1조2천억 매도, 삼성전자·SK하이닉스 급락",
+   "url": "https://www.topstarnews.net/news/articleView.html?idxno=16266954",
+   "press": "톱스타뉴스",
+   "at": "2026-11-03 14:00",
+   "why": "외국인 매도 멈춤 watch — 10월 −19.7조에 이어 11월 첫 주도 매도 지속",
+   "summary": "외국인 약 1.2조 순매도, 반도체 대형주 급락으로 코스피 5,630선."
+  },
+  {
+   "title": "마벨, 루멘텀 인수 보도에 하루 −13.2% — 시가총액 약 290억$ 증발",
+   "url": "https://www.heygotrade.com/en/news/marvell-mrvl-stock-news-october-30-2026/",
+   "press": "Gotrade",
+   "at": "2026-11-03 11:45",
+   "why": "11/3 1,150억$ 전액 주식 인수 확정 — 인수자 희석·프리미엄 우려가 광통신 내 분화(COHR·AAOI vs MRVL) 관찰과 이어짐",
+   "summary": "10/29 인수 협상 보도에 MRVL −13.2% · 시장은 인수 프리미엄·신주 발행 희석·규제 심사를 우려 · 11/3 확정 규모 1,150억$(전액 주식)"
+  },
+  {
+   "title": "OpenAI, 300억$ 라운드 기업가치 목표 1.4조→1.25조$로 낮춰",
+   "url": "https://www.boersen-zeitung.de/unternehmen-branchen/openai-schraubt-bewertungsziel-bei-funding-runde-herunter",
+   "press": "Börsen-Zeitung",
+   "at": "2026-11-03 11:45",
+   "why": "AI 크레딧 가설(0.92) — 자금 조달 목표 미달(WSJ)과 함께 AI 자본 조달 피로의 근거",
+   "summary": "투자자 저항으로 목표 기업가치 1.4조$ → 1.25조$ 하향 보도 · 라운드 규모 300억$(코투·UAE 투자자 주도 보도) · 날짜·확정 여부 미확인"
+  },
+  {
+   "title": "미국, 이란 케슘섬 타격 — 트럼프는 전쟁 위험 축소 발언",
+   "url": "https://www.wsj.com/world/middle-east/u-s-strikes-irans-qeshm-island-as-trump-talks-down-war-risks-79d73d3d",
+   "press": "WSJ",
+   "at": "2026-11-03 10:45",
+   "why": "전일 WTI −7%(이란 합의 기대)·에너지 섹터 −3.97% 뒤 반전 위험 — 유가·에너지 칸",
+   "summary": "WSJ: 공격 목적은 「호르무즈 해협 방어」, 이란의 상선 공격 능력 억제. 보도 직후 WTI 선물 소폭 상승·S&P·NDX 선물 상승 유지(globalmktinsight/7817) — 시장 반응은 안정적"
+  },
+  {
+   "title": "美 케슘섬 공습에 유가 반등",
+   "url": "https://www.heygotrade.com/en/news/oil-climbs-97-iran-tensions-us-strikes-qeshm-island/",
+   "press": "Gotrade",
+   "at": "2026-11-03 10:45",
+   "why": "이란 합의 기대로 빠진 유가가 되돌려지는지 — 에너지 칸·인플레 기대·10년 금리",
+   "summary": "제목 「유가 97달러 향해 상승」 — 기준 유종·시점 미확인. 한국 10월 CPI 석유류 +14.9%와 겹쳐 금리 부담 요인"
+  },
+  {
+   "title": "[개장시황] 코스피·코스닥, 외국인·기관 '팔자'에 동반 하락",
+   "url": "https://www.newspim.com/news/view/20261103000241",
+   "press": "뉴스핌",
+   "at": "2026-11-03 09:45",
+   "why": "🐻 하락장 watch — 외국인 복귀 조건(foreign_return 0/3) 계속 깨짐, 반도체 칸",
+   "summary": "11/3 개장 코스피 −2.46% 5,715 출발 뒤 5,600선까지 밀림, 외국인·기관 동반 순매도. 삼전·하닉 장초반 −4~5%."
+  },
+  {
+   "title": "홍콩 투자 서밋 — 금융 수장들 AI 투자 공식 재검토",
+   "url": "https://www.thestandard.com.hk/finance/article/346519/Finance-chiefs-to-rethink-AI-playbook-other-key-themes-at-Nov-investment-summit-in-HK",
+   "press": "The Standard",
+   "at": "2026-11-03 09:45",
+   "why": "골드만·모건스탠리 CEO 발언(오늘) — AI 크레딧 가설 0.92 의 반대/보강 재료",
+   "summary": "11월 홍콩 글로벌 금융리더 투자 서밋 주제: AI 플레이북 재검토·무역. 세부 발언은 미확인."
+  },
+  {
+   "title": "AI 광통신 일제 매도에 루멘텀 하락",
+   "url": "https://www.tikr.com/blog/widespread-ai-photonics-selloff-drags-down-lumentum-stock",
+   "press": "TIKR",
+   "at": "2026-11-03 08:35",
+   "why": "마벨의 루멘텀 인수설(10/29 마벨 −13%) 뒤 광통신 업종 전반 매도 — COHR·AAOI 상향과 엇갈림, 반도체 확산 여부 관찰",
+   "summary": "인수 프리미엄·희석·규제 우려로 마벨 하루 시총 290억$ 증발(fourweekmba), 광통신 동반 약세."
+  },
+  {
+   "title": "팔란티어, 3분기 호실적 뒤 연간 가이던스 상향 — 시간외 강세",
+   "url": "https://seekingalpha.com/news/4662192-palantir-perks-up-as-it-boosts-full-year-forecast-after-stellar-q3-results",
+   "press": "Seeking Alpha",
+   "at": "2026-11-03 06:45",
+   "why": "PLTR 📊 실적 신호(10/29) — 실적 뒤 D+1 진입 규칙 후보 채점 재료",
+   "summary": "매출 23.1억$(+96%)·美 상업 매출 9.84억$(+148%)이 정부(9.53억$) 첫 추월(CNBC). 연간 가이던스 상향, 시간외 소폭 강세. Motley Fool 「신규 계약 둔화」 지적."
+  },
+  {
+   "title": "나스닥, 조정 구간 진입 — 증시 하락 마감",
+   "url": "https://www.wral.com/nasdaq-enters-correction-territory-as-stocks-close-lower/20086373/",
+   "press": "WRAL(AP)",
+   "at": "2026-11-03 06:45",
+   "why": "반도체·AI 하드웨어 약세 확산 — 반도체 칸 추격 금지·킥 신규 진입 보류 근거",
+   "summary": "11/2 나스닥 −1.07%·S&P 하락·다우 상승 혼조 마감(연합). 유가 −7%(WTI 96$선)·10년 4.8%대에도 인텔발 메모리·스토리지 매도 확산(yahoo)."
+  },
+  {
+   "title": "美 증시 11/2 장중 — 오라클 −6.4%(100억$ 주식 매각)·마벨 −9.5%·루멘텀 −15.2%, 브렌트 −7% 104$",
+   "url": "https://www.stocktitan.net/articles/stock-market-today-live-november-2-2026",
+   "press": "StockTitan",
+   "at": "2026-11-03 05:45",
+   "why": "AI 차입(크레딧) 가설 — 빅테크가 채권에 이어 주식으로도 조달, 하드웨어 약세와 함께 「보여 줘」 국면",
+   "summary": "S&P 오전 +1% → 12:55 ET +0.3%로 상승폭 축소. 오라클 100억$ 주식 매각에 −6.38%. 브렌트 −7%대 약 104$."
+  },
+  {
+   "title": "팔란티어, 실적 발표 앞두고 매출 성장·현금흐름 우려에 하락 반전",
+   "url": "https://fxleaders.com/news/2026/11/02/pltr-stock-reverses-down-on-revenue-growth-and-cash-flow-with-palantir-to-report-third-quarter-financial-results-after-market-close",
+   "press": "FX Leaders",
+   "at": "2026-11-03 05:45",
+   "why": "PLTR(📊 실적 신호 10/29) 장 마감 뒤 실적 — 옵션 시장 ±11~13% 변동 예상(tipranks), D+1 갭으로 earn 신호 채점",
+   "summary": "실적 당일 장중 하락 반전. 회사 가이던스 매출 21.6억$ 대비 시장 기대가 그 위(financefeeds)."
+  },
+  {
+   "title": "루멘텀 8-K — 마벨 인수 합병 계약 공시(SEC)",
+   "url": "https://www.sec.gov/Archives/edgar/data/0001633978/000119312526442758/d163169dex991.htm",
+   "press": "SEC EDGAR",
+   "at": "2026-11-03 04:35",
+   "why": "AI 광학 대형 M&A — 인수자 주가 희석·프리미엄 우려(10/29 보도 때 MRVL −13%), AI 크레딧·AI 하드웨어 「보여 줘」 국면 재료",
+   "summary": "11/2 루멘텀이 마벨과의 합병 계약을 8-K·425로 공시. 피드(gn_jp)는 인수액 약 18조엔 보도, 발표일 LITE −14.9%(fool). 세부 조건은 미확인."
+  },
+  {
+   "title": "델·HPE, 슈퍼마이크로 실적 경고 뒤 AI 서버주 동반 하락",
+   "url": "https://tr.tradingview.com/news/gurufocus%3A6df158a80094b%3A0-dell-and-hpe-shares-fall-after-super-micro-s-weak-earnings-shake-ai-server-sector",
+   "press": "GuruFocus via TradingView",
+   "at": "2026-11-03 04:35",
+   "why": "AI 서버 하드웨어 약세 확산 — 반도체 칸 추격 금지·하드웨어 「뉴스에 판다」 패턴과 연결",
+   "summary": "11/2 장중 슈퍼마이크로 −5%(실적 앞)·델 −4%·HPE −3%(yahoo 피드 헤드라인). 같은 날 세레브라스 급락·LITE −14.9%로 AI 하드웨어만 약세, 지수는 상승."
+  },
+  {
+   "title": "美 선물 11월 첫날 상승 — 팔란티어 실적 대기",
+   "url": "https://www.tipranks.com/news/u-s-stock-futures-rise-as-november-trading-kicks-off-palantir-pltr-earnings-on-deck",
+   "press": "TipRanks",
+   "at": "2026-11-03 03:00",
+   "why": "PLTR(kick_cands 📊 실적 10/29) 장 마감 뒤 실적 — 실적 신호 종목 반응 채점 재료",
+   "summary": "11/2 美 선물 상승 출발, 팔란티어 실적이 이번 주 첫 대형 AI 소프트웨어 이벤트. 장중 S&P +0.5%·나스닥 +0.5%(CNBC 12:25 EST)."
+  },
+  {
+   "title": "美 국채금리 하락 — 이란 긴장 완화 기대에 유가 급락",
+   "url": "https://ground.news/article/us-treasury-yields-fall-as-oil-prices-plunge-on-iran-de-escalation-hopes",
+   "press": "Ground News",
+   "at": "2026-11-03 03:00",
+   "why": "watch 美 10년 4.95 이틀 판정 — 오늘 마감 4.95 아래면 고금리 정점 0.55",
+   "summary": "WTI −7%(96.8$)·브렌트 105$, 10년 4.88%(−5bp, CNBC 12:25 EST)."
+  },
+  {
+   "title": "앤트로픽, IPO 몇 주 앞두고 막대한 공급사 부채(구매약정) 공개",
+   "url": "https://www.ifre.com/equities/2493228/anthropic-reveals-huge-supplier-liabilities-just-weeks-ahead-of-potential-ipo",
+   "press": "IFR",
+   "at": "2026-11-03 02:10",
+   "why": "AI 크레딧 가설 — 비상장 AI 의 장기 컴퓨트 약정이 공급사(클라우드·칩) 매출의 담보가 되는 구조",
+   "summary": "S-1 수정본에 장기 컴퓨트·공급 약정 공개(피드 cnbc_top 은 8,954억$ 보도). 약정 상대방 매출 가시성↑ vs 이행 위험은 앤트로픽 조달에 달림."
+  },
+  {
+   "title": "앤트로픽 IPO 초안 — 매출 약 15배, 컴퓨트 계약 6,000억$",
+   "url": "https://investinglive.com/stocks/anthropic-ipo-draft-shows-nearly-15-fold-revenue-jump-and-600-billion-in-compute-deals/",
+   "press": "investingLive",
+   "at": "2026-11-03 02:10",
+   "why": "AI 인프라 공급사(반도체·전력·광통신 칸) 수요 근거 vs 차입 의존 — 같은 사건의 두 면",
+   "summary": "매출 급증·대규모 컴퓨트 계약(초안 기준 6,000억$, 이후 수정본은 더 큼). 수치는 보도 시점별로 다름 — 확정치는 S-1."
+  },
+  {
+   "title": "美 ISM 제조업 10월 55.5 — 예상 54.5 상회, 생산 2021년 이후 최대폭",
+   "url": "https://www.prnewswire.com/news-releases/manufacturing-pmi-at-55-5-october-2026-ism-manufacturing-pmi-report-302925617.html",
+   "press": "ISM(PR Newswire)",
+   "at": "2026-11-03 00:55",
+   "why": "고금리 정점 가설 반대 재료 — 경기 강하면 12월 인상 기대↑, 10년 4.95 판정에 영향",
+   "summary": "10월 제조업 PMI 55.5(예상 54.5~54.6). 생산 지수 2021년 이후 최대 상승. 발표 뒤에도 10년물 장중 4.89%로 하락(유가 −7% 영향 우세)."
+  },
+  {
+   "title": "ISM 제조업 55.5로 점프 — 생산 급증, 그러나 가격 압력 지속",
+   "url": "https://www.actionforex.com/live-comments/659568-us-ism-manufacturing-jumps-to-55-5-as-production-surges-but-price-pressures-persist/",
+   "press": "ActionForex",
+   "at": "2026-11-03 00:55",
+   "why": "가격지수 고공 = 연준 매파(로건·더타) 근거 — 금리 민감 칸 판단에 필요",
+   "summary": "헤드라인 55.5, 생산 급증. 가격 지수는 여전히 높아 인플레 압력 지속 해석."
+  },
+  {
+   "title": "오라클 장중 −4% — 100억$ 회사채 발행이 AI 부채 걱정 되살려, 코어위브 +2%",
+   "url": "https://247wallst.com/investing/2026/11/02/oracle-declines-4-as-10-billion-bond-sale-revives-ai-debt-worries-coreweave-advances-2-microsoft-holds-steady/",
+   "press": "24/7 Wall St.",
+   "at": "2026-11-02 23:40",
+   "why": "AI 크레딧 가설(0.89) — 하이퍼스케일러 자금 조달이 채권에서 주식(희석)까지 번짐, 반도체 칸 추격 금지 쪽",
+   "summary": "ORCL 125.43$(−4%, 연초 대비 −33%) · 1분기(FY27) FCF −54억$·이자비용 14억$(+55%)·RPO 6,640억$ · 연초 250억$ 채권·200억$ 주식 프로그램에 이어 추가"
+  },
+  {
+   "title": "오라클, 보통주 100억$ 매각 신고",
+   "url": "https://www.newsquawk.com/headlines/oracle-orcl-filed-to-sell-usd-10bln-of-common-stock",
+   "press": "Newsquawk",
+   "at": "2026-11-02 23:40",
+   "why": "빚 대신 주식 = 크레딧 시장 한도 신호 — 마벨-루멘텀 전액 주식 인수와 같은 흐름(차입 회피)",
+   "summary": "11/2 장전 보통주 100억$ 신고 · 같은 날 투자등급 달러채 100억$ 별도(블룸버그) · 총 200억$"
+  },
+  {
+   "title": "마벨, 루멘텀을 전액 주식 1,150억$에 인수 — 주당 1,132$, 소문 전 대비 +23.9%",
+   "url": "https://www.globalbankingandfinance.com/marvell-buy-lumentum-115-billion-deal-ai-data-center-bet/",
+   "press": "Global Banking & Finance(로이터 인용)",
+   "at": "2026-11-02 21:45",
+   "why": "섹터 칸 광통신 LITE 직격 — 주식교환이라 LITE 수익률이 MRVL 주가에 묶임 · 광통신 동종(COHR 장전 +6.7%) 재평가",
+   "summary": "총액 1,150억$(지분가치 1,025억$) 전액 주식 · 주당 1,132$ = 10/28 비교란 전 종가 대비 +23.9% · 발표일 MRVL 장전 +2.8%·LITE 거래정지, 소문 뒤 LITE −8%·MRVL −22%"
+  },
+  {
+   "title": "마벨, 루멘텀 1,150억$ 전액 주식 인수 발표",
+   "url": "https://www.investing.com/news/company-news/marvell-to-acquire-lumentum-for-115-billion-in-allstock-deal-93CH-4991177",
+   "press": "Investing.com",
+   "at": "2026-11-02 21:45",
+   "why": "AI 크레딧 가설 — 빚이 아닌 주식으로 산 초대형 AI 딜(차입 부담 피함) · 광통신 칸",
+   "summary": "AI 데이터센터 광 인터커넥트 결합 · 전액 주식 · 세부 교환비율은 미확인"
+  },
+  {
+   "title": "BofA: 하이퍼스케일러 회사채 발행 2026년 연 1,000억 달러 수준 지속",
+   "url": "https://www.fi-desk.com/bofa-deluge-of-hyperscaler-issuance-steady-at-us100bn-in-2026/",
+   "press": "FI Desk",
+   "at": "2026-11-02 20:40",
+   "why": "AI 크레딧 가설 — 빅테크 채권 공급 부담, 알파벳 유로채·메타 전망 하향과 같은 줄",
+   "summary": "BofA 추정 하이퍼스케일러 발행 연 약 1,000억$. 게재 날짜 미확인."
+  },
+  {
+   "title": "댈러스 연은 로건 「연준 최소 두 번 더 인상 필요」",
+   "url": "https://www.kitco.com/news/off-the-wire/2026-10-30/fed-needs-least-two-more-rate-hikes-logan-says",
+   "press": "Kitco(로이터)",
+   "at": "2026-11-02 19:40",
+   "why": "고금리 정점 가설(0.55)·중장기채 칸 — 연준 매파 위원 「50bp 이상 더」",
+   "summary": "로건: 금리 25bp씩 최소 2번 더 올려야 물가 안정(10/30). 무살렘도 추가 인상 신호(political.org). 美 2년 4.60%·10년 4.93%(latest)."
+  },
+  {
+   "title": "오픈AI, 기술주 급락 속 펀딩 목표 200억$로 축소",
+   "url": "https://www.verdict.co.uk/openai-cuts-funding-goal-20bn/",
+   "press": "Verdict",
+   "at": "2026-11-02 19:40",
+   "why": "AI 크레딧 가설(0.88) — 비상장 AI 자금줄 위축, 반도체·하이퍼스케일러 칸 수요 기대 약화",
+   "summary": "오픈AI가 시장 변동성·투자자 신중으로 조달 목표·밸류 하향(피드 제목 200억$, thenextweb 앞서 1.25조$ 밸류·300억$ 보도). 하이퍼스케일러 5사 시총 1조$ 감소(닛케이 피드)."
+  },
+  {
+   "title": "알파벳, 대규모 AI 지출 속 유로 회사채 시장 복귀(약 30억€)",
+   "url": "https://www.itiger.com/news/1107943849",
+   "press": "Tiger Brokers",
+   "at": "2026-11-02 18:40",
+   "why": "AI 크레딧 가설·🐋 GOOGL(10/29 고래 신호) — FCF 적자 회사의 채권 조달 반복",
+   "summary": "알파벳이 AI 투자 자금 위해 유로채 발행(약 30억€, 기사 날짜 미확인). 피드: 3Q capex 514억$가 영업현금흐름 423억$를 넘어 FCF −91억$(kimu_nim/47818)."
+  },
+  {
+   "title": "키옥시아 주가, 한 달 새 50% 급락",
+   "url": "https://www.kucoin.com/news/flash/japanese-semiconductor-giant-kioxia-s-stock-plunges-50-in-a-month",
+   "press": "KuCoin News",
+   "at": "2026-11-02 18:40",
+   "why": "반도체 칸·091160 — 낸드 가격 둔화 쇼크의 깊이, 하이닉스·삼성 되돌림 판단",
+   "summary": "키옥시아 한 달 −50%(기사 날짜 미확인). 피드: 11/2 도쿄장 키옥시아 안값 경신으로 닛케이 −208엔(63,081)."
+  },
+  {
+   "title": "도이체방크, 美 기술주 투자의견 상향 — 「매도세가 지나쳤다」",
+   "url": "https://www.investing.com/news/stock-market-news/deutsche-bank-upgrades-us-techsays-selloff-has-gone-too-far-4990112",
+   "press": "Investing.com",
+   "at": "2026-11-02 17:40",
+   "why": "AI 크레딧 가설(0.88)·반도체 칸 추격 금지와 반대 — 대형 IB 첫 「과매도」 판단, 나스닥 10/30 −2.86% 뒤",
+   "summary": "도이체방크가 美 기술 섹터 의견 상향(제목 기준). 나스닥 10/30 25,437(−2.86%, CNBC). 목표·세부 숫자는 미확인."
+  }
+ ],
+ "at": "2026-11-05 09:45"
+}

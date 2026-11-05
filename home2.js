@@ -176,20 +176,26 @@
 
   /* ───────── ⑰ 오늘의 숫자 — 그날 제일 중요한 숫자 하나 + 한 줄 이유 (🎨 11/04 사용자 「오늘 한 줄을 맨 위 큰 글씨로」) ─────────
      한국 장중 = 코스피 지금 · 장 끝난 뒤 = 코스피 마감 · 아침 9시 전 = 밤사이 S&P500. 오를 확률이 70% 넘거나 30% 아래면 그게 더 눈에 띄니 그걸로. 한 줄은 pbbrief(오늘 한 장)의 one 그대로 */
+  /* 🔍 11/05 A1 「홈 첫 줄은 결론 한 문장」 — 확률 하나로 겁주지 않게: 오늘 할 일(지키기·지켜보기·담기) + 숫자 2개, 확률은 작게(극단값이면 꼬리표) */
   function numHtml(d){
     var ks = ix(d.kr, "코스피"), sp = ix(d.us, "S&P500"), h = kst().getUTCHours() + kst().getUTCMinutes() / 60, wk = [0, 6].indexOf(kst().getUTCDay()) < 0;
     var pk = d.pb && d.pb.markets && d.pb.markets.KR, p1 = pk && pk.p1 != null ? Math.round(pk.p1 * 100) : null;
-    try { var lv_ = pk && window.probLive && probLive(pk, d.kr, d.pb); if (lv_ && lv_.p1 != null) p1 = Math.round(lv_.p1 * 100); } catch(x) {}   // 🎲 오를 확률 화면과 같은 숫자(장중 다시 계산)
-    var pick = null;
-    if (p1 != null && (p1 >= 70 || p1 <= 30)) pick = {k: "prob", lab: "🇰🇷 " + (pk.open_now ? "오늘 코스피 오를 확률" : "다음 장 코스피 오를 확률"), v: p1 + "%", c: p1 >= 50 ? "up" : "dn", go: "prob"};
-    else if (ks && wk && h >= 8.9 && h < 15.6 && liveNow(d.kr)) pick = {k: "kr", lab: "🇰🇷 코스피 지금 · " + d.kr.t, v: sg(ks.chg), c: cls(ks.chg), go: "sector"};
-    else if (sp && (h < 9 || !ks)) pick = {k: "us", lab: "🇺🇸 밤사이 S&P500", v: sg(sp.chg), c: cls(sp.chg), go: "sector"};
-    else if (ks) pick = {k: "kr", lab: "🇰🇷 코스피 " + md(d.kr.date) + " 마감", v: sg(ks.chg), c: cls(ks.chg), go: "sector"};
-    if (!pick) return "";
+    try { var lv_ = pk && window.probLive && probLive(pk, d.kr, d.pb); if (lv_ && lv_.p1 != null) p1 = Math.round(lv_.p1 * 100); } catch(x) {}
+    var kLive = ks && wk && h >= 8.9 && h < 15.6 && liveNow(d.kr);
+    var kv = ks ? +ks.chg : null, sv = sp ? +sp.chg : null;
+    var fut = null; try { var tk = (d.brief && d.brief.talk) || []; tk.forEach(function(t){ var m = /S&P500 선물 ([+−\-]?\d+(?:\.\d+)?)%/.exec(t); if (m) fut = +m[1].replace("−", "-"); }); } catch(x) {}
+    // 오늘의 결론 — 한국 하락이 크거나 확률이 낮으면 「지키는 날」, 반대면 「담는 날」, 그 밖엔 「지켜보는 날」
+    var down = (kv != null && kv <= -1.5) || (p1 != null && p1 <= 30), up = (kv != null && kv >= 1.5) || (p1 != null && p1 >= 70);
+    var V = down && !up ? {ic: "🛡", t: "오늘은 지키는 날", c: "dn", s: "서둘러 팔기보다 비중·현금 점검"} : up && !down ? {ic: "🚀", t: "오늘은 담는 날", c: "up", s: "계획한 분할 매수를 진행할 때"} : {ic: "👀", t: "오늘은 지켜보는 날", c: "", s: "큰 결정은 미루고 흐름 확인"};
+    if (down && fut != null && fut >= 0.8) V.s = "미국 선물 " + sg(fut) + " — 반등 기대도 있음 · 추격 매도 금지";
     var one = d.brief && d.brief.one ? String(d.brief.one) : "";
-    var sub = [];
-    if (pick.k !== "kr" && ks) sub.push("코스피 " + sg(ks.chg)); if (pick.k !== "us" && sp) sub.push("S&P500 " + sg(sp.chg)); if (pick.k !== "prob" && p1 != null) sub.push("오를 확률 " + p1 + "%");
-    return '<section class="card h2-num wow-big" data-goto="' + pick.go + '"><small>' + e(pick.lab) + '</small><b class="' + pick.c + '">' + e(pick.v) + '</b>' + (one ? '<p>' + e(one) + '</p>' : '') + (sub.length ? '<div class="h2-nsub">' + sub.map(function(x){ return '<span>' + e(x) + '</span>'; }).join("") + '</div>' : '') + '</section>';
+    var nums = [];
+    if (ks) nums.push({l: "🇰🇷 코스피" + (kLive ? " 지금" : " " + md(d.kr.date)), v: kv});
+    if (fut != null && kLive) nums.push({l: "🇺🇸 S&P 선물", v: fut}); else if (sp) nums.push({l: "🇺🇸 S&P500", v: sv});
+    var pr = p1 == null ? "" : '<span class="h2-np' + (p1 <= 15 || p1 >= 85 ? " x" : "") + '" data-goto="prob">🎲 ' + (pk && pk.open_now ? "오늘" : "다음 장") + ' 오를 확률 <b>' + p1 + '%</b>' + (p1 <= 15 || p1 >= 85 ? ' <em>극단값 · 참고만</em>' : '') + '</span>';
+    return '<section class="card h2-num wow-big" data-cz="done" data-goto="sector"><div class="h2-vd ' + V.c + '"><span>' + V.ic + '</span><b>' + V.t + '</b></div>' +
+      '<div class="h2-vs">' + e(V.s) + '</div>' + (one ? '<p>' + e(one) + '</p>' : '') +
+      '<div class="h2-nn">' + nums.map(function(n){ return '<div><small>' + e(n.l) + '</small><b class="' + cls(n.v) + '">' + sg(n.v) + '</b></div>'; }).join("") + '</div>' + pr + '</section>';
   }
   /* ⑳ 하루 흐름 작은 선 — live_*.json 의 snaps([시각, 오른 수, 내린 수, 지수 등락, …]) */
   function spark(J){
@@ -273,12 +279,36 @@
   }
   document.addEventListener("click", function(ev){ var t = ev.target.closest && ev.target.closest(".h2-tm[data-k]"); if (!t || !t.closest("#h2map")) return; ev.stopPropagation(); ev.preventDefault(); mapPick(+t.dataset.k); }, true);
   /* ㉑ 고객에게 보낼 한 장 미리보기 — 홈에서 바로 「보내기」 (onepage.js 의 고르기 창을 엶) */
+  /* 🔍 11/05 A3 「한 장」 3개(고객에게 보낼 한 장 · ☀️ 오늘 한 장 · 📨 이번 주 한 장)를 카드 하나로 — 위 탭 3칸 */
+  var CLT = "c";
   function clientHtml(d){
     var b = d.brief; if (!b || !b.one) return "";
-    var tk = (b.talk || []).slice(0, 2);
-    return '<section class="card h2-cl"><div class="h2-hd"><b>📨 오늘 고객에게 보낼 한 장</b><span class="mut">' + e(b.label || "") + '</span></div>' +
-      '<div class="h2-clp"><div class="h2-clt">' + e(b.one) + '</div>' + (tk.length ? '<ul>' + tk.map(function(x){ return '<li>' + e(x) + '</li>'; }).join("") + '</ul>' : '') + (b.advice && b.advice.read ? '<p>' + e(b.advice.read) + '</p>' : '') + '</div>' +
-      '<button type="button" class="h2-clb" id="h2clb">📨 카톡으로 보내기 — 한 장 고르기</button></section>';
+    var tk = (b.talk || []).slice(0, 2), A = b.advice || {};
+    var fri = (function(){ var k = kst(), w = k.getUTCDay(), hh = k.getUTCHours(); return (w === 5 && hh >= 15) || w === 6 || w === 0; })();
+    var pane = {
+      c: '<div class="h2-clp"><div class="h2-clt">' + e(b.one) + '</div>' + (tk.length ? '<ul>' + tk.map(function(x){ return '<li>' + e(x) + '</li>'; }).join("") + '</ul>' : '') + (A.read ? '<p>' + e(A.read) + '</p>' : '') + '</div>' +
+         '<button type="button" class="h2-clb" data-clgo="op">📨 카톡으로 보내기 — 한 장 고르기</button>',
+      p: '<div class="h2-clp">' + (b.regime ? '<div class="h2-clr">' + e(b.regime) + '</div>' : '') + '<ul>' + (b.talk || []).map(function(x){ return '<li>' + e(x) + '</li>'; }).join("") + '</ul>' +
+         ((b.events || []).length ? '<div class="h2-cle"><b>📅 오늘 일정</b>' + b.events.map(function(x){ return '<div>' + e(x) + '</div>'; }).join("") + '</div>' : '') +
+         ((A.plan || []).length ? '<div class="h2-cle"><b>🧭 대응</b>' + A.plan.slice(0, 2).map(function(x){ return '<div>' + e(x) + '</div>'; }).join("") + '</div>' : '') + '</div>' +
+         '<button type="button" class="h2-clb alt" data-clgo="pb">☀️ PB용 한 장 그림으로 받기</button>',
+      w: '<div class="h2-clp"><div class="h2-clt">' + (fri ? "이번 주 한 장이 준비됐어요" : "금요일 장이 끝나면 이번 주 한 장이 열려요") + '</div><p>' + (fri ? "이번 주 지수·업종·포트 흐름을 고객용 그림 한 장으로 만들어 드려요." : "지금 눌러도 지난 금요일까지의 주간 요약으로 만들 수 있어요.") + '</p></div>' +
+         '<button type="button" class="h2-clb" data-clgo="wk">📨 이번 주 한 장 만들기</button>'
+    };
+    if (fri && CLT === "c" && !ls("h2_clt_pick")) CLT = "w";
+    var tabs = [["c", "👥 고객용"], ["p", "📋 PB 요약"], ["w", "📅 이번 주"]];
+    return '<section class="card h2-cl no-clp" data-cz="done" data-xc="1"><div class="h2-hd"><b>📨 오늘의 한 장</b><span class="mut">' + e(b.label || "") + '</span></div>' +
+      '<div class="h2-clt3">' + tabs.map(function(t){ return '<button type="button" data-clt="' + t[0] + '"' + (CLT === t[0] ? ' class="on"' : '') + '>' + t[1] + '</button>'; }).join("") + '</div>' +
+      '<div class="h2-clw">' + tabs.map(function(t){ return '<div data-clp="' + t[0] + '"' + (CLT === t[0] ? '' : ' hidden') + '>' + pane[t[0]] + '</div>'; }).join("") + '</div></section>';
+  }
+  function clientBind(root){
+    [].forEach.call(root.querySelectorAll("[data-clt]"), function(x){ x.onclick = function(ev){ ev.stopPropagation(); CLT = x.dataset.clt; ls("h2_clt_pick", 1);
+      [].forEach.call(root.querySelectorAll("[data-clt]"), function(y){ y.classList.toggle("on", y === x); });
+      [].forEach.call(root.querySelectorAll("[data-clp]"), function(y){ y.hidden = y.dataset.clp !== CLT; }); }; });
+    [].forEach.call(root.querySelectorAll("[data-clgo]"), function(x){ x.onclick = function(ev){ ev.stopPropagation(); var k = x.dataset.clgo;
+      if (k === "wk"){ if (window.__weekSend) __weekSend(); else if (window.toast) window.toast("잠시 뒤 다시 눌러 주세요"); return; }
+      if (k === "pb"){ var pc = document.querySelector("#pbcard .pb-ft button, #pbcard [data-pbsend], #pbcard button"); if (pc){ pc.click(); return; } }
+      var ob = document.getElementById("opbtn"); if (ob) ob.click(); else if (window.goTo) goTo("home"); }; });
   }
 
   /* ───────── 붙이기 ───────── */
@@ -302,7 +332,8 @@
       rings.insertAdjacentElement("afterend", world); world.insertAdjacentElement("afterend", hero);   // 날씨판은 타일 아래로
       hero.insertAdjacentElement("afterend", disc);
       var pl = b.querySelector("section.card.pl"); (pl || disc).insertAdjacentElement("afterend", map); map.insertAdjacentElement("afterend", cl);
-      var cb = document.getElementById("h2clb"); if (cb) cb.onclick = function(ev){ ev.stopPropagation(); var ob = document.getElementById("opbtn"); if (ob) ob.click(); else if (window.goTo) goTo("home"); };
+      clientBind(cl);
+      world.querySelector(".card") && world.querySelector(".card").setAttribute("data-cz", "done"); map.querySelector(".card") && map.querySelector(".card").setAttribute("data-cz", "done");
       b.setAttribute("data-h2", String(DT));
       [].forEach.call(rings.querySelectorAll("[data-st]"), function(x){ x.onclick = function(ev){ ev.stopPropagation(); openStory(S, +x.dataset.st); }; });
       reorder(b);
@@ -313,8 +344,13 @@
     var more = b.querySelector(".hm-more"); if (more) more.classList.add("h2-hide");   // 아래 바로가기 줄 → 「오늘의 발견」이 대신
     var nm_ = document.getElementById("h2num"); if (nm_ && b.firstElementChild !== nm_) b.insertBefore(nm_, b.firstChild);
     var hz = document.getElementById("tdhero"), wz = document.getElementById("h2world"); if (hz && wz && wz.nextElementSibling !== hz) wz.insertAdjacentElement("afterend", hz);
-    var pb = document.getElementById("pbcard"), mp = document.getElementById("h2map");
-    if (pb && mp && pb.previousElementSibling !== mp && pb.compareDocumentPosition(mp) & Node.DOCUMENT_POSITION_FOLLOWING) mp.insertAdjacentElement("afterend", pb);
+    // 🔍 11/05 A3: ☀️ 오늘 한 장 · 📨 이번 주 한 장 카드는 「📨 오늘의 한 장」 탭으로 합쳤으니 홈에선 숨김(보내기 단추는 그대로 씀)
+    var pb = document.getElementById("pbcard"); if (pb && document.getElementById("h2cl")) pb.classList.add("h2-hide");
+    var w1 = document.getElementById("wk1"); if (w1 && document.getElementById("h2cl")) w1.classList.add("h2-hide");
+    // 🔍 11/05 A2: 홈은 4장만 펼침 — 나머지는 제목 한 줄(펼치기). 날씨판·발견·바뀐 것 등에 제목을 달아 둠(calm.js 가 접음)
+    var hz2 = document.getElementById("tdhero"); if (hz2 && !hz2.dataset.czt) hz2.dataset.czt = "🌤 지금 시장 날씨";
+    var dz = document.querySelector("#h2disc .h2-disc"); if (dz && !dz.dataset.czt){ dz.dataset.czt = "✨ 오늘의 발견"; dz.classList.add("card"); }
+    var vt = b.querySelector(".hb-vote"); if (vt) vt.setAttribute("data-cz", "done");
   }
   var T = 0;
   try { new MutationObserver(function(ms){
@@ -326,6 +362,13 @@
   var css = document.createElement("style");
   css.textContent =
     ".h2-hide{display:none!important}html.h2-lock{overflow:hidden}" +
+    /* 🔍 11/05 A1 오늘의 결론 · A3 한 장 탭 */
+    ".h2-vd{display:flex;align-items:center;gap:8px;margin:0 0 2px}.h2-num .h2-vd span{font-size:28px}.h2-num .h2-vd b{display:inline;margin:0;font-size:clamp(26px,8vw,32px);font-weight:900;letter-spacing:-1px;line-height:1.15}.h2-num .h2-vd.dn b{color:var(--down,#3182f6)}.h2-num .h2-vd.up b{color:var(--up,#f04452)}" +
+    ".h2-vs{font-size:14.5px;font-weight:700;color:var(--sub);margin:2px 0 10px}" +
+    ".h2-nn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 8px}.h2-num .h2-nn div{background:var(--panel2);border-radius:14px;padding:10px 12px}.h2-num .h2-nn small{display:block;font-size:13px;font-weight:700;color:var(--sub)}.h2-num .h2-nn b{display:block;font-size:26px;font-weight:900;letter-spacing:-.8px;margin-top:2px}.h2-num .h2-nn b.up{color:var(--up,#f04452)}.h2-num .h2-nn b.dn{color:var(--down,#3182f6)}" +
+    ".h2-np{display:inline-flex;align-items:center;gap:4px;font-size:13.5px;color:var(--sub);cursor:pointer}.h2-num .h2-np b{display:inline;font-size:inherit;margin:0;letter-spacing:0;line-height:inherit;color:var(--text)}.h2-np em{font-style:normal;font-size:12px;font-weight:800;color:#b7791f;background:rgba(240,180,60,.18);border-radius:999px;padding:2px 8px}" +
+    ".h2-clt3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--panel2);border-radius:12px;padding:4px;margin-bottom:10px}.h2-clt3 button{font:inherit;font-size:14px;font-weight:800;border:0;border-radius:9px;padding:9px 4px;background:transparent;color:var(--sub)}.h2-clt3 button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}" +
+    ".h2-clr{font-size:14px;font-weight:700;margin-bottom:6px}.h2-cle{margin-top:10px;font-size:14px;line-height:1.5}.h2-cle b{display:block;font-size:14px;margin-bottom:2px}.h2-cle div{padding:2px 0;color:var(--text)}.h2-clb.alt{background:var(--panel2);color:var(--text);border:1px solid var(--line)}" +
     /* ⑰ 오늘의 숫자 */
     ".h2-num{cursor:pointer;padding:22px 20px 18px!important}.h2-num small{display:block;font-size:14px;font-weight:700;color:var(--sub);letter-spacing:-.2px}.h2-num b{display:block;font-size:clamp(40px,12vw,54px);font-weight:900;letter-spacing:-2px;line-height:1.05;margin:4px 0 6px}" +
     ".h2-num b.up{color:var(--up,#f04452)}.h2-num b.dn{color:var(--down,#3182f6)}.h2-num p{margin:0;font-size:16.5px;line-height:1.5;font-weight:600;word-break:keep-all;text-wrap:pretty}.h2-nsub{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.h2-nsub span{font-size:13px;font-weight:700;color:var(--sub);background:var(--panel2);border-radius:999px;padding:4px 10px}" +

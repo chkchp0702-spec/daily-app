@@ -5,16 +5,15 @@
    ④ 뒤로 버튼은 돌아갈 곳이 있을 때만 */
 (function(){
   var GROUPS = [
-    {k: "home", ic: "🏠", t: "오늘", tabs: ["home"]},
-    {k: "mkt",  ic: "🌐", t: "시장", tabs: ["market", "sector", "prob"]},
+    // 🔍 11/05 A4 아래 탭 8 → 6: 🔮 운세 묶음은 「오늘」 안으로(홈 맨 아래 줄 · 위 작은 탭), 📰 피드는 「시장」 안으로(시황 재료)
+    {k: "home", ic: "🏠", t: "오늘", tabs: ["home", "luck", "saju", "tarot", "lotto"]},
+    {k: "mkt",  ic: "🌐", t: "시장", tabs: ["market", "sector", "prob", "feed"]},
     {k: "inv",  ic: "💼", t: "포트", tabs: ["port", "score"]},
     {k: "sig",  ic: "🎯", t: "신호", tabs: ["whale", "cup", "gap", "screen", "sigmore"]},   // 10/12: 🤫 매집·⚡ 단타는 메뉴에서 뺌 — 알림(앱·텔레그램)으로만. 알림을 누르면 그 화면은 그대로 열림
     {k: "prod", ic: "🛍️", t: "상품", tabs: ["bond", "fund", "els"]},   // 10/16 사용자: 상품 카테고리 — 채권·펀드·ELS
     {k: "prop", ic: "📝", t: "제안서", tabs: ["prop"]},                 // 10/28 사용자: 제안서 카테고리 — 기본폼 9종 → 한 장·PDF·PPT
-    {k: "luck", ic: "🔮", t: "운세", tabs: ["luck", "saju", "tarot", "lotto"]},   // 10/28 사용자: 사주 리포트 · 오늘의 운세
-    {k: "feed", ic: "📰", t: "피드", tabs: ["feed"]}
   ];
-  var LAB = {market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 고래", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
+  var LAB = {home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
   function grpOf(k){ for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].tabs.indexOf(k) >= 0) return GROUPS[i]; return null; }
   function last(g){ var m = (window.store && store.gl) || {}; return m[g.k] && g.tabs.indexOf(m[g.k]) >= 0 ? m[g.k] : g.tabs[0]; }
 
@@ -38,7 +37,7 @@
     if (cur && cur !== "onepager"){ store.lastTab = cur; }
     try { updBack(); } catch(x) {}
     if (g){ store.gl = store.gl || {}; store.gl[g.k] = cur; try { save(); } catch(x) {} }
-    if (g && g.tabs.length > 1){
+    if (g && g.tabs.length > 1 && cur !== "home"){   // 홈에선 위 작은 탭을 안 보임(첫 화면 깔끔하게)
       nav.className = "tabs sub";
       nav.innerHTML = g.tabs.map(function(k){ var c = CATS.filter(function(x){ return x.key === k; })[0] || {};
         return '<button class="tab' + (k === cur ? " on" : "") + '" style="--c:' + c.color + '" data-k="' + k + '">' + (LAB[k] || c.name) + '</button>'; }).join("");

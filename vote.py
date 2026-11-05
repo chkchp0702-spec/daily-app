@@ -123,7 +123,9 @@ def main():
             if day < since or res is None or res == 0:
                 continue
             for dev, v in vs.items():
-                s = S.setdefault(dev, {"id": dev[:4], "nm": v[1] or "PB-" + dev[:4], "w": 0, "n": 0})
+                if not (v[1] or "").strip() or str(v[1]).startswith("PB-"):   # 🔍 11/05 B7: 별명 안 정한 사람은 순위에서 빠짐(자동 PB-xxxx 없앰)
+                    continue
+                s = S.setdefault(dev, {"id": dev[:4], "nm": v[1], "w": 0, "n": 0})
                 s["n"] += 1
                 s["w"] += 1 if v[0] == res else 0
                 if v[1]:

@@ -1,0 +1,390 @@
+{
+ "at": "2026-11-04 23:43",
+ "total": 1554,
+ "experiments": 42,
+ "adopted": 2,
+ "haircut": 0.5,
+ "luck_total": 1.16,
+ "line": "🧾 지금까지 시험한 규칙 조합 1,554개 (42개 실험) — 이만큼 고르면 운만으로도 앞 구간 1등 샤프가 1.16 정도 나와요. 그래서 채택은 뒤 구간(2017~)으로만 판정하고, 과거 검증의 초과수익은 절반으로 깎아 봐요.",
+ "rows": [
+  {
+   "name": "k1012_exits",
+   "where": "lab",
+   "n": 180,
+   "is_years": 8.5,
+   "luck_sharpe": 0.94,
+   "verdict": "➖ 애매",
+   "at": "2026-10-12 23:47"
+  },
+  {
+   "name": "base_bt",
+   "where": "bt",
+   "n": 108,
+   "is_years": 8.5,
+   "luck_sharpe": 0.88,
+   "verdict": null,
+   "at": "2026-11-01 10:26"
+  },
+  {
+   "name": "k1024_pead",
+   "where": "lab",
+   "n": 108,
+   "is_years": 8.5,
+   "luck_sharpe": 0.88,
+   "verdict": "➖ 애매",
+   "at": "2026-10-24 23:45"
+  },
+  {
+   "name": "skel_bt",
+   "where": "bt",
+   "n": 84,
+   "is_years": 8.5,
+   "luck_sharpe": 0.85,
+   "verdict": null,
+   "at": "2026-11-01 10:29"
+  },
+  {
+   "name": "k1023_pullback",
+   "where": "lab",
+   "n": 75,
+   "is_years": 8.5,
+   "luck_sharpe": 0.83,
+   "verdict": "➖ 애매",
+   "at": "2026-10-23 23:44"
+  },
+  {
+   "name": "k1020_gap",
+   "where": "lab",
+   "n": 72,
+   "is_years": 8.5,
+   "luck_sharpe": 0.83,
+   "verdict": "➖ 애매",
+   "at": "2026-10-20 23:45"
+  },
+  {
+   "name": "k1029_indmom",
+   "where": "lab",
+   "n": 72,
+   "is_years": 8.5,
+   "luck_sharpe": 0.83,
+   "verdict": "➖ 애매",
+   "at": "2026-10-29 23:47"
+  },
+  {
+   "name": "k1026_voltgt",
+   "where": "lab",
+   "n": 64,
+   "is_years": 8.5,
+   "luck_sharpe": 0.81,
+   "verdict": "➖ 애매",
+   "at": "2026-10-26 23:45"
+  },
+  {
+   "name": "k1029_volctl",
+   "where": "lab",
+   "n": 54,
+   "is_years": 8.5,
+   "luck_sharpe": 0.79,
+   "verdict": null,
+   "at": "2026-10-29 10:07"
+  },
+  {
+   "name": "k1101_tom",
+   "where": "lab",
+   "n": 54,
+   "is_years": 8.5,
+   "luck_sharpe": 0.79,
+   "verdict": "➖ 애매",
+   "at": "2026-11-01 23:44"
+  },
+  {
+   "name": "k1030_slip",
+   "where": "lab",
+   "n": 50,
+   "is_years": 8.5,
+   "luck_sharpe": 0.78,
+   "verdict": "➖ 애매",
+   "at": "2026-10-31 00:42"
+  },
+  {
+   "name": "k1103_lowvol",
+   "where": "lab",
+   "n": 48,
+   "is_years": 8.5,
+   "luck_sharpe": 0.78,
+   "verdict": "➖ 애매",
+   "at": "2026-11-03 23:44"
+  },
+  {
+   "name": "k1104_frog",
+   "where": "lab",
+   "n": 48,
+   "is_years": 8.5,
+   "luck_sharpe": 0.78,
+   "verdict": "➖ 애매",
+   "at": "2026-11-04 23:43"
+  },
+  {
+   "name": "k1019_cupbrk",
+   "where": "lab",
+   "n": 42,
+   "is_years": 8.5,
+   "luck_sharpe": 0.76,
+   "verdict": "➖ 애매",
+   "at": "2026-10-19 23:46"
+  },
+  {
+   "name": "k1025_peadpri",
+   "where": "lab",
+   "n": 37,
+   "is_years": 8.5,
+   "luck_sharpe": 0.74,
+   "verdict": "➖ 애매",
+   "at": "2026-10-25 23:45"
+  },
+  {
+   "name": "k1028_rebalflow",
+   "where": "lab",
+   "n": 32,
+   "is_years": 8.5,
+   "luck_sharpe": 0.72,
+   "verdict": null,
+   "at": "2026-10-28 14:07"
+  },
+  {
+   "name": "k1102_hi52",
+   "where": "lab",
+   "n": 32,
+   "is_years": 8.5,
+   "luck_sharpe": 0.72,
+   "verdict": "➖ 애매",
+   "at": "2026-11-03 01:13"
+  },
+  {
+   "name": "k1013_trend",
+   "where": "lab",
+   "n": 30,
+   "is_years": 8.5,
+   "luck_sharpe": 0.71,
+   "verdict": "➖ 애매",
+   "at": "2026-10-13 23:44"
+  },
+  {
+   "name": "k1027_sigmix",
+   "where": "lab",
+   "n": 26,
+   "is_years": 8.5,
+   "luck_sharpe": 0.69,
+   "verdict": "➖ 애매",
+   "at": "2026-10-27 23:52"
+  },
+  {
+   "name": "k1028_order",
+   "where": "lab",
+   "n": 25,
+   "is_years": 8.5,
+   "luck_sharpe": 0.69,
+   "verdict": "➖ 애매",
+   "at": "2026-10-28 23:46"
+  },
+  {
+   "name": "k1103_stage",
+   "where": "lab",
+   "n": 25,
+   "is_years": 8.5,
+   "luck_sharpe": 0.69,
+   "verdict": null,
+   "at": "2026-11-03 12:06"
+  },
+  {
+   "name": "k1022_assettrend",
+   "where": "lab",
+   "n": 24,
+   "is_years": 8.5,
+   "luck_sharpe": 0.68,
+   "verdict": "➖",
+   "at": "2026-10-22 09:19"
+  },
+  {
+   "name": "k1022_overnight",
+   "where": "lab",
+   "n": 24,
+   "is_years": 8.5,
+   "luck_sharpe": 0.68,
+   "verdict": "✅ 통과",
+   "at": "2026-10-22 09:21"
+  },
+  {
+   "name": "k1029_intlflow",
+   "where": "lab",
+   "n": 24,
+   "is_years": 8.5,
+   "luck_sharpe": 0.68,
+   "verdict": null,
+   "at": "2026-10-29 16:09"
+  },
+  {
+   "name": "k1011_size",
+   "where": "lab",
+   "n": 19,
+   "is_years": 8.5,
+   "luck_sharpe": 0.64,
+   "verdict": "➖ 애매",
+   "at": "2026-10-11 23:44"
+  },
+  {
+   "name": "k1014_q10",
+   "where": "lab",
+   "n": 18,
+   "is_years": 8.5,
+   "luck_sharpe": 0.64,
+   "verdict": null,
+   "at": "2026-10-14 11:15"
+  },
+  {
+   "name": "k1014_volw",
+   "where": "lab",
+   "n": 18,
+   "is_years": 8.5,
+   "luck_sharpe": 0.64,
+   "verdict": "➖ 애매",
+   "at": "2026-10-14 23:43"
+  },
+  {
+   "name": "k1022_trend3",
+   "where": "lab",
+   "n": 18,
+   "is_years": 8.5,
+   "luck_sharpe": 0.64,
+   "verdict": "❌",
+   "at": "2026-10-22 09:18"
+  },
+  {
+   "name": "k1022_whalewide",
+   "where": "lab",
+   "n": 18,
+   "is_years": 8.5,
+   "luck_sharpe": 0.64,
+   "verdict": null,
+   "at": null
+  },
+  {
+   "name": "k1103_vrp",
+   "where": "lab",
+   "n": 18,
+   "is_years": 8.5,
+   "luck_sharpe": 0.64,
+   "verdict": null,
+   "at": "2026-11-03 10:07"
+  },
+  {
+   "name": "k1021_whale5",
+   "where": "lab",
+   "n": 16,
+   "is_years": 0.8,
+   "luck_sharpe": 2.08,
+   "verdict": null,
+   "at": null
+  },
+  {
+   "name": "k1022_breadth",
+   "where": "lab",
+   "n": 16,
+   "is_years": 8.5,
+   "luck_sharpe": 0.62,
+   "verdict": "➖ 애매",
+   "at": "2026-10-22 09:20"
+  },
+  {
+   "name": "k1014_q14",
+   "where": "lab",
+   "n": 12,
+   "is_years": 8.5,
+   "luck_sharpe": 0.57,
+   "verdict": "🧪",
+   "at": "2026-10-14 15:02"
+  },
+  {
+   "name": "k1102_dumped",
+   "where": "lab",
+   "n": 12,
+   "is_years": 8.5,
+   "luck_sharpe": 0.57,
+   "verdict": "❌",
+   "at": "2026-11-02 01:24"
+  },
+  {
+   "name": "e1013_pref",
+   "where": "lab",
+   "n": 9,
+   "is_years": 8.5,
+   "luck_sharpe": 0.52,
+   "verdict": null,
+   "at": "2026-10-13 13:26"
+  },
+  {
+   "name": "k1014_q12",
+   "where": "lab",
+   "n": 8,
+   "is_years": 8.5,
+   "luck_sharpe": 0.5,
+   "verdict": null,
+   "at": "2026-10-14 12:44"
+  },
+  {
+   "name": "k1102_famsw",
+   "where": "lab",
+   "n": 8,
+   "is_years": 8.5,
+   "luck_sharpe": 0.5,
+   "verdict": null,
+   "at": "2026-11-02 16:15"
+  },
+  {
+   "name": "k1102_kickpit",
+   "where": "lab",
+   "n": 8,
+   "is_years": 8.5,
+   "luck_sharpe": 0.5,
+   "verdict": "➖ 뒤에서만 나음",
+   "at": "2026-11-02 14:25"
+  },
+  {
+   "name": "rules_bt",
+   "where": "bt",
+   "n": 7,
+   "is_years": 8.5,
+   "luck_sharpe": 0.48,
+   "verdict": null,
+   "at": "2026-11-01 10:16"
+  },
+  {
+   "name": "k1102_kickpit2",
+   "where": "lab",
+   "n": 4,
+   "is_years": 8.5,
+   "luck_sharpe": 0.36,
+   "verdict": null,
+   "at": "2026-11-02 14:18"
+  },
+  {
+   "name": "k1103_whaleetf",
+   "where": "lab",
+   "n": 4,
+   "is_years": 8.5,
+   "luck_sharpe": 0.36,
+   "verdict": null,
+   "at": null
+  },
+  {
+   "name": "kick_ideas_bt",
+   "where": "bt",
+   "n": 3,
+   "is_years": 8.5,
+   "luck_sharpe": 0.29,
+   "verdict": null,
+   "at": "2026-10-15 10:31"
+  }
+ ],
+ "note": "운 막대 = 샤프 0인 조합 N개를 앞 구간 Y년 돌렸을 때 1등의 기댓값(Bailey·López de Prado). 조합끼리 비슷할수록 실제로는 더 작음 — 보수적 기준."
+}

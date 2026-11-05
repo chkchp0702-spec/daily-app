@@ -5,6 +5,7 @@
   var ORDER = ["KR", "US", "JP", "CN", "HK"], SEL = null, OPEN = {};
   try { OPEN = JSON.parse(localStorage.getItem("probopen") || "{}"); } catch(x) {}
   function P(name){ return getJSON("archive/x/" + name + "?" + Math.floor(Date.now() / 120000), {ttl: 120000}); }
+  function xtag(p){ return p != null && (p <= 0.15 || p >= 0.85) ? '<i class="pr-xt" title="모형이 드물게 내는 극단값이에요 — 맞아도 틀려도 크게 보이니 참고만">극단값 · 참고만</i>' : ""; }   // 🔍 11/05 D16
   function pc(p){ return p == null ? "–" : Math.round(p * 100) + "%"; }
   function sg(v, d){ return v == null ? "–" : (v > 0 ? "+" : "") + Number(v).toFixed(d == null ? 1 : d) + "%"; }
   function tcls(p){ return p == null ? "" : p >= 0.57 ? "up" : p <= 0.43 ? "dn" : ""; }
@@ -181,8 +182,8 @@
       (m.strength ? '<div class="pr-sg"><span class="pr-bd s' + ({"강": 3, "보통": 2, "약": 1}[m.strength]) + '">' + STR[m.strength] + '</span>' + votes(m.votes) + '</div>' : '') +
       (function(){ var c = (m.comb || {}).p1 || {}, a = c.anchor && (m.methods || []).filter(function(x){ return x.k === c.anchor; })[0]; if (!a) return '';   // 🧭 10/15 닻
         return '<div class="pr-anc">' + a.ic + ' <b>닻 ' + pc(c.p_anchor) + '</b> — ' + e(a.ev) + (c.dev ? ' · 나머지 방법 ' + (c.dev > 0 ? '+' : '') + (c.dev * 25).toFixed(1) + '%p 남짓' : '') + '</div>'; })() +
-      '<div class="pr-two"><div><small>' + dlab(m.next_day) + ' · 오를 확률</small><b class="' + ecls(m.e1) + '">' + pc(m.p1) + '</b><em><span class="pr-gp ' + ecls(m.e1) + '">' + gapTx(m.e1, m.pb1) + '</span> · 68% 폭 ' + sg(m.band1[0]) + ' ~ ' + sg(m.band1[1]) + '</em>' + (m.pb1 != null ? zbar(m.p1, m.pb1) : pbar(m.p1, 1)) + '</div>' +
-      '<div><small>일주일(5일) · 오를 확률</small><b class="' + ecls(m.e5) + '">' + pc(m.p5) + '</b><em><span class="pr-gp ' + ecls(m.e5) + '">' + gapTx(m.e5, m.pb5) + '</span> · 68% 폭 ' + sg(m.band5[0]) + ' ~ ' + sg(m.band5[1]) + '</em>' + (m.pb5 != null ? zbar(m.p5, m.pb5) : pbar(m.p5, 1)) + '</div></div>' +
+      '<div class="pr-two"><div><small>' + dlab(m.next_day) + ' · 오를 확률</small><b class="' + ecls(m.e1) + '">' + pc(m.p1) + '</b> + xtag(m.p1)<em><span class="pr-gp ' + ecls(m.e1) + '">' + gapTx(m.e1, m.pb1) + '</span> · 68% 폭 ' + sg(m.band1[0]) + ' ~ ' + sg(m.band1[1]) + '</em>' + (m.pb1 != null ? zbar(m.p1, m.pb1) : pbar(m.p1, 1)) + '</div>' +
+      '<div><small>일주일(5일) · 오를 확률</small><b class="' + ecls(m.e5) + '">' + pc(m.p5) + '</b> + xtag(m.p5)<em><span class="pr-gp ' + ecls(m.e5) + '">' + gapTx(m.e5, m.pb5) + '</span> · 68% 폭 ' + sg(m.band5[0]) + ' ~ ' + sg(m.band5[1]) + '</em>' + (m.pb5 != null ? zbar(m.p5, m.pb5) : pbar(m.p5, 1)) + '</div></div>' +
       tailCard(m) +
       (m.mk === "KR" && window.twinKR ? '<div id="twinkr"></div>' : '') +   // 🧲 10/21 A10/21-2 닮은 날 — 한국은 상태 한 줄 자리에 (twin.js)
       (m.mk === "KR" && window.twinKR ? '' : '<p class="note pr-st">' + e(m.state) + (m.widen > 1 ? ' · 📣 이벤트로 폭 ×' + m.widen : '') + (m.open_now ? ' · 장중이라 오늘 봉이 아직 움직여요 — 마감 뒤 확률이 기록·채점돼요' : '') + '</p>');

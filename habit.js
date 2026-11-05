@@ -173,7 +173,7 @@
   /* ───────── C1 🎯 아침 1탭 예측 ───────── */
   var VK = "hb_vote";   // {day: p}
   function myVotes(){ return ls(VK) || {}; }
-  function nick(){ var n = ls("hb_nick"); return n || "PB-" + dev().slice(0, 4); }
+  function nick(){ var n = ls("hb_nick"); return n || ""; }   // 🔍 11/05 B7: 자동 별명(PB-xxxx) 없앰 — 비우면 순위에서 빠짐
   function target(PB, L){
     var kr = PB && PB.markets && PB.markets.KR, nd = kr && kr.next_day, td = today(), m = hm(), wk = [0, 6].indexOf(kst().getUTCDay()) >= 0;
     var session = !wk && m >= "09:00" && m < "15:30" && L && L.date === td;
@@ -231,7 +231,7 @@
       if (jw.n) foot.push('이번 주 🧒 조이 ' + jw.w + '/' + jw.n + ' vs 👥 사람 ' + (pw.n ? Math.round(pw.w / pw.n * 100) + '%' : '–'));
       var rank = rows.length ? '<div class="hv-rk"><small>🏆 이번 주 순위 (' + md(Wk.from) + '~)</small>' + rows.slice(0, 3).map(function(x, i){ return '<div class="' + (x.id === me ? "me" : "") + '"><span>' + ["🥇", "🥈", "🥉"][i] + '</span><b>' + e(x.nm) + '</b><span>' + x.w + '/' + x.n + '</span></div>'; }).join("") +
         (rows.slice(3).some(function(x){ return x.id === me; }) ? '<div class="me"><span>' + (rows.map(function(x){ return x.id; }).indexOf(me) + 1) + '위</span><b>나</b><span></span></div>' : '') + '</div>' : '';
-      var html = '<div class="hm-h"><span class="hm-i">🎯</span><div><b>1탭 예측</b><small>동료 PB와 맞히기 · 재미로</small></div><button type="button" class="hv-nk" data-hvnk="1">별명 ' + e(nick()) + ' ✏️</button></div>' + h +
+      var html = '<div class="hm-h"><span class="hm-i">🎯</span><div><b>1탭 예측</b><small>동료 PB와 맞히기 · 재미로</small></div><button type="button" class="hv-nk" data-hvnk="1">' + (nick() ? '별명 ' + e(nick()) + ' ✏️' : '✏️ 별명 정하기') + '</button></div>' + h +
         (foot.length ? '<div class="hv-ft">' + foot.join(" · ") + '</div>' : '') + rank;
       var ex = document.getElementById("hbvote");
       if (!ex){ ex = document.createElement("section"); ex.id = "hbvote"; ex.className = "card hb-vote"; }
@@ -249,6 +249,8 @@
       if (n != null){ n = n.trim().slice(0, 10); ls("hb_nick", n || null); var ex0 = document.getElementById("hbvote"); if (ex0) ex0.removeAttribute("data-h"); voteCard(); }
       return;
     }
+    // 🔍 11/05 B7 「순위에 PB-xxxx 같은 자동 별명 말고」 — 첫 투표 때 별명을 먼저 정함(비우면 「익명」으로 순위에선 빠짐)
+    if (!ls("hb_nick") && !ls("hb_nick_ask")){ ls("hb_nick_ask", 1); var n0 = prompt("이번 주 순위에 보일 별명을 정해 주세요 (실명 말고 · 10자 이내)\n비우면 순위에 안 나와요", ""); if (n0 && n0.trim()) ls("hb_nick", n0.trim().slice(0, 10)); }
     Promise.all([gj("archive/x/prob.json" + q5()), gj("archive/x/live_kr.json" + q5(), 120000)]).then(function(r){
       var T = target(r[0], r[1]); if (!T.open){ toast("지금은 투표 시간이 아니에요"); return; }
       sendVote(T.day, +t.dataset.hv); toast((+t.dataset.hv > 0 ? "📈 오른다" : "📉 내린다") + " — " + dayLab(T.day) + " 3시 반에 채점해요");

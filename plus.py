@@ -782,6 +782,15 @@ def cp_alerts(U):
     now = dt.datetime.now(X.KST)
     if not (8 <= now.hour < 20):
         return
+    # 🔍 11/05 B8 「내 일이 생길 때만」 — 채권 매수 금리가 어제보다 0.15%p 넘게 움직이면(값이 크게 바뀜) 같이 알림
+    PV_P = os.path.join(X.OUT, "cp_prev.json")
+    PV = X.jl(PV_P, {}) or {}
+    yday = PV.get("d")
+    prev = PV.get("y") or {}
+    if yday != X.TODAY:
+        PV = {"d": X.TODAY, "y": {c: b.get("buy") for c, b in B.items() if b.get("buy") is not None}, "p": prev}
+        json.dump(PV, open(PV_P, "w", encoding="utf-8"), ensure_ascii=False)
+    old_y = PV.get("p") or {}
     for uid, u in U.items():
         key = f"cp:{uid}:{X.TODAY}"
         lines = []
@@ -799,6 +808,9 @@ def cp_alerts(U):
                 if dm is not None and 0 <= dm <= 3:
                     lines.append(f"🏦 {nm[:18]} 만기 D-{dm} · 재투자 상담")
             b = B.get(cid) if k == "krw" else None
+            if b and b.get("buy") is not None and old_y.get(cid) is not None and abs(b["buy"] - old_y[cid]) >= 0.15:
+                dy = b["buy"] - old_y[cid]
+                lines.append(f"🏦 {nm[:18]} 매수 금리 {old_y[cid]:.2f}→{b['buy']:.2f}% ({dy:+.2f}%p) · " + ("값 내려감 — 추가 매수 기회" if dy > 0 else "값 올라감 — 차익 상담"))
             if b and b.get("freq") and b.get("issue") and "복리" not in str(b.get("ctype") or ""):
                 t, n = dt.date.fromisoformat(b["issue"]), 0
                 while t < today and n < 600:
@@ -873,6 +885,10 @@ def brief_text(hits):
     PB = X.jl(os.path.join(X.OUT, "pbbrief.json"), {}) or {}        # 10/28 pbbrief.py(장중 매시간)와 같은 글
     if str(PB.get("asof", ""))[:10] == X.TODAY and PB.get("talk"):
         kk = list(PB["talk"])
+    # 🔍 11/05 B5 「알림 본문 자체가 쓸 만하게」 — 고객 전화가 오면 그대로 할 한 마디(오늘 한 장 advice.read)를 맨 앞에
+    rd = strip(((PB.get("advice") or {}).get("read") or "")) if str(PB.get("asof", ""))[:10] == X.TODAY else ""
+    if rd:
+        L.insert(0, "📞 고객 전화엔: " + rd[:120])
     if kk:
         L.append("💬 고객에게 할 말")
         for x in kk[:3]:
@@ -893,10 +909,14 @@ def brief_text(hits):
     for s, xs in hits.items():
         for txt, tab in xs:
             by[tab] = by.get(tab, 0) + 1
-    nm = {"cup": "☕ 컵", "gap": "📈 갭", "whale": "🐋 고래"}
+    nm = {"cup": "☕ 컵", "gap": "📈 갭", "whale": "🐋 큰손"}
     sig = " · ".join(f"{nm[k]} {v}" for k, v in by.items() if k in nm)
     if sig:
         L.append("신호 " + sig + " (앱 신호 탭)")
+    # 🔍 11/05 B6 「이 앱은 제안서 뽑는 앱」 — 알림을 하나 더 보내지 않고(알림 다이어트) 아침 한 장 끝에 한 줄
+    PP = X.jl(os.path.join(X.OUT, "proposal.json"), {}) or {}
+    if str(PP.get("at", ""))[:10] == X.TODAY and PP.get("forms"):
+        L.append(f"📝 오늘 시황에 맞춘 제안서 기본폼 {len(PP['forms'])}종 준비 — 고객 이름·성향·금액만 넣으면 PDF·PPT (제안서 탭)")
     return "\n".join(L)
 
 
@@ -1093,6 +1113,17 @@ if __name__ == "__main__":
                 parts.append(f"{lab} {v:+.1f}%".replace("+-", "−").replace("-", "−"))
         msg = ("이번 주 " + " · ".join(parts) + "\n" if parts else "") + "고객에게 보낼 「이번 주 한 장」이 준비됐어요 — 홈에서 눌러 바로 보내기"
         X.push("brief", "📨 이번 주 한 장", msg, "home~wk1", f"week1:{X.TODAY}", tags="incoming_envelope", quiet=None, level="mid")
+        sys.exit(0)
+    if len(sys.argv) > 1 and sys.argv[1] == "vote1":          # 🔍 11/05 B7 금요일 마감 채점 뒤 — 「이번 주 1등 ○○」 (vote.yml)
+        now_ = dt.datetime.now(X.KST)
+        V = X.jl(os.path.join(X.OUT, "vote.json"), {}) or {}
+        rows = (V.get("week") or {}).get("rows") or []
+        if now_.weekday() == 4 and now_.hour >= 15 and rows:
+            top = rows[0]
+            jw, pw = (V.get("week") or {}).get("joey") or {}, (V.get("week") or {}).get("people") or {}
+            more = " · ".join(f"{i + 2}위 {r['nm']} {r['w']}/{r['n']}" for i, r in enumerate(rows[1:3]))
+            msg = f"🥇 {top['nm']} {top['w']}/{top['n']} 맞힘" + (f"\n{more}" if more else "") + (f"\n🧒 조이 {jw.get('w', 0)}/{jw.get('n', 0)} vs 👥 사람 {round(pw['w'] / pw['n'] * 100)}%" if pw.get("n") else "") + "\n다음 주 월요일 아침 9시까지 첫 표를 던져 보세요"
+            X.push("brief", "🏆 이번 주 1탭 예측 1등", msg, "home", f"vote1:{X.TODAY}", tags="trophy", quiet=None, level="mid")
         sys.exit(0)
     if len(sys.argv) > 1 and sys.argv[1] == "brief":          # brief.yml: 07:58 PB 한 장만
         U = {}
