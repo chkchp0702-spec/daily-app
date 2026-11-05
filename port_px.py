@@ -15,7 +15,7 @@ X = os.path.join("archive", "x")
 D = os.path.join(X, "port_px")
 DAYS = 7
 ETF = ["SPY", "QQQ", "GLD", "BIL"]
-NAMES = {"SPY": "S&P500 (SPY)", "QQQ": "나스닥100 (QQQ)", "GLD": "금 (GLD)", "BIL": "현금·단기채 (BIL)", "KOSPI": "코스피"}
+NAMES = {"USDKRW": "원/달러 환율", "SPY": "S&P500 (SPY)", "QQQ": "나스닥100 (QQQ)", "GLD": "금 (GLD)", "BIL": "현금·단기채 (BIL)", "KOSPI": "코스피"}
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
 
@@ -162,6 +162,53 @@ def check():
     json.dump(out, open(os.path.join(D, "check.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 
+# ── 🧾 11/05 세금 계산용 (사용자 「달러로 사면 양도세·국내 ETF면 배당소득세·금융종합과세까지 뗀 실제 수익률」) ──
+#   ① USDKRW.json: 원/달러 일봉(야후 KRW=X) 2006~ — 하루에 ±8% 넘게 튀는 잘못 찍힌 값은 버림
+#   ② div.json: 해마다 분배금(배당) 수익률 % = (배당 포함 값 상승 ÷ 가격만 상승 − 1) — 수정종가(auto_adjust)와 그냥 종가로 계산
+def fx_clean(P):
+    out, prev = {}, None
+    for d in sorted(P):
+        v = P[d]
+        if prev and abs(v / prev - 1) > 0.08:
+            print("✗ USDKRW 튀는 값 버림", d, v); continue
+        out[d] = v; prev = v
+    return out
+
+
+def div_years():
+    out = {}
+    for k in ETF:
+        tr, pr = dl(k, "2006-01-01", True), dl(k, "2006-01-01", False)
+        if not tr or not pr:
+            return None
+        ds = sorted(set(tr) & set(pr)); ys = {}
+        for d in ds:
+            ys.setdefault(d[:4], []).append(d)
+        prev_last, row = None, {}
+        for y in sorted(ys):
+            a, b = (prev_last or ys[y][0]), ys[y][-1]
+            t, p = tr[b] / tr[a], pr[b] / pr[a]
+            if p > 0:
+                row[y] = round((t / p - 1) * 100, 3)
+            prev_last = b
+        out[k] = row
+    return out
+
+
+def tax_data(idx):
+    ch = False
+    if stale(idx, "USDKRW", 1):
+        P = dl("KRW=X", "2006-01-01", False)
+        if P:
+            P = fx_clean(P); idx["assets"]["USDKRW"] = write("USDKRW", P, 6); idx["assets"]["USDKRW"]["last"] = round(P[max(P)], 2); ch = True; print("✓ USDKRW", len(P))
+    if stale(idx, "DIV", DAYS):
+        Y = div_years()
+        if Y:
+            json.dump({"at": now(), "note": "해마다 분배금 수익률 % (배당 포함 값 ÷ 가격만 − 1)", "y": Y}, open(os.path.join(D, "div.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+            idx["assets"]["DIV"] = {"f": "div.json", "at": now(), "name": "분배금 수익률(해마다)"}; ch = True; print("✓ div", {k: len(v) for k, v in Y.items()})
+    return ch
+
+
 def main():
     os.makedirs(D, exist_ok=True)
     idx = read_idx(); idx.setdefault("assets", {}); ch = False
@@ -171,6 +218,10 @@ def main():
         P = dl(k, "2006-01-01", True)
         if P:
             idx["assets"][k] = write(k, P, 6); ch = True; print("✓", k, len(P))
+    try:
+        ch = tax_data(idx) or ch
+    except Exception as x:
+        print("세금 자료 못 받음", x)
     # 코스피: 마지막 날이 바뀌었거나 그 날 값이 바뀌었을 때 (10/22 고침 — 장중 값이 낮 12시에 굳어 종가 −3.5% 가 안 들어갔음)
     P = dl("^KS11", "2000-01-01", False)
     if P:

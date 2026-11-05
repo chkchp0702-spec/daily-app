@@ -12358,13 +12358,14 @@
    종목 하나를 0~20% 섞어 볼 수 있음(일봉 있는 18개 · 종목 화면 「💼 이 종목 5% 넣어 보면」 단추가 여기로).
    자료: archive/x/port_px/(SPY·QQQ·GLD·BIL 배당 포함 수정종가, port_px.py 가 7일마다) · 종목은 archive/x/els_px(종가)
    검사: port_px/check.json(파이썬이 같은 자료·같은 규칙으로 낸 값)과 이 엔진 값이 같아야 「✓ 파이썬과 같음」.
-   원칙: 과거 계산 · 미래 보장 아님 · 사라는 말 없음 · 세금·환전 비용 빼지 않음. */
+   원칙: 과거 계산 · 미래 보장 아님 · 사라는 말 없음 · 위 곡선은 세전 — 11/05 🧾 세금 칸(달러 직투 양도세 vs 국내 ETF 배당소득세·금융종합과세)에서 뗀 값을 따로 보임. */
 (function(){
   var ETF = ["SPY", "QQQ", "GLD", "BIL"], PX = {}, IDX = null, IDXW = null, EIDX = null, CHK = null, CHKOK = null;
   // 11/03 사용자 「거치식과 적립식을 구분 · 적립식이면 한 달에 얼마·며칠에 넣는지로 계산 · 거치식 누르면 적립식 칸은 닫히게」
   //   mode: lump(거치식) | dca(적립식) · dm 매달 넣는 돈(만원) · dd 매월 며칠(1~28, 31 = 말일) · d0 처음에 한 번(만원, 선택)
-  var ST = {w: {SPY: 47.5, QQQ: 47.5, GLD: 5}, reg: 1, vol: 1, st: "", stw: 5, from: "", prev: null, last: null, ms: 0, pn: null, mode: "lump", dm: 100, dd: 1, d0: 0};
-  var KEEP = ["w", "reg", "vol", "st", "stw", "from", "mode", "dm", "dd", "d0"];
+  var ST = {w: {SPY: 47.5, QQQ: 47.5, GLD: 5}, reg: 1, vol: 1, st: "", stw: 5, from: "", prev: null, last: null, ms: 0, pn: null, mode: "lump", dm: 100, dd: 1, d0: 0,
+    tx: "gen", brg: 26.4, brb: 44, of: 2000, txo: 1};   // 🧾 11/05 세금: tx 탭(gen 일반 | big 금융소득종합과세 대상자) · brg/brb 종합소득 세율(지방세 포함 %) · of 다른 금융소득(만원/년) · txo 펼침
+  var KEEP = ["w", "reg", "vol", "st", "stw", "from", "mode", "dm", "dd", "d0", "tx", "brg", "brb", "of", "txo"];
   try { var sv = JSON.parse(localStorage.getItem("pdz") || "null"); if (sv && sv.w) KEEP.forEach(function(k){ if (sv[k] !== undefined) ST[k] = sv[k]; }); } catch(x) {}
   function keep(){ try { var o = {}; KEEP.forEach(function(k){ o[k] = ST[k]; }); localStorage.setItem("pdz", JSON.stringify(o)); } catch(x) {} }
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
@@ -12440,7 +12441,7 @@
     var st = o.start ? Date.parse(o.start + "T00:00:00Z") / 864e5 : 0, i0 = 0;
     while (i0 < n && D[i0] < st) i0++;
     i0 = Math.max(i0, 201); if (i0 >= n - 5) return null;   // 10/21 사용자 「날짜를 직접 넣어서」 — 짧은 기간도
-    var W = null, lastEq = 0, nav = 1, NV = new Float64Array(n - i0), sp = new Float64Array(n - i0), spv = 1, turn = 0, expo = 0;
+    var W = null, lastEq = 0, nav = 1, NV = new Float64Array(n - i0), sp = new Float64Array(n - i0), spv = 1, turn = 0, expo = 0, WY = {};   // WY: 해마다 자산별 평균 비중(🧾 세금 — 분배금 계산용)
     for (var t = i0; t < n; t++){
       if (!W){ W = tg(t - 1); lastEq = W.SPY + W.QQQ; }
       var r = 0, sum = 0, nw = {};
@@ -12452,6 +12453,8 @@
         W = T; lastEq = T.SPY + T.QQQ; r -= tv * cost; turn += tv;
       }
       nav *= 1 + r; NV[t - i0] = nav; spv *= 1 + R.SPY[t]; sp[t - i0] = spv; expo += W.SPY + W.QQQ;
+      var yk = String(new Date(D[t] * 864e5).getUTCFullYear()), wy = WY[yk] || (WY[yk] = {n: 0});
+      wy.n++; for (var k4 in W) wy[k4] = (wy[k4] || 0) + W[k4];
     }
     var ycnt = 0, yrs = (D[n - 1] - D[i0]) / 365.25, pk = 0, mdd = 0, mddAt = 0, spk = 0, smdd = 0, Y = {}, py = null, yv = 1, ysp = 1;
     for (var u = 0; u < NV.length; u++){
@@ -12466,7 +12469,7 @@
     var tot = (nav - 1) * 100, sptot = (spv - 1) * 100;   // 반년 넘게 굴린 해만 (2008 은 3월부터라 넣음)
     var worst = full.sort(function(a, b){ return Y[a][0] - Y[b][0]; })[0];
     return {from: day2s(D[i0]), to: day2s(D[n - 1]), yrs: yrs, tot: tot, sptot: sptot, cagr: (Math.pow(nav, 1 / yrs) - 1) * 100, mdd: mdd * 100, mddAt: day2s(D[i0 + mddAt]), end: nav,
-      sp_cagr: (Math.pow(spv, 1 / yrs) - 1) * 100, sp_mdd: smdd * 100, sp_end: spv, worst: worst, Y: Y, nv: NV, sp: sp, D: D, i0: i0, expo: expo / NV.length * 100, turn: turn / yrs * 100};
+      sp_cagr: (Math.pow(spv, 1 / yrs) - 1) * 100, sp_mdd: smdd * 100, sp_end: spv, worst: worst, Y: Y, nv: NV, sp: sp, D: D, i0: i0, expo: expo / NV.length * 100, turn: turn / yrs * 100, WY: WY};
   }
   /* 💵 적립식 — 설계한 포트(매일 굴린 값 nv)와 S&P(sp)를 「매월 dd일(그날이 쉬면 다음 거래일 · 그달에 그날이 없으면 그달 마지막 거래일) 종가」에 dm 만원씩 산 셈 */
   function dcaCalc(r){
@@ -12515,6 +12518,127 @@
       '<div class="pz-won">📈 S&P500에 같은 날 같은 돈을 넣었다면 <b>' + won(c.sEnd) + '원</b> <small>수익률 ' + sg(c.sRet, 1) + '%' + (c.sIrr != null ? ' · 연 ' + sg(c.sIrr, 1) + '%' : '') + ' · 설계한 포트가 ' + (c.end >= c.sEnd ? '앞섬 +' : '뒤짐 −') + won(Math.abs(c.end - c.sEnd)) + '원</small></div>' +
       dcaCurve(r, c) +
       '<p class="note" style="margin:2px 0 6px">연 % = 돈을 넣은 때를 감안한 연평균 수익(내부수익률) · 매월 그날 종가에 삼(쉬는 날이면 다음 거래일, 그달에 그날이 없으면 마지막 거래일) </p></div>';
+  }
+
+  /* 🧾 11/05 세금 뗀 실제 수익 (사용자 「원화로 달러 사서 미국을 사면 세금이 나오잖아 — 양도세가 얼마라서 실제 수익률이 얼마다 ·
+     금융종합소득세 과세 대상자 탭을 만들어서 국내에서 ETF로 샀을 때 세금 얼마고 실제 수익률이 얼마다」)
+     같은 포트를 ① 💵 원화 → 달러로 바꿔 미국 ETF 직접(SPY·QQQ·GLD·BIL) ② 🇰🇷 국내 상장 같은 지수 ETF(환노출)로 산 셈.
+     · 💵 직투: 미국 배당 15% 원천징수(해마다) · 팔 때 (원화 기준 차익 − 연 250만원) × 22% 분리과세 · 환전 0.1%씩(우대 가정)
+     · 🇰🇷 국내 ETF: 분배금·매매차익 = 배당소득 15.4% · 그해 금융소득(이자·배당)이 2천만원 넘는 몫은 종합과세(고른 세율, 15.4%보다 낮으면 15.4%)
+     · 직투 배당도 금융소득 → 대상자면 2천만 넘는 몫은 고른 세율(외국납부 15% 공제 → 최소 15%)
+     · 원화 값 = 포트 값(달러) × 그날 원/달러(USDKRW.json) · 분배금 = 해마다 자산별 평균 비중 × 그해 분배금 수익률(div.json)
+     근사: 끝에 한 번에 판 셈(달마다 맞추며 판 차익 과세는 미룬 셈) · 구간 세율 한 칸으로 · 보수·과표기준가 차이·건보료 빼지 않음 */
+  var TXD = null, TXW = null;
+  var BR = [[6.6, "1,400만↓"], [16.5, "5,000만↓"], [26.4, "8,800만↓"], [38.5, "1.5억↓"], [41.8, "3억↓"], [44, "5억↓"], [46.2, "10억↓"], [49.5, "10억↑"]];
+  var DYF = {SPY: 1.8, QQQ: 0.7, GLD: 0, BIL: 1.5, X: 0};   // div.json 이 아직 없을 때만
+  function txLoad(){
+    if (!TXW) TXW = idx().then(function(){
+      var dv = IDX.assets.DIV;
+      return Promise.all([px("USDKRW"), dv ? getJSON("archive/x/port_px/div.json?" + String(dv.at || "").replace(/\D/g, ""), {ttl: 864e5}).catch(function(){ return null; }) : null]);
+    }).then(function(x){ TXD = {fx: x[0], div: x[1] && x[1].y ? x[1].y : null}; return TXD; }).catch(function(){ TXD = {fx: null, div: null}; return TXD; });
+    return TXW;
+  }
+  function fxOf(r){
+    if (r.fxA) return r.fxA;
+    var N = r.nv.length, a = new Float64Array(N), f = TXD && TXD.fx;
+    if (!f){ for (var i = 0; i < N; i++) a[i] = 1; r.fxA = a; r.fxNo = 1; return a; }
+    for (var u = 0, j = 0; u < N; u++){ var t = r.D[r.i0 + u]; while (j + 1 < f.d.length && f.d[j + 1] <= t) j++; a[u] = f.c[j]; }
+    r.fxA = a; return a;
+  }
+  function dyOf(k, y){ var d = TXD && TXD.div && TXD.div[k]; return d && d[y] != null ? Math.max(0, d[y]) : DYF[k] || 0; }
+  function flowsOf(r){   // [u, 원] — 거치식 = 첫날 한 번 · 적립식 = dcaCalc 와 같은 날
+    var N = r.nv.length, out = [];
+    if (ST.mode !== "dca"){ out.push([0, amt()]); return out; }
+    var m = (ST.dm || 0) * 1e4, z = (ST.d0 || 0) * 1e4, dd = ST.dd || 1, curM = null, did = false, lastU = -1;
+    if (z > 0) out.push([0, z]);
+    for (var u = 0; u < N; u++){
+      var ds = day2s(r.D[r.i0 + u]), mo = ds.slice(0, 7), dom = +ds.slice(8, 10);
+      if (mo !== curM){ if (curM && !did && lastU >= 0 && m > 0) out.push([lastU, m]); curM = mo; did = false; }
+      if (!did && dom >= dd && m > 0){ out.push([u, m]); did = true; }
+      lastU = u;
+    }
+    out.sort(function(a, b){ return a[0] - b[0]; });
+    return out;
+  }
+  function sim(r, kind, fl, br, other){
+    var N = r.nv.length, fx = fxOf(r), fxc = kind === "us" ? 0.001 : 0, base = kind === "us" ? 0.15 : 0.154, hi = Math.max(br / 100, base);
+    var B = Math.max(0, 2e7 - other), units = 0, up = 0, basis = 0, inv = 0, usdIn = 0, usdU = 0, divTax = 0, divTot = 0, divOver = 0, brem = B, fi = 0, yrOf = function(u){ return new Date(r.D[r.i0 + u] * 864e5).getUTCFullYear(); };
+    for (var u = 0; u < N; u++){
+      var U = r.nv[u] * fx[u];
+      while (fi < fl.length && fl[fi][0] === u){ var a = fl[fi][1]; units += a * (1 - fxc) / U; up += a / U; basis += a; inv += a; usdIn += a / fx[u]; usdU += a / fx[u] / r.nv[u]; fi++; }
+      var y = yrOf(u), endY = u === N - 1 || yrOf(u + 1) !== y;
+      if (endY){
+        var w = r.WY && r.WY[y], py = 0;
+        if (w && w.n) for (var k in w) if (k !== "n") py += w[k] / w.n * dyOf(k === "X" ? "X" : k, String(y)) / 100;
+        if (w) py *= Math.min(1, w.n / 252);
+        brem = B;
+        if (py > 0 && units > 0){
+          var V = units * U, dv = V * py, inb = Math.min(dv, brem), t = inb * base + (dv - inb) * hi;
+          brem -= inb; divOver += dv - inb; units *= 1 - t / V; basis += dv - t; divTax += t; divTot += dv;
+        }
+      }
+    }
+    var Ve = units * r.nv[N - 1] * fx[N - 1], pre = up * r.nv[N - 1] * fx[N - 1], o = {kind: kind, inv: inv, pre: pre, divTax: divTax, divTot: divTot, divOver: divOver};
+    if (kind === "us"){
+      var Vs = Ve * (1 - fxc); o.fxCost = inv * fxc + Ve * fxc; o.gain = Vs - basis; o.saleTax = Math.max(0, o.gain - 2.5e6) * 0.22; o.net = Vs - o.saleTax;
+    } else {
+      o.fxCost = 0; o.gain = Ve - basis; var g = Math.max(0, o.gain), inb2 = Math.min(g, brem); o.over = g - inb2; o.saleTax = inb2 * 0.154 + o.over * Math.max(br / 100, 0.154); o.net = Ve - o.saleTax;
+    }
+    o.tax = o.divTax + o.saleTax; o.ret = (o.net / inv - 1) * 100; o.preRet = (pre / inv - 1) * 100;
+    o.usdRet = (usdU * r.nv[N - 1] / usdIn - 1) * 100; o.fx0 = inv / usdIn; o.fx1 = fx[N - 1];
+    // 연 % — 거치식은 연평균, 적립식은 넣은 때를 감안한 내부수익률
+    var tEnd = r.D[r.i0 + N - 1], yrs = (tEnd - r.D[r.i0 + fl[0][0]]) / 365.25;
+    if (yrs >= 1){
+      if (fl.length === 1) o.ann = (Math.pow(o.net / inv, 1 / yrs) - 1) * 100, o.preAnn = (Math.pow(pre / inv, 1 / yrs) - 1) * 100;
+      else { var irr = function(end){ var f = function(q){ var s2 = end; fl.forEach(function(x){ s2 -= x[1] * Math.pow(1 + q, (tEnd - r.D[r.i0 + x[0]]) / 365.25); }); return s2; };
+          var lo = -0.95, hi2 = 3; if (f(lo) * f(hi2) > 0) return null; for (var i = 0; i < 80; i++){ var md = (lo + hi2) / 2; if (f(lo) * f(md) <= 0) hi2 = md; else lo = md; } return (lo + hi2) / 2 * 100; };
+        o.ann = irr(o.net); o.preAnn = irr(pre); }
+    }
+    return o;
+  }
+  function taxH(r){
+    if (!TXD){ txLoad().then(function(){ var el = document.getElementById("pzres"); if (el && ST.last && ST.last.R){ el.innerHTML = result(); bindRes(); } }); return '<div class="pz-tx"><div class="loading">🧾 세금 계산 자료 불러오는 중…</div></div>'; }
+    var big = ST.tx === "big", br = big ? ST.brb : ST.brg, other = big ? (ST.of || 0) * 1e4 : 0, fl = flowsOf(r);
+    if (!fl.length) return "";
+    var us = sim(r, "us", fl, br, other), kr = sim(r, "kr", fl, br, other), fx = fxOf(r), best = us.net >= kr.net ? us : kr, gap = Math.abs(us.net - kr.net);
+    var nm = {us: "💵 달러로 직접", kr: "🇰🇷 국내 상장 ETF"}, sub = {us: "원화 → 달러 환전 후 SPY·QQQ·GLD·BIL", kr: "같은 지수 환노출 ETF(원화)"};
+    var mx = Math.max(us.pre, kr.pre, us.inv) || 1;
+    var bar = function(o){ var n = Math.max(0, o.net), t = o.tax, f = o.fxCost || 0;
+      return '<div class="pz-txb"><i class="n" style="width:' + (n / mx * 100).toFixed(1) + '%"></i><i class="t" style="width:' + (t / mx * 100).toFixed(1) + '%"></i>' + (f > 0 ? '<i class="f" style="width:' + Math.max(0.6, f / mx * 100).toFixed(1) + '%"></i>' : '') + '<em style="left:' + (o.inv / mx * 100).toFixed(1) + '%"></em></div>'; };
+    var card = function(o){
+      var lost = o.preRet - o.ret, win = o === best && gap >= 1e4;
+      return '<div class="pz-txc' + (win ? ' win' : '') + '"><div class="pz-txn">' + nm[o.kind] + (win ? ' <span class="pz-txw">👑 더 남음</span>' : '') + '<small>' + sub[o.kind] + '</small></div>' +
+        '<div class="pz-txv"><small>세금 떼고 손에 쥐는 돈</small><b>' + won(o.net) + '원</b></div>' +
+        '<div class="pz-txr"><span>실제 수익률</span><b class="' + cl(o.ret) + '">' + sg(o.ret, 1) + '%</b>' + (o.ann != null ? '<em>연 ' + sg(o.ann, 1) + '%</em>' : '<em>1년 안 됨</em>') + '</div>' +
+        bar(o) +
+        '<div class="pz-txl"><span>세전 수익</span><b class="' + cl(o.pre - o.inv) + '">' + (o.pre >= o.inv ? '+' : '−') + won(Math.abs(o.pre - o.inv)) + '</b></div>' +
+        '<div class="pz-txl"><span>' + (o.kind === "us" ? '배당 세금(미국 15%' + (big && o.divOver > 0 ? '+종합' : '') + ')' : '분배금 세금(15.4%' + (big && o.divOver > 0 ? '+종합' : '') + ')') + '</span><b class="dn">−' + won(o.divTax) + '</b></div>' +
+        '<div class="pz-txl"><span>' + (o.kind === "us" ? '양도세 22% <small>(250만 공제)</small>' : '매매차익 세금 ' + (o.over > 0 ? '<small>(15.4% + 종합 ' + Math.max(br, 15.4) + '%)</small>' : '15.4%')) + '</span><b class="dn">−' + won(o.saleTax) + '</b></div>' +
+        (o.kind === "us" ? '<div class="pz-txl"><span>환전 비용 <small>(0.1%씩)</small></span><b class="dn">−' + won(o.fxCost) + '</b></div>' : '') +
+        '<div class="pz-txl tot"><span>세금으로 깎인 수익</span><b class="dn">−' + Math.max(0, lost).toFixed(1) + '%p</b></div></div>';
+    };
+    var per = r.from.replace(/-/g, ".") + ' ~ ' + r.to.slice(2).replace(/-/g, "."), lump = fl.length === 1;
+    var fxl = r.fxNo ? '<div class="pz-txx">⏳ 원/달러 일봉은 오늘 저녁 상품 작업 뒤 들어와요 — 지금은 환율이 그대로였던 셈</div>' :
+      '<div class="pz-txu"><div><small>달러로는</small><b class="' + cl(us.usdRet) + '">' + sg(us.usdRet, 1) + '%</b></div><div class="op">×</div>' +
+      '<div><small>' + (lump ? '환율 ' : '평균 산 환율 ') + Math.round(us.fx0).toLocaleString() + ' → ' + Math.round(us.fx1).toLocaleString() + '원</small><b class="' + cl(us.fx1 - us.fx0) + '">' + sg((us.fx1 / us.fx0 - 1) * 100, 1) + '%</b></div><div class="op">→</div>' +
+      '<div><small>원화 세전</small><b class="' + cl(us.preRet) + '">' + sg(us.preRet, 1) + '%</b></div></div>';
+    var warn = "";
+    if (!big && kr.over > 0) warn = '<div class="pz-txx">⚠️ 국내 ETF는 판 해에 차익 ' + won(Math.max(0, kr.gain)) + '원이 금융소득으로 잡혀 2천만원 넘는 ' + won(kr.over) + '원은 종합과세(' + Math.max(br, 15.4) + '%) — 몇 해에 나눠 팔면 세금이 줄어요.</div>';
+    if (big) warn = '<div class="pz-txx ok">💡 대상자는 국내 ETF 차익·분배금이 다른 소득과 합쳐 높은 세율을 맞지만, 해외 직투 양도세는 22% 분리과세라 종합과세에 안 섞여요' + (best.kind === "us" ? ' — 그래서 이 조건에선 직투가 유리' : '') + '. 연금저축·IRP·ISA에 담으면 과세를 미루거나 낮출 수 있어요.</div>';
+    var chips = '<div class="pz-txk"><span>' + (big ? '내 종합소득 세율 <small>(지방세 포함 · 과세표준 구간)</small>' : '2천만원 넘을 때 적용할 내 세율 <small>(지방세 포함)</small>') + '</span><div>' +
+      BR.map(function(b){ return '<button data-br="' + b[0] + '" class="' + (+br === b[0] ? "on" : "") + '">' + b[0] + '%<small>' + b[1] + '</small></button>'; }).join("") + '</div></div>' +
+      (big ? '<label class="pz-txo">다른 금융소득(이자·배당) 연 <input type="number" inputmode="numeric" min="0" step="100" id="pztxof" value="' + (ST.of || 0) + '"> 만원 <small>2천만원 넘으면 이 포트 소득 전부 종합과세</small></label>' : '');
+    var sumL = (lump ? won(us.inv) + '원 한 번에' : '적립식 ' + won(us.inv) + '원') + ' · ' + nm[best.kind].split(" ")[0] + ' ' + sg(best.ret, 1) + '%';
+    return '<details class="pz-tx" id="pztx"' + (ST.txo ? ' open' : '') + '><summary><b>🧾 세금 떼면 실제 수익률</b><span>💵 직투 <b class="' + cl(us.ret) + '">' + sg(us.ret, 1) + '%</b> · 🇰🇷 국내 ETF <b class="' + cl(kr.ret) + '">' + sg(kr.ret, 1) + '%</b> <small>세전 ' + sg(us.preRet, 1) + '%</small></span></summary>' +
+      '<div class="pz-txt"><button data-tx="gen" class="' + (!big ? "on" : "") + '">🙂 일반<small>금융소득 연 2천만원 이하</small></button><button data-tx="big" class="' + (big ? "on" : "") + '">💼 금융소득종합과세 대상자<small>이자·배당 연 2천만원 초과</small></button></div>' +
+      chips +
+      '<div class="pz-txp">📅 ' + per + ' · ' + (lump ? won(us.inv) + '원을 첫날 한 번에' : '넣은 돈 ' + won(us.inv) + '원 · ' + fl.length + '번') + '</div>' + fxl +
+      '<div class="pz-txg">' + card(us) + card(kr) + '</div>' +
+      '<div class="pz-txkey"><span><i class="n"></i>손에 쥐는 돈</span><span><i class="t"></i>세금</span><span><i class="f"></i>환전</span><span><i class="e"></i>넣은 돈</span></div>' +
+      (gap >= 1e4 ? '<div class="pz-txwin">👑 이 조건이면 <b>' + nm[best.kind] + '</b>이 <b>' + won(gap) + '원</b> 더 남아요 <small>(' + (best === us ? '국내 ETF' : '달러 직투') + '보다 수익률 ' + Math.abs(us.ret - kr.ret).toFixed(1) + '%p)</small></div>' : '<div class="pz-txwin">두 방법 차이가 거의 없어요</div>') +
+      warn +
+      (ST.st ? '<p class="note" style="margin:4px 0 0">섞은 종목(' + e(lab(ST.st)) + ')도 같은 방식으로 셈(근사 · 배당 빠짐).</p>' : '') +
+      '<p class="note pz-txnote">가정 · 💵 양도세 = (원화로 본 차익 − 연 250만원) × 22%, 끝에 한 번에 판 셈(달마다 맞추며 판 차익 과세는 미룬 셈) · 미국 배당 15% 원천징수 · 환전 우대 0.1%씩 · 🇰🇷 국내 상장 해외 ETF 매매차익·분배금은 배당소득 15.4%, 그해 금융소득 2천만원 넘는 몫은 종합과세(구간 세율 한 칸으로 근사) · 분배금 = 해마다 실제 분배금 수익률' + (TXD.div ? '' : '(자료 준비 중 — 평균값)') + ' · 보수·과표기준가 차이·건강보험료(금융소득 1천만원 넘으면 영향)는 빼지 않음 · 2026년 세법 기준, 바뀔 수 있음 · 세무 상담이 아니에요.</p></details>';
   }
   function wts(){   // 화면 % → 엔진 비중(합 1, 종목은 다른 칸에서 비율대로 떼어 옴)
     var s = ST.w.SPY / 100, q = ST.w.QQQ / 100, g = ST.w.GLD / 100, c = Math.max(0, 1 - s - q - g), x = ST.st ? ST.stw / 100 : 0, k = 1 - x;
@@ -12686,6 +12810,7 @@
         '<div><small>S&P보다</small><b class="' + cl(r.tot - r.sptot) + '">' + sg(r.tot - r.sptot, 1) + '%p</b><em>같은 기간</em></div>') + '</div>' +
       delta(r, ST.prev) +
       (ST.mode === "dca" ? '' : '<div class="pz-won">💰 ' + won(A) + '원 → <b>' + won(A * r.end) + '원</b> <small>S&P 그대로였다면 ' + won(A * r.sp_end) + '원 · ' + r.from.slice(0, 7).replace("-", ".") + ' ~ ' + r.to.slice(2).replace(/-/g, ".") + ' (' + (r.yrs >= 1.5 ? r.yrs.toFixed(0) + '년' : Math.round(r.yrs * 12) + '개월') + ')</small></div>') +
+      (function(){ try { return taxH(r); } catch(x) { console.warn(x); return ""; } })() +
       (function(){ var ph = ""; try { ph = panicH(r); } catch(x) { console.warn(x); } return curve(r, ST.pnObj) + insur(R) + ph; })() + yearsH(r) +
       '<p class="note pz-ms">휴대폰에서 ' + (r.nv.length * 3).toLocaleString() + '일 치를 ' + (ST.ms < 1000 ? ST.ms.toFixed(0) + 'ms' : (ST.ms / 1000).toFixed(1) + '초') + ' 만에 다시 셈 · 평균 주식 ' + r.expo.toFixed(0) + '%' +
         (CHKOK ? (CHKOK.ok === CHKOK.n ? ' · <b class="pz-ok">✓ 파이썬 검사 ' + CHKOK.n + '개와 같은 숫자</b>' : ' · ⚠️ 파이썬 검사 ' + CHKOK.ok + '/' + CHKOK.n + ' 맞음') : '') + '</p>';
@@ -12712,7 +12837,7 @@
     box.innerHTML = '<div class="sec">🎛 포트 설계기 <small class="mut">비중·날짜를 바꾸면 그때부터 지금까지 다시 계산 · 휴대폰에만 저장</small></div><section class="card pz">' +
       '<p class="pz-sub">💼 기본 포트 규칙 그대로(200일선 방어 · 변동성 맞춤 · 달마다 맞춤 · 비용 0.1%) 비중과 시작 날짜는 내 맘대로 — 그날 종가에 사서 매일 굴린 셈이에요(처음 = 2008년 3월, 폭락까지 다 넣음).</p>' + head(MY) +
       '<div class="pz-res" id="pzres">' + result() + '</div>' +
-      '<p class="note" style="margin:8px 0 0">과거 계산이고 미래를 보장하지 않아요 · 배당 포함 ETF 값(SPY·QQQ·GLD·BIL) · 세금·환전 비용은 빼지 않음 · 사라는 뜻이 아니에요.</p></section>';
+      '<p class="note" style="margin:8px 0 0">과거 계산이고 미래를 보장하지 않아요 · 배당 포함 ETF 값(SPY·QQQ·GLD·BIL) · 세금·환전 비용은 🧾 세금 칸에서 따로 뗌 · 사라는 뜻이 아니에요.</p></section>';
     bind(box);
     if (!ST.last) calc(); else bindRes();
     if (window.__pdzFocus){ window.__pdzFocus = 0; setTimeout(function(){ box.scrollIntoView({block: "start", behavior: "smooth"}); }, 120); }
@@ -12721,6 +12846,15 @@
   }
   function bindRes(){
     [].forEach.call(document.querySelectorAll("#pzpanic [data-pn]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); ST.pn = b.getAttribute("data-pn"); var r = document.getElementById("pzres"); if (r){ r.innerHTML = result(); bindRes(); } }; });
+    var rr = function(){ var el = document.getElementById("pzres"); if (el){ el.innerHTML = result(); bindRes(); } };
+    var tx = document.getElementById("pztx");
+    if (tx){ tx.addEventListener("toggle", function(){ ST.txo = tx.open ? 1 : 0; keep(); });
+      tx.querySelector("summary").addEventListener("click", function(ev){ ev.stopPropagation(); }); }
+    [].forEach.call(document.querySelectorAll("#pztx [data-tx]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); ST.tx = b.getAttribute("data-tx"); keep(); rr(); }; });
+    [].forEach.call(document.querySelectorAll("#pztx [data-br]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); ST[ST.tx === "big" ? "brb" : "brg"] = +b.getAttribute("data-br"); keep(); rr(); }; });
+    var of = document.getElementById("pztxof");
+    if (of){ of.addEventListener("click", function(ev){ ev.stopPropagation(); });
+      of.onchange = function(){ ST.of = Math.max(0, Math.round(+of.value || 0)); keep(); rr(); }; }
     [].forEach.call(document.querySelectorAll(".pz-yr>div"), function(d){ d.onclick = function(ev){ ev.stopPropagation(); if (window.P && P.toast) P.toast(d.title); }; });
   }
   function bind(box){
@@ -12761,7 +12895,7 @@
   window.__pdz = {
     ready: function(){ return idx().then(function(){ return Promise.all(ETF.map(px)); }).then(function(ss){ return ss.every(Boolean) ? align({SPY: ss[0], QQQ: ss[1], GLD: ss[2], BIL: ss[3]}) : null; }); },
     panic: function(){ ST.from = ""; ST.last = null; keep(); window.__pdzFocus = 1; window.__pdzPanic = 1; },
-    engine: engine, wts: function(){ var w = wts(); return w.X ? null : w; }, cfg: function(){ return {reg: ST.reg, vol: ST.vol, w: ST.w, st: ST.st}; }
+    tax: {sim: sim, flowsOf: flowsOf, taxH: taxH, set: function(x){ TXD = x; TXW = Promise.resolve(x); }}, engine: engine, wts: function(){ var w = wts(); return w.X ? null : w; }, cfg: function(){ return {reg: ST.reg, vol: ST.vol, w: ST.w, st: ST.st}; }
   };
 
   /* 📄 종목 화면: 「💼 이 종목 5% 넣어 보면」 */
@@ -12812,6 +12946,27 @@
     ".pz-pns{font-size:12.5px;color:var(--sub);margin:2px 0 6px;word-break:keep-all}.pz-pns b{color:var(--text)}" +
     ".pz-pnr{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;padding:6px 0;border-top:1px solid var(--line);font-size:13px}.pz-pnr b{font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}.pz-pnr b.up{color:var(--up)}.pz-pnr b.dn{color:var(--down)}.pz-pnr em{font-style:normal;font-size:12.5px;color:var(--sub);white-space:nowrap;min-width:46px;text-align:right}" +
     ".pz-pk{display:inline-block;width:12px;height:0;border-top:2px dashed;margin-right:5px;vertical-align:middle}.pz-pk0{color:#ff8fa3}.pz-pk1{color:#c77dff}.pz-pk2{color:#8a94a8}.pz-pnb{font-weight:700;grid-template-columns:auto 1fr}.pz-pnb span{grid-column:1/-1}.pz-pnb em{text-align:left}" +
+    ".pz-tx{margin:12px 0 6px;padding:10px;border-radius:12px;background:color-mix(in srgb,#3fb950 7%,var(--panel2));border:1px solid color-mix(in srgb,#3fb950 25%,var(--line))}" +
+    ".pz-tx>summary{cursor:pointer;list-style:none;display:flex;flex-direction:column;gap:2px}.pz-tx>summary::-webkit-details-marker{display:none}.pz-tx>summary>b{font-size:15px}.pz-tx>summary>b::after{content:' ›';color:var(--sub);font-weight:400}.pz-tx[open]>summary>b::after{content:' ⌄'}" +
+    ".pz-tx>summary span{font-size:13px;color:var(--sub)}.pz-tx>summary span b{font-size:15px;font-variant-numeric:tabular-nums}.pz-tx b.up{color:var(--up)}.pz-tx b.dn{color:var(--down)}.pz-tx>summary small{font-size:12.5px;margin-left:4px}" +
+    ".pz-txt{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 8px}.pz-txt button{border:1px solid var(--line);background:var(--panel);color:var(--sub);border-radius:10px;padding:8px 6px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;word-break:keep-all}.pz-txt button small{display:block;font-weight:400;font-size:12px}" +
+    ".pz-txt button.on{background:#3fb950;color:#fff;border-color:transparent}.pz-txt button.on small{color:#e8ffe9}" +
+    ".pz-txk{font-size:12.5px;margin:0 0 6px}.pz-txk>span{display:block;color:var(--sub);margin-bottom:4px}.pz-txk>span small{font-size:12px}.pz-txk>div{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}" +
+    ".pz-txk button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:8px;padding:4px 2px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums}.pz-txk button small{display:block;font-weight:400;font-size:11.5px;color:var(--sub)}.pz-txk button.on{background:#e9c46a;color:#111;border-color:transparent}.pz-txk button.on small{color:#4a3d10}" +
+    ".pz-txo{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;margin:6px 0}.pz-txo input{font:inherit;font-size:16px;width:96px;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--text);color-scheme:light dark}.pz-txo small{width:100%;font-size:12px;color:var(--sub)}" +
+    ".pz-txp{font-size:12.5px;color:var(--sub);margin:8px 0 4px}" +
+    ".pz-txu{display:grid;grid-template-columns:1fr auto 1.3fr auto 1fr;align-items:center;gap:4px;background:var(--panel);border-radius:10px;padding:7px 6px;text-align:center;margin:0 0 8px}.pz-txu small{display:block;font-size:11.5px;color:var(--sub);white-space:nowrap}.pz-txu b{font-size:16px;font-variant-numeric:tabular-nums}.pz-txu .op{color:var(--sub);font-weight:700}" +
+    ".pz-txg{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pz-txc{background:var(--panel);border-radius:11px;padding:9px 8px;border:1.5px solid transparent;min-width:0}.pz-txc.win{border-color:#e9c46a}" +
+    ".pz-txn{font-size:13.5px;font-weight:800;word-break:keep-all}.pz-txn small{display:block;font-weight:400;font-size:11.5px;color:var(--sub);margin-top:1px}.pz-txw{display:inline-block;font-size:11px;font-weight:700;background:#e9c46a;color:#111;border-radius:999px;padding:0 6px;vertical-align:1px}" +
+    ".pz-txv{margin:7px 0 2px}.pz-txv small{display:block;font-size:11.5px;color:var(--sub)}.pz-txv b{font-size:19px;font-variant-numeric:tabular-nums;white-space:nowrap}" +
+    ".pz-txr{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;font-size:12px;color:var(--sub)}.pz-txr b{font-size:18px;font-variant-numeric:tabular-nums}.pz-txr em{font-style:normal}" +
+    ".pz-txb{position:relative;display:flex;height:9px;border-radius:5px;overflow:hidden;background:color-mix(in srgb,var(--line) 60%,transparent);margin:7px 0 5px}.pz-txb i{display:block;height:100%}.pz-txb i.n,.pz-txkey i.n{background:#e9c46a}.pz-txb i.t,.pz-txkey i.t{background:#ff6b6b}.pz-txb i.f,.pz-txkey i.f{background:#8a94a8}" +
+    ".pz-txb em{position:absolute;top:-1px;bottom:-1px;width:2px;background:var(--text);opacity:.7}.pz-txkey i.e{background:var(--text);width:2px!important;opacity:.7}" +
+    ".pz-txl{display:flex;justify-content:space-between;gap:4px;font-size:12px;color:var(--sub);padding:2px 0;border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent)}.pz-txl small{font-size:11px}.pz-txl b{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--text)}.pz-txl b.up{color:var(--up)}.pz-txl b.dn{color:var(--down)}.pz-txl.tot{font-weight:700}" +
+    ".pz-txkey{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;color:var(--sub);margin:6px 0 2px}.pz-txkey i{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:4px;vertical-align:middle}" +
+    ".pz-txwin{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,#e9c46a 16%,var(--panel));font-size:13.5px;word-break:keep-all}.pz-txwin small{display:block;font-size:12px;color:var(--sub)}" +
+    ".pz-txx{margin:6px 0 0;padding:7px 9px;border-radius:9px;background:color-mix(in srgb,#ff6b6b 10%,var(--panel));font-size:12.5px;word-break:keep-all}.pz-txx.ok{background:color-mix(in srgb,#3fb950 10%,var(--panel))}.pz-txnote{margin:8px 0 0;font-size:12px;word-break:keep-all}" +
+    "@media (max-width:370px){.pz-txg{grid-template-columns:1fr}.pz-txk>div{grid-template-columns:repeat(2,1fr)}}" +
     ".pz-go{display:block;width:100%;text-align:left;margin:8px 0 0;border:1px dashed #e9c46a;background:color-mix(in srgb,#e9c46a 10%,var(--panel));color:var(--text);border-radius:10px;padding:9px 11px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}.pz-go small{display:block;font-weight:400;font-size:12.5px;color:var(--sub)}";
   document.head.appendChild(css);
 })();
