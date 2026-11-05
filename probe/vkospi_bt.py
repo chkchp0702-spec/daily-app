@@ -73,7 +73,11 @@ for mk in ("KR", "JP", "HK"):
         A = lambda s: prob_x.align(prob_x.rank252(s), d.index)
     Au = lambda s: prob_x.align(prob_x.rank252(s), d.index)
     rv = Au(vix); rs = Au(np.log(sp).diff(5))
-    oth = lab(rv, "vh", "vl") + "|" + lab(rs, "sh", "sl")
+    r1 = Au(np.log(sp).diff()); ro = prob_x.rank252(d["r"])  # 간밤 S&P 하루 등락(닻 몫) · 자기 지수 오늘 등락
+    oth = lab(rv, "vh", "vl") + "|" + lab(rs, "sh", "sl") + "|" + lab(r1, "oh", "ol") + "|" + lab(ro, "mh", "ml")
+    if mk == "KR":
+        kv = np.log(vk).diff().reindex(d.index)
+        print("TIMING corr dVK vs 같은날 r", round(float(kv.corr(d["r"])), 3), "· vs 다음날 r", round(float(kv.corr(d["r"].shift(-1))), 3), "· vs 전날 r", round(float(kv.corr(d["r"].shift(1))), 3))
     R = {}
     for fn, ser in (("수준", vk), ("5일변화", np.log(vk).diff(5)), ("VKOSPI−VIX백분위", None)):
         if ser is None:
@@ -88,16 +92,16 @@ for mk in ("KR", "JP", "HK"):
                 cells[nm][half] = None if not c_ else [c_["n"], round((c_["p1"] - d.loc[msk, "y1"].mean()) * 100, 1), round(((c_["p5"] or 0) - d.loc[msk, "y5"].mean()) * 100, 1)]
         fh = (rg >= 0.9).fillna(False); fl = (rg <= 0.1).fillna(False)
         ov = {"높음일": int(fh.sum()), "높음&VIX≥90": int((fh & (rv >= 0.9)).sum()), "높음&S&P≤10": int((fh & (rs <= 0.1)).sum()),
-              "낮음일": int(fl.sum()), "낮음&VIX≤10": int((fl & (rv <= 0.1)).sum())}
+              "낮음일": int(fl.sum()), "낮음&VIX≤10": int((fl & (rv <= 0.1)).sum()), "낮음&간밤≤10": int((fl & (r1 <= 0.1)).sum()), "높음&자기≤10": int((fh & (ro <= 0.1)).sum())}
         gh, gl, gb = one(rg, rg >= 0.9, "gh"), one(rg, rg <= 0.1, "gl"), lab(rg, "gh", "gl")
         r = {"mid": str(mid.date()), "cur_rank": None if pd.isna(rg.iloc[-1]) else round(float(rg.iloc[-1]), 3), "칸(n,y1차,y5차)": cells, "겹침": ov}
         for ycol, h in (("y1", 1), ("y5", 5)):
             P = {"평소": wf(d, gb, ycol, h)[1], "높음": wf(d, gh, ycol, h)[0], "낮음": wf(d, gl, ycol, h)[0],
-                 "기존(VIX·S&P)": wf(d, oth, ycol, h)[0], "기존+높음": wf(d, oth + "|" + gh, ycol, h)[0],
+                 "기존(VIX·S&P5·간밤·자기)": wf(d, oth, ycol, h)[0], "기존+높음": wf(d, oth + "|" + gh, ycol, h)[0],
                  "기존+낮음": wf(d, oth + "|" + gl, ycol, h)[0], "기존+양쪽": wf(d, oth + "|" + gb, ycol, h)[0]}
             r[ycol] = score(d, ycol, P, str(d.index[0].date()))
-        D = pd.DataFrame({"c": 1.0, "vh": rv >= .9, "vl": rv <= .1, "sh": rs >= .9, "sl": rs <= .1, "gh": rg >= .9, "gl": rg <= .1}, index=d.index).astype(float)
-        ok = rv.notna() & rs.notna() & rg.notna()
+        D = pd.DataFrame({"c": 1.0, "vh": rv >= .9, "vl": rv <= .1, "sh": rs >= .9, "sl": rs <= .1, "oh": r1 >= .9, "ol": r1 <= .1, "mh": ro >= .9, "ml": ro <= .1, "gh": rg >= .9, "gl": rg <= .1}, index=d.index).astype(float)
+        ok = rv.notna() & rs.notna() & rg.notna() & r1.notna() & ro.notna()
         X = {}
         for ycol in ("y1", "y5"):
             m = ok & d[ycol].notna(); idx = d.index[m]; md = idx[len(idx) // 2]
@@ -105,7 +109,7 @@ for mk in ("KR", "JP", "HK"):
             xr = {}
             for nm, tr, te in (("앞→뒤", a, b), ("뒤→앞", b, a)):
                 s = {}
-                for k, cols in (("기존", [0, 1, 2, 3, 4]), ("+높음", [0, 1, 2, 3, 4, 5]), ("+낮음", [0, 1, 2, 3, 4, 6])):
+                for k, cols in (("기존", list(range(9))), ("+높음", list(range(9)) + [9]), ("+낮음", list(range(9)) + [10])):
                     w = logit_fit(Xa[tr][:, cols], y[tr]); p = 1 / (1 + np.exp(-Xa[te][:, cols] @ w))
                     s[k] = round(float(((p - y[te]) ** 2).mean()), 5)
                     if k != "기존": s[k + "계수"] = round(float(w[-1]), 3)
