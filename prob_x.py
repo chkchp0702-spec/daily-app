@@ -292,6 +292,31 @@ def vkospi_daily():
     return s
 
 
+_JN = {}
+def jniv_daily():
+    """11/5 12시 #71b: 닛케이 VI(일본 변동성지수) 일별 — CNBC ts-api .JNIV(2003-01~). 일본 날짜(15:00 JST 마감 = 같은 날 EST 새벽)."""
+    if "s" in _JN:
+        return _JN["s"]
+    s = None
+    try:
+        import prob
+        if not prob.FAKE:
+            end = (pd.Timestamp.today() + pd.Timedelta(days=2)).strftime("%Y%m%d")
+            u = f"https://ts-api.cnbc.com/harmony/app/bars/.JNIV/1D/20030101000000/{end}000000/adjusted/EST5EDT.json"
+            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                bars = json.loads(r.read().decode("utf-8")).get("barData", {}).get("priceBars", [])
+            v = pd.Series({pd.Timestamp(x["tradeTime"][:8]): float(x["close"]) for x in bars if x.get("close")}, dtype=float).sort_index()
+            v = v[~v.index.duplicated(keep="last")]
+            v = v[v > 0]
+            if len(v) > 600:
+                s = v
+    except Exception:
+        s = None
+    _JN["s"] = s
+    return s
+
+
 def rank252(x):
     return x.rolling(252, min_periods=120).rank(pct=True)
 
@@ -848,6 +873,36 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p1"] = None
         except Exception as e:
             research["gsr_err"] = str(e)[:120]
+    # 😨 닛케이 VI − VIX 1년 백분위 차 3칸 — 일본 「일주일」만, w 0.5 (11/5 12시 #71b · probe/vx71b_bt.py)
+    #   d = 닛케이 VI 1년 백분위(일본 t) − VIX 1년 백분위(미국 t → 일본 t 다음 장 전) · d 의 1년 순위 ≤30% / 가운데 / ≥70%
+    #   닛케이 5일 뒤 오름: 낮음(일본 공포가 미국보다 낮음) −7.1·−5.9%p(n 809·804) · 높음 +6.6·+8.9(n 811·833), 2016-05 기준 앞/뒤 · 5일 간격 시작점 5개 모두 같은 쪽
+    #   자기·S&P 5일 꼬리 칸 위 걸어가며 사전 100 브라이어(5일) 0.25036→0.24898 · 0.24504→0.24275 · 최근5년 0.24548→0.2428 ✅ · VIX 수준 칸 더한 위에서도 0.25065→0.24975 · 0.24692→0.24452 · 0.24599→0.24409 ✅
+    #   덧셈형 w0.5 5일 간격 시작점 5개 × 앞·뒤·최근5년 15/15 개선 · 교차 로지스틱 두 방향(매일·5일 간격) 모두 개선(계수 낮음 −0.09~−0.35 · 높음 +0.12~+0.46)
+    #   다음 날은 CME 닛케이 선물 닻(NKD) 위에서 걸어가기 세 기간 나빠짐 ❌ → 일주일만
+    if mk == "JP" and "vix" in G:
+        try:
+            jn = jniv_daily()
+            if jn is not None:
+                jvp = rank252(jn).reindex(idx).ffill(limit=3)
+                vxp = lag(rank252(G["vix"]))
+                dd = jvp - vxp
+                rd = rank252(dd); cv = rd.iloc[-1]
+                research["jniv"] = {"d": str(jn.index[-1].date()), "vi": round(float(jn.iloc[-1]), 2), "vip": None if pd.isna(jvp.iloc[-1]) else round(float(jvp.iloc[-1]), 3),
+                                    "vixp": None if pd.isna(vxp.iloc[-1]) else round(float(vxp.iloc[-1]), 3), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv):
+                    if cv <= 0.3:
+                        f, nm, tx = (rd <= 0.3), "닛케이 VI−VIX 낮음(1년 하위 30%)", "일본 공포가 미국보다 낮음(안심) — 닛케이 일주일이 평소보다 덜 오름"
+                    elif cv >= 0.7:
+                        f, nm, tx = (rd >= 0.7), "닛케이 VI−VIX 높음(1년 상위 30%)", "일본 공포가 미국보다 큼(겁먹음) — 닛케이 일주일이 평소보다 잘 오름"
+                    else:
+                        f, nm, tx = ((rd > 0.3) & (rd < 0.7)), "닛케이 VI−VIX 가운데", "일본·미국 공포 비슷 — 평소와 비슷"
+                    m = cond(d, f.fillna(False), nm)
+                    add("jniv", "😨", "일본 대 미국 공포", "심리", m, 0.5,
+                        f"닛케이 VI {float(jn.iloc[-1]):.1f}(1년 {float(jvp.iloc[-1])*100:.0f}%) − VIX 1년 {float(vxp.iloc[-1])*100:.0f}% → 차이의 1년 순위 {cv*100:.0f}% · {tx}(다음 날엔 안 씀)")
+                    if M and M[-1]["k"] == "jniv":
+                        M[-1]["p1"] = None
+        except Exception as e:
+            research["jniv_err"] = str(e)[:120]
     # 🇯🇵 외국인의 일본 주식 순매수 4주 합 많음(≥90% 한쪽만) — 일본 「일주일」만, w 0.5 (11/4 10시 #64 · probe/mof_bt.py)
     #   재무성 주간 대내 증권투자(株式・投資ファンド持分 ネット, 억엔) 2005-01~ 1,138주 · 주(일~토) 끝 + 4일(목 08:50 JST 발표)부터 · 4주 합의 52주 백분위
     #   닛케이 5일 뒤 오름 +7.2·+5.2%p(n 294·353, 2016-02 기준 앞/뒤) · 목요일(발표일)만 +9.1·+2.5(n 62·72)
