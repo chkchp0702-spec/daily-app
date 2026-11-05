@@ -227,6 +227,10 @@
   var CORE = [["spx", "🇺🇸", "S&P500"], ["ndx", "💻", "나스닥100"], ["k200", "🇰🇷", "코스피200"], ["gold", "🥇", "금"]];
   var CORE_F = {kr_stock: 1, gl_stock: 1, pension: 1, dc: 1, irp: 1};
   var SLOT_NM = "⭐ PB 선택 칸";
+  // 11/05 저녁 사용자 「그래도 기본 구성 값은 좀 두자 — 각 지수 같은 것들 선택 편하게」 → 한 번에 고르는 구성 묶음
+  var PRESET = [["all", "🌏 시황 그대로", {spx: 1, ndx: 1, k200: 1, gold: 1}, "지수 3개 + 금"], ["us", "🇺🇸 미국 지수", {spx: 1, ndx: 1, k200: 0, gold: 0}, "S&P500 + 나스닥100"],
+    ["uskr", "🇺🇸 미국 + 🇰🇷 한국", {spx: 1, ndx: 1, k200: 1, gold: 0}, "미국 지수 + 코스피200"], ["usg", "🛡 미국 + 금", {spx: 1, ndx: 1, k200: 0, gold: 1}, "미국 지수 + 금"],
+    ["spg", "🌱 S&P500 + 금", {spx: 1, ndx: 0, k200: 0, gold: 1}, "덜 출렁이게"], ["none", "✍️ 직접 고르기", {spx: 0, ndx: 0, k200: 0, gold: 0}, "⭐ 추천 종목으로 채움"]];
   function coreDef(){ try { var d = JSON.parse(localStorage.getItem("pp_core") || "null"); if (d && typeof d === "object") return {spx: d.spx ? 1 : 0, ndx: d.ndx ? 1 : 0, k200: d.k200 ? 1 : 0, gold: d.gold ? 1 : 0}; } catch(x) {} return {spx: 0, ndx: 0, k200: 0, gold: 0}; }
   function coreOf(k){ var o = ST.opt[k]; return (o && o.core) || coreDef(); }
   function coreAllOn(c){ return CORE.every(function(x){ return !!c[x[0]]; }); }
@@ -349,7 +353,10 @@
     var empty = sl && !mus.length ? '<p class="pp-pw">💡 켠 지수가 없어 <b>' + pc(sl.pct) + '</b>가 「⭐ PB 선택 칸」으로 비어 있어요 — 아래 ⭐ 추천 종목·ETF를 넣으면 그 칸부터 채워요</p>'
       : sl ? '<p class="pp-tip" style="margin:0 0 6px">⭐ 추천 종목이 「PB 선택 칸」 ' + pc(sl.pct) + '를 먼저 채워요 (넣은 % 비율대로)</p>'
       : k === "gl_stock" && !c.spx && !c.ndx && !mus.length ? '<p class="pp-pw">💡 해외 주식인데 미국 지수가 빠져 있어요 — 위 칩을 켜거나 아래 ⭐ 추천 종목으로 해외 종목·ETF를 넣어 주세요</p>' : '';
-    return '<div class="pp-ol"><span data-tip="' + e(JOY.core) + '">🧩 기본 구성 고르기 ⓘ</span> <span class="mut">(누르면 켜고 끔)</span></div>' +
+    var many = CORE.filter(function(x){ return has0(x[0]); }).length > 1;
+    var same2 = function(a, b){ return CORE.every(function(x){ return !has0(x[0]) || !!a[x[0]] === !!b[x[0]]; }); };
+    return '<div class="pp-ol"><span data-tip="' + e(JOY.core) + '">🧩 기본 구성 고르기 ⓘ</span> <span class="mut">(한 번에 고르고 · 아래에서 하나씩 켜고 끔)</span></div>' +
+      (many ? '<div class="pp-pre">' + PRESET.map(function(q){ return '<button type="button" data-cp="' + k + '" data-pv="' + q[0] + '"' + (same2(c, q[2]) ? ' class="on"' : '') + '><b>' + q[1] + '</b><small>' + q[3] + '</small></button>'; }).join("") + '</div>' : '') +
       '<div class="pp-core" style="grid-template-columns:repeat(' + (function(n){ return n > 3 ? 2 : n; })(CORE.filter(function(x){ return has0(x[0]); }).length) + ',1fr)">' + CORE.filter(function(x){ return has0(x[0]); }).map(function(x){ return '<button type="button" data-ck="' + k + '" data-cv="' + x[0] + '"' + (c[x[0]] ? ' class="on"' : '') + '>' + x[1] + ' ' + x[2] + '<small>' + (c[x[0]] ? "넣음" : "안 넣음") + '</small></button>'; }).join("") + '</div>' +
       empty +
       '<div class="pp-cs"><span class="mut">끈 칸의 몫은 켠 칸에 비율대로</span>' + (same ? '<span class="pp-cd">✓ 내 기본값</span>' : '<button type="button" data-cd="' + k + '">📌 이 구성을 내 기본값으로</button>') + '</div>';
@@ -1651,7 +1658,7 @@
       "버튼을 한 번 누르면 만들고, 초록으로 바뀐 뒤 한 번 더 누르면 저장·공유 창이 떠요(아이폰은 누른 순간에만 공유 창이 열려서 그래요).",
       "모든 출력물 맨 끝에는 위험고지가 들어가요. 고객에게 드리기 전 숫자와 상품 조건을 한 번 더 확인해 주세요."],
     prof: "고객의 투자성향(미래에셋증권 투자자 유형 5단계)을 먼저 골라요.\n🔥 성장형 = 모든 상품(1등급까지) · 해외 주식·브라질국채도 가능해요.\n🚀 성장추구형 = 2·3등급까지 · 국내 주식·ELS 가능해요.\n⚖️ 위험중립형 = 4등급까지 · 미국채 가능해요.\n🌱 안정추구형 = 5등급까지.\n🛡 안정형 = 6등급만 · 국고채·현금성.\n고른 성향에 안 맞는 상품은 잠기고, 추천 종목도 등급이 안 맞으면 담을 수 없어요.\n주식·연금 폼의 주식(위험자산) 비중은 성향에 맞춰 저절로 정해져요: 성장형은 적극적으로, 성장추구형은 오늘 기본폼, 위험중립형은 절반, 안정추구형은 ¼, 안정형은 주식 없이 현금성으로.\n🆕 신규 고객은 성향을 아직 모르니 예외로 모두 열어 두고 오늘 기본폼으로 만들어요.\n국내 ETF 등급은 이름으로 추정한 것이라 운용사 표기를 꼭 확인해 주세요.",
-    core: "🧩 S&P500 · 나스닥100 · 코스피200 · 금은 처음엔 넣지 않아요. 고객 취향에 맞게 칩을 눌러 켜고 끄세요.\n끈 칸의 몫은 같은 종류의 남은 칸(켠 지수·현금성 등)에 비율대로 나눠요 · 시황 테마 칸은 그대로예요.\n켠 지수가 하나도 없으면 그 몫은 「⭐ PB 선택 칸」으로 비워 두고, ⭐ 추천 종목·ETF가 넣은 % 비율대로 채워요.\nDC·IRP는 위험자산 70% 한도를 그대로 지켜요.\n과거 계산(모의투자)은 고른 구성으로 앱에서 다시 셈해요.\n📌 「이 구성을 내 기본값으로」를 누르면 다음 제안서부터 같은 구성으로 시작해요.",
+    core: "🧩 위 묶음(시황 그대로 · 미국 지수 · 미국+한국 · 미국+금 · S&P+금 · 직접)을 누르면 한 번에 골라져요. 아래 칩으로 하나씩 더 켜고 끌 수도 있어요.\nS&P500 · 나스닥100 · 코스피200 · 금은 처음엔 넣지 않아요. 고객 취향에 맞게 칩을 눌러 켜고 끄세요.\n끈 칸의 몫은 같은 종류의 남은 칸(켠 지수·현금성 등)에 비율대로 나눠요 · 시황 테마 칸은 그대로예요.\n켠 지수가 하나도 없으면 그 몫은 「⭐ PB 선택 칸」으로 비워 두고, ⭐ 추천 종목·ETF가 넣은 % 비율대로 채워요.\nDC·IRP는 위험자산 70% 한도를 그대로 지켜요.\n과거 계산(모의투자)은 고른 구성으로 앱에서 다시 셈해요.\n📌 「이 구성을 내 기본값으로」를 누르면 다음 제안서부터 같은 구성으로 시작해요.",
     fx: "💴 원화로 = 국내 상장 ETF(TIGER 미국S&P500 등)로 담아요. 환전이 없고, 팔아서 남은 돈은 배당소득으로 15.4% 세금(금융소득종합과세 대상)이에요.\n💵 환전해서 = 미국 상장 ETF(SPY·QQQ·GLD 등)를 달러로 담아요. 팔아서 남은 돈은 1년에 250만원까지 빼고 22% 양도세(분리과세)예요.\n고른 방식에 맞춰 담을 ETF와 세금 설명이 바뀌어요.",
     must: "고객에게 꼭 넣고 싶은 종목·ETF를 검색해서 % 를 적어요(여러 개 가능).\n넣은 % 만큼 나머지 기본 포트를 원래 비율 그대로 줄여서 합계 100%를 맞춰요. 막대에서 줄어든 칸은 옛 % 가 흐리게 보여요.\n왜 추천하는지는 종목리포트·ETF 구성·실적·애널리스트·뉴스·시황 테마로 자동으로 써 줘요.\n개인연금·DC·IRP는 국내 상장 ETF만 담을 수 있고, DC·IRP에서 채권형·TDF는 「안전형」에 체크하면 안전자산 칸에서 깎아요.",
     sim: "모든 제안서 맨 끝에 들어가는 위험고지 문구를 확인하고 심의필을 관리하는 칸이에요.\n① 아래 원문을 읽어 보고 ② 「심의 요청서 PDF」를 받아 준법감시 부서에 내요.\n③ 받은 심의필 번호와 유효기간을 넣으면 한 장·PDF·PPT 모두에 저절로 찍혀요.\n유효기간이 지나거나 문구가 바뀌면 번호가 자동으로 빠지고 여기서 알려 줘요. 번호는 꼭 회사에서 받은 것만 넣어 주세요."
@@ -1765,6 +1772,8 @@
     var w = document.getElementById("ppw");
     [].forEach.call(w.querySelectorAll("[data-ck]"), function(b){ b.onclick = function(){ var k = b.dataset.ck, o = opt(k), c = JSON.parse(JSON.stringify(coreOf(k))); c[b.dataset.cv] = c[b.dataset.cv] ? 0 : 1; o.core = c; keep(); resetBtns(); preview();
       var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    [].forEach.call(w.querySelectorAll("[data-cp]"), function(b){ b.onclick = function(){ var k = b.dataset.cp, q = PRESET.filter(function(x){ return x[0] === b.dataset.pv; })[0]; if (!q) return;
+      opt(k).core = JSON.parse(JSON.stringify(q[2])); keep(); resetBtns(); preview(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     [].forEach.call(w.querySelectorAll("[data-cd]"), function(b){ b.onclick = function(){ var c = coreOf(b.dataset.cd); try { localStorage.setItem("pp_core", JSON.stringify(c)); } catch(x) {}
       toast("📌 다음 제안서부터 「" + coreTxt(c) + "」로 시작해요"); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     [].forEach.call(w.querySelectorAll("[data-pr]"), function(b){ b.onclick = function(){ ST.prof = +b.dataset.pr; var gone = profFix(); keep(); resetBtns();
@@ -2070,6 +2079,8 @@
 
   var css = document.createElement("style");
   css.textContent =
+    ".pp-pre{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:4px 0 8px}.pp-pre button{font:inherit;text-align:center;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 2px;cursor:pointer;line-height:1.25}" +
+    ".pp-pre b{display:block;font-size:14px;white-space:nowrap}.pp-pre small{display:block;font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pp-pre button.on{background:#F58220;border-color:#F58220;color:#fff}.pp-pre button.on small{color:rgba(255,255,255,.9)}" +
     ".pp-core{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 6px}.pp-core button{font:inherit;font-size:14px;font-weight:700;color:var(--sub);background:var(--panel2,rgba(127,127,127,.08));border:1.5px dashed var(--line);border-radius:12px;padding:9px 4px;white-space:nowrap;cursor:pointer;line-height:1.3}" +
     ".pp-core button small{display:block;font-size:12px;font-weight:500}.pp-core button.on{color:var(--text);background:rgba(245,130,32,.12);border:1.5px solid #F58220}.pp-core button.on small{color:#F58220;font-weight:700}" +
     ".pp-cs{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;margin:0 0 10px}.pp-cs button{font:inherit;font-size:12.5px;font-weight:700;color:#F58220;background:none;border:1px solid #F58220;border-radius:99px;padding:4px 10px;cursor:pointer;white-space:nowrap}.pp-cd{color:#1a8a5a;font-weight:700;white-space:nowrap}" +
