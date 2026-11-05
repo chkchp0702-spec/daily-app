@@ -352,7 +352,7 @@
     var pubBy = {}; if (PUB && PUB.v) Object.keys(PUB.v).forEach(function(c){ var nm = (PUB.n || {})[c]; if (!nm) return; (pubBy[nm[1]] = pubBy[nm[1]] || []).push(c); });
     var n = 0;
     L.rows.forEach(function(o){
-      if (o.live) return;
+      if (o.live || (o.k && o.kb && o.kd >= ANCHOR)) return;      // 11/05: 사진 날짜 = 금투협 마지막 날짜인 날엔 실측 펀드를 추정으로 바꾸지 않음(다음 기준가부터 📡)
       var C = [];
       if (o.mg && pubBy[o.mg]) pubBy[o.mg].slice(0, 40).forEach(function(c){ var S = serNav(PUB.d, PUB.v[c]); if (S) C.push([S, "같은 운용사 공모펀드 「" + fname(PUB.n[c][0]) + "」 기준가", "pub"]); });
       if (o.mg && BK && BK[o.mg]){ var S2 = serMkt(BK[o.mg].d, BK[o.mg].v); if (S2) C.push([S2, "운용사 바스켓(5% 넘게 가진 " + BK[o.mg].n + "종목 · 평가금액 비중)", "bk"]); }
@@ -361,8 +361,9 @@
       var best = null;
       C.forEach(function(c){ var ft = fitCand(o, c[0]); if (ft && (!best || ft.err < best.ft.err)) best = {c: c, ft: ft}; });
       if (!best || best.ft.err > 10) return;
-      // 10/27 학습: 지수(ix)로 맞춘 추정은 실제보다 2배쯤 크게 움직였음(10/15→22·10/22→27 두 번 다) → 민감도 절반으로. 다른 후보는 그대로
-      var S = best.c[0], st = !S.nav, b = best.ft.b * (best.c[2] === "ix" ? 0.5 : 1), z = sAt(S, ANCHOR, st, 4), lastD = S.d[S.d.length - 1], last = S.f[S.f.length - 1];
+      // 10/27 학습: 지수(ix)로 맞춘 추정은 실제보다 2배쯤 크게 움직였음(10/15→22·10/22→27 두 번 다) → 민감도 절반으로
+      // 11/05 학습: 같은 운용사 공모펀드(pub)로 맞춘 민감도가 1을 넘으면(타임폴리오 위드타임 1.5배 등) 실제보다 크게 움직임 → 1로 상한(세 구간 중 두 구간 개선)
+      var S = best.c[0], st = !S.nav, b = Math.min(best.c[2] === "pub" ? 1 : 3, best.ft.b) * (best.c[2] === "ix" ? 0.5 : 1), z = sAt(S, ANCHOR, st, 4), lastD = S.d[S.d.length - 1], last = S.f[S.f.length - 1];
       if (!z) return;
       var tf = function(r){ return r == null ? null : Math.round((Math.exp(b * Math.log(1 + r)) - 1) * 10000) / 100; };
       var since = last / z - 1, est = tf(since);
@@ -432,18 +433,79 @@
       (none.length ? '<details class="card cpx-d"><summary>' + PVPN[p] + ' 수익률 없음 ' + none.length + '개 <span class="mut">새로 만든 펀드 등</span></summary><div class="pd-list">' + none.map(function(x){ return pvlrow(x, null, p); }).join("") + '</div></details>' : '') +
       '<p class="note">' + e(PVL.src) + '. 비교 기준선 KOSPI·KOSDAQ는 지수 종가로 직접 계산(엑셀 값 안 씀). 수익률은 기준가 기준(세전·보수 차감 후), 달러 펀드는 달러 기준이에요. <b>📡 표시 ' + (PVL.nlive || 0) + '개</b>는 금융투자협회 공시 기준가를 매일 쌓아 수익률을 직접 계산, <b>🧮 추정 ' + (PVL.nest || 0) + '개</b>는 기준가가 공개되지 않아 같은 운용사 공모펀드·운용사 보유 종목 바스켓·같은 전략 실측 펀드·지수 중 과거 성적에 가장 잘 맞는 것으로 매일 추정(' + e(md(PVL.kasof || "")) + ') — 나머지는 금투협에 기준가를 안 올리는 펀드라 ' + amd() + ' 화면 값이에요(새 화면 사진·엑셀을 주시면 갱신). 펀드를 누르면 전략 설명·연도별 성적·모의 계산이 펼쳐져요. <a href="#" id="pvlock">이 기기에서 잠그기</a></p>';
   }
+  /* 🏢 운용사별 — 11/05 사용자 「공모랑 사모펀드 운용사별로 검색할 수 있는 탭 만들어」
+     공모 = 미래에셋 펀드검색 전체(x.co) · 사모 = 🔒 라인업(잠금 풀렸을 때만, o.mg — 없으면 이름 앞머리로. 확실한 계열만 운용사 이름으로 붙이고 나머지는 「이름 기준」 표시) */
+  var MGMAP = [[/^미래에셋/, "미래에셋자산운용"], [/^KB\s/, "KB자산운용"], [/^신한\s/, "신한자산운용"], [/^삼성/, "삼성자산운용"], [/^대신\s/, "대신자산운용"]];
+  var MGBRAND = ["WWG", "TCK", "The황소", "Blue 라이언", "아너스", "CK", "AH", "리딩", "NB", "W"];
+  function mgNorm(n){ return String(n || "").replace(/투자일임$/, "").replace(/\s+/g, "").trim(); }
+  function pvMgr(o){
+    if (o.mg) return [mgNorm(o.mg), false];
+    for (var i = 0; i < MGMAP.length; i++) if (MGMAP[i][0].test(o.n)) return [MGMAP[i][1], false];
+    for (var j = 0; j < MGBRAND.length; j++) if (String(o.n).indexOf(MGBRAND[j]) === 0) return [MGBRAND[j], true];
+    return [String(o.n).split(/\s|일반|전문/)[0] || "기타", true];
+  }
+  function mgShort(n){ return String(n).replace(/(자산운용|투자신탁운용|투자자산운용|자산운용사)$/, "") || n; }
+  function mgIndex(D){
+    var M = {}, add = function(nm, k, x, g){ var m = M[nm] = M[nm] || {n: nm, pub: [], pv: [], guess: false}; m[k].push(x); if (g) m.guess = true; };
+    (D.funds || []).forEach(function(x){ if (x.co) add(mgNorm(x.co), "pub", x); });
+    if (PVL) PVL.rows.forEach(function(o){ var g = pvMgr(o); add(g[0], "pv", o, g[1]); });
+    return Object.keys(M).map(function(k){ return M[k]; });
+  }
+  function mgSrch(s){ return String(s || "").toLowerCase().replace(/[\s·()\[\]_\-]/g, ""); }
+  function mgAvg(a){ var v = a.filter(function(v){ return v != null && v > -99; }); return v.length ? v.reduce(function(s, x){ return s + x; }, 0) / v.length : null; }
+  function mgList(D){
+    var per = PER, q = mgSrch(SEL.mq), Q = String(SEL.mq || "").split(/\s+/).map(mgSrch).filter(Boolean), kind = SEL.mk || "", srt = SEL.ms || "n";
+    var A = mgIndex(D).map(function(m){
+      // 띄어쓰기로 나눈 낱말이 모두 (운용사 이름 + 펀드 이름)에 들어 있으면 맞음 — 「머스트 10호」·「타임 EH」처럼
+      var mn = mgSrch(m.n) + mgSrch(mgShort(m.n)), ok = function(x){ var t = mn + "|" + mgSrch(x.n); return Q.every(function(w){ return t.indexOf(w) >= 0; }); };
+      var hitN = Q.length && Q.every(function(w){ return mn.indexOf(w) >= 0; }), pub = m.pub, pv = m.pv;
+      if (Q.length && !hitN){ pub = pub.filter(ok); pv = pv.filter(ok); }
+      if (kind === "pub") pv = []; if (kind === "pv") pub = [];
+      return {n: m.n, guess: m.guess, pub: pub, pv: pv, hitN: hitN, cnt: pub.length + pv.length, avg: mgAvg(pub.map(function(x){ return x[per]; }).concat(pv.map(function(o){ return pvv(o, per === "y3" ? "y1" : per); })))};
+    }).filter(function(m){ return m.cnt > 0; });
+    A.sort(srt === "r" ? function(a, b){ return (b.avg == null ? -1e9 : b.avg) - (a.avg == null ? -1e9 : a.avg); } : function(a, b){ return b.cnt - a.cnt || (b.avg || 0) - (a.avg || 0); });
+    var nPub = A.reduce(function(s, m){ return s + m.pub.length; }, 0), nPv = A.reduce(function(s, m){ return s + m.pv.length; }, 0);
+    var row = function(m){
+      var by = function(a, pv){ return a.slice().sort(function(x, y){ var u = pv ? pvv(x, per) : x[per], w = pv ? pvv(y, per) : y[per]; return (w == null ? -1e9 : w) - (u == null ? -1e9 : u); }); };
+      var pvs = by(m.pv, true), pbs = by(m.pub, false), best = pbs.concat(pvs).filter(function(x){ return (m.pv.indexOf(x) >= 0 ? pvv(x, per) : x[per]) != null; })[0];
+      var bestV = best ? (m.pv.indexOf(best) >= 0 ? pvv(best, per) : best[per]) : null;
+      var body = (pvs.length ? '<div class="sub2">🔒 사모 ' + pvs.length + '개</div><div class="pd-list">' + pvs.map(function(x, i){ return pvlrow(x, i, per === "y3" ? "y1" : per); }).join("") + '</div>' : '') +
+        (pbs.length ? '<div class="sub2">📦 공모 ' + pbs.length + '개</div><div class="pd-list">' + pbs.slice(0, 20).map(function(x, i){ return frow(x, i, per); }).join("") + '</div>' +
+          (pbs.length > 20 ? '<details class="pd-mmore"><summary>공모 나머지 ' + (pbs.length - 20) + '개 펼치기</summary><div class="pd-list">' + pbs.slice(20).map(function(x, i){ return frow(x, i + 20, per); }).join("") + '</div></details>' : '') : '') +
+        (m.guess ? '<p class="note" style="margin:6px 2px 0">운용사 이름은 펀드 이름 앞머리 기준이라 실제 운용사와 다를 수 있어요(약관에서 확인).</p>' : '');
+      return '<details class="pd-mg"' + (q && A.length <= 3 ? ' open' : '') + '><summary><div class="pd-mgh"><div class="pd-n"><b>' + e(mgShort(m.n)) + (m.guess ? ' <span class="mut" style="font-weight:400;font-size:12px">이름 기준</span>' : '') + '</b><small>' +
+        (m.pub.length ? '📦 공모 ' + m.pub.length : '') + (m.pub.length && m.pv.length ? ' · ' : '') + (m.pv.length ? '🔒 사모 ' + m.pv.length : '') +
+        (best && m.pub.length + m.pv.length > 1 ? ' · 1등 ' + e((m.pv.indexOf(best) >= 0 ? pvname(best.n) : fname(best.n)).slice(0, 22)) + ' ' + sg(bestV) : '') + '</small></div>' +
+        '<div class="pd-v">' + (m.avg == null ? '<b class="mut">–</b>' : sg(m.avg)) + '<small>평균 ' + PN[per] + '</small></div></div></summary><div class="pd-mgb">' + body + '</div></details>';
+    };
+    var lim = SEL.mall ? A.length : 30;
+    return '<p class="pd-mgc">' + (q ? '「' + e(SEL.mq) + '」 ' : '') + '운용사 <b>' + A.length + '</b>곳 · 공모 <b>' + nPub.toLocaleString() + '</b> · 사모 <b>' + nPv + '</b></p>' +
+      (A.length ? A.slice(0, lim).map(row).join("") : '<div class="empty">찾는 운용사·펀드가 없어요. 이름 일부만 넣어 보세요(예: 타임, 머스트, VIP).</div>') +
+      (A.length > lim ? '<button class="pd-mall" id="pdmall">운용사 ' + (A.length - lim) + '곳 더 보기</button>' : '');
+  }
+  function mgBody(D){
+    return card("🏢 운용사별 찾기 <span class='mut'>공모 + 사모</span>",
+      '<input id="pdmq" class="pd-q" type="search" enterkeyhint="search" autocomplete="off" placeholder="운용사·펀드 이름 (예: 타임폴리오, 머스트, 삼성)" value="' + e(SEL.mq || "") + '">' +
+      seg("pdmk", [["", "전체"], ["pub", "📦 공모"], ["pv", "🔒 사모"]], SEL.mk || "") +
+      '<div class="pd-sort"><span class="mut">기간</span>' + seg("pdper", PERS, PER) + '</div>' +
+      '<div class="pd-sort"><span class="mut">순서</span>' + seg("pdms", [["n", "펀드 많은 순"], ["r", "평균 수익률 순"]], SEL.ms || "n") + '</div>' +
+      (PVL ? '' : '<a href="#" id="pdmpv" class="pd-mpv">🔒 사모는 「사모 라인업」에서 비밀번호로 열면 함께 보여요 ›</a>') +
+      '<p class="note" style="margin:6px 2px 0">운용사를 누르면 그 운용사의 사모·공모 펀드가 수익률 순으로 펼쳐지고, 펀드를 누르면 상세가 열려요. 평균은 그 운용사 펀드들의 단순 평균(클래스가 여러 개면 각각 셈)이라 참고용이에요. 사모 3년 수익률은 없어서 1년으로 보여 줘요.</p>') +
+      '<div id="pdmlist">' + mgList(D) + '</div>';   // 목록은 카드 밖 — 긴 카드 「전체 보기」 접기에 안 걸리게
+  }
   function fundView(D){
     var F = (D.funds || []).filter(function(x){ return x.t; }), k = SEL.fund || "pv";
     if (k === "mir") k = SEL.fund = "pv";
     var h = '<div class="mg-kv"><div><small>🔒 미래에셋 사모 라인업</small><b>' + (PVL ? PVL.rows.length + '개' : '잠김') + '</b><em>' + (PVL ? e(PVL.asof) + ' 사내 화면' : '비밀번호로 열기') + '</em></div>' +
       '<div><small>공모펀드 (미래에셋 펀드검색)</small><b>' + F.length.toLocaleString() + '개</b><em>순자산 10억↑ 수익률 순위</em></div></div>';
-    h += seg("pdseg", [["pv", "🔒 사모 라인업"], ["all", "🏆 공모 TOP 20"], ["type", "유형별 TOP"]], k) + '<div id="pdbody">' + fundBody(D, k) + '</div>';
+    h += seg("pdseg", [["pv", "🔒 사모 라인업"], ["mgr", "🏢 운용사별"], ["all", "🏆 공모 TOP 20"], ["type", "유형별 TOP"]], k) + '<div id="pdbody">' + fundBody(D, k) + '</div>';
     return doc("fund") + h + WARN;
   }
   function fundBody(D, k){
     var F = (D.funds || []).filter(function(x){ return x.t; }), per = PER;
     var by = function(a, p){ p = p || per; return a.filter(function(x){ return x[p] != null; }).sort(function(x, y){ return y[p] - x[p]; }); };
     if (k === "pv" || k === "mir") return pvBody();
+    if (k === "mgr") return mgBody(D);
     if (k === "all"){
       var big = by(F.filter(function(x){ return (x.aum || 0) >= 10; })), top = big.slice(0, 20), bot = big.slice(-10).reverse();
       return card("🏆 공모펀드 수익률 TOP 20 <span class='mut'>" + PN[per] + " · 순자산 10억 이상 " + big.length + "개 중</span>", seg("pdper", PERS, per) + '<div class="pd-list">' + top.map(function(x, i){ return frow(x, i, per); }).join("") + '</div>') +
@@ -859,12 +921,19 @@
         bindSeg("pdpvp", function(k){ SEL.pvp = k; keep(); redraw(); });
         bindSeg("pdpvs", function(k){ SEL.pvs = k; keep(); redraw(); });
         bindSeg("pdpvoc", function(k){ SEL.pvoc = k; keep(); redraw(); });
+        bindSeg("pdmk", function(k){ SEL.mk = k; keep(); redraw(); });
+        bindSeg("pdms", function(k){ SEL.ms = k; keep(); redraw(); });
+        var mq = document.getElementById("pdmq"), ml = document.getElementById("pdmlist"), mt = null;
+        var mgAll = function(){ var b = document.getElementById("pdmall"); if (b) b.onclick = function(){ SEL.mall = 1; ml.innerHTML = mgList(D); mgAll(); }; };
+        if (mq && ml){ mq.oninput = function(){ clearTimeout(mt); mt = setTimeout(function(){ SEL.mq = mq.value.trim(); SEL.mall = 0; keep(); ml.innerHTML = mgList(D); mgAll(); }, 180); }; mgAll(); }
+        var mpv = document.getElementById("pdmpv"); if (mpv) mpv.onclick = function(ev){ ev.preventDefault(); SEL.fund = "pv"; keep(); full(); };
         var go = document.getElementById("pvgo"), pw = document.getElementById("pvpw");
         var tryOpen = function(v, quiet){ if (PVBUSY || !v) return; PVBUSY = true; if (go) go.textContent = "여는 중…";
           pvUnlock(v).then(function(){ PVERR = ""; try { localStorage.setItem("pvk", v); } catch(z) {} PVBUSY = false; full(); })
             .catch(function(err){ PVBUSY = false; PVERR = quiet ? "" : (err && err.message && /브라우저/.test(err.message) ? err.message : "비밀번호가 맞지 않아요."); try { if (quiet && err && err.name === "OperationError") localStorage.removeItem("pvk"); } catch(z) {} redraw(); }); };
         if (go && pw){ go.onclick = function(){ tryOpen(pw.value.trim()); }; pw.onkeydown = function(ev){ if (ev.key === "Enter") tryOpen(pw.value.trim()); }; }
         if (!PVL && !PVBUSY && document.querySelector("#pdbody .loading")){ var sv = ""; try { sv = localStorage.getItem("pvk") || ""; } catch(z) {} if (sv) tryOpen(sv, true); }
+        if (!PVL && !PVBUSY && mq && !window.__pvTried){ window.__pvTried = 1; var sv2 = ""; try { sv2 = localStorage.getItem("pvk") || ""; } catch(z) {} if (sv2) tryOpen(sv2, true); }   // 운용사별 탭에서도 저장된 비밀번호로 사모 자동 열기
         var lk = document.getElementById("pvlock"); if (lk) lk.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); PVL = null; try { localStorage.removeItem("pvk"); } catch(z) {} full(); };
       };
       full();
@@ -885,7 +954,8 @@
     }).catch(function(err){ console.error(err); var r = document.getElementById("pdroot"); if (r) r.innerHTML = '<div class="empty">상품 자료를 못 불러왔어요. 다음 수집 때 채워져요.</div>'; });
   };
   var css = document.createElement("style");
-  css.textContent = ".pd-list{display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}.pd-list>*{min-width:0}.pd-x{min-width:0;overflow:hidden}.pd-it{display:block;background:var(--panel2);border-radius:14px;padding:11px 12px;color:var(--text);text-decoration:none}" +
+  css.textContent = ".pd-mg{background:var(--panel2);border-radius:14px;margin:0 0 8px;overflow:hidden}.pd-mg>summary{list-style:none;cursor:pointer;padding:11px 12px}.pd-mg>summary::-webkit-details-marker{display:none}.pd-mg[open]>summary{border-bottom:1px solid var(--line)}.pd-mgh{display:flex;align-items:center;gap:10px}.pd-mgh .pd-n b{font-size:15px}.pd-mgb{padding:4px 8px 10px}.pd-mgb .pd-it{background:var(--panel)}.pd-mgb .sub2{margin:10px 4px 6px}.pd-mgc{font-size:12.5px;color:var(--sub);margin:4px 2px 8px}.pd-mgc b{color:var(--text)}.pd-mall{display:block;width:100%;margin:4px 0 0;padding:11px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--text);font-weight:700}.pd-mmore{margin-top:8px}.pd-mmore>summary{cursor:pointer;font-size:13px;color:var(--sub);padding:6px 4px}#pdmq{margin:0 0 10px}.pd-mpv{display:block;font-size:12.5px;color:var(--sub);margin:2px 2px 10px;text-decoration:none}" +
+    ".pd-list{display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}.pd-list>*{min-width:0}.pd-x{min-width:0;overflow:hidden}.pd-it{display:block;background:var(--panel2);border-radius:14px;padding:11px 12px;color:var(--text);text-decoration:none}" +
     ".pd-h{display:flex;align-items:center;gap:10px}.pd-n{flex:1;min-width:0}.pd-n b{display:block;font-size:14px;line-height:1.35;word-break:keep-all;overflow-wrap:anywhere}.pd-n small{overflow-wrap:anywhere}.pd-it{overflow:hidden}.pd-n small{display:block;color:var(--sub);font-size:12.5px;margin-top:2px;line-height:1.5}" +
     ".pd-v{text-align:right;flex:none}.pd-v b{display:block;font-size:19px;letter-spacing:-.3px}.pd-v small{display:block;color:var(--dim);font-size:12.5px}" +
     ".pd-it .rk{flex:none;width:22px;height:22px;border-radius:7px;background:var(--panel);color:var(--sub);font-size:12.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}" +
