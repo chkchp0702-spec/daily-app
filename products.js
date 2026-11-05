@@ -76,7 +76,7 @@
       '<div><small>🇺🇸 미국채 10년 금리</small><b>' + (U.y10 != null ? pc(U.y10) : "–") + '</b><em>' + (U.y10_prev != null ? "전일 " + pc(U.y10_prev) + " · 환율 " + fmt(U.fx) : "") + '</em></div>' +
       '<div><small>🇺🇸 판매 미국채 최고 수익률</small><b>' + (u1 ? pc(u1.ytm) : "–") + '</b><em>' + (u1 ? e(u1.name) + " · 만기 " + e(u1.mat) : "") + '</em></div>' +
       '<div><small>🇧🇷 헤알/원 환율</small><b>' + (brl ? fmt(brl[1]) : "–") + '</b><em>' + (brl && brl0 ? "하루 " + V.sgn((brl[1] / brl0[1] - 1) * 100, 2) + "% · " + md(brl[0]) : "") + '</em></div></div>';
-    h += seg("pdseg", [["gov", "🇰🇷 국채"], ["ust", "🇺🇸 미국채"], ["brl", "🇧🇷 브라질(헤알)"], ["bru", "🇧🇷 브라질(달러)"], ["oth", "공사채·회사채"]], k) + sortBar() + '<div id="pdbody">' + bondBody(D, k) + '</div>';
+    h += seg("pdseg", [["gov", "🇰🇷 국채"], ["ust", "🇺🇸 미국채"], ["brl", "🇧🇷 브라질(헤알)"], ["bru", "🇧🇷 브라질(달러)"], ["oth", "공사채·회사채"]], k) + sortBar() + '<div id="pdbody">' + boSlot(k) + bondBody(D, k) + '</div>';
     if (D.notice && D.notice.length) h += '<details class="card cpx-d"><summary>📢 채권 공지 <span class="mut">미래에셋 · 최근 ' + D.notice.length + '건</span></summary>' +
       D.notice.map(function(n){ return '<a class="pd-nt" href="' + e(n.url) + '" target="_blank" rel="noopener"><span class="mut">' + e(n.date || "") + '</span>' + e(n.title) + '</a>'; }).join("") + '</details>';
     return h + WARN;
@@ -901,7 +901,8 @@
   };
 
   /* ───────── 공통 ───────── */
-  var VIEW = {bond: bondView, fund: fundView, els: elsView}, BODY = {bond: bondBody, fund: fundBody, els: elsBody};
+  function boSlot(k){ return /^(gov|ust|brl|bru)$/.test(k || "gov") ? '<div class="bo-slot" data-bo="' + (k || "gov") + '"></div>' : ""; }   // 📄 11/05 채권 전망 보고서(bond_outlook.js) 자리
+  var VIEW = {bond: bondView, fund: fundView, els: elsView}, BODY = {bond: function(D, k){ return boSlot(k) + bondBody(D, k); }, fund: fundBody, els: elsBody};
   window.prodView = function(key){ return '<div id="pdroot" data-k="' + key + '"><div class="loading">미래에셋 상품 자료 불러오는 중…</div></div>'; };
   window.prodInit = function(key){
     P().then(function(D){

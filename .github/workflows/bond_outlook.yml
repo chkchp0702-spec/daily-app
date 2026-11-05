@@ -1,0 +1,37 @@
+name: bond_outlook
+# 📄 채권 전망 보고서 — 🇰🇷 국채 · 🇺🇸 미국채 · 🇧🇷 브라질국채 (11/05 사용자 「시황에 맞춘 전망 보고서를 매일 아침 미리 — 한 장 + PDF 풀버전」)
+#   아침 시황(brief.yml 07:50~08:10 의 proposal.py)이 나온 뒤 만듦 → archive/x/bond_outlook/{ktb,ust,brl}.jpg·.pdf · index.json
+#   같은 날·같은 판이면 건너뜀(두 번째 예약은 예비)
+on:
+  schedule:
+    - cron: "20 23 * * 0-4"   # KST 08:20 월~금
+    - cron: "50 23 * * 0-4"   # KST 08:50 (예비)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "같은 판이어도 다시 만들기 (1)"
+        default: ""
+permissions:
+  contents: write
+concurrency:
+  group: bond_outlook
+  cancel-in-progress: false
+jobs:
+  make:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 글꼴·크롬
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk fonts-noto-color-emoji >/dev/null
+          pip install -q playwright && python -m playwright install --with-deps chromium >/dev/null
+      - name: 최신 자료 받기
+        run: git pull -q --rebase origin main || true
+      - name: 📄 전망 보고서 만들기
+        run: python bond_outlook.py ${{ github.event.inputs.force == '1' && '--force' || '' }}
+      - name: 저장
+        run: bash scripts/push.sh "📄 채권 전망 보고서 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/bond_outlook
