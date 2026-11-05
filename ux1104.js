@@ -376,14 +376,14 @@
         (GF.length ? GF.map(function(g){ return '<button type="button" class="ns-g" data-nsf="' + e(g.key) + '"><span>' + e(g.ic) + ' <b>' + e(g.t) + '</b><small>' + g.from.replace("-", ".") + '~ · ' + g.n + '번 중 ' + g.k + '번 · 가장 나쁜 1년 ' + sg(g.worst, 1) + '%</small></span><b class="ns-p">' + Math.round(g.p) + '%</b></button>'; }).join("") +
           '<p class="ns-n">과거 계산 · 미래 보장 아님 · 채권·ELS 폼은 확정·조건 수익이라 뺌 · 누르면 그 폼으로</p>' : '<div class="gs-hint">폼 자료를 못 받았어요.</div>');
     }
-    if (o.amt != null){
+    if (false && o.amt != null){   // 11/05 세 갈래 길 뺌
       h += '<div class="ns-hd">💰 <b>' + won(o.amt) + '원</b><small>같은 돈을 채권·ELS·포트에 나눠 보면</small></div>' +
         '<button type="button" class="ns-g" data-nsa="' + o.amt + '"><span>⚖️ <b>' + won(o.amt) + '원으로 세 갈래 길 열기</b><small>채권 한 점 · ELS · 포트 3년 범위 — 💼 주문서 투자금도 같은 칸이라 ' + won(o.amt) + '원으로 바뀌어요(지금 ' + won(amt()) + '원)</small></span><b class="ns-p">›</b></button>';
     }
     return h + '<p class="ns-n">참고용 · 투자 권유 아님 · 세금·수수료 전 · 숫자는 미래에셋 판매 목록(채권·펀드)·DART 청약 공시(ELS) 그대로</p>';
   }
   function chipsHTML(){
-    return '<div class="ns-chips"><small>🔢 숫자로 찾기</small>' + ["5%", "4% 3년", "1000만원", "1년 +10%"].map(function(x){ return '<button type="button" data-nsc="' + e(x) + '">' + e(x) + '</button>'; }).join("") + '</div>';
+    return '<div class="ns-chips"><small>🔢 숫자로 찾기</small>' + ["5%", "3년", "4% 3년", "1년 +10%"].map(function(x){ return '<button type="button" data-nsc="' + e(x) + '">' + e(x) + '</button>'; }).join("") + '</div>';
   }
   function hook(){
     var o = document.getElementById("gsq"); if (!o || o.dataset.ns) return; o.dataset.ns = "1";

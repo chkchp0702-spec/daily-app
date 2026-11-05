@@ -406,7 +406,7 @@
   window.__u1105b = {findStocks: findStocks, numCond: numCond, rpBuild: rpBuild, ymPoints: ymPoints, G: G, YM: YM, sendImg: sendImg};   // 검사용
 
   var T = null;
-  function tick(){ T = null; try { ymMount(); } catch(x) { console.warn(x); } try { rpHook(); } catch(x) { console.warn(x); } }
+  function tick(){ T = null; /* 11/05 사용자 「상품에 이 화면들 다 빼 — 더 복잡해 보여」 → 📐 수익률 지도 숨김 */ try { var o = document.getElementById("ymap"); if (o) o.remove(); } catch(x) {} try { rpHook(); } catch(x) { console.warn(x); } }
   function soon(){ if (!T) T = setTimeout(tick, 150); }
   var css = document.createElement("style");
   css.textContent =
