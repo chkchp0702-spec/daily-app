@@ -11,4 +11,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q yfinance pandas numpy lxml requests
-      - run: python probe/jgb_bt.py
+      - run: python probe/jgb2_bt.py
