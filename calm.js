@@ -48,13 +48,13 @@
     });
   }
   function fold(){
-    var tab = window.cur, re = KEEP[tab], main = document.getElementById("main"); if (!re || !main) return;
+    var tab = window.cur, EZF = !!(window.__ezFold && window.__ezFold(tab)), re = KEEP[tab] || (EZF ? /^$/ : null), main = document.getElementById("main"); if (!re || !main) return;   // 🔰 11/05 쉬운 화면: 신호·상품·피드 탭도 전부 접음 (ux1105c.js)
     var cards = topCards(main, tab), seen = false;
     cards.forEach(function(c){
       if (c.dataset.cz === "done" || c.classList.contains("xs-hid")) return;
       var t = titleOf(c);
-      if (!ALL_FOLD[tab] && !seen && re.test(t)){ seen = true; c.dataset.cz = "done"; return; }
-      if (!ALL_FOLD[tab] && re.test(t)){ c.dataset.cz = "done"; return; }
+      if (!(ALL_FOLD[tab] || EZF) && !seen && re.test(t)){ seen = true; c.dataset.cz = "done"; return; }
+      if (!(ALL_FOLD[tab] || EZF) && re.test(t)){ c.dataset.cz = "done"; return; }
       if (!t){ c.dataset.cz = "done"; return; }
       if (c.offsetHeight < 140) return;                                     // 아직 짧은(그리는 중일 수 있는) 카드는 다음에 다시 봄
       c.dataset.cz = "done"; var key = tab + ":" + t.replace(EMO, "").slice(0, 24);
