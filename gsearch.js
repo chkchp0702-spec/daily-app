@@ -77,6 +77,7 @@
     };
   }
   window.gsOpen = open;
+  window.__gsAsk = {list: ASK, jump: jump};   // 11/05 📋 받은 글 → 답장 한 장(ux1105b)이 답 카드 칩을 같이 씀
   function addBtn(){
     var top = document.querySelector("header .top"); if (!top || document.getElementById("gsbtn")) return;
     var b = document.createElement("button"); b.id = "gsbtn"; b.setAttribute("aria-label", "종목 검색"); b.innerHTML = "🔍";

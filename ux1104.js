@@ -453,7 +453,7 @@
       else { var a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); }
     }, "image/png");
   }
-  window.__u1104 = {parse: parse, pick: pick, goalForms: goalForms, ldRun: ldRun, beta5: beta5, kbase: kbase, nsData: nsData};   // 검사용
+  window.__u1104 = {parse: parse, pick: pick, goalForms: goalForms, ldRun: ldRun, beta5: beta5, kbase: kbase, nsData: nsData, rowTxt: rowTxt, ytxt: ytxt, title: title};   // 11/05 ux1105b 가 rowTxt·ytxt 를 같이 씀   // 검사용
 
   var T = null;
   function tick(){ T = null; try { portMount(); } catch(x) { console.warn(x); } try { hook(); } catch(x) { console.warn(x); } }
