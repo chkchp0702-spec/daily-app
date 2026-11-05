@@ -72,13 +72,18 @@ for nm, f in (("rd≤30", rd <= 0.3), ("rd≥70", rd >= 0.7), ("rd≤10", rd <= 
         sp5.append([len(a), round((a.mean() - ba) * 100, 1), len(b), round((b.mean() - bb) * 100, 1)])
     cells[nm]["5일간격"] = sp5
 out["mid"] = str(mid.date()); out["칸(n,y1차,y5차)"] = cells
+print("칸", json.dumps(cells, ensure_ascii=False))
+vl = prob_x.align(vix, d.index); vix5 = pd.Series(pd.cut(vl, [0, 13, 17, 22, 30, 200], labels=list("abcde")).astype(str), index=d.index).where(vl.notna())
+jp3 = lab(jvp, "jh", "jl", 0.7)
 for ycol, h in (("y5", 5), ("y1", 1)):
     P = {"평소": wf(d, d3, ycol, h)[1], "기존": wf(d, oth, ycol, h)[0], "기존+rd3": wf(d, oth + "|" + d3, ycol, h)[0],
-         "기존+rd10": wf(d, oth + "|" + dlo, ycol, h)[0], "기존+d3": wf(d, oth + "|" + draw3, ycol, h)[0]}
+         "기존+rd10": wf(d, oth + "|" + dlo, ycol, h)[0], "기존+d3": wf(d, oth + "|" + draw3, ycol, h)[0],
+         "기존V": wf(d, oth + "|" + vix5, ycol, h)[0], "기존V+rd3": wf(d, oth + "|" + vix5 + "|" + d3, ycol, h)[0], "기존V+jv3": wf(d, oth + "|" + vix5 + "|" + jp3, ycol, h)[0]}
     # 덧셈형: 기존 칸 확률 + w·(d칸 확률 − 평소) (로그오즈)
     lg = lambda p: np.log(p / (1 - p))
     for w in (0.3, 0.5):
         P[f"덧셈 rd3 w{w}"] = 1 / (1 + np.exp(-(lg(P["기존"]) + w * (lg(wf(d, d3, ycol, h)[0]) - lg(P["평소"])))))
+        P[f"V덧셈 rd3 w{w}"] = 1 / (1 + np.exp(-(lg(P["기존V"]) + w * (lg(wf(d, d3, ycol, h)[0]) - lg(P["평소"])))))
     out[ycol] = {"전체": score(d, ycol, P)}
     if ycol == "y5":
         out[ycol]["5일간격"] = [score(d, ycol, P, every=5, off=o) for o in range(5)]
