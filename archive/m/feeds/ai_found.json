@@ -1,6 +1,62 @@
 {
  "items": [
   {
+   "title": "민주당 지도부 「데이터센터 모라토리엄」 요구에 반발 확산",
+   "url": "https://news.bgov.com/bloomberg-government-news/top-democrats-call-for-data-center-moratorium-stokes-opposition",
+   "press": "Bloomberg Government",
+   "at": "2026-11-06 07:40",
+   "why": "이번 AI 투매의 핵심 재료(데이터센터 규제) — 반도체·AI 소프트웨어 칸, AI 차입 가설(0.92)",
+   "summary": "민주당 지도부의 데이터센터 신규 건설 중단 요구와 업계 반발(게재일 미확인). 11/5 마감 브리핑 UBS 「2028년 예정 증설 물량 약 30% 건설 중단 위험」(kimu_nim/48217)과 같은 줄기."
+  },
+  {
+   "title": "계획된 美 데이터센터 절반이 지연될 수 있다 — 키머리지",
+   "url": "https://news.bgov.com/artificial-intelligence/half-of-planned-us-data-centers-may-face-delays-kimmeridge-says",
+   "press": "Bloomberg Government",
+   "at": "2026-11-06 07:40",
+   "why": "전력·인허가 병목 → AI CAPEX 속도 둔화 = 반도체 칸 실적 기대 하향 위험",
+   "summary": "키머리지 「계획된 美 데이터센터 절반 지연 가능」(게재일 미확인). 규제 + 전력 병목이 겹치면 2027 CAPEX 추정치 하향 쪽."
+  },
+  {
+   "title": "헤지펀드, 2025년에 산 AI 주식을 5거래일 만에 전부 되팔았다",
+   "url": "https://www.forbes.com/sites/jonmarkman/2026/11/02/hedge-funds-reversed-all-their-2025-ai-stock-buying-in-five-days/",
+   "press": "Forbes",
+   "at": "2026-11-06 05:40",
+   "why": "AI 차입 가설(0.92)·반도체 칸 — 이번 투매의 주체가 헤지펀드 디레버리징임을 보여줌(기계적 매도 → 끝나면 빠른 반등 가능)",
+   "summary": "헤지펀드 AI 순매수 1년치가 5일 만에 반전(Forbes 11/2). 11/5 investing 「AI 급락이 헤지펀드 구조조정 또 촉발」과 이어짐."
+  },
+  {
+   "title": "나스닥, 조정 국면으로 급락",
+   "url": "https://www.axios.com/2026/11/05/nasdaq-plummets-correction",
+   "press": "Axios",
+   "at": "2026-11-06 05:40",
+   "why": "🐻 하락장 판정 watch — 나스닥 고점 대비 −10% 조정 진입 확인",
+   "summary": "선거 뒤 칩주 투매로 나스닥 조정 영역 진입(Axios 11/5). 장중 나스닥 −5.1%·S&P −4.0%·VIX 26(latest 14:32 EST)."
+  },
+  {
+   "title": "스페이스X, 아폴로 주도 400억$ 차입으로 엔비디아 칩 구매 추진(FT) — 배경 기사",
+   "url": "https://investinglive.com/stocks/spacex-seeks-40-billion-in-debt-led-by-apollo-to-fund-nvidia-chip-order-ft-says/",
+   "press": "investingLive",
+   "at": "2026-11-06 04:40",
+   "why": "11/6 골드만·아폴로가 이 400억$ 거래를 다른 인수자에게 팔려 한다는 블룸버그 보도의 원래 구조 — AI 차입 가설(크레딧) 확인용",
+   "summary": "10/7 보도: 아폴로 주도 400억$ 차입, 그중 약 300억$는 투자등급 채권 구조(inside.com.tw 정리). 11/5 스페이스X 부도위험 신고점(bbg)과 겹쳐 대형 AI 차입의 소화 여부가 관건."
+  },
+  {
+   "title": "AI 공포가 민주당 스윕을 덮었다 — 나스닥 조정 진입",
+   "url": "https://www.thenationalnews.com/business/markets/2026/11/05/ai-fears-overtake-democratic-sweep-as-nasdaq-enters-correction-territory/",
+   "press": "The National",
+   "at": "2026-11-06 02:40",
+   "why": "🐻 하락장 판정 watch·반도체 칸 — 선거 재료가 「AI 데이터센터 지연」 공포로 바뀐 경로 정리",
+   "summary": "나스닥 조정(고점 −10%) 진입, 칩·AI 인프라주 주도 매도. 선거 결과보다 데이터센터 인허가·전력 반발이 핵심 재료로 부각."
+  },
+  {
+   "title": "AI·반도체주 주도 매도에 나스닥 조정 향해",
+   "url": "https://yournews.com/2026/11/05/7254236/nasdaq-heads-for-correction-as-ai-and-chip-stocks-lead/",
+   "press": "YourNews",
+   "at": "2026-11-06 02:40",
+   "why": "반도체 칸·091160 — 美 칩 매도 이틀째, 한국 반도체 다음 장 갭 위험",
+   "summary": "latest 12:23 EST 기준 S&P 7,423(−3.46%)·나스닥 24,550(−4.61%)·VIX 24.7(+49%)·엔비디아 −7.5%·마이크론 −12.8%."
+  },
+  {
    "title": "나스닥 조정 구간 진입 — 중간선거 결과가 AI 붐에 새 의문",
    "url": "https://www.cnn.com/2026/11/05/investing/tech-heavy-nasdaq-plunges",
    "press": "CNN",
@@ -583,63 +639,7 @@
    "at": "2026-11-04 00:01",
    "why": "🐻 하락장 판정 watch·포트 미국 칸 — 지수(시총가중)와 종목 체력이 갈라진 정도",
    "summary": "S&P 500 지수는 최고치 대비 약 3% 이내인데 구성 종목의 60%는 하락장(−20%↓) 영역 · 소수 대형주가 지수를 떠받치는 폭 붕괴 구간"
-  },
-  {
-   "title": "美 9월 구인 4개월 최고·해고 1년여 최저 — 노동 수요 다시 단단",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-03/us-job-openings-jump-to-highest-level-since-may-layoffs-fall",
-   "press": "Bloomberg",
-   "at": "2026-11-04 00:03",
-   "why": "美 10년 5% watch·고금리 정점 가설(0.55) 반대 재료 — 11/6 고용 앞 금리 상방",
-   "summary": "9월 JOLTS 구인 예상 밖 급증(5월 이후 최고)·해고 1년여 최저 · 장 초반 10년 4.94%(+4.7bp, CNBC 09:58 EST)"
-  },
-  {
-   "title": "헤지펀드, 한 주 만에 2년치 AI 순매수 지워 — 골드만 「디레버리징 이제 시작일 수도」",
-   "url": "https://www.itiger.com/news/1150649522",
-   "press": "Tiger Brokers(골드만 프라임북 인용)",
-   "at": "2026-11-03 23:40",
-   "why": "AI 크레딧 가설(0.92)·🧭 AI 칸 — 수급 청산이 진행 중인지 끝났는지 가르는 숫자",
-   "summary": "골드만 프라임북: 헤지펀드 AI 관련 순매수 2년치가 한 주에 소멸·AI 비중 2023 이후 첫 언더웨이트(yahoo 11/3) · AI 주 3주간 시총 약 5조$ 감소"
-  },
-  {
-   "title": "애플 新 CEO 터너스 첫 시험 — 세계 메모리 위기가 이익을 깎는다",
-   "url": "https://cnbc.com/2026/11/03/apple-earnings-john-ternus-faces-first-test-amid-high-memory-costs.html",
-   "press": "CNBC",
-   "at": "2026-11-03 22:45",
-   "why": "반도체 칸 — OEM 마진 압박 = 메모리 공급사 가격 결정력(MU·091160.KS 페어 관찰)",
-   "summary": "애플이 메모리 원가를 「전례 없는」 수준이라 부르며 마진 전망 약세. 시간외 시총 약 1,400억$ 증발(feed 헤드라인 기준, 세부 수치 미확인)."
-  },
-  {
-   "title": "11/3 증시: 美 중간선거 당일 선물 혼조 — 애플·팔란티어 실적 뒤 하락",
-   "url": "https://www.tipranks.com/news/stock-market-today-nov-3-futures-mixed-on-midterm-election-day-apple-and-palantir-shares-slide-after-earnings",
-   "press": "TipRanks",
-   "at": "2026-11-03 22:45",
-   "why": "🐻 하락장 판정 watch — 선거 결과·11/4 리펀딩·11/6 고용 전 美 지수 방향",
-   "summary": "선거 당일 선물 혼조, AAPL·PLTR 실적 뒤 약세. 다우 장중 −300P(IBD 헤드라인). 정확한 지수 숫자는 미확인."
-  },
-  {
-   "title": "애플, 실적 상회에도 마진 전망 약해 하락 · 팔란티어 실적 뒤 −8%",
-   "url": "https://www.cnbc.com/2026/11/03/apple-palantir-stock-earnings.html",
-   "press": "CNBC",
-   "at": "2026-11-03 20:40",
-   "why": "AI·대형 기술주 실적 반응이 「숫자 좋아도 하락」 — 반도체·AI 소프트웨어 칸 심리 점검",
-   "summary": "애플 4분기 실적은 예상 상회했으나 마진 가이던스 약세로 주가 하락. 팔란티어는 실적 뒤 약 8% 하락(제목 기준, 세부 미확인)."
-  },
-  {
-   "title": "애플, 메모리 가격 급등에 마진 압박 — 시간외 −2.7%, 마이크론·샌디스크는 소폭 상승",
-   "url": "https://stocktwits.com/news-articles/markets/equity/aapl-stock-tumbles-overnight-on-margin-pressure-from-surging-memory-prices-mu-sndk-inch-higher/cNGQxyuR95f",
-   "press": "Stocktwits",
-   "at": "2026-11-03 20:40",
-   "why": "메모리 원가가 완제품 업체 마진을 깎는다 = 메모리 공급사 가격 결정력 확인(반도체 칸)",
-   "summary": "12월 분기 총마진 45~46% 전망(직전 47.9%), CFO 「메모리 비용으로 약 1%p 하락」. AAPL 시간외 −2.7%, MU +0.8%·SNDK +1%. 메모리 비용 내년까지 상승 예상."
-  },
-  {
-   "title": "핌코, AI 관련 채권 수십억 달러 처분해 손실 회피",
-   "url": "https://www.advisorperspectives.com/articles/2026/10/28/pimco-offloads-billions-ai-debt-skirt-losses",
-   "press": "Advisor Perspectives(블룸버그 전재)",
-   "at": "2026-11-03 18:45",
-   "why": "AI 크레딧 가설(0.92) — 핌코 CEO 11/3 「AI 조달 과잉」 경고와 같은 줄기, 운용사가 실제로 AI 채권을 덜어냄",
-   "summary": "10/28 보도: 핌코가 AI 인프라 관련 회사채 수십억 달러 규모를 매각해 손실을 피함(제목 기준, 세부 금액 미확인). 11/3 CEO 「AI 금융이 너무 많아지는 길」 발언(블룸버그)으로 이어짐."
   }
  ],
- "at": "2026-11-06 01:40"
+ "at": "2026-11-06 07:40"
 }

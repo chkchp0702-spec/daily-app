@@ -1,5 +1,5 @@
 {
- "at": "2026-11-06 01:40",
+ "at": "2026-11-06 07:40",
  "rule": "🔴 핵심 = 정말 큰 것만(하루 0~3개, 대부분 시간은 0개): 연준·한은 깜짝·지수 −3%↓ 급변·보유 칸/킥 종목 직격·핵심 가설을 뒤집는 숫자 / 🟡 주목 = 그다음 중요한 것만(시간당 0~3개) · 나머지는 표시 안 함",
  "items": {
   "globalmktinsight/7817": {
@@ -136,6 +136,66 @@
    "lv": 1,
    "why": "AI 차입 가설(0.92) — 스페이스X 부도위험 신고점: 칩 매도가 크레딧으로 번짐",
    "at": "2026-11-06 01:40"
+  },
+  "n/0JsYy1lQTFkR3VJVkFyel9KeFFCdDNWWE4xeEE4aDNTYmZEejVrcEhPQQoc5": {
+   "lv": 1,
+   "why": "🐻 하락장 판정·고금리 정점(0.55) — 실업수당 57년 최저·3분기 생산성 급증: 주식 투매는 경기 아닌 AI 쏠림 청산이라는 반대 근거",
+   "at": "2026-11-06 02:40"
+  },
+  "n/ZQkRNWUFTbGZRYjFxTkJscXlRWW4weHRtbFlTQ01TejlCdHRNQ2FvcnYzoc5": {
+   "lv": 1,
+   "why": "고금리 정점 가설(0.55) — 선거 뒤 12월 인상 전망 후퇴(동결 확률 33%): 금리 정점 쪽 근거, 중장기채 칸",
+   "at": "2026-11-06 02:40"
+  },
+  "n/7sp500plungeswallstreetcircuitbreakertrumprecordhighstsrcrss": {
+   "lv": 2,
+   "why": "S&P −3.9%·나스닥 −5.2%·VIX +59% — 지수 −3%↓ 급변, 🐻 하락장 판정 watch·킥 보유·포트 전 칸 직격",
+   "at": "2026-11-06 03:40"
+  },
+  "n/esinks9aswallstreetdumpssoftwaresaiwinnersoktadrops10tsrcrss": {
+   "lv": 1,
+   "why": "매도가 칩→소프트웨어 AI 승자로 번짐(PLTR −10%·CRWD −9%) — AI 소프트웨어 칸·열린 PCOR bet 직격",
+   "at": "2026-11-06 03:40"
+  },
+  "n/eos20261105aiselloffhasroomtogoonmechanicalsellingtchirvideo": {
+   "lv": 1,
+   "why": "「기계적 매도 더 남음」(Tchir) — VIX 하락 전환일 전 재진입 서두르지 말라는 근거, 🐻 watch",
+   "at": "2026-11-06 03:40"
+  },
+  "n/5fZFN4LXpOSjAwRzJTRDRfZm1QSklFc05NRTAxd19aaWw4OFpSWHJ6WDgoc5": {
+   "lv": 1,
+   "why": "中, 엔비디아 AI칩 약 60만 개 홍콩 통관 보류 — 칩 수요 쪽 새 악재, AI 차입 가설(공급자 쪽 위험)·SMH 약세와 이어짐",
+   "at": "2026-11-06 04:40"
+  },
+  "n/VUDc3dDA5cng5TC1mak5NM3pLckZRdGU1TjJpdjI0dndMUGQwNTRlZFY0oc5": {
+   "lv": 1,
+   "why": "골드만·아폴로가 스페이스X 400억$ AI칩 금융을 다른 투자자에게 넘기려 함 — AI 차입이 소화 안 되는 신호(AI 차입 가설 0.92)",
+   "at": "2026-11-06 04:40"
+  },
+  "n/httpskrinvestingcomnewsstockmarketnewsarticle2162602": {
+   "lv": 1,
+   "why": "AI 차입 가설(0.92)·반도체 칸 — AI 급락이 헤지펀드 디레버리징을 또 부름(기계적 매도 지속): VIX 꺾이는 날 전 재진입 보류 근거",
+   "at": "2026-11-06 05:40"
+  },
+  "n/lMWEZkLTdtNGxPWnBXRVRNSTdHMGRaamk1OVNEd2dzc0VnbEFfQ3V4Mm8oc5": {
+   "lv": 1,
+   "why": "고금리 정점(0.55)·🐻 watch — 투매 뒤 금요일 10월 고용이 안도 또는 추가 하락의 다음 변곡",
+   "at": "2026-11-06 05:40"
+  },
+  "n/tailtradersdumpthemoststocksinsingledaysincecovidselloffhtml": {
+   "lv": 1,
+   "why": "개인 하루 순매도 코로나 이후 최대 — 디레버리징 끝(항복) 신호 후보, SMH 재진입 관찰과 이어짐",
+   "at": "2026-11-06 06:40"
+  },
+  "n/oraise75bfrombondofferingamidmarketselloffcNG1HDrR948tsrcrss": {
+   "lv": 1,
+   "why": "투매 중 애플 75억$ 채권 발행 — 「AI 차입(크레딧)」 가설: 빅테크 회사채 공급·스프레드 점검",
+   "at": "2026-11-06 06:40"
+  },
+  "kimu_nim/48217": {
+   "lv": 1,
+   "why": "뉴욕 마감 숫자 한 장 — SOX −12.25%·VIX +70%·12월 인상 확률 70%·UBS 데이터센터 30% 중단 위험 → AI 차입 가설·반도체 칸",
+   "at": "2026-11-06 07:40"
   }
  }
 }
