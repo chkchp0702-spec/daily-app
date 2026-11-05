@@ -10,11 +10,55 @@
   var ME = {};
   try { ME = JSON.parse(localStorage.getItem("propme") || "{}") || {}; } catch(x) {}
   ST.opt = {};   // 10/29 사용자 — 종목마다 {mode: "krw"|"usd", must: [{name, code, mkt, etf, pct}]}
-  try { var s0 = JSON.parse(localStorage.getItem("propsel") || "{}"); if (s0 && s0.sel) { ST.sel = s0.sel; ST.amt = s0.amt || {}; ST.opt = s0.opt || {}; } } catch(x) {}
-  function keep(){ try { localStorage.setItem("propme", JSON.stringify(ME)); localStorage.setItem("propsel", JSON.stringify({sel: ST.sel, amt: ST.amt, opt: ST.opt})); } catch(x) {} }
+  try { var s0 = JSON.parse(localStorage.getItem("propsel") || "{}"); if (s0 && s0.sel) { ST.sel = s0.sel; ST.amt = s0.amt || {}; ST.opt = s0.opt || {}; } if (s0 && s0.prof != null) ST.prof = +s0.prof; } catch(x) {}
+  function keep(){ try { localStorage.setItem("propme", JSON.stringify(ME)); localStorage.setItem("propsel", JSON.stringify({sel: ST.sel, amt: ST.amt, opt: ST.opt, prof: ST.prof})); } catch(x) {} }
   var EQ = {kr_stock: 1, gl_stock: 1, pension: 1, dc: 1, irp: 1};
   var MCOL = ["#c9962b", "#b5651d", "#8e44ad", "#16a085", "#c0392b", "#2c3e50"];
   function opt(k){ ST.opt[k] = ST.opt[k] || {mode: "krw", must: []}; if (!ST.opt[k].must) ST.opt[k].must = []; return ST.opt[k]; }
+  /* 🧭 11/05 사용자 「고객 투자성향 5단계를 먼저 넣고, 성향에 맞는 상품만 제안 · 성향에 맞게 주식 비중」
+     미래에셋증권 「투자자 유형 및 금융투자상품 위험도 분류표」(2025.11.24) 기준
+     성장형=1등급까지 · 성장추구형=2·3등급까지 · 위험중립형=4등급까지 · 안정추구형=5등급까지 · 안정형=6등급만
+     폼: 국내 주식·ELS = 성장추구형 이상 · 해외 주식·브라질국채 = 성장형 · 미국채 = 위험중립형 이상 · 국고채·연금 = 모두
+     연금(개인연금·DC·IRP)은 성향에 맞춰 주식(위험자산) 비중을 조절 · 신규 고객(성향 모름)은 예외로 모두 열어 둠(오늘 기본폼) */
+  var PROF = ["신규 고객", "안정형", "안정추구형", "위험중립형", "성장추구형", "성장형"];
+  var PROF_IC = ["🆕", "🛡", "🌱", "⚖️", "🚀", "🔥"];
+  var PROF_SUB = ["성향 확인 전 · 모두 열림", "6등급만", "5등급까지", "4등급까지", "2·3등급까지", "1등급까지"];
+  var PTIER = {1: "zero", 2: "low", 3: "safe", 4: "normal", 5: "bold"};
+  var FMIN = {kr_stock: 4, gl_stock: 5, brl: 5, els: 4, ust: 3, ktb: 1, pension: 1, dc: 1, irp: 1};
+  var GMIN = {1: 6, 2: 5, 3: 4, 4: 2, 5: 1};   // 성향별로 담을 수 있는 가장 위험한 상품 등급(숫자가 작을수록 위험)
+  var GRADE = ["", "매우높은위험", "높은위험", "다소높은위험", "보통위험", "낮은위험", "매우낮은위험"];
+  function profSet(){ return ST.prof != null && ST.prof >= 0 && ST.prof <= 5; }
+  function profName(){ return profSet() ? PROF[ST.prof] : ""; }
+  function formOK(k){ if (!profSet()) return false; if (!ST.prof) return true; return ST.prof >= (FMIN[k] || 1); }
+  function lockTxt(k){ if (!profSet()) return "🧭 투자성향을 먼저 고르세요"; var n = FMIN[k] || 1; return "🔒 " + PROF[n] + (n === 5 ? "만" : " 이상") + " 제안 가능"; }
+  // ⭐ 추천 종목의 위험등급 (분류표 기준 추정 — 국내 ETF는 운용사 표기가 우선)
+  function mustGrade(m){
+    var n = String(m.name || ""), mk = String(m.mkt || ""), dom = !mk || mk === "한국" || mk === "KR";
+    var etf = m.etf === true || (m.etf == null && /ETF|ETN|KODEX|TIGER|ACE|SOL|RISE|KBSTAR|HANARO|PLUS|KOSEF|ARIRANG|TIMEFOLIO|파워/i.test(n));
+    if (!dom) return {g: 1, why: etf ? "해외 ETF" : "해외 주식", est: false};
+    if (/ETN/i.test(n)) return {g: 1, why: "일반 ETN", est: false};
+    if (!etf) return {g: 2, why: "국내 주식", est: false};
+    if (/레버리지|인버스|2X|3X|울트라|곱버스/i.test(n)) return {g: 1, why: "레버리지·인버스 ETF", est: true};
+    if (/CD금리|CD\b|KOFR|머니마켓|MMF|초단기|단기통안|단기자금|SOFR/i.test(n)) return {g: 6, why: "현금성 ETF", est: true};
+    if (/회사채|크레딧|하이일드|신종|회사/i.test(n)) return {g: 4, why: "회사채 ETF", est: true};
+    if (/국고채|국채|통안|국공채|채권/i.test(n)) return /미국|해외|달러|글로벌|선진/.test(n) ? {g: 4, why: "해외 채권 ETF", est: true} : {g: 5, why: "국내 국공채 ETF", est: true};
+    if (/TDF|TIF|TRF|혼합|자산배분/i.test(n)) return {g: 3, why: "혼합형 ETF", est: true};
+    return {g: 2, why: "주식·원자재 ETF", est: true};
+  }
+  function mustOK(m){ if (!profSet()) return false; if (!ST.prof) return true; return mustGrade(m).g >= GMIN[ST.prof]; }
+  function tierOf(k){
+    if (!EQ[k] || !profSet() || !ST.prof) return "normal";
+    var t = PTIER[ST.prof], f0 = form(k);
+    if (t === "bold" && !(f0 && f0.sim && f0.sim.tiers && f0.sim.tiers.bold)) return "normal";   // 이미 위험자산 100%(또는 70% 한도)
+    return t;
+  }
+  // 성향을 바꾸면 안 맞는 상품·추천 종목을 빼고 알려 줌
+  function profFix(){
+    var gone = [];
+    ST.sel = ST.sel.filter(function(k){ if (formOK(k)) return true; var f = form(k); gone.push(f ? f.short : k); return false; });
+    Object.keys(ST.opt).forEach(function(k){ var o = ST.opt[k]; if (!o || !o.must) return; o.must = o.must.filter(function(m){ if (mustOK(m)) return true; gone.push(m.name); return false; }); });
+    return gone;
+  }
   /* 🔎 추천 이유 — 앱이 이미 모아 둔 자료(종목리포트 d/ · ETF x/ · 뉴스 n/ · 시세 p/ · 시황 테마 · ETF 속 회사)로 규칙대로 씀 (10/29 사용자 「넌 이유를 찾아서 넣어」) */
   var RS = {}, RSP = {};
   function rkey(m){ return (m.sym || m.code || m.name || "").toUpperCase(); }
@@ -109,7 +153,7 @@
   function r1(v){ return Math.round(v * 10) / 10; }
   // 지정 종목을 넣고 기본 포트를 깎은 결과 (화면 요약·제안서 둘 다 이걸 씀)
   function mustPlan(k, f){
-    var o = ST.opt[k] || {}, must = (o.must || []).filter(function(m){ return m && m.name && +m.pct > 0; });
+    var o = ST.opt[k] || {}, must = (o.must || []).filter(function(m){ return m && m.name && +m.pct > 0 && mustOK(m); });
     if (!must.length) return null;
     var base = f.alloc, Rb = base.filter(function(a){ return a.kind === "위험"; }).reduce(function(s2, a){ return s2 + a.pct; }, 0), Sb = 100 - Rb;
     var items = must.map(function(m){ return {m: m, pct: +m.pct, safe: !!(RET[k] && m.safe)}; });
@@ -144,17 +188,20 @@
   // 고른 방식(원화/환전) + 꼭 넣을 종목을 기본폼에 덧입힌 「이 고객용」 폼
   /* 🎚 10/29 A10/29-1 위험 정도 「안전 · 보통 · 적극」 — proposal_mkt.py tier_alloc 과 같은 규칙
      안전 = 위험자산 몫의 절반을 현금성(CD금리)으로 · 적극 = 안전자산 몫의 절반을 위험자산으로(비율 그대로 · DC·IRP 70% 한도) · 보통 = 오늘 기본폼 */
-  var TIER = {safe: "🛡 안전", normal: "⚖️ 보통", bold: "🔥 적극"};
+  var TIER = {zero: "🛡 안정형", low: "🌱 안정추구형", safe: "⚖️ 위험중립형", normal: "🚀 성장추구형", bold: "🔥 성장형"};
+  var KEEP = {safe: 0.5, low: 0.25, zero: 0};   // 위험자산을 몇 배로 남기나 (나머지 → CD금리) · proposal_mkt.py TIER_KEEP 과 같음
   function tierOK(f0, t){ return t === "normal" || !!(f0 && f0.sim && f0.sim.tiers && f0.sim.tiers[t]); }
   function tierAlloc(al, t, cap, cdT){
     al = al.filter(function(a){ return +a.pct > 0; }).map(function(a){ return JSON.parse(JSON.stringify(a)); });
     var R = 0, S = 0; al.forEach(function(a){ if (a.kind === "위험") R += a.pct; else S += a.pct; });
     var mv2 = 0;
-    if (t === "safe"){ var mv = R * 0.5; al.forEach(function(a){ if (a.kind === "위험") a.pct *= 0.5; });
-      var cd = al.filter(function(a){ return a.k === "cd"; })[0]; if (!cd){ cd = JSON.parse(JSON.stringify(cdT || {k: "cd", name: "현금성 (CD금리)", kind: "안전", color: "#3fb28f"})); cd.pct = 0; al.push(cd); } cd.pct += mv; }
+    if (KEEP[t] != null){ var kf = KEEP[t], mv = R * (1 - kf); al.forEach(function(a){ if (a.kind === "위험") a.pct *= kf; });
+      var cd = al.filter(function(a){ return a.k === "cd"; })[0]; if (!cd){ cd = JSON.parse(JSON.stringify(cdT || {k: "cd", name: "현금성 (CD금리)", code: "499660", inst: "TIGER CD금리투자KIS(합성)", kind: "안전", color: "#3fb28f"})); cd.pct = 0; al.push(cd); }
+      if (t === "zero") al.forEach(function(a){ if (a.kind !== "위험" && a !== cd){ mv += a.pct; a.pct = 0; } });
+      cd.pct += mv; }
     else { mv2 = S * 0.5; if (cap != null) mv2 = Math.min(mv2, cap - R); if (mv2 < 1 || R <= 0) return al;
       al.forEach(function(a){ if (a.kind === "위험") a.pct += mv2 * a.pct / R; else a.pct *= (S - mv2) / S; }); }
-    var Rt = r1(t === "safe" ? R * 0.5 : R + mv2);
+    var Rt = r1(KEEP[t] != null ? R * KEEP[t] : R + mv2);
     al.forEach(function(a){ a.pct = r1(a.pct); }); al = al.filter(function(a){ return a.pct > 0; });
     [[true, Rt], [false, r1(100 - Rt)]].forEach(function(gt){   // 위험·안전 합이 딱 맞게 (proposal_mkt.py 와 같음)
       var g = al.filter(function(a){ return (a.kind === "위험") === gt[0]; }); if (!g.length) return;
@@ -167,7 +214,18 @@
     var f0 = form(k); if (!f0) return null;
     var o = ST.opt[k] || {}, f = JSON.parse(JSON.stringify(f0));
     if (k === "gl_stock" && o.mode === "usd" && f.alt && f.alt.usd){ var u = f.alt.usd; for (var q in u) f[q] = u[q]; }
-    var t = o.tier, T = EQ[k] && t && t !== "normal" && f.sim && f.sim.tiers && f.sim.tiers[t];
+    var t = tierOf(k), T = EQ[k] && t !== "normal" && f.sim && f.sim.tiers && f.sim.tiers[t];
+    if (EQ[k] && t !== "normal" && !T && KEEP[t] != null){   // 새 단계 과거 계산이 아직 없을 때(다음 갱신 전) — 비중만 바꾸고 과거 계산은 숨김
+      var R00 = riskyOf(f.alloc), th00 = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
+      f.alloc = tierAlloc(f.alloc, t, f.sim && f.sim.tier_cap, null);
+      var th01 = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
+      (f.themes || []).forEach(function(x){ var rr = th00 ? (th01 || 0) / th00 : 0; if (x.pct != null) x.pct = r1(x.pct * rr); if (x.w != null) x.w = r1(x.w * rr); });
+      if (f.sim){ f.sim = {kind: f.sim.kind, few: 1, note: "성향 단계 과거 계산은 다음 갱신 때 들어감"}; }
+      f.tier = t; f.headline = f.alloc.map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" · ") + " 제안임";
+      f.points = [profPoint(t, R00, riskyOf(f.alloc), f.sim && f.sim.tier_cap)].concat(f.points || []);
+      if (!f.alloc.some(function(a){ return a.k === "theme"; })) f.themes = [];
+      return f;
+    }
     if (T){
       var R0 = riskyOf(f.alloc), cdT = (T.alloc || []).filter(function(a){ return a.k === "cd"; })[0];
       var th0 = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
@@ -179,11 +237,18 @@
       f.sim.note = (f.sim.note || "") + " · " + TIER[t].slice(2) + " 단계 비중으로 계산";
       f.tier = t;
       f.headline = f.alloc.map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" · ") + " 제안임";
-      f.points = [(t === "safe" ? "🛡 안전하게 — 오늘 기본 제안의 위험자산 " + pc(R0) + " 중 절반을 현금성(CD금리)으로 옮겨 " + pc(riskyOf(f.alloc)) + "만 담음"
-                               : "🔥 적극적으로 — 오늘 기본 제안의 안전자산 몫 절반을 위험자산으로 옮겨 위험자산 " + pc(R0) + " → " + pc(riskyOf(f.alloc)) + (cap ? " (법정 한도 " + cap + "% 안)" : "")) +
-                  " · 아래 설명의 % 숫자는 기본 제안 기준"].concat(f.points || []);
+      f.points = [profPoint(t, R0, riskyOf(f.alloc), cap)].concat(f.points || []);
     }
+    if (f.tier && !f.alloc.some(function(a){ return a.k === "theme"; })) f.themes = [];
     return f;
+  }
+  function profPoint(t, R0, R1, cap){
+    var who = "🧭 투자성향 「" + profName() + "」에 맞춤 — ";
+    return who + (t === "zero" ? "주식 등 위험자산 없이 전부 현금성(CD금리 · 매우낮은위험 6등급)으로 담음"
+      : t === "low" ? "오늘 기본 제안의 위험자산 " + pc(R0) + " 중 ¼만 남겨 " + pc(R1) + "만 담고 나머지는 현금성(CD금리)으로"
+      : t === "safe" ? "오늘 기본 제안의 위험자산 " + pc(R0) + " 중 절반만 남겨 " + pc(R1) + "만 담고 나머지는 현금성(CD금리)으로"
+      : "오늘 기본 제안의 안전자산 몫 절반을 위험자산으로 옮겨 위험자산 " + pc(R0) + " → " + pc(R1) + (cap ? " (법정 한도 " + cap + "% 안)" : "")) +
+      " · 아래 설명의 % 숫자는 기본 제안 기준";
   }
   function formX(k){
     var f = baseX(k); if (!f) return null;
@@ -520,7 +585,7 @@
   function model(keys){
     var items = (keys || ST.sel).map(function(k){ var f = formX(k); return f ? {f: f, amt: amtOf(k)} : null; }).filter(Boolean);
     return {cust: (ST.cust || "").trim(), pb: (ME.pb || "").trim(), org: (ME.org || "").trim(), date: dlabel(), items: items,
-            total: items.reduce(function(s, x){ return s + x.amt; }, 0), notice: DATA.notice || [], basis: DATA.basis || ""};
+            total: items.reduce(function(s, x){ return s + x.amt; }, 0), notice: DATA.notice || [], basis: DATA.basis || "", prof: ST.prof ? profName() : ""};
   }
   function titleOf(m){ return m.items.length === 1 ? m.items[0].f.title : m.items.map(function(x){ return x.f.short; }).slice(0, 3).join(" · ") + (m.items.length > 3 ? " 외 " + (m.items.length - 3) : "") + " 포트폴리오"; }
   function custName(m){ return m.cust ? m.cust + " 고객님" : "고객님"; }
@@ -594,6 +659,7 @@
       '<div style="width:64px;height:5px;background:' + ORG + ';margin:22px 0 18px"></div>' +
       '<div style="font-size:50px;font-weight:800;letter-spacing:-1.5px;line-height:1.22;color:' + NAVY + '">' + e(custName(m)) + '을 위한<br>' + e(titleOf(m)) + '</div>' +
       (m.total ? '<div style="display:inline-block;margin-top:20px;background:#fff4ea;border-radius:16px;padding:12px 22px;font-size:28px;color:' + INK + '">제안 금액 <b style="font-size:36px;color:' + NAVY + '">' + man(m.total) + '</b></div>' : '') +
+      (m.prof ? '<div style="margin-top:14px;font-size:22px;color:#48535B">투자성향 <b style="color:' + NAVY + '">' + e(m.prof) + '</b> 맞춤</div>' : '') +
       (function(){ var gl = m.items.length === 1 ? gLine(m.items[0].f) : ""; return gl ? '<div style="margin-top:16px;font-size:22px;line-height:1.5;color:#48535B">' + e(gl) + '</div>' : ''; })() + '</div></div>' +
       '<div style="height:6px;background:' + ORG + '"></div>';
     if (multi){
@@ -900,6 +966,7 @@
         '<div style="font-size:40px;font-weight:800;letter-spacing:-1.2px;line-height:1.28;margin-top:10px;color:' + NAVY + '">' + e(titleOf(m)) + '<br>투자 제안서</div>' +
         (m.total ? '<div style="margin-top:26px;font-size:16px;color:#48535B">제안 금액 <b style="font-size:26px;color:' + NAVY + ';margin-left:6px">' + man(m.total) + '</b></div>' : '') +
         (gl ? '<div style="margin-top:10px;font-size:14.5px;line-height:1.6;color:#48535B;max-width:600px">' + e(gl) + '</div>' : '') +
+        (m.prof ? '<div style="margin-top:12px;font-size:14.5px;color:#48535B">고객 투자성향 <b style="color:' + NAVY + '">' + e(m.prof) + '</b> · 투자성향에 맞는 상품만 담음</div>' : '') +
         '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:20px">' + m.items.map(function(x){ return '<span style="border:1px solid ' + LINE + ';border-radius:99px;padding:6px 14px;font-size:13.5px;font-weight:700;color:' + INK + '"><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + x.f.color + ';margin-right:6px"></i>' + e(x.f.short) + (x.amt ? " · " + man(x.amt) : "") + '</span>'; }).join("") + '</div>' +
       '</div>' +
       '<div style="position:absolute;left:72px;top:735px;width:62px;height:4px;background:' + ORG + '"></div>' +
@@ -1032,10 +1099,10 @@
   function reviewFor(m){
     var D = discOf(m), made = Object.keys(READY).filter(function(k){ return KLAB[k]; }).map(function(k){ return KLAB[k]; });
     var must = [].concat.apply([], m.items.map(function(x){ return (x.f.must || []).map(function(a){ return a.inst.split(" · ")[0] + " " + pc(a.pct); }); }));
-    var rm = {cust: m.cust, pb: m.pb, org: m.org, date: m.date, items: m.items, total: m.total, notice: m.notice, basis: m.basis,
+    var rm = {cust: m.cust, pb: m.pb, org: m.org, date: m.date, items: m.items, total: m.total, notice: m.notice, basis: m.basis, prof: m.prof,
               doc: "준법감시 심의 요청서 — " + titleOf(m) + " 투자 제안서", foot: "준법감시 심의 요청 · " + maskN(m.cust) + " 고객 제안서 · " + m.date};
     var head = hTitle("📝 준법감시 심의 요청서", titleOf(m) + " 투자 제안서") +
-      tbl({cols: ["항목", "내용"], rows: [["요청자", byLine(m) || "–"], ["요청일", m.date], ["고객", maskN(m.cust) + " 고객님"],
+      tbl({cols: ["항목", "내용"], rows: [["요청자", byLine(m) || "–"], ["요청일", m.date], ["고객", maskN(m.cust) + " 고객님"], ["투자성향", m.prof ? m.prof + " — 성향에 맞는 상품·주식 비중만 담음" : "신규 고객(성향 확인 전) — 오늘 기본폼"],
         ["대상 상품", m.items.map(function(x){ return x.f.short + (x.amt ? " " + man(x.amt) : ""); }).join(" · ") + (m.total ? " (합계 " + man(m.total) + ")" : "")]]
         .concat(must.length ? [["PB 추천 종목", must.join(" · ")]] : [])
         .concat([["자료 종류", (made.length ? made.join(" · ") : "풀버전 PDF") + " — 내용은 모두 같은 원본에서 만듦"], ["별첨", "제안서 전체(표지~마지막 쪽)를 이 요청서 뒤에 붙임"],
@@ -1224,6 +1291,7 @@
       T(s, titleOf(m) + " 투자 제안서", {x: 0.698, y: 1.763, w: 9.4, h: 1.3, fontSize: 32, bold: true, color: "003863"});
       if (m.total) T(s, [{text: "제안 금액  ", options: {fontSize: 14, color: "48535B"}}, {text: man(m.total), options: {fontSize: 22, bold: true, color: "003863"}}], {x: 0.698, y: 3.2, w: 9, h: 0.5});
       T(s, m.items.map(function(x){ return x.f.short + (x.amt ? " " + man(x.amt) : ""); }).join("   ·   "), {x: 0.698, y: 3.75, w: 9.4, h: 0.4, fontSize: 12, color: "48535B"});
+      if (m.prof) T(s, "고객 투자성향 " + m.prof + " · 투자성향에 맞는 상품만 담음", {x: 0.698, y: 4.18, w: 9.4, h: 0.35, fontSize: 12, color: "48535B"});
       s.addShape(P.ShapeType.line, {x: 0.795, y: 4.917, w: 0.802, h: 0, line: {color: "F58220", width: 2.5}});
       T(s, byLine(m) || "담당 PB", {x: 0.698, y: 5.25, w: 5.06, h: 0.375, fontSize: 16, bold: true, color: "48535B"});
       T(s, ym(), {x: 0.698, y: 5.665, w: 5.06, h: 0.375, fontSize: 14, color: "48535B"});
@@ -1400,28 +1468,29 @@
       "제안자 이름과 소속은 한 번 넣으면 이 휴대폰이 기억해서 다음부터 자동으로 들어가요.",
       "직함(PB·팀장·지점장 등)을 안 쓰면 이름 뒤에 「PB」를 붙여 줘요."],
     amt: ["상품마다 금액을 만원 단위로 적거나 칩(1천만~3억)을 눌러요. 그 금액으로 종목별 금액·이자·위기 때 줄어드는 돈이 원 단위로 계산돼요.",
-      "🎚 위험 정도(주식·연금): ⚖️ 보통 = 오늘 기본폼 그대로 · 🛡 안전 = 위험자산의 절반을 현금성(CD금리)으로 · 🔥 적극 = 안전자산의 절반을 위험자산으로(DC·IRP는 70% 한도 안). 고른 단계가 한 장·PDF·PPT에 그대로 들어가요.",
+      "🧭 고객 투자성향(5단계 + 신규)을 먼저 고르면 성향에 맞는 상품만 열리고, 주식·연금 폼의 주식 비중도 성향에 맞춰 저절로 정해져요. 정한 비중이 한 장·PDF·PPT에 그대로 들어가요.",
       "💱 국내+해외 주식은 원화(국내 상장 ETF)로 할지, 환전해서 미국 상장 ETF로 할지 고를 수 있어요. 세금 방식이 달라요.",
       "⭐ 추천 종목·ETF를 넣으면 넣은 % 만큼 기본 포트를 원래 비율 그대로 줄여 합계 100%를 맞춰요. 왜 추천하는지는 앱 자료로 자동으로 써 줘요.",
       "개인연금·DC·IRP는 국내 상장 ETF만 담을 수 있어요."],
-    make: ["📲 고객에게 보여 주기 — 상담 자리에서 휴대폰을 고객에게 건네는 화면이에요. 큰 글씨 카드를 옆으로 넘기고, 고객이 금액과 위험 정도를 직접 눌러 보면 숫자가 바로 바뀌어요. 닫을 땐 ✕를 두 번.",
-      "그 화면 마지막 장의 🔗 동료 PB에게 보내기는 고른 상품·금액·위험 정도·추천 종목만 링크로 보내요. 고객 이름은 안 담겨요. 받은 PB가 열면 같은 세팅에 자기 이름·소속이 들어가요.",
+    make: ["📲 고객에게 보여 주기 — 상담 자리에서 휴대폰을 고객에게 건네는 화면이에요. 큰 글씨 카드를 옆으로 넘기고, 고객이 금액을 직접 눌러 보면 숫자가 바로 바뀌어요. 닫을 땐 ✕를 두 번.",
+      "그 화면 마지막 장의 🔗 동료 PB에게 보내기는 고른 상품·금액·투자성향·추천 종목만 링크로 보내요. 고객 이름은 안 담겨요. 받은 PB가 열면 같은 세팅에 자기 이름·소속이 들어가요.",
       "📱 한 장 = 카톡으로 보내는 그림 한 장 · 📄 PDF = 표지·시장·상품별 분석·모의 계산·유의사항까지 다 · 📊 PPT(고칠 수 있는 판) = 글·표·차트를 PPT에서 직접 고침 · 🖼️ 그림판 PPT = 어디서 열어도 똑같이 보임.",
       "버튼을 한 번 누르면 만들고, 초록으로 바뀐 뒤 한 번 더 누르면 저장·공유 창이 떠요(아이폰은 누른 순간에만 공유 창이 열려서 그래요).",
       "모든 출력물 맨 끝에는 위험고지가 들어가요. 고객에게 드리기 전 숫자와 상품 조건을 한 번 더 확인해 주세요."],
-    tier: "주식·연금 제안의 위험 정도를 세 단계로 골라요.\n⚖️ 보통 = 오늘 기본폼 그대로예요.\n🛡 안전 = 위험자산(주식·금) 몫의 절반을 현금성(CD금리 ETF)으로 옮겨요.\n🔥 적극 = 안전자산(현금성·회사채) 몫의 절반을 위험자산으로 옮겨요. DC·IRP는 법정 한도 70%를 넘지 않아요.\n이미 위험자산이 100%(또는 70% 한도)면 적극은 고를 수 없어요.\n과거 계산·위기 때 숫자도 고른 단계로 다시 계산돼서 한 장·PDF·PPT에 그대로 들어가요.",
+    prof: "고객의 투자성향(미래에셋증권 투자자 유형 5단계)을 먼저 골라요.\n🔥 성장형 = 모든 상품(1등급까지) · 해외 주식·브라질국채도 가능해요.\n🚀 성장추구형 = 2·3등급까지 · 국내 주식·ELS 가능해요.\n⚖️ 위험중립형 = 4등급까지 · 미국채 가능해요.\n🌱 안정추구형 = 5등급까지.\n🛡 안정형 = 6등급만 · 국고채·현금성.\n고른 성향에 안 맞는 상품은 잠기고, 추천 종목도 등급이 안 맞으면 담을 수 없어요.\n주식·연금 폼의 주식(위험자산) 비중은 성향에 맞춰 저절로 정해져요: 성장형은 적극적으로, 성장추구형은 오늘 기본폼, 위험중립형은 절반, 안정추구형은 ¼, 안정형은 주식 없이 현금성으로.\n🆕 신규 고객은 성향을 아직 모르니 예외로 모두 열어 두고 오늘 기본폼으로 만들어요.\n국내 ETF 등급은 이름으로 추정한 것이라 운용사 표기를 꼭 확인해 주세요.",
     fx: "💴 원화로 = 국내 상장 ETF(TIGER 미국S&P500 등)로 담아요. 환전이 없고, 팔아서 남은 돈은 배당소득으로 15.4% 세금(금융소득종합과세 대상)이에요.\n💵 환전해서 = 미국 상장 ETF(SPY·QQQ·GLD 등)를 달러로 담아요. 팔아서 남은 돈은 1년에 250만원까지 빼고 22% 양도세(분리과세)예요.\n고른 방식에 맞춰 담을 ETF와 세금 설명이 바뀌어요.",
     must: "고객에게 꼭 넣고 싶은 종목·ETF를 검색해서 % 를 적어요(여러 개 가능).\n넣은 % 만큼 나머지 기본 포트를 원래 비율 그대로 줄여서 합계 100%를 맞춰요. 막대에서 줄어든 칸은 옛 % 가 흐리게 보여요.\n왜 추천하는지는 종목리포트·ETF 구성·실적·애널리스트·뉴스·시황 테마로 자동으로 써 줘요.\n개인연금·DC·IRP는 국내 상장 ETF만 담을 수 있고, DC·IRP에서 채권형·TDF는 「안전형」에 체크하면 안전자산 칸에서 깎아요.",
     sim: "모든 제안서 맨 끝에 들어가는 위험고지 문구를 확인하고 심의필을 관리하는 칸이에요.\n① 아래 원문을 읽어 보고 ② 「심의 요청서 PDF」를 받아 준법감시 부서에 내요.\n③ 받은 심의필 번호와 유효기간을 넣으면 한 장·PDF·PPT 모두에 저절로 찍혀요.\n유효기간이 지나거나 문구가 바뀌면 번호가 자동으로 빠지고 여기서 알려 줘요. 번호는 꼭 회사에서 받은 것만 넣어 주세요."
   };
   function draw(){
     var w = document.getElementById("ppw"); if (!w || !DATA) return;
-    ST.sel = ST.sel.filter(function(k){ return !!form(k); });
+    ST.sel = ST.sel.filter(function(k){ return !!form(k) && formOK(k); });
     var M = DATA.market || {};
     var h = '<section data-xc="1" class="card pp-top"><h3>📋 오늘의 기본폼</h3>' + notes(JOY.forms()) + '<p class="pp-tip" style="margin-top:-4px">' + e(DATA.basis || "") + '</p>' +
       '<div class="pp-reg"><span class="' + (M.us_up ? "ok" : "no") + '">🇺🇸 ' + (M.us_up ? "상승 추세" : "조심") + '</span><span class="' + (M.kr_up ? "ok" : "no") + '">🇰🇷 ' + (M.kr_up ? "상승 추세" : "회복 전") + '</span><span class="mut">' + e(String(DATA.at || "").slice(5).replace("-", "/")) + ' 갱신</span></div>' +
-      gUI() + '<p class="pp-tip">고를 상품을 누르세요 · 여러 개 함께 골라도 됨</p><div class="pp-grid">' + DATA.forms.map(function(f){ var on = ST.sel.indexOf(f.key) >= 0, GB = gBadge(f);
-        return '<button type="button" class="pp-f' + (on ? " on" : "") + '" data-k="' + f.key + '" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small>' + e(f.headline.replace(/ 제안임$/, "")) + '</small>' + (on ? '<em>✓</em>' : '') + '<span class="pp-gb ' + GB.c + '" id="ppgb_' + f.key + '">' + GB.h + '</span></button>'; }).join("") + '</div><div id="ppmix">' + mixUI() + '</div></section>';
+      profUI() + gUI() + '<p class="pp-tip">' + (profSet() ? (ST.prof ? "「" + e(profName()) + "」 고객에게 맞는 상품만 열려 있음 · 여러 개 함께 골라도 됨" : "신규 고객 — 성향 확인 전이라 모든 상품이 열려 있음 · 여러 개 함께 골라도 됨") : "🧭 위에서 고객 투자성향을 먼저 골라 주세요") + '</p><div class="pp-grid">' + DATA.forms.map(function(f){ var on = ST.sel.indexOf(f.key) >= 0, GB = gBadge(f), ok = formOK(f.key);
+        if (!ok) return '<button type="button" class="pp-f lk" data-k="' + f.key + '" data-lk="1" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small class="pp-lk">' + e(lockTxt(f.key)) + '</small></button>';
+        return '<button type="button" class="pp-f' + (on ? " on" : "") + '" data-k="' + f.key + '" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small>' + e(formX(f.key) ? formX(f.key).headline.replace(/ 제안임$/, "") : f.headline.replace(/ 제안임$/, "")) + '</small>' + (on ? '<em>✓</em>' : '') + '<span class="pp-gb ' + GB.c + '" id="ppgb_' + f.key + '">' + GB.h + '</span></button>'; }).join("") + '</div><div id="ppmix">' + mixUI() + '</div></section>';
     h += '<section data-xc="1" class="card"><h3>✍️ 누구에게 · 누가</h3>' + notes(JOY.who) + '<div class="pp-in">' +
       '<label>고객 이름<input id="ppcust" maxlength="20" placeholder="예: 홍길동" value="' + e(ST.cust) + '"></label>' +
       '<label>제안자 이름<input id="pppb" maxlength="20" placeholder="예: 김OO PB" value="' + e(ME.pb || "") + '"></label>' +
@@ -1434,7 +1503,7 @@
         '<div class="pp-tot">합계 <b id="pptot">' + (total() ? man(total()) : "–") + '</b></div>'
       : '<p class="mut">위에서 상품을 먼저 골라 주세요.</p>') + '</section>';
     h += '<section data-xc="1" class="card"><h3>📤 만들기</h3>' + notes(JOY.make) + '<p class="pp-tip" style="margin-top:-4px">휴대폰에서 바로 만듦 · 돈 안 듦' + (simState().ok ? ' · ⚖️ 심의필 ' + e(simText()) + ' 찍힘' : ' · <span style="color:#ff7a6e">⚠️ 심의필 없음 — 위 「⚖️ 위험고지 · 심의필」에서 받아 넣어 주세요</span>') + '</p><div class="pp-go">' +
-      '<button type="button" id="ppshow" class="pp-show">📲 고객에게 보여 주기 <small>큰 글씨 카드 · 넘겨 보기 · 고객이 금액·위험 정도를 직접 눌러 봄</small></button>' +
+      '<button type="button" id="ppshow" class="pp-show">📲 고객에게 보여 주기 <small>큰 글씨 카드 · 넘겨 보기 · 고객이 금액을 직접 눌러 봄</small></button>' +
       '<button type="button" data-mk="png" class="main">📱 한 장 <small>카톡 전송용 그림</small></button>' +
       '<button type="button" data-mk="pdf">' + BTNL.pdf + '</button>' +
       '<button type="button" data-mk="ppt">' + BTNL.ppt + '</button>' +
@@ -1446,9 +1515,20 @@
     bind(); preview(); ensureReasons().then(function(){ preview(); });
   }
   var MKT = {KR: "한국", US: "미국", JP: "일본", CN: "중국", HK: "홍콩"};
+  // 🧭 고객 투자성향 고르기 (5단계 + 신규)
+  function profUI(){
+    return '<div class="pp-pf"><div class="pp-ol"><span data-tip="' + e(JOY.prof) + '">🧭 고객 투자성향 ⓘ</span>' + (profSet() ? '' : ' <span class="pp-need">먼저 골라 주세요</span>') + '</div><div class="pp-pg">' +
+      [5, 4, 3, 2, 1, 0].map(function(p){ return '<button type="button" data-pr="' + p + '" class="p' + p + (ST.prof === p ? " on" : "") + '"><b>' + PROF_IC[p] + ' ' + PROF[p] + '</b><small>' + PROF_SUB[p] + '</small></button>'; }).join("") + '</div></div>';
+  }
+  function profLine(k){
+    var f = baseX(k); if (!f) return "";
+    var R = riskyOf(f.alloc), t = tierOf(k);
+    return '<div class="pp-pl2"><b>' + (ST.prof ? PROF_IC[ST.prof] + " " + e(profName()) : "🆕 신규 고객") + '</b> → 위험자산(주식·금) <b>' + pc(R) + '</b>' +
+      (!ST.prof ? ' · 오늘 기본폼 그대로' : t === "normal" && ST.prof === 5 ? ' · 오늘 기본폼(이미 위험자산 최대)' : t === "normal" ? ' · 오늘 기본폼' : '') + '</div>';
+  }
   function optUI(k, f){
     if (!EQ[k]) return "";
-    var o = opt(k), h2 = tierUI(k);
+    var o = opt(k), h2 = profLine(k);
     if (k === "gl_stock") h2 += '<div class="pp-ol"><span data-tip="' + e(JOY.fx) + '">💱 해외 투자는 어떻게? ⓘ</span></div><div class="pp-md">' +
       [["krw", "💴 원화로", "국내 상장 ETF · 환전 없음"], ["usd", "💵 환전해서", "미국 상장 ETF · 달러로"]].map(function(x){ return '<button type="button" data-md="' + x[0] + '" data-mk2="' + k + '"' + (o.mode === x[0] ? ' class="on"' : '') + '><b>' + x[1] + '</b><small>' + x[2] + '</small></button>'; }).join("") + '</div>';
     var only = {pension: 1, dc: 1, irp: 1}[k], A = amtOf(k);
@@ -1461,21 +1541,6 @@
       '<div class="pp-pl" id="pppl_' + k + '">' + planHTML(k) + '</div>' +
       '<p class="pp-tip" style="margin:4px 0 0">' + (only ? "연금·퇴직연금 계좌는 국내 상장 ETF만 담을 수 있음 (개별 주식·해외 상장 불가)" + (RET[k] ? " · 채권형·TDF 등은 「안전형」에 체크하면 안전자산 칸에서 깎음" : "") : "넣은 % 만큼 기본 포트를 원래 비율 그대로 줄여 합계 100%를 맞춤") + '</p>';
     return '<div class="pp-op">' + h2 + '</div>';
-  }
-  // 🎚 위험 정도 고르기 (주식·연금 폼) — 건네기 모드와 같은 값
-  function tierUI(k){
-    var f0 = form(k); if (!f0 || !f0.sim || !EQ[k]) return "";
-    var o = opt(k), cur = o.tier || "normal", base = baseRisky(k);
-    return '<div class="pp-ol"><span data-tip="' + e(JOY.tier) + '">🎚 위험 정도 ⓘ</span></div><div class="pp-md pp-tr">' + ["safe", "normal", "bold"].map(function(t){ var ok = tierOK(f0, t);
-      return '<button type="button" data-tr="' + t + '" data-mk2="' + k + '"' + (cur === t ? ' class="on"' : '') + (ok ? '' : ' disabled') + '><b>' + TIER[t] + '</b><small>' + tierSub(k, t, base) + '</small></button>'; }).join("") + '</div>';
-  }
-  function baseRisky(k){ var f0 = form(k), o = ST.opt[k] || {}, al = f0.alloc; if (k === "gl_stock" && o.mode === "usd" && f0.alt && f0.alt.usd) al = f0.alt.usd.alloc; return riskyOf(al); }
-  function tierSub(k, t, base){
-    var f0 = form(k), T = f0 && f0.sim && f0.sim.tiers && f0.sim.tiers[t];
-    if (t === "normal") return "위험자산 " + pc(base) + " · 오늘 기본폼";
-    if (!f0.sim.tiers) return "준비 중";
-    if (!T) return t === "bold" ? (f0.sim.tier_cap && base >= f0.sim.tier_cap ? "이미 법정 한도 " + f0.sim.tier_cap + "%" : "이미 위험자산 " + pc(base)) : "준비 중";
-    return "위험자산 " + pc(T.risky);
   }
   // 지정 비중 → 기본 포트가 어떻게 줄어드는지 한눈에
   function planHTML(k){
@@ -1504,6 +1569,7 @@
     var o = opt(k); if (!m || !m.name) return;
     if ({pension: 1, dc: 1, irp: 1}[k] && ((m.mkt && m.mkt !== "한국") || m.etf === false)) toast("연금·퇴직연금은 국내 상장 ETF만 담을 수 있어요 — 확인 후 쓰세요");
     if ((o.must || []).some(function(x){ return x.name === m.name && (x.code || "") === (m.code || ""); })){ toast("이미 넣은 종목이에요"); return; }
+    if (!mustOK(m)){ var G = mustGrade(m); toast("🔒 " + m.name + " — " + G.why + " " + G.g + "등급(" + GRADE[G.g] + ")" + (G.est ? " 추정" : "") + "이라 「" + profName() + "」 고객에게 담을 수 없어요"); return; }
     var safe = RET[k] && /채권|국채|회사채|TDF|금리|단기|머니마켓|MMF|CD/i.test(m.name);
     o.must = (o.must || []).concat([{name: m.name, code: m.code || "", mkt: m.mkt || "", etf: !!m.etf, pct: 10, safe: safe, sym: m.sym || ""}]).slice(0, 20); keep(); resetBtns();
     ensureReasons().then(function(){ preview(); });
@@ -1522,7 +1588,10 @@
   }
   function bind(){
     var w = document.getElementById("ppw");
-    [].forEach.call(w.querySelectorAll(".pp-f"), function(b){ b.onclick = function(){ var k = b.dataset.k, i = ST.sel.indexOf(k); if (i >= 0) ST.sel.splice(i, 1); else { ST.sel.push(k); if (gOn() && !+ST.amt[k] && +GL.l) ST.amt[k] = +GL.l; } keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    [].forEach.call(w.querySelectorAll("[data-pr]"), function(b){ b.onclick = function(){ ST.prof = +b.dataset.pr; var gone = profFix(); keep(); resetBtns();
+      if (gone.length) toast("🧭 " + profName() + "에 맞지 않아 뺐어요: " + gone.slice(0, 4).join(", ") + (gone.length > 4 ? " 외 " + (gone.length - 4) : ""));
+      var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    [].forEach.call(w.querySelectorAll(".pp-f"), function(b){ b.onclick = function(){ if (b.dataset.lk){ toast(lockTxt(b.dataset.k)); return; } var k = b.dataset.k, i = ST.sel.indexOf(k); if (i >= 0) ST.sel.splice(i, 1); else { ST.sel.push(k); if (gOn() && !+ST.amt[k] && +GL.l) ST.amt[k] = +GL.l; } keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     // 🎯 목표에서 거꾸로 — 입력은 다시 그리지 않고 배지만 바꿈(입력 칸 초점 유지)
     [].forEach.call(w.querySelectorAll("[data-gk]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d.]/g, ""); if (inp.value !== v) inp.value = v; GL[inp.dataset.gk] = v; gkeep(); gUpd();
       if (inp.dataset.gk === "y") [].forEach.call(w.querySelectorAll("[data-gy]"), function(x){ x.classList.toggle("on", +x.dataset.gy === +v); }); resetBtns(); preview(); }; });
@@ -1543,7 +1612,6 @@
     [].forEach.call(w.querySelectorAll("[data-mk]"), function(b){ b.onclick = function(){ make(b.dataset.mk, b); }; });
     var redraw = function(){ var y = window.scrollY; draw(); window.scrollTo(0, y); };
     [].forEach.call(w.querySelectorAll("[data-md]"), function(b){ b.onclick = function(){ opt(b.dataset.mk2).mode = b.dataset.md; keep(); resetBtns(); redraw(); }; });
-    [].forEach.call(w.querySelectorAll("[data-tr]"), function(b){ b.onclick = function(){ if (b.disabled) return; opt(b.dataset.mk2).tier = b.dataset.tr; keep(); resetBtns(); redraw(); }; });
     var sh = document.getElementById("ppshow"); if (sh) sh.onclick = function(){ showOpen(); };
     [].forEach.call(w.querySelectorAll("[data-mx]"), function(b){ b.onclick = function(){ opt(b.dataset.mx).must.splice(+b.dataset.mi, 1); keep(); resetBtns(); redraw(); }; });
     var upPlan = function(k){ var pl = document.getElementById("pppl_" + k); if (pl) pl.innerHTML = planHTML(k); var A = amtOf(k);
@@ -1734,9 +1802,9 @@
   function showDraw(first){
     var x = document.getElementById("ppx"); if (!x) return;
     var k = PX.k, f = formX(k), A = amtOf(k); if (!f){ showClose(); return; }
-    var S = f.sim || {}, kind = S.kind, f0 = form(k), o = opt(k), cur = o.tier || "normal";
+    var S = f.sim || {}, kind = S.kind, f0 = form(k), o = opt(k), cur = tierOf(k);
     var cover = '<section class="px-s"><div class="px-in px-cv" style="--fc:' + f.color + '"><p class="px-for">' + e(ST.cust ? ST.cust.trim() + " 고객님을 위한" : "고객님을 위한") + '</p><h1>' + e(f.icon) + ' ' + e(f.title) + '</h1>' +
-      '<div class="px-amt">' + man(A) + '</div>' + (EQ[k] && cur !== "normal" ? '<div class="px-tg">' + TIER[cur] + ' 단계</div>' : '') +
+      '<div class="px-amt">' + man(A) + '</div>' + (ST.prof ? '<div class="px-tg">' + PROF_IC[ST.prof] + ' ' + e(profName()) + ' 맞춤</div>' : '') +
       (function(){ var gl = gLine(f); return gl ? '<p class="px-goal">' + e(gl) + '</p>' : ''; })() +
       '<p class="px-hl">' + e(String(f.headline || "").replace(/ 제안임$/, "")) + '</p>' + (f.fit ? '<p class="px-fit">이런 분께 · ' + e(f.fit) + '</p>' : '') +
       '<p class="px-sw">옆으로 넘겨 보세요 →</p></div></section>';
@@ -1744,7 +1812,7 @@
     var link = '<section class="px-s"><div class="px-in"><h2>이 안으로 정리하면</h2>' +
       (function(){ var L = simLine(f, A); return L ? '<div class="px-big">' + e(L.big) + '</div><p class="px-cap">' + e(L.lab) + '</p><p class="px-note">' + e(L.sub) + '</p>' : ''; })() +
       '<div class="px-go"><button type="button" data-mk="png" class="main">📨 이 안 카톡으로 받기<small>한 장 그림으로 만들어 보내 드림</small></button>' +
-      '<button type="button" id="pxlink">🔗 동료 PB에게 이 세팅 보내기<small>고른 상품·금액·위험 정도·추천 종목만 · 고객 이름은 안 담김</small></button></div></div></section>';
+      '<button type="button" id="pxlink">🔗 동료 PB에게 이 세팅 보내기<small>고른 상품·금액·투자성향·추천 종목만 · 고객 이름은 안 담김</small></button></div></div></section>';
     var MX = ST.sel.length > 1 ? mixCalc(model().items) : null, mixS = [];
     if (MX){ var mr = mixRows(MX), mmx = Math.max.apply(null, mr.map(function(r){ return Math.abs(r.st.mdd); }).concat([1]));
       mixS.push(slide("섞으면 어땠나", (MX.A ? '<div class="px-big dn">' + signWon(MX.A * MX.mix.mdd / 100) + '</div><p class="px-cap">섞은 ' + man(MX.A) + '이 가장 크게 잠깐 줄었을 때 (' + ym(MX.mix.at) + ')</p>' : '') +
@@ -1753,7 +1821,7 @@
     var slides = [cover].concat(body).concat(mixS).concat([link]);
     var n = slides.length; PX.i = Math.min(PX.i, n - 1);
     var chips = ST.sel.length > 1 ? '<div class="px-fs">' + ST.sel.map(function(q){ var g = form(q); return g ? '<button type="button" data-pf="' + q + '"' + (q === k ? ' class="on"' : '') + ' style="--fc:' + g.color + '">' + e(g.icon) + ' ' + e(g.short) + '</button>' : ''; }).join("") + '</div>' : '';
-    var tiers = EQ[k] && f0.sim ? '<div class="px-seg">' + ["safe", "normal", "bold"].map(function(t){ return '<button type="button" data-pt="' + t + '"' + (cur === t ? ' class="on"' : '') + (tierOK(f0, t) ? '' : ' disabled') + '>' + TIER[t] + '</button>'; }).join("") + '</div>' : '';
+    var tiers = '';   // 11/05 위험 정도는 고객 투자성향으로 정해짐 (고르는 칸 없앰)
     var amts = '<div class="px-am">' + AMTS.map(function(a){ return '<button type="button" data-pa="' + a[0] + '"' + (+ST.amt[k] === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div>';
     x.innerHTML = '<div class="px-top">' + chips + '<button type="button" class="px-x" id="pxx" aria-label="닫기">✕</button></div>' +
       '<div class="px-ctl">' + amts + tiers + '</div>' +
@@ -1780,16 +1848,16 @@
   function b64e(str){ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
   function b64d(str){ str = str.replace(/-/g, "+").replace(/_/g, "/"); while (str.length % 4) str += "="; return decodeURIComponent(escape(atob(str))); }
   function settingCode(){
-    var o = {v: 1, s: ST.sel.slice(), a: {}, o: {}};
+    var o = {v: 1, s: ST.sel.slice(), a: {}, o: {}}; if (profSet()) o.p = ST.prof;
     ST.sel.forEach(function(k){ if (+ST.amt[k]) o.a[k] = +ST.amt[k]; var q = ST.opt[k]; if (!q) return; var y = {};
-      if (q.mode && q.mode !== "krw") y.m = q.mode; if (q.tier && q.tier !== "normal") y.t = q.tier;
+      if (q.mode && q.mode !== "krw") y.m = q.mode;
       if (q.must && q.must.length) y.u = q.must.map(function(m){ var z = {n: m.name, p: +m.pct || 0}; if (m.code) z.c = m.code; if (m.mkt) z.k = m.mkt; if (m.sym) z.y = m.sym; if (m.etf) z.e = 1; if (m.safe) z.f = 1; return z; });
       if (Object.keys(y).length) o.o[k] = y; });
     return b64e(JSON.stringify(o));
   }
   function shareSetting(btn){
     var url = location.origin + location.pathname + "#prop~" + settingCode(), names = ST.sel.map(function(k){ var f = form(k); return f ? f.short : k; }).join(" · ");
-    var text = "📝 제안서 세팅 — " + names + "\n열면 같은 상품·금액·위험 정도로 바로 만들 수 있어요 (이름·소속은 각자 것으로)";
+    var text = "📝 제안서 세팅 — " + names + "\n열면 같은 상품·금액·투자성향으로 바로 만들 수 있어요 (이름·소속은 각자 것으로)";
     var done = function(m){ btn.innerHTML = m + '<small>고객 이름은 안 담겼어요</small>'; };
     if (navigator.share){ navigator.share({title: "제안서 세팅", text: text, url: url}).then(function(){ done("✓ 보냈어요"); }).catch(function(){}); return; }
     try { navigator.clipboard.writeText(text + "\n" + url).then(function(){ done("✓ 링크를 복사했어요"); }, function(){ prompt("이 링크를 복사해 보내세요", url); }); } catch(z) { prompt("이 링크를 복사해 보내세요", url); }
@@ -1800,15 +1868,15 @@
     var o; try { o = JSON.parse(b64d(m[1])); } catch(z) { toast("세팅 링크를 읽지 못했어요"); return; }
     if (!o || o.v !== 1 || !Array.isArray(o.s)) return;
     var ok = function(k){ return typeof k === "string" && !!form(k); }, str = function(v, n){ return String(v == null ? "" : v).slice(0, n || 40); };
+    if (o.p != null && +o.p >= 0 && +o.p <= 5) ST.prof = +o.p; else delete ST.prof;
     var sel = o.s.filter(ok).slice(0, 9); if (!sel.length) return;
     ST.sel = sel; ST.amt = {}; ST.opt = {};
     sel.forEach(function(k){ var a = +((o.a || {})[k]); if (a > 0 && a < 1e7) ST.amt[k] = Math.round(a);
       var y = (o.o || {})[k] || {}, q = {mode: y.m === "usd" ? "usd" : "krw", must: []};
-      if (y.t === "safe" || y.t === "bold") q.tier = y.t;
       (Array.isArray(y.u) ? y.u : []).slice(0, 20).forEach(function(z){ if (!z || !z.n) return; var mm = {name: str(z.n), pct: Math.max(0, Math.min(100, +z.p || 0))};
         if (z.c) mm.code = str(z.c, 16); if (z.k) mm.mkt = str(z.k, 8); if (z.y) mm.sym = str(z.y, 20); if (z.e) mm.etf = true; if (z.f) mm.safe = true; q.must.push(mm); });
       ST.opt[k] = q; });
-    ST.cust = ""; keep();
+    ST.cust = ""; profFix(); keep();
     toast("동료가 보낸 제안서 세팅을 불러왔어요 — 이름·소속은 내 것으로");
   }
 
@@ -1845,6 +1913,9 @@
     ".pp-go button small{font-size:11.5px;color:var(--sub);font-weight:500}.pp-go button.main{background:var(--c,#7c9cff);color:#111;border-color:transparent}.pp-go button.main small{color:rgba(0,0,0,.65)}" +
     ".pp-go button.ready{background:#22a06b;color:#fff;border-color:transparent}.pp-go button.ready small{color:rgba(255,255,255,.85)}.pp-go button:disabled{opacity:.7}" +
     ".pp-op{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.pp-ol{font-size:12.5px;font-weight:800;margin:8px 0 5px}" +
+    ".pp-pf{margin:4px 0 10px}.pp-pg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.pp-pg button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px 9px;font:inherit;min-width:0}" +
+    ".pp-pg button b{font-size:13px;white-space:nowrap}.pp-pg button small{font-size:10.5px;color:var(--sub)}.pp-pg button.on{border-color:#F58220;box-shadow:inset 0 0 0 1px #F58220;background:rgba(245,130,32,.12)}" +
+    ".pp-need{font-size:11px;color:#ff7a6e;font-weight:700}.pp-f.lk{opacity:.45;filter:grayscale(.7)}.pp-f .pp-lk{color:var(--sub)}.pp-pl2{font-size:12.5px;padding:7px 10px;border-radius:10px;background:rgba(245,130,32,.10);margin:4px 0 6px}" +
     ".pp-md{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pp-md button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px 10px;font:inherit}" +
     ".pp-md button small{font-size:11px;color:var(--sub)}.pp-md button.on{border-color:var(--fc);box-shadow:inset 0 0 0 1px var(--fc)}" +
     ".pp-mw{display:inline-block;margin-left:6px;font-style:normal;font-size:11.5px;color:var(--sub)}.pp-sf{display:flex;align-items:center;gap:3px;font-size:11.5px;color:var(--sub);flex:none}" +

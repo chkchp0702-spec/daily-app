@@ -439,6 +439,7 @@ REGION = {"spx": "미국 주식", "ndx": "미국 주식", "k200": "한국 주식
 # 10/29 A10/29-1 건네기 모드 「안전 · 보통 · 적극」 — 기본폼(보통)에서 한 가지 규칙만 바꿈
 #   안전 = 위험자산 몫의 절반을 현금성(CD금리)으로 · 적극 = 안전자산 몫의 절반을 위험자산으로(비율 그대로, DC·IRP 는 법정 70% 한도 안)
 TIER_CAP = {"dc": 70, "irp": 70}
+TIER_KEEP = {"safe": 0.5, "low": 0.25, "zero": 0.0}   # 위험자산을 몇 배로 남기나 (나머지 → CD금리)
 CD_T = {"k": "cd", "name": "현금성 (CD금리)", "code": "499660", "inst": "TIGER CD금리투자KIS(합성)", "us": "SGOV",
         "why": "매일 이자가 붙는 현금성 ETF — 위험을 줄인 몫을 맡겨 둠", "kind": "안전", "color": "#3fb28f"}
 
@@ -448,16 +449,23 @@ def tier_alloc(alloc, tier, cap=None):
     risky = [a for a in al if a.get("kind") == "위험"]
     safe = [a for a in al if a.get("kind") != "위험"]
     R, S = sum(a["pct"] for a in risky), sum(a["pct"] for a in safe)
-    if tier == "safe":
-        if R <= 0:
+    if tier in TIER_KEEP:
+        # 11/05 투자성향: 위험중립형=safe(위험자산 ½) · 안정추구형=low(¼) · 안정형=zero(현금성 CD금리 100% — 6등급만)
+        if R <= 0 and tier != "zero":
             return None
-        mv = R * 0.5
+        f0 = TIER_KEEP[tier]
+        mv = R * (1 - f0)
         for a in risky:
-            a["pct"] = a["pct"] * 0.5
+            a["pct"] = a["pct"] * f0
         cd = next((a for a in al if a["k"] == "cd"), None)
         if cd is None:
             cd = dict(CD_T, pct=0)
             al.append(cd)
+        if tier == "zero":
+            for a in safe:
+                if a is not cd:
+                    mv += a["pct"]
+                    a["pct"] = 0
         cd["pct"] += mv
     else:
         mv = S * 0.5
@@ -470,7 +478,7 @@ def tier_alloc(alloc, tier, cap=None):
         for a in risky:
             a["pct"] = a["pct"] + mv * a["pct"] / R
     r1 = lambda v: math.floor(v * 10 + 0.5) / 10      # 앱(propose.js)과 같은 반올림
-    Rt = r1(R * 0.5 if tier == "safe" else R + mv)
+    Rt = r1(R * TIER_KEEP[tier] if tier in TIER_KEEP else R + mv)
     for a in al:
         a["pct"] = r1(a["pct"])
     al = [a for a in al if a["pct"] > 0]
@@ -492,7 +500,7 @@ def sim_equity(f, k, P=None, tiers=True):
     out = _sim_equity(f, k, P)
     if out and tiers:
         T = {}
-        for t in ("safe", "bold"):
+        for t in ("safe", "bold", "low", "zero"):
             al2 = tier_alloc(f["alloc"], t, TIER_CAP.get(k))
             if not al2:
                 continue
