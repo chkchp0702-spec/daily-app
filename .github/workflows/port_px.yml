@@ -1,0 +1,27 @@
+name: port_px
+# 🧾 11/05: port_px.py 가 바뀌어 push 되면 바로 설계기 일봉(원/달러·분배금 포함)을 받아 올림 — 다음 상품 작업까지 기다리지 않게
+on:
+  push:
+    branches: [main]
+    paths: ["port_px.py", ".github/workflows/port_px.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: products
+  cancel-in-progress: false
+jobs:
+  px:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q yfinance pandas
+      - run: python port_px.py
+      - name: 저장
+        run: |
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          bash scripts/push.sh "🧾 설계기 일봉 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/port_px
