@@ -255,26 +255,40 @@
     }
     return out;
   }
+  /* 🗺 11/05 사용자 「깔끔하게 쫌」 — 칸이 15개라 글자가 잘리고 겹쳤음 → 큰 업종 9개 + 「그 밖」 한 칸 · 칸 안 그림 없앰 ·
+     글자 크기는 칸의 실제 크기에 맞춰(fitMap) — 좁으면 이름은 빼고 숫자만, 아주 작으면 둘 다 뺌(누르면 보임) */
   function mapHtml(d){
     var useKr = d.kr && d.kr.sectors && (liveNow(d.kr) || !(d.us && d.us.sectors) || (kst().getUTCHours() >= 9 && kst().getUTCHours() < 22 && [0, 6].indexOf(kst().getUTCDay()) < 0));
     var J = useKr ? d.kr : d.us; if (!J || !J.sectors) return "";
-    var it = J.sectors.filter(function(s){ return s.n >= 5; }).map(function(s){ return {n: s.name.replace(/\(.*?\)/g, ""), ic: s.icon || "", v: s.r, w: Math.pow(s.n, 0.8), big: (s.big || []).slice(0, 3), up: s.up, down: s.down}; }).sort(function(a, b){ return b.w - a.w; }).slice(0, 15);
-    if (it.length < 6) return "";
+    var all = J.sectors.filter(function(s){ return s.n >= 5; }).map(function(s){ return {n: s.name.replace(/\(.*?\)/g, "").split(/[·\/]/)[0].trim(), ic: s.icon || "", v: s.r, w: Math.pow(s.n, 0.6), cnt: s.n, big: (s.big || []).slice(0, 3), up: s.up, down: s.down}; }).sort(function(a, b){ return b.w - a.w; });
+    if (all.length < 6) return "";
+    var it = all.slice(0, 12);   // 종목 수가 많은 큰 업종 12개만 (작은 업종은 시장 흐름 탭에)
     var W = 100, Hh = 78, R = squarify(it, 0, 0, W, Hh);
-    var cells = R.map(function(r, k){ var big = r.w * r.h > 380, mid = r.w * r.h > 150;
-      return '<div class="h2-tm" data-k="' + k + '" style="left:' + r.x.toFixed(2) + '%;top:' + (r.y / Hh * 100).toFixed(2) + '%;width:' + r.w.toFixed(2) + '%;height:' + (r.h / Hh * 100).toFixed(2) + '%;background:' + heatBg(r.it.v) + '">' + (mid ? '<span>' + (big ? e(r.it.ic) + " " : "") + e(r.it.n.split("·")[0]) + '</span>' : '') + (r.w * r.h > 70 && r.w > 9 ? '<b>' + sg(r.it.v) + '</b>' : '') + '</div>'; }).join("");
+    var cells = R.map(function(r, k){
+      return '<div class="h2-tm" data-k="' + k + '" style="left:' + r.x.toFixed(2) + '%;top:' + (r.y / Hh * 100).toFixed(2) + '%;width:' + r.w.toFixed(2) + '%;height:' + (r.h / Hh * 100).toFixed(2) + '%;background:' + heatBg(r.it.v) + '"><span>' + e(r.it.n) + '</span><b>' + sg(r.it.v) + '</b></div>'; }).join("");
     var when = useKr ? (liveNow(d.kr) ? "지금 " + d.kr.t : md(d.kr.date) + " 마감") : "미국 " + (d.us.t && d.us.t < "12:00" ? md(new Date(Date.parse(d.us.date + "T00:00:00Z") - 864e5).toISOString()) : md(d.us.date)) + " 마감";
     MAPIT = R.map(function(r){ return r.it; });
-    return '<section class="card h2-map"><div class="h2-hd" data-goto="sector"><b>🗺 ' + (useKr ? "🇰🇷 한국" : "🇺🇸 미국") + ' 업종 지도</b><span class="mut">' + e(when) + ' · 넓이 = 종목 수</span></div><div class="h2-tmw">' + cells + '</div><div class="h2-pick" id="h2pick"></div><div class="h2-lg"><span class="dn">■ 내림</span><span>색이 진할수록 많이 움직임</span><span class="up">오름 ■</span></div><p class="note" style="margin:6px 0 0">칸을 누르면 그 업종 대표 종목 · 제목을 누르면 시장 흐름</p></section>';
+    return '<section class="card h2-map"><div class="h2-hd h2-mh" data-goto="sector"><b>' + (useKr ? "🇰🇷 한국" : "🇺🇸 미국") + ' 업종 지도</b><span class="mut">' + e(when) + ' · 큰 업종 ' + it.length + '개 · 칸을 누르면 대표 종목</span></div><div class="h2-tmw" data-nofs>' + cells + '</div><div class="h2-pick" id="h2pick"></div><div class="h2-lg" data-nofs><span class="dn">■ 내림</span><span class="up">오름 ■</span></div></section>';
   }
-  var MAPIT = [];
+  function fitMap(){
+    [].forEach.call(document.querySelectorAll(".h2-tm"), function(c){
+      var w = c.clientWidth, h = c.clientHeight, sp = c.querySelector("span"), b = c.querySelector("b"); if (!w || !sp || !b) return;
+      var vl = (b.textContent || "").length, nl = Math.max(2, (sp.textContent || "").length);
+      var vf = Math.max(10, Math.min(20, h / 2.6, (w - 12) / (vl * 0.7))), nf = Math.max(10, Math.min(14, h / 4, (w - 8) / (nl * 0.95)));
+      b.style.setProperty("font-size", vf.toFixed(1) + "px", "important"); sp.style.setProperty("font-size", nf.toFixed(1) + "px", "important");
+      sp.style.display = (w >= 54 && h >= 46) ? "" : "none";
+      b.style.display = (w >= 36 && h >= 22) ? "" : "none";
+      b.dataset.wfs = sp.dataset.wfs = "1"; b.dataset.f13 = sp.dataset.f13 = "1";
+    });
+  }
+  window.addEventListener("resize", function(){ setTimeout(fitMap, 100); });
   function mapPick(k){   // ⑲ 🎨 11/04 업종 칸 터치 → 대표 종목 3개 (사용자 「지금은 보기만 함」)
     var it = MAPIT[k], box = document.getElementById("h2pick"); if (!it || !box) return;
     [].forEach.call(document.querySelectorAll(".h2-tm.on"), function(x){ x.classList.remove("on"); });
     if (box.dataset.k === String(k)){ box.innerHTML = ""; box.dataset.k = ""; return; }
     var t = document.querySelector('.h2-tm[data-k="' + k + '"]'); if (t) t.classList.add("on");
     box.dataset.k = String(k);
-    box.innerHTML = '<div class="h2-ph"><b>' + e(it.ic + " " + it.n) + ' <span class="' + cls(it.v) + '">' + sg(it.v) + '</span></b><small>오른 ' + (it.up || 0) + ' · 내린 ' + (it.down || 0) + '</small></div>' +
+    box.innerHTML = '<div class="h2-ph"><b>' + e(it.ic + " " + it.n) + ' <span class="' + cls(it.v) + '">' + sg(it.v) + '</span></b><small>' + (it.rest ? '' : '오른 ' + (it.up || 0) + ' · 내린 ' + (it.down || 0)) + '</small></div>' + (it.rest ? '<p class="note" style="margin:0 0 6px">' + e(it.rest.join(" · ")) + '</p>' : '') +
       (it.big.length ? it.big.map(function(x){ return '<button type="button" class="h2-pr" data-op="' + e(x.s) + '"><b>' + e(x.n) + '</b><em>' + e(String(x.s).replace(/\.(KS|KQ)$/, "")) + '</em><span class="' + cls(x.r) + '">' + sg(x.r) + '</span></button>'; }).join("") : '<p class="note">대표 종목 자료가 없어요.</p>');
   }
   document.addEventListener("click", function(ev){ var t = ev.target.closest && ev.target.closest(".h2-tm[data-k]"); if (!t || !t.closest("#h2map")) return; ev.stopPropagation(); ev.preventDefault(); mapPick(+t.dataset.k); }, true);
@@ -333,6 +347,7 @@
       hero.insertAdjacentElement("afterend", disc);
       var pl = b.querySelector("section.card.pl"); (pl || disc).insertAdjacentElement("afterend", map); map.insertAdjacentElement("afterend", cl);
       clientBind(cl);
+      setTimeout(fitMap, 30); setTimeout(fitMap, 600);
       world.querySelector(".card") && world.querySelector(".card").setAttribute("data-cz", "done"); map.querySelector(".card") && map.querySelector(".card").setAttribute("data-cz", "done");
       b.setAttribute("data-h2", String(DT));
       [].forEach.call(rings.querySelectorAll("[data-st]"), function(x){ x.onclick = function(ev){ ev.stopPropagation(); openStory(S, +x.dataset.st); }; });
@@ -398,7 +413,8 @@
     ".h2-d:after{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08)}.h2-d:active{transform:scale(.98)}" +
     /* 지도 */
     ".h2-map{cursor:pointer}.h2-tmw{position:relative;width:100%;aspect-ratio:100/78;border-radius:14px;overflow:hidden}.h2-tm{position:absolute;box-sizing:border-box;border:1.5px solid var(--panel);padding:4px 5px;color:#fff;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}" +
-    ".h2-tm span{font-size:12px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.h2-tm b{font-size:13.5px;font-weight:900;white-space:nowrap}.h2-lg{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub);margin-top:6px}" +
+    ".h2-tm span{font-size:12px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;opacity:.95}.h2-tm b{font-size:13.5px;font-weight:900;white-space:nowrap;letter-spacing:-.5px;line-height:1.15;max-width:100%;overflow:hidden}" +
+    ".h2-mh{display:block!important}.h2-mh b{display:block;font-size:18px}.h2-mh .mut{display:block;font-size:13px;margin-top:2px}.h2-lg{justify-content:space-between}.h2-lg{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub);margin-top:6px}" +
     /* 스토리 */
     "#h2sv{position:fixed;inset:0;z-index:100050;color:#fff;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 10px) 18px calc(env(safe-area-inset-bottom) + 16px);user-select:none;-webkit-user-select:none;animation:svIn .22s ease}@keyframes svIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}" +
     ".sv-bars{display:flex;gap:4px}.sv-bars i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden}.sv-bars i b{display:block;height:100%;width:0;background:#fff}.sv-bars i.done b{width:100%}" +
