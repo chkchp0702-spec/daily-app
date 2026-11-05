@@ -160,8 +160,15 @@
     var items = must.map(function(m){ return {m: m, pct: +m.pct, safe: !!(RET[k] && m.safe)}; });
     var tot = items.reduce(function(s2, x){ return s2 + x.pct; }, 0), warn = [];
     if (tot > 100){ items.forEach(function(x){ x.pct = x.pct * 100 / tot; }); warn.push("지정 비중 합이 100%를 넘어 100%로 맞춤"); }
-    var fr = {}, cut = {};
-    if (RET[k]){   // 위험 70% 한도: 위험형 지정은 위험 칸에서, 안전형 지정은 안전 칸에서 먼저 깎음
+    var fr = {}, cut = {}, sl = slotOf(base);
+    if (sl){   // 🧩 PB 선택 칸: 추천 종목이 먼저 채움 — 모자라면 넣은 % 비율대로 늘리고, 넘치면 나머지 칸을 비율대로 줄임
+      var Ms0 = items.reduce(function(s2, x){ return s2 + x.pct; }, 0), rest0 = 100 - sl.pct;
+      if (Ms0 <= sl.pct){ var up = sl.pct / Ms0; items.forEach(function(x){ x.pct *= up; }); if (Math.abs(up - 1) > 0.001) warn.push("추천 종목 합 " + pc(r1(Ms0)) + " → PB 선택 칸 " + pc(sl.pct) + "에 맞춰 넣은 비율대로 늘림"); fr["위험"] = fr["안전"] = 1; }
+      else { fr["위험"] = fr["안전"] = rest0 ? (100 - Ms0) / rest0 : 0; }
+      if (RET[k]){ var Rr = items.filter(function(x){ return !x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0) + base.filter(function(a){ return a.kind === "위험" && a !== sl; }).reduce(function(s2, a){ return s2 + a.pct * fr["위험"]; }, 0);
+        if (Rr > 70.05) warn.push("위험자산이 법정 한도 70%를 넘음(" + pc(r1(Rr)) + ") — 추천 종목 중 채권형·TDF는 「안전형」에 체크하거나 비중을 줄여 주세요"); }
+      base = base.filter(function(a){ return a !== sl; });
+    } else if (RET[k]){   // 위험 70% 한도: 위험형 지정은 위험 칸에서, 안전형 지정은 안전 칸에서 먼저 깎음
       var T = Rb, Mr = items.filter(function(x){ return !x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0), Ms = items.filter(function(x){ return x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0);
       if (Mr > T){ var sc0 = T / Mr; items.forEach(function(x){ if (!x.safe) x.pct *= sc0; }); warn.push("위험자산 지정이 " + (T >= 70 ? "법정 한도" : "이 제안의 위험자산 몫") + "(" + T + "%)를 넘어 " + T + "%로 줄임"); Mr = T; }
       var rb = Math.max(0, Math.min(T - Mr, 100 - Mr - Ms)), sb = Math.max(0, 100 - Mr - Ms - rb);
@@ -215,11 +222,15 @@
      끈 칸의 몫은 같은 종류(위험/안전)의 남은 칸(시황 테마 칸 빼고)에 비율대로 나눔 · DC·IRP 위험 70% 한도는 그대로
      「내 기본값으로」 = 이 휴대폰의 다음 제안서부터 같은 구성으로 시작 (localStorage pp_core)
      과거 계산은 고른 구성으로 앱에서 다시 셈 — proposal_mkt.py backtest() 와 같은 규칙(같은 port_px 자료 · 매달 첫 거래일 비중 맞춤) */
-  var CORE = [["spx", "🇺🇸", "S&P500"], ["ndx", "💻", "나스닥100"], ["gold", "🥇", "금"]];
-  var CORE_F = {gl_stock: 1, pension: 1, dc: 1, irp: 1};
-  function coreDef(){ try { var d = JSON.parse(localStorage.getItem("pp_core") || "null"); if (d && typeof d === "object") return {spx: d.spx ? 1 : 0, ndx: d.ndx ? 1 : 0, gold: d.gold ? 1 : 0}; } catch(x) {} return {spx: 0, ndx: 0, gold: 0}; }
+  /* 11/05 저녁 사용자 「코스피200 디폴트값도 없애야지」 → 코스피200도 칩으로 · 국내 주식 폼도 같은 방식
+     켠 칸이 하나도 안 남은 몫(위험자산)은 「⭐ PB 선택 칸」으로 비워 두고, 아래 ⭐ 추천 종목·ETF로 채움 (못 채우면 만들기 막음) */
+  var CORE = [["spx", "🇺🇸", "S&P500"], ["ndx", "💻", "나스닥100"], ["k200", "🇰🇷", "코스피200"], ["gold", "🥇", "금"]];
+  var CORE_F = {kr_stock: 1, gl_stock: 1, pension: 1, dc: 1, irp: 1};
+  var SLOT_NM = "⭐ PB 선택 칸";
+  function coreDef(){ try { var d = JSON.parse(localStorage.getItem("pp_core") || "null"); if (d && typeof d === "object") return {spx: d.spx ? 1 : 0, ndx: d.ndx ? 1 : 0, k200: d.k200 ? 1 : 0, gold: d.gold ? 1 : 0}; } catch(x) {} return {spx: 0, ndx: 0, k200: 0, gold: 0}; }
   function coreOf(k){ var o = ST.opt[k]; return (o && o.core) || coreDef(); }
   function coreAllOn(c){ return CORE.every(function(x){ return !!c[x[0]]; }); }
+  function slotOf(al){ return (al || []).filter(function(a){ return a.k === "slot"; })[0] || null; }
   function coreTxt(c){ var on = CORE.filter(function(x){ return c[x[0]]; }).map(function(x){ return x[2]; }); return on.length ? on.join("·") : "지수·금 없음"; }
   function coreAlloc(al, c){
     al = al.map(function(a){ return JSON.parse(JSON.stringify(a)); });
@@ -229,8 +240,9 @@
     ["위험", "안전"].forEach(function(kd){
       var mv = off.filter(function(a){ return (a.kind || "위험") === kd; }).reduce(function(s2, a){ return s2 + a.pct; }, 0); if (!mv) return;
       var to = keep.filter(function(a){ return (a.kind || "위험") === kd && a.k !== "theme" && a.pct > 0; });
-      if (!to.length) to = keep.filter(function(a){ return (a.kind || "위험") === kd && a.pct > 0; });
-      if (!to.length) to = keep.filter(function(a){ return a.pct > 0; });
+      if (!to.length){   // 받을 칸이 없으면 PB가 직접 채울 빈 칸으로 (시황 테마 칸이 커지지 않게)
+        var sl = slotOf(keep); if (!sl){ sl = {k: "slot", name: SLOT_NM, inst: "아래 ⭐ 추천 종목·ETF로 채움", code: null, kind: kd, pct: 0, color: "#c9962b", why: "PB가 고객에게 맞춰 고를 칸"}; keep.push(sl); }
+        sl.pct += mv; return; }
       var base = to.reduce(function(s2, a){ return s2 + a.pct; }, 0); if (!base) return;
       to.forEach(function(a){ a.pct += mv * a.pct / base; });
     });
@@ -331,12 +343,16 @@
   function coreUI(k){
     if (!CORE_F[k]) return "";
     var f0 = form(k); if (!f0 || !(f0.alloc || []).some(function(a){ return CORE.some(function(x){ return x[0] === a.k; }); })) return "";
+    var has0 = function(q){ return (f0.alloc || []).concat((((f0.alt || {}).usd || {}).alloc) || []).some(function(a){ return a.k === q; }); };
     var c = coreOf(k), d = coreDef(), same = CORE.every(function(x){ return !!c[x[0]] === !!d[x[0]]; });
-    var empty = k === "gl_stock" && !c.spx && !c.ndx && !((ST.opt[k] || {}).must || []).some(function(m){ return +m.pct > 0; });
+    var fb = baseX(k), sl = fb && slotOf(fb.alloc), mus = ((ST.opt[k] || {}).must || []).filter(function(m){ return +m.pct > 0 && mustOK(m); });
+    var empty = sl && !mus.length ? '<p class="pp-pw">💡 켠 지수가 없어 <b>' + pc(sl.pct) + '</b>가 「⭐ PB 선택 칸」으로 비어 있어요 — 아래 ⭐ 추천 종목·ETF를 넣으면 그 칸부터 채워요</p>'
+      : sl ? '<p class="pp-tip" style="margin:0 0 6px">⭐ 추천 종목이 「PB 선택 칸」 ' + pc(sl.pct) + '를 먼저 채워요 (넣은 % 비율대로)</p>'
+      : k === "gl_stock" && !c.spx && !c.ndx && !mus.length ? '<p class="pp-pw">💡 해외 주식인데 미국 지수가 빠져 있어요 — 위 칩을 켜거나 아래 ⭐ 추천 종목으로 해외 종목·ETF를 넣어 주세요</p>' : '';
     return '<div class="pp-ol"><span data-tip="' + e(JOY.core) + '">🧩 기본 구성 고르기 ⓘ</span> <span class="mut">(누르면 켜고 끔)</span></div>' +
-      '<div class="pp-core">' + CORE.map(function(x){ return '<button type="button" data-ck="' + k + '" data-cv="' + x[0] + '"' + (c[x[0]] ? ' class="on"' : '') + '>' + x[1] + ' ' + x[2] + '<small>' + (c[x[0]] ? "넣음" : "안 넣음") + '</small></button>'; }).join("") + '</div>' +
-      (empty ? '<p class="pp-pw">💡 해외 주식인데 미국 지수가 빠져 있어요 — 위 칩을 켜거나 아래 ⭐ 추천 종목으로 해외 종목·ETF를 넣어 주세요</p>' : '') +
-      '<div class="pp-cs"><span class="mut">끈 칸의 몫은 남은 칸(코스피200 등)에 비율대로</span>' + (same ? '<span class="pp-cd">✓ 내 기본값</span>' : '<button type="button" data-cd="' + k + '">📌 이 구성을 내 기본값으로</button>') + '</div>';
+      '<div class="pp-core" style="grid-template-columns:repeat(' + (function(n){ return n > 3 ? 2 : n; })(CORE.filter(function(x){ return has0(x[0]); }).length) + ',1fr)">' + CORE.filter(function(x){ return has0(x[0]); }).map(function(x){ return '<button type="button" data-ck="' + k + '" data-cv="' + x[0] + '"' + (c[x[0]] ? ' class="on"' : '') + '>' + x[1] + ' ' + x[2] + '<small>' + (c[x[0]] ? "넣음" : "안 넣음") + '</small></button>'; }).join("") + '</div>' +
+      empty +
+      '<div class="pp-cs"><span class="mut">끈 칸의 몫은 켠 칸에 비율대로</span>' + (same ? '<span class="pp-cd">✓ 내 기본값</span>' : '<button type="button" data-cd="' + k + '">📌 이 구성을 내 기본값으로</button>') + '</div>';
   }
   function riskyOf(al){ return r1(al.reduce(function(s2, a){ return s2 + (a.kind === "위험" ? +a.pct || 0 : 0); }, 0)); }
   // 원화/환전 + 위험 정도까지 입힌 폼 (⭐ 추천 종목 넣기 전)
@@ -388,13 +404,15 @@
     var th1 = thp(f.alloc);
     (f.themes || []).forEach(function(x){ var rr = th0 ? th1 / th0 : 0; if (x.pct != null) x.pct = r1(x.pct * rr); if (x.w != null) x.w = r1(x.w * rr); });
     if (!th1) f.themes = [];
-    f.sim = csim(k, f.alloc, sim0);
-    f.core = cc;
+    var sl0 = slotOf(f.alloc);
+    f.sim = sl0 ? null : csim(k, f.alloc, sim0);   // 빈 칸이 있으면 과거 계산은 추천 종목을 채운 뒤에도 할 수 없음(종목 과거 자료 없음)
+    f.core = cc; f.slot = sl0 ? sl0.pct : 0;
     f.headline = f.alloc.map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" · ") + " 제안임";
     var off = CORE.filter(function(x){ return !cc[x[0]]; }).map(function(x){ return x[2]; });
     f.points = ["🧩 PB가 고른 구성 — " + coreTxt(cc) + (off.length ? " (" + off.join("·") + "은 넣지 않음)" : "") + " · 뺀 몫은 남은 칸에 비율대로 나눔" + (RET[k] ? " · 위험자산 법정 한도 70% 안" : "")]
+      .concat(sl0 ? ["⭐ 지수 칸을 모두 빼서 " + pc(sl0.pct) + "는 PB가 고른 종목·ETF로 채움 · 고른 종목은 과거 지수 자료가 없어 과거 모의 계산은 생략함"] : [])
       .concat(f.tier ? [profPoint(t, R0, riskyOf(f.alloc), sim0 && sim0.tier_cap)] : [])
-      .concat((f.points || []).filter(function(p){ return !/S&P500|나스닥|금 /.test(p); }));
+      .concat((f.points || []).filter(function(p){ return !/S&P500|나스닥|코스피200|금 /.test(p); }));
     return f;
   }
   function profPoint(t, R0, R1, cap){
@@ -1613,7 +1631,7 @@
     forms: function(){ var M = DATA.market || {};
       return ["매일 아침 시황 리포트가 나오면 9가지 제안서 틀(기본폼)이 저절로 다시 만들어져요. 장중에도 매시간 시세를 넣어 새로 고쳐요.",
         "🇺🇸 · 🇰🇷 칩은 지금 미국·한국 시장이 상승 추세(200일 평균선 위)인지예요. 지금은 미국 " + (M.us_up ? "상승 추세" : "조심") + " · 한국 " + (M.kr_up ? "상승 추세" : "회복 전") + "이라 주식 비중이 거기에 맞춰져 있어요.",
-        "주식·개인연금 폼은 시황 리포트 배분표(한국 + 시황 테마 · 미국 지수·금은 🧩 기본 구성에서 PB가 골라 넣음)를 따르고, DC·IRP는 위험자산 법정 한도 70% 안에서 같은 비율로 담아요.",
+        "주식·개인연금 폼은 시황 리포트의 시황 테마 칸을 따르고, 지수(S&P500·나스닥100·코스피200)와 금은 🧩 기본 구성에서 PB가 골라 넣으며, DC·IRP는 위험자산 법정 한도 70% 안에서 같은 비율로 담아요.",
         "국고채·미국채·브라질국채는 미래에셋이 지금 파는 채권 중 기간별로 세금 뗀 수익률이 가장 좋은 것을, ELS는 원금지급형 ELB에 지수형 ELS 2개를 섞어요.",
         "카드를 누르면 고르기, 한 번 더 누르면 빼기예요. 여러 개를 함께 고르면 한 제안서에 같이 들어가요.",
         "둘 넘게 고르면 바로 밑에 「🧪 섞으면 어땠나」 — 고른 금액 비율대로 섞어 과거에 굴렸을 때 가장 크게 빠진 폭·연평균·최악의 해를 따로 들었을 때와 나란히 보여 줘요(한 장·PDF·📲 에도 같이).",
@@ -1633,7 +1651,7 @@
       "버튼을 한 번 누르면 만들고, 초록으로 바뀐 뒤 한 번 더 누르면 저장·공유 창이 떠요(아이폰은 누른 순간에만 공유 창이 열려서 그래요).",
       "모든 출력물 맨 끝에는 위험고지가 들어가요. 고객에게 드리기 전 숫자와 상품 조건을 한 번 더 확인해 주세요."],
     prof: "고객의 투자성향(미래에셋증권 투자자 유형 5단계)을 먼저 골라요.\n🔥 성장형 = 모든 상품(1등급까지) · 해외 주식·브라질국채도 가능해요.\n🚀 성장추구형 = 2·3등급까지 · 국내 주식·ELS 가능해요.\n⚖️ 위험중립형 = 4등급까지 · 미국채 가능해요.\n🌱 안정추구형 = 5등급까지.\n🛡 안정형 = 6등급만 · 국고채·현금성.\n고른 성향에 안 맞는 상품은 잠기고, 추천 종목도 등급이 안 맞으면 담을 수 없어요.\n주식·연금 폼의 주식(위험자산) 비중은 성향에 맞춰 저절로 정해져요: 성장형은 적극적으로, 성장추구형은 오늘 기본폼, 위험중립형은 절반, 안정추구형은 ¼, 안정형은 주식 없이 현금성으로.\n🆕 신규 고객은 성향을 아직 모르니 예외로 모두 열어 두고 오늘 기본폼으로 만들어요.\n국내 ETF 등급은 이름으로 추정한 것이라 운용사 표기를 꼭 확인해 주세요.",
-    core: "🧩 S&P500 · 나스닥100 · 금은 처음엔 넣지 않아요. 고객 취향에 맞게 칩을 눌러 켜고 끄세요.\n끈 칸의 몫은 같은 종류의 남은 칸(코스피200·현금성 등)에 비율대로 나눠요 · 시황 테마 칸은 그대로예요.\nDC·IRP는 위험자산 70% 한도를 그대로 지켜요.\n과거 계산(모의투자)은 고른 구성으로 앱에서 다시 셈해요.\n📌 「이 구성을 내 기본값으로」를 누르면 다음 제안서부터 같은 구성으로 시작해요.",
+    core: "🧩 S&P500 · 나스닥100 · 코스피200 · 금은 처음엔 넣지 않아요. 고객 취향에 맞게 칩을 눌러 켜고 끄세요.\n끈 칸의 몫은 같은 종류의 남은 칸(켠 지수·현금성 등)에 비율대로 나눠요 · 시황 테마 칸은 그대로예요.\n켠 지수가 하나도 없으면 그 몫은 「⭐ PB 선택 칸」으로 비워 두고, ⭐ 추천 종목·ETF가 넣은 % 비율대로 채워요.\nDC·IRP는 위험자산 70% 한도를 그대로 지켜요.\n과거 계산(모의투자)은 고른 구성으로 앱에서 다시 셈해요.\n📌 「이 구성을 내 기본값으로」를 누르면 다음 제안서부터 같은 구성으로 시작해요.",
     fx: "💴 원화로 = 국내 상장 ETF(TIGER 미국S&P500 등)로 담아요. 환전이 없고, 팔아서 남은 돈은 배당소득으로 15.4% 세금(금융소득종합과세 대상)이에요.\n💵 환전해서 = 미국 상장 ETF(SPY·QQQ·GLD 등)를 달러로 담아요. 팔아서 남은 돈은 1년에 250만원까지 빼고 22% 양도세(분리과세)예요.\n고른 방식에 맞춰 담을 ETF와 세금 설명이 바뀌어요.",
     must: "고객에게 꼭 넣고 싶은 종목·ETF를 검색해서 % 를 적어요(여러 개 가능).\n넣은 % 만큼 나머지 기본 포트를 원래 비율 그대로 줄여서 합계 100%를 맞춰요. 막대에서 줄어든 칸은 옛 % 가 흐리게 보여요.\n왜 추천하는지는 종목리포트·ETF 구성·실적·애널리스트·뉴스·시황 테마로 자동으로 써 줘요.\n개인연금·DC·IRP는 국내 상장 ETF만 담을 수 있고, DC·IRP에서 채권형·TDF는 「안전형」에 체크하면 안전자산 칸에서 깎아요.",
     sim: "모든 제안서 맨 끝에 들어가는 위험고지 문구를 확인하고 심의필을 관리하는 칸이에요.\n① 아래 원문을 읽어 보고 ② 「심의 요청서 PDF」를 받아 준법감시 부서에 내요.\n③ 받은 심의필 번호와 유효기간을 넣으면 한 장·PDF·PPT 모두에 저절로 찍혀요.\n유효기간이 지나거나 문구가 바뀌면 번호가 자동으로 빠지고 여기서 알려 줘요. 번호는 꼭 회사에서 받은 것만 넣어 주세요."
@@ -1850,6 +1868,7 @@
   var READY = {};
   function make(kind, btn){
     if (!ST.sel.length){ toast("상품을 먼저 골라 주세요"); return; }
+    if (kind !== "disc"){ var hole = ST.sel.filter(function(k){ var f = CORE_F[k] && formX(k); return f && slotOf(f.alloc); }); if (hole.length){ toast("⭐ " + hole.map(function(k){ return (form(k) || {}).short || k; }).join("·") + " — 「PB 선택 칸」이 비어 있어요. 기본 구성 칩을 켜거나 ⭐ 추천 종목을 넣어 주세요"); return; } }
     var rk = kind.indexOf("rev:") === 0 ? kind.slice(4) : null;
     var m = model(rk ? [rk] : null), sig = JSON.stringify([kind, ST.sel, ST.amt, ST.opt, ST.cust, ME.pb, ME.org, ME.simNo, ME.simFrom, ME.simTo, DATA.at]);
     if (READY[kind] && READY[kind].sig === sig){ var R = READY[kind]; shareBlob(R.blob, R.name, R.mime); return; }   // 두 번째 누름 = 저장·공유 (아이폰은 누른 순간에만 공유창이 열림)
@@ -2012,7 +2031,7 @@
     var o = {v: 1, s: ST.sel.slice(), a: {}, o: {}}; if (profSet()) o.p = ST.prof;
     ST.sel.forEach(function(k){ if (+ST.amt[k]) o.a[k] = +ST.amt[k]; var q = ST.opt[k]; if (!q) return; var y = {};
       if (q.mode && q.mode !== "krw") y.m = q.mode;
-      if (q.core) y.c = CORE.map(function(x){ return q.core[x[0]] ? 1 : 0; }).join("");
+      if (q.core) y.c = CORE.map(function(x){ return q.core[x[0]] ? 1 : 0; }).join("");   // spx·ndx·k200·gold
       if (q.must && q.must.length) y.u = q.must.map(function(m){ var z = {n: m.name, p: +m.pct || 0}; if (m.code) z.c = m.code; if (m.mkt) z.k = m.mkt; if (m.sym) z.y = m.sym; if (m.etf) z.e = 1; if (m.safe) z.f = 1; return z; });
       if (Object.keys(y).length) o.o[k] = y; });
     return b64e(JSON.stringify(o));
@@ -2035,7 +2054,7 @@
     ST.sel = sel; ST.amt = {}; ST.opt = {};
     sel.forEach(function(k){ var a = +((o.a || {})[k]); if (a > 0 && a < 1e7) ST.amt[k] = Math.round(a);
       var y = (o.o || {})[k] || {}, q = {mode: y.m === "usd" ? "usd" : "krw", must: []};
-      if (typeof y.c === "string" && /^[01]{3}$/.test(y.c)) q.core = {spx: +y.c[0], ndx: +y.c[1], gold: +y.c[2]};
+      if (typeof y.c === "string" && /^[01]{4}$/.test(y.c)) q.core = {spx: +y.c[0], ndx: +y.c[1], k200: +y.c[2], gold: +y.c[3]};
       (Array.isArray(y.u) ? y.u : []).slice(0, 20).forEach(function(z){ if (!z || !z.n) return; var mm = {name: str(z.n), pct: Math.max(0, Math.min(100, +z.p || 0))};
         if (z.c) mm.code = str(z.c, 16); if (z.k) mm.mkt = str(z.k, 8); if (z.y) mm.sym = str(z.y, 20); if (z.e) mm.etf = true; if (z.f) mm.safe = true; q.must.push(mm); });
       ST.opt[k] = q; });
@@ -2051,7 +2070,7 @@
 
   var css = document.createElement("style");
   css.textContent =
-    ".pp-core{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 6px}.pp-core button{font:inherit;font-size:14px;font-weight:700;color:var(--sub);background:var(--panel2,rgba(127,127,127,.08));border:1.5px dashed var(--line);border-radius:12px;padding:9px 4px;cursor:pointer;line-height:1.3}" +
+    ".pp-core{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 6px}.pp-core button{font:inherit;font-size:14px;font-weight:700;color:var(--sub);background:var(--panel2,rgba(127,127,127,.08));border:1.5px dashed var(--line);border-radius:12px;padding:9px 4px;white-space:nowrap;cursor:pointer;line-height:1.3}" +
     ".pp-core button small{display:block;font-size:12px;font-weight:500}.pp-core button.on{color:var(--text);background:rgba(245,130,32,.12);border:1.5px solid #F58220}.pp-core button.on small{color:#F58220;font-weight:700}" +
     ".pp-cs{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;margin:0 0 10px}.pp-cs button{font:inherit;font-size:12.5px;font-weight:700;color:#F58220;background:none;border:1px solid #F58220;border-radius:99px;padding:4px 10px;cursor:pointer;white-space:nowrap}.pp-cd{color:#1a8a5a;font-weight:700;white-space:nowrap}" +
     ".pp-reg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 8px}.pp-reg span{font-size:12.5px;padding:3px 9px;border-radius:99px;border:1px solid var(--line)}" +
