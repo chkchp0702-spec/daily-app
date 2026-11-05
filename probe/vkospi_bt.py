@@ -6,51 +6,14 @@ sys.path.insert(0, os.getcwd())
 import prob, prob_x
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36"}
-ids = []
-for u, kw in (("https://api.investing.com/api/search/v2/search?q=VKOSPI", {}),
-              ("https://api.investing.com/api/search/v2/search?q=KOSPI%20Volatility", {}),
-              ("https://www.investing.com/indices/kospi-volatility", {}),
-              ("https://www.investing.com/indices/kospi-volatility-historical-data", {}),
-              ("https://kr.investing.com/indices/kospi-volatility", {})):
-    try:
-        r = requests.get(u, headers={**UA, "domain-id": "www"}, timeout=25)
-        t = r.text; print("SRC", u, r.status_code, len(t), t[:160].replace("\n", " "))
-        if u.startswith("https://api") and r.ok:
-            for q in r.json().get("quotes", []):
-                print("  Q", q.get("id"), q.get("name"), q.get("symbol"), q.get("exchange"), q.get("type"))
-                if "KOSPI" in (str(q.get("name")) + str(q.get("symbol"))).upper() and "VOL" in (str(q.get("name")) + str(q.get("symbol"))).upper():
-                    ids.append(int(q["id"]))
-        elif r.ok:
-            for m in re.findall(r'"instrument":\{"id":(\d+)', t)[:3] + re.findall(r'data-pair-id="(\d+)"', t)[:3] + re.findall(r'"pairId":(\d+)', t)[:3]:
-                print("  ID", m); ids.append(int(m))
-    except Exception as e: print("SRC", u, "err", str(e)[:100])
-ids = list(dict.fromkeys(ids)); print("IDS", ids)
-
 cand = {}
-for pid in ids[:4]:
-    parts = []
-    for a, b in (("2003-01-01", "2012-12-31"), ("2013-01-01", "2020-12-31"), ("2021-01-01", "2026-11-05")):
-        try:
-            r = requests.get(f"https://api.investing.com/api/financialdata/historical/{pid}?start-date={a}&end-date={b}&time-frame=Daily&add-missing-rows=false", headers={**UA, "domain-id": "www"}, timeout=30)
-            js = r.json().get("data", []) if r.ok else []
-            s_ = pd.Series({pd.Timestamp(x["rowDateTimestamp"][:10]): float(str(x["last_closeRaw"]).replace(",", "")) for x in js}, dtype=float)
-            print("SRC inv", pid, a, r.status_code, len(s_), (round(float(s_.iloc[-1]), 2) if len(s_) else "")); parts.append(s_)
-        except Exception as e: print("SRC inv", pid, a, "err", str(e)[:80])
-    if parts:
-        s_ = pd.concat(parts).sort_index(); cand[f"inv{pid}"] = s_[~s_.index.duplicated()]
-# KRX OTP (로그인 없이 되는지)
-try:
-    hk = {**UA, "Referer": "http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201010105"}
-    r = requests.post("http://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd", headers=hk, timeout=20,
-                      data={"locale": "ko_KR", "tboxindIdx_finder_drvetcidx0_0": "코스피 200 변동성지수", "indIdx": "1", "indIdx2": "300",
-                            "codeNmindIdx_finder_drvetcidx0_0": "코스피 200 변동성지수", "strtDd": "20240101", "endDd": "20241231",
-                            "share": "2", "money": "3", "csvxls_isNo": "false", "name": "fileDown", "url": "dbms/MDC/STAT/standard/MDCSTAT01201"})
-    print("SRC krx otp", r.status_code, r.text[:80])
-    if r.ok and len(r.text) > 20 and "LOGOUT" not in r.text:
-        r2 = requests.post("http://data.krx.co.kr/comm/fileDn/download_csv/download.cmd", headers=hk, data={"code": r.text}, timeout=20)
-        print("SRC krx dl", r2.status_code, len(r2.content), r2.content[:120].decode("euc-kr", "ignore"))
-except Exception as e: print("SRC krx err", str(e)[:100])
-
+r = requests.get("https://ts-api.cnbc.com/harmony/app/bars/.KSVKOSPI/1D/20030101000000/20261106000000/adjusted/EST5EDT.json", headers=UA, timeout=40)
+bars = r.json().get("barData", {}).get("priceBars", [])
+s_ = pd.Series({pd.Timestamp(x["tradeTime"][:8]): float(x["close"]) for x in bars if x.get("close")}, dtype=float).sort_index()
+s_ = s_[~s_.index.duplicated(keep="last")]
+print("SRC cnbc .KSVKOSPI", r.status_code, len(s_), s_.index[0].date() if len(s_) else "", s_.tail(6).round(2).to_dict())
+gaps = s_.index.to_series().diff().dt.days; print("gaps>7d", int((gaps > 7).sum()), gaps[gaps > 7].head(8).to_dict())
+cand["cnbc"] = s_
 if not cand or max(len(v) for v in cand.values()) < 1000:
     print("NO DATA"); sys.exit(0)
 best = max(cand, key=lambda k: len(cand[k])); vk = cand[best]; vk = vk[vk > 0]
@@ -103,7 +66,7 @@ def logit_fit(X, y, l2=1.0, it=100):
 out = {}
 for mk in ("KR", "JP", "HK"):
     cfg = prob.MK[mk]
-    d = prob.feats(H[cfg["ix"]]); d = d[(d.index >= vk.index[0] + pd.Timedelta(days=400)) & (d.index <= vk.index[-1] + pd.Timedelta(days=5))].copy()
+    d = prob.feats(H[cfg["ix"]]); d = d[(d.index >= vk.index[0] + pd.Timedelta(days=200)) & (d.index <= vk.index[-1] + pd.Timedelta(days=5))].copy()
     if mk == "KR":
         A = lambda s: prob_x.rank252(s).reindex(d.index).ffill(limit=3)   # 같은 달력: 한국 t 마감값 → t+1 예측
     else:
