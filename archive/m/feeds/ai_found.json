@@ -1,6 +1,102 @@
 {
  "items": [
   {
+   "title": "닌텐도 스위치2 판매 41% 급감 — 가격 인상·메모리 대란 영향",
+   "url": "https://www.cnbc.com/2026/11/05/nintendo-earnings-switch-2-sales.html",
+   "press": "CNBC",
+   "at": "2026-11-05 16:40",
+   "why": "메모리 가격 상승이 소비 기기 수요를 깎기 시작 — 한국 메모리(091160) 실적의 수요 쪽 위험",
+   "summary": "스위치2 판매 −41%(CNBC 제목) · 블룸버그: 메모리 비용으로 이익 감소 · 세부 숫자 미확인"
+  },
+  {
+   "title": "BOE, 3년 만의 첫 금리 인상 앞둬 — 결정 가이드",
+   "url": "https://www.mpamag.com/uk/news/general/heres-what-to-expect-from-todays-bank-of-england-announcement/564265",
+   "press": "MPA / Bloomberg",
+   "at": "2026-11-05 16:40",
+   "why": "주요 중앙은행 인상 재개 여부 — 고금리 정점 가설·장기채 칸",
+   "summary": "블룸버그 「BOE Poised for First Rate Hike in Three Years」(11/5) · 결정 오늘 밤 · 폭 미확인"
+  },
+  {
+   "title": "대만 가권지수 TSMC 하락 연장·외국인 매도에 4만5천 아래 마감",
+   "url": "https://www.kotakneo.com/news/global-markets/taiwan-weighted-index-falls-as-tsmc-shares-and-foreign-investor-selling-weigh-on-market",
+   "press": "Kotak Neo",
+   "at": "2026-11-05 15:40",
+   "why": "아시아 칩 동반 투매 — 한국 반도체 칸(091160)과 같은 외국인 매도 흐름 확인",
+   "summary": "11/5 대만 가권 −3.28%(investing_en 피드) · 기사 날짜 미확인"
+  },
+  {
+   "title": "MS, 영국 Nscale 수십억 달러 AI 계약 거절 — 텍사스 DC 계약 2배 확대 옵션 포기",
+   "url": "https://www.ft.com/content/668e6ef8-88a1-4bef-8664-8f495baf09f8",
+   "press": "Financial Times",
+   "at": "2026-11-05 14:40",
+   "why": "AI 차입 가설 — 빅테크가 네오클라우드 증설 물량을 덜 받는다 = 차입 DC 수요 신호 약화(10/18 영국 DC 철수에 이은 두 번째)",
+   "summary": "IPO 앞둔 Nscale 에 새 타격. MS 가 텍사스 데이터센터 계약을 두 배 넘게 늘릴 옵션을 행사하지 않음(FT). 10/18 영국 DC 철수 보도(Telegraph)에 이어 연속."
+  },
+  {
+   "title": "SemiAnalysis: 2027년 DC 50GW 는 정책 충격에서 보호, 2028년 신규 62.2GW 중 90%↑ 미착공·승인 지연 위험 — 텍사스가 최대 변수",
+   "url": "https://t.me/kimu_nim/48179",
+   "press": "김현석 텔레그램(SemiAnalysis 요약)",
+   "at": "2026-11-05 14:40",
+   "why": "한국 반도체 급락의 근거(데이터센터 규제)는 2028년 이야기 — 2027년 수요는 거의 확정, 공포와 실적 시차",
+   "summary": "2027년 약 50GW 생산능력은 물리적으로 정책 충격에서 거의 보호. 2028년 신규 62.2GW 의 90% 이상이 미착공. 텍사스 결과가 최대 변수."
+  },
+  {
+   "title": "세미애널리시스: 데이터센터 반발, 초당적으로 번진다",
+   "url": "https://newsletter.semianalysis.com/p/the-datacenter-backlash-goes-bipartisan",
+   "press": "SemiAnalysis",
+   "at": "2026-11-05 13:45",
+   "why": "AI 차입 가설·반도체 칸 — 美 DC 규제가 한쪽 정당 이슈가 아니라는 근거, 한국 반도체 급락(오늘 하닉 −9%대)의 배경",
+   "summary": "중간선거 뒤 데이터센터 반발이 양당으로 확산. 2027 증설은 대부분 착공 단계라 「확정」, 2028 계획이 변수(피드 HANAchina/71583 요약). 게재일 미확인."
+  },
+  {
+   "title": "중간선거 「일시 중단」 공약이 2028년 데이터센터 30GW를 덮는다",
+   "url": "https://fourweekmba.com/ai-midterm-pause-pledges-cover-30-gw-of-2028-data-centers/",
+   "press": "FourWeekMBA",
+   "at": "2026-11-05 13:45",
+   "why": "반도체·AI 소프트웨어 칸 — 규제 노출 규모(GW) 숫자, 2028 수요 위험 크기 가늠",
+   "summary": "당선인들의 DC 중단·규제 공약 지역에 2028년 예정 약 30GW 해당(제목 기준). 연합: 주지사 당선인 36명 중 34명 「DC 규제」 입장(yna 11/5). 세부 수치 미확인."
+  },
+  {
+   "title": "오라클, 주식·채권 동시 발행 — AI 투자 자금 조달에 주가 −7%",
+   "url": "https://www.tikr.com/blog/oracle-sinks-7-on-20-billion-stock-and-bond-sale-to-fund-ai-buildout",
+   "press": "TIKR",
+   "at": "2026-11-05 13:45",
+   "why": "가설 「AI 차입이 약한 고리」(0.92) 직격 — 하이퍼스케일러가 채권만으론 부족해 주식 희석까지",
+   "summary": "주식 100억$+채권 100억$ 동시 발행 신청, 발표일 주가 −7%(제목 기준). 피드 「Oracle Sells Cheap Stock As Its Debt Window Narrows」(11/5)와 같은 사건으로 보임 — 날짜 미확인."
+  },
+  {
+   "title": "코스피 장중 4%↑ 급락·매도 사이드카 발동(증권시장)",
+   "url": "https://ground.news/article/kospi-plunges-over-4-during-trading-sell-side-circuit-breaker-triggered-in-securities-market",
+   "press": "Ground News",
+   "at": "2026-11-05 12:40",
+   "why": "사이드카 이벤트 그림자 채점(091160·069500) 기준일 기록",
+   "summary": "코스피 장중 −4%↑에 유가증권 매도 사이드카. latest 기준 삼성전자 −7%·SK하이닉스 −9.4%, 외국인 −1.8조(미확인 단위 억원 −17,983)."
+  },
+  {
+   "title": "코스피 8%대 폭락 — 연준 우려에 기술주 붕괴(6/8 선례)",
+   "url": "https://www.thestar.com.my/business/business-news/2026/06/08/south-korea039s-kospi-craters-over-8-as-fed-fears-spark-tech-rout",
+   "press": "The Star",
+   "at": "2026-11-05 12:40",
+   "why": "올해 코스피 급락일 선례 — 사이드카·급락 뒤 D+5 반등/추가 하락 표본 확보용",
+   "summary": "2026-06-08 코스피 −8%대, 연준 우려 기술주 투매. 6/23에도 약 −10%(Korea Times) — 올해 대형 급락일 표본."
+  },
+  {
+   "title": "NEXTDC 10% 급등 — 큰 소식이 매수 근거가 되나(10/28)",
+   "url": "https://www.fool.com.au/2026/10/28/up-10-does-todays-big-news-make-nextdc-shares-a-buy/",
+   "press": "Motley Fool AU",
+   "at": "2026-11-05 11:45",
+   "why": "오늘 NextDC +43%(굿맨·디지털리얼티 지분) 앞의 흐름 — 데이터센터 자산 M&A 수요가 美 규제 공포와 반대로 움직임(AI 차입 가설 반대 근거)",
+   "summary": "10/28 +10% 이어 11/5 지분 매입 소식에 +43%(CNBC) · 9월엔 한 달 −14%였음 — 자산가치 재평가 쪽"
+  },
+  {
+   "title": "노무라 글로벌 메모리 리포트 — 삼성·SK하이닉스 메모리 슈퍼사이클 2028년까지",
+   "url": "https://www.mt.co.kr/en/stock/2026/10/21/2026102110162736502",
+   "press": "머니투데이",
+   "at": "2026-11-05 10:40",
+   "why": "오늘 하닉 −10% 급락의 반대 근거 — 실적 사이클은 그대로라는 IB 시각(반도체 칸·091160 watch)",
+   "summary": "노무라 10/20 리포트: DRAM 공급 증가가 2028년까지 수요에 못 미침, 가격 고점 유지 전망. 11/5 텔레그램(kimu_nim/48155)도 같은 ASP 전망 재인용."
+  },
+  {
    "title": "히노호사, 텍사스 신규 데이터센터 승인 중단 요구 — 입법 전까지 멈춤",
    "url": "https://www.fox7austin.com/news/hinojosa-urges-gov-abbott-pause-new-data-centers-until-lawmakers-act",
    "press": "FOX 7 Austin",
@@ -543,103 +639,7 @@
    "at": "2026-11-03 02:10",
    "why": "AI 인프라 공급사(반도체·전력·광통신 칸) 수요 근거 vs 차입 의존 — 같은 사건의 두 면",
    "summary": "매출 급증·대규모 컴퓨트 계약(초안 기준 6,000억$, 이후 수정본은 더 큼). 수치는 보도 시점별로 다름 — 확정치는 S-1."
-  },
-  {
-   "title": "美 ISM 제조업 10월 55.5 — 예상 54.5 상회, 생산 2021년 이후 최대폭",
-   "url": "https://www.prnewswire.com/news-releases/manufacturing-pmi-at-55-5-october-2026-ism-manufacturing-pmi-report-302925617.html",
-   "press": "ISM(PR Newswire)",
-   "at": "2026-11-03 00:55",
-   "why": "고금리 정점 가설 반대 재료 — 경기 강하면 12월 인상 기대↑, 10년 4.95 판정에 영향",
-   "summary": "10월 제조업 PMI 55.5(예상 54.5~54.6). 생산 지수 2021년 이후 최대 상승. 발표 뒤에도 10년물 장중 4.89%로 하락(유가 −7% 영향 우세)."
-  },
-  {
-   "title": "ISM 제조업 55.5로 점프 — 생산 급증, 그러나 가격 압력 지속",
-   "url": "https://www.actionforex.com/live-comments/659568-us-ism-manufacturing-jumps-to-55-5-as-production-surges-but-price-pressures-persist/",
-   "press": "ActionForex",
-   "at": "2026-11-03 00:55",
-   "why": "가격지수 고공 = 연준 매파(로건·더타) 근거 — 금리 민감 칸 판단에 필요",
-   "summary": "헤드라인 55.5, 생산 급증. 가격 지수는 여전히 높아 인플레 압력 지속 해석."
-  },
-  {
-   "title": "오라클 장중 −4% — 100억$ 회사채 발행이 AI 부채 걱정 되살려, 코어위브 +2%",
-   "url": "https://247wallst.com/investing/2026/11/02/oracle-declines-4-as-10-billion-bond-sale-revives-ai-debt-worries-coreweave-advances-2-microsoft-holds-steady/",
-   "press": "24/7 Wall St.",
-   "at": "2026-11-02 23:40",
-   "why": "AI 크레딧 가설(0.89) — 하이퍼스케일러 자금 조달이 채권에서 주식(희석)까지 번짐, 반도체 칸 추격 금지 쪽",
-   "summary": "ORCL 125.43$(−4%, 연초 대비 −33%) · 1분기(FY27) FCF −54억$·이자비용 14억$(+55%)·RPO 6,640억$ · 연초 250억$ 채권·200억$ 주식 프로그램에 이어 추가"
-  },
-  {
-   "title": "오라클, 보통주 100억$ 매각 신고",
-   "url": "https://www.newsquawk.com/headlines/oracle-orcl-filed-to-sell-usd-10bln-of-common-stock",
-   "press": "Newsquawk",
-   "at": "2026-11-02 23:40",
-   "why": "빚 대신 주식 = 크레딧 시장 한도 신호 — 마벨-루멘텀 전액 주식 인수와 같은 흐름(차입 회피)",
-   "summary": "11/2 장전 보통주 100억$ 신고 · 같은 날 투자등급 달러채 100억$ 별도(블룸버그) · 총 200억$"
-  },
-  {
-   "title": "마벨, 루멘텀을 전액 주식 1,150억$에 인수 — 주당 1,132$, 소문 전 대비 +23.9%",
-   "url": "https://www.globalbankingandfinance.com/marvell-buy-lumentum-115-billion-deal-ai-data-center-bet/",
-   "press": "Global Banking & Finance(로이터 인용)",
-   "at": "2026-11-02 21:45",
-   "why": "섹터 칸 광통신 LITE 직격 — 주식교환이라 LITE 수익률이 MRVL 주가에 묶임 · 광통신 동종(COHR 장전 +6.7%) 재평가",
-   "summary": "총액 1,150억$(지분가치 1,025억$) 전액 주식 · 주당 1,132$ = 10/28 비교란 전 종가 대비 +23.9% · 발표일 MRVL 장전 +2.8%·LITE 거래정지, 소문 뒤 LITE −8%·MRVL −22%"
-  },
-  {
-   "title": "마벨, 루멘텀 1,150억$ 전액 주식 인수 발표",
-   "url": "https://www.investing.com/news/company-news/marvell-to-acquire-lumentum-for-115-billion-in-allstock-deal-93CH-4991177",
-   "press": "Investing.com",
-   "at": "2026-11-02 21:45",
-   "why": "AI 크레딧 가설 — 빚이 아닌 주식으로 산 초대형 AI 딜(차입 부담 피함) · 광통신 칸",
-   "summary": "AI 데이터센터 광 인터커넥트 결합 · 전액 주식 · 세부 교환비율은 미확인"
-  },
-  {
-   "title": "BofA: 하이퍼스케일러 회사채 발행 2026년 연 1,000억 달러 수준 지속",
-   "url": "https://www.fi-desk.com/bofa-deluge-of-hyperscaler-issuance-steady-at-us100bn-in-2026/",
-   "press": "FI Desk",
-   "at": "2026-11-02 20:40",
-   "why": "AI 크레딧 가설 — 빅테크 채권 공급 부담, 알파벳 유로채·메타 전망 하향과 같은 줄",
-   "summary": "BofA 추정 하이퍼스케일러 발행 연 약 1,000억$. 게재 날짜 미확인."
-  },
-  {
-   "title": "댈러스 연은 로건 「연준 최소 두 번 더 인상 필요」",
-   "url": "https://www.kitco.com/news/off-the-wire/2026-10-30/fed-needs-least-two-more-rate-hikes-logan-says",
-   "press": "Kitco(로이터)",
-   "at": "2026-11-02 19:40",
-   "why": "고금리 정점 가설(0.55)·중장기채 칸 — 연준 매파 위원 「50bp 이상 더」",
-   "summary": "로건: 금리 25bp씩 최소 2번 더 올려야 물가 안정(10/30). 무살렘도 추가 인상 신호(political.org). 美 2년 4.60%·10년 4.93%(latest)."
-  },
-  {
-   "title": "오픈AI, 기술주 급락 속 펀딩 목표 200억$로 축소",
-   "url": "https://www.verdict.co.uk/openai-cuts-funding-goal-20bn/",
-   "press": "Verdict",
-   "at": "2026-11-02 19:40",
-   "why": "AI 크레딧 가설(0.88) — 비상장 AI 자금줄 위축, 반도체·하이퍼스케일러 칸 수요 기대 약화",
-   "summary": "오픈AI가 시장 변동성·투자자 신중으로 조달 목표·밸류 하향(피드 제목 200억$, thenextweb 앞서 1.25조$ 밸류·300억$ 보도). 하이퍼스케일러 5사 시총 1조$ 감소(닛케이 피드)."
-  },
-  {
-   "title": "알파벳, 대규모 AI 지출 속 유로 회사채 시장 복귀(약 30억€)",
-   "url": "https://www.itiger.com/news/1107943849",
-   "press": "Tiger Brokers",
-   "at": "2026-11-02 18:40",
-   "why": "AI 크레딧 가설·🐋 GOOGL(10/29 고래 신호) — FCF 적자 회사의 채권 조달 반복",
-   "summary": "알파벳이 AI 투자 자금 위해 유로채 발행(약 30억€, 기사 날짜 미확인). 피드: 3Q capex 514억$가 영업현금흐름 423억$를 넘어 FCF −91억$(kimu_nim/47818)."
-  },
-  {
-   "title": "키옥시아 주가, 한 달 새 50% 급락",
-   "url": "https://www.kucoin.com/news/flash/japanese-semiconductor-giant-kioxia-s-stock-plunges-50-in-a-month",
-   "press": "KuCoin News",
-   "at": "2026-11-02 18:40",
-   "why": "반도체 칸·091160 — 낸드 가격 둔화 쇼크의 깊이, 하이닉스·삼성 되돌림 판단",
-   "summary": "키옥시아 한 달 −50%(기사 날짜 미확인). 피드: 11/2 도쿄장 키옥시아 안값 경신으로 닛케이 −208엔(63,081)."
-  },
-  {
-   "title": "도이체방크, 美 기술주 투자의견 상향 — 「매도세가 지나쳤다」",
-   "url": "https://www.investing.com/news/stock-market-news/deutsche-bank-upgrades-us-techsays-selloff-has-gone-too-far-4990112",
-   "press": "Investing.com",
-   "at": "2026-11-02 17:40",
-   "why": "AI 크레딧 가설(0.88)·반도체 칸 추격 금지와 반대 — 대형 IB 첫 「과매도」 판단, 나스닥 10/30 −2.86% 뒤",
-   "summary": "도이체방크가 美 기술 섹터 의견 상향(제목 기준). 나스닥 10/30 25,437(−2.86%, CNBC). 목표·세부 숫자는 미확인."
   }
  ],
- "at": "2026-11-05 09:45"
+ "at": "2026-11-05 16:40"
 }
