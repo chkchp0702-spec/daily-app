@@ -22,7 +22,7 @@
      연금(개인연금·DC·IRP)은 성향에 맞춰 주식(위험자산) 비중을 조절 · 신규 고객(성향 모름)은 예외로 모두 열어 둠(오늘 기본폼) */
   var PROF = ["신규 고객", "안정형", "안정추구형", "위험중립형", "성장추구형", "성장형"];
   var PROF_IC = ["🆕", "🛡", "🌱", "⚖️", "🚀", "🔥"];
-  var PROF_SUB = ["성향 확인 전 · 모두 열림", "6등급만", "5등급까지", "4등급까지", "2·3등급까지", "1등급까지"];
+  var PROF_SUB = ["성향 모름 · 모두 열림", "6등급만", "5등급까지", "4등급까지", "2·3등급까지", "1등급까지"];
   var PTIER = {1: "zero", 2: "low", 3: "safe", 4: "normal", 5: "bold"};
   var FMIN = {kr_stock: 4, gl_stock: 5, brl: 5, els: 4, ust: 3, ktb: 1, pension: 1, dc: 1, irp: 1};
   var GMIN = {1: 6, 2: 5, 3: 4, 4: 2, 5: 1};   // 성향별로 담을 수 있는 가장 위험한 상품 등급(숫자가 작을수록 위험)
@@ -30,7 +30,7 @@
   function profSet(){ return ST.prof != null && ST.prof >= 0 && ST.prof <= 5; }
   function profName(){ return profSet() ? PROF[ST.prof] : ""; }
   function formOK(k){ if (!profSet()) return false; if (!ST.prof) return true; return ST.prof >= (FMIN[k] || 1); }
-  function lockTxt(k){ if (!profSet()) return "🧭 투자성향을 먼저 고르세요"; var n = FMIN[k] || 1; return "🔒 " + PROF[n] + (n === 5 ? "만" : " 이상") + " 제안 가능"; }
+  function lockTxt(k){ if (!profSet()) return "🧭 성향 먼저"; var n = FMIN[k] || 1; return "🔒 " + PROF[n] + (n === 5 ? "만" : " 이상"); }
   // ⭐ 추천 종목의 위험등급 (분류표 기준 추정 — 국내 ETF는 운용사 표기가 우선)
   function mustGrade(m){
     var n = String(m.name || ""), mk = String(m.mkt || ""), dom = !mk || mk === "한국" || mk === "KR";
@@ -220,7 +220,7 @@
       f.alloc = tierAlloc(f.alloc, t, f.sim && f.sim.tier_cap, null);
       var th01 = (f.alloc.filter(function(a){ return a.k === "theme"; })[0] || {}).pct;
       (f.themes || []).forEach(function(x){ var rr = th00 ? (th01 || 0) / th00 : 0; if (x.pct != null) x.pct = r1(x.pct * rr); if (x.w != null) x.w = r1(x.w * rr); });
-      if (f.sim){ f.sim = {kind: f.sim.kind, few: 1, note: "성향 단계 과거 계산은 다음 갱신 때 들어감"}; }
+      f.sim = null;   // 이 단계 과거 계산이 아직 없음(다음 갱신 때 들어감) — 옛 비중 숫자가 섞이지 않게 뺌
       f.tier = t; f.headline = f.alloc.map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" · ") + " 제안임";
       f.points = [profPoint(t, R00, riskyOf(f.alloc), f.sim && f.sim.tier_cap)].concat(f.points || []);
       if (!f.alloc.some(function(a){ return a.k === "theme"; })) f.themes = [];
@@ -1591,7 +1591,7 @@
     [].forEach.call(w.querySelectorAll("[data-pr]"), function(b){ b.onclick = function(){ ST.prof = +b.dataset.pr; var gone = profFix(); keep(); resetBtns();
       if (gone.length) toast("🧭 " + profName() + "에 맞지 않아 뺐어요: " + gone.slice(0, 4).join(", ") + (gone.length > 4 ? " 외 " + (gone.length - 4) : ""));
       var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
-    [].forEach.call(w.querySelectorAll(".pp-f"), function(b){ b.onclick = function(){ if (b.dataset.lk){ toast(lockTxt(b.dataset.k)); return; } var k = b.dataset.k, i = ST.sel.indexOf(k); if (i >= 0) ST.sel.splice(i, 1); else { ST.sel.push(k); if (gOn() && !+ST.amt[k] && +GL.l) ST.amt[k] = +GL.l; } keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    [].forEach.call(w.querySelectorAll(".pp-f"), function(b){ b.onclick = function(){ if (b.dataset.lk){ toast(profSet() ? lockTxt(b.dataset.k) + " 제안 가능한 상품이에요" : "🧭 위에서 고객 투자성향을 먼저 골라 주세요"); return; } var k = b.dataset.k, i = ST.sel.indexOf(k); if (i >= 0) ST.sel.splice(i, 1); else { ST.sel.push(k); if (gOn() && !+ST.amt[k] && +GL.l) ST.amt[k] = +GL.l; } keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     // 🎯 목표에서 거꾸로 — 입력은 다시 그리지 않고 배지만 바꿈(입력 칸 초점 유지)
     [].forEach.call(w.querySelectorAll("[data-gk]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d.]/g, ""); if (inp.value !== v) inp.value = v; GL[inp.dataset.gk] = v; gkeep(); gUpd();
       if (inp.dataset.gk === "y") [].forEach.call(w.querySelectorAll("[data-gy]"), function(x){ x.classList.toggle("on", +x.dataset.gy === +v); }); resetBtns(); preview(); }; });
@@ -1727,7 +1727,7 @@
     var x = document.getElementById("ppx"); if (x) x.remove();
     x = document.createElement("div"); x.id = "ppx"; x.setAttribute("role", "dialog"); x.setAttribute("aria-label", "고객에게 보여 주기");
     document.body.appendChild(x); document.documentElement.classList.add("ppx-on");
-    showDraw(true);
+    try { showDraw(true); } catch(er){ showClose(); toast("보여 주기 화면을 열지 못했어요 · " + (er && er.message || er)); return; }   // 오류가 나도 화면이 멈추지 않게
     try { if (window.ntfyUse) ntfyUse("propose_show"); } catch(z) {}
   }
   function showClose(){ var x = document.getElementById("ppx"); if (x) x.remove(); document.documentElement.classList.remove("ppx-on");
@@ -1913,8 +1913,8 @@
     ".pp-go button small{font-size:11.5px;color:var(--sub);font-weight:500}.pp-go button.main{background:var(--c,#7c9cff);color:#111;border-color:transparent}.pp-go button.main small{color:rgba(0,0,0,.65)}" +
     ".pp-go button.ready{background:#22a06b;color:#fff;border-color:transparent}.pp-go button.ready small{color:rgba(255,255,255,.85)}.pp-go button:disabled{opacity:.7}" +
     ".pp-op{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.pp-ol{font-size:12.5px;font-weight:800;margin:8px 0 5px}" +
-    ".pp-pf{margin:4px 0 10px}.pp-pg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.pp-pg button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px 9px;font:inherit;min-width:0}" +
-    ".pp-pg button b{font-size:13px;white-space:nowrap}.pp-pg button small{font-size:10.5px;color:var(--sub)}.pp-pg button.on{border-color:#F58220;box-shadow:inset 0 0 0 1px #F58220;background:rgba(245,130,32,.12)}" +
+    ".pp-pf{margin:4px 0 10px}.pp-pg{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pp-pg button{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;text-align:left;border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:7px 10px;font:inherit;min-width:0;overflow:hidden}" +
+    ".pp-pg button b{font-size:14px;white-space:nowrap;letter-spacing:-.3px;max-width:100%;overflow:hidden;text-overflow:ellipsis}.pp-pg button small{font-size:11px;color:var(--sub);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}.pp-pg button.on{border-color:#F58220;box-shadow:inset 0 0 0 1px #F58220;background:rgba(245,130,32,.12)}" +
     ".pp-need{font-size:11px;color:#ff7a6e;font-weight:700}.pp-f.lk{opacity:.45;filter:grayscale(.7)}.pp-f .pp-lk{color:var(--sub)}.pp-pl2{font-size:12.5px;padding:7px 10px;border-radius:10px;background:rgba(245,130,32,.10);margin:4px 0 6px}" +
     ".pp-md{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pp-md button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:8px 10px;font:inherit}" +
     ".pp-md button small{font-size:11px;color:var(--sub)}.pp-md button.on{border-color:var(--fc);box-shadow:inset 0 0 0 1px var(--fc)}" +
