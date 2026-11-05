@@ -267,6 +267,31 @@ def bdi_daily():
     return s
 
 
+_VK = {}
+def vkospi_daily():
+    """11/5 10시 #69b: VKOSPI(코스피200 변동성) 일별 — CNBC ts-api .KSVKOSPI(2009-04~). 날짜 확인: 같은 날 코스피와 상관 −0.50 · 다음 날 0.00."""
+    if "s" in _VK:
+        return _VK["s"]
+    s = None
+    try:
+        import prob
+        if not prob.FAKE:
+            end = (pd.Timestamp.today() + pd.Timedelta(days=2)).strftime("%Y%m%d")
+            u = f"https://ts-api.cnbc.com/harmony/app/bars/.KSVKOSPI/1D/20090101000000/{end}000000/adjusted/EST5EDT.json"
+            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                bars = json.loads(r.read().decode("utf-8")).get("barData", {}).get("priceBars", [])
+            v = pd.Series({pd.Timestamp(x["tradeTime"][:8]): float(x["close"]) for x in bars if x.get("close")}, dtype=float).sort_index()
+            v = v[~v.index.duplicated(keep="last")]
+            v = v[v > 0]
+            if len(v) > 600:
+                s = v
+    except Exception:
+        s = None
+    _VK["s"] = s
+    return s
+
+
 def rank252(x):
     return x.rolling(252, min_periods=120).rank(pct=True)
 
