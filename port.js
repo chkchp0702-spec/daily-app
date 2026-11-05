@@ -149,7 +149,7 @@
     var FB = PF.filter(function(f){ return f.k === "base"; })[0], FM = PF.filter(function(f){ return f.k === "mine"; })[0];
     var fxv = FB && FM && FB.ret != null && FM.ret != null ? FM.ret - FB.ret : null, fxD = myDiff(MW);
     var h = winHtml() + '<section class="po-sum" id="posum"><div class="po-sh"><span id="posumh">' + md(P.start) + '부터 성적</span> <small>S&P500보다 <button class="po-shb" type="button" data-pshare="1">📤 공유</button></small></div>' +
-      PF.map(function(f){ return '<button class="po-sr' + (S.pf === f.k ? " on" : "") + ' ' + f.k + '" data-pf="' + f.k + '"><span>' + f.ic + ' ' + f.t + '</span><b class="' + cls(f.ret) + '">' + sg(f.ret) + '</b>' + gapB(f.ret) + '</button>'; }).join("") +
+      PF.map(function(f){ var op = S.sumOpen === f.k; return '<button class="po-sr' + (S.pf === f.k ? " on" : "") + (op ? " op" : "") + ' ' + f.k + '" data-pf="' + f.k + '" data-sumo="1"><span>' + f.ic + ' ' + f.t + ' <i class="po-sra">' + (op ? '▴' : '▾') + '</i></span><b class="' + cls(f.ret) + '">' + sg(f.ret) + '</b>' + gapB(f.ret) + '</button>' + (op ? holdBox(f) : ''); }).join("") +
       (fxv != null ? '<div class="po-myfx" id="pomyfx">🙋 내 선택 효과 ' + fxTag(fxv) + ' <small>' + (fxD.length ? '💼 기본 포트 대비' : '아직 기본과 같은 비중') + '</small></div>' : '') +
       '<div class="po-sr sp"><span>🇺🇸 S&P500</span><b class="' + cls(spN) + '">' + sg(spN) + '</b><em>기준</em></div></section>' + infHtml() +
       '<section class="po-hero' + (F.k === "kick" ? " kick" : F.k === "conc" ? " conc" : F.k === "mine" ? " mine" : "") + '"><div class="po-k">' + F.ic + ' <b>' + F.t + '</b> · ' + F.s + ' · ' + md(P.start) + '부터</div>' +
@@ -268,9 +268,11 @@
     [].forEach.call(b.querySelectorAll(".po-q button"), function(x){ x.onclick = function(){ S.amt = +x.dataset.v; inp.value = S.amt.toLocaleString("ko-KR"); keep(); rows(); }; });
     [].forEach.call(b.querySelectorAll(".po-mode button[data-m]"), function(x){ x.onclick = function(){ S.mode = x.dataset.m; keep();
       [].forEach.call(b.querySelectorAll(".po-mode button[data-m]"), function(y){ y.classList.toggle("on", y === x); }); rows(); }; });
-    [].forEach.call(b.querySelectorAll("[data-pf]"), function(x){ x.onclick = function(){ S.pf = x.dataset.pf; keep(); pfJump(x); }; });
+    [].forEach.call(b.querySelectorAll("[data-pf]"), function(x){ x.onclick = function(){ if (x.dataset.sumo) S.sumOpen = S.sumOpen === x.dataset.pf ? "" : x.dataset.pf; S.pf = x.dataset.pf; keep(); pfJump(x); }; });
+    [].forEach.call(b.querySelectorAll("[data-hbx]"), function(x){ x.onclick = function(ev){ ev.stopPropagation(); var k = S.sumOpen; S.sumOpen = ""; keep(); var r = document.querySelector('#posum .po-sr[data-pf="' + k + '"]'); if (r) pfJump(r); else draw(); }; });
     [].forEach.call(b.querySelectorAll(".po-mode button[data-p]"), function(x){ x.onclick = function(){ S.pf = x.dataset.p; keep();
-      [].forEach.call(b.querySelectorAll("[data-pf]"), function(x){ x.onclick = function(){ S.pf = x.dataset.pf; keep(); pfJump(x); }; });
+      [].forEach.call(b.querySelectorAll("[data-pf]"), function(x){ x.onclick = function(){ if (x.dataset.sumo) S.sumOpen = S.sumOpen === x.dataset.pf ? "" : x.dataset.pf; S.pf = x.dataset.pf; keep(); pfJump(x); }; });
+    [].forEach.call(b.querySelectorAll("[data-hbx]"), function(x){ x.onclick = function(ev){ ev.stopPropagation(); var k = S.sumOpen; S.sumOpen = ""; keep(); var r = document.querySelector('#posum .po-sr[data-pf="' + k + '"]'); if (r) pfJump(r); else draw(); }; });
     [].forEach.call(b.querySelectorAll(".po-mode button[data-p]"), function(y){ y.classList.toggle("on", y === x); }); rows(); }; });
     document.getElementById("pocopy").onclick = copy;
     myBind(b);
@@ -406,6 +408,22 @@
       return {tags: o.tags || "", short: nm(o.name), nm: (o.tags ? o.tags + " " : "") + nm(o.name), code: o.code, amt: a2, usd: usd2, cur: us2 ? "$" : kr2 ? "원" : "현지",
               sh: us2 ? (usd2 && o.now ? Math.floor(usd2 / o.now) : null) : kr2 ? Math.floor(a2 / o.now) : null, note: o.rule || ""}; })});
     return out;
+  }
+  // 11/05 사용자 「각 포트 누르면 뭐를 담고 있는지 보여줘」 — 성적 줄을 누르면 그 포트가 지금 담은 칸·상품·종목을 바로 아래에 펼침(다시 누르거나 「닫기」로 접음)
+  function holdBox(f){
+    var sv = S.pf, pl = [];
+    try { S.pf = f.k; pl = plan() || []; } catch(x) { console.warn("holdBox", x); } finally { S.pf = sv; }
+    pl = pl.filter(function(p){ return p.x && p.x.pct > 0; });
+    if (!pl.length) return '<div class="po-hb"><div class="po-hbn">담은 것을 아직 못 불러왔어요</div></div>';
+    var col = function(p){ return p.kick ? "#ff6b6b" : p.prod ? "#38bdf8" : COL[p.i % COL.length]; };
+    var tk = function(it){ var c = String(it.code || ""), us = /^[A-Z][A-Z.\-]{0,6}$/.test(c), n = String(it.short || it.nm || c).replace(c, "").replace(/\s*(Incorporated|Corporation|Holdings?|Company|Group|Class [A-C]|Common Stock)\b.*$/i, "").replace(/[\s\-–,·]+$/, "").trim() || c;
+      if (n.length > 16) n = n.slice(0, 15) + "…";   // 미국 종목은 이름 밑에 티커
+      return '<span class="po-hbi"' + (c ? ' data-op="' + e(c) + '"' : '') + '>' + (it.tags && n.indexOf(it.tags) < 0 ? e(it.tags) + ' ' : '') + e(n) + (us && n !== c ? '<small>' + e(c) + '</small>' : '') + '</span>'; };
+    return '<div class="po-hb" data-hb="' + f.k + '"><div class="po-hbh">' + f.ic + ' <b>' + f.t + '</b>가 지금 담은 것 <small>' + (S.mode === "kr" ? "₩ 원화 상품" : "💵 외화 상품") + ' 기준</small></div>' +
+      '<div class="po-hbbar">' + pl.map(function(p){ return '<i style="flex:' + p.x.pct + ';background:' + col(p) + '"></i>'; }).join("") + '</div>' +
+      pl.map(function(p){ return '<div class="po-hbr"><div class="po-hbc"><i style="background:' + col(p) + '"></i><b>' + e(p.x.name) + '</b><span>' + p.x.pct + '%</span></div>' +
+        '<div class="po-hbl">' + (p.items.length ? p.items.map(tk).join("") : '<span class="po-hbe">' + (p.kick ? '지금 빈 자리(현금)' : '현금·단기채') + '</span>') + '</div></div>'; }).join("") +
+      '<button type="button" class="po-hbx" data-hbx="1">닫기 ▴</button></div>';
   }
   function plan(){
     if (S.pf === "conc" && CN && CN.now) return concPlan();
@@ -919,6 +937,12 @@
     ".po-itn{font-size:12.5px;color:var(--dim);padding:2px 0 0 17px}.po-rk{background:rgba(255,107,107,.06);border-radius:10px;padding:10px 6px}" +
     ".po-mx table{width:100%;border-collapse:collapse;font-size:12.5px}.po-mx td,.po-mx th{white-space:nowrap}.po-mx th{font-size:12.5px;color:var(--sub);font-weight:600;text-align:right;padding:3px}.po-mx th:first-child{text-align:left}" +
     ".po-mx td{text-align:right;padding:8px 3px;border-top:1px solid var(--line);vertical-align:top}.po-mx td:first-child{text-align:left;font-weight:800;white-space:nowrap}.po-mx td small{display:block;font-weight:400;font-size:12.5px;color:var(--sub)}" +
+    ".po-sra{font-style:normal;font-size:12px;color:var(--sub);margin-left:2px}.po-sr.op{background:color-mix(in srgb,#e9c46a 10%,var(--panel2))}" +
+    ".po-hb{margin:2px 0 8px;padding:10px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}.po-hbh{font-size:13.5px;margin-bottom:6px}.po-hbh small{display:block;font-size:12px;color:var(--sub)}" +
+    ".po-hbbar{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px;margin:0 0 6px}.po-hbbar i{display:block}" +
+    ".po-hbr{padding:6px 0;border-top:1px solid var(--line)}.po-hbr:first-of-type{border-top:0}.po-hbc{display:flex;align-items:center;gap:6px;font-size:13.5px}.po-hbc i{width:9px;height:9px;border-radius:2px;flex:none}.po-hbc b{flex:1;min-width:0}.po-hbc span{font-weight:800;font-variant-numeric:tabular-nums}" +
+    ".po-hbl{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 0 15px}.po-hbi{display:inline-flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px 7px;font-size:12.5px;line-height:1.3;cursor:pointer}.po-hbi small{font-size:11.5px;color:var(--sub)}.po-hbe{font-size:12.5px;color:var(--sub)}" +
+    ".po-hbx{display:block;margin:8px auto 0;border:1px solid var(--line);background:var(--panel);color:var(--sub);border-radius:999px;padding:6px 18px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}" +
     ".po-mx td em{display:block;font-style:normal;font-size:12.5px}.po-mx tr[data-pf]{cursor:pointer}.po-mx tr.on td{background:rgba(233,196,106,.08)}.po-mx tr.mkt td{color:var(--sub);font-size:12.5px}" +
     ".po-cbuy{margin:10px 0 8px;padding:10px 12px;border-radius:14px;background:rgba(77,212,122,.08);border:1px solid rgba(77,212,122,.35)}.po-cbh{font-weight:800;font-size:14px}.po-cbh small{font-weight:400;color:var(--sub);font-size:12.5px;margin-left:4px}.po-cbuy .cn-buy:last-of-type{border-bottom:0}.po-cbn{font-size:12.5px;color:var(--sub);margin-top:4px}" +
     ".cn-buy{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);cursor:pointer}.cn-buy .pct{font-size:18px;min-width:46px}.cn-buy .nm{flex:1;min-width:0;font-weight:700}.cn-buy .nm small{display:block;font-weight:400;color:var(--sub);font-size:12.5px;margin-top:2px}.cn-buy .q{text-align:right}.cn-buy .q b{font-size:17px;display:block}.cn-buy .q small{color:var(--sub);font-size:12.5px}.cn-vr{margin:8px 0 2px;font-size:12.5px}.cn-vr small{color:var(--sub);margin-left:4px}.cn-n2{font-size:12.5px;color:var(--sub);margin:6px 0 8px}.cn-d>summary{cursor:pointer;font-size:13px;font-weight:700;padding:8px 0}" +

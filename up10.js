@@ -395,10 +395,14 @@
       var id = x.m[1], open = FOLD[id] == null ? !!x.m[3] : !!FOLD[id];
       var w = document.createElement("div"); w.className = "fold" + (open ? " open" : ""); w.id = id;
       x.sec.parentNode.insertBefore(w, x.sec);
-      x.sec.classList.add("fold-h"); x.sec.insertAdjacentHTML("beforeend", '<i class="fchev">▾</i>');
+      x.sec.classList.add("fold-h"); x.sec.insertAdjacentHTML("beforeend", '<i class="fchev"></i>');   // 글자는 CSS(펼치기 ▾ / 접기 ▴)
       w.appendChild(x.sec);
       var bd = document.createElement("div"); bd.className = "fold-b"; x.body.forEach(function(n){ bd.appendChild(n); }); w.appendChild(bd);
-      x.sec.onclick = function(ev){ if (ev.target.closest("button,a,[data-op]")) return; var o = w.classList.toggle("open"); FOLD[id] = o ? 1 : 0; try { localStorage.setItem("fold", JSON.stringify(FOLD)); } catch(z) {} };
+      // 11/05 사용자 「집중 포트 눌렀더니 닫기 버튼이 없어」 — 펼친 묶음 맨 아래에 「접기 ▴」 (제목 줄 ▾ 만으로는 안 보임) · 제목 줄도 「펼치기 ▾ / 접기 ▴」 글자로
+      var cb = document.createElement("button"); cb.type = "button"; cb.className = "fold-x"; cb.textContent = "접기 ▴"; bd.appendChild(cb);
+      var setF = function(o){ w.classList.toggle("open", o); FOLD[id] = o ? 1 : 0; try { localStorage.setItem("fold", JSON.stringify(FOLD)); } catch(z) {} };
+      cb.onclick = function(ev){ ev.stopPropagation(); setF(false); var y = w.getBoundingClientRect().top; var hh = (document.querySelector("header") || {}).offsetHeight || 0; if (y < hh + 46) window.scrollTo({top: window.scrollY + y - hh - 52, behavior: "instant"}); };
+      x.sec.onclick = function(ev){ if (ev.target.closest("button,a,[data-op],.tt-i")) return; setF(!w.classList.contains("open")); };
     });
     var bar_ = document.createElement("div"); bar_.className = "fold-jump";
     bar_.innerHTML = '<button data-j="pohero">💼 성적</button>' + groups.map(function(x){ return '<button data-j="' + x.m[1] + '">' + x.m[2] + '</button>'; }).join("");
@@ -502,8 +506,10 @@
     ".sc-few{font-size:12.5px;color:var(--sub);margin-top:6px}",
     ".lrn .st-강함{color:#4dd47a}.lrn .st-관찰{color:#ffb84d}.lrn .st-닫힘{color:var(--dim)}",
     /* 접기 */
-    ".fold .fold-h{cursor:pointer;display:flex;align-items:center;gap:6px}.fold .fold-h .fchev{margin-left:auto;font-style:normal;color:var(--sub);transition:transform .2s}",
-    ".fold:not(.open) .fold-b{display:none}.fold:not(.open) .fchev{transform:rotate(-90deg)}.fold:not(.open){margin-bottom:6px}",
+    ".fold .fold-h{cursor:pointer;display:flex;align-items:center;gap:6px}.fold .fold-h .fchev{margin-left:auto;flex:none;font-style:normal;white-space:nowrap}",
+    ".fold .fold-h .fchev::after{content:'접기 ▴';font-size:12.5px;font-weight:700;color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:3px 9px;background:var(--panel)}.fold:not(.open) .fold-h .fchev::after{content:'펼치기 ▾'}",
+    ".fold:not(.open) .fold-b{display:none}.fold:not(.open){margin-bottom:6px}",
+    ".fold-x{display:block;margin:10px auto 2px;border:1px solid var(--line);background:var(--panel);color:var(--sub);border-radius:999px;padding:8px 22px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}",
     ".fold:not(.open) .fold-h{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px 12px}",
     ".fold-jump{position:sticky;top:var(--hh,140px);z-index:5;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 10px;padding:6px 16px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}",
     ".fold-jump::-webkit-scrollbar{display:none}.fold-jump button{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:5px 11px;font:inherit;font-size:12.5px;cursor:pointer}",
