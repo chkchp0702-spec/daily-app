@@ -37,7 +37,7 @@ for s in SYMS:
     if y is not None and len(y) > 50:
         print("  em", s, str(y.index[0].date()), str(y.index[-1].date()), len(y))
         if x is None or len(x) < 500: x, src = y, "eastmoney"
-        elif y.index[-1] > x.index[-1]:   # 등락률로 이어 붙임(가격 수준 차이 무시)
+        elif y.index[-1] > x.index[-1] and y.index[0] <= x.index[-1]:   # 등락률로 이어 붙임(가격 수준 차이 무시)
             r = pd.concat([x.pct_change().dropna(), y.pct_change()[y.index > x.index[-1]].dropna()])
             x = (1 + r).cumprod() * 100; src = "sina+eastmoney"
     if x is not None and len(x) >= 500: P[s] = x[x > 0]; SRC[s] = src
@@ -74,14 +74,14 @@ OUT = {"src": SRC}
 for mk, ix in (("CN", "000001.SS"), ("HK", "^HSI"), ("KR", "^KS11")):
     a = C[ix]; days = a.index
     b = bask.reindex(days).fillna(0.0)  # 그 나라 장날에 맞춤(바구니 없는 날 0)
-    b = b[b.index >= bask.index[0]]
+    b = b[(b.index >= bask.index[0]) & (b.index <= bask.index[-1])]
     ar = a.pct_change()
     c5 = b.rolling(5).sum(); a5 = a.pct_change(5)
     pc1, pc5 = pct(b), pct(c5)
     us_d = spr.index; rows = []
     for i in range(1, len(days) - 5):
         Pd, D = days[i], days[i + 1]
-        if Pd not in b.index or pd.isna(pc5.get(Pd, np.nan)) or pd.isna(a5.get(Pd, np.nan)): continue
+        if Pd not in b.index or Pd > bask.index[-1] or pd.isna(pc5.get(Pd, np.nan)) or pd.isna(a5.get(Pd, np.nan)): continue
         j = us_d.searchsorted(D) - 1
         if j < 0 or us_d[j] < Pd: us = 0.0
         else: us = float(spr.iloc[j])
