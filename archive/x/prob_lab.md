@@ -95,11 +95,20 @@
 | 79 | 미 상장 아시아 국가 ETF(EWY·EWJ·EWH) 「과잉반응」 — 국가 ETF 초과 등락이 큰 날(|z|≥2) 다음 날 현지 지수가 덜 따라가는지(닻 계수 꼬리 줄이기) | Price discovery or overreaction? Asia Pacific country ETFs https://www.nisc.co.za/products/abstracts/36915/price-discovery-or-overreaction-a-study-on-the-reaction-of-asia-pacific-country-etfs-to-the-us-stock-market · 닻 #4 위 잔차 칸 | 한·일·홍 | ➖ 11/6 10시 한국만 작게 엇갈림(걸어가기 세 구간 −0.0005 개선, 교차 뒤→앞 나빠짐) · 일본·홍콩 ❌ · 지금 ETF 기울기 ±0.3 상한이 이미 꼬리를 자름 → 붙이지 않음 · probe/etfovr_bt.py |
 | 80 | 국가 ETF 거래량 급증(EWY·EWJ·EWH 5일÷60일 1년 백분위 꼬리) → 현지 다음 날·5일 | ETF 흐름·괴리와 수익률 https://scholarworks.bwise.kr/ssu/handle/2018.sw.ssu/35551 · probe/etfvol_bt.py — 야후 EWY 2000-05~·EWJ·EWH 1997~ 거래대금 · 2013-11 기준 앞/뒤·최근5년 · ETF 자기·S&P·달러 5일 꼬리 칸 위 걸어가기(곱하기·덧셈형) + 교차 로지스틱 | 한·일·홍 | ➖ 11/6 11시 일본 내일 작게(급증+EWJ 5일 오름, w 0.3 덧셈형) · 홍콩 같은 칸 +5.8·+5.9%p 이나 덧셈형 최근5년 나빠짐 ❌ · 한국 칸 뒤집힘 ❌ · 투매·가뭄·5일 ❌ |
 | 81 | 외국인 현물 순매수(다음 금융 2,573일) 5·20일 합 꼬리 — 지금 「외국인 수급」 칸이 5일 꼬리를 잘 쓰는지 다시 · 지수 등락 칸 위 겹침 | 다음 finance.daum.net/api/investor/KOSPI/days(11/6 totalCount 2,573) · 기존 칸 점검 | 한국 | ❌ 11/6 12시 5일 꼬리 기각 · 기존 20일 칸도 세 기간 브라이어 나빠짐 → 무게 0.9→0.2 |
-| 82 | 중국 상품선물(구리·철광석 등) 지수 = 「경기 바로미터」 등락 → 중국·홍콩 다음 날·5일 | Chen·Xiong 등 「Commodity futures as barometer」 https://www.princeton.edu/~wxiong/papers/Barometer.pdf · 야후 HG=F·철광석(TIO=F) · 구리/금(#18)과 다른 몫인지 | 중·홍 | ⏳ |
+| 82 | 중국 상품선물(구리·철광석 등) 지수 = 「경기 바로미터」 등락 → 중국·홍콩 다음 날·5일 | probe/ccm_bt.py — 시나 선물 일봉(주력 연속 CU0·AL0·ZN0·RB0·HC0·I0·J0·JM0) 공업품 바구니 2007-03~**2024-07-17 에서 멈춤** · 동방재부 push2his 는 Actions 에서 연결 끊김(8개 중 1개만) · 기존(간밤 S&P+자기 1·5일) 위 교차·걸어가기 브라이어 | 중·홍·한 | ➖ 11/6 14시 다음 날 ❌(세 시장 c1·c5·cx 교차·걸어가기 개선 없음) · 한국 「바구니 5일 급락(≤10)」 → 일주일 57.3·66.8%(평소 54.8·55.5, n 199·199) · +c5 걸어가기 세 기간 좋아지나 교차 뒤→앞 나빠짐 · 중국 같은 칸 앞 −3.8·뒤 +14.2 뒤집힘 · 지금 값 받을 주소 없음 → 붙이지 않음 |
 | 83 | 미 상장 중국 인터넷 ETF(KWEB) − 항셍 초과 등락 → 홍콩 다음 날(닻 위) | 국가 ETF 닻 #4(EWH)·FXI ➖ 와 다른 몫(중국 기술주) · 야후 KWEB 2013~ · 교차·걸어가기 브라이어 | 홍콩·중국 | ✅ 11/6 13시 홍콩 닻(KWEB−EWH 0.15/1%p, ±0.25) — 교차 0.23753→0.2272·0.23362→0.23017 · 걸어가기 세 구간 개선 · 칸 +1%p↑ 65.0·60.1%(평소 52.3·50.2) · 중국 ➖(최근3년 나빠짐) · 한국 ❌ · probe/kweb_bt.py |
+| 84 | VKOSPI 와 한국 스타일 순환(소형·대형, 가치·성장) → 섹터·종목 | https://www.nisc.co.za/products/abstracts/22091/the-volatility-index-and-style-rotation-evidence-from-the-korean-stock-market-and-vkospi · VKOSPI 자료는 #69 에서 찾음 | 섹터(한국) | ⏳ |
+| 85 | 한국 경제지표 발표(산업생산·CPI·고용) 놀람 → 코스피 변동·방향 | https://koasas.kaist.ac.kr/handle/10203/282017 · 나라지표 iframe(#54 길) | 한국 | ⏳ |
 | 14 | 결합 손잡이(N0·RHO·CAP) 보정 · auto_w 점검 | prob_hist.json 채점 60건 넘으면 | 5개 시장 | ⏳ 11/4 17시 실제 채점 77건이나 기준일 16일뿐(5개 시장 같은 날 겹침) · 브라이어 0.2494(평소 비율 0.2449 보다 못함, 적중 45.5%) → 날 수 40일 넘으면 손잡이 보정 |
 
 ## 실행 기록
+
+### 11/6 14시 — 🏭 중국 상품선물 「경기 바로미터」 (#82)
+- 자료: 시나 stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesDailyKLine?symbol=CU0 등 8개 공업품 주력 연속 — 2007-03~2024-07-17 4,222일(그 뒤 갱신 멈춤) · 동방재부 push2his.eastmoney.com 은 Actions 에서 연결 끊김 · 새 시나 jsonp 주소는 형식 오류 · probe/ccm_bt.py (Actions probe_tmp run 42167144907, 끝나고 워크플로 지움).
+- 검증(2008-01~2024-07 약 4,000일, 2016-04 기준 앞/뒤): 다음 날 — 중·홍·한 모두 c1·c5·cx 를 더해도 교차·걸어가기 브라이어 개선 없음(중국 c1 교차 0.24526→0.2457) · 일주일 — 한국 「바구니 5일 급락(≤10)」 57.3·66.8%(평소 54.8·55.5, n 199·199), +c5 걸어가기 0.24431→0.24413 · 0.24338→0.24279 · 최근5년 0.24264→0.24205 이나 교차 뒤→앞 0.24185→0.24203 나빠짐 · 중국 같은 칸 앞 47.4(−3.8)·뒤 66.5(+14.2) 뒤집힘 · 홍콩 앞 +1.1 작음.
+- 판정: ➖ 한국 일주일만 후보 · 다음 날 ❌ · 지금 값을 매일 받을 공개 주소가 없어(시나 2024-07 멈춤) 붙이지 않음.
+- 붙인 곳: 없음(prob.py·prob_x.py 그대로) → 지금 5개 시장 확률 변화 없음.
+- 다음: #84 VKOSPI·한국 스타일 순환 · #85 한국 경제지표 놀람 · #83 중국 KWEB 칸 다시(➖) · 시나 새 선물 주소(InnerFuturesNewService) 다시 시험.
 
 ### 11/6 13시 — 🐉 미 상장 중국 인터넷 ETF(KWEB) 초과 등락 (#83)
 - 자료: 야후 KWEB 2013-08-01~2026-11-05 3,337일 + ^HSI·EWH·000001.SS·^KS11·EWY·^GSPC · probe/kweb_bt.py (Actions probe_tmp run 42160688611, 끝나고 워크플로 지움).
