@@ -264,6 +264,31 @@ def _hyg_vol():
     return v
 
 
+_ETFV = {}
+
+
+def _etf_vol(tk):
+    """11/6 11시 #80: 국가 ETF 거래대금(종가×거래량) — load_hist 는 거래량을 안 받으므로 따로 한 번 받아 둠."""
+    if tk in _ETFV:
+        return _ETFV[tk]
+    v = None
+    try:
+        import prob
+        if not prob.FAKE:
+            import yfinance as yf
+            V = yf.download(tk, start="2000-01-01", interval="1d", auto_adjust=False, progress=False)
+            if isinstance(V.columns, pd.MultiIndex):
+                V.columns = V.columns.get_level_values(0)
+            V.index = pd.to_datetime(V.index).tz_localize(None)
+            V = V[~V.index.duplicated(keep="last")].dropna(subset=["Close"])
+            if len(V) > 300:
+                v = V[["Close", "Volume"]].astype(float)
+    except Exception:
+        v = None
+    _ETFV[tk] = v
+    return v
+
+
 _BDI = {}
 def bdi_daily():
     """11/4 17시 #70: 발틱 건화물 운임지수(BDI) 일별 — investing.com 과거 자료 API(pair 940793, domain-id 머리글). 5,000줄 제한이라 기간 나눠 받음."""
@@ -823,6 +848,28 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["hygvol_err"] = str(e)[:120]
+    # 🇯🇵 미 상장 일본 ETF(EWJ) 거래대금 급증 + EWJ 5일 오름 → 일본 「내일」만, w 0.3(➖ 작게) (11/6 11시 #80 · probe/etfvol_bt.py · 해외 투자자가 일본을 몰려 사는 날)
+    #   EWJ 거래대금 5일 평균 ÷ 60일 평균 의 1년 백분위 ≥90% 이면서 EWJ 5일 등락 >0 · 미국 날짜 값 → 다음 아시아 장 · 2001~, 2013-11 기준 앞/뒤
+    #   닛케이 다음 날 오름 +5.6·+7.5%p(n 197·148) · ETF·S&P·달러 5일 꼬리 위 덧셈형 w0.3 브라이어 0.24849→0.24844 · 0.24581→0.24574 · 최근5년 0.24576→0.24576(그대로)
+    #   교차 로지스틱 앞→뒤 0.24443→0.24433 · 뒤→앞 0.24534→0.24523(계수 +0.20·+0.22 같은 쪽) · 칸 곱하기는 세 기간 나빠짐 → ➖ w 0.3 · 5일 ❌(교차 한쪽 나빠짐)
+    #   급증+투매·가뭄·한국(EWY)·홍콩(EWH) ❌(칸 앞/뒤 엇갈림 또는 기존 칸 위 나빠짐)
+    if mk == "JP":
+        try:
+            V = _etf_vol("EWJ")
+            if V is not None:
+                dv = (V["Close"] * V["Volume"]).replace(0, np.nan)
+                vr = dv.rolling(5).mean() / dv.rolling(60).mean()
+                up5 = (np.log(V["Close"]).diff(5) > 0).astype(float).where(V["Close"].notna())
+                rk = align(rank252(vr), idx); ua = align(up5, idx); cv = rk.iloc[-1]
+                research["ewjvol"] = {"d": str(V.index[-1].date()), "vr": None if pd.isna(vr.iloc[-1]) else round(float(vr.iloc[-1]), 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv >= 0.9 and ua.iloc[-1] > 0.5:
+                    m = cond(d, ((rk >= 0.9) & (ua > 0.5)).fillna(False), "일본 ETF(EWJ) 거래대금 급증(1년 상위 10%) + EWJ 5일 오름")
+                    add("ewjvol", "🇯🇵", "해외서 일본 몰려 삼", "자금", m, 0.3,
+                        f"미국 상장 일본 ETF(EWJ) 거래대금 5일÷60일 {float(vr.iloc[-1]):.2f}배 (1년 백분위 {cv*100:.0f}%) · 값은 오름 — 해외 투자자가 일본 주식을 몰려 사는 날 다음 닛케이가 평소보다 잘 오름(다음 날만)")
+                    if M and M[-1]["k"] == "ewjvol":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["ewjvol_err"] = str(e)[:120]
     # 🚢 발틱 건화물 운임지수(BDI) 급등 꼬리 → 미국만 (11/4 17시 #70 · probe/bdi_bt.py · 운임 급등 = 원가·물가 압력)
     #   investing.com API(pair 940793) 2000-01~2026-11 6,692일 · 로그 변화의 1년 백분위 ≥90% · 2013-12 기준 앞/뒤 · 걸어가며 사전 100 브라이어(달러·S&P 5일 꼬리 칸 위)
     #   「내일」 = 20일 급등: S&P 다음 날 −6.1·−3.8%p(n 406·286) · 0.24905→0.2488 · 0.24868→0.24866 · 최근5년 0.24995→0.24989 · 교차 0.2491→0.24891 · 0.24896→0.24847(계수 −0.27·−0.17) → w 0.4(뒤 기간 개선 작음)
