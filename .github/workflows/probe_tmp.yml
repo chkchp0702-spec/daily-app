@@ -11,4 +11,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q yfinance pandas numpy lxml requests
-      - run: python probe/ffut_find.py
+      - run: python probe/ffut_find2.py
