@@ -8,6 +8,7 @@ H = {"User-Agent": "Mozilla/5.0", "Referer": "https://finance.sina.com.cn/"}
 SYMS = ["CU0", "AL0", "ZN0", "RB0", "HC0", "I0", "J0", "JM0"]
 EM = {"CU0": "113.cum", "AL0": "113.alm", "ZN0": "113.znm", "RB0": "113.rbm", "HC0": "113.hcm", "I0": "114.im", "J0": "114.jm", "JM0": "114.jmm"}
 def sina(s):
+    best = (None, None)
     for u in (f"https://stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesDailyKLine?symbol={s}",
               f"https://stock2.finance.sina.com.cn/futures/api/jsonp.php/var%20_{s}=/InnerFuturesNewService.getDailyKLine?symbol={s}"):
         try:
@@ -19,9 +20,10 @@ def sina(s):
             if isinstance(d, list) and d:
                 if isinstance(d[0], dict): rows = [(x.get("d") or x.get("date"), float(x.get("c") or x.get("close"))) for x in d]
                 else: rows = [(x[0], float(x[4])) for x in d]
-                s_ = pd.Series(dict(rows)); s_.index = pd.to_datetime(s_.index); return s_.sort_index(), "sina"
+                s_ = pd.Series(dict(rows)); s_.index = pd.to_datetime(s_.index); s_ = s_.sort_index(); print("  ", s, str(s_.index[0].date()), str(s_.index[-1].date()), len(s_))
+                if best[0] is None or s_.index[-1] > best[0].index[-1]: best = (s_, "sina")
         except Exception as e: print("sina err", s, repr(e)[:120])
-    return None, None
+    return best
 def em(s):
     u = f"https://push2his.eastmoney.com/api/qt/stock/kline/get?secid={EM[s]}&klt=101&fqt=0&beg=19900101&end=20991231&fields1=f1&fields2=f51,f53"
     try:
@@ -31,7 +33,13 @@ def em(s):
 P = {}; SRC = {}
 for s in SYMS:
     x, src = sina(s)
-    if x is None or len(x) < 500: x, src = em(s)
+    y, _ = em(s)
+    if y is not None and len(y) > 50:
+        print("  em", s, str(y.index[0].date()), str(y.index[-1].date()), len(y))
+        if x is None or len(x) < 500: x, src = y, "eastmoney"
+        elif y.index[-1] > x.index[-1]:   # 등락률로 이어 붙임(가격 수준 차이 무시)
+            r = pd.concat([x.pct_change().dropna(), y.pct_change()[y.index > x.index[-1]].dropna()])
+            x = (1 + r).cumprod() * 100; src = "sina+eastmoney"
     if x is not None and len(x) >= 500: P[s] = x[x > 0]; SRC[s] = src
     time.sleep(0.5)
 if len(P) < 4:
@@ -49,7 +57,7 @@ RET = pd.DataFrame({s: v.pct_change().clip(-0.08, 0.08) for s, v in P.items()})
 bask = RET.mean(axis=1, skipna=True)[RET.notna().sum(axis=1) >= 3].dropna()
 print("바구니", str(bask.index[0].date()), str(bask.index[-1].date()), len(bask), "평균", round(float(bask.mean()) * 100, 3))
 SY = ["000001.SS", "^HSI", "^KS11", "^GSPC"]
-df = yf.download(SY, start="2003-01-01", interval="1d", group_by="ticker", auto_adjust=False, progress=False, threads=True)
+df = yf.download(SY, start="2003-01-01", interval="1d", group_by="ticker", auto_adjust=False, progress=False, threads=False)
 def cl(s):
     x = df[s]["Close"].dropna(); x.index = pd.to_datetime(x.index).tz_localize(None); x = x[~x.index.duplicated(keep="last")]; return x[x > 0]
 C = {s: cl(s) for s in SY}; spr = C["^GSPC"].pct_change().dropna()
