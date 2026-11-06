@@ -1,4 +1,4 @@
-"""#80 국가 ETF 거래량 급증(EWY·EWJ·EWH) → 현지 다음 날·5일 — 확률 보강 11/6 11시 (Actions)
+"""#80·#80b 국가 ETF 거래량 급증(EWY·EWJ·EWH) → 현지 다음 날·5일 — 확률 보강 11/6 11시 (Actions)
 특성 = ETF 거래대금(종가×거래량) 5일÷60일 평균 의 1년 백분위.
 칸: 「급증·ETF 5일 오름」(≥90 & r5>0) · 「급증·ETF 5일 내림(투매)」(≥90 & r5≤0) · 「가뭄」(≤10).
 기존 칸 = ETF 자기 5일 등락 꼬리 · S&P 5일 꼬리 · 달러지수 5일 꼬리 (가격 움직임과 겹침 확인).
@@ -101,6 +101,25 @@ for mk, tk in ETF.items():
             xr[nm] = s
         X[ycol] = xr
     r["교차"] = X
+    # 덧셈형(#80b): 기존 걸어가기 로짓 + 「급증·오름」 칸 몫 · 첫날만(사건 솎기) 칸도
+    lo = lambda p: np.log(p / (1 - p))
+    fE = fU & ~fU.shift(1, fill_value=False)
+    r["첫날칸"] = {}
+    for half, msk in (("앞", d.index < mid), ("뒤", d.index >= mid)):
+        c_ = prob.cond(d[msk], fE[msk], "첫날")
+        r["첫날칸"][half] = None if not c_ else [c_["n"], round((c_["p1"] - d.loc[msk, "y1"].mean()) * 100, 1), round(((c_["p5"] or 0) - d.loc[msk, "y5"].mean()) * 100, 1)]
+    for ycol, h in (("y1", 1), ("y5", 5)):
+        pb = wf(d, oth, ycol, h)[0]; y = d[ycol]; known = y.shift(h); bse = known.expanding().mean()
+        for tg, ff in (("오름", fU), ("투매", fD)):
+            fk = ff.shift(h, fill_value=False)
+            k = known.where(fk).fillna(0).cumsum(); n_ = (known.notna() & fk).astype(float).cumsum()
+            pl = (k + 100 * bse) / (n_ + 100)
+            P = {"기존": pb}
+            for w in (0.3, 0.5, 1.0):
+                pa = pb.copy(); m_ = ff & pb.notna() & pl.notna()
+                pa[m_] = 1 / (1 + np.exp(-(lo(pb[m_]) + w * (lo(pl[m_]) - lo(bse[m_])))))
+                P[f"+{tg} w{w}"] = pa
+            r.setdefault("덧셈형", {})[f"{ycol} {tg}"] = score(d, ycol, P, "2004-01-01")
     print(mk, tk, json.dumps(r, ensure_ascii=False))
     out[mk] = r
 json.dump(out, open("probe/etfvol_bt.json", "w"), ensure_ascii=False, indent=1)
