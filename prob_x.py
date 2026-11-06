@@ -209,10 +209,31 @@ def load_foreign(fake=False, pages=40):
         json.dump(dict(sorted(hist.items())[-1500:]), open(FR_FILE, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     except Exception:
         pass
+    _save_ffut()
     print("외국인 수급", len(hist), "일 (이번에 받음", got, ")")
     if not hist:
         return pd.Series(dtype=float)
     return pd.Series({pd.Timestamp(k): v for k, v in hist.items()}).sort_index()
+
+
+FF_FILE = "archive/x/ffut_hist.json"
+
+
+def _save_ffut():
+    """11/6 09시 #73: 외국인 코스피200 선물 순매수(억원) — 일별 이력 공개 주소가 없어(다음 investor 500·네이버 PC 410·KRX 로그인)
+       네이버 모바일 오늘 값(m.stock.naver.com/api/index/FUT/trend)을 매시간 받아 날짜별로 쌓기만 한다(장 마감 뒤 값이 그날 값).
+       확률에는 아직 안 씀 — 100일 넘게 쌓이면 검증."""
+    import os
+    try:
+        h = json.load(open(FF_FILE, encoding="utf-8")) if os.path.exists(FF_FILE) else {}
+        req = urllib.request.Request("https://m.stock.naver.com/api/index/FUT/trend", headers={"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)", "Referer": "https://m.stock.naver.com/"})
+        j = json.loads(urllib.request.urlopen(req, timeout=20).read().decode("utf-8"))
+        d = j["bizdate"]; f = lambda k: float(str(j[k]).replace(",", "").replace("+", ""))
+        h[f"{d[:4]}-{d[4:6]}-{d[6:]}"] = {"f": f("foreignValue"), "p": f("personalValue"), "i": f("institutionalValue")}
+        json.dump(dict(sorted(h.items())[-2000:]), open(FF_FILE, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        print("외국인 선물(네이버)", len(h), "일 쌓임")
+    except Exception as e:
+        print("외국인 선물(네이버) 실패", e)
 
 
 def _c(H, s):
