@@ -612,7 +612,7 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
         cv = rk.iloc[-1]; streak = int(stv[-1])
         m, tb = bucket_stats(dd_, rk, [-0.01, 0.1, 0.3, 0.7, 0.9, 1.01], ["매도 극단(하위 10%)", "매도 우위", "보통", "매수 우위", "매수 극단(상위 10%)"], cv, cond)
         research["foreign"] = tb
-        add("foreign", "🌏", "외국인 수급", "폭·수급", m, 0.9,
+        add("foreign", "🌏", "외국인 수급", "폭·수급", m, 0.2,   # 11/6 12시 #81: 2016~ 2,573일로 다시 보니 5칸 앞/뒤 엇갈림 · 걸어가며 브라이어 내일·일주일 세 기간 모두 나빠짐 → 0.9→0.2
             f"외국인 20일 누적 {c20.iloc[-1]/10000:+.1f}조 (최근 {len(f)}일 중 {cv*100:.0f}% 위치) · {'연속 순매도' if streak < 0 else '연속 순매수'} {abs(streak)}일")
     # 🗓️ 옵션 만기 주간
     ex = expiry_dates(mk, idx[0], idx[-1] + pd.Timedelta(days=40))
