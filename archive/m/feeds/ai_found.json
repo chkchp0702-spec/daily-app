@@ -1,6 +1,62 @@
 {
  "items": [
   {
+   "title": "美 중간선거 뒤 전례 없는 부채 교착 위험(Börsen-Zeitung)",
+   "url": "https://www.boersen-zeitung.de/konjunktur-politik/us-markt-droht-nach-kongresswahlen-beispielloses-schulden-patt",
+   "press": "Börsen-Zeitung",
+   "at": "2026-11-09 06:40",
+   "why": "민주 의회 vs 트럼프 → 부채한도·예산 교착 = 장기채 기간 프리미엄 — 「고금리 정점」 가설·중장기채 칸 반대 재료",
+   "summary": "선거 뒤 의회·백악관 분점으로 부채 교착 위험 거론. 구체 시한·금액은 미확인."
+  },
+  {
+   "title": "코어위브 3분기 실적(11/10) 미리보기 — AI 지출 파도 지속?",
+   "url": "https://www.nasdaq.com/articles/eps-watch-can-coreweave-keep-riding-ai-spending-wave",
+   "press": "Nasdaq/Zacks",
+   "at": "2026-11-09 06:40",
+   "why": "AI 차입 가설(0.92)의 이번 주 시험대 — CRWV 채권·주가가 AI 인프라 신용 스트레스 바로미터",
+   "summary": "데이터센터 지연으로 연간 매출 가이던스 하향 이력(itiger). 옵션 내재 변동 두 자릿수 %(tipranks, 정확 수치 날짜 미확인)."
+  },
+  {
+   "title": "BofA 하트넷 「민주당 스윕은 채권에 우호 — 4분기 역발상 채권 매수」",
+   "url": "https://cryptobriefing.com/hartnett-democratic-sweep-bonds-contrarian/",
+   "press": "Crypto Briefing",
+   "at": "2026-11-09 05:40",
+   "why": "고금리 정점 가설·채권 칸(단기채 vs 중장기채) — 재정지출 둔화 + AI 투자 감속이 장기금리 하락 쪽",
+   "summary": "하트넷은 민주당 의회 장악이 재정 지출을 묶어 국채에 유리하다고 봄. 선거 뒤 국채 랠리·10년 한 달 저점(investinglive)과 같은 방향."
+  },
+  {
+   "title": "트럼프, 이란 공격 재개 가능성 낮춰 — 「선거 뒤 공격 재개」 우려 진정",
+   "url": "https://www.al-monitor.com/originals/2026/11/trump-raises-doubts-about-renewed-attacks-iran",
+   "press": "Al-Monitor",
+   "at": "2026-11-09 04:40",
+   "why": "브렌트 95 장부 조건(에너지 칸)·월요일 유가 갭 방향 — 후티 리야드 타격과 상쇄",
+   "summary": "트럼프가 중간선거 뒤 대이란 공격 재개에 의문 제기. 11/8 CNN 보도로 「협상 진전 시 공격 안 할 듯」 재확인(Reuters 피드). 유가 반응 숫자는 선물 개장 전이라 미확인."
+  },
+  {
+   "title": "앤트로픽, 데이터센터용 가스 발전 비용 상한 없이 부담 — 터빈 업체 수주잔고 확대",
+   "url": "https://www.ctol.digital/news/anthropic-s1-uncapped-gas-costs-baker-hughes-turbine-backlog/",
+   "press": "CTOL Digital",
+   "at": "2026-11-09 04:40",
+   "why": "AI 차입·전력 가설 — 데이터센터 반발 국면에서 자체 가스 발전(터빈·가스) 쪽으로 투자 이동",
+   "summary": "FT 보도 34억$·1.7GW 가스발전기 구매 약정 관련. 전력망 대신 자가 발전 → 베이커휴즈 등 터빈 수주잔고 수혜 해석. 세부 숫자는 원문 확인 필요."
+  },
+  {
+   "title": "골드만삭스, 월가 「극단적 패닉」 감지 — 반등 가능성 언급",
+   "url": "https://dolarhoy.com/mercado/goldman-sachs-detecto-panico-extremo-en-wall-street-y-anticipa-una-recuperacion-20261161570",
+   "press": "DolarHoy",
+   "at": "2026-11-09 03:40",
+   "why": "위험 회피 regime 의 역발상 근거 — 지수·ETF 칸 비중 판단",
+   "summary": "골드만 패닉지수 9.57(10점 만점) 극단 구간. 과거 이 구간 뒤 단기 반등이 잦았다는 해석 — 구체 통계는 원문 확인 필요(미확인)."
+  },
+  {
+   "title": "美 하원 3개 위원회, 젠슨 황에 「중국 스파이 연루 의혹」 비공개 브리핑 요구",
+   "url": "https://axios.com/2026/11/05/jensen-huang-nvidia-congress-china",
+   "press": "Axios",
+   "at": "2026-11-09 03:40",
+   "why": "AI 반도체 대장 규제 헤드라인 위험 — AI 차입·기술주 약세 가설과 이어짐",
+   "summary": "공화당 위원장들이 엔비디아 CEO 에 비공개 브리핑 요구(11/5). CNBC 11/8 초당적 압박 재보도 — 주가 영향은 월요일 개장 전 미확인."
+  },
+  {
    "title": "후티, 리야드 아람코 시설 타격 주장 — 예멘 교전 확대",
    "url": "https://oilprice.com/Latest-Energy-News/World-News/Houthis-Claim-Strike-on-Aramco-Facility-in-Riyadh-as-Yemen-Fighting-Escalates.html",
    "press": "OilPrice",
@@ -583,63 +639,7 @@
    "at": "2026-11-05 00:34",
    "why": "AI 차입·AI 안의 갈림 가설 — 지수 +2%대 랠리 속 메모리·네오클라우드만 약세",
    "summary": "민주당 스윕 → AI 데이터센터 규제·전력 반발 우려로 MU 하락 — 원문 숫자 미확인."
-  },
-  {
-   "title": "美 재무부, 11월 리펀딩 — 쿠폰 입찰 규모 유지·발행 가이던스 손질",
-   "url": "https://marketnews.com/mni-brief-us-treasury-maintains-steady-issuance-guidance",
-   "press": "MNI",
-   "at": "2026-11-04 23:35",
-   "why": "고금리 정점 가설(중장기채·유틸리티) — 공급 충격 없음 확인",
-   "summary": "쿠폰 입찰 규모 동결, 「적어도 향후 몇 분기」 문구 손질(bbg_mkt 동일 보도). 발표 뒤 美 10년 4.92%·30년 5.30%(CNBC 23:18 KST). 세부 숫자 미확인."
-  },
-  {
-   "title": "재무부 차입 추정치 — 11/4 리펀딩이 정할 것(장기물 바이백)",
-   "url": "https://marketsandnews.com/rates/treasury-quarterly-refunding-november-4-2026-buybacks-yields/",
-   "press": "Markets and News",
-   "at": "2026-11-04 22:35",
-   "why": "고금리 정점 가설·美 10년 4.95 판정 — 오늘 리펀딩의 장기물 축소·바이백 확대 여부",
-   "summary": "11/4 분기 리펀딩 전 프리뷰: 장기물 바이백 확대 논의. 세부 숫자는 미확인."
-  },
-  {
-   "title": "민주당 의회 스윕에 대한 시장 분석가 반응 모음",
-   "url": "https://finance.yahoo.com/markets/stocks/articles/analysts-react-us-midterm-election-025738421.html",
-   "press": "Yahoo Finance",
-   "at": "2026-11-04 20:40",
-   "why": "🗳️ 중간선거 watch — 스윕 뒤 AI 규제·재정 경로에 대한 IB 해석 모음, 반도체·AI 소프트웨어 칸 판단 재료",
-   "summary": "민주당 상·하원 장악 후 월가 분석가 반응 정리(원문 숫자는 이 세션에서 미확인 — 제목·요지 기준)."
-  },
-  {
-   "title": "S&P500·나스닥 선물, 기술주 실적·중간선거 결과 주시하며 상승",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-04/us-equity-futures-inch-higher-as-investors-await-midterm-results",
-   "press": "Bloomberg",
-   "at": "2026-11-04 20:40",
-   "why": "오늘 밤 정규장 「정치 갭 되돌림」 판정 — 선물 방향 확인용",
-   "summary": "선거 결과·AMD 등 기술주 실적에 美 지수 선물 소폭 상승(세부 숫자 미확인)."
-  },
-  {
-   "title": "BofA: 민주당 상·하원 장악 시 美 증시 10% 넘게 빠질 수 있다",
-   "url": "https://cryptobriefing.com/bofa-democrats-sweep-congress-stocks-decline/",
-   "press": "Crypto Briefing(BofA 인용)",
-   "at": "2026-11-04 16:40",
-   "why": "스윕 확정 — 오늘 밤 美 정규장 갭 판정·🐻 하락장 watch 의 하방 시나리오 기준",
-   "summary": "BofA 전략가가 민주당 스윕을 증시 −10%↑ 위험 시나리오로 제시(기사 기준, 원 리포트 미확인)."
-  },
-  {
-   "title": "마벨, 루멘텀 인수설에 하루 시총 290억$ 증발(10/29)",
-   "url": "https://fourweekmba.com/ai-marvell-lost-29b-of-value-in-a-day-on-lumentum-deal-talks/",
-   "press": "FourWeekMBA",
-   "at": "2026-11-04 16:40",
-   "why": "AI 광통신 M&A 발 변동 — 테제 「AI 차입(크레딧)」과 같은 결: 인수자금·희석 부담을 시장이 벌함",
-   "summary": "10/29 MRVL −12~13%(인수 프리미엄·신주 희석·규제 우려). 11/4 피드 「마벨 30% 급락」은 루멘텀 쪽 수치인지 미확인."
-  },
-  {
-   "title": "美 증시 전망(11/4): AMD 가이던스 상회로 시간외 급등, 중간선거 개표에 선물 하락",
-   "url": "https://www.techflowpost.com/en-US/article/35085",
-   "press": "TechFlow",
-   "at": "2026-11-04 10:40",
-   "why": "킥 SPY·반도체 칸 — 칩 호재보다 선거(민주 스윕) 불확실성이 지수를 끌어내리는지",
-   "summary": "S&P 선물 −0.6%·나스닥100 −0.5%·다우 −252pt · AMD 4분기 매출 가이던스 ~170억$(예상 162.3억) 시간외 +9%→+4% · 칼시 민주 상원 90%·하원 97%, JP모건 스윕 66% · 10년 4.951%(+5.8bp)"
   }
  ],
- "at": "2026-11-09 01:40"
+ "at": "2026-11-09 05:40"
 }
