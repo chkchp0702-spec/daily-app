@@ -1085,6 +1085,31 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["odd_err"] = str(e)[:120]
+    # 🌓 밤·낮 괴리 20일 — Σ20(밤 log 시가/전날 종가) − Σ20(낮 log 종가/시가) 1년 백분위 ≥90% → 일본 「내일」만, w 0.4 덧셈형 (11/9 12시 #90 · probe/ng90_bt.py · https://koreascience.kr/article/JAKO202332543309190.pdf)
+    #   본 대상 한국은 ❌(칸 앞 +0.8·뒤 +1.0%p 작음 · 기존 칸 위 세 기간 나빠짐) · 곁가지 일본: 2000-07~ 6,440일, 2013-08 기준 앞/뒤
+    #   다음 날 오름 +4.5·+3.3%p(n 344·365) · 최근5년 +3.3(n 144) · 덧셈형 w0.5(기존 자기5·S&P5 꼬리·간밤 3칸 걸어가기 위) 0.23077→0.23053 · 0.22237→0.22223 · 0.21521→0.21506 ✅
+    #   교차 로지스틱 앞→뒤 0.21695→0.21674 · 뒤→앞 0.21839→0.21803(계수 +0.27·+0.21) ✅ · 칸 곱하기는 나빠짐 → 덧셈으로만 · 5일은 #40(밤 5일)과 겹쳐 안 씀 · 중·홍 ❌
+    if mk == "JP":
+        try:
+            px_ = H.get("^N225")
+            if px_ is not None and "Open" in px_:
+                o_, c_ = px_["Open"].astype(float), px_["Close"].astype(float); pc_ = c_.shift(1)
+                bad_ = (o_ <= 0) | o_.isna() | ((o_ - pc_).abs() < 1e-9 * pc_) | ((o_ - c_).abs() < 1e-9 * c_)
+                yr_ = bad_.groupby(px_.index.year).mean(); okyr_ = yr_[yr_ <= 0.2].index
+                ng_ = np.log(o_ / pc_).where(~bad_ & px_.index.year.isin(okyr_))
+                ng_ = ng_.where(ng_.abs() < 0.15)
+                dy_ = np.log(c_ / o_).where(ng_.notna())
+                gp_ = (ng_.rolling(20, min_periods=16).sum() - dy_.rolling(20, min_periods=16).sum()).dropna()
+                rk = rank252(gp_).reindex(idx); cv = rk.iloc[-1]
+                research["ngap"] = {"d": str(gp_.index[-1].date()), "gap20": round(float(gp_.iloc[-1]) * 100, 2), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv >= 0.9:
+                    m = cond(d, (rk >= 0.9).fillna(False), "닛케이 밤−낮 20일 괴리(1년 상위 10%)")
+                    add("ngap", "🌓", "밤 강하고 낮 약함(20일)", "심리", m, 0.4,
+                        f"닛케이 최근 20일 「밤 사이」 합 − 「장중」 합 {float(gp_.iloc[-1])*100:+.1f}%p (1년 백분위 {cv*100:.0f}%) — 장 밖 매수가 장중보다 훨씬 강했던 때 다음 날은 평소보다 잘 오름(다음 날만)")
+                    if M and M[-1]["k"] == "ngap":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["ngap_err"] = str(e)[:120]
     # 🔀 일본 「혼자 약함」 — 닛케이 5일 − S&P 5일(간밤 미국 하루 뺀 같은 창) 1년 백분위 ≤10% → 일본 「내일」만, w 0.5 (10/31 16시 #51 · probe/rs51_bt.py · #49 ➖ 다시)
     #   2000~ 6,400여 일, 2014-06 기준 앞/뒤 · 다음 날 오름 +8.8·+4.1%p(n 297·336) · 사건 첫날만 +10.2·+5.5%p(n 118·129) · 최근5년 +1.6%p(n 134, 작아짐)
     #   덧셈형(기존 자기5·S&P5 꼬리·간밤 3칸 걸어가기 로짓 + 약함 칸 몫×0.5) 브라이어 앞 0.23139→0.23099 · 뒤 0.22339→0.22314 · 최근5년 0.21687→0.21677 ✅(w 0.3·1.0 도 세 기간 개선)
