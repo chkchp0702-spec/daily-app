@@ -122,7 +122,7 @@
     if (w){
       var ck = (w.checks || []), on = ck.filter(function(c){ return c.on; }).length;
       return '<details class="ez-rule"><summary>' + (o.red ? '🔴 지금 규칙 · 현금 ' + (w.cash || 0) + '%까지 · 바닥 신호 ' + on + '/' + ck.length : '🟡 지금 규칙 · 바닥 신호 ' + on + '/' + ck.length) + '</summary>' +
-        '<p>' + e(w.advice || (BR && BR.lead) || "") + '</p><ul>' + ck.map(function(c){ return '<li class="' + (c.on ? "on" : "") + '">' + (c.on ? "✅" : "⬜") + ' ' + e(c.k) + ' <small>' + e(c.d) + '</small></li>'; }).join("") + '</ul>' +
+        '<p>' + e(w.advice || (BR && BR.lead) || "") + '</p>' + (window.__bearSigHead ? __bearSigHead(w) : '') + '<ul>' + ck.map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '">' + (c.on ? "✅" : "⬜") + ' ' + e(c.k) + ' <small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(w, k) : '') + '</li>'; }).join("") + '</ul>' +
         '<p class="ez-rule-n">바닥 신호가 2·3·4개 켜지면 현금을 30→20→10→0%로 줄여 다시 담아요 · 종가 판정 · 사라·팔라는 뜻 아님</p></details>';
     }
     return '<details class="ez-rule"><summary>🔴이 되면 이렇게 바뀌어요</summary><p>코스피나 S&P500이 고점보다 <b>−20%</b>(종가)면 🔴 하락장 — 현금을 30%까지 늘리고 새로 사지 않아요. <b>−10%</b>면 🟡 조정 — 현금 10%.</p>' +

@@ -339,7 +339,8 @@
       var ladder = m.state === "🐻" ? [30, 30, 20, 10, 0] : [10, 10, 5, 0, 0];
       return '<div class="bg-m"><div class="bg-mh">' + FL[m.nat] + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' · 고점보다 ' + sg(m.dd) + ' · 지금 권고 현금 <b>' + m.cash + '%</b></div>' +
         '<div class="bg-n">🌱 바닥 신호 <b>' + m.n + '/4</b> — 켜질수록 3분의 1씩 다시 사기</div>' +
-        '<ul class="bg-ck">' + (m.checks || []).map(function(c){ return '<li class="' + (c.on ? "on" : "") + '"><i>' + (c.on ? "✅" : "⬜") + '</i><b>' + e(c.k) + '</b><small>' + e(c.d) + '</small></li>'; }).join("") + '</ul>' +
+        (window.__bearSigHead ? __bearSigHead(m) : '') +   // 🌱 11/09 A11/9-1 과거 성적표 (ux1109b.js)
+        '<ul class="bg-ck">' + (m.checks || []).map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '"><i>' + (c.on ? "✅" : "⬜") + '</i><b>' + e(c.k) + '</b><small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(m, k) : '') + '</li>'; }).join("") + '</ul>' +
         '<div class="bg-lad">' + [[ladder[0], "신호 0~1개"], [ladder[2], "2개"], [ladder[3], "3개"], [ladder[4], "4개"]].map(function(x, i){ return '<span class="' + (Math.max(0, m.n - 1) === i ? "now" : "") + '"><small>' + x[1] + '</small><b>현금 ' + x[0] + '%</b></span>'; }).join("") + '</div>' +
         '<p class="bg-ad">' + e(m.advice) + '</p></div>';
     }).join("");
