@@ -22,7 +22,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
-XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF", "^VVIX", "^SKEW", "1306.T"]
+XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF", "^VVIX", "^SKEW", "1306.T", "^VIX9D"]
 FX = {"KR": ("KRW=X", "원/달러"), "JP": ("JPY=X", "엔/달러"), "CN": ("CNY=X", "위안/달러"), "HK": ("CNY=X", "위안/달러"), "US": ("DX-Y.NYB", "달러 인덱스")}
 
 
@@ -782,6 +782,25 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                     M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["move5_err"] = str(e)[:120]
+    # ⚡ VIX9D÷VIX > 1(9일 공포가 30일 공포보다 큼) — 중국 「다음 날」만 (11/9 17시 #93 · probe/vix9_bt.py · https://www.cxoadvisory.com/?p=31176)
+    #   야후 ^VIX9D 2011-01~ 3,985일 · 미국 날짜 값 → 다음 중국 장 · 2019-08 기준 앞/뒤 · 걸어가며 사전 100 브라이어
+    #   중국 다음 날 −6.4·−3.8%p(n 528·401) · 🌡️ VIX÷VIX3M 5칸 위(칸 곱하기)에서도 0.24954→0.2492 · 0.2496→0.24948 · 최근5년 0.24969→0.24938 ✅
+    #   5일 −8.0·+5.5 뒤집힘 ❌ · 한·일·홍·미 VIX3M 칸 위에서 나빠짐 ❌ · 순위 꼬리(≥90·≤10) ❌/➖ · 15칸×2 시험이라 w 작게
+    if mk == "CN":
+        try:
+            v9_, vx_ = _c(H, "^VIX9D"), _c(H, "^VIX")
+            if v9_ is not None and vx_ is not None and len(v9_) > 1000:
+                r9 = (v9_ / vx_.reindex(v9_.index).ffill()).dropna()
+                ra = align(r9, idx); cv = ra.iloc[-1]
+                research["vix9"] = {"d": str(r9.index[-1].date()), "r9": round(float(r9.iloc[-1]), 3)}
+                if not pd.isna(cv) and cv > 1.0:
+                    m = cond(d, (ra > 1.0).fillna(False), "VIX9D÷VIX > 1(초단기 공포 쏠림)")
+                    add("vix9", "⚡", "초단기 공포(VIX9D÷VIX)", "심리", m, 0.4,
+                        f"VIX9D÷VIX = {float(r9.iloc[-1]):.2f} — 9일 공포가 30일 공포보다 크면(급한 공포) 중국 다음 날이 평소보다 덜 오름(다음 날만)")
+                    if M and M[-1]["k"] == "vix9":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["vix9_err"] = str(e)[:120]
     # 🪃 큰 등락일 뒤 되돌림 (11/2 15시 #55 · probe/ovr_bt.py · 아시아 지수 과잉반응 https://emerald.com/insight/content/doi/10.1016/S0196-3821(07)00207-9) — 꼬리 날만
     #   자기 지수 오늘 등락 ±3% 고정 꼬리 · 2001~, 2013-11 기준 앞/뒤 칸 + 걸어가며 사전 100 브라이어(평소 대비 · ① 연속일수 칸 위에 덧붙여)
     #   한국 −3%↓ 다음 날 +8.6·+10.7%p(n 99·68) · 브라이어 0.24958→0.24951 · 0.24782→0.24761 · 최근5년 0.24811→0.2480 · 연속일수 위에서도 세 기간 ✅ (5일 ❌)
