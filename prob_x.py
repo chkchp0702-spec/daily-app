@@ -1180,7 +1180,7 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                     dv = dy_.reindex(idx)
                     if not pd.isna(dv.iloc[-1]) and dv.iloc[-1] > 0:
                         hit = (((rk <= 0.1) & (dv > 0)).fillna(False), "항셍 크게 낮게 열고 장중 반등",
-                               f"오늘 항셍이 {float(cg)*100:+.1f}% 낮게 열린 뒤(1년 백분위 {cv*100:.0f}%) 장중에는 올라 마감 — 이런 날 다음 날은 평소보다 덜 오름(반등 소진 · 다음 날만)")
+                               f"오늘 항셍이 {float(cg)*100:+.1f}% 낮게 열린 뒤(1년 백분위 {cv*100:.0f}%) 장중에는 시가보다 올라 있음(장 중이면 지금까지 기준) — 이렇게 마감한 날 다음 날은 평소보다 덜 오름(반등 소진 · 다음 날만)")
                 if hit:
                     m = cond(d, hit[0], hit[1])
                     add("gap89", "🌅", "오늘 시가 갭", "흐름", m, 0.4, hit[2])
