@@ -12,7 +12,7 @@ vk = pd.Series({pd.Timestamp(x["tradeTime"][:8]): float(x["close"]) for x in bar
 vk = vk[~vk.index.duplicated(keep="last")]; vk = vk[vk > 0]
 print("VKOSPI", len(vk), vk.index[0].date(), vk.index[-1].date(), round(float(vk.iloc[-1]), 2))
 SY = ["^KQ11", "^KS200", "^KS11"]
-df = yf.download(SY, start="2007-01-01", interval="1d", group_by="ticker", auto_adjust=False, progress=False, threads=True)
+df = yf.download(SY, start="2007-01-01", interval="1d", group_by="ticker", auto_adjust=False, progress=False, threads=False)
 def cl(s):
     x = df[s]["Close"].dropna(); x.index = pd.to_datetime(x.index).tz_localize(None); x = x[~x.index.duplicated(keep="last")]; return x[x > 0]
 C = {s: cl(s) for s in SY}
