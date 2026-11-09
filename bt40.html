@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>40주선 검증</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#14171c;--sub:#6b7280;--line:#e5e7eb;--up:#d93a3a;--dn:#2563eb;--strat:#0f766e;--bh:#9ca3af;--chip:#eef2f6;--good:#0f766e;--bad:#b45309}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--ink:#eef0f3;--sub:#9aa3af;--line:#2a2f37;--chip:#232831;--strat:#2dd4bf;--bh:#6b7280;--good:#2dd4bf;--bad:#f59e0b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 60px}
+h1{font-size:22px;margin:6px 0 2px;letter-spacing:-.3px}
+.made{color:var(--sub);font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+.card h2{font-size:16px;margin:0 0 10px}
+.verdict{font-size:17px;font-weight:700;line-height:1.45;margin:0 0 10px}
+.vl{margin:0;padding-left:18px}.vl li{margin:4px 0}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:var(--chip);border-radius:12px;padding:10px;text-align:center}
+.tile b{display:block;font-size:22px}.tile span{font-size:12px;color:var(--sub)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{color:var(--sub);font-weight:600;font-size:12px;cursor:pointer}
+tr.row{cursor:pointer}tr.row:active{background:var(--chip)}
+.g{color:var(--good);font-weight:600}.b{color:var(--bad)}
+.tk{display:block;color:var(--sub);font-size:11px}
+.st{font-size:11px;border-radius:6px;padding:1px 6px}
+.st.h{background:rgba(217,58,58,.12);color:var(--up)}.st.c{background:rgba(37,99,235,.12);color:var(--dn)}
+.note{color:var(--sub);font-size:12px}
+.bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+.bar .lab{width:96px;flex:none}
+.bar .tr{flex:1;position:relative;height:18px}
+.bar i{position:absolute;top:0;height:8px;border-radius:4px}
+.bar i.s{background:var(--strat)}.bar i.bh{background:var(--bh);top:10px}
+.bar .val{width:110px;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--sub);margin:4px 0 8px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+#detail{display:none}
+.canvas{position:relative;height:260px}
+.scroll{overflow-x:auto}
+.back{display:inline-block;color:var(--sub);text-decoration:none;font-size:13px;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="./">‹ 앱으로</a>
+<h1>📏 40주 이동평균선 검증</h1>
+<div class="made" id="made">불러오는 중…</div>
+
+<div class="card" id="vcard"></div>
+
+<div class="card">
+  <h2>그룹별 한눈에</h2>
+  <div class="chips" id="gchips"></div>
+  <div class="chips" id="vchips" style="margin-top:6px"></div>
+  <div class="tiles" id="tiles" style="margin-top:10px"></div>
+  <p class="note" id="tnote"></p>
+</div>
+
+<div class="card">
+  <h2>하락장에서 지켜 줬나 (중간값)</h2>
+  <div class="legend"><span style="--c:var(--strat)">40주선</span><span style="--c:var(--bh)">그냥 보유</span></div>
+  <div id="bears"></div>
+  <h2 style="margin-top:16px">상승장에서 놓친 건 (중간값)</h2>
+  <div id="bulls"></div>
+</div>
+
+<div class="card" id="detail">
+  <h2 id="dtitle"></h2>
+  <div class="legend"><span style="--c:var(--strat)">40주선</span><span style="--c:var(--bh)">그냥 보유</span><span>세로축 로그</span></div>
+  <div class="canvas"><canvas id="eq"></canvas></div>
+  <div id="dvar" class="scroll" style="margin-top:10px"></div>
+  <div id="dyears" class="scroll" style="margin-top:10px"></div>
+  <div id="dtrades" class="scroll" style="margin-top:10px"></div>
+</div>
+
+<div class="card">
+  <h2>종목별 결과 <span class="note">— 탭하면 자세히</span></h2>
+  <div class="chips" id="lchips"></div>
+  <div class="scroll"><table id="tbl"></table></div>
+</div>
+
+<div class="card">
+  <h2>검증 방식</h2>
+  <p id="rule" style="margin:0 0 8px"></p>
+  <ul class="vl note" id="honest"></ul>
+</div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const f1=x=>x==null?'–':(x>0?'+':'')+x.toFixed(1)+'%';
+const f2=x=>x==null?'–':x.toFixed(2);
+let D,G='전체',V='w40',L='전체',SORT='gap',chart;
+fetch('archive/x/bt40.json?'+Date.now()).then(r=>r.json()).then(d=>{D=d;init()}).catch(()=>{$('#made').textContent='아직 결과가 없음 — GitHub Actions에서 bt40 실행 필요'});
+
+function init(){
+  $('#made').textContent=`${D.made} 기준 · ${D.rows.length}개 자산 · 매주 토요일 자동 갱신`;
+  $('#vcard').innerHTML=`<p class="verdict">${D.verdict[0]}</p><ul class="vl">${D.verdict.slice(1).map(x=>`<li>${x}</li>`).join('')}</ul>`;
+  const groups=Object.keys(D.summary.groups);
+  chips('#gchips',groups,()=>G,g=>{G=g;tiles()});
+  chips('#vchips',Object.keys(D.variants),()=>V,v=>{V=v;tiles();table()},k=>D.variants[k]);
+  chips('#lchips',groups,()=>L,g=>{L=g;table()});
+  tiles();bars('#bears',D.summary.bears);bars('#bulls',D.summary.bulls);table();
+  $('#rule').textContent=D.rule;
+  $('#honest').innerHTML=D.honest.map(x=>`<li>${x}</li>`).join('');
+}
+function chips(sel,items,get,set,lab){
+  const el=$(sel);
+  const draw=()=>{el.innerHTML=items.map(k=>`<button class="chip ${get()===k?'on':''}" data-k="${k}">${lab?lab(k):k}</button>`).join('');
+    el.querySelectorAll('button').forEach(b=>b.onclick=()=>{set(b.dataset.k);draw()})};
+  draw();
+}
+function tiles(){
+  const s=D.summary.groups[G][V];
+  if(!s){$('#tiles').innerHTML='';return}
+  $('#tiles').innerHTML=`
+   <div class="tile"><b>${s.beat_cagr}/${s.n}</b><span>수익률이 더 높았던 수</span></div>
+   <div class="tile"><b>${s.less_mdd}/${s.n}</b><span>최대 낙폭이 줄어든 수</span></div>
+   <div class="tile"><b>${s.beat_sharpe}/${s.n}</b><span>위험 대비 수익 개선</span></div>
+   <div class="tile"><b>${s.med_cagr_s}%</b><span>연평균 · 보유 ${s.med_cagr_b}%</span></div>
+   <div class="tile"><b>${s.med_mdd_s}%</b><span>최대 낙폭 · 보유 ${s.med_mdd_b}%</span></div>
+   <div class="tile"><b>${s.med_invested}%</b><span>시장에 있던 기간</span></div>`;
+  $('#tnote').textContent=`중간값 기준 · 1년에 약 ${s.med_trades_yr}번 매매 · 이긴 매매 비율 ${s.med_win}%`;
+}
+function bars(sel,arr){
+  const mx=Math.max(...arr.flatMap(a=>[Math.abs(a.s),Math.abs(a.b)]),1);
+  $(sel).innerHTML=arr.map(a=>{
+    const w=v=>Math.abs(v)/mx*100;
+    return `<div class="bar"><span class="lab">${a.name}<span class="tk">${a.better}/${a.n}개 40주선 우세</span></span>
+    <span class="tr"><i class="s" style="width:${w(a.s)}%"></i><i class="bh" style="width:${w(a.b)}%"></i></span>
+    <span class="val"><span class="${a.s>a.b?'g':''}">${f1(a.s)}</span> / ${f1(a.b)}</span></div>`}).join('');
+}
+function table(){
+  let rows=D.rows.filter(r=>(L==='전체'||r.grp===L)&&r.v[V]);
+  const key={name:r=>r.name,cagr:r=>r.v[V].s.cagr-r.v[V].b.cagr,mdd:r=>r.v[V].s.mdd-r.v[V].b.mdd,gap:r=>r.now.gap};
+  rows.sort((a,b)=>SORT==='name'?a.name.localeCompare(b.name):key[SORT](b)-key[SORT](a));
+  $('#tbl').innerHTML=`<tr><th data-s="name">종목</th><th data-s="cagr">연평균<br>40주/보유</th><th data-s="mdd">최대낙폭<br>40주/보유</th><th data-s="gap">지금<br>40주선 대비</th></tr>`+
+   rows.map(r=>{const v=r.v[V];return `<tr class="row" data-tk="${r.tk}"><td>${r.name}<span class="tk">${r.tk} · ${r.years}년</span></td>
+   <td><span class="${v.s.cagr>v.b.cagr?'g':''}">${v.s.cagr}%</span><br><span class="note">${v.b.cagr}%</span></td>
+   <td><span class="${v.s.mdd>v.b.mdd?'g':''}">${v.s.mdd}%</span><br><span class="note">${v.b.mdd}%</span></td>
+   <td>${f1(r.now.gap)}<br><span class="st ${r.now.state==='보유'?'h':'c'}">${r.now.state}</span></td></tr>`}).join('');
+  $('#tbl').querySelectorAll('th').forEach(t=>t.onclick=()=>{SORT=t.dataset.s;table()});
+  $('#tbl').querySelectorAll('tr.row').forEach(t=>t.onclick=()=>detail(t.dataset.tk));
+}
+function detail(tk){
+  const r=D.rows.find(x=>x.tk===tk);$('#detail').style.display='block';
+  $('#dtitle').innerHTML=`${r.name} <span class="note">${r.tk} · ${r.test_start}부터 · 지금 ${r.now.state} (${r.now.since||'-'}부터)</span>`;
+  const cs=getComputedStyle(document.documentElement);
+  if(chart)chart.destroy();
+  chart=new Chart($('#eq'),{type:'line',data:{labels:r.curve.map(p=>p[0]),datasets:[
+    {data:r.curve.map(p=>p[1]),borderColor:cs.getPropertyValue('--strat'),borderWidth:2,pointRadius:0},
+    {data:r.curve.map(p=>p[2]),borderColor:cs.getPropertyValue('--bh'),borderWidth:1.5,pointRadius:0}]},
+    options:{animation:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>(c.datasetIndex?'보유 ':'40주선 ')+((c.raw-1)*100).toFixed(0)+'%'}}},
+    scales:{y:{type:'logarithmic',ticks:{color:cs.getPropertyValue('--sub'),callback:v=>v+'배'},grid:{color:cs.getPropertyValue('--line')}},x:{ticks:{color:cs.getPropertyValue('--sub'),maxTicksLimit:6,callback:function(v){return this.getLabelForValue(v).slice(0,4)}},grid:{display:false}}}}});
+  $('#dvar').innerHTML=`<table><tr><th>방식</th><th>연평균</th><th>최대낙폭</th><th>샤프</th><th>매매/년</th><th>승률</th></tr>`+
+    Object.entries(r.v).map(([k,v])=>`<tr><td>${D.variants[k]}</td><td>${v.s.cagr}%</td><td>${v.s.mdd}%</td><td>${f2(v.s.sharpe)}</td><td>${v.trades_yr}</td><td>${v.win??'–'}%</td></tr>`).join('')+
+    `<tr><td><b>그냥 보유</b></td><td>${r.v.w40.b.cagr}%</td><td>${r.v.w40.b.mdd}%</td><td>${f2(r.v.w40.b.sharpe)}</td><td>0</td><td>–</td></tr></table>`;
+  const ys=Object.entries(r.years_tbl).reverse();
+  $('#dyears').innerHTML=`<table><tr><th>연도</th><th>40주선</th><th>보유</th><th>차이</th></tr>`+
+    ys.map(([y,[s,b]])=>`<tr><td>${y}</td><td>${f1(s)}</td><td>${f1(b)}</td><td class="${s>b?'g':'b'}">${f1(s-b)}</td></tr>`).join('')+`</table>`;
+  $('#dtrades').innerHTML=`<table><tr><th>최근 매매</th><th>매수</th><th>매도</th><th>수익</th></tr>`+
+    r.trades.slice().reverse().slice(0,15).map((t,i)=>`<tr><td>${i+1}</td><td>${t.buy}</td><td>${t.sell||'보유 중'}</td><td class="${t.ret>0?'g':'b'}">${f1(t.ret)}</td></tr>`).join('')+`</table>`;
+  $('#detail').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

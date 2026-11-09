@@ -1,0 +1,27 @@
+name: bt40
+# 📏 40주 이동평균선 백테스트 — 지수·ETF·한미일중홍 대표주 → archive/x/bt40.json (bt40.html 에서 봄)
+on:
+  schedule:
+    - cron: "17 0 * * 6"   # KST 토요일 09:17 (미국 금요일 마감 뒤)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: bt40
+  cancel-in-progress: false
+jobs:
+  bt40:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q yfinance pandas
+      - run: python bt40.py 2>&1 | tee archive/x/bt40_log.txt
+      - name: 저장
+        run: |
+          git config user.name "bot"
+          git config user.email "bot@users.noreply.github.com"
+          bash scripts/push.sh "bt40 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/bt40.json archive/x/bt40_log.txt
