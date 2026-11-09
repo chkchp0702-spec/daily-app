@@ -350,16 +350,17 @@
     var det = bad.map(function(m){
       var ladder = m.state === "🐻" ? [30, 30, 20, 10, 0] : [10, 10, 5, 0, 0];
       return '<div class="bg-m"><div class="bg-mh">' + FL[m.nat] + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' · 고점보다 ' + sg(m.dd) + ' · 지금 권고 현금 <b>' + m.cash + '%</b></div>' +
-        '<div class="bg-n">🌱 바닥 신호 <b>' + m.n + '/4</b> — 켜질수록 3분의 1씩 다시 사기</div>' +
+        (m.rule && m.rule.id === "F" ? '<div class="bg-n">🌱 이 시장은 바닥 신호로 미리 다시 사지 않아요 — 판정이 풀릴 때(고점 −10% 위 + 200일선 위)까지 현금 유지 · 아래 신호는 참고</div>'
+          : '<div class="bg-n">🌱 다시 사는 조건 <b>' + m.n + '/' + (m.nuse || 4) + '</b> — ' + e(m.rule ? m.rule.name : "켜질수록 3분의 1씩 다시 사기") + '</div>') +   // 🌱 11/09 시장별 다시 사기 규칙
         (window.__bearSigHead ? __bearSigHead(m) : '') +   // 🌱 11/09 A11/9-1 과거 성적표 (ux1109b.js)
-        '<ul class="bg-ck">' + (m.checks || []).map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '"><i>' + (c.on ? "✅" : "⬜") + '</i><b>' + e(c.k) + '</b><small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(m, k) : '') + '</li>'; }).join("") + '</ul>' +
-        '<div class="bg-lad">' + [[ladder[0], "신호 0~1개"], [ladder[2], "2개"], [ladder[3], "3개"], [ladder[4], "4개"]].map(function(x, i){ return '<span class="' + (Math.max(0, m.n - 1) === i ? "now" : "") + '"><small>' + x[1] + '</small><b>현금 ' + x[0] + '%</b></span>'; }).join("") + '</div>' +
+        '<ul class="bg-ck">' + (m.checks || []).map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '"><i>' + (c.on ? "✅" : "⬜") + '</i><b>' + e(c.k) + (c.use === false ? ' <em class="bg-ref">참고</em>' : '') + '</b><small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(m, k) : '') + '</li>'; }).join("") + '</ul>' +
+        '<div class="bg-lad">' + (m.ladder && m.ladder.length ? m.ladder.map(function(x){ return [x[0], x[1]]; }) : [[ladder[0], "신호 0~1개"], [ladder[2], "2개"], [ladder[3], "3개"], [ladder[4], "4개"]]).map(function(x, i, A){ var now = m.ladder && m.ladder.length ? x[0] === m.cash : Math.max(0, m.n - 1) === i; return '<span class="' + (now ? "now" : "") + '"><small>' + e(x[1]) + '</small><b>현금 ' + x[0] + '%</b></span>'; }).join("") + '</div>' +
         '<p class="bg-ad">' + e(m.advice) + '</p></div>';
     }).join("");
     return '<section class="card h2-bear" id="bear" data-cz="done"><div class="bg-h">🐻 하락장 계기판 <small>' + e(md(B.at)) + ' ' + e(String(B.at || "").slice(11, 16)) + ' · 종가 판정</small></div>' +
       '<div class="bg-cs">' + chips + '</div><p class="bg-lead' + (bad.length ? " warn" : "") + '">' + e(lead) + '</p>' +
       (bad.length ? '<details class="bg-d"><summary>무엇을 보면 다시 사나 · 체크리스트 펼치기</summary>' + det +
-        '<p class="note bg-ru">판정: 고점보다 −10% 조정 · −20% 하락장 (종가) · 현금 권고: 하락장 30→20→10→0% · 조정 10→5→0% (바닥 신호 2·3·4개). 규칙은 결과 보기 전 등록 · 매수·매도 추천 아님 — 고객 성향·기간에 맞춰 판단.</p></details>' : '') +
+        '<p class="note bg-ru">판정: 고점보다 −10% 조정 · −20% 하락장 (종가) · 현금 권고(11/09 오후부터 시장별): 🇰🇷 코스피 하락장 30% → ① 저점 다지기+④ 50일선 위 10% → ② 20일선 회복까지 0% · 조정 10% → ①+④ 0% / 🇺🇸 S&P·나스닥 하락장 30%·조정 10% 를 판정 풀릴 때까지 — 2000년부터 판 7개 시험(lab b1109_floor). 판정 규칙은 결과 보기 전 등록 · 매수·매도 추천 아님 — 고객 성향·기간에 맞춰 판단.</p></details>' : '') +
       '</section>';
   }
   function apply(){

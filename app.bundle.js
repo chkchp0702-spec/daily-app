@@ -3667,8 +3667,8 @@
       var bk = BR && (BR.markets || []).filter(function(m){ return m.key === "kospi"; })[0], bearN = null;
       if (bk && (bk.state === "🐻" || bk.state === "🟡")){
         bearN = {h: (bk.state === "🐻" ? "🐻 코스피 하락장" : "🟡 코스피 조정") + " · 고점보다 " + pct(bk.dd), t: String(bk.advice || BR.lead || "").replace(/^코스피 (하락장|조정)\s*—\s*/, ""), tone: "warn", max: 3};
-        var on_ = (bk.checks || []).filter(function(c){ return c.on; }).length;
-        if (bk.checks && bk.checks.length) bearN.t += " · 바닥 신호 " + on_ + "/" + bk.checks.length + "개 (다 켜지면 비중을 다시 늘림)";
+        var on_ = (bk.checks || []).filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙(rule)
+        if (bk.rule && bk.rule.id === "F"){} else if (bk.checks && bk.checks.length) bearN.t += " · 다시 사는 조건 " + on_ + "/" + (bk.nuse || bk.checks.length) + "개 켜짐";
         if (adv && adv.plan) adv.plan = adv.plan.filter(function(x){ return !/상승 추세|비중을 그대로/.test(x); });
       }
       // 🧊 11/09 ⑰ 「다음에 볼 것」 한 줄 — 오늘이 아닌 가장 가까운 일정 → 고객이 다음 한 장을 기다리게
@@ -17684,16 +17684,17 @@ window.VIDC = {
     var det = bad.map(function(m){
       var ladder = m.state === "🐻" ? [30, 30, 20, 10, 0] : [10, 10, 5, 0, 0];
       return '<div class="bg-m"><div class="bg-mh">' + FL[m.nat] + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' · 고점보다 ' + sg(m.dd) + ' · 지금 권고 현금 <b>' + m.cash + '%</b></div>' +
-        '<div class="bg-n">🌱 바닥 신호 <b>' + m.n + '/4</b> — 켜질수록 3분의 1씩 다시 사기</div>' +
+        (m.rule && m.rule.id === "F" ? '<div class="bg-n">🌱 이 시장은 바닥 신호로 미리 다시 사지 않아요 — 판정이 풀릴 때(고점 −10% 위 + 200일선 위)까지 현금 유지 · 아래 신호는 참고</div>'
+          : '<div class="bg-n">🌱 다시 사는 조건 <b>' + m.n + '/' + (m.nuse || 4) + '</b> — ' + e(m.rule ? m.rule.name : "켜질수록 3분의 1씩 다시 사기") + '</div>') +   // 🌱 11/09 시장별 다시 사기 규칙
         (window.__bearSigHead ? __bearSigHead(m) : '') +   // 🌱 11/09 A11/9-1 과거 성적표 (ux1109b.js)
-        '<ul class="bg-ck">' + (m.checks || []).map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '"><i>' + (c.on ? "✅" : "⬜") + '</i><b>' + e(c.k) + '</b><small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(m, k) : '') + '</li>'; }).join("") + '</ul>' +
-        '<div class="bg-lad">' + [[ladder[0], "신호 0~1개"], [ladder[2], "2개"], [ladder[3], "3개"], [ladder[4], "4개"]].map(function(x, i){ return '<span class="' + (Math.max(0, m.n - 1) === i ? "now" : "") + '"><small>' + x[1] + '</small><b>현금 ' + x[0] + '%</b></span>'; }).join("") + '</div>' +
+        '<ul class="bg-ck">' + (m.checks || []).map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '"><i>' + (c.on ? "✅" : "⬜") + '</i><b>' + e(c.k) + (c.use === false ? ' <em class="bg-ref">참고</em>' : '') + '</b><small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(m, k) : '') + '</li>'; }).join("") + '</ul>' +
+        '<div class="bg-lad">' + (m.ladder && m.ladder.length ? m.ladder.map(function(x){ return [x[0], x[1]]; }) : [[ladder[0], "신호 0~1개"], [ladder[2], "2개"], [ladder[3], "3개"], [ladder[4], "4개"]]).map(function(x, i, A){ var now = m.ladder && m.ladder.length ? x[0] === m.cash : Math.max(0, m.n - 1) === i; return '<span class="' + (now ? "now" : "") + '"><small>' + e(x[1]) + '</small><b>현금 ' + x[0] + '%</b></span>'; }).join("") + '</div>' +
         '<p class="bg-ad">' + e(m.advice) + '</p></div>';
     }).join("");
     return '<section class="card h2-bear" id="bear" data-cz="done"><div class="bg-h">🐻 하락장 계기판 <small>' + e(md(B.at)) + ' ' + e(String(B.at || "").slice(11, 16)) + ' · 종가 판정</small></div>' +
       '<div class="bg-cs">' + chips + '</div><p class="bg-lead' + (bad.length ? " warn" : "") + '">' + e(lead) + '</p>' +
       (bad.length ? '<details class="bg-d"><summary>무엇을 보면 다시 사나 · 체크리스트 펼치기</summary>' + det +
-        '<p class="note bg-ru">판정: 고점보다 −10% 조정 · −20% 하락장 (종가) · 현금 권고: 하락장 30→20→10→0% · 조정 10→5→0% (바닥 신호 2·3·4개). 규칙은 결과 보기 전 등록 · 매수·매도 추천 아님 — 고객 성향·기간에 맞춰 판단.</p></details>' : '') +
+        '<p class="note bg-ru">판정: 고점보다 −10% 조정 · −20% 하락장 (종가) · 현금 권고(11/09 오후부터 시장별): 🇰🇷 코스피 하락장 30% → ① 저점 다지기+④ 50일선 위 10% → ② 20일선 회복까지 0% · 조정 10% → ①+④ 0% / 🇺🇸 S&P·나스닥 하락장 30%·조정 10% 를 판정 풀릴 때까지 — 2000년부터 판 7개 시험(lab b1109_floor). 판정 규칙은 결과 보기 전 등록 · 매수·매도 추천 아님 — 고객 성향·기간에 맞춰 판단.</p></details>' : '') +
       '</section>';
   }
   function apply(){
@@ -19091,10 +19092,11 @@ window.VIDC = {
   function ruleHtml(o, BR){
     var w = o.red || o.yel, M = (BR && BR.markets) || [];
     if (w){
-      var ck = (w.checks || []), on = ck.filter(function(c){ return c.on; }).length;
-      return '<details class="ez-rule"><summary>' + (o.red ? '🔴 지금 규칙 · 현금 ' + (w.cash || 0) + '%까지 · 바닥 신호 ' + on + '/' + ck.length : '🟡 지금 규칙 · 바닥 신호 ' + on + '/' + ck.length) + '</summary>' +
-        '<p>' + e(w.advice || (BR && BR.lead) || "") + '</p>' + (window.__bearSigHead ? __bearSigHead(w) : '') + '<ul>' + ck.map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '">' + (c.on ? "✅" : "⬜") + ' ' + e(c.k) + ' <small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(w, k) : '') + '</li>'; }).join("") + '</ul>' +
-        '<p class="ez-rule-n">바닥 신호가 2·3·4개 켜지면 현금을 30→20→10→0%로 줄여 다시 담아요 · 종가 판정 · 사라·팔라는 뜻 아님</p></details>';
+      var ck = (w.checks || []), F_ = w.rule && w.rule.id === "F", nu = w.nuse || ck.length, on = ck.filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙
+      var tail = F_ ? '판정 풀릴 때까지' : '다시 사는 조건 ' + on + '/' + nu;
+      return '<details class="ez-rule"><summary>' + (o.red ? '🔴 지금 규칙 · 현금 ' + (w.cash || 0) + '%까지 · ' + tail : '🟡 지금 규칙 · ' + tail) + '</summary>' +
+        '<p>' + e(w.advice || (BR && BR.lead) || "") + '</p>' + (window.__bearSigHead ? __bearSigHead(w) : '') + '<ul>' + ck.map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '">' + (c.on ? "✅" : "⬜") + ' ' + e(c.k) + (c.use === false ? ' <em class="ez-ref">참고</em>' : '') + ' <small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(w, k) : '') + '</li>'; }).join("") + '</ul>' +
+        '<p class="ez-rule-n">' + (w.rule ? '다시 사는 규칙(' + e(w.name) + '): ' + e(w.rule.name) : '') + ' · 종가 판정 · 사라·팔라는 뜻 아님</p></details>';
     }
     return '<details class="ez-rule"><summary>🔴이 되면 이렇게 바뀌어요</summary><p>코스피나 S&P500이 고점보다 <b>−20%</b>(종가)면 🔴 하락장 — 현금을 30%까지 늘리고 새로 사지 않아요. <b>−10%</b>면 🟡 조정 — 현금 10%.</p>' +
       '<p>지금: ' + M.map(function(m){ return m.state + ' ' + e(m.name) + ' ' + sg(m.dd); }).join(" · ") + '</p><p class="ez-rule-n">⚡ 공격 포트는 종목마다 −5%면 손절 · 판정은 종가</p></details>';
@@ -19562,7 +19564,7 @@ window.VIDC = {
 })();
 ;
 /* ======== ux1109b.js ======== */
-/* 🌱 11/09 A11/9-1 「신호가 켜지면 — 바닥 신호 4개의 과거 성적표」 (사용자 「다 진행해」)
+/* 🌱 11/09 A11/9-1 (+ 같은 날 오후: 시장별 다시 사기 규칙 — 머리는 그 규칙 단계 기준, 규칙에 안 쓰는 신호는 「참고」) 「신호가 켜지면 — 바닥 신호 4개의 과거 성적표」 (사용자 「다 진행해」)
    bear.json 시장마다 hist(src/bear_gate.py --bt → market/bear_sig_bt.json, 2000년부터 과거 🐻 하락장마다)를
    🐻 하락장 계기판 체크리스트(오늘 홈 · 쉬운 화면 「지금 규칙」 펼침)에 붙인다.
    ─ 머리: 신호 2·3·4개가 처음 켜진 날 → 6개월 뒤 코스피가 올라 있던 때 / 내려 있던 때 · 그날 뒤 바닥이 더 남아 있던 때 (「n번 중 m번」으로만)
@@ -19575,35 +19577,39 @@ window.VIDC = {
   function md(s){ s = String(s || ""); return s.length >= 10 ? (+s.slice(5, 7)) + "/" + (+s.slice(8, 10)) : s; }
   var NUM = ["①", "②", "③", "④"];
 
-  function stepLine(n, s, nm){
+  // 🌱 11/09 오후 시장별 다시 사기 규칙(사용자 「네 추천대로」): 머리는 「그 규칙의 단계에 처음 닿은 날」 뒤 6개월
+  function stageLine(s, nm, merged){
     if (!s) return "";
-    if (!s.hit) return '<li><b>신호 ' + n + '개</b> — 과거 하락장 ' + s.eps + '번 안에선 ' + n + '개가 한꺼번에 켜진 적 없음</li>';
+    var lab = merged ? "①+④(+② 대개 같은 날) 켜져 다시 산 날" : s.lv === "out" ? "하락장 판정이 풀려 다시 산 날" : s.lv === "10" ? "① 저점 다지기 + ④ 50일선 위 → 현금 10%" : "② 20일선까지 → 현금 0%";
+    if (!s.hit) return '<li><b>' + e(lab) + '</b> — 과거 하락장 ' + s.eps + '번 안에선 닿은 적 없음</li>';
     var r6n = (s.pos6 || 0) + (s.neg6 || 0);
-    return '<li><b>신호 ' + n + '개</b> 처음 켜진 날 → 6개월 뒤 ' + e(nm) + ' 올라 있던 때 <b class="bs-u">' + s.pos6 + '번</b> · 내려 있던 때 <b class="bs-d">' + s.neg6 + '번</b>' +
+    return '<li><b>' + e(lab) + '</b> → 6개월 뒤 ' + e(nm) + ' 올라 있던 때 <b class="bs-u">' + s.pos6 + '번</b> · 내려 있던 때 <b class="bs-d">' + s.neg6 + '번</b>' +
       (r6n < s.hit ? ' <small>(' + (s.hit - r6n) + '번은 6개월이 아직 안 지남)</small>' : '') +
-      '<br><small>그날 뒤로 바닥이 더 남아 있던 때 ' + s.early + '번' + (s.worst_more ? ' (가장 깊게 ' + e(s.worst_more.y) + '년 ' + pc(s.worst_more.more) + ' 더)' : '') + ' · ' + s.eps + '번 중 ' + s.hit + '번 켜짐</small></li>';
+      '<br><small>보통 바닥 ' + Math.round(s.after) + '거래일 뒤 · 바닥보다 ' + pc(s.up) + ' 위에서 · 그 뒤 바닥이 더 남아 있던 때 ' + s.early + '번' + (s.worst_more ? ' (가장 깊게 ' + e(s.worst_more.y) + '년 ' + pc(s.worst_more.more) + ' 더)' : '') + '</small></li>';
   }
 
   // 체크리스트 한 줄 밑에 붙는 과거 한 줄 (k = 0~3)
   window.__bearSigLine = function(m, k){
     var h = m && m.hist, s = h && h.sig && h.sig[k], c = m && m.checks && m.checks[k]; if (!s) return "";
-    var fresh = (m.fresh || []).indexOf(k) >= 0, on = c && c.on;
+    var fresh = (m.fresh || []).indexOf(k) >= 0, on = c && c.on, ref = c && c.use === false;
     var main = !s.on ? '과거 하락장 ' + s.eps + '번: 바닥 뒤엔 한 번도 안 켜짐'
       : '과거 ' + s.eps + '번 중 ' + s.on + '번 · 보통 바닥 <b>' + Math.round(s.after) + '거래일</b> 뒤 · 바닥보다 <b>' + pc(s.up) + '</b> 위에서 켜짐';
     var fk = s.fake_eps ? '<details class="bs-f"><summary>켜졌다가 더 빠진 적 ' + s.eps + '번 중 ' + s.fake_eps + '번</summary><p>하락장 ' + s.fake_eps + '번에서 모두 ' + s.fake_n + '회 켜졌다가, 그 뒤 더 낮은 바닥이 나왔어요' +
       (s.fake_worst ? ' · 가장 깊게 ' + e(s.fake_worst.y) + '년 켜진 뒤 ' + pc(s.fake_worst.more) + ' 더 빠짐' : '') + '.' + (k === 3 && h.note4 ? ' ' + e(h.note4) + '.' : '') + '</p></details>'
       : (s.on ? '<small class="bs-ok">켜졌다가 더 빠진 적 없음</small>' : '');
-    return '<div class="bs-l' + (on ? " on" : "") + '">' + (on ? '<b class="bs-on">🟢 ' + (fresh ? "오늘 " : "") + '켜짐</b> · ' : '') + '📜 ' + main + fk + '</div>';
+    return '<div class="bs-l' + (on && !ref ? " on" : "") + '">' + (on && !ref ? '<b class="bs-on">🟢 ' + (fresh ? "오늘 " : "") + '켜짐</b> · ' : '') + '📜 ' + main + fk + '</div>';
   };
 
-  // 체크리스트 위에 붙는 머리 (신호 n개째 처음 켜진 날 뒤 6개월)
+  // 체크리스트 위에 붙는 머리 (그 시장 다시 사기 규칙의 단계에 처음 닿은 날 뒤 6개월)
   window.__bearSigHead = function(m){
-    var h = m && m.hist; if (!h || !h.step) return "";
-    var nm = m.name || "", S = h.step, eps = (S["2"] || {}).eps;
-    var now = h.now && h.now.fake ? h.now.fake.map(function(n, i){ return n ? NUM[i] + ' ' + n + '회' : ""; }).filter(Boolean) : [];
-    return '<div class="bs-h"><div class="bs-ht">📜 과거 ' + e(nm) + ' 하락장 ' + (eps || "") + '번이면 <small>' + e(String(h.from || "").slice(0, 4)) + '년부터 · 종가</small></div><ul class="bs-ul">' +
-      stepLine(2, S["2"], nm) + stepLine(3, S["3"], nm) + stepLine(4, S["4"], nm) + '</ul>' +
-      (h.now ? '<p class="bs-now">이번 하락장(' + md(h.now.in) + '부터 ' + h.now.len + '거래일): ' + (now.length ? '켜졌다가 도로 꺼진 신호 ' + now.join(" · ") : '아직 켜졌다 꺼진 신호 없음') + '</p>' : '') +
+    var h = m && m.hist; if (!h || !h.stages || !h.stages.length) return "";
+    var nm = m.name || "", S = h.stages, eps = S[0].eps, F_ = h.rule === "F";
+    var merged = !F_ && S.length === 2 && S[1].same_prev === S[1].hit && S[0].hit === S[1].hit;
+    var now = h.now && h.now.fake ? h.now.fake.map(function(n, i){ return n && (!m.checks || !m.checks[i] || m.checks[i].use !== false) ? NUM[i] + ' ' + n + '회' : ""; }).filter(Boolean) : [];
+    return '<div class="bs-h"><div class="bs-ht">📜 이 규칙대로였다면 — 과거 ' + e(nm) + ' 하락장 ' + (eps || "") + '번 <small>' + e(String(h.from || "").slice(0, 4)) + '년부터 · 종가</small></div><ul class="bs-ul">' +
+      (merged ? stageLine(S[1], nm, true) : S.map(function(s){ return stageLine(s, nm); }).join("")) + '</ul>' +
+      (h.now && !F_ ? '<p class="bs-now">이번 하락장(' + md(h.now.in) + '부터 ' + h.now.len + '거래일): ' + (now.length ? '켜졌다가 도로 꺼진 조건 ' + now.join(" · ") : '아직 켜졌다 꺼진 조건 없음') + '</p>' : '') +
+      (F_ ? '<p class="bs-now">이 시장은 바닥 신호로 미리 다시 사지 않아요 — 늦게 사는 대신 「바닥이 더 남았는데 산」 일이 없어요</p>' : '') +
       '<p class="bs-n">하락장 수가 적어 「몇 번 중 몇 번」으로만 봐요 · 과거일 뿐 앞날 보장 아님 · 사라·팔라는 뜻 아님' + (h.note4 ? ' · ' + e(h.note4) : '') + '</p></div>';
   };
 
@@ -19618,7 +19624,7 @@ window.VIDC = {
     ".bs-f{margin-top:2px}.bs-f summary{cursor:pointer;list-style:none;color:var(--acc,#3182f6);font-weight:700}.bs-f summary::-webkit-details-marker{display:none}.bs-f p{margin:3px 0 0}.bs-ok{display:block;color:var(--sub)}" +
     ".bg-ck li .bs-l{grid-column:2}.bg-ck li .bs-l b{color:var(--text);font-weight:800}.bg-ck li .bs-l b.bs-on{color:#1f9d55}.bg-ck li .bs-l small{font-size:12.5px}" +
     ".ez-rule li .bs-l{margin-left:22px;width:auto}.ez-rule li .bs-l small{margin-left:0!important;display:block}.ez-rule .bs-h ul.bs-ul{list-style:disc;padding-left:16px;margin:6px 0 4px}.ez-rule .bs-h li{font-size:13.5px}.ez-rule .bs-h li small{display:inline;margin-left:0}.ez-rule .bs-h p{margin:4px 0 0}" +
-    ".bs-h ul.bs-ul{list-style:disc}";
+    ".bs-h ul.bs-ul{list-style:disc}.ez-ref,.bg-ref{font-style:normal;font-size:11px;font-weight:700;color:var(--sub);border:1px solid var(--line);border-radius:6px;padding:0 4px;margin-left:4px}";
   document.head.appendChild(css);
 })();
 ;
