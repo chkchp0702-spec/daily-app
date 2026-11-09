@@ -80,4 +80,12 @@ for mk in ("CN", "HK", "KR", "JP"):
         r["겹침(자기5꼬리)"] = int((f & ((ro >= .9) | (ro <= .1))).sum()); r["날수"] = int(f.sum())
         res[tag] = r
     OUT[mk] = res
-print(json.dumps(OUT, ensure_ascii=False, indent=1))
+def dl(r):
+    return "/".join(f"{(r[k]['+갭']-r[k]['기존'])*1e5:+.0f}" for k in ("앞","뒤","최근5년"))
+for mk, res in OUT.items():
+    print("##", mk, {k: res[k] for k in ("n","first","mid","last","cur_rank","cur_gap%")}, "그날낮", res["그날낮(앞[n,%p],뒤)"], "결측해", res["결측해"])
+    for tag, r in res.items():
+        if not isinstance(r, dict) or "칸" not in r: continue
+        c = r["칸"]; cs = " ".join(f"{h}:n{v['n']} d1{v['d1']:+} d5{v['d5']} 솎{v.get('솎음')}" if v else f"{h}:-" for h, v in c.items())
+        cx = lambda yc: "/".join(f"{(v[1]-v[0])*1e5:+.0f}({v[2]:+})" for v in r[f"교차 {yc}(기존,+갭,계수)"].values())
+        print(f" {tag} | {cs} | 칸곱1 {dl(r['칸곱 y1'])} 덧1 {dl(r['덧셈w0.5 y1'])} 교1 {cx('y1')} | 칸곱5 {dl(r['칸곱 y5'])} 덧5 {dl(r['덧셈w0.5 y5'])} 교5 {cx('y5')} | 5간 {r['5일간격 y5(앞,뒤)']} 날{r['날수']}")
