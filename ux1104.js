@@ -222,7 +222,7 @@
     var rows = '<div class="ld-ld">' +
       '<div class="ld-r ld-me"><span class="ld-l"><b>0%</b><small>지금</small></span><i class="ld-dot"></i><span class="ld-t"><b>📍 지금 여기</b><small>' + DV.nm + (K.live ? ' 오늘 ' : ' ' + md(K.at) + ' ') + sg(K.chg, 1) + '% · 20거래일 고점 대비 ' + sg(K.dd, 1) + '%</small></span></div>' +
       (inR.length ? inR.map(function(x){ var on = m < 0 && x.m >= m;
-        return '<div class="ld-r' + (on ? ' on' : '') + (x.ki ? ' ki' : '') + '" data-g="' + x.g + '"><span class="ld-l"><b>' + sg(x.m, 1) + '%</b><small>고점 대비 ' + sg(((1 + K.dd / 100) * (1 + x.m / 100) - 1) * 100, 0) + '</small></span><i class="ld-dot"></i>' +
+        return '<div class="ld-r' + (on ? ' on' : '') + (x.ki ? ' ki' : '') + '" data-g="' + x.g + '"><span class="ld-l"><b>' + sg(x.m, 1) + '%</b><small>고점 ' + sg(((1 + K.dd / 100) * (1 + x.m / 100) - 1) * 100, 0) + '%</small></span><i class="ld-dot"></i>' +
           '<span class="ld-t"><b>' + e(x.t) + '</b><small>' + e(x.s) + (x.b ? ' · 같이 움직이는 크기 ' + x.b.toFixed(2) : '') + '</small></span></div>'; }).join("")
         : '<div class="ld-r"><span class="ld-l"><b>−30%</b></span><i class="ld-dot"></i><span class="ld-t"><b>' + DV.sh + '이 30% 더 빠져도 먼저 깨지는 게 없어요</b><small>담아 둔 것이 ' + DV.sh + '와 따로 움직이거나, 여유가 커요</small></span></div>') +
       '</div>';

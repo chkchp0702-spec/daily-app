@@ -7,7 +7,8 @@ from playwright.async_api import async_playwright
 APP=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); MSR=os.path.join(os.path.dirname(APP), "market-strategy-report")
 TABS=sys.argv[1].split(",")
 SEL="#main button, #main .fold, #main summary, #main [data-pf], #main [data-m], #main [data-f], #main [data-win], #main [data-bg], #main [data-cm], #main .chip[data-k]"
-JS_LIST="""(sel)=>{var a=[].slice.call(document.querySelectorAll(sel)).filter(function(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0&&!e.closest('a[href^=http]')&&!/공유|복사|📤|PDF|크게 보기|새 창/.test(e.innerText||'');});
+# 🔧 11/09: 「처음엔 접어 두기」(calm.js .cz) 로 📊 성적표가 전부 접혀 버튼 0개만 검사하던 것 — 목록 만들기 전에 접힌 카드를 모두 펼치고(「접기 ▴」는 접으며 위로 올라가는 게 정상이라 뺌) 안의 버튼까지 누름
+JS_LIST="""(sel)=>{[].forEach.call(document.querySelectorAll('#main .cz.cz-on > .cz-h'),function(h){h.click()}); var a=[].slice.call(document.querySelectorAll(sel)).filter(function(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0&&!e.closest('a[href^=http]')&&!/공유|복사|📤|PDF|크게 보기|새 창|^접기 ▴|^✕ 빼기$|^[−+]$/.test((e.innerText||'').trim());});
   a.forEach(function(e,i){e.setAttribute('data-au',i)}); return a.length;}"""
 async def main():
     async with async_playwright() as p:

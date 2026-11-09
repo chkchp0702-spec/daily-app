@@ -1543,7 +1543,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261109f";
+var APPV = "20261109h";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1595,7 +1595,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합친 한 파일. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.bundle.js?v=408bc76fa6"></script>
+<script defer src="app.bundle.js?v=1cd2d97074"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1623,7 +1623,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="brain.js?v=9"></script>
 <script defer src="feed.js?v=11"></script>
 <script defer src="push.js?v=6"></script>
-<script defer src="port.js?v=56"></script>
+<script defer src="port.js?v=57"></script>
 <script defer src="simple.js?v=20"></script>
 <script defer src="pdfx.js?v=9"></script>
 <script defer src="honest.js?v=1"></script>
@@ -1652,7 +1652,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1023.js?v=2"></script>   <!· 🐇🧬🔬🧯 10/23 A10/23-1·2·3 + 비상 훈련 ·>
 <script defer src="ux1026.js?v=2"></script>   <!· 🎯📐🗺 10/26 A10/26-1·2·3 ·>
 <script defer src="voices.js?v=2"></script>   <!· 🗣 10/27 A10/27-1 목소리 경주 ·>
-<script defer src="ux1104.js?v=2"></script>   <!· 🪜🔢 11/04 A11/4-1 금 가는 순서표 · A11/4-2 숫자로 찾기 ·>
+<script defer src="ux1104.js?v=3"></script>   <!· 🪜🔢 11/04 A11/4-1 금 가는 순서표 · A11/4-2 숫자로 찾기 ·>
 <script defer src="mc.js?v=1"></script>   <!· 🎲 11/04 1만 번 돌려보기(성적표) ·>
 <script defer src="iconz.js?v=3"></script>   <!· 🔣 10/22 아이콘 풀이 ·>
 <script defer src="today.js?v=14"></script>   <!· 🏠 10/22 오늘 탭 10가지 ·>
