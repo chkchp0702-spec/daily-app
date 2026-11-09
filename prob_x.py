@@ -22,7 +22,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
-XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF", "^VVIX", "^SKEW"]
+XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF", "^VVIX", "^SKEW", "1306.T"]
 FX = {"KR": ("KRW=X", "원/달러"), "JP": ("JPY=X", "엔/달러"), "CN": ("CNY=X", "위안/달러"), "HK": ("CNY=X", "위안/달러"), "US": ("DX-Y.NYB", "달러 인덱스")}
 
 
@@ -1107,6 +1107,26 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["rs_jp_err"] = str(e)[:120]
+    # 🗾 홍콩 「NT 배율 5일 급락」 — 닛케이225 ÷ TOPIX(1306.T) 5일 변화 1년 백분위 ≤10% → 홍콩 「내일」만, w 0.5 덧셈형 (11/9 10시 #86b · probe/nt86b_bt.py · #86 ➖ 다시)
+    #   NT 자료 기간 2009~ 4,266일, 2018-03 기준 앞/뒤 · 다음 날 오름 56.9 vs 평소 51.9(+5.0%p, n 188) · 57.3 vs 50.5(+6.8, n 253) · 최근5년 +6.9(n 148) · 첫날만 +8.7·+5.6(n 71·82)
+    #   5일 간격 표본 시작점 5개: 뒤 5/5 · 앞 4/5 같은 쪽 · 덧셈형 w0.5(기존 자기5·S&P5 꼬리·간밤 3칸 걸어가기 위) 브라이어 0.23767→0.23761 · 0.23937→0.23918 · 최근5년 0.23828→0.23811 ✅(w0.3·1.0 도 세 기간 개선)
+    #   교차 로지스틱 앞→뒤 0.24346→0.243 · 뒤→앞 0.23164→0.23135(계수 +0.25·+0.32 같은 쪽) ✅ · 칸 곱하기는 앞·최근5년 나빠짐 → 덧셈으로만 · 일·한·중 ❌(#86)
+    if mk == "HK":
+        try:
+            nk_, tp_ = _c(H, "^N225"), _c(H, "1306.T")
+            if nk_ is not None and tp_ is not None:
+                tp_ = tp_[tp_ > 0]; tp_ = tp_[np.log(tp_).diff().abs().fillna(0) < 0.15]
+                nt_ = (nk_[nk_ > 0] / tp_).dropna()
+                rk = rank252(np.log(nt_).diff(5).dropna()).reindex(idx).ffill(limit=3); cv = rk.iloc[-1]
+                research["nt_hk"] = {"d": str(nt_.index[-1].date()), "nt": round(float(nt_.iloc[-1]), 3), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv <= 0.1:
+                    m = cond(d, (rk <= 0.1).fillna(False), "NT 배율 5일 급락(1년 하위 10%)")
+                    add("nt_hk", "🗾", "일본 NT 급락 → 홍콩", "흐름", m, 0.5,
+                        f"닛케이÷TOPIX(NT 배율) 5일 변화 1년 백분위 {cv*100:.0f}% — 일본에서 대형 기술주 쏠림이 크게 풀린 날 다음 날 홍콩은 평소보다 잘 오름(다음 날만)")
+                    if M and M[-1]["k"] == "nt_hk":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["nt_hk_err"] = str(e)[:120]
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
