@@ -24,6 +24,9 @@
   var PROF_IC = ["🆕", "🛡", "🌱", "⚖️", "🚀", "🔥"];
   var PROF_SUB = ["성향 모름 · 모두 열림", "6등급만", "5등급까지", "4등급까지", "2·3등급까지", "1등급까지"];
   var PTIER = {1: "zero", 2: "low", 3: "safe", 4: "normal", 5: "bold"};
+  // ⚠️ 중개물 (11/09 사용자 「브라질국채는 중개물이라 먼저 제안 못 함 — 밑에 주요문구」)
+  var BROKER = {brl: "⚠️ 중개물 — PB가 먼저 제안할 수 없고, 고객 요청이 있을 때에만 제안할 수 있음"};
+  function brokerTag(k){ return BROKER[k] ? '<span class="pp-warn">' + e(BROKER[k]) + '</span>' : ""; }
   var FMIN = {kr_stock: 4, gl_stock: 5, brl: 5, els: 4, ust: 3, ktb: 1, pension: 1, dc: 1, irp: 1};
   var GMIN = {1: 6, 2: 5, 3: 4, 4: 2, 5: 1};   // 성향별로 담을 수 있는 가장 위험한 상품 등급(숫자가 작을수록 위험)
   var GRADE = ["", "매우높은위험", "높은위험", "다소높은위험", "보통위험", "낮은위험", "매우낮은위험"];
@@ -1670,15 +1673,15 @@
     var h = '<section data-xc="1" class="card pp-top"><h3>📋 오늘의 기본폼</h3>' + notes(JOY.forms()) + '<p class="pp-tip" style="margin-top:-4px">' + e(DATA.basis || "") + '</p>' +
       '<div class="pp-reg"><span class="' + (M.us_up ? "ok" : "no") + '">🇺🇸 ' + (M.us_up ? "상승 추세" : "조심") + '</span><span class="' + (M.kr_up ? "ok" : "no") + '">🇰🇷 ' + (M.kr_up ? "상승 추세" : "회복 전") + '</span><span class="mut">' + e(String(DATA.at || "").slice(5).replace("-", "/")) + ' 갱신</span></div>' +
       profUI() + gUI() + '<p class="pp-tip">' + (profSet() ? (ST.prof ? "「" + e(profName()) + "」 고객에게 맞는 상품만 열려 있음 · 여러 개 함께 골라도 됨" : "신규 고객 — 성향 확인 전이라 모든 상품이 열려 있음 · 여러 개 함께 골라도 됨") : "🧭 위에서 고객 투자성향을 먼저 골라 주세요") + '</p><div class="pp-grid">' + DATA.forms.map(function(f){ var on = ST.sel.indexOf(f.key) >= 0, GB = gBadge(f), ok = formOK(f.key);
-        if (!ok) return '<button type="button" class="pp-f lk" data-k="' + f.key + '" data-lk="1" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small class="pp-lk">' + e(lockTxt(f.key)) + '</small></button>';
-        return '<button type="button" class="pp-f' + (on ? " on" : "") + '" data-k="' + f.key + '" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b><small>' + e(formX(f.key) ? formX(f.key).headline.replace(/ 제안임$/, "") : f.headline.replace(/ 제안임$/, "")) + '</small>' + (on ? '<em>✓</em>' : '') + '<span class="pp-gb ' + GB.c + '" id="ppgb_' + f.key + '">' + GB.h + '</span></button>'; }).join("") + '</div><div id="ppmix">' + mixUI() + '</div></section>';
+        if (!ok) return '<button type="button" class="pp-f lk" data-k="' + f.key + '" data-lk="1" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b>' + brokerTag(f.key) + '<small class="pp-lk">' + e(lockTxt(f.key)) + '</small></button>';
+        return '<button type="button" class="pp-f' + (on ? " on" : "") + '" data-k="' + f.key + '" style="--fc:' + f.color + '"><span class="pp-i">' + e(f.icon) + '</span><b>' + e(f.short) + '</b>' + brokerTag(f.key) + '<small>' + e(formX(f.key) ? formX(f.key).headline.replace(/ 제안임$/, "") : f.headline.replace(/ 제안임$/, "")) + '</small>' + (on ? '<em>✓</em>' : '') + '<span class="pp-gb ' + GB.c + '" id="ppgb_' + f.key + '">' + GB.h + '</span></button>'; }).join("") + '</div><div id="ppmix">' + mixUI() + '</div></section>';
     h += '<section data-xc="1" class="card"><h3>✍️ 누구에게 · 누가</h3>' + notes(JOY.who) + '<div class="pp-in">' +
       '<label>고객 이름<input id="ppcust" maxlength="20" placeholder="예: 홍길동" value="' + e(ST.cust) + '"></label>' +
       '<label>제안자 이름<input id="pppb" maxlength="20" placeholder="예: 김OO PB" value="' + e(ME.pb || "") + '"></label>' +
       '<label>소속<input id="pporg" maxlength="30" placeholder="예: OO WM센터" value="' + e(ME.org || "") + '"></label></div><p class="pp-tip">제안자·소속은 이 휴대폰에 기억해 둠</p></section>';
     h += simCard();
     h += '<section data-xc="1" class="card"><h3>💰 상품별 금액</h3>' + notes(JOY.amt) + '' + (ST.sel.length ? ST.sel.map(function(k){ var f = form(k), v = ST.amt[k] || "";
-        return '<div class="pp-amt" style="--fc:' + f.color + '"><div class="pp-an"><span>' + e(f.icon) + '</span><b>' + e(f.short) + '</b><span class="pp-aw" id="ppw_' + k + '">' + (v ? man(v * 10000) : "") + '</span></div>' +
+        return '<div class="pp-amt" style="--fc:' + f.color + '"><div class="pp-an"><span>' + e(f.icon) + '</span><b>' + e(f.short) + '</b><span class="pp-aw" id="ppw_' + k + '">' + (v ? man(v * 10000) : "") + '</span></div>' + brokerTag(k) +
           '<div class="pp-ar"><input inputmode="numeric" data-ak="' + k + '" placeholder="금액 (만원)" value="' + e(v) + '"><span>만원</span></div>' +
           '<div class="pp-q">' + AMTS.map(function(a){ return '<button type="button" data-qk="' + k + '" data-qv="' + a[0] + '"' + (+v === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div>' + optUI(k, f) + '</div>'; }).join("") +
         '<div class="pp-tot">합계 <b id="pptot">' + (total() ? man(total()) : "–") + '</b></div>'
@@ -1779,7 +1782,7 @@
     [].forEach.call(w.querySelectorAll("[data-pr]"), function(b){ b.onclick = function(){ ST.prof = +b.dataset.pr; var gone = profFix(); keep(); resetBtns();
       if (gone.length) toast("🧭 " + profName() + "에 맞지 않아 뺐어요: " + gone.slice(0, 4).join(", ") + (gone.length > 4 ? " 외 " + (gone.length - 4) : ""));
       var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
-    [].forEach.call(w.querySelectorAll(".pp-f"), function(b){ b.onclick = function(){ if (b.dataset.lk){ toast(profSet() ? lockTxt(b.dataset.k) + " 제안 가능한 상품이에요" : "🧭 위에서 고객 투자성향을 먼저 골라 주세요"); return; } var k = b.dataset.k, i = ST.sel.indexOf(k); if (i >= 0) ST.sel.splice(i, 1); else { ST.sel.push(k); if (gOn() && !+ST.amt[k] && +GL.l) ST.amt[k] = +GL.l; } keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
+    [].forEach.call(w.querySelectorAll(".pp-f"), function(b){ b.onclick = function(){ if (b.dataset.lk){ toast(profSet() ? lockTxt(b.dataset.k) + " 제안 가능한 상품이에요" : "🧭 위에서 고객 투자성향을 먼저 골라 주세요"); return; } var k = b.dataset.k, i = ST.sel.indexOf(k); if (i >= 0) ST.sel.splice(i, 1); else { ST.sel.push(k); if (BROKER[k]) toast(BROKER[k]); if (gOn() && !+ST.amt[k] && +GL.l) ST.amt[k] = +GL.l; } keep(); var y = window.scrollY; draw(); window.scrollTo(0, y); }; });
     // 🎯 목표에서 거꾸로 — 입력은 다시 그리지 않고 배지만 바꿈(입력 칸 초점 유지)
     [].forEach.call(w.querySelectorAll("[data-gk]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d.]/g, ""); if (inp.value !== v) inp.value = v; GL[inp.dataset.gk] = v; gkeep(); gUpd();
       if (inp.dataset.gk === "y") [].forEach.call(w.querySelectorAll("[data-gy]"), function(x){ x.classList.toggle("on", +x.dataset.gy === +v); }); resetBtns(); preview(); }; });
@@ -2096,6 +2099,7 @@
     ".pp-mx2 b.dn{flex:none;min-width:52px;text-align:right;font-size:13.5px;color:#4f86ff}.pp-mx2 small{flex:none;width:118px;font-size:11.5px;color:var(--sub);text-align:right;white-space:nowrap}.pp-mxk{font-size:11px;color:var(--sub);margin:6px 0 0}" +
     ".pp-mxn{font-size:11px;color:var(--sub);line-height:1.5;margin:7px 0 0}" +
     ".pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}" +
+    ".pp-warn{display:block;width:100%;box-sizing:border-box;margin:2px 0 1px;padding:4px 6px;border-radius:7px;background:rgba(229,72,77,.13);color:#e5484d;font-size:10.5px;font-weight:800;line-height:1.35;letter-spacing:-.2px}.pp-amt .pp-warn{font-size:11.5px;margin:4px 0 6px}" +
     ".pp-f{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:var(--panel2);border:1.5px solid var(--line);border-radius:14px;padding:10px 9px 9px;color:var(--text);font:inherit;min-width:0}" +
     ".pp-f .pp-i{font-size:20px;line-height:1}.pp-f b{font-size:13.5px;letter-spacing:-.3px}.pp-f small{font-size:10.5px;color:var(--sub);line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}" +
     ".pp-f.on{border-color:var(--fc);box-shadow:inset 0 0 0 1px var(--fc)}.pp-f em{position:absolute;right:7px;top:6px;font-style:normal;font-weight:900;color:#fff;background:var(--fc);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}" +
