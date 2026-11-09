@@ -70,10 +70,11 @@ main{padding:16px;max-width:760px;margin:0 auto}
 .pbig{overflow-x:auto;padding:8px;-webkit-overflow-scrolling:touch}.pcl{margin-left:6px}.pz.on{background:var(--accent,#3b7ddd);color:#fff}.sh-top .btn{padding:5px 8px;font-size:12.5px;white-space:nowrap;flex-shrink:0}.sh-top b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .pdf canvas{width:100%;display:block;border-radius:10px;margin-bottom:8px;background:#fff}
 .loading{color:var(--dim);font-size:13px;padding:20px 0;text-align:center}
-#netbar{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 6px);transform:translate(-50%,-140%);z-index:60;max-width:calc(100% - 24px);
+/* 11/09: 위쪽(시계·배터리 자리)을 가리던 띠 → 아래 탭 바 바로 위 작은 알약으로 · 안 보일 땐 투명 */
+#netbar{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 92px);transform:translate(-50%,12px);opacity:0;visibility:hidden;z-index:60;max-width:calc(100% - 24px);
   background:#3a2a10;color:#ffd58a;border:1px solid #6b4e1a;border-radius:12px;padding:7px 12px;font-size:12.5px;font-weight:600;line-height:1.35;
-  box-shadow:0 6px 18px rgba(0,0,0,.35);transition:transform .25s;pointer-events:none;text-align:center}
-#netbar.on{transform:translate(-50%,0);pointer-events:auto}
+  box-shadow:0 6px 18px rgba(0,0,0,.25);transition:transform .25s,opacity .25s,visibility .25s;pointer-events:none;text-align:center;border-radius:99px;padding:8px 14px;white-space:nowrap;font-size:13.5px!important}
+#netbar.on{transform:translate(-50%,0);opacity:1;visibility:visible;pointer-events:auto}
 #netbar.ok{background:#12301f;color:#8fe0ad;border-color:#1f5a37;cursor:pointer}
 .hon-line{font-size:12.5px;line-height:1.5;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 11px;margin:0 0 10px;color:var(--sub)}
 .hon-line b{color:var(--text)}.hon-line .up{color:var(--up)}.hon-line .dn{color:var(--down)}
@@ -447,6 +448,7 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
   navigator.serviceWorker.addEventListener("message", function(ev){
     var m = ev.data || {}; if (!m.t || !m.url) return;
     if (m.t === "stale"){ pend[m.url] = 1; if (m.at && (!oldest || m.at < oldest)) oldest = m.at;
+      if (m.why !== "off") return;   // 11/09: 잠깐 느린 것(저장본 먼저 → 곧 새것)은 알리지 않음 — 인터넷이 끊겼을 때만
       show(m.why === "off" ? "⚠ 인터넷이 끊겨 " + hm(oldest) + " 저장본을 보여 주고 있어요" : "⚠ 연결이 느려 " + hm(oldest) + " 저장본을 보여 주고 있어요 · 새로 받는 중", "");
       if (m.why === "off"){ clearTimeout(hideT); hideT = setTimeout(hide, 8000); } return; }
     if (!pend[m.url]) return;
@@ -454,7 +456,7 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
     if (Object.keys(pend).length) return;
     oldest = 0;
     if (window.getJSONdrop) getJSONdrop();          // 저장본으로 받아 둔 것은 버리고 다음엔 새로
-    if (m.t === "fresh"){ show("✓ 새 자료가 왔어요 · 눌러서 새로 보기", "ok"); hideT = setTimeout(hide, 6000); }
+    if (m.t === "fresh"){ show("✓ 새 자료 · 눌러서 새로 보기", "ok"); hideT = setTimeout(hide, 4000); }
     else { show("⚠ 인터넷이 끊겨 저장본을 보여 주고 있어요", "off"); hideT = setTimeout(hide, 8000); }
   });
 })();
@@ -1541,7 +1543,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261109a";
+var APPV = "20261109b";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
