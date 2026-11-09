@@ -352,6 +352,8 @@
   function apply(){
     if (!on() || typeof cur === "undefined" || cur !== "home") return;
     var b = document.getElementById("hmbody"); if (!b || BUSY) return;
+    // 🧊 11/09 ⑪ 쉬운 화면에서 「오늘 자세히 보기」를 안 열었으면 무거운 자료(상품 0.9MB·나침반 0.7MB 등)를 받지 않음 — 열 때 받음
+    if (document.documentElement.getAttribute("data-ez") === "easy" && !b.classList.contains("ez-open")) return;
     var hero = document.getElementById("tdhero"); if (!hero) return;
     if (b.getAttribute("data-h2") === String(DT) && document.getElementById("h2rings")) return reorder(b);
     BUSY = true;
@@ -377,6 +379,7 @@
       reorder(b);
     }).catch(function(x){ BUSY = false; console.warn("home2", x); });
   }
+  window.__h2apply = function(){ try { apply(); } catch(x) {} };
   function reorder(b){   // v2에선 「오늘 한 장」·「바뀐 것」·5개 시장과 겹치는 띠는 아래로 / 숨김
     var hm = document.getElementById("hmlive"); if (hm) hm.classList.add("h2-hide");
     var more = b.querySelector(".hm-more"); if (more) more.classList.add("h2-hide");   // 아래 바로가기 줄 → 「오늘의 발견」이 대신

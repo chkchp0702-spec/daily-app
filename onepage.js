@@ -30,8 +30,8 @@
   // 🌐 시장 한 장 — 고객이 한눈에: 코스피 큰 숫자+오늘 흐름+한 달 흐름 · 세계 시장 타일 · 업종 열지도 · 시장 온도(오른 종목) · 테마 · 환율·유가·금 · 일정 · 자산배분
   function mkMarket(){
     var it = latest("market");
-    return Promise.all([window.__pbbrief ? __pbbrief() : null, gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), it ? gj(file("market", it.id, "data.json")) : null, gj(RAWM + "ledger/ledger.json"), kospiHist(), gj("archive/x/wl_live.json" + q())]).then(function(r){
-      var PB = r[0], L = r[1], U = r[2], D = r[3] || {}, LG = r[4], KH = r[5], WLJ = r[6];
+    return Promise.all([window.__pbbrief ? __pbbrief() : null, gj("archive/x/live_kr.json" + q()), gj("archive/x/live_us_pre.json" + q()), it ? gj(file("market", it.id, "data.json")) : null, gj(RAWM + "ledger/ledger.json"), kospiHist(), gj("archive/x/wl_live.json" + q()), gj(RAWM + "market/bear.json" + q())]).then(function(r){
+      var PB = r[0], L = r[1], U = r[2], D = r[3] || {}, LG = r[4], KH = r[5], WLJ = r[6], BR = r[7];
       var live = !!(L && L.date === today() && L.index && L.index.length), liveMode = !!(PB && PB.mode === "장중" && live);
       var ix = {}; (live ? L.index : []).forEach(function(x){ ix[x.name] = x; });
       var ks = ix["코스피"] || {}, kq = ix["코스닥"] || {};
@@ -71,7 +71,17 @@
       var stars = live ? (L.value || []).slice(0, 5).map(function(x){ return {n: x.n, p: x.p, r: x.r, v: x.v}; }) : null;
       var adv = PB && PB.advice && PB.asof && PB.asof.slice(0, 10) === today() ? Object.assign({}, PB.advice, {watch: liveWatch(PB.advice.watch)}) : null;
       if (adv && live && ks.chg != null) adv.read = String(adv.read).replace(/(코스피[가는]? (?:오늘(?:도)? )?)[+−\-]?\d+(\.\d+)?%/, "$1" + pct(ks.chg));   // 매시간 글 ↔ 지금 숫자 맞춤
-      return {kind: "market", title: liveMode ? "지금 시장 한 장" : "오늘 시장 한 장", sub: lab + (head ? " · " + head : ""), label: lab, key: key.length >= 2 ? key : null, stars: stars && stars.length >= 3 ? stars : null,
+      // 🧊 11/09 ④ 하락장 판정을 고객 한 장에도 — 코스피가 하락장·조정이면 「주식 비중 그대로」 대신 계기판 권고를 먼저 (S&P 200일선만 보던 것)
+      var bk = BR && (BR.markets || []).filter(function(m){ return m.key === "kospi"; })[0], bearN = null;
+      if (bk && (bk.state === "🐻" || bk.state === "🟡")){
+        bearN = {h: (bk.state === "🐻" ? "🐻 코스피 하락장" : "🟡 코스피 조정") + " · 고점보다 " + pct(bk.dd), t: String(bk.advice || BR.lead || "").replace(/^코스피 (하락장|조정)\s*—\s*/, ""), tone: "warn", max: 3};
+        var on_ = (bk.checks || []).filter(function(c){ return c.on; }).length;
+        if (bk.checks && bk.checks.length) bearN.t += " · 바닥 신호 " + on_ + "/" + bk.checks.length + "개 (다 켜지면 비중을 다시 늘림)";
+        if (adv && adv.plan) adv.plan = adv.plan.filter(function(x){ return !/상승 추세|비중을 그대로/.test(x); });
+      }
+      // 🧊 11/09 ⑰ 「다음에 볼 것」 한 줄 — 오늘이 아닌 가장 가까운 일정 → 고객이 다음 한 장을 기다리게
+      var nx_ = adv && (adv.watch || []).filter(function(w){ return w[0] !== "오늘"; })[0], nextN = nx_ ? {h: "👀 다음에 볼 것", t: nx_[0] + " — " + String(nx_[1]).split(" · ")[0], tone: "dark", max: 2} : null;
+      return {kind: "market", bear: bearN, next: nextN, title: liveMode ? "지금 시장 한 장" : "오늘 시장 한 장", sub: lab + (head ? " · " + head : ""), label: lab, key: key.length >= 2 ? key : null, stars: stars && stars.length >= 3 ? stars : null,
         advice: adv,
         hero: hero, world: world.length ? world : null, heat: heat.length >= 8 ? heat : null, gauge: gauge, chips: chips, events: ev,
         themes: themes.length ? {title: "오늘 뜨는 테마 — 대장주", items: themes} : null, kpis2: k2.slice(0, 4),
@@ -681,7 +691,7 @@
     }
     var blocks;
     if (C.kind === "screen") blocks = C.blocks || [];
-    else if (C.kind === "market") blocks = [["key", C.key], ["world", C.world], ["stars", C.stars], ["heat", C.heat], ["gauge", C.gauge], ["advice", C.advice, name], ["kpis", C.kpis2], ["rows", C.themes], ["alloc", C.alloc, false]];
+    else if (C.kind === "market") blocks = [["key", C.key], ["note", C.bear], ["world", C.world], ["stars", C.stars], ["heat", C.heat], ["gauge", C.gauge], ["advice", C.advice, name], ["note", C.next], ["kpis", C.kpis2], ["rows", C.themes], ["alloc", C.alloc, false]];
     else if (C.kind === "port") blocks = [["chips", C.chips], ["alloc", C.alloc, true], ["line", C.line], ["kpis", C.kpis], ["rows", C.why, "text"], ["bullets", C.bullets], ["rows", C.sched, "text"]];
     else if (C.kind === "bond") blocks = [["kpis", C.kpis], ["timeline", C.timeline], ["tiles", C.tiles], ["risk", C.risk, C.riskTitle], ["bars", C.cmp], ["bullets", C.bullets]];
     else if (C.kind === "els") blocks = [["chips", C.chips], ["kpis", C.kpis], ["steps", C.steps], ["prob", C.prob], ["tiles", C.tiles], ["bullets", C.bullets]];

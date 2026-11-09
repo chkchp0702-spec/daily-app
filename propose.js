@@ -1685,7 +1685,7 @@
           '<div class="pp-ar"><input inputmode="numeric" data-ak="' + k + '" placeholder="금액 (만원)" value="' + e(v) + '"><span>만원</span></div>' +
           '<div class="pp-q">' + AMTS.map(function(a){ return '<button type="button" data-qk="' + k + '" data-qv="' + a[0] + '"' + (+v === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div>' + optUI(k, f) + '</div>'; }).join("") +
         '<div class="pp-tot">합계 <b id="pptot">' + (total() ? man(total()) : "–") + '</b></div>'
-      : '<p class="mut">위에서 상품을 먼저 골라 주세요.</p>') + '</section>';
+      : '<p class="mut">2단계(📦 상품)에서 상품을 먼저 골라 주세요.</p>') + '</section>';
     h += '<section data-xc="1" class="card"><h3>📤 만들기</h3>' + notes(JOY.make) + '<p class="pp-tip" style="margin-top:-4px">휴대폰에서 바로 만듦 · 돈 안 듦' + (simState().ok ? ' · ⚖️ 심의필 ' + e(simText()) + ' 찍힘' : ' · <span style="color:#ff7a6e">⚠️ 심의필 없음 — 위 「⚖️ 위험고지 · 심의필」에서 받아 넣어 주세요</span>') + '</p><div class="pp-go">' +
       '<button type="button" id="ppshow" class="pp-show">📲 고객에게 보여 주기 <small>큰 글씨 카드 · 넘겨 보기 · 고객이 금액을 직접 눌러 봄</small></button>' +
       '<button type="button" data-mk="png" class="main">📱 한 장 <small>카톡 전송용 그림</small></button>' +

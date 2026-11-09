@@ -25,6 +25,23 @@
   function num(s){ return s == null ? null : +String(s).replace("−", "-"); }
   function sg(v){ if (v == null || isNaN(v)) return "–"; var a = Math.abs(v).toFixed(1); return (+a === 0 ? "" : v > 0 ? "+" : "−") + a + "%"; }
   function cl(v){ return v > 0 ? "up" : v < 0 ? "dn" : ""; }
+  /* 🧊 11/09 ⑫ 첫 방문 「나는 누구?」 1탭 — PB / 투자자 / 구경 → 첫 화면 큰 버튼(오늘 할 일)과 🙋 순서가 바뀜 */
+  function ROLE(){ return ls("ez_role") || ""; }
+  var ROLES = [["pb", "👔", "PB", "고객에게 보낼 것 먼저"], ["inv", "📈", "투자자", "뭘 살지 먼저"], ["look", "👀", "구경", "가볍게 둘러보기"]];
+  window.__ezRole = function(force){ if (force){ ls("ez_role", null); try { localStorage.removeItem("ez_role"); } catch(x) {} HB = 0; if (cur() !== "home" && window.go) go("home"); setTimeout(tick, 50); } return ROLE(); };
+  function roleHtml(){
+    return '<div class="ez-role"><b>어떤 분이세요?</b><small>고르면 첫 화면이 맞춰져요 · 🙋 에서 언제든 바꿈</small><div>' +
+      ROLES.map(function(r){ return '<button type="button" data-role="' + r[0] + '"><span>' + r[1] + '</span>' + r[2] + '<small>' + r[3] + '</small></button>'; }).join("") + '</div></div>';
+  }
+  document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-role]"); if (!b) return; ev.stopPropagation(); ls("ez_role", b.dataset.role); HB = 0; tick(); });
+  // ⑬ 오늘 할 일 1개 — 역할·장 상태에 맞춘 행동 하나
+  function todo(o){
+    var r = ROLE();
+    if (r === "inv") return '<p class="ez-todo">✅ 오늘 할 일 1개</p><button type="button" class="ez-cta' + (o.red ? ' red' : '') + '" data-ezgo="port">' + (o.red ? '💼 하락장 규칙대로 비중 확인하기' : '💼 지금 뭘 얼마나 사나 보기') + '</button>';
+    if (r === "look") return '<p class="ez-todo">✅ 오늘 할 일 1개</p><button type="button" class="ez-cta" data-ezask="1">🙋 궁금한 것 골라 보기</button>';
+    return '<p class="ez-todo">✅ 오늘 할 일 1개</p><button type="button" class="ez-cta' + (o.red ? ' red' : '') + '" data-pbsend="1">' + (o.red ? '📨 하락장 안내 한 장 고객에게 보내기' : '📨 고객에게 오늘 한 장 보내기') + '</button>';
+  }
+  document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-ezask]"); if (!b) return; ev.stopPropagation(); help(); });
   var EASY_TABS = {home: 1, port: 1, score: 1, prop: 1, luck: 1, saju: 1, tarot: 1, lotto: 1};
   function inEasy(k){ return !!EASY_TABS[k]; }
 
@@ -46,11 +63,16 @@
 
   /* ── ① ⑦ ⑨ ⑬ 첫 화면 한 장 ── */
   var B = null, BT = 0;
+  var RM = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/";
+  function gj5(u, ttl){ if (!window.getJSON) return Promise.resolve(null); var q5 = Math.floor(Date.now() / 300000); return getJSON(u + (u.indexOf("?") < 0 ? "?" : "&") + q5, {ttl: ttl || 300000}).catch(function(){ return null; }); }
   function brief(){
     if (B && Date.now() - BT < 300000) return Promise.resolve(B);
-    var p = window.__pbbrief ? window.__pbbrief() : (window.getJSON ? getJSON("archive/x/pbbrief.json?" + Math.floor(Date.now() / 300000), {ttl: 300000}) : Promise.resolve(null));
-    return Promise.resolve(p).then(function(d){ if (d){ B = d; BT = Date.now(); } return d; }).catch(function(){ return B; });
+    var p = window.__pbbrief ? window.__pbbrief() : gj5("archive/x/pbbrief.json");
+    // 🧊 11/09: 신호등 판정에 🐻 하락장 계기판 · 적중률(scores) · 지수 값(live_kr·선물) · 바뀐 것(home.json) 같이
+    return Promise.all([Promise.resolve(p).catch(function(){ return null; }), gj5(RM + "bear.json"), gj5(RM + "scores.json", 900000), gj5("archive/x/live_kr.json", 120000), gj5("archive/x/live_us_pre.json", 120000), gj5(RM + "home.json")])
+      .then(function(r){ var d = r[0]; if (d){ d = Object.assign({}, d, {_bear: r[1], _sc: r[2], _kr: r[3], _fut: r[4], _home: r[5]}); B = d; BT = Date.now(); } return d || B; }).catch(function(){ return B; });
   }
+  window.__ezBrief = function(){ return B; };
   function read(b){
     var t = (b.talk || []).join(" · "), plan = ((b.advice && b.advice.plan) || []).join(" "), m;
     var o = {};
@@ -60,30 +82,76 @@
     if ((m = /S&P500 선물 ([+−\-]?\d+(?:\.\d+)?)%/.exec(t))) { o.s = num(m[1]); o.sl = "S&P500 선물"; }
     else if ((m = /S&P500 ([+−\-]?\d+(?:\.\d+)?)%/.exec(t))) { o.s = num(m[1]); o.sl = "S&P500"; }
     o.up = /200일 평균 위|200일선 위/.test(plan) ? true : /200일 평균 아래|200일선 아래/.test(plan) ? false : null;
+    // 🧊 11/09 ⑩ 지수 값은 실시간 표(live_kr · 선물)에서 — 세 칸 모두 「%+값」
+    var KR = b._kr, today_ = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+    if (KR && KR.date === today_ && KR.index){ KR.index.forEach(function(x){ if (x.name === "코스피"){ o.k = x.chg; o.kv = Math.round(x.last).toLocaleString(); } if (x.name === "코스닥"){ o.q = x.chg; o.qv = (Math.round(x.last * 10) / 10).toLocaleString(); } }); }
+    var FU = b._fut && b._fut.date === today_ ? (b._fut.fut || []).filter(function(f){ return f.name === "S&P500 선물"; })[0] : null;
+    if (FU && o.sl === "S&P500 선물"){ o.s = FU.chg; o.sv = Math.round(FU.last).toLocaleString(); }
+    // 🧊 11/09 ④ 하락장 계기판(종가 판정)이 신호등의 바탕 — 코스피·S&P 중 하나라도 🐻면 🔴, 🟡(조정)이면 🟡. 오늘 등락은 작은 글로만
+    var BM = {}; ((b._bear && b._bear.markets) || []).forEach(function(m){ BM[m.key] = m; }); o.bear = BM;
+    var kb = BM.kospi, sb = BM.sp500, day = o.k != null ? "오늘 코스피 " + sg(o.k) : o.s != null ? "오늘 " + o.sl + " " + sg(o.s) : "";
     var big = o.k != null ? o.k : o.s;
-    if (o.up === false) o.L = ["r", "🔴", "조심하는 장", "큰 흐름이 아래로 꺾여 있어요"];
+    if ((kb && kb.state === "🐻") || (sb && sb.state === "🐻")){ var w = kb && kb.state === "🐻" ? kb : sb;
+      o.L = ["r", "🔴", "조심하는 장", w.name + " 하락장 · 고점보다 " + sg(w.dd) + (day ? " · " + day : "")]; o.red = w; }
+    else if (o.up === false) o.L = ["r", "🔴", "조심하는 장", "큰 흐름이 아래로 꺾여 있어요"];
+    else if ((kb && kb.state === "🟡") || (sb && sb.state === "🟡")){ var w2 = kb && kb.state === "🟡" ? kb : sb;
+      o.L = ["y", "🟡", "흔들리는 장", w2.name + " 조정 · 고점보다 " + sg(w2.dd) + (day ? " · " + day : "")]; o.yel = w2; }
     else if ((o.k != null && o.k <= -2) || (o.s != null && o.s <= -1.5)) o.L = ["y", "🟡", "흔들리는 날", o.up ? "큰 흐름은 아직 위예요" : "오늘은 크게 출렁여요"];
     else if (big != null && big >= 0.5) o.L = ["g", "🟢", "좋은 날", o.up ? "큰 흐름도 위예요" : "오늘은 오르고 있어요"];
     else o.L = ["g", "🟢", "무난한 날", o.up ? "큰 흐름은 위예요" : "크게 움직이지 않아요"];
+    // ⑤ 장 시작 30분(09:00~09:30)은 노이즈 — 「전날 마감 기준」 꼬리표 · 뉴스 톤과 신호등이 엇갈리면 ⚠ 한 줄
+    var hm = new Date(Date.now() + 9 * 3600e3).toISOString().slice(11, 16), wd = new Date(Date.now() + 9 * 3600e3).getUTCDay();
+    o.early = wd > 0 && wd < 6 && hm >= "09:00" && hm < "09:30";
+    var bad = /투매|급락|폭락|공포|패닉|충격|손실|붕괴|매도 폭탄|반대매매/.test(String(b.one || "")), good = /급등|랠리|신고가|폭등|환호/.test(String(b.one || ""));
+    o.mix = (o.L[0] === "g" && bad) ? "뉴스는 나쁜데 지수는 버티는 중 — 엇갈릴 땐 서두르지 않기" : (o.L[0] === "r" && good) ? "뉴스는 좋은데 큰 흐름은 아직 아래 — 하루 반등에 서두르지 않기" : "";
     var rd = String((b.advice && b.advice.read) || "").split(/(?:[.!?])\s+/).map(function(x){ return /[.!?]$/.test(x) ? x : x + "."; }).filter(function(x){ return x.trim(); });
     o.act = rd.length ? rd[rd.length - 1] : (((b.advice && b.advice.plan) || [])[1] || "");
     var md = String(b.mode || b.label || "");
     o.ph = /마감|장 끝|저녁/.test(md) ? 2 : /장중/.test(md) ? 1 : 0;
     return o;
   }
+  // ③ 적중률 한 줄 — 신호등 바로 밑 (시황 예고 채점 · scores.json)
+  function hitHtml(S){
+    var r = S && (S.rows || []).filter(function(x){ return x.k === "report"; })[0]; if (!r || !r.n) return "";
+    var hi = ((r.cal && r.cal.buckets) || []).filter(function(x){ return /^[789]0%/.test(x.bucket); }), hn = 0, hh = 0; hi.forEach(function(x){ hn += x.n; hh += x.hit; });
+    return '<p class="ez-hit" data-ezgo="score">🎯 시황 예고 적중 <b>' + r.rate + '%</b> (' + r.n + '건)' + (hn >= 10 ? ' · 「70% 이상」이라 한 예고는 <b>' + Math.round(hh / hn * 100) + '%</b>' : '') + ' <i>성적표 ›</i></p>';
+  }
+  // ④ 🔴이 되면 / 🔴일 때 — 규칙을 미리 (하락장 계기판 · 바닥 신호)
+  function ruleHtml(o, BR){
+    var w = o.red || o.yel, M = (BR && BR.markets) || [];
+    if (w){
+      var ck = (w.checks || []), on = ck.filter(function(c){ return c.on; }).length;
+      return '<details class="ez-rule"><summary>' + (o.red ? '🔴 지금 규칙 · 현금 ' + (w.cash || 0) + '%까지 · 바닥 신호 ' + on + '/' + ck.length : '🟡 지금 규칙 · 바닥 신호 ' + on + '/' + ck.length) + '</summary>' +
+        '<p>' + e(w.advice || (BR && BR.lead) || "") + '</p><ul>' + ck.map(function(c){ return '<li class="' + (c.on ? "on" : "") + '">' + (c.on ? "✅" : "⬜") + ' ' + e(c.k) + ' <small>' + e(c.d) + '</small></li>'; }).join("") + '</ul>' +
+        '<p class="ez-rule-n">바닥 신호가 2·3·4개 켜지면 현금을 30→20→10→0%로 줄여 다시 담아요 · 종가 판정 · 사라·팔라는 뜻 아님</p></details>';
+    }
+    return '<details class="ez-rule"><summary>🔴이 되면 이렇게 바뀌어요</summary><p>코스피나 S&P500이 고점보다 <b>−20%</b>(종가)면 🔴 하락장 — 현금을 30%까지 늘리고 새로 사지 않아요. <b>−10%</b>면 🟡 조정 — 현금 10%.</p>' +
+      '<p>지금: ' + M.map(function(m){ return m.state + ' ' + e(m.name) + ' ' + sg(m.dd); }).join(" · ") + '</p><p class="ez-rule-n">⚡ 공격 포트는 종목마다 −5%면 손절 · 판정은 종가</p></details>';
+  }
+  function redAct(w){ return w.name + " 하락장 — 현금 " + (w.cash || 30) + "%까지 늘리고 새로 사지 않기. 단, 이미 크게 빠졌으니 투매는 금지 · 반등 때 나눠 덜기."; }
+  // ⑯ 비중이 바뀐 날 「달라진 것 1개 + 이유 1줄」 (home.json port.change)
+  function chgHtml(H){
+    var c = H && H.port && H.port.change; if (!c || !c.why) return "";
+    var td = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10), ago = (Date.parse(td) - Date.parse(c.date)) / 864e5; if (!(ago >= 0 && ago <= 2)) return "";
+    var parts = String(c.why).split(" — "), first = parts[0].split(" · ")[0].replace(/^🧭\s*/, ""), why = (parts[0].split(" · ")[1] || "").replace(/\(.*$/, "").trim();
+    return '<div class="ez-chg" data-ezgo="port"><small>🔁 ' + (ago === 0 ? "오늘" : String(c.date).slice(5).replace("-", "/")) + ' 포트에서 달라진 것</small><p>' + e(first.slice(0, 60)) + '</p>' + (why ? '<em>이유: ' + e(why.slice(0, 70)) + '</em>' : '') + '</div>';
+  }
   function heroHtml(b){
     var o = read(b), N = [];
     if (o.k != null) N.push(["코스피", o.kv || "", o.k]);
-    if (o.q != null) N.push(["코스닥", "", o.q]);
-    if (o.s != null) N.push([o.sl, "", o.s]);
+    if (o.q != null) N.push(["코스닥", o.qv || "", o.q]);
+    if (o.s != null) N.push([o.sl, o.sv || "", o.s]);
     var PH = [["☀️", "아침"], ["⚡", "장중"], ["🌙", "마감"]];
     return '<div class="ez-top"><span>🔄 ' + e(String(b.asof || b.at || "").slice(11, 16) || b.label || "") + ' 갱신</span><span class="ez-ph">' +
         PH.map(function(p, i){ return '<i class="' + (i === o.ph ? "on" : "") + '">' + p[0] + ' ' + p[1] + '</i>'; }).join("") + '</span></div>' +
-      '<div class="ez-light ' + o.L[0] + '"><b>' + o.L[1] + '</b><div><small>오늘 장</small><strong>' + e(o.L[2]) + '</strong><em>' + e(o.L[3]) + '</em></div></div>' +
+      '<div class="ez-light ' + o.L[0] + '"><b>' + o.L[1] + '</b><div><small>오늘 장' + (o.early ? ' <i class="ez-early">09:30 전 · 전날 마감 기준</i>' : '') + '</small><strong>' + e(o.L[2]) + '</strong><em>' + e(o.L[3]) + '</em></div></div>' +
+      hitHtml(b._sc) + ruleHtml(o, b._bear) +
+      (o.mix ? '<p class="ez-mix">⚠ ' + e(o.mix) + '</p>' : '') +
       (b.one ? '<p class="ez-one">' + e(b.one) + '</p>' : '') +
       (N.length ? '<div class="ez-nums">' + N.slice(0, 3).map(function(n){ return '<div><small>' + e(n[0]) + '</small><b class="' + cl(n[2]) + '">' + sg(n[2]) + '</b>' + (n[1] ? '<em>' + e(n[1]) + '</em>' : '') + '</div>'; }).join("") + '</div>' : '') +
-      (o.act ? '<div class="ez-act"><small>그래서 오늘은</small><p>👉 ' + e(o.act) + '</p></div>' : '') +
-      '<button type="button" class="ez-cta" data-pbsend="1">📨 고객에게 오늘 한 장 보내기</button>' +
+      (o.act ? '<div class="ez-act"><small>그래서 오늘은</small><p>👉 ' + e(o.red ? redAct(o.red) : o.act) + '</p></div>' : '') +
+      chgHtml(b._home) +
+      (ROLE() ? todo(o) : roleHtml()) +
       '<p class="ez-note">' + e(b.note || "참고용 · 사라·팔라는 뜻이 아니에요") + '</p>';
   }
   var HB = 0;
@@ -103,7 +171,7 @@
       more.innerHTML = '<button type="button" class="ez-open">▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small></button>' +
         '<div class="ez-drawer"><small>🎁 더보기</small><div>' + [["luck", "🔮", "운세"], ["saju", "📜", "사주"], ["tarot", "🃏", "타로"], ["lotto", "🎱", "로또"]].map(function(x){ return '<button type="button" data-ezgo="' + x[0] + '"><span>' + x[1] + '</span>' + x[2] + '</button>'; }).join("") + '</div></div>';
       h.insertAdjacentElement("afterend", more);
-      more.querySelector(".ez-open").onclick = function(){ var o = hb.classList.toggle("ez-open"); this.innerHTML = o ? "▴ 접기" : '▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small>'; };   /* 🔧 11/05 자가 업그레이드: 펼칠 때 화면을 hb 맨 위로 끌어 「▴ 접기」가 화면 밖(383→−189px)으로 튀던 것 → 누른 단추 제자리, 내용은 바로 아래 */
+      more.querySelector(".ez-open").onclick = function(){ var o = hb.classList.toggle("ez-open"); if (o && window.__h2apply) setTimeout(window.__h2apply, 30); this.innerHTML = o ? "▴ 접기" : '▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small>'; };   /* 🔧 11/05 자가 업그레이드: 펼칠 때 화면을 hb 맨 위로 끌어 「▴ 접기」가 화면 밖(383→−189px)으로 튀던 것 → 누른 단추 제자리, 내용은 바로 아래 */
     }
     if (Date.now() - HB > 60000){ HB = Date.now();
       brief().then(function(b){ var x = document.getElementById("ezhero"); if (!x) return; x.innerHTML = b && (b.one || b.talk) ? heroHtml(b) : '<div class="ez-load">아직 오늘 자료가 안 올라왔어요 · 아래 「오늘 자세히 보기」를 눌러 주세요</div>'; }); }
@@ -123,8 +191,10 @@
   function help(){
     var old = document.getElementById("ezsheet"); if (old){ old.remove(); return; }
     var d = document.createElement("div"); d.id = "ezsheet";
+    var ord = ROLE() === "inv" ? ["port", "prob", "home", "sector", "bond", "prop", "@send", "luck"] : ROLE() === "look" ? ["home", "sector", "prob", "luck", "port", "bond", "prop", "@send"] : null;
+    var AS = ord ? ASK.slice().sort(function(a, b){ return ord.indexOf(a[0]) - ord.indexOf(b[0]); }) : ASK;
     d.innerHTML = '<div class="ezs-in"><div class="ezs-h"><img src="img/kid_think.jpg?v=1" alt=""><div><b>뭐 보면 돼요?</b><small>궁금한 걸 누르면 그 화면으로 데려가요</small></div><button type="button" class="ezs-x" aria-label="닫기">✕</button></div>' +
-      '<div class="ezs-g">' + ASK.map(function(a){ return '<button type="button" data-ask="' + a[0] + '"><span>' + a[1] + '</span><b>' + e(a[2]) + '</b><small>' + e(a[3]) + '</small></button>'; }).join("") + '</div>' +
+      '<div class="ezs-g">' + AS.map(function(a){ return '<button type="button" data-ask="' + a[0] + '"><span>' + a[1] + '</span><b>' + e(a[2]) + '</b><small>' + e(a[3]) + '</small></button>'; }).join("") + '</div>' +
       '<button type="button" class="ezs-mode">' + (EZ() ? "☰ 전체 메뉴로 보기 (예전 화면 전부)" : "🔰 쉬운 화면으로 보기") + '</button></div>';
     document.body.appendChild(d);
     d.addEventListener("click", function(ev){
@@ -146,8 +216,30 @@
   }
 
   /* ── ⑧ 제안서 4단계 ── */
+  var VIEW = 0, LASTAT = -1;
+  function stepCards(w){   // 🧊 11/09 ⑦ 단계별 카드 — 성향·상품(기본폼) / 이름·금액 / 고지·만들기
+    var top = w.querySelector(".pp-top"), cu = document.getElementById("ppcust"), sim = w.querySelector(".pp-sim"), mk = document.getElementById("ppshow");
+    var amt = [].filter.call(w.querySelectorAll(":scope > section.card"), function(c){ return /상품별 금액/.test((c.innerText || "").slice(0, 30)); })[0];
+    cu = cu && cu.closest("section.card"); mk = mk && mk.closest("section.card");
+    return [[top], [top], [cu, amt], [sim, mk]];
+  }
+  function stepShow(w){
+    var SC = stepCards(w), on = [].concat(SC[VIEW] || []);
+    [].forEach.call(w.querySelectorAll(":scope > section.card"), function(c){ c.classList.toggle("ezw-off", EZ() && on.indexOf(c) < 0); });
+    var nv = document.getElementById("ezwnav");
+    if (!EZ()){ if (nv) nv.remove(); return; }
+    if (!nv){ nv = document.createElement("div"); nv.id = "ezwnav"; }
+    if (nv.parentNode !== w.parentNode || w.nextSibling !== nv) w.parentNode.insertBefore(nv, w.nextSibling);
+    var k = String(VIEW); if (nv.dataset.k === k) return; nv.dataset.k = k;
+    nv.innerHTML = (VIEW > 0 ? '<button type="button" data-wv="' + (VIEW - 1) + '">◂ 이전</button>' : '<span></span>') +
+      (VIEW < 3 ? '<button type="button" class="go" data-wv="' + (VIEW === 0 ? 1 : VIEW + 1) + '">다음 ▸ ' + ["", "", "이름·금액", "만들기"][VIEW === 0 ? 2 : VIEW + 1] + '</button>' : '<span></span>');
+    nv.onclick = function(ev){ var b = ev.target.closest("[data-wv]"); if (!b) return; VIEW = +b.dataset.wv; if (VIEW === 1) VIEW = 2; z_k(); wiz(); window.scrollTo({top: 0, behavior: "smooth"}); };
+  }
+  function z_k(){ var z = document.getElementById("ezwiz"); if (z) z.dataset.k = ""; }
   function wiz(){
-    if (cur() !== "prop" || !EZ()) { var o = document.getElementById("ezwiz"); if (o && cur() !== "prop") o.remove(); if (o && !EZ()) o.remove(); return; }
+    if (cur() !== "prop" || !EZ()) { var o = document.getElementById("ezwiz"); if (o && cur() !== "prop") o.remove(); if (o && !EZ()) o.remove();
+      var nv0 = document.getElementById("ezwnav"); if (nv0 && (cur() !== "prop" || !EZ())) nv0.remove(); [].forEach.call(document.querySelectorAll(".ezw-off"), function(c){ if (!EZ() || cur() !== "prop") c.classList.remove("ezw-off"); });
+      if (cur() !== "prop"){ VIEW = 0; LASTAT = -1; } return; }
     var w = document.getElementById("ppw"); if (!w || !w.querySelector(".pp-pf")) return;
     var S = [
       ["🧭", "성향", ".pp-pf", !!w.querySelector(".pp-pg button.on")],
@@ -156,16 +248,21 @@
       ["📤", "만들기", "#ppshow", false]
     ];
     var at = 0; while (at < 3 && S[at][3]) at++;
+    if (LASTAT < 0) VIEW = Math.min(at, 1); else if (at === 1 && LASTAT === 0 && VIEW === 0) VIEW = 1;   // 성향 고르면 같은 카드의 상품으로
+    LASTAT = at;
     var MSG = ["고객 투자성향부터 골라 주세요", "보낼 상품을 골라 주세요 (여러 개 가능)", "고객 이름과 금액을 넣어 주세요", "📱 한 장 · PDF · PPT 중 하나만 누르면 끝!"];
-    var key = S.map(function(s){ return s[3] ? 1 : 0; }).join("") + at;
+    var key = S.map(function(s){ return s[3] ? 1 : 0; }).join("") + at + "v" + VIEW;
+    stepShow(w);
     var z = document.getElementById("ezwiz");
     if (z && z.dataset.k === key && z.parentNode === w.parentNode) return;
     if (!z){ z = document.createElement("div"); z.id = "ezwiz"; }
     if (z.parentNode !== w.parentNode || z.nextSibling !== w) w.parentNode.insertBefore(z, w);
     z.dataset.k = key;
-    z.innerHTML = '<div class="ezw-s">' + S.map(function(s, i){ return '<button type="button" data-st="' + i + '" class="' + (s[3] ? "ok" : i === at ? "on" : "") + '"><b>' + (s[3] ? "✓" : i + 1) + '</b><span>' + s[0] + ' ' + s[1] + '</span></button>'; }).join("") + '</div>' +
-      '<p class="ezw-m"><b>' + (at + 1) + '단계</b> ' + e(MSG[at]) + '</p>';
-    z.querySelectorAll("[data-st]").forEach(function(btn){ btn.onclick = function(){ var s = S[+btn.dataset.st], t = w.querySelector(s[2]) || document.querySelector(s[2]); if (!t) return;
+    var vs = VIEW === 1 && !S[0][3] ? 0 : VIEW;   // 보고 있는 단계
+    z.innerHTML = '<div class="ezw-s">' + S.map(function(s, i){ return '<button type="button" data-st="' + i + '" class="' + (i === vs || (vs === 0 && i === 1 && VIEW === 1) ? "on" : s[3] ? "ok" : "") + '"><b>' + (s[3] ? "✓" : i + 1) + '</b><span>' + s[0] + ' ' + s[1] + '</span></button>'; }).join("") + '</div>' +
+      '<p class="ezw-m"><b>' + (vs + 1) + '단계</b> ' + e(MSG[vs]) + '</p>';
+    z.querySelectorAll("[data-st]").forEach(function(btn){ btn.onclick = function(){ var i = +btn.dataset.st, s = S[i]; VIEW = i; z.dataset.k = ""; wiz();
+      var t = w.querySelector(s[2]) || document.querySelector(s[2]); if (!t) { window.scrollTo({top: 0, behavior: "smooth"}); return; }
       var c = t.closest(".card") || t; if (c.classList.contains("cz-on")) c.click();
       c.scrollIntoView({behavior: "smooth", block: "center"}); c.classList.remove("ezw-hl"); void c.offsetWidth; c.classList.add("ezw-hl"); }; });
   }
@@ -176,10 +273,11 @@
     if (!EZ() || TOURON || ls("ez_tour") || navigator.webdriver || /[?&]embed=1/.test(location.search)) return;
     if (cur() !== "home" || !document.querySelector("#ezhero .ez-light") || document.getElementById("wowob") || document.getElementById("gdq") || document.getElementById("uxob")) return;
     if (!ls("wow_ob")) return;   // wow.js 첫 인사가 먼저
+    if (!ROLE()) return;          // 🧊 11/09 「나는 누구?」 고른 다음
     TOURON = true; ls("ux_ob3", 1);   // ux1105 의 옛 3곳 안내(지금은 접혀 있는 칸을 가리킴)는 대신함
     var T = [
-      ["#ezhero .ez-light", "1 / 3", "이것만 보면 돼요", "🟢 좋은 날 · 🟡 흔들리는 날 · 🔴 조심하는 장 — 오늘 장을 신호등 하나로 알려 줘요."],
-      ["#ezhero .ez-cta", "2 / 3", "고객에게 바로 보내기", "누르면 오늘 시장을 그림 한 장으로 만들어 카톡으로 보낼 수 있어요."],
+      ["#ezhero .ez-light", "1 / 3", "이것만 보면 돼요", "🟢 좋은 날 · 🟡 흔들리는 장 · 🔴 조심하는 장 — 하락장 계기판(종가)으로 판정해요. 바로 밑 「규칙」을 누르면 언제 바뀌는지 나와요."],
+      ["#ezhero .ez-cta", "2 / 3", "오늘 할 일은 이것 하나", ROLE() === "pb" ? "누르면 오늘 시장을 그림 한 장으로 만들어 카톡으로 보낼 수 있어요." : ROLE() === "inv" ? "누르면 지금 뭘 얼마나 담으면 되는지(비중·주문서)로 가요." : "누르면 궁금한 것 8가지 중에서 골라 볼 수 있어요."],
       ["#ezask", "3 / 3", "막히면 여기", "아래 🙋 뭐 보지? 를 누르면 「뭐 보면 돼요?」 8가지가 나와요. 예전 화면 전부는 아래 ☰ 전체 메뉴."]
     ], k = 0;
     var m = document.createElement("div"); m.id = "eztour"; document.body.appendChild(m);
@@ -257,6 +355,16 @@
     ".ez-hero .up{color:var(--up,#f04452)}.ez-hero .dn{color:var(--down,#3182f6)}" +
     ".ez-act{border-left:4px solid var(--c,#7c9cff);padding:2px 0 2px 12px;margin:0 0 14px}.ez-act small{font-size:13px!important;color:var(--sub)}.ez-act p{margin:2px 0 0;font-size:17px;font-weight:700;line-height:1.5;word-break:keep-all}" +
     ".ez-cta{display:block;width:100%;font:inherit;font-size:18px;font-weight:900;padding:15px 12px;border:0;border-radius:16px;background:#3182f6;color:#fff;cursor:pointer}.ez-cta:active{transform:scale(.98)}" +
+    ".ez-early{font-style:normal;font-size:11.5px!important;font-weight:700;color:#b7791f;background:rgba(242,201,76,.2);padding:1px 6px;border-radius:99px;margin-left:4px}" +
+    ".ez-hit{margin:-4px 2px 10px;font-size:13.5px!important;color:var(--sub);cursor:pointer}.ez-hit b{color:var(--text)}.ez-hit i{font-style:normal;color:#3182f6;font-weight:700}" +
+    ".ez-rule{margin:0 0 12px;border:1px solid var(--line);border-radius:14px;padding:9px 12px;font-size:14.5px}.ez-rule summary{font-weight:800;cursor:pointer;list-style:none}.ez-rule summary::after{content:' ▾';color:var(--sub)}.ez-rule[open] summary::after{content:' ▴'}" +
+    ".ez-rule p{margin:8px 0 0;line-height:1.5;word-break:keep-all}.ez-rule ul{margin:8px 0 0;padding:0;list-style:none}.ez-rule li{padding:3px 0;font-size:14px}.ez-rule li small{display:block;color:var(--sub);font-size:12.5px!important;margin-left:22px}.ez-rule-n{font-size:12.5px!important;color:var(--sub)}" +
+    ".ez-mix{margin:0 2px 10px;padding:8px 10px;border-radius:12px;background:rgba(242,201,76,.16);font-size:14.5px!important;font-weight:700;word-break:keep-all}" +
+    ".ez-chg{margin:0 0 14px;padding:10px 12px;border-radius:14px;background:var(--panel2,rgba(127,127,127,.1));cursor:pointer}.ez-chg small{font-size:12.5px!important;color:var(--sub);font-weight:700}.ez-chg p{margin:2px 0 0;font-size:15.5px;font-weight:800;word-break:keep-all}.ez-chg em{display:block;font-style:normal;font-size:13px!important;color:var(--sub);margin-top:2px}" +
+    ".ez-cta.red{background:#e5484d}.ez-todo{margin:0 2px 6px;font-size:13px!important;font-weight:800;color:var(--sub)}" +
+    ".ez-role{margin:0 0 4px;padding:12px;border-radius:16px;border:1.5px solid #3182f6;background:rgba(49,130,246,.06)}.ez-role>b{display:block;font-size:17px}.ez-role>small{display:block;font-size:12.5px!important;color:var(--sub);margin-bottom:8px}" +
+    ".ez-role>div{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.ez-role button{display:flex;flex-direction:column;align-items:center;gap:1px;font:inherit;font-size:15px;font-weight:800;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 4px;cursor:pointer}.ez-role button span{font-size:22px}.ez-role button small{font-size:11.5px!important;font-weight:500;color:var(--sub);text-align:center;word-break:keep-all}" +
+    ".ezw-off{display:none!important}#ezwnav{display:flex;justify-content:space-between;gap:8px;margin:8px 0 16px}#ezwnav button{flex:1;font:inherit;font-size:16px;font-weight:800;border:1px solid var(--line);border-radius:14px;padding:13px 10px;background:var(--panel);color:var(--text);cursor:pointer}#ezwnav button.go{background:#3182f6;color:#fff;border-color:#3182f6}#ezwnav span{flex:1}" +
     ".ez-note{margin:8px 0 0;font-size:12.5px!important;color:var(--dim,var(--sub));text-align:center}" +
     "#ezmore{margin:0 0 12px}#ezmore .ez-open{display:block;width:100%;font:inherit;font-size:16px;font-weight:800;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px 12px;cursor:pointer}#ezmore .ez-open small{display:block;font-size:13px!important;font-weight:500;color:var(--sub);margin-top:2px}" +
     ".ez-drawer{margin-top:12px}.ez-drawer>small{font-size:13px!important;color:var(--sub);font-weight:700}.ez-drawer>div{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}.ez-drawer button{display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;font-size:14px;font-weight:700;color:var(--sub);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 4px;cursor:pointer}.ez-drawer button span{font-size:20px}" +

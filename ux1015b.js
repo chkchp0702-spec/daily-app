@@ -146,7 +146,7 @@
     });
     if (!box.nextElementSibling || !box.nextElementSibling.classList.contains("a104-lg")){
       var lg = document.createElement("div"); lg.className = "a104-lg";
-      lg.textContent = "밑줄 왼쪽 🇰🇷 코스피 · 오른쪽 🇺🇸 S&P (빨강↑ 파랑↓) · 길게 누르면 한 줄";
+      lg.textContent = "";   // 🧊 11/09 ⑨ 설명 문장(「밑줄 왼쪽…」) 대신 고른 날의 숫자를 그림 옆에 바로 (아래 PERF 받은 뒤)
       box.parentNode.insertBefore(lg, box.nextSibling);
     }
     (PERF ? Promise.resolve(PERF) : X("market_perf.json", 600000)).then(function(m){
@@ -159,7 +159,15 @@
         var k = chg(m.kospi, i), s = chg(m.sp500, i);
         b.style.setProperty("--kr", col(k)); b.style.setProperty("--us", col(s)); b.classList.add("a104");
         b.title = "그날 코스피 " + (k == null ? "–" : pct(k)) + " · S&P " + (s == null ? "–" : pct(s)) + " (리포트 성적표 기준)";
+        b.dataset.kr = k == null ? "" : pct(k); b.dataset.us = s == null ? "" : pct(s);
       });
+      var on_ = box.querySelector(".date.on") || bs[0], lg_ = box.nextElementSibling, td_ = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+      if (on_ && (on_.dataset.id || "").slice(0, 10) === td_) on_ = bs.filter(function(x){ return (x.dataset.id || "").slice(0, 10) < td_ && (x.dataset.kr || x.dataset.us); })[0] || null;   // 오늘은 아직 채점 전 → 마지막 거래일
+      if (on_ && lg_ && lg_.classList.contains("a104-lg") && (on_.dataset.kr || on_.dataset.us)){
+        var cc = function(t){ return /^\+/.test(t) ? "#f04452" : /^[−-]/.test(t) ? "#3182f6" : "inherit"; };
+        lg_.innerHTML = '<b>' + esc(on_.textContent.replace(/📝.*$/, "").trim()) + '</b> 그날 <span style="border-bottom:3px solid var(--kr)">🇰🇷 코스피 <b style="color:' + cc(on_.dataset.kr) + '">' + esc(on_.dataset.kr || "–") + '</b></span> · <span>🇺🇸 S&P <b style="color:' + cc(on_.dataset.us) + '">' + esc(on_.dataset.us || "–") + '</b></span>';
+        lg_.style.setProperty("--kr", on_.style.getPropertyValue("--kr") || "transparent");
+      }
     });
     // 길게 누르면 그날 한 줄
     bs.forEach(function(b){
