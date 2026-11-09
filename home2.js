@@ -43,9 +43,9 @@
       gj(RAWM + "market/home.json" + q5()), sec ? gj("archive/sector/" + sec.id + "/compass.json") : null,
       gj("archive/x/whale_pick.json" + q5()), gj("archive/x/whale_x.json" + q5()), arc("cup", "cards.json"), arc("gap", "cards.json"),
       gj("archive/x/products.json" + q5(), 600000), gj("archive/x/prob.json" + q5()), gj(RAWM + "feeds/hot.json" + q5()), gj("archive/x/pbbrief.json" + q5(), 300000),   // 🎨 11/04: 오늘 한 줄(pbbrief)
-      window.SIGNMP || null
+      window.SIGNMP || null, gj(RAWM + "market/bear.json" + q5())   // 🐻 11/09 하락장 계기판
     ]).then(function(r){
-      D = {kr: r[0], us: r[1], jp: r[2], cn: r[3], hk: r[4], H: r[5] || {}, C: r[6], wp: r[7], wx: r[8], cup: r[9], gap: r[10], pd: r[11], pb: r[12], hot: r[13], brief: r[14]};
+      D = {kr: r[0], us: r[1], jp: r[2], cn: r[3], hk: r[4], H: r[5] || {}, C: r[6], wp: r[7], wx: r[8], cup: r[9], gap: r[10], pd: r[11], pb: r[12], hot: r[13], brief: r[14], bear: r[16]};
       DT = Date.now(); return D;
     });
   }
@@ -327,6 +327,28 @@
 
   /* ───────── 붙이기 ───────── */
   var CUR_S = null, BUSY = false;
+  /* 🐻 11/09 하락장 계기판 — 사용자 「하락장이면 현금 늘리라 권하고, 바닥이면 이 조건 충족 시 비중 늘리자 — 네가 설명하고 이끌어」
+     market/bear.json(src/bear_gate.py, 종가 기계 판정): 시장별 🟢/🟡/🐻 · 현금 권고 · 🌱 바닥 신호 4개. 결론 한 줄 + 펼치면 체크리스트 */
+  function bearHtml(d){
+    var B = d.bear; if (!B || !B.markets || !B.markets.length) return "";
+    var M_ = B.markets, bad = M_.filter(function(m){ return m.state !== "🟢"; });
+    var FL = {kr: "🇰🇷", us: "🇺🇸"}, NM = {"🟢": "정상", "🟡": "조정", "🐻": "하락장"};
+    var chips = M_.map(function(m){ return '<span class="bg-c s' + (m.state === "🐻" ? 3 : m.state === "🟡" ? 2 : 1) + '">' + FL[m.nat] + ' ' + e(m.name) + ' <b>' + m.state + ' ' + NM[m.state] + '</b><small>' + sg(m.dd, 0) + '</small></span>'; }).join("");
+    var lead = bad.length ? B.lead : "세 시장 모두 정상 — 현금을 따로 늘릴 때 아님";
+    var det = bad.map(function(m){
+      var ladder = m.state === "🐻" ? [30, 30, 20, 10, 0] : [10, 10, 5, 0, 0];
+      return '<div class="bg-m"><div class="bg-mh">' + FL[m.nat] + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' · 고점보다 ' + sg(m.dd) + ' · 지금 권고 현금 <b>' + m.cash + '%</b></div>' +
+        '<div class="bg-n">🌱 바닥 신호 <b>' + m.n + '/4</b> — 켜질수록 3분의 1씩 다시 사기</div>' +
+        '<ul class="bg-ck">' + (m.checks || []).map(function(c){ return '<li class="' + (c.on ? "on" : "") + '"><i>' + (c.on ? "✅" : "⬜") + '</i><b>' + e(c.k) + '</b><small>' + e(c.d) + '</small></li>'; }).join("") + '</ul>' +
+        '<div class="bg-lad">' + [[ladder[0], "신호 0~1개"], [ladder[2], "2개"], [ladder[3], "3개"], [ladder[4], "4개"]].map(function(x, i){ return '<span class="' + (Math.max(0, m.n - 1) === i ? "now" : "") + '"><small>' + x[1] + '</small><b>현금 ' + x[0] + '%</b></span>'; }).join("") + '</div>' +
+        '<p class="bg-ad">' + e(m.advice) + '</p></div>';
+    }).join("");
+    return '<section class="card h2-bear" id="bear" data-cz="done"><div class="bg-h">🐻 하락장 계기판 <small>' + e(md(B.at)) + ' ' + e(String(B.at || "").slice(11, 16)) + ' · 종가 판정</small></div>' +
+      '<div class="bg-cs">' + chips + '</div><p class="bg-lead' + (bad.length ? " warn" : "") + '">' + e(lead) + '</p>' +
+      (bad.length ? '<details class="bg-d"><summary>무엇을 보면 다시 사나 · 체크리스트 펼치기</summary>' + det +
+        '<p class="note bg-ru">판정: 고점보다 −10% 조정 · −20% 하락장 (종가) · 현금 권고: 하락장 30→20→10→0% · 조정 10→5→0% (바닥 신호 2·3·4개). 규칙은 결과 보기 전 등록 · 매수·매도 추천 아님 — 고객 성향·기간에 맞춰 판단.</p></details>' : '') +
+      '</section>';
+  }
   function apply(){
     if (!on() || typeof cur === "undefined" || cur !== "home") return;
     var b = document.getElementById("hmbody"); if (!b || BUSY) return;
@@ -342,6 +364,7 @@
       var old = document.getElementById("h2ringsw"); if (old) old.remove();
       b.insertBefore(rings, b.firstChild);
       var num = mk("h2num", numHtml(d)); b.insertBefore(num, b.firstChild);   // ⑰ 오늘의 숫자 맨 위
+      var ob = document.getElementById("h2bear"); if (ob) ob.remove(); var bh = bearHtml(d); if (bh) num.insertAdjacentElement("afterend", mk("h2bear", bh));   // 🐻 11/09 결론 바로 아래
       var world = mk("h2world", worldHtml(d)), disc = mk("h2disc", discHtml(d)), map = mk("h2map", mapHtml(d)), cl = mk("h2cl", clientHtml(d));
       rings.insertAdjacentElement("afterend", world); world.insertAdjacentElement("afterend", hero);   // 날씨판은 타일 아래로
       hero.insertAdjacentElement("afterend", disc);
@@ -358,6 +381,7 @@
     var hm = document.getElementById("hmlive"); if (hm) hm.classList.add("h2-hide");
     var more = b.querySelector(".hm-more"); if (more) more.classList.add("h2-hide");   // 아래 바로가기 줄 → 「오늘의 발견」이 대신
     var nm_ = document.getElementById("h2num"); if (nm_ && b.firstElementChild !== nm_) b.insertBefore(nm_, b.firstChild);
+    var br_ = document.getElementById("h2bear"); if (nm_ && br_ && nm_.nextElementSibling !== br_) nm_.insertAdjacentElement("afterend", br_);
     var hz = document.getElementById("tdhero"), wz = document.getElementById("h2world"); if (hz && wz && wz.nextElementSibling !== hz) wz.insertAdjacentElement("afterend", hz);
     // 🔍 11/05 A3: ☀️ 오늘 한 장 · 📨 이번 주 한 장 카드는 「📨 오늘의 한 장」 탭으로 합쳤으니 홈에선 숨김(보내기 단추는 그대로 씀)
     var pb = document.getElementById("pbcard"); if (pb && document.getElementById("h2cl")) pb.classList.add("h2-hide");
@@ -370,13 +394,22 @@
   var T = 0;
   try { new MutationObserver(function(ms){
     if (!on()) return;
-    for (var i = 0; i < ms.length; i++){ var t = ms[i].target; if (t.closest && t.closest("#h2ringsw,#h2world,#h2disc,#h2map,#h2sv")) continue; if (T) return; T = setTimeout(function(){ T = 0; apply(); }, 200); return; }
+    for (var i = 0; i < ms.length; i++){ var t = ms[i].target; if (t.closest && t.closest("#h2ringsw,#h2world,#h2disc,#h2map,#h2sv,#h2bear")) continue; if (T) return; T = setTimeout(function(){ T = 0; apply(); }, 200); return; }
   }).observe(document.getElementById("main") || document.body, {childList: true, subtree: true}); } catch(x) {}
   setInterval(function(){ if (on() && !document.hidden && typeof cur !== "undefined" && cur === "home"){ DT = 0; var b = document.getElementById("hmbody"); if (b) b.removeAttribute("data-h2"); apply(); } }, 5 * 60e3);
 
   var css = document.createElement("style");
   css.textContent =
     ".h2-hide{display:none!important}html.h2-lock{overflow:hidden}" +
+    ".h2-bear{padding:16px 16px 14px!important}.bg-h{font-size:16px;font-weight:900;letter-spacing:-.3px}.bg-h small{font-size:12px;font-weight:600;color:var(--sub);margin-left:4px}" +
+    ".bg-cs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 8px}.bg-c{display:inline-flex;align-items:baseline;gap:4px;font-size:13.5px;border-radius:12px;padding:7px 10px;background:var(--panel2)}.bg-c b{font-weight:800}.bg-c small{font-size:12px;color:var(--sub);font-weight:700}" +
+    ".bg-c.s3{background:rgba(47,111,221,.14);box-shadow:inset 0 0 0 1.5px rgba(47,111,221,.45)}.bg-c.s2{background:rgba(240,180,60,.16)}.bg-c.s1{opacity:.85}" +
+    ".bg-lead{margin:0;font-size:15.5px;line-height:1.5;font-weight:700;word-break:keep-all;text-wrap:pretty}.bg-lead.warn{color:var(--text)}" +
+    ".bg-d{margin-top:10px}.bg-d summary{cursor:pointer;font-size:14px;font-weight:800;color:var(--accent,#3182f6);list-style:none}.bg-d summary::-webkit-details-marker{display:none}.bg-d summary:after{content:' ▾'}.bg-d[open] summary:after{content:' ▴'}" +
+    ".bg-m{background:var(--panel2);border-radius:14px;padding:12px;margin-top:10px}.bg-mh{font-size:14.5px;line-height:1.5;word-break:keep-all}.bg-n{font-size:14px;font-weight:700;margin:6px 0 4px}" +
+    ".bg-ck{list-style:none;margin:0;padding:0}.bg-ck li{display:grid;grid-template-columns:22px 1fr;column-gap:4px;padding:5px 0;border-top:1px solid var(--line,rgba(0,0,0,.06));font-size:14px}.bg-ck li i{font-style:normal;grid-row:span 2}.bg-ck li b{font-weight:700}.bg-ck li small{color:var(--sub);font-size:12.5px;word-break:keep-all}.bg-ck li.on b{color:var(--up,#f04452)}" +
+    ".bg-lad{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:8px 0 6px}.bg-lad span{text-align:center;border-radius:10px;padding:6px 2px;background:var(--panel,#fff);opacity:.6}.bg-lad span.now{opacity:1;box-shadow:inset 0 0 0 2px var(--accent,#3182f6)}.bg-lad small{display:block;font-size:11.5px;color:var(--sub);font-weight:700}.bg-lad b{font-size:14px;font-weight:900}" +
+    ".bg-ad{margin:4px 0 0;font-size:14px;line-height:1.5;font-weight:600;word-break:keep-all}.bg-ru{font-size:12px;margin:10px 0 0}" +
     /* 🔍 11/05 A1 오늘의 결론 · A3 한 장 탭 */
     ".h2-vd{display:flex;align-items:center;gap:8px;margin:0 0 2px}.h2-num .h2-vd span{font-size:28px}.h2-num .h2-vd b{display:inline;margin:0;font-size:clamp(26px,8vw,32px);font-weight:900;letter-spacing:-1px;line-height:1.15}.h2-num .h2-vd.dn b{color:var(--down,#3182f6)}.h2-num .h2-vd.up b{color:var(--up,#f04452)}" +
     ".h2-vs{font-size:14.5px;font-weight:700;color:var(--sub);margin:2px 0 10px}" +
