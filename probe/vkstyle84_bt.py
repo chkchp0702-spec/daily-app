@@ -11,13 +11,21 @@ bars = r.json().get("barData", {}).get("priceBars", [])
 vk = pd.Series({pd.Timestamp(x["tradeTime"][:8]): float(x["close"]) for x in bars if x.get("close")}, dtype=float).sort_index()
 vk = vk[~vk.index.duplicated(keep="last")]; vk = vk[vk > 0]
 print("VKOSPI", len(vk), vk.index[0].date(), vk.index[-1].date(), round(float(vk.iloc[-1]), 2))
-SY = ["^KQ11", "^KS200", "^KS11"]
+SY = ["^KQ11", "^KS11"]
 df = yf.download(SY, start="2007-01-01", interval="1d", group_by="ticker", auto_adjust=False, progress=False, threads=False)
 def cl(s):
     x = df[s]["Close"].dropna(); x.index = pd.to_datetime(x.index).tz_localize(None); x = x[~x.index.duplicated(keep="last")]; return x[x > 0]
 C = {s: cl(s) for s in SY}
 for s in SY: print(s, len(C[s]), C[s].index[0].date(), C[s].index[-1].date())
-L = C["^KS200"]; S = C["^KQ11"].reindex(L.index).ffill(limit=2)
+import re, urllib.request
+def fch(sym, n=6000):
+    t = urllib.request.urlopen(urllib.request.Request(f"https://fchart.stock.naver.com/sise.nhn?symbol={sym}&timeframe=day&count={n}&requestType=0", headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.stock.naver.com/"}), timeout=30).read().decode("euc-kr", "replace")
+    rows = re.findall(r'data="(\d{8})\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|', t)
+    return pd.Series({pd.Timestamp(r[0]): float(r[4]) for r in rows if r[4]}).sort_index()
+L = fch("KPI200"); L = L[L > 0]
+if len(L) < 3000: print("KPI200 짧음", len(L), "→ 코스피"); L = C["^KS11"]
+print("대형", len(L), L.index[0].date(), L.index[-1].date())
+S = C["^KQ11"].reindex(L.index).ffill(limit=2)
 lr = np.log(S).diff() - np.log(L).diff()          # 소형−대형 하루
 vkp = vk.rolling(252).rank(pct=True)
 vk5 = np.log(vk).diff(5); vk5p = vk5.rolling(252).rank(pct=True)
