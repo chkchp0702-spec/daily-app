@@ -1152,6 +1152,42 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["nt_hk_err"] = str(e)[:120]
+    # 🌅 오늘 시가 갭(log 시가/전날 종가) → 「내일」만, w 0.4 덧셈형 (11/9 13시 #89 · probe/gap89_bt.py · https://hull-repository.worktribe.com/output/4164212/the-asymmetric-overnight-return-anomaly-in-the-chinese-stock-market)
+    #   본 대상 중국 ➖(갭 1년 하위 10% 다음 날 +6.4·+1.6%p, 뒤 2%p 아래 · 교차 엇갈림) · 일본 ❌ · 곁가지 2가지만 통과(6칸×4시장 중 → 무게 낮게)
+    #   한국 갭 ≥+1%: 2000-07~ 6,477일, 2013-08 기준 앞/뒤 · 다음 날 오름 +4.7·+2.4%p(n 408·211) · 최근5년 +3.6(n 150) · 솎음 +4.7·+4.8
+    #     덧셈형 w0.5(기존 자기5·S&P5 꼬리·간밤 3칸 걸어가기 위) 브라이어 −0.00011·−0.00001·−0.00009 · 교차 −0.00002·−0.00017(계수 +0.18·+0.09) ✅ · 5일 ❌
+    #   홍콩 갭 1년 하위 10% + 그날 장중 오름(시가 아래로 열고 낮에 반등): 2000-07~ 6,487일 · 다음 날 오름 −4.8·−3.3%p(n 157·140) · 최근5년 −1.2(n 50) · 솎음 −3.5·−2.5
+    #     덧셈형 −0.00001·−0.00004·−0.00003 · 교차 −0.00009·−0.00033(계수 −0.40·−0.23) ✅ · 5일 덧셈 최근5년 나빠짐 ❌
+    if mk in ("KR", "HK"):
+        try:
+            px_ = H.get({"KR": "^KS11", "HK": "^HSI"}[mk])
+            if px_ is not None and "Open" in px_:
+                o_, c_ = px_["Open"].astype(float), px_["Close"].astype(float); pc_ = c_.shift(1)
+                bad_ = (o_ <= 0) | o_.isna() | ((o_ - pc_).abs() < 1e-9 * pc_) | ((o_ - c_).abs() < 1e-9 * c_)
+                yr_ = bad_.groupby(px_.index.year).mean(); okyr_ = yr_[yr_ <= 0.2].index
+                g_ = np.log(o_ / pc_).where(~bad_ & px_.index.year.isin(okyr_))
+                g_ = g_.where(g_.abs() < 0.15)
+                dy_ = np.log(c_ / o_).where(g_.notna())
+                gv = g_.reindex(idx); cg = gv.iloc[-1]
+                rk = rank252(g_.dropna()).reindex(idx); cv = rk.iloc[-1]
+                research["gap89"] = {"d": str(g_.dropna().index[-1].date()), "gap%": None if pd.isna(cg) else round(float(cg) * 100, 2),
+                                     "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                hit = None
+                if mk == "KR" and not pd.isna(cg) and cg >= 0.01:
+                    hit = ((gv >= 0.01).fillna(False), "코스피 시가 갭 +1% 이상",
+                           f"오늘 코스피가 전날보다 {float(cg)*100:+.1f}% 높게 열림 — 크게 높게 연 날 다음 날은 평소보다 잘 오름(다음 날만 · 효과 작음)")
+                if mk == "HK" and not pd.isna(cv) and cv <= 0.1:
+                    dv = dy_.reindex(idx)
+                    if not pd.isna(dv.iloc[-1]) and dv.iloc[-1] > 0:
+                        hit = (((rk <= 0.1) & (dv > 0)).fillna(False), "항셍 크게 낮게 열고 장중 반등",
+                               f"오늘 항셍이 {float(cg)*100:+.1f}% 낮게 열린 뒤(1년 백분위 {cv*100:.0f}%) 장중에는 올라 마감 — 이런 날 다음 날은 평소보다 덜 오름(반등 소진 · 다음 날만)")
+                if hit:
+                    m = cond(d, hit[0], hit[1])
+                    add("gap89", "🌅", "오늘 시가 갭", "흐름", m, 0.4, hit[2])
+                    if M and M[-1]["k"] == "gap89":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["gap89_err"] = str(e)[:120]
     # 🪙 크립토 공포·탐욕 (2018년~)
     if "crypto" in ext:
         cs = align(ext["crypto"], idx); cv = cs.iloc[-1]
