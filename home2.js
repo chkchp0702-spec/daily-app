@@ -188,6 +188,18 @@
     var down = (kv != null && kv <= -1.5) || (p1 != null && p1 <= 30), up = (kv != null && kv >= 1.5) || (p1 != null && p1 >= 70);
     var V = down && !up ? {ic: "🛡", t: "오늘은 지키는 날", c: "dn", s: "서둘러 팔기보다 비중·현금 점검"} : up && !down ? {ic: "🚀", t: "오늘은 담는 날", c: "up", s: "계획한 분할 매수를 진행할 때"} : {ic: "👀", t: "오늘은 지켜보는 날", c: "", s: "큰 결정은 미루고 흐름 확인"};
     if (down && fut != null && fut >= 0.8) V.s = "미국 선물 " + sg(fut) + " — 반등 기대도 있음 · 추격 매도 금지";
+    /* 🐻 11/09 「쉬운 화면은 🔴 조심하는 장인데 여기는 🚀 담는 날?」 — 하루 등락·확률보다 하락장 계기판(종가 판정)이 먼저.
+       🐻 하락장: 바닥 신호 0~1개면 절대 「담는 날」 아님(오늘 반등 = 현금 맞출 기회) · 2개↑면 「조금 담는 날」(신호마다 1/3씩)
+       🟡 조정: 「담는 날」 → 「지켜보는 날」로 낮춤 */
+    var BM = {}; ((d.bear && d.bear.markets) || []).forEach(function(m){ BM[m.key] = m; });
+    var bw = [BM.kospi, BM.sp500].filter(function(m){ return m && m.state === "🐻"; })[0], yw = [BM.kospi, BM.sp500].filter(function(m){ return m && m.state === "🟡"; })[0];
+    if (bw){
+      var bn = bw.n || 0, nm = bw.name + " 하락장(고점 " + sg(bw.dd) + ")";
+      if (bn >= 2) V = {ic: "🌱", t: "오늘은 조금 담는 날", c: "", s: nm + " · 바닥 신호 " + bn + "/4 — 현금 " + bw.cash + "%는 남기고 나눠서만"};
+      else V = {ic: "🛡", t: "오늘은 지키는 날", c: "dn", s: nm + " · 바닥 신호 " + bn + "/4 — " + (up ? "오늘 반등은 현금 " + bw.cash + "% 맞출 기회 · 새로 사기는 신호 2개부터" : "현금 " + bw.cash + "%까지 · 투매는 금지")};
+    } else if (yw && V.c === "up"){
+      V = {ic: "👀", t: "오늘은 지켜보는 날", c: "", s: yw.name + " 조정(고점 " + sg(yw.dd) + ") · 오늘 강해도 추격 말고 계획대로 나눠서"};
+    }
     var one = d.brief && d.brief.one ? String(d.brief.one) : "";
     var nums = [];
     if (ks) nums.push({l: "🇰🇷 코스피" + (kLive ? " 지금" : " " + md(d.kr.date)), v: kv});
