@@ -861,7 +861,7 @@ def weekly_report():
 
 
 def strip(t):
-    return re.sub(r"<[^>]+>", "", str(t or "")).replace("&nbsp;", " ").strip()
+    return re.sub(r"<[^>]+>", "", re.sub(r"<br\s*/?>", " ｜ ", str(t or ""), flags=re.I)).replace("&nbsp;", " ").strip()
 
 
 def brief_text(hits):

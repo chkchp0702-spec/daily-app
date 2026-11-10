@@ -7,7 +7,7 @@
   var SCREENS = {};   // 화면 키 → 한 장 만들기 (아래에서 채움)
   var RAWM = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/";
   function ls(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(x) {} return null; }
-  function strip(t){ return String(t || "").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim(); }
+  function strip(t){ return String(t || "").replace(/<br\s*\/?>/gi, " ｜ ").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim(); }
   function kst(){ return new Date(Date.now() + 9 * 3600e3); }
   function today(){ return kst().toISOString().slice(0, 10); }
   function md(s){ return s ? String(s).slice(5, 10).replace("-", "/") : ""; }

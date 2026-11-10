@@ -1534,6 +1534,148 @@
     document.head.appendChild(st); })();
 })();
 ;
+/* ======== flow.js ======== */
+/* CH Investing — 🧲 수급: 국내 주식 누가 사고 있나 (외국인·기관 집중 매수) · archive/x/flow_kr.json (flow_kr.yml 하루 3번)
+   11/10 사용자 「국내 주식 수급 분석, 외국인·기관 집중 매수 종목들 파악해서 그런 칸을」
+   · 시총 상위 300 · 하루/5일/20일 순매수 금액 · 시총 대비 세기 · 연속 일수 · 쌍끌이
+   · 사는 신호가 아님 — 10/28 10년 검증(기관 따라 사기 2021년 뒤 손해 · 외국인 약한 플러스)을 화면에 같이 적음 */
+(function(){
+  var e = V.e;
+  var ST = {mk: "A", per: "5", who: "f", side: "buy", sort: "amt"};
+  try { var s0 = JSON.parse(localStorage.getItem("flowst") || "{}"); for (var k in s0) if (k in ST) ST[k] = s0[k]; } catch(x) {}
+  var D = null;
+  function keep(){ try { localStorage.setItem("flowst", JSON.stringify(ST)); } catch(x) {} }
+  function won(v){ if (v == null) return "–"; var a = Math.abs(v), sg = v > 0 ? "+" : v < 0 ? "−" : "";
+    return sg + (a >= 10000 ? (a / 10000).toFixed(a >= 100000 ? 0 : 1) + "조" : a >= 100 ? Math.round(a).toLocaleString() + "억" : a.toFixed(a >= 10 ? 0 : 1) + "억"); }
+  function pct(v, d){ return v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d == null ? 1 : d) + "%"; }
+  function cl(v){ return v > 0 ? "up" : v < 0 ? "dn" : ""; }
+  function md(d){ return d ? Number(d.slice(5, 7)) + "/" + Number(d.slice(8, 10)) : ""; }
+  function sym(s){ return s.c + (s.m === "P" ? ".KS" : ".KQ"); }
+  function uni(){ return D.stocks.filter(function(s){ return ST.mk === "A" || s.m === ST.mk; }); }
+  function val(s, who, per){ return s[who + per]; }
+  function inten(s, who, per){ var v = val(s, who, per); return v != null && s.mc ? v / s.mc * 100 : null; }
+  // 20일 하루 순매수 막대(작게) — 위 빨강 = 산 날 · 아래 파랑 = 판 날
+  function spark(a, w, H){
+    if (!a || !a.length) return "";
+    var m = Math.max.apply(null, a.map(Math.abs)) || 1, g = 1; w = w || 3; H = H || 22;
+    return '<svg class="fl-sp" width="' + a.length * (w + g) + '" height="' + H + '" aria-hidden="true">' + a.map(function(v, i){
+      var h = Math.max(1, Math.abs(v) / m * (H / 2 - 1));
+      return '<rect x="' + i * (w + g) + '" y="' + (v >= 0 ? H / 2 - h : H / 2) + '" width="' + w + '" height="' + h + '" fill="var(--' + (v >= 0 ? "up" : "down") + ')"/>'; }).join("") + '</svg>';
+  }
+  function chips(key, opts){ return '<div class="fl-ch">' + opts.map(function(o){ return '<button type="button" data-fk="' + key + '" data-fv="' + o[0] + '"' + (ST[key] === o[0] ? ' class="on"' : '') + '>' + o[1] + '</button>'; }).join("") + '</div>'; }
+  function row(s, i, main, sub, sp, tag){
+    return '<button type="button" class="fl-r" data-fop="' + sym(s) + '"><i class="fl-n">' + (i + 1) + '</i><span class="fl-nm"><b>' + e(s.n) + '</b><small>' + (tag ? tag + ' · ' : '') + (s.r5 != null ? '주가 5일 <em class="' + cl(s.r5) + '">' + pct(s.r5) + '</em>' : '') + '</small></span>' +
+      (sp ? '<span class="fl-spw">' + sp + '</span>' : '') + '<span class="fl-v">' + main + '<small>' + sub + '</small></span></button>';
+  }
+  function strk(n){ return n ? Math.abs(n) + "일 연속 " + (n > 0 ? "매수" : "매도") : ""; }
+
+  // ── 시장 전체 ──
+  function mktCard(){
+    var mk = ST.mk === "Q" ? "KOSDAQ" : "KOSPI", R = (D.mkt || {})[mk] || [];
+    if (!R.length || R[0].f == null) return "";
+    var r = R[0], f20 = 0, i20 = 0, p20 = 0; R.forEach(function(x){ f20 += x.f || 0; i20 += x.i || 0; p20 += x.p || 0; });
+    var U = R[0].f != null && Math.abs(R[0].f) > 1e6 ? 1e8 : 1;   // 원 단위면 억으로
+    function b(lab, v, v20){ return '<div class="fl-m"><small>' + lab + '</small><b class="' + cl(v) + '">' + won(v / U) + '</b><em>20일 <i class="' + cl(v20) + '">' + won(v20 / U) + '</i></em></div>'; }
+    var fs = 0; for (var i = 0; i < R.length; i++){ if ((R[i].f > 0) === (R[0].f > 0) && R[i].f) fs++; else break; }
+    var say = (fs <= 1 ? "외국인 " + (r.f > 0 ? "매수" : "매도") + "로 돌아섬" : "외국인 " + fs + "거래일째 " + (r.f > 0 ? "사는 중" : "파는 중")) + " · 20일 합계 " + won(f20 / U) + ". " +
+      (r.f < 0 && r.i > 0 ? "기관이 받고 있어요." : r.f < 0 && r.p > 0 ? "개인이 받고 있어요." : r.f > 0 && r.i > 0 ? "외국인·기관이 같이 사요." : r.f > 0 ? "외국인만 사요." : "외국인·기관 모두 팔아요.");
+    return '<section class="card fl-mk"><h3>' + (mk === "KOSPI" ? "코스피" : "코스닥") + ' 전체 <span class="mut">' + md(r.d) + ' 하루 순매수</span></h3>' +
+      '<p class="fl-say">' + e(say) + '</p><div class="fl-m3">' + b("외국인", r.f, f20) + b("기관", r.i, i20) + b("개인", r.p, p20) + '</div>' +
+      (function(){ var d = r.det || {}, L = [["금융투자", d.FINANCIAL_INVESTOR], ["투신", d.MUTUAL_FUND], ["연기금", d.PENSION_FUND], ["사모", d.PRIVATE_EQUITY_FUND], ["보험", d.INSURANCE_COMPANIES]].filter(function(x){ return x[1] != null; });
+        return L.length ? '<p class="fl-det"><b>기관 안쪽</b> ' + L.map(function(x){ return x[0] + ' <i class="' + cl(x[1]) + '">' + won(x[1] / U) + '</i>'; }).join(" · ") + '</p>' : ''; })() +
+      '<div class="fl-bars"><small>외국인 20일</small>' + spark(R.map(function(x){ return (x.f || 0) / U; }).reverse(), 9, 44) + '</div></section>';
+  }
+
+  // ── 집중 매수·매도 순위 ──
+  function rankCard(){
+    var who = ST.who, per = ST.per, buy = ST.side === "buy", by = ST.sort;
+    var L = uni().filter(function(s){ return val(s, who, per) != null && (by === "amt" || s.mc); });
+    L.sort(function(a, b){ var x = by === "amt" ? val(a, who, per) : inten(a, who, per), y = by === "amt" ? val(b, who, per) : inten(b, who, per); return buy ? y - x : x - y; });
+    L = L.filter(function(s){ return buy ? val(s, who, per) > 0 : val(s, who, per) < 0; }).slice(0, 10);
+    var nm = who === "f" ? "외국인" : "기관";
+    return '<section class="card" id="flrank"><h3>' + (who === "f" ? "🌍" : "🏛") + ' ' + nm + ' 집중 ' + (buy ? "매수" : "매도") + ' <span class="mut">' + (per === "1" ? "하루" : per + "일 합계") + ' · ' + md(D.day) + ' 마감</span></h3>' +
+      '<div class="fl-cr">' + chips("who", [["f", "외국인"], ["i", "기관"]]) + chips("side", [["buy", "많이 산"], ["sell", "많이 판"]]) + '</div>' +
+      '<div class="fl-cr">' + chips("per", [["1", "하루"], ["5", "5일"], ["20", "20일"]]) + chips("sort", [["amt", "금액순"], ["int", "덩치 대비"]]) + '</div>' +
+      (L.length ? L.map(function(s, i){
+        var v = val(s, who, per), it = inten(s, who, per), sk = s[who + "s"];
+        return row(s, i, '<b class="' + cl(v) + '">' + won(v) + '</b>', (it != null ? "시총의 " + Math.abs(it).toFixed(2) + "%" : ""), spark(s["s" + who], 2, 22), sk && Math.abs(sk) >= 3 ? strk(sk) : "");
+      }).join("") : '<p class="note">해당 종목이 없어요.</p>') +
+      '<p class="fl-ft">「덩치 대비」 = 순매수 금액 ÷ 시가총액 — 작은 회사에 큰돈이 들어온 순서 · 작은 막대 = 최근 20일 하루하루(위 빨강 산 날)</p></section>';
+  }
+
+  // ── 쌍끌이 ──
+  function bothCard(){
+    var L = uni().filter(function(s){ return s.f5 > 0 && s.i5 > 0 && s.mc; }).map(function(s){ return {s: s, v: s.f5 + s.i5, it: (s.f5 + s.i5) / s.mc * 100}; })
+      .sort(function(a, b){ return b.it - a.it; }).slice(0, 8);
+    if (!L.length) return "";
+    return '<section class="card"><h3>🤝 외국인·기관이 같이 산 종목 <span class="mut">5일 · 덩치 대비 순</span></h3>' +
+      L.map(function(o, i){ return row(o.s, i, '<b class="up">' + won(o.v) + '</b>', "외 " + won(o.s.f5) + " · 기 " + won(o.s.i5), ""); }).join("") + '</section>';
+  }
+  // ── 연속 ──
+  function streakCard(){
+    var L = [];
+    uni().forEach(function(s){ if (s.fs >= 5) L.push({s: s, n: s.fs, w: "외국인", v: s.f5}); if (s.is >= 5) L.push({s: s, n: s.is, w: "기관", v: s.i5}); });
+    L.sort(function(a, b){ return b.n - a.n || b.v - a.v; }); L = L.slice(0, 8);
+    if (!L.length) return "";
+    return '<section class="card"><h3>🔁 하루도 안 쉬고 사는 중 <span class="mut">5거래일 이상 연속</span></h3>' +
+      L.map(function(o, i){ return row(o.s, i, '<b>' + (o.n >= 24 ? "24일+" : o.n + "일째") + '</b>', o.w + " · 5일 " + won(o.v), ""); }).join("") + '</section>';
+  }
+  // ⭐ 내 관심종목 수급 — 내 종목 얘기라 다시 열 이유가 됨 (관심종목에 국내 종목이 있을 때만)
+  function wlCard(){
+    var wl = (window.store && store.wl) || {}, codes = {}; for (var k in wl){ var c = String(k).replace(/\D/g, "").slice(0, 6); if (c.length === 6) codes[c] = 1; }
+    var L = D.stocks.filter(function(s){ return codes[s.c]; });
+    if (!L.length) return "";
+    return '<section class="card"><h3>⭐ 내 관심종목 수급 <span class="mut">5일 합계</span></h3>' + L.slice(0, 12).map(function(s, i){
+      return row(s, i, '<b class="' + cl(s.f5) + '">외 ' + won(s.f5) + '</b>', '기관 <i class="' + cl(s.i5) + '">' + won(s.i5) + '</i>', spark(s.sf, 2, 22), Math.abs(s.fs) >= 3 ? "외국인 " + strk(s.fs) : ""); }).join("") + '</section>';
+  }
+  function honest(){
+    return '<section class="card fl-hon"><h3>📌 먼저 알고 보세요</h3><p><b>「많이 샀다」가 「오른다」는 아니에요.</b> 2016~2026년 10년을 직접 돌려 봤어요(시총 상위 200 · 20일 순매수 상위 10% · 다음 날 진입).</p>' +
+      '<div class="fl-tb"><div><span>기관·연기금이 많이 산 종목</span><b class="dn">2021년 뒤 60일 −2.0%p</b></div><div><span>외국인이 많이 산 종목</span><b>+1.6%p (통계로 확실하진 않음)</b></div></div>' +
+      '<p>그래서 이 화면은 <b>사는 신호가 아니라</b> 「요즘 큰돈이 어디로 가나」를 고객과 이야기할 재료예요. 외국인 바구니는 10/27부터 실제 성적을 따로 재고 있고, 의미가 생기면 알려 드려요.</p></section>';
+  }
+  function copyText(){
+    var mk = (D.mkt || {}).KOSPI || [], U = mk[0] && Math.abs(mk[0].f) > 1e6 ? 1e8 : 1;
+    function top(who, n){ return D.stocks.filter(function(s){ return s[who + "5"] > 0; }).sort(function(a, b){ return b[who + "5"] - a[who + "5"]; }).slice(0, n).map(function(s){ return s.n + "(" + won(s[who + "5"]) + ")"; }).join(", "); }
+    return "[" + md(D.day) + " 국내 수급]\n" + (mk[0] && mk[0].f != null ? "코스피 하루: 외국인 " + won(mk[0].f / U) + " · 기관 " + won(mk[0].i / U) + " · 개인 " + won(mk[0].p / U) + "\n" : "") +
+      "외국인 5일 순매수 상위: " + top("f", 5) + "\n기관 5일 순매수 상위: " + top("i", 5) + "\n※ 참고용 자료이며 매수 권유가 아닙니다.";
+  }
+  function draw(){
+    var el = document.getElementById("flbody"); if (!el) return;
+    if (!D || !D.stocks || !D.stocks.length){ el.innerHTML = '<section class="card"><p class="note" style="margin:0">수급 자료가 아직 안 올라왔어요 — 장 마감 뒤 저녁·다음 날 아침에 채워져요.</p></section>'; return; }
+    el.innerHTML = '<div class="fl-top">' + chips("mk", [["A", "전체"], ["P", "코스피"], ["Q", "코스닥"]]) + '<button type="button" id="flcopy">📋 한 줄 복사</button></div>' +
+      mktCard() + wlCard() + rankCard() + bothCard() + streakCard() + honest() +
+      '<p class="fl-src">시총 상위 ' + D.n + '종목 · ' + md(D.day) + ' 마감 기준(종목별 자료는 그날 밤에 나와요) · 금액은 순매수 수량 × 종가로 어림 · 자료: 다음 금융</p>';
+    [].forEach.call(el.querySelectorAll("[data-fk]"), function(b){ b.onclick = function(){ var y = b.getBoundingClientRect().top; ST[b.dataset.fk] = b.dataset.fv; keep(); draw();
+      var n = document.querySelector('[data-fk="' + b.dataset.fk + '"][data-fv="' + b.dataset.fv + '"]'); if (n) window.scrollBy(0, n.getBoundingClientRect().top - y); }; });
+    [].forEach.call(el.querySelectorAll("[data-fop]"), function(b){ b.onclick = function(){ if (window.openOP) openOP(b.dataset.fop); }; });
+    var c = document.getElementById("flcopy");
+    if (c) c.onclick = function(){ var t = copyText(); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ c.textContent = "✅ 복사됨 — 카톡에 붙여 넣기"; }, function(){ window.prompt("길게 눌러 복사하세요", t); }); };
+  }
+  window.flowView = function(){ return '<div id="flbody"><div class="loading">수급 자료 불러오는 중…</div></div>'; };
+  window.flowInit = function(){
+    getJSON("archive/x/flow_kr.json?" + Math.floor(Date.now() / 600000), {ttl: 600000}).then(function(j){ D = j; draw(); }).catch(function(){ D = null; draw(); });
+  };
+  (function(){ var st = document.createElement("style"); st.textContent =
+    ".fl-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px}.fl-top .fl-ch{margin:0}" +
+    "#flcopy{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}" +
+    ".fl-cr{display:flex;justify-content:space-between;gap:8px;margin:0 0 8px}.fl-cr .fl-ch{margin:0;gap:0;flex-wrap:nowrap;border:1px solid var(--line);border-radius:999px;overflow:hidden}.fl-cr .fl-ch button{border:0;border-radius:0;padding:7px 11px}" +
+    ".fl-ch{display:flex;gap:6px;margin:0 0 8px;flex-wrap:wrap}.fl-ch button{border:1px solid var(--line);background:var(--panel2,transparent);color:var(--sub);border-radius:999px;padding:7px 13px;font:inherit;font-size:13px;cursor:pointer;min-height:34px}" +
+    ".fl-ch button.on{background:var(--text);color:var(--panel);border-color:var(--text);font-weight:700}" +
+    ".fl-say{font-size:15px;font-weight:700;line-height:1.5;margin:2px 0 12px;word-break:keep-all}" +
+    ".fl-m3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.fl-m{background:var(--panel2,rgba(127,127,127,.08));border-radius:12px;padding:10px 8px;text-align:center;min-width:0}" +
+    ".fl-m small{display:block;font-size:12.5px;color:var(--sub)}.fl-m b{display:block;font-size:19px;font-weight:800;line-height:1.3;white-space:nowrap}.fl-m em{font-style:normal;font-size:12px;color:var(--sub);white-space:nowrap}.fl-m i{font-style:normal}" +
+    ".fl-det{font-size:12.5px;line-height:1.7;color:var(--sub);margin:10px 0 0;word-break:keep-all}.fl-det b{color:var(--text)}.fl-det i{font-style:normal;font-weight:700}" +
+    ".fl-bars{display:flex;align-items:center;justify-content:space-between;margin-top:12px}.fl-bars small{color:var(--sub);font-size:12.5px}" +
+    ".fl-r{display:flex;align-items:center;gap:9px;width:100%;padding:10px 0;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}.fl-r:last-of-type{border-bottom:0}" +
+    ".fl-n{flex:0 0 18px;font-style:normal;font-size:13px;color:var(--sub);text-align:center}.fl-nm{flex:1 1 110px;min-width:110px}.fl-nm b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
+    ".fl-nm small{display:block;font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fl-nm em{font-style:normal}" +
+    ".fl-spw{flex:0 0 auto;line-height:0}.fl-v{flex:0 0 auto;text-align:right;line-height:1.25}.fl-v b{display:block;font-size:15px;font-weight:800;white-space:nowrap}.fl-v small{display:block;font-size:12px;color:var(--sub);white-space:nowrap}" +
+    "#flbody .up{color:var(--up)}#flbody .dn{color:var(--down)}.fl-ft,.fl-src{font-size:12px;color:var(--sub);line-height:1.5;margin:10px 0 0;word-break:keep-all}.fl-src{text-align:center;margin:4px 8px 16px}" +
+    ".fl-hon p{font-size:13.5px;line-height:1.6;margin:0 0 8px;word-break:keep-all;color:var(--sub)}.fl-hon p b{color:var(--text)}.fl-tb{margin:0 0 10px}.fl-tb div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}.fl-tb div:last-child{border:0}.fl-tb b{text-align:right;white-space:nowrap}" +
+    ".fl-v small i{font-style:normal;font-weight:700}@media(max-width:360px){.fl-spw{display:none}}";
+    document.head.appendChild(st); })();
+})();
+;
 /* ======== products.js ======== */
 /* CH Investing — 🛍️ 상품: 미래에셋증권이 지금 파는 채권 · 펀드 · ELS (archive/x/products.json, products.yml 하루 3번 · 🇧🇷 브라질 실시간 금리·달러채 archive/x/brl_live.json 평일 20분마다)
    10/16 사용자: 「상품 카테고리 — 국채·미국채·브라질국채 / 펀드·사모펀드(수익률 순위) / ELS — 하위 3개 · 기존 카테고리 형식과 비슷하게」
@@ -3191,7 +3333,7 @@
 
   // ---------- 🎯 11/04 누른 것 · 본 화면 (사용자 「들어온 사람들이 어디를 제일 많이 봤니」) ----------
   //   이름·관심종목·입력한 글은 안 보냄. 단추·카드의 「짧은 이름」만 세서 모았다가 한 번에(앱을 내릴 때 · 10분마다) 보냄.
-  var TK = "us_tap", NAMES = {home: "오늘", market: "시황", sector: "시장 흐름", prob: "오를 확률", port: "포트", score: "성적표", whale: "큰손", cup: "컵 차트", gap: "갭 상승", screen: "종목 찾기", sigmore: "신호 더 보기",
+  var TK = "us_tap", NAMES = {home: "오늘", market: "시황", sector: "시장 흐름", prob: "오를 확률", flow: "수급", port: "포트", score: "성적표", whale: "큰손", cup: "컵 차트", gap: "갭 상승", screen: "종목 찾기", sigmore: "신호 더 보기",
     bond: "채권", fund: "펀드", els: "ELS", prop: "제안서", luck: "오늘의 운세", saju: "사주", tarot: "타로", lotto: "로또", feed: "피드", onepager: "종목리포트", alarm: "알림", idea: "의견함"};
   function bag(){ var b = null; try { b = JSON.parse(localStorage.getItem(TK) || "null"); } catch(x) {} if (!b || b.day !== kst()) b = {day: kst(), taps: {}, views: {}, n: 0}; return b; }
   function put(b){ try { localStorage.setItem(TK, JSON.stringify(b)); } catch(x) {} }
@@ -3599,7 +3741,7 @@
   var SCREENS = {};   // 화면 키 → 한 장 만들기 (아래에서 채움)
   var RAWM = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/";
   function ls(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(x) {} return null; }
-  function strip(t){ return String(t || "").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim(); }
+  function strip(t){ return String(t || "").replace(/<br\s*\/?>/gi, " ｜ ").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim(); }
   function kst(){ return new Date(Date.now() + 9 * 3600e3); }
   function today(){ return kst().toISOString().slice(0, 10); }
   function md(s){ return s ? String(s).slice(5, 10).replace("-", "/") : ""; }
@@ -7431,7 +7573,7 @@
     [/금리|국채|채권/, ASK[0][1]], [/els|ELS|이엘에스/i, ASK[1][1]], [/들어가|살까|사도|타이밍|매수/, ASK[2][1]], [/팔까|손절|매도/, ASK[3][1]],
     [/섹터|업종|테마|요즘|세요|센 ?거/, ASK[4][1]], [/환율|달러|원화/, ASK[5][1]], [/연금|irp|IRP|DC|퇴직/i, ASK[6][1]], [/목표|모으|노후/, ASK[7][1]],
     [/포트|비중|배분|뭐 ?사/, [["💼 지금 이렇게 담으면 돼요 · 비중", "port", "#porec"]].concat(ASK[9][1].slice(0, 2))], [/큰손|고래|기관|연기금/, ASK[10][1]], [/일정|cpi|CPI|실적|fomc|FOMC|고용/, ASK[11][1]],
-    [/확률|오를까|오르나|내릴까/, [["🎲 다음 장 오를 확률 · 한국장 기준", "prob", "#prbody"]]], [/제안서|제안|성향/, [["📝 고객 제안서 만들기 · 4단계", "prop", ".pp-pf"]]],
+    [/수급|외국인|외인|기관|순매수|쌍끌이/, [["🧲 국내 수급 · 외국인·기관 집중 매수", "flow", "#flrank"]]], [/확률|오를까|오르나|내릴까/, [["🎲 다음 장 오를 확률 · 한국장 기준", "prob", "#prbody"]]], [/제안서|제안|성향/, [["📝 고객 제안서 만들기 · 4단계", "prop", ".pp-pf"]]],
     [/한 ?장|보내|카톡/, [["📨 고객에게 오늘 한 장 · 홈", "home", "#ezhero"]]], [/운세|사주|타로|로또/, [["🔮 오늘의 운세 · 사주 · 타로", "luck", "#main"]]],
     [/펀드|사모/, [["🧺 펀드 · 사모 라인업", "fund", "#pdbody"]]], [/컵|cup/i, [["☕ 컵 차트 · 돌파 임박", "cup", "#main"]]], [/갭/, [["📈 갭 상승 · 오늘 갭 지도", "gap", "#main"]]]
   ];
@@ -10319,13 +10461,13 @@
   var GROUPS = [
     // 🔍 11/05 A4 아래 탭 8 → 6: 🔮 운세 묶음은 「오늘」 안으로(홈 맨 아래 줄 · 위 작은 탭), 📰 피드는 「시장」 안으로(시황 재료)
     {k: "home", ic: "🏠", t: "오늘", tabs: ["home", "luck", "saju", "tarot", "lotto"]},
-    {k: "mkt",  ic: "🌐", t: "시장", tabs: ["market", "sector", "prob", "feed"]},
+    {k: "mkt",  ic: "🌐", t: "시장", tabs: ["market", "sector", "flow", "prob", "feed"]},
     {k: "inv",  ic: "💼", t: "포트", tabs: ["port", "score"]},
     {k: "sig",  ic: "🎯", t: "신호", tabs: ["whale", "cup", "gap", "screen", "sigmore"]},   // 10/12: 🤫 매집·⚡ 단타는 메뉴에서 뺌 — 알림(앱·텔레그램)으로만. 알림을 누르면 그 화면은 그대로 열림
     {k: "prod", ic: "🛍️", t: "상품", tabs: ["bond", "fund", "els"]},   // 10/16 사용자: 상품 카테고리 — 채권·펀드·ELS
     {k: "prop", ic: "📝", t: "제안서", tabs: ["prop"]},                 // 10/28 사용자: 제안서 카테고리 — 기본폼 9종 → 한 장·PDF·PPT
   ];
-  var LAB = {home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
+  var LAB = {home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
   function grpOf(k){ for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].tabs.indexOf(k) >= 0) return GROUPS[i]; return null; }
   function last(g){ var m = (window.store && store.gl) || {}; return m[g.k] && g.tabs.indexOf(m[g.k]) >= 0 ? m[g.k] : g.tabs[0]; }
 
@@ -10364,7 +10506,7 @@
   // ⑦ 뒤로: 홈이 아니면 늘 보이게 (알림 링크로 종목 화면을 바로 열었을 때도) — 더 돌아갈 기록이 없으면 보던 탭 → 오늘로
   window.updBack = function(){ var b = document.getElementById("backbtn"); if (!b) return; b.classList.add("on");
     // 🎨 11/04: 아래 탭으로 가는 첫 화면(돌아갈 기록 없음)에선 숨김 — 종목리포트처럼 탭에 없는 화면은 보임
-    var tabbed = !!(window.cur && document.querySelector("#bnav") && ["home","market","sector","prob","port","score","whale","cup","gap","screen","sigmore","bond","fund","els","prop","luck","saju","tarot","lotto","feed"].indexOf(cur) >= 0);
+    var tabbed = !!(window.cur && document.querySelector("#bnav") && ["home","market","sector","flow","prob","port","score","whale","cup","gap","screen","sigmore","bond","fund","els","prop","luck","saju","tarot","lotto","feed"].indexOf(cur) >= 0);
     b.classList.toggle("root", tabbed ? !document.getElementById("sheet") : !(navD() > 0 || !!document.getElementById("sheet") || (window.cur && cur !== "home"))); };
   var _goBack = window.goBack;
   window.goBack = function(){
@@ -16580,7 +16722,7 @@ window.VIDC = {
     if (/추정|검증 중|확률/.test(t)) return FACE.think;
     return null; }
   var MKPOSE = {prob: FACE.think, cup: FACE.detect, gap: FACE.detect, screen: FACE.detect, feed: FACE.tablet};                      // 자세히 묶음별 자세 (확률 = 생각하는 조이)
-  var GRP = {home: "home", market: "mkt", sector: "mkt", prob: "mkt", port: "inv", score: "inv",
+  var GRP = {home: "home", market: "mkt", sector: "mkt", prob: "mkt", flow: "mkt", port: "inv", score: "inv",
              whale: "sig", cup: "sig", gap: "sig", screen: "sig", sigmore: "sig", accum: "sig", danta: "sig",
              bond: "prod", fund: "prod", els: "prod", feed: "feed", prop: "prop", luck: "luck", saju: "luck", tarot: "luck", lotto: "luck"};
   var NAME = {intro: "👋 인사", home: "🏠 오늘", mkt: "🌐 시장", inv: "💼 포트", sig: "🎯 신호", prod: "🛍️ 상품", prop: "📝 제안서", feed: "📰 피드", luck: "🔮 운세"};
@@ -16601,6 +16743,7 @@ window.VIDC = {
     home: ["「오늘」은 앱 전체에서 오늘 꼭 볼 것만 뽑은 한 장이에요.", "포트 성적, 킥이 사고판 것, 오늘 집중할 곳, 알람, 두뇌 생각, 성적표가 한 줄씩 있어요.", "카드를 누르면 그 탭의 자세한 화면으로 바로 가요.", "매시간 새로 계산해요. 장중엔 한국 시장 숫자가 10분마다 바뀌어요."],
     market: ["🌐 시황은 매일 아침 7시 20분쯤 만드는 시장 전략 리포트예요.", "미국·한국 전날 종가, 밤사이 뉴스, 전략가 의견, 매일 읽는 블로그·텔레그램 글을 다 읽고 써요.", "「어느 나라·어느 업종으로 돈이 몰리나 → 수혜 종목·ETF → 오늘 여기 집중」 순서예요.", "리포트가 한 예고는 다음 날 맞았는지 스스로 채점해요(확률로 적고 브라이어 점수로 쌓아요).", "⚠️ 리포트는 판단을 돕는 자료예요. 매수 추천이 아니에요."],
     sector: ["🧭 나침반은 한국·미국·일본·중국·홍콩 5개 시장을 한 화면에 모은 거예요.", "오른 종목 수와 내린 종목 수, 지수 흐름, 강한 업종과 약한 업종을 보여 줘요.", "장중엔 10분마다 새 숫자로 바뀌어요.", "미국 장이 열리기 전엔 미국 지수 선물과 아시아·유럽 시장으로 미국을 미리 짐작해요."],
+    flow: ["🧲 수급은 국내 주식을 누가 사고 있는지 보여 줘요. 외국인과 기관이 하루·5일·20일 동안 많이 산 종목 순서예요.", "「덩치 대비」를 누르면 회사 크기에 비해 큰돈이 들어온 순서로 바뀌어요. 종목을 누르면 종목리포트가 열려요.", "꼭 기억하세요 — 많이 샀다고 꼭 오르진 않아요. 10년을 돌려 보니 기관이 많이 산 종목은 오히려 덜 올랐어요. 고객과 이야기할 재료로만 써요."],
     prob: ["🎲 시장확률은 내일과 일주일 뒤 시장이 오를 확률이에요.", "계산법: 평소 오르는 비율(기저율)에서 출발해요. 추세·변동성·심리(공포·탐욕)·자금(크레딧·환율)·시장 폭·외국인 수급·옵션 만기·전날 미국장 같은 근거 20가지 정도를 하나씩 더해요.", "근거끼리 비슷한 말을 하는 경우가 많아서, 근거가 많아도 「서로 다른 근거 2개 정도」 몫만 믿어요.", "과거에 잘 맞힌 방법은 가중치를 올리고, 못 맞힌 방법은 내려요(매일 자동 채점).", "그래서 숫자가 50% 근처에 자주 머물러요. 억지로 부풀리지 않으려는 거예요.", "⚠️ 실전 방향 성적이 20건 넘게 쌓이고 55%를 넘기 전까진 「약간 ○○ 쪽」까지만 말해요. 아직 그대로 따라 사고팔긴 무리예요."],
     port: ["💼 포트는 「시황 리포트 배분표대로 투자했다면」을 매일 계산해요.", "💼 기본 = 뼈대(S&P500 반 + 나스닥 반, 시장이 200일선 아래면 현금·금을 늘림) · ⚡ 킥 = 기본에 확인된 신호(고래·컵·갭) 조금 · 🎯 집중 = 오르는 시장에 몰아서.", "시작일은 10/2가 기본이고, 날짜를 바꿔 다른 날부터 볼 수도 있어요.", "🎛 포트 설계기에서는 비중을 손가락으로 밀면 2008년부터 다시 굴려서 연 수익·최대 낙폭·최악의 해를 바로 보여 줘요.", "「정직」 숫자는 다음 날 진입·사고팔 때 비용까지 뺀 값이에요.", "⚠️ 실전 기록은 10/2부터라 아직 몇 주뿐이에요. 그대로 따라 하기엔 이르니, 위의 S&P500 비교 숫자와 성적표를 꼭 같이 보세요."],
     score: ["📊 성적표는 앱이 한 말이 맞았는지 한곳에서 채점하는 곳이에요.", "시황 예고, 두뇌 생각, 킥 신호, 단타 알람, 해외 상품까지 다 매겨요.", "🧪 포트 규칙 검증은 규칙을 2008~2016년에서 고르고 2017년부터 시험한 결과예요.", "🧾 시도 장부는 지금까지 시험한 규칙 조합 수예요. 많이 시험할수록 1등은 운으로도 좋아 보여서, 과거 숫자는 절반쯤 깎아서 봐요."],
@@ -19134,7 +19277,7 @@ window.VIDC = {
       '<div class="ez-light ' + o.L[0] + '"><b>' + o.L[1] + '</b><div><small>오늘 장' + (o.early ? ' <i class="ez-early">09:30 전 · 전날 마감 기준</i>' : '') + '</small><strong>' + e(o.L[2]) + '</strong><em>' + e(o.L[3]) + '</em></div></div>' +
       hitHtml(b._sc) + ruleHtml(o, b._bear) +
       (o.mix ? '<p class="ez-mix">⚠ ' + e(o.mix) + '</p>' : '') +
-      (b.one ? '<p class="ez-one">' + e(b.one) + '</p>' : '') +
+      (b.one ? '<p class="ez-one">' + e(String(b.one).split(" ｜ ").pop()) + '</p>' : '') +   /* 11/10: 앞 절반(하락장 판정)은 바로 위 상자와 같은 말 → 뉴스 한 줄만 */
       (N.length ? '<div class="ez-nums">' + N.slice(0, 3).map(function(n){ return '<div><small>' + e(n[0]) + '</small><b class="' + cl(n[2]) + '">' + sg(n[2]) + '</b>' + (n[1] ? '<em>' + e(n[1]) + '</em>' : '') + '</div>'; }).join("") + '</div>' : '') +
       (o.act ? '<div class="ez-act"><small>그래서 오늘은</small><p>👉 ' + e(o.red ? redAct(o.red) : o.act) + '</p></div>' : '') +
       (window.__rebCard ? __rebCard(b._bear, o.k, "ez") : '') +   // 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (ux1110.js · 반등 날에만)
@@ -19173,13 +19316,14 @@ window.VIDC = {
     ["prop", "📝", "고객 제안서 만들기", "성향 → 상품 → 금액 → 끝"],
     ["@send", "📨", "고객에게 한 장 보내기", "카톡용 그림 한 장"],
     ["bond", "🏦", "채권·ELS 금리 보기", "상품 한곳에서"],
+    ["flow", "🧲", "외국인·기관은 뭘 사요?", "국내 수급 한눈에"],
     ["prob", "🎲", "오늘 오를 확률은?", "한국장 기준"],
     ["luck", "🔮", "오늘의 운세", "운세·사주·타로"]
   ];
   function help(){
     var old = document.getElementById("ezsheet"); if (old){ old.remove(); return; }
     var d = document.createElement("div"); d.id = "ezsheet";
-    var ord = ROLE() === "inv" ? ["port", "prob", "home", "sector", "bond", "prop", "@send", "luck"] : ROLE() === "look" ? ["home", "sector", "prob", "luck", "port", "bond", "prop", "@send"] : null;
+    var ord = ROLE() === "inv" ? ["port", "prob", "flow", "home", "sector", "bond", "prop", "@send", "luck"] : ROLE() === "look" ? ["home", "sector", "flow", "prob", "luck", "port", "bond", "prop", "@send"] : null;
     var AS = ord ? ASK.slice().sort(function(a, b){ return ord.indexOf(a[0]) - ord.indexOf(b[0]); }) : ASK;
     d.innerHTML = '<div class="ezs-in"><div class="ezs-h"><img src="img/kid_think.jpg?v=1" alt=""><div><b>뭐 보면 돼요?</b><small>궁금한 걸 누르면 그 화면으로 데려가요</small></div><button type="button" class="ezs-x" aria-label="닫기">✕</button></div>' +
       '<div class="ezs-g">' + AS.map(function(a){ return '<button type="button" data-ask="' + a[0] + '"><span>' + a[1] + '</span><b>' + e(a[2]) + '</b><small>' + e(a[3]) + '</small></button>'; }).join("") + '</div>' +
@@ -19284,7 +19428,7 @@ window.VIDC = {
   }
 
   /* ── ⑫ 막히는 곳 재기 (usage.js 의 하루 주머니에 같이 넣음 · 화면 이름만) ── */
-  var NM = {home: "오늘", market: "시황", sector: "시장 흐름", prob: "오를 확률", port: "포트", score: "성적표", whale: "큰손", cup: "컵 차트", gap: "갭 상승", screen: "종목 찾기", sigmore: "신호 더 보기", bond: "채권", fund: "펀드", els: "ELS", prop: "제안서", luck: "운세", saju: "사주", tarot: "타로", lotto: "로또", feed: "피드", onepager: "종목리포트"};
+  var NM = {home: "오늘", market: "시황", sector: "시장 흐름", prob: "오를 확률", flow: "수급", port: "포트", score: "성적표", whale: "큰손", cup: "컵 차트", gap: "갭 상승", screen: "종목 찾기", sigmore: "신호 더 보기", bond: "채권", fund: "펀드", els: "ELS", prop: "제안서", luck: "운세", saju: "사주", tarot: "타로", lotto: "로또", feed: "피드", onepager: "종목리포트"};
   function bagAdd(label){
     try { var day = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10), b = JSON.parse(localStorage.getItem("us_tap") || "null");
       if (!b || b.day !== day) b = {day: day, taps: {}, views: {}, n: 0};

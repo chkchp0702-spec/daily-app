@@ -25,7 +25,7 @@ def jl(p, d=None):
 
 
 def strip(t):
-    return re.sub(r"<[^>]+>", "", str(t or "")).replace("&nbsp;", " ").replace("\n", " ").strip()
+    return re.sub(r"<[^>]+>", "", re.sub(r"<br\s*/?>", " ｜ ", str(t or ""), flags=re.I)).replace("&nbsp;", " ").replace("\n", " ").strip()   # 11/10: <br> 을 그냥 지워 「−8%유가발」처럼 두 문장이 붙던 것
 
 
 def sg(v, d=1):

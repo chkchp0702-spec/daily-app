@@ -148,7 +148,7 @@
       '<div class="ez-light ' + o.L[0] + '"><b>' + o.L[1] + '</b><div><small>오늘 장' + (o.early ? ' <i class="ez-early">09:30 전 · 전날 마감 기준</i>' : '') + '</small><strong>' + e(o.L[2]) + '</strong><em>' + e(o.L[3]) + '</em></div></div>' +
       hitHtml(b._sc) + ruleHtml(o, b._bear) +
       (o.mix ? '<p class="ez-mix">⚠ ' + e(o.mix) + '</p>' : '') +
-      (b.one ? '<p class="ez-one">' + e(b.one) + '</p>' : '') +
+      (b.one ? '<p class="ez-one">' + e(String(b.one).split(" ｜ ").pop()) + '</p>' : '') +   /* 11/10: 앞 절반(하락장 판정)은 바로 위 상자와 같은 말 → 뉴스 한 줄만 */
       (N.length ? '<div class="ez-nums">' + N.slice(0, 3).map(function(n){ return '<div><small>' + e(n[0]) + '</small><b class="' + cl(n[2]) + '">' + sg(n[2]) + '</b>' + (n[1] ? '<em>' + e(n[1]) + '</em>' : '') + '</div>'; }).join("") + '</div>' : '') +
       (o.act ? '<div class="ez-act"><small>그래서 오늘은</small><p>👉 ' + e(o.red ? redAct(o.red) : o.act) + '</p></div>' : '') +
       (window.__rebCard ? __rebCard(b._bear, o.k, "ez") : '') +   // 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (ux1110.js · 반등 날에만)
@@ -187,13 +187,14 @@
     ["prop", "📝", "고객 제안서 만들기", "성향 → 상품 → 금액 → 끝"],
     ["@send", "📨", "고객에게 한 장 보내기", "카톡용 그림 한 장"],
     ["bond", "🏦", "채권·ELS 금리 보기", "상품 한곳에서"],
+    ["flow", "🧲", "외국인·기관은 뭘 사요?", "국내 수급 한눈에"],
     ["prob", "🎲", "오늘 오를 확률은?", "한국장 기준"],
     ["luck", "🔮", "오늘의 운세", "운세·사주·타로"]
   ];
   function help(){
     var old = document.getElementById("ezsheet"); if (old){ old.remove(); return; }
     var d = document.createElement("div"); d.id = "ezsheet";
-    var ord = ROLE() === "inv" ? ["port", "prob", "home", "sector", "bond", "prop", "@send", "luck"] : ROLE() === "look" ? ["home", "sector", "prob", "luck", "port", "bond", "prop", "@send"] : null;
+    var ord = ROLE() === "inv" ? ["port", "prob", "flow", "home", "sector", "bond", "prop", "@send", "luck"] : ROLE() === "look" ? ["home", "sector", "flow", "prob", "luck", "port", "bond", "prop", "@send"] : null;
     var AS = ord ? ASK.slice().sort(function(a, b){ return ord.indexOf(a[0]) - ord.indexOf(b[0]); }) : ASK;
     d.innerHTML = '<div class="ezs-in"><div class="ezs-h"><img src="img/kid_think.jpg?v=1" alt=""><div><b>뭐 보면 돼요?</b><small>궁금한 걸 누르면 그 화면으로 데려가요</small></div><button type="button" class="ezs-x" aria-label="닫기">✕</button></div>' +
       '<div class="ezs-g">' + AS.map(function(a){ return '<button type="button" data-ask="' + a[0] + '"><span>' + a[1] + '</span><b>' + e(a[2]) + '</b><small>' + e(a[3]) + '</small></button>'; }).join("") + '</div>' +
@@ -298,7 +299,7 @@
   }
 
   /* ── ⑫ 막히는 곳 재기 (usage.js 의 하루 주머니에 같이 넣음 · 화면 이름만) ── */
-  var NM = {home: "오늘", market: "시황", sector: "시장 흐름", prob: "오를 확률", port: "포트", score: "성적표", whale: "큰손", cup: "컵 차트", gap: "갭 상승", screen: "종목 찾기", sigmore: "신호 더 보기", bond: "채권", fund: "펀드", els: "ELS", prop: "제안서", luck: "운세", saju: "사주", tarot: "타로", lotto: "로또", feed: "피드", onepager: "종목리포트"};
+  var NM = {home: "오늘", market: "시황", sector: "시장 흐름", prob: "오를 확률", flow: "수급", port: "포트", score: "성적표", whale: "큰손", cup: "컵 차트", gap: "갭 상승", screen: "종목 찾기", sigmore: "신호 더 보기", bond: "채권", fund: "펀드", els: "ELS", prop: "제안서", luck: "운세", saju: "사주", tarot: "타로", lotto: "로또", feed: "피드", onepager: "종목리포트"};
   function bagAdd(label){
     try { var day = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10), b = JSON.parse(localStorage.getItem("us_tap") || "null");
       if (!b || b.day !== day) b = {day: day, taps: {}, views: {}, n: 0};

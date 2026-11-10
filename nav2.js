@@ -7,13 +7,13 @@
   var GROUPS = [
     // 🔍 11/05 A4 아래 탭 8 → 6: 🔮 운세 묶음은 「오늘」 안으로(홈 맨 아래 줄 · 위 작은 탭), 📰 피드는 「시장」 안으로(시황 재료)
     {k: "home", ic: "🏠", t: "오늘", tabs: ["home", "luck", "saju", "tarot", "lotto"]},
-    {k: "mkt",  ic: "🌐", t: "시장", tabs: ["market", "sector", "prob", "feed"]},
+    {k: "mkt",  ic: "🌐", t: "시장", tabs: ["market", "sector", "flow", "prob", "feed"]},
     {k: "inv",  ic: "💼", t: "포트", tabs: ["port", "score"]},
     {k: "sig",  ic: "🎯", t: "신호", tabs: ["whale", "cup", "gap", "screen", "sigmore"]},   // 10/12: 🤫 매집·⚡ 단타는 메뉴에서 뺌 — 알림(앱·텔레그램)으로만. 알림을 누르면 그 화면은 그대로 열림
     {k: "prod", ic: "🛍️", t: "상품", tabs: ["bond", "fund", "els"]},   // 10/16 사용자: 상품 카테고리 — 채권·펀드·ELS
     {k: "prop", ic: "📝", t: "제안서", tabs: ["prop"]},                 // 10/28 사용자: 제안서 카테고리 — 기본폼 9종 → 한 장·PDF·PPT
   ];
-  var LAB = {home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", port: "💼 포트", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
+  var LAB = {home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
   function grpOf(k){ for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].tabs.indexOf(k) >= 0) return GROUPS[i]; return null; }
   function last(g){ var m = (window.store && store.gl) || {}; return m[g.k] && g.tabs.indexOf(m[g.k]) >= 0 ? m[g.k] : g.tabs[0]; }
 
@@ -52,7 +52,7 @@
   // ⑦ 뒤로: 홈이 아니면 늘 보이게 (알림 링크로 종목 화면을 바로 열었을 때도) — 더 돌아갈 기록이 없으면 보던 탭 → 오늘로
   window.updBack = function(){ var b = document.getElementById("backbtn"); if (!b) return; b.classList.add("on");
     // 🎨 11/04: 아래 탭으로 가는 첫 화면(돌아갈 기록 없음)에선 숨김 — 종목리포트처럼 탭에 없는 화면은 보임
-    var tabbed = !!(window.cur && document.querySelector("#bnav") && ["home","market","sector","prob","port","score","whale","cup","gap","screen","sigmore","bond","fund","els","prop","luck","saju","tarot","lotto","feed"].indexOf(cur) >= 0);
+    var tabbed = !!(window.cur && document.querySelector("#bnav") && ["home","market","sector","flow","prob","port","score","whale","cup","gap","screen","sigmore","bond","fund","els","prop","luck","saju","tarot","lotto","feed"].indexOf(cur) >= 0);
     b.classList.toggle("root", tabbed ? !document.getElementById("sheet") : !(navD() > 0 || !!document.getElementById("sheet") || (window.cur && cur !== "home"))); };
   var _goBack = window.goBack;
   window.goBack = function(){

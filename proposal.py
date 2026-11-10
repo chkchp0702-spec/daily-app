@@ -46,7 +46,7 @@ def remote(name):
 
 
 def strip(t):
-    t = re.sub(r"<[^>]+>", "", str(t or "")).replace("&nbsp;", " ").replace("\n", " ")
+    t = re.sub(r"<[^>]+>", "", re.sub(r"<br\s*/?>", " ｜ ", str(t or ""), flags=re.I)).replace("&nbsp;", " ").replace("\n", " ")
     return re.sub(r"\s+", " ", t).strip()
 
 
