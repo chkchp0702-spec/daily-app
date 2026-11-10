@@ -1872,8 +1872,8 @@
       var pick = function(sym){ ST.pick[i] = sym; ST.done = false; keep(); draw();
         var nx = document.querySelector("[data-dvq]"); if (nx) setTimeout(function(){ nx.focus(); }, 30); else { var g = document.getElementById("dvgo"); if (g) g.scrollIntoView({block: "center", behavior: "smooth"}); } };
       q.oninput = function(){ opLoadIdx().then(function(){
-        var res = opSearch(q.value).filter(function(r){ return ST.pick.indexOf(r.sym) < 0; }).slice(0, 6);
-        box.innerHTML = res.map(function(r){ return '<button type="button" data-s="' + e(r.sym) + '">' + (V.FLAGS[r.mkt] || "") + ' <b>' + e(r.name) + '</b>' + (r.etf ? '<span class="etfb">ETF</span>' : '') + '<small>' + e(V.cd(r.sym)) + '</small></button>'; }).join("");
+        var all = opSearch(q.value, 40).filter(function(r){ return ST.pick.indexOf(r.sym) < 0; }), res = all.slice(0, 30);
+        box.innerHTML = res.map(function(r){ return '<button type="button" data-s="' + e(r.sym) + '">' + (V.FLAGS[r.mkt] || "") + ' <b>' + e(r.name) + '</b>' + (r.etf ? '<span class="etfb">ETF</span>' : '') + '<small>' + e(V.cd(r.sym)) + '</small></button>'; }).join("") + (res.length >= 8 ? '<p class="dv-more">' + res.length + (all.length > 30 ? '개+' : '개') + ' 찾음 · 위아래로 넘겨 보세요' + (all.length > 30 ? ' (더 자세히 쳐 보세요)' : '') + '</p>' : '');
         [].forEach.call(box.children, function(x){ x.onclick = function(){ pick(x.dataset.s); }; }); }); };
       q.onkeydown = function(ev){ if (ev.key === "Enter"){ opLoadIdx().then(function(){ var r = opSearch(q.value).filter(function(r){ return ST.pick.indexOf(r.sym) < 0; })[0]; if (r) pick(r.sym); }); } };
     });
@@ -2004,7 +2004,7 @@
     ".dv-ex{display:grid;gap:6px}.dv-ex button{text-align:left;border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text);border-radius:12px;padding:10px 12px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}.dv-ex small{display:block;font-weight:400;font-size:12.5px;color:var(--sub);margin-top:2px}" +
     ".dv-slot{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.dv-slot>i{flex:0 0 26px;height:26px;border-radius:50%;color:#fff;font-style:normal;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:8px}" +
     ".dv-in{flex:1;min-width:0;position:relative}.dv-in input{width:100%;box-sizing:border-box;border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text);border-radius:12px;padding:11px 12px;font:inherit;font-size:16px}" +
-    ".dv-sug button{display:block;width:100%;text-align:left}.dv-got{flex:1;min-width:0;padding-top:4px}.dv-got b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dv-got small{color:var(--sub);font-size:12.5px}" +
+    ".dv-sug{max-height:330px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}.dv-sug button{display:flex;width:100%;text-align:left}.dv-more{font-size:12px;color:var(--sub);margin:6px 4px 2px;text-align:center}.dv-got{flex:1;min-width:0;padding-top:4px}.dv-got b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dv-got small{color:var(--sub);font-size:12.5px}" +
     ".dv-x{flex:0 0 36px;height:36px;border:0;background:none;color:var(--sub);font-size:16px;cursor:pointer;margin-top:2px}" +
     ".dv-go{display:block;width:100%;margin-top:14px;border:0;border-radius:14px;padding:14px;font:inherit;font-size:16px;font-weight:800;background:var(--acc,#3b7ddd);color:#fff;cursor:pointer}.dv-go[disabled]{background:var(--panel2);color:var(--dim,#888);cursor:default;font-weight:600;font-size:14px}" +
     ".dv-big{font-size:21px;font-weight:800;line-height:1.35;margin:2px 0 6px;word-break:keep-all}.dv-say{font-size:15px;line-height:1.55;margin:0;word-break:keep-all;color:var(--sub)}.dv-say b{color:var(--text)}" +

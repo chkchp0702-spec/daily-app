@@ -1386,8 +1386,20 @@ function fuzzy(q){
   });
   return Object.keys(best).map(function(x){ return best[x]; }).sort(function(a, b){ return b[0] - a[0]; }).slice(0, 8);
 }
-function opSearch(q){
-  var raw = q;
+// 11/10 「나스닥커버드콜」→「미국나스닥100커버드콜」: 띄어 쓰거나 중간 말(미국·100 등)을 빼고 쳐도 조각(2글자 이상, 3조각까지)이 순서대로 있으면 찾음
+function chunkIn(q, s){
+  var i = 0, j = 0, n = 0;
+  while (i < q.length){
+    var L = q.length - i, at = -1;
+    for (; L >= 2; L--){ at = s.indexOf(q.substr(i, L), j); if (at >= 0) break; }
+    if (at < 0) return false;
+    if (++n > 3) return false;
+    i += L; j = at + L;
+  }
+  return true;
+}
+function opSearch(q, lim){
+  var raw = q; lim = lim || 8;
   q = norm(q); if (!q) return [];
   var out = [];
   OPIDX.forEach(function(r){
@@ -1395,13 +1407,14 @@ function opSearch(q){
     if (r.s1 === q) sc = 120; else if (r.n1 === q) sc = 110; else if (r.alts.indexOf(q) >= 0) sc = 100;   // 11/02 티커가 정확히 같은 종목이 맨 위
     else if (r.n1.indexOf(q) === 0 || r.s1.indexOf(q) === 0) sc = 60;
     else if (r.key.indexOf(q) >= 0) sc = 30;
+    else if (q.length >= 4 && /[가-힣]/.test(q) && chunkIn(q, r.n1)) sc = 25;
     if (sc) out.push([sc + (r.built ? 5 : 0) - r.name.length / 100, r]);
   });
   out.sort(function(a, b){ return b[0] - a[0]; });
   // 10/28 「하이닉스를 쳤는데 왜 ADR로 나와」 — 한국 본주가 같이 찾아지면 미국 ADR 은 숨김 (adr·티커를 직접 치면 보임)
   var krN = {}; out.forEach(function(x){ if (x[1].mkt === "KR") krN[x[1].n1] = 1; });
   if (q.indexOf("adr") < 0) out = out.filter(function(x){ var r = x[1]; return !(/ ADR$/.test(r.name) && krN[norm(r.name.replace(/ ADR$/, ""))] && r.s1 !== q); });
-  var res = out.slice(0, 8).map(function(x){ return x[1]; });
+  var res = out.slice(0, lim).map(function(x){ return x[1]; });
   if (res.length < 8){                                            // 발음이 비슷한 이름으로 더 찾기
     var have = {}; res.forEach(function(r){ have[r.sym] = 1; });
     res.fz = {};
@@ -1547,7 +1560,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261110f";
+var APPV = "20261110g";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1599,7 +1612,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합친 한 파일. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.bundle.js?v=e6c888ba46"></script>
+<script defer src="app.bundle.js?v=1273e30591"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
