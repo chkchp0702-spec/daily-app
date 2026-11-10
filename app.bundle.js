@@ -1873,8 +1873,8 @@
   var QD = null;
   function qload(){
     if (QD) return Promise.resolve(QD);
-    return Promise.all([gj(RM + "bear.json", 600000), gj(RM + "port.json", 600000), gj("archive/x/flow_kr.json", 600000), gj("archive/x/wl_live.json", 120000), gj("archive/x/live_kr.json", 120000), gj("archive/x/products.json", 1800000)])
-      .then(function(r){ QD = {B: r[0] || {}, P: r[1] || {}, F: r[2] || {}, W: r[3] || {}, L: r[4] || {}, PR: r[5] || {}}; setTimeout(function(){ QD = null; }, 600000); return QD; });
+    return Promise.all([gj(RM + "bear.json", 600000), gj(RM + "port.json", 600000), gj("archive/x/flow_kr.json", 600000), gj("archive/x/wl_live.json", 120000), gj("archive/x/live_kr.json", 120000), gj("archive/x/products.json", 1800000), gj(RM + "qa.json", 300000)])
+      .then(function(r){ QD = {B: r[0] || {}, P: r[1] || {}, F: r[2] || {}, W: r[3] || {}, L: r[4] || {}, PR: r[5] || {}, QA: r[6] || null}; setTimeout(function(){ QD = null; }, 600000); return QD; });
   }
   function qa(Q){
     var M = {}; (Q.B.markets || []).forEach(function(m){ M[m.key] = m; });
@@ -1910,19 +1910,50 @@
     if (fx.p) out.push(["환율 어디로 가요?", "원/달러는 지금 " + (Math.round(fx.p * 10) / 10).toLocaleString() + "원(" + sg(fx.chg, 2) + ")이에요. 환율 방향은 아무도 맞히기 어려워서, 달러 자산은 한 번에 바꾸기보다 몇 번에 나눠 환전하는 게 원칙이에요."]);
     return out.slice(0, 10);
   }
+  /* 💬 11/10 사용자 「답변이 영 시원치 않다 — 네 시황을 반영해서 우와 할 정도로 늘 답해」
+     → 답은 매일 아침 시황리포트를 쓰는 Claude 가 그날 시황으로 직접 씀(market-strategy-report market/qa.json · RULES 1-N · 검산 src/qa.py).
+       결론 한 문장 → 근거 3(오늘 숫자) → 고객 유형별 행동 → 이 답이 바뀌는 조건 → 다음에 볼 것. 4일 넘게 안 올라오면 예전 틀 답으로 대신. */
+  function rich(Q){ var A = Q.QA; if (!A || !(A.items || []).length || !A.date) return null; return (Date.parse(kd(0)) - Date.parse(A.date)) / 864e5 <= 4 ? A : null; }
+  function nowStrip(Q){
+    var p = [], ix = (Q.L.index || [])[0], fx = Q.W.fx;
+    if (ix && Q.L.date) p.push("코스피 " + Math.round(ix.last).toLocaleString() + " <b class=\"" + cl(ix.chg) + "\">" + sg(ix.chg) + "</b>" + (Q.L.date === kd(0) ? "" : " (" + md(Q.L.date) + ")"));
+    if (fx && fx.p) p.push("원/달러 " + (Math.round(fx.p * 10) / 10).toLocaleString() + "원");
+    var r = ((Q.F.mkt || {}).KOSPI || [])[0]; if (r && r.f != null){ var U = Math.abs(r.f) > 1e6 ? 1e8 : 1; p.push("외국인 <b class=\"" + cl(r.f) + "\">" + won(r.f / U) + "</b> (" + md(r.d) + ")"); }
+    return p.length ? '<div class="qa-now">⚡ 지금 · ' + p.join(" · ") + '</div>' : "";
+  }
+  function richItem(x, i, open){
+    return '<details class="mn-q qa-r"' + (open ? " open" : "") + '><summary>' + e(x.q) + '<em>' + e(x.a) + '</em></summary><div class="qa-body">' +
+      '<p class="qa-a">' + e(x.a) + '</p>' +
+      '<ol class="qa-pts">' + (x.pts || []).map(function(p){ return '<li><b>' + e(p.k) + '</b>' + e(p.t) + '</li>'; }).join("") + '</ol>' +
+      ((x.act || []).length ? '<div class="qa-act"><small>그래서 이렇게</small>' + x.act.map(function(a){ return '<div><b>' + e(a[0]) + '</b><span>' + e(a[1]) + '</span></div>'; }).join("") + '</div>' : '') +
+      (x.flip ? '<p class="qa-flip"><b>🔁 이 답이 바뀌는 조건</b>' + e(x.flip) + '</p>' : '') +
+      (x.watch ? '<p class="qa-watch">👀 다음에 볼 것 · ' + e(x.watch) + '</p>' : '') +
+      (x.src ? '<p class="qa-src">근거: ' + e(x.src) + '</p>' : '') +
+      '<div class="qa-btn"><button type="button" class="mn-qc" data-qcopy="' + i + '" data-qm="s">📋 카톡용(짧게)</button><button type="button" class="mn-qc" data-qcopy="' + i + '" data-qm="f">📋 전체 복사</button></div></div></details>';
+  }
   function qaList(Q, lim){
+    var A = rich(Q);
+    if (A) return (lim ? "" : '<p class="qa-meta">📝 ' + md(A.date) + ' ' + e(A.edition || "") + ' 시황으로 쓴 답 · ' + e(String(A.at || "").slice(5).replace("-", "/")) + ' 갱신' + (A.date !== kd(0) ? ' · <b>지난 시황 기준</b>' : '') + '</p>' + nowStrip(Q)) +
+      A.items.slice(0, lim || A.items.length).map(function(x, i){ return richItem(x, i, !lim && i === 0); }).join("");
     var L = qa(Q);
     return L.slice(0, lim || L.length).map(function(x, i){ return '<details class="mn-q"' + (i === 0 && !lim ? " open" : "") + '><summary>' + e(x[0]) + '</summary><p>' + e(x[1]) + '</p><button type="button" class="mn-qc" data-qcopy="' + i + '">📋 카톡용 복사</button></details>'; }).join("");
   }
-  function copyQ(i){ qload().then(function(Q){ var x = qa(Q)[i]; if (!x) return; var t = "Q. " + x[0] + "\nA. " + x[1] + "\n※ 참고용 자료이며 투자 권유가 아닙니다. 투자 판단과 책임은 본인에게 있습니다.";
+  var NUM = ["①", "②", "③", "④"];
+  function copyQ(i, mode){ qload().then(function(Q){
+    var A = rich(Q), t, tail = "\n\n※ 참고용 자료이며 투자 권유가 아닙니다. 투자 판단과 책임은 본인에게 있습니다.";
+    if (A){ var x = A.items[i]; if (!x) return;
+      t = "Q. " + x.q + "\n\n" + x.a + "\n\n" + (x.pts || []).map(function(p, k){ return NUM[k] + " " + p.t; }).join("\n");
+      if (mode === "f") t += ((x.act || []).length ? "\n\n[그래서 이렇게]\n" + x.act.map(function(a){ return "· " + a[0] + ": " + a[1]; }).join("\n") : "") + (x.flip ? "\n\n[이 답이 바뀌는 조건]\n" + x.flip : "");
+      t += (x.watch ? "\n\n👀 다음에 볼 것: " + x.watch : "") + "\n(" + md(A.date) + " 기준)" + tail;
+    } else { var y = qa(Q)[i]; if (!y) return; t = "Q. " + y[0] + "\nA. " + y[1] + tail; }
     (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ try { toast("📋 복사했어요 — 카톡에 붙여 넣기"); } catch(x2) {} }, function(){ window.prompt("길게 눌러 복사하세요", t); }); }); }
   function qaCard(){
-    return '<section class="card mn-c no-clp" data-cz="done" data-xc="1" id="mnqa"><h3>💬 고객이 이렇게 물으면</h3><div id="mnqab"><div class="loading">불러오는 중…</div></div><button type="button" class="mn-btn" data-qaall="1">💬 10개 모두 보기</button></section>';
+    return '<section class="card mn-c no-clp" data-cz="done" data-xc="1" id="mnqa"><h3>💬 고객이 이렇게 물으면 <span class="mut">오늘 시황으로 쓴 답</span></h3><div id="mnqab"><div class="loading">불러오는 중…</div></div><button type="button" class="mn-btn" data-qaall="1">💬 10개 모두 보기</button></section>';
   }
   window.__qaOpen = function(){
     var old = document.getElementById("qasheet"); if (old) old.remove();
     var d = document.createElement("div"); d.id = "qasheet";
-    d.innerHTML = '<div class="qa-in"><div class="qa-h"><b>💬 고객이 이렇게 물으면</b><small>오늘 숫자로 채운 답 · 눌러서 펼치고 카톡으로 복사</small><button type="button" class="qa-x" aria-label="닫기">✕</button></div><div class="qa-b"><div class="loading">불러오는 중…</div></div><p class="mn-ft">참고용 · 고객 성향과 기간에 맞춰 조정하세요 · 투자 권유 아님</p></div>';
+    d.innerHTML = '<div class="qa-in"><div class="qa-h"><b>💬 고객이 이렇게 물으면</b><small>질문을 누르면 결론 → 근거 3개 → 행동 → 바뀌는 조건</small><button type="button" class="qa-x" aria-label="닫기">✕</button></div><div class="qa-b"><div class="loading">불러오는 중…</div></div><p class="mn-ft">참고용 · 고객 성향과 기간에 맞춰 조정하세요 · 투자 권유 아님</p></div>';
     document.body.appendChild(d);
     var off = function(){ var x = document.getElementById("qasheet"); if (x) x.remove(); window.removeEventListener("hashchange", off); window.removeEventListener("popstate", off); };
     window.addEventListener("hashchange", off); window.addEventListener("popstate", off);
@@ -1959,7 +1990,7 @@
     var t = ev.target.closest && ev.target.closest("[data-mnop],[data-qcopy],[data-qaall]"); if (!t) return;
     ev.stopPropagation();
     if (t.dataset.mnop != null){ if (window.openOP) openOP(t.dataset.mnop); return; }
-    if (t.dataset.qcopy != null){ copyQ(+t.dataset.qcopy); return; }
+    if (t.dataset.qcopy != null){ copyQ(+t.dataset.qcopy, t.dataset.qm); return; }
     if (t.dataset.qaall) window.__qaOpen();
   }, true);
   var MT = 0; new MutationObserver(function(){ clearTimeout(MT); MT = setTimeout(function(){ try { mount(); propBtn(); } catch(x) {} }, 120); }).observe(document.documentElement, {childList: true, subtree: true});
@@ -1980,6 +2011,16 @@
     ".mn-cd{flex:0 0 66px;white-space:nowrap;font-size:12.5px;font-weight:700;color:var(--sub)}.mn-ct{flex:0 0 46px;font-size:12px;color:var(--sub);white-space:nowrap}.mn-ce{flex:1;min-width:0;line-height:1.4;word-break:keep-all}.mn-ce small{color:var(--sub);font-size:12px}" +
     ".mn-q{border-bottom:1px solid var(--line);padding:2px 0}.mn-q summary{cursor:pointer;font-size:14.5px;font-weight:700;padding:9px 0;list-style:none}.mn-q summary::-webkit-details-marker{display:none}.mn-q summary:before{content:'Q. ';color:var(--acc,#7c9cff)}" +
     ".mn-q p{margin:0 0 8px;font-size:14px;line-height:1.65;color:var(--text);word-break:keep-all}.mn-qc{border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;margin:0 0 8px;cursor:pointer}" +
+    ".qa-r summary em{display:block;font-style:normal;font-weight:500;font-size:13px;line-height:1.5;color:var(--sub);margin-top:3px;word-break:keep-all}.qa-r[open] summary em{display:none}.qa-r summary:before{content:'Q. ';color:var(--acc,#7c9cff)}" +
+    ".qa-body{padding:0 0 12px}.qa-a{font-size:16px!important;font-weight:800;line-height:1.55!important;margin:2px 0 10px!important;padding:11px 13px;border-radius:12px;background:color-mix(in srgb,var(--acc,#7c9cff) 13%,transparent);word-break:keep-all}" +
+    ".qa-pts{list-style:none;margin:0 0 10px;padding:0;counter-reset:q}.qa-pts li{counter-increment:q;position:relative;padding:8px 0 8px 30px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.6;word-break:keep-all}.qa-pts li:last-child{border-bottom:0}" +
+    ".qa-pts li:before{content:counter(q);position:absolute;left:0;top:9px;width:21px;height:21px;border-radius:50%;background:var(--text);color:var(--panel,#fff);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}" +
+    ".qa-pts li b{display:inline-block;font-size:12px;font-weight:800;padding:1px 7px;border-radius:999px;border:1px solid var(--line);margin-right:6px;vertical-align:1px;white-space:nowrap}" +
+    ".qa-act{border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:0 0 10px}.qa-act small{display:block;font-size:12px;font-weight:800;color:var(--sub);margin-bottom:2px}.qa-act div{padding:6px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.5;word-break:keep-all}.qa-act div:last-child{border-bottom:0}" +
+    ".qa-act div b{display:block;font-size:13px}.qa-act div span{color:var(--text)}" +
+    ".qa-flip{font-size:13.5px!important;line-height:1.6!important;margin:0 0 8px!important;padding:9px 12px;border-radius:12px;background:color-mix(in srgb,#f0a020 14%,transparent);word-break:keep-all}.qa-flip b{display:block;font-size:12.5px;margin-bottom:2px}" +
+    ".qa-watch{font-size:13px!important;margin:0 0 4px!important;line-height:1.5!important;color:var(--text)}.qa-src{font-size:12px!important;color:var(--sub)!important;margin:0 0 8px!important;line-height:1.5!important}.qa-btn{display:flex;gap:8px;flex-wrap:wrap}.qa-btn .mn-qc{margin:0}" +
+    ".qa-meta{font-size:12.5px;color:var(--sub);margin:0 0 6px;line-height:1.5}.qa-meta b{color:var(--up)}.qa-now{font-size:13px;line-height:1.5;padding:8px 11px;border-radius:10px;background:var(--panel2,rgba(127,127,127,.08));margin:0 0 6px}.qa-now .up{color:var(--up)}.qa-now .dn{color:var(--down)}" +
     "#qasheet{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}.qa-in{background:var(--bg,var(--panel));width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}" +
     ".qa-h{position:relative;padding-right:36px;margin-bottom:6px}.qa-h b{display:block;font-size:18px}.qa-h small{color:var(--sub);font-size:12.5px}.qa-x{position:absolute;right:0;top:0;border:0;background:var(--panel2,transparent);color:var(--text);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer}";
     document.head.appendChild(st); })();
