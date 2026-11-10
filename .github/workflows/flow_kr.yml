@@ -1,0 +1,29 @@
+name: flow_kr
+# 🧲 국내 수급 — 시총 상위 300 외국인·기관 순매수(하루·5일·20일)·연속 일수 → archive/x/flow_kr.json (11/10 · 돈·AI 안 씀)
+on:
+  schedule:
+    - cron: "37 22 * * 0-4"   # KST 07:37 화~토 아침 (종목별 투자자 자료는 밤사이 채워짐)
+    - cron: "41 9 * * 1-5"    # KST 18:41 장 마감 뒤 첫 시도
+    - cron: "23 12 * * 1-5"   # KST 21:23 다시
+  push:
+    branches: [main]
+    paths: [flow_kr.py, .github/workflows/flow_kr.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: flow_kr
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 수급 모으기
+        run: python flow_kr.py
+      - name: 저장
+        run: bash scripts/push.sh "flow_kr $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/flow_kr.json
