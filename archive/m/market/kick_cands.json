@@ -6413,6 +6413,33 @@
 "src": "earn",
 "score": 70.4,
 "lv": 102.86
+},
+"003490.KS|2026-11-10": {
+"code": "003490.KS",
+"name": "대한항공",
+"mkt": "KR",
+"d": "2026-11-10",
+"src": "focus",
+"score": 70,
+"theme": "항공"
+},
+"105740.KQ|2026-11-10": {
+"code": "105740.KQ",
+"name": "디케이락",
+"mkt": "KR",
+"d": "2026-11-10",
+"src": "accum",
+"score": 58.0,
+"lv": 13480.0
+},
+"3866.HK|2026-11-08": {
+"code": "3866.HK",
+"name": "BQD",
+"mkt": "HK",
+"d": "2026-11-08",
+"src": "accum",
+"score": 69.0,
+"lv": 5.19
 }
 },
 "sent": [
@@ -6436,21 +6463,21 @@
 "BKNG",
 "CDW",
 "CG",
-"CHTR",
-"CNC",
+"CLF",
 "CPNG",
-"CRL",
-"FIGR",
+"GOOG",
 "GOOGL",
-"GPCR",
+"HPE",
+"IMVT",
+"INSM",
+"IONS",
 "META",
 "NCLH",
+"NRIX",
 "RLAY",
 "ROIV",
-"RVMD",
+"SLDB",
 "SPGI",
-"TSM",
-"UBER",
-"VTRS"
+"STM"
 ]
 }
