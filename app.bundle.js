@@ -1192,7 +1192,7 @@
     if (c.vh){ var pts = [[0, 1]].concat(c.vh).concat([[tot, 0.003]]);
       for (var i = 0; i < pts.length - 1; i++) if (el >= pts[i][0] && el <= pts[i + 1][0]){ var a = pts[i], b = pts[i + 1]; vr = Math.max(0.003, a[1] + (b[1] - a[1]) * (el - a[0]) / ((b[0] - a[0]) || 1)); break; } }
     var pi = Math.min(0.99, Math.max(0.01, cdf(Math.log(1 + chg / 100) / (c.sig * Math.sqrt(vr)))));
-    return {p1: Math.round(Math.min(0.99, Math.max(0.01, sg(lg(pi) + (c.dev || 0)))) * 1000) / 1000, rem: rem, vr: vr};
+    return {p1: Math.round(Math.min(0.99, Math.max(0.01, sg(lg(pi) + (c.c0 || 0) + (c.dev || 0)))) * 1000) / 1000, rem: rem, vr: vr};
   }
   window.probAt = function(m, chg, hhmm){
     var c = m && m.ic; if (!c || chg == null || !hhmm) return null;
@@ -1215,7 +1215,7 @@
     if (pNew) return {p1: m.p1, chg: m.intra_chg, t: P.t, rem: rem, vr: vr, sig: c.sig, src: "prob"};
     var chg = L.index[0].chg, pi = cdf(Math.log(1 + chg / 100) / (c.sig * Math.sqrt(vr)));
     pi = Math.min(0.99, Math.max(0.01, pi));
-    var p1 = Math.min(0.99, Math.max(0.01, sg(lg(pi) + (c.dev || 0))));
+    var p1 = Math.min(0.99, Math.max(0.01, sg(lg(pi) + (c.c0 || 0) + (c.dev || 0))));
     return {p1: Math.round(p1 * 1000) / 1000, chg: chg, t: L.t, rem: rem, vr: vr, sig: c.sig};
   };
 })();
