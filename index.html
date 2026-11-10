@@ -485,6 +485,7 @@ var CATS = [
   {key:"home",   name:"오늘", short:"오늘",     icon:"🏠", color:"#9ad0ff", desc:"아침에 30초 — 포트 · 킥 · 집중 · 알람 · 두뇌 · 성적 한 장"},
   {key:"market", name:"시황", short:"시황",     icon:"🌐", color:"#7c9cff", desc:"오늘의 시장 전략 리포트"},
   {key:"port",   name:"포트", short:"포트",     icon:"💼", color:"#e9c46a", desc:"시황리포트대로 투자했다면 — 지금 담을 비중과 지난 성적"},
+  {key:"divc",   name:"배당비교", short:"배당", icon:"💰", color:"#f2c14e", desc:"비슷한 종목·ETF 배당 나란히 — 배당률 · 100만원이면 얼마 · 언제 들어오나"},   // 💰 11/10 배당비교 (divc.js)
   {key:"score",  name:"성적표", short:"성적",   icon:"📊", color:"#b9e769", desc:"리포트·두뇌·킥·단타·해외 상품 — 무엇이 맞고 무엇이 틀리나 한 곳에"},
   {key:"whale",  name:"고래", short:"고래",     icon:"🐋", color:"#3dd6c6", desc:"기관·유명 투자자 TOP 40 보유 변화"},
   {key:"cup",    name:"컵차트", short:"컵",   icon:"☕", color:"#ffb84d", desc:"컵앤핸들 돌파 후보"},
@@ -653,8 +654,8 @@ function go(key, id){
   var items = (M.cats[key] || []);
   curDate = id || (items[0] && items[0].id);
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
-          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">켜기 · 끄기만</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "port" ? '<span class="chip">10/2부터 · 매일 갱신</span>' : key === "home" ? '<span class="chip">매시간 갱신</span><span class="chip">누르면 그 탭으로</span>' : key === "score" ? '<span class="chip">매시간 자동 채점</span>' : key === "sigmore" ? '<span class="chip">한 단계 아래 · 참고</span>' : key === "prob" ? '<span class="chip">매시간 계산</span><span class="chip">마감 뒤 채점</span>' : key === "flow" ? '<span class="chip">매일 마감 뒤</span><span class="chip">사는 신호 아님</span>' : (key === "bond" || key === "fund" || key === "els") ? '<span class="chip">미래에셋증권</span><span class="chip">하루 3번 갱신</span>' : key === "prop" ? '<span class="chip">매일 아침 + 장중 갱신</span><span class="chip">AI 안 씀 · 0원</span>' : key === "feed" ? '<span class="chip">블로그 5 · 텔레그램 8 · 뉴스 47</span><span class="chip">15분마다</span>' : key === "luck" ? '<span class="chip">매일 0시 새로</span><span class="chip">🔒 생일은 이 휴대폰에만</span>' : key === "saju" ? '<span class="chip">휴대폰 안에서 계산</span><span class="chip">📄 PDF 저장</span>' : key === "tarot" ? '<span class="chip">질문 맞춤 해석</span><span class="chip">78장 · 10가지 주제</span>' : key === "lotto" ? '<span class="chip">전 회차 분석</span><span class="chip">토요일 밤 자동 갱신</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
-          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" && key !== "port" && key !== "home" && key !== "score" && key !== "sigmore" && key !== "prob" && key !== "flow" && key !== "bond" && key !== "fund" && key !== "els" && key !== "prop" && key !== "luck" && key !== "saju" && key !== "tarot" && key !== "lotto" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
+          (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">켜기 · 끄기만</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "port" ? '<span class="chip">10/2부터 · 매일 갱신</span>' : key === "home" ? '<span class="chip">매시간 갱신</span><span class="chip">누르면 그 탭으로</span>' : key === "score" ? '<span class="chip">매시간 자동 채점</span>' : key === "sigmore" ? '<span class="chip">한 단계 아래 · 참고</span>' : key === "prob" ? '<span class="chip">매시간 계산</span><span class="chip">마감 뒤 채점</span>' : key === "flow" ? '<span class="chip">매일 마감 뒤</span><span class="chip">사는 신호 아님</span>' : key === "divc" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰 종목·ETF</span><span class="chip">100만원 기준</span>' : (key === "bond" || key === "fund" || key === "els") ? '<span class="chip">미래에셋증권</span><span class="chip">하루 3번 갱신</span>' : key === "prop" ? '<span class="chip">매일 아침 + 장중 갱신</span><span class="chip">AI 안 씀 · 0원</span>' : key === "feed" ? '<span class="chip">블로그 5 · 텔레그램 8 · 뉴스 47</span><span class="chip">15분마다</span>' : key === "luck" ? '<span class="chip">매일 0시 새로</span><span class="chip">🔒 생일은 이 휴대폰에만</span>' : key === "saju" ? '<span class="chip">휴대폰 안에서 계산</span><span class="chip">📄 PDF 저장</span>' : key === "tarot" ? '<span class="chip">질문 맞춤 해석</span><span class="chip">78장 · 10가지 주제</span>' : key === "lotto" ? '<span class="chip">전 회차 분석</span><span class="chip">토요일 밤 자동 갱신</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
+          (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" && key !== "port" && key !== "home" && key !== "score" && key !== "sigmore" && key !== "prob" && key !== "flow" && key !== "divc" && key !== "bond" && key !== "fund" && key !== "els" && key !== "prop" && key !== "luck" && key !== "saju" && key !== "tarot" && key !== "lotto" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
   if (key === "onepager") { $("main").innerHTML = h + opView(); opInit(id); window.scrollTo(0, 0); return; }
   if (key === "alarm") { $("main").innerHTML = h + alarmView(); alarmInit(); window.scrollTo(0, 0); return; }
   if (key === "idea") { $("main").innerHTML = h + ideaView(); ideaInit(); window.scrollTo(0, 0); return; }
@@ -664,7 +665,8 @@ function go(key, id){
   if (key === "sigmore") { $("main").innerHTML = h + sigmoreView(); sigmoreInit(); window.scrollTo(0, 0); return; }
   if (key === "feed") { $("main").innerHTML = h + feedView(); feedInit(); window.scrollTo(0, 0); return; }
   if (key === "prob") { $("main").innerHTML = h + probView(); probInit(); window.scrollTo(0, 0); return; }
-  if (key === "flow") { $("main").innerHTML = h + flowView(); flowInit(); window.scrollTo(0, 0); return; }   // 🧲 11/10 국내 수급
+  if (key === "flow") { $("main").innerHTML = h + flowView(); flowInit(); window.scrollTo(0, 0); return; }
+  if (key === "divc") { $("main").innerHTML = h + divcView(); divcInit(); window.scrollTo(0, 0); return; }   // 💰 11/10 배당비교   // 🧲 11/10 국내 수급
   if (key === "bond" || key === "fund" || key === "els") { $("main").innerHTML = h + prodView(key); prodInit(key); window.scrollTo(0, 0); return; }
   if (key === "luck") { lazyTab(key, h, "luckView", "luckInit"); return; }
   if (key === "lotto") { lazyTab(key, h, "lottoView", "lottoInit"); return; }
@@ -1545,7 +1547,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261110e";
+var APPV = "20261110f";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1597,7 +1599,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합친 한 파일. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.bundle.js?v=b8850f4902"></script>
+<script defer src="app.bundle.js?v=550b432d73"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1605,6 +1607,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="problive.js?v=5"></script>
 <script defer src="prob.js?v=26"></script>
 <script defer src="flow.js?v=2"></script>
+<script defer src="divc.js?v=1"></script>   <!· 💰 11/10 배당비교 (포트 · 성적표 옆) ·>
 <script defer src="verdict.js?v=1"></script>   <!· 🧭 11/10 #1 오늘의 결론 하나로 (국내·해외 한 줄씩) ·>
 <script defer src="mine.js?v=3"></script>   <!· ⭐⚡📅💬 11/10 #7~#10 내 종목·왜 움직였나·이번 주·고객 질문 ·>   <!· 🧲 11/10 국내 수급(외국인·기관 집중 매수) ·>
 <script defer src="products.js?v=29"></script>

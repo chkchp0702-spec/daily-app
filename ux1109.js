@@ -53,7 +53,7 @@
   }
 
   /* ── ⑥ 쉬운 화면: 카드 5개 상한 · 첫 카드 열기 ── */
-  var NOCAP = {home: 1, prop: 1, luck: 1, saju: 1, tarot: 1, lotto: 1, onepager: 1, alarm: 1, idea: 1};
+  var NOCAP = {home: 1, divc: 1, prop: 1, luck: 1, saju: 1, tarot: 1, lotto: 1, onepager: 1, alarm: 1, idea: 1};
   var CAP = 5, MORE = {};
   try { MORE = JSON.parse(sessionStorage.getItem("ezcapmore") || "{}") || {}; } catch(x) {}
   function blocks(root){

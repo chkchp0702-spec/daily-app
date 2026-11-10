@@ -1,0 +1,73 @@
+name: div_cal
+# 💰 배당비교 — 배당 있는 종목·ETF의 최근 3년 배당 기록 → archive/x/dv/ (11/10 · 돈·AI 안 씀)
+#   매주 일요일 KST 10:23 + 매달 1·16일 KST 06:53 (월배당 ETF 새 분배 반영)
+on:
+  schedule:
+    - cron: "23 1 * * 0"
+    - cron: "53 21 15,30 * *"
+  push:
+    branches: [main]
+    paths: [div_cal.py, .github/workflows/div_cal.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: div_cal
+  cancel-in-progress: false
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: 배당 있는 종목·ETF 목록
+        run: |
+          git clone -q --depth 1 -b opdata https://github.com/${{ github.repository }} opdata
+          python3 div_cal.py --list --opdata opdata --out syms.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dvsyms
+          path: syms.json
+          retention-days: 2
+
+  fetch:
+    needs: prep
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: dvsyms
+      - run: pip install -q yfinance pandas
+      - run: python div_cal.py --fetch --syms syms.json --shard ${{ matrix.shard }} --of 8 --out part
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dv-${{ matrix.shard }}
+          path: part/
+          if-no-files-found: ignore
+          retention-days: 2
+
+  merge:
+    needs: fetch
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dv-*
+          path: parts
+      - run: |
+          git pull -q --rebase origin main || true
+          python3 div_cal.py --merge --parts parts --dest archive/x/dv
+      - name: 저장
+        run: bash scripts/push.sh "div_cal $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/dv
