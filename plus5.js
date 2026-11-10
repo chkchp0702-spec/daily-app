@@ -12,20 +12,16 @@
     var ks = ORD.filter(function(o){ return C.markets[o[0]]; }), h = "";
     // ① 세계 시장 하루 흐름
     if (ks.length >= 3){
-      var W = 330, H = 150, step = (W - 50) / (ks.length - 1);
-      var s = '<svg class="lc" viewBox="0 0 ' + W + ' ' + H + '"><defs><linearGradient id="wfg" x1="0" x2="1"><stop offset="0" stop-color="#ffb84d"/><stop offset="1" stop-color="#7c9cff"/></linearGradient></defs>';
-      s += '<path d="M25,70 ' + ks.map(function(_, i){ return "L" + (25 + i * step).toFixed(1) + ",70"; }).join(" ") + '" stroke="url(#wfg)" stroke-width="3" fill="none" stroke-dasharray="6 5"><animate attributeName="stroke-dashoffset" from="22" to="0" dur="1.2s" repeatCount="indefinite"/></path>';
-      ks.forEach(function(o, i){ var m = C.markets[o[0]], r = m.up / Math.max(1, m.up + m.down) * 100, ix = m.index[0] || {}, cx = 25 + i * step, R = 15 + Math.abs(r - 50) / 3;
+      // 11/10 사용자 「이거 고쳐」: SVG 글자 안 국기가 아이폰에서 □J□P 로 깨지고, 시장 이름·시각이 서로 겹침 → HTML 5칸 격자로
+      var s = '<div class="wf2">' + ks.map(function(o, i){ var m = C.markets[o[0]], r = m.up / Math.max(1, m.up + m.down) * 100, ix = m.index[0] || {}, R = Math.round(34 + Math.abs(r - 50) / 2);
         var col = r >= 55 ? V.UP : r <= 45 ? V.DN : "#6b7385";
-        s += '<g data-tip="' + e("<b>" + m.flag + " " + m.name + "</b> " + m.date + " 마감<br>오른 종목 " + r.toFixed(0) + "% · " + (ix.name || "") + " " + pct(ix.chg1) + "<br>" + m.regime) + '">' +
-          '<circle cx="' + cx.toFixed(1) + '" cy="70" r="' + R.toFixed(1) + '" fill="' + col + '" fill-opacity=".85" stroke="#121826" stroke-width="2"><animate attributeName="r" values="' + R.toFixed(1) + ';' + (R + 3).toFixed(1) + ';' + R.toFixed(1) + '" dur="2.4s" begin="' + (i * .35) + 's" repeatCount="indefinite"/></circle>' +
-          '<text x="' + cx.toFixed(1) + '" y="74" text-anchor="middle" class="wf-r">' + r.toFixed(0) + '</text>' +
-          '<text x="' + cx.toFixed(1) + '" y="34" text-anchor="middle" class="wf-f">' + m.flag + '</text>' +
-          '<text x="' + cx.toFixed(1) + '" y="108" text-anchor="middle" class="lc-a">' + e(m.name) + ' ' + o[1].replace("다음 날 ", "") + '</text>' +
-          '<text x="' + cx.toFixed(1) + '" y="124" text-anchor="middle" class="wf-c ' + cls(ix.chg1) + '">' + pct(ix.chg1) + '</text></g>'; });
-      s += '</svg>';
+        return '<div class="wf2-c" data-tip="' + e("<b>" + m.flag + " " + m.name + "</b> " + m.date + " 마감<br>오른 종목 " + r.toFixed(0) + "% · " + (ix.name || "") + " " + pct(ix.chg1) + "<br>" + m.regime) + '">' +
+          '<div class="wf2-f">' + m.flag + '</div>' +
+          '<div class="wf2-o"><span style="width:' + R + 'px;height:' + R + 'px;background:' + col + ';animation-delay:' + (i * .35) + 's">' + r.toFixed(0) + '</span></div>' +
+          '<div class="wf2-n">' + e(m.name) + '</div><div class="wf2-t">' + o[1].replace("다음 날 ", "") + '</div>' +
+          '<div class="wf2-p ' + cls(ix.chg1) + '">' + pct(ix.chg1) + '</div></div>'; }).join("") + '</div>';
       var best = ks.slice().sort(function(a, b){ var ma = C.markets[a[0]], mb = C.markets[b[0]]; return mb.up / Math.max(1, mb.up + mb.down) - ma.up / Math.max(1, ma.up + ma.down); })[0];
-      h += card("🌍 세계 시장 하루 흐름 <span class='mut'>해가 뜨는 순서 · 원 안 = 오른 종목 %</span>", s +
+      h += card("🌍 세계 시장 하루 흐름", '<p class="wf2-sub">해가 뜨는 순서 · 원 안 숫자 = 오른 종목 %</p>' + s +
         '<p class="note">일본 → 한국 → 중국 → 홍콩 → 미국 순으로 장이 닫혀요. 원이 크고 빨갈수록 오른 종목이 많았던 시장. 가장 고르게 오른 곳: <b>' + C.markets[best[0]].flag + " " + e(C.markets[best[0]].name) + '</b>. 원을 누르면 자세히.</p>');
     }
     // ⑤ 상관 매트릭스
