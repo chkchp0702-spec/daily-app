@@ -1,6 +1,118 @@
 {
  "items": [
   {
+   "title": "반도체주 하락 5조 달러 육박 — 엔비디아 2019년 이후 가장 극단적 매도 수준",
+   "url": "https://finance.yahoo.com/markets/article/chip-stocks-slide-nears-5-trillion-as-nvidia-hits-most-extreme-selling-level-since-2019-191532559.html",
+   "press": "Yahoo Finance",
+   "at": "2026-11-11 04:15",
+   "why": "반도체 칸·SMH 대결(11/13 판정)·🎯 AI 분할 매수 시점 — 과매도 극단은 반등 후보지만 대장주 고유 악재(중국 유출 의혹)가 겹침",
+   "summary": "엔비디아·메모리주가 뜨거운 CPI 뒤 반도체를 다시 끌어내림, S&P 대부분 종목은 버팀. 같은 날 브로드컴 +3.6%·TSMC +1.3%(daily-app live_us 04:33) — 업종 안 자금 이동."
+  },
+  {
+   "title": "BofA, 메모리 칩 슈퍼사이클 2028년까지 이어진다",
+   "url": "https://seekingalpha.com/news/4670043-bofa-sees-memory-chip-supercycle-extending-through-2028",
+   "press": "Seeking Alpha",
+   "at": "2026-11-11 04:14",
+   "why": "한국 반도체(삼성전자·SK하이닉스·091160)·마이크론 — 외국인 20일 반도체 매도와 반대되는 IB 판단, 골드만 「마이크론 너무 싸다」·모건스탠리 「北美 반도체 구간 하단」과 같은 방향",
+   "summary": "BofA 메모리 업황 상승 주기 2028년까지 연장 전망(제목 기준, 세부 숫자 미확인). 같은 시간 골드만 「마이크론 무시하기엔 너무 싼 수준」(이데일리)·모건스탠리 「北美 반도체 조정 뒤 구간 하단 — 매수 기회」(야후 홍콩)."
+  },
+  {
+   "title": "TheStreet: 10월 CPI 뒤 나스닥 하락 — 엔비디아 −6%·GE버노바 −7%·퍼스트솔라 −6%",
+   "url": "https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-nov-10-2026",
+   "press": "TheStreet",
+   "at": "2026-11-11 03:45",
+   "why": "금리 5% 위에서 AI·전력 장비 고평가주부터 매도 — ⚡ 공격 칸 「전력」 동점 후보 순서 재점검",
+   "summary": "12:37 ET S&P −0.83%. 하락 상위 스카이댄스 −7.8%·GE버노바 −7.1%·퍼스트솔라 −6.3%·엔비디아 −6.0%. 개장 때 러셀2000은 +3.15%."
+  },
+  {
+   "title": "CNBC: 마이크로소프트, 앤스로픽의 오피스 위협에 장중 급락",
+   "url": "https://cnbc.com/2026/11/10/stock-market-movers-live-updates.html",
+   "press": "CNBC",
+   "at": "2026-11-11 03:45",
+   "why": "「현금 도는 AI(MS)」 가설 반례 — AI 소프트웨어 칸·MS 시총 추월 하루 만의 반전",
+   "summary": "앤스로픽이 상장 앞두고 오피스용 AI 도구 공개 → MS 장중 급락(정확한 % 미확인). 같은 날 구글 100억·AMD 25억·TSMC 최대 10억 달러 앤스로픽 지분 투자 보도."
+  },
+  {
+   "title": "앤스로픽 완전희석 1.4조 달러 상장 추진 — 11/18 가격 결정, 최대 904억 달러 조달",
+   "url": "https://www.business-standard.com/world-news/anthropic-targets-1-4-tn-valuation-in-ipo-eyes-90-4-billion-fundraise-126111000700_1.html",
+   "press": "Business Standard(블룸버그)",
+   "at": "2026-11-11 02:45",
+   "why": "「AI 안에서도 갈린다」·AI 차입 가설 — 엔비디아 실적(11/17) 다음 날 나스닥에 1천억 달러 안팎 공급, QQQ·AI 대형주 수급 부담",
+   "summary": "공모가 70~78달러·8.01억 주(+구주 0.24억), 기본 644억 + AMD·브로드컴·구글·마이크론·MS·엔비디아·TSMC 사모 260억 = 최대 904억 달러, 티커 ANT. 3분기 매출 약 170억 달러(전년 14억)·영업손실 5.67억(2분기 흑자 9.74억)."
+  },
+  {
+   "title": "앤스로픽, 1조 달러 넘는 가치로 상장 조건 제시",
+   "url": "https://axios.com/2026/11/10/anthropic-ipo-terms",
+   "press": "Axios",
+   "at": "2026-11-11 02:45",
+   "why": "AI 자금 흡수 — 오픈AI도 1.25조 달러로 자금 조달 중, 대형 AI 상장 물량이 연말 나스닥 수급 변수",
+   "summary": "공모가 상단 기준 시가총액 약 1조 달러, 완전희석 1.4조 달러. 가격 결정 11/18(수)."
+  },
+  {
+   "title": "월러 「12월 인상 지지 — 50bp도 테이블 위에」",
+   "url": "https://seekingalpha.com/news/4669588-waller-backs-december-rate-hike-says-50-basis-point-move-may-be-on-the-table",
+   "press": "Seeking Alpha",
+   "at": "2026-11-11 01:45",
+   "why": "12/9 FOMC 분수령 가설(0.55)·미국채 나눠 사기 시점·현금/단기채 칸 — 비둘기로 꼽히던 월러가 빅스텝 언급",
+   "summary": "10월 CPI 근원이 월러의 50bp 조건(근원 예상 상회)에 걸림. 같은 날 로건 댈러스 연은 「최소 두 번 더·속도 높일 수도」(블룸버그), 나겔 「ECB 12월 인상 꽤 분명」 — 글로벌 동시 매파."
+  },
+  {
+   "title": "뜨거운 물가 보고서로 연준 12월 인상 궤도",
+   "url": "https://www.americanbanker.com/news/hot-inflation-report-puts-fed-on-track-for-december-rate-hike",
+   "press": "American Banker",
+   "at": "2026-11-11 01:45",
+   "why": "금융 칸(8%)·AI 차입 가설 — 인상이 조달 비용·신용(NY연은 3분기 연체율 소폭↑)으로 번지는지",
+   "summary": "CPI 전월 +0.4%·근원 +0.3%로 12월 인상이 기본 시나리오로. 미 2년 4.75%(+0.21%p)·10년 4.996%(CNBC 11:30 EST)."
+  },
+  {
+   "title": "미국 데이터센터 속 중국산 부품 — 트럼프가 왜 금지하려 하나",
+   "url": "https://www.newsweek.com/the-chinese-parts-in-us-data-centers-and-why-trump-wants-to-ban-them-12288018",
+   "press": "Newsweek",
+   "at": "2026-11-11 00:45",
+   "why": "MS가 「중국산 광트랜시버 금지가 미국 AI를 늦춘다」며 로비(로이터 11/10) — 데이터센터 원가↑ = AI 차입 부담 가설·전력/인프라 칸과 연결",
+   "summary": "미국 데이터센터 광트랜시버의 상당 부분이 중국산 — 금지되면 대체 공급 부족·원가 상승 우려. 수치는 원문 확인 필요(미확인)."
+  },
+  {
+   "title": "중국 광트랜시버 업체들, FCC 규칙 개정으로 미국 금지 일단 피해",
+   "url": "https://www.scmp.com/tech/big-tech/article/3367219/chinese-optical-transceiver-makers-dodge-us-ban-now-fcc-updates-rules",
+   "press": "SCMP",
+   "at": "2026-11-11 00:45",
+   "why": "트랜시버 금지 논쟁의 앞선 경과 — 금지 확정 여부가 미국 광통신주(COHR·LITE)와 하이퍼스케일러 원가 갈림길",
+   "summary": "FCC 규칙 개정에서 중국 광트랜시버 업체는 당장 금지 대상에서 빠짐(당시 기준). 이후 행정부 별도 금지안 초안 보도로 재점화."
+  },
+  {
+   "title": "CPI 뒤 선물 하락·금리 급등",
+   "url": "https://www.streetinsider.com/Market+Check/Futures+Decline%2C+Yields+Spike+Following+Hot+CPI+Data/18670080.html",
+   "press": "StreetInsider",
+   "at": "2026-11-10 23:45",
+   "why": "12/9 FOMC 분수령·고금리 정점 가설 — 2년물이 10년물보다 더 뛰는 매파형 반응",
+   "summary": "10월 CPI 예상 상회 뒤 미 선물 하락·국채 금리 급등(제목 기준). 같은 시각 우리 수집: 2년 4.689%(+14bp)·10년 4.954%(+9bp)·나스닥100 선물 −1.0%(23:23)."
+  },
+  {
+   "title": "월러 연준 이사 「10월 CPI가 뜨거우면 12월 0.5%p 인상 고려해야」",
+   "url": "https://uk.investing.com/news/economy-news/feds-waller-says-larger-hike-should-be-considered-if-october-cpi-runs-hot-4971098",
+   "press": "Investing.com",
+   "at": "2026-11-10 22:45",
+   "why": "오늘 밤 근원 CPI +0.3%(예상 0.2%)로 조건이 걸림 — 12/9 FOMC 분수령 가설·미국채 단기물·🫧 신용 칸",
+   "summary": "월러: 12월 인상 지지, 근원 물가가 높게 나오면 50bp 고려. 발표 결과 헤드라인 +0.4%·근원 +0.3%로 둘 다 예상 +0.1%p 상회(김현석 텔레그램 22:30)."
+  },
+  {
+   "title": "2022년 이후 최대 인상이 이례적인 10월 CPI에 달렸다",
+   "url": "https://www.tipranks.com/news/feds-largest-rate-hike-since-2022-hinges-on-todays-unusual-october-inflation-report",
+   "press": "TipRanks",
+   "at": "2026-11-10 22:45",
+   "why": "1년 전 대비 숫자 없이 전월비만 나오는 CPI — 반응이 전월비에 몰림, 금리 민감주·장기채 칸",
+   "summary": "셧다운 여파로 10월 전년비 CPI 미발표. 전월비 근원이 50bp 인상 여부의 핵심 변수로 지목."
+  },
+  {
+   "title": "평화 협상 속 유가 4주 만의 최저 부근",
+   "url": "https://www.khaleejtimes.com/business/oil-prices-ease-to-nearly-four-week-low-amid-peace-talks",
+   "press": "Khaleej Times",
+   "at": "2026-11-10 22:45",
+   "why": "장부 brent_95(선 90) — 오늘 종가 90↓면 에너지 13→10, XLE 대기 bet",
+   "summary": "미·이란 협상 진전 기대로 브렌트 약세. 알아라비아는 우라늄 3.67% 제한·동결자금 해제 예비 합의 근접 보도."
+  },
+  {
    "title": "중국 10월 생산자물가 4년여 만 최고로 가속",
    "url": "https://tradingeconomics.com/china/producer-prices-change/news/591666",
    "press": "Trading Economics",
@@ -527,127 +639,7 @@
    "at": "2026-11-09 07:40",
    "why": "파운드리 가격 인상(TSMC 27년 1월·PSMC 10~20%, HANAchina/71766) — 반도체 급락 속 실적 쪽 버팀목, 반도체 ETF 반등 신호 붙을 때 근거",
    "summary": "파운드리 원가 상승을 반영해 팹리스들이 5%~두 자릿수 인상 검토. PSMC 3Q 로직 평균가 QoQ +8~10%(HANAchina 인용)."
-  },
-  {
-   "title": "美 중간선거 뒤 전례 없는 부채 교착 위험(Börsen-Zeitung)",
-   "url": "https://www.boersen-zeitung.de/konjunktur-politik/us-markt-droht-nach-kongresswahlen-beispielloses-schulden-patt",
-   "press": "Börsen-Zeitung",
-   "at": "2026-11-09 06:40",
-   "why": "민주 의회 vs 트럼프 → 부채한도·예산 교착 = 장기채 기간 프리미엄 — 「고금리 정점」 가설·중장기채 칸 반대 재료",
-   "summary": "선거 뒤 의회·백악관 분점으로 부채 교착 위험 거론. 구체 시한·금액은 미확인."
-  },
-  {
-   "title": "코어위브 3분기 실적(11/10) 미리보기 — AI 지출 파도 지속?",
-   "url": "https://www.nasdaq.com/articles/eps-watch-can-coreweave-keep-riding-ai-spending-wave",
-   "press": "Nasdaq/Zacks",
-   "at": "2026-11-09 06:40",
-   "why": "AI 차입 가설(0.92)의 이번 주 시험대 — CRWV 채권·주가가 AI 인프라 신용 스트레스 바로미터",
-   "summary": "데이터센터 지연으로 연간 매출 가이던스 하향 이력(itiger). 옵션 내재 변동 두 자릿수 %(tipranks, 정확 수치 날짜 미확인)."
-  },
-  {
-   "title": "BofA 하트넷 「민주당 스윕은 채권에 우호 — 4분기 역발상 채권 매수」",
-   "url": "https://cryptobriefing.com/hartnett-democratic-sweep-bonds-contrarian/",
-   "press": "Crypto Briefing",
-   "at": "2026-11-09 05:40",
-   "why": "고금리 정점 가설·채권 칸(단기채 vs 중장기채) — 재정지출 둔화 + AI 투자 감속이 장기금리 하락 쪽",
-   "summary": "하트넷은 민주당 의회 장악이 재정 지출을 묶어 국채에 유리하다고 봄. 선거 뒤 국채 랠리·10년 한 달 저점(investinglive)과 같은 방향."
-  },
-  {
-   "title": "트럼프, 이란 공격 재개 가능성 낮춰 — 「선거 뒤 공격 재개」 우려 진정",
-   "url": "https://www.al-monitor.com/originals/2026/11/trump-raises-doubts-about-renewed-attacks-iran",
-   "press": "Al-Monitor",
-   "at": "2026-11-09 04:40",
-   "why": "브렌트 95 장부 조건(에너지 칸)·월요일 유가 갭 방향 — 후티 리야드 타격과 상쇄",
-   "summary": "트럼프가 중간선거 뒤 대이란 공격 재개에 의문 제기. 11/8 CNN 보도로 「협상 진전 시 공격 안 할 듯」 재확인(Reuters 피드). 유가 반응 숫자는 선물 개장 전이라 미확인."
-  },
-  {
-   "title": "앤트로픽, 데이터센터용 가스 발전 비용 상한 없이 부담 — 터빈 업체 수주잔고 확대",
-   "url": "https://www.ctol.digital/news/anthropic-s1-uncapped-gas-costs-baker-hughes-turbine-backlog/",
-   "press": "CTOL Digital",
-   "at": "2026-11-09 04:40",
-   "why": "AI 차입·전력 가설 — 데이터센터 반발 국면에서 자체 가스 발전(터빈·가스) 쪽으로 투자 이동",
-   "summary": "FT 보도 34억$·1.7GW 가스발전기 구매 약정 관련. 전력망 대신 자가 발전 → 베이커휴즈 등 터빈 수주잔고 수혜 해석. 세부 숫자는 원문 확인 필요."
-  },
-  {
-   "title": "골드만삭스, 월가 「극단적 패닉」 감지 — 반등 가능성 언급",
-   "url": "https://dolarhoy.com/mercado/goldman-sachs-detecto-panico-extremo-en-wall-street-y-anticipa-una-recuperacion-20261161570",
-   "press": "DolarHoy",
-   "at": "2026-11-09 03:40",
-   "why": "위험 회피 regime 의 역발상 근거 — 지수·ETF 칸 비중 판단",
-   "summary": "골드만 패닉지수 9.57(10점 만점) 극단 구간. 과거 이 구간 뒤 단기 반등이 잦았다는 해석 — 구체 통계는 원문 확인 필요(미확인)."
-  },
-  {
-   "title": "美 하원 3개 위원회, 젠슨 황에 「중국 스파이 연루 의혹」 비공개 브리핑 요구",
-   "url": "https://axios.com/2026/11/05/jensen-huang-nvidia-congress-china",
-   "press": "Axios",
-   "at": "2026-11-09 03:40",
-   "why": "AI 반도체 대장 규제 헤드라인 위험 — AI 차입·기술주 약세 가설과 이어짐",
-   "summary": "공화당 위원장들이 엔비디아 CEO 에 비공개 브리핑 요구(11/5). CNBC 11/8 초당적 압박 재보도 — 주가 영향은 월요일 개장 전 미확인."
-  },
-  {
-   "title": "후티, 리야드 아람코 시설 타격 주장 — 예멘 교전 확대",
-   "url": "https://oilprice.com/Latest-Energy-News/World-News/Houthis-Claim-Strike-on-Aramco-Facility-in-Riyadh-as-Yemen-Fighting-Escalates.html",
-   "press": "OilPrice",
-   "at": "2026-11-09 02:40",
-   "why": "브렌트·에너지 칸 — 월요일 XLE·USO 시가 갭, brent_95 조건 근접",
-   "summary": "후티가 리야드 아람코 시설·금융지구 타격 주장(블룸버그도 '이례적 리야드 금융허브 타격' 보도). 유가 반응 숫자는 선물 개장(08:00 KST) 전이라 미확인."
-  },
-  {
-   "title": "유가 아닌 AI 붐이 실질금리를 구조적으로 끌어올린다",
-   "url": "https://www.pulse.bot/bonds/news/ai-boom-not-oil-shock-driving-real-yields-structurally-higher-a0c2ed67-9be3-492b-a86c-893d845e5449/",
-   "press": "Pulse (월가 전략 요약)",
-   "at": "2026-11-09 02:40",
-   "why": "AI 차입 가설·채권 칸 — 하이퍼스케일러 회사채 발행(메타 선거일 발행)이 장기물 공급 압력",
-   "summary": "월가 신호: 美 국채 금리 동력이 유가 충격에서 AI 설비투자 자금조달로 이동. 반론으로 PIMCO는 '경기 요인이 여전히 우선' 입장."
-  },
-  {
-   "title": "EPS 점검: 코어위브, AI 지출 물결 계속 탈 수 있나",
-   "url": "https://www.finanzen.net/nachricht/aktien/eps-watch-can-coreweave-keep-riding-the-ai-spending-wave-15243207",
-   "press": "finanzen.net",
-   "at": "2026-11-09 01:40",
-   "why": "「AI 차입(크레딧)」 가설(0.92)의 시험대 — 11/10 실적에서 차입·capex 가이던스가 AI 인프라 칸 방향을 가른다",
-   "summary": "코어위브 실적 미리보기 — AI 지출 지속성·부채 부담이 관건(세부 컨센서스 숫자 미확인)"
-  },
-  {
-   "title": "기술주 반등에도 S&P 500 주간 2025년 4월 뒤 최악",
-   "url": "https://pro.thestreet.com/market-commentary/tech-bounces-but-the-sp-500-still-has-its-worst-week-since-april-2025",
-   "press": "TheStreet",
-   "at": "2026-11-09 00:40",
-   "why": "위험 회피 국면 판정 — 금요일 반등이 추세 전환인지 CPI·코어위브 주간에 확인",
-   "summary": "금요일 나스닥 반등에도 S&P 주간 낙폭은 2025년 4월 뒤 최대"
-  },
-  {
-   "title": "BofA: 반도체 업종, 2027년 1분기 회복 가능 — 3가지 시나리오",
-   "url": "https://placera.se/telegram/advanced-micro-devices-bofa-halvledarsektorn-kan-aterhamta-sig-under-forsta-kvartalet-2027-20261106",
-   "press": "Placera(BofA 인용)",
-   "at": "2026-11-09 00:40",
-   "why": "반도체 칸·SMH — 「저점 매수 vs 대기」 판단 기준, 지금 바로 사지 말고 회복 시점은 내년 1분기로 본다는 IB 견해",
-   "summary": "BofA 반도체 3시나리오: 회복은 2027년 1분기 가능 · 단기 추가 하락 여지 열어 둠(세부 수치 미확인)"
-  },
-  {
-   "title": "민주당 승리, 美 데이터센터 확장 늦추고 국채금리 낮출 수 있다(로이터 인용)",
-   "url": "https://timesofoman.com/article/178808-democratic-victories-threaten-to-slow-us-data-centre-expansion-ease-bond-yields-report",
-   "press": "Times of Oman(Reuters)",
-   "at": "2026-11-08 23:40",
-   "why": "AI 차입 가설·고금리 정점 가설 동시 — 규제 리스크는 AI 인프라엔 악재, 장기채엔 호재로 갈라짐",
-   "summary": "중간선거 블루웨이브로 데이터센터 인허가·전력 규제 강화 관측 → AI 설비투자 속도 둔화 우려, 국채금리 하락 요인으로 거론."
-  },
-  {
-   "title": "모닝 비드: 시장, 「블루웨이브가 데이터센터를 삼킬까」 걱정",
-   "url": "https://www.globalbankingandfinance.com/morning-bid-markets-fret-blue-wave-drown-data-centres/",
-   "press": "Global Banking & Finance(Reuters Morning Bid)",
-   "at": "2026-11-08 23:40",
-   "why": "이번 주 코어위브(11/10)·CPI 앞 AI 인프라 심리 — SMH·091160.KS 방향 관찰",
-   "summary": "정책 리스크가 AI 데이터센터 붐의 새 변수로 부상. 세부 숫자 미확인."
-  },
-  {
-   "title": "월가 주간 전망 — 기술주 급락 속 美 물가 지표 대기",
-   "url": "https://www.kitco.com/news/off-the-wire/2026-11-06/wall-st-week-ahead-tech-swoon-roils-market-us-inflation-data-tap",
-   "press": "Reuters(Kitco)",
-   "at": "2026-11-08 22:45",
-   "why": "이번 주 CPI가 12월 인상 여부 결정 — 현금·단기채 칸·고금리 가설 점검",
-   "summary": "S&P 500 2025년 4월 이후 최악의 주(TheStreet). 이번 주 CPI·PPI 발표, 기술주 변동성 지속."
   }
  ],
- "at": "2026-11-10 17:40"
+ "at": "2026-11-11 02:45"
 }
