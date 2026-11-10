@@ -382,6 +382,8 @@
       b.insertBefore(rings, b.firstChild);
       var num = mk("h2num", numHtml(d)); b.insertBefore(num, b.firstChild);   // ⑰ 오늘의 숫자 맨 위
       var ob = document.getElementById("h2bear"); if (ob) ob.remove(); var bh = bearHtml(d); if (bh) num.insertAdjacentElement("afterend", mk("h2bear", bh));   // 🐻 11/09 결론 바로 아래
+      var orb = document.getElementById("h2reb"); if (orb) orb.remove();   // 📨 11/10 A11/10-1 반등 날 기록 — 🛡 결론 밑 · 계기판 위 (ux1110.js · 반등 날에만)
+      try { var kx_ = ix(d.kr, "코스피"), rh = window.__rebCard && kx_ && d.kr && d.kr.date === new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10) ? __rebCard(d.bear, kx_.chg, "home") : ""; if (rh) num.insertAdjacentElement("afterend", mk("h2reb", rh)); } catch(x) {}
       var world = mk("h2world", worldHtml(d)), disc = mk("h2disc", discHtml(d)), map = mk("h2map", mapHtml(d)), cl = mk("h2cl", clientHtml(d));
       rings.insertAdjacentElement("afterend", world); world.insertAdjacentElement("afterend", hero);   // 날씨판은 타일 아래로
       hero.insertAdjacentElement("afterend", disc);

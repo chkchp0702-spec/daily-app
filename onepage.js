@@ -81,7 +81,8 @@
       }
       // 🧊 11/09 ⑰ 「다음에 볼 것」 한 줄 — 오늘이 아닌 가장 가까운 일정 → 고객이 다음 한 장을 기다리게
       var nx_ = adv && (adv.watch || []).filter(function(w){ return w[0] !== "오늘"; })[0], nextN = nx_ ? {h: "👀 다음에 볼 것", t: nx_[0] + " — " + String(nx_[1]).split(" · ")[0], tone: "dark", max: 2} : null;
-      return {kind: "market", bear: bearN, next: nextN, title: liveMode ? "지금 시장 한 장" : "오늘 시장 한 장", sub: lab + (head ? " · " + head : ""), label: lab, key: key.length >= 2 ? key : null, stars: stars && stars.length >= 3 ? stars : null,
+      var rebN = window.__rebNote && live ? __rebNote(BR, ks.chg) : null;   // 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (반등 날에만 · ux1110.js)
+      return {kind: "market", bear: bearN, reb: rebN, next: nextN, title: liveMode ? "지금 시장 한 장" : "오늘 시장 한 장", sub: lab + (head ? " · " + head : ""), label: lab, key: key.length >= 2 ? key : null, stars: stars && stars.length >= 3 ? stars : null,
         advice: adv,
         hero: hero, world: world.length ? world : null, heat: heat.length >= 8 ? heat : null, gauge: gauge, chips: chips, events: ev,
         themes: themes.length ? {title: "오늘 뜨는 테마 — 대장주", items: themes} : null, kpis2: k2.slice(0, 4),
@@ -691,7 +692,7 @@
     }
     var blocks;
     if (C.kind === "screen") blocks = C.blocks || [];
-    else if (C.kind === "market") blocks = [["key", C.key], ["note", C.bear], ["world", C.world], ["stars", C.stars], ["heat", C.heat], ["gauge", C.gauge], ["advice", C.advice, name], ["note", C.next], ["kpis", C.kpis2], ["rows", C.themes], ["alloc", C.alloc, false]];
+    else if (C.kind === "market") blocks = [["key", C.key], ["note", C.bear], ["note", C.reb], ["world", C.world], ["stars", C.stars], ["heat", C.heat], ["gauge", C.gauge], ["advice", C.advice, name], ["note", C.next], ["kpis", C.kpis2], ["rows", C.themes], ["alloc", C.alloc, false]];
     else if (C.kind === "port") blocks = [["chips", C.chips], ["alloc", C.alloc, true], ["line", C.line], ["kpis", C.kpis], ["rows", C.why, "text"], ["bullets", C.bullets], ["rows", C.sched, "text"]];
     else if (C.kind === "bond") blocks = [["kpis", C.kpis], ["timeline", C.timeline], ["tiles", C.tiles], ["risk", C.risk, C.riskTitle], ["bars", C.cmp], ["bullets", C.bullets]];
     else if (C.kind === "els") blocks = [["chips", C.chips], ["kpis", C.kpis], ["steps", C.steps], ["prob", C.prob], ["tiles", C.tiles], ["bullets", C.bullets]];

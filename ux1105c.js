@@ -151,6 +151,7 @@
       (b.one ? '<p class="ez-one">' + e(b.one) + '</p>' : '') +
       (N.length ? '<div class="ez-nums">' + N.slice(0, 3).map(function(n){ return '<div><small>' + e(n[0]) + '</small><b class="' + cl(n[2]) + '">' + sg(n[2]) + '</b>' + (n[1] ? '<em>' + e(n[1]) + '</em>' : '') + '</div>'; }).join("") + '</div>' : '') +
       (o.act ? '<div class="ez-act"><small>그래서 오늘은</small><p>👉 ' + e(o.red ? redAct(o.red) : o.act) + '</p></div>' : '') +
+      (window.__rebCard ? __rebCard(b._bear, o.k, "ez") : '') +   // 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (ux1110.js · 반등 날에만)
       chgHtml(b._home) +
       (ROLE() ? todo(o) : roleHtml()) +
       '<p class="ez-note">' + e(b.note || "참고용 · 사라·팔라는 뜻이 아니에요") + '</p>';
