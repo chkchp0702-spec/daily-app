@@ -68,6 +68,9 @@
       if (world.length){ var upN = world.filter(function(w){ return w.v > 0; }).length; key.push(["🌏", (upN === world.length ? "세계 증시 모두 올라요" : upN === 0 ? "세계 증시 모두 내려요" : "세계 증시 " + world.length + "곳 중 " + upN + "곳 상승") + " — " + world.slice(0, 2).map(function(w){ return w.n.replace(" · 전일", "") + " " + pct(w.v); }).join(" · ")]); }
       var wl0 = PB && PB.advice ? liveWatch(PB.advice.watch) : []; if (wl0[0]) key.push(["📅", wl0[0][0] + " " + wl0[0][1]]);
       else if (gauge) key.push(["🌡️", "종목 " + Math.round(gauge.up / gauge.total * 100) + "%가 올랐어요 · 상한가 " + gauge.lu]);
+      try { if (window.__flowJ){ var R_ = (__flowJ.mkt || {}).KOSPI || [], r_ = R_[0]; if (r_ && r_.f != null){ var U_ = Math.abs(r_.f) > 1e6 ? 1e8 : 1, w_ = function(v){ v /= U_; var a = Math.abs(v); return (v >= 0 ? "+" : "−") + (a >= 10000 ? (a / 10000).toFixed(1) + "조" : Math.round(a).toLocaleString() + "억"); };
+        var fl_ = ["🧲", "외국인 " + w_(r_.f) + " · 기관 " + w_(r_.i) + " · 개인 " + w_(r_.p) + " (코스피 " + Number(r_.d.slice(5, 7)) + "/" + Number(r_.d.slice(8)) + ")"];   // 🧲 11/10 #3 수급 한 줄
+        if (key.length >= 3 && key[2][0] === "🌡️") key[2] = fl_; else if (key.length < 3) key.push(fl_); else key.splice(2, 0, fl_); key = key.slice(0, 3); } } } catch(x) {}
       var stars = live ? (L.value || []).slice(0, 5).map(function(x){ return {n: x.n, p: x.p, r: x.r, v: x.v}; }) : null;
       var adv = PB && PB.advice && PB.asof && PB.asof.slice(0, 10) === today() ? Object.assign({}, PB.advice, {watch: liveWatch(PB.advice.watch)}) : null;
       if (adv && live && ks.chg != null) adv.read = String(adv.read).replace(/(코스피[가는]? (?:오늘(?:도)? )?)[+−\-]?\d+(\.\d+)?%/, "$1" + pct(ks.chg));   // 매시간 글 ↔ 지금 숫자 맞춤
@@ -77,6 +80,9 @@
         bearN = {h: (bk.state === "🐻" ? "🐻 코스피 하락장" : "🟡 코스피 조정") + " · 고점보다 " + pct(bk.dd), t: String(bk.advice || BR.lead || "").replace(/^코스피 (하락장|조정)\s*—\s*/, ""), tone: "warn", max: 3};
         var on_ = (bk.checks || []).filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙(rule)
         if (bk.rule && !bk.nuse){} else if (bk.checks && bk.checks.length) bearN.t += " · 다시 사는 조건 " + on_ + "/" + (bk.nuse || bk.checks.length) + "개 켜짐";
+        var sp_ = (BR.markets || []).filter(function(m){ return m.key === "sp500"; })[0];   // 🧭 11/10 결론 통일 — 해외 ETF 포트는 S&P500 판정을 따름
+        if (sp_ && sp_.state !== bk.state) bearN.t += " | 🌏 해외 주식(포트)은 S&P500 " + sp_.state + (sp_.state === "🟢" ? " 정상 → 배분 그대로" : " → 현금 " + (sp_.cash || 0) + "%");
+        bearN.max = 4;
         if (adv && adv.plan) adv.plan = adv.plan.filter(function(x){ return !/상승 추세|비중을 그대로/.test(x); });
       }
       // 🧊 11/09 ⑰ 「다음에 볼 것」 한 줄 — 오늘이 아닌 가장 가까운 일정 → 고객이 다음 한 장을 기다리게

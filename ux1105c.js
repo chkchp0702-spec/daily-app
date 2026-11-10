@@ -56,9 +56,14 @@
     if (!EZ()){ if (all) all.remove(); [].forEach.call(b.querySelectorAll("button[data-g]"), function(x){ if (x.dataset.ezo){ x.children[1].textContent = x.dataset.ezo; delete x.dataset.ezo; } }); return; }
     [].forEach.call(b.querySelectorAll("button[data-g]"), function(x){ var q = QN[x.dataset.g], s = x.children[1]; if (!q || !s) return;
       if (s.textContent !== q){ if (!x.dataset.ezo) x.dataset.ezo = s.textContent; s.textContent = q; } });
+    // 📝 11/10 #13 순서: 오늘 → 고객 제안 → 뭐 살까 → 🙋 → ☰ (📈 투자자로 고른 사람은 뭐 살까 먼저)
+    var ORD = ROLE() === "inv" ? {home: 0, inv: 1, prop: 2} : {home: 0, prop: 1, inv: 2};
+    [].forEach.call(b.querySelectorAll("button[data-g]"), function(x){ x.style.order = ORD[x.dataset.g] != null ? ORD[x.dataset.g] : 5; });
+    var ask_ = document.getElementById("ezask"); if (ask_) ask_.style.order = 6;
     if (!all){ all = document.createElement("button"); all.id = "ezall"; all.type = "button";
       all.innerHTML = '<span class="i">☰</span><span>전체 메뉴</span>'; all.onclick = function(){ setMode("pro"); toast("전체 메뉴로 바꿨어요 · 오늘 탭 맨 위 🔰 로 다시 쉬운 화면"); };
       b.appendChild(all); }
+    all.style.order = 7;
   }
 
   /* ── ① ⑦ ⑨ ⑬ 첫 화면 한 장 ── */
@@ -146,10 +151,12 @@
     return '<div class="ez-top"><span>🔄 ' + e(String(b.asof || b.at || "").slice(11, 16) || b.label || "") + ' 갱신</span><span class="ez-ph">' +
         PH.map(function(p, i){ return '<i class="' + (i === o.ph ? "on" : "") + '">' + p[0] + ' ' + p[1] + '</i>'; }).join("") + '</span></div>' +
       '<div class="ez-light ' + o.L[0] + '"><b>' + o.L[1] + '</b><div><small>오늘 장' + (o.early ? ' <i class="ez-early">09:30 전 · 전날 마감 기준</i>' : '') + '</small><strong>' + e(o.L[2]) + '</strong><em>' + e(o.L[3]) + '</em></div></div>' +
+      '<div data-vd></div>' +   /* 🧭 11/10 결론 통일 — 국내·해외(포트) 한 줄씩 (verdict.js) */
       hitHtml(b._sc) + ruleHtml(o, b._bear) +
       (o.mix ? '<p class="ez-mix">⚠ ' + e(o.mix) + '</p>' : '') +
       (b.one ? '<p class="ez-one">' + e(String(b.one).split(" ｜ ").pop()) + '</p>' : '') +   /* 11/10: 앞 절반(하락장 판정)은 바로 위 상자와 같은 말 → 뉴스 한 줄만 */
       (N.length ? '<div class="ez-nums">' + N.slice(0, 3).map(function(n){ return '<div><small>' + e(n[0]) + '</small><b class="' + cl(n[2]) + '">' + sg(n[2]) + '</b>' + (n[1] ? '<em>' + e(n[1]) + '</em>' : '') + '</div>'; }).join("") + '</div>' : '') +
+      '<div data-flow></div>' +   /* 🧲 11/10 #3 수급 한 줄 (flow.js) */
       (o.act ? '<div class="ez-act"><small>그래서 오늘은</small><p>👉 ' + e(o.red ? redAct(o.red) : o.act) + '</p></div>' : '') +
       (window.__rebCard ? __rebCard(b._bear, o.k, "ez") : '') +   // 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (ux1110.js · 반등 날에만)
       chgHtml(b._home) +
@@ -186,6 +193,7 @@
     ["port", "💼", "지금 뭘 얼마나 사요?", "포트 비중 그대로"],
     ["prop", "📝", "고객 제안서 만들기", "성향 → 상품 → 금액 → 끝"],
     ["@send", "📨", "고객에게 한 장 보내기", "카톡용 그림 한 장"],
+    ["@qa", "💬", "고객이 이렇게 물으면?", "오늘 숫자로 채운 답 10개"],
     ["bond", "🏦", "채권·ELS 금리 보기", "상품 한곳에서"],
     ["flow", "🧲", "외국인·기관은 뭘 사요?", "국내 수급 한눈에"],
     ["prob", "🎲", "오늘 오를 확률은?", "한국장 기준"],
@@ -194,7 +202,7 @@
   function help(){
     var old = document.getElementById("ezsheet"); if (old){ old.remove(); return; }
     var d = document.createElement("div"); d.id = "ezsheet";
-    var ord = ROLE() === "inv" ? ["port", "prob", "flow", "home", "sector", "bond", "prop", "@send", "luck"] : ROLE() === "look" ? ["home", "sector", "flow", "prob", "luck", "port", "bond", "prop", "@send"] : null;
+    var ord = ROLE() === "inv" ? ["port", "prob", "flow", "home", "sector", "bond", "prop", "@send", "@qa", "luck"] : ROLE() === "look" ? ["home", "sector", "flow", "prob", "luck", "port", "bond", "prop", "@send", "@qa"] : null;
     var AS = ord ? ASK.slice().sort(function(a, b){ return ord.indexOf(a[0]) - ord.indexOf(b[0]); }) : ASK;
     d.innerHTML = '<div class="ezs-in"><div class="ezs-h"><img src="img/kid_think.jpg?v=1" alt=""><div><b>뭐 보면 돼요?</b><small>궁금한 걸 누르면 그 화면으로 데려가요</small></div><button type="button" class="ezs-x" aria-label="닫기">✕</button></div>' +
       '<div class="ezs-g">' + AS.map(function(a){ return '<button type="button" data-ask="' + a[0] + '"><span>' + a[1] + '</span><b>' + e(a[2]) + '</b><small>' + e(a[3]) + '</small></button>'; }).join("") + '</div>' +
@@ -206,6 +214,7 @@
       if (t.closest && t.closest(".ezs-mode")) { d.remove(); setMode(EZ() ? "pro" : "easy"); return; }
       var a = t.closest && t.closest("[data-ask]"); if (!a) return; d.remove();
       var k = a.dataset.ask;
+      if (k === "@qa"){ if (window.__qaOpen) __qaOpen(); return; }
       if (k === "@send"){ if (window.__onepage) (__onepage.chooser || __onepage.go)(null); return; }
       if (typeof window.go === "function") go(k); window.scrollTo(0, 0);
     });

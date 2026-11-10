@@ -90,9 +90,10 @@ def earnings(watch):
                 mc = float(re.sub(r"[^\d.]", "", r.get("marketCap") or "") or 0)
             except Exception:
                 mc = 0
-            if s in seen or not (s in MEGA or s in watch or mc >= 1e11):
+            nm0 = (r.get("name") or s)[:18]
+            if s in seen or nm0 in seen or not (s in MEGA or s in watch or mc >= 1e11):
                 continue
-            seen.add(s)
+            seen.add(s); seen.add(nm0)
             tm = {"time-pre-market": "장 전", "time-after-hours": "장 뒤"}.get(r.get("time") or "", "")
             # 미국 장 뒤 실적 → 한국은 다음 날 아침에 반영
             out.append({"d": d.isoformat(), "s": s, "n": (r.get("name") or s)[:30], "tm": tm, "mc": round(mc / 1e9), "w": s in watch,

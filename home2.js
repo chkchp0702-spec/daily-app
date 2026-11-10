@@ -185,7 +185,8 @@
     var kv = ks ? +ks.chg : null, sv = sp ? +sp.chg : null;
     var fut = null; try { var tk = (d.brief && d.brief.talk) || []; tk.forEach(function(t){ var m = /S&P500 선물 ([+−\-]?\d+(?:\.\d+)?)%/.exec(t); if (m) fut = +m[1].replace("−", "-"); }); } catch(x) {}
     // 오늘의 결론 — 한국 하락이 크거나 확률이 낮으면 「지키는 날」, 반대면 「담는 날」, 그 밖엔 「지켜보는 날」
-    var down = (kv != null && kv <= -1.5) || (p1 != null && p1 <= 30), up = (kv != null && kv >= 1.5) || (p1 != null && p1 >= 70);
+    var px_ = p1 != null && (p1 <= 15 || p1 >= 85);   // 🎲 11/10 #2: 극단 확률은 판정에도 화면에도 안 씀 (−45% 하락장 다음 날 「99%」)
+    var down = (kv != null && kv <= -1.5) || (p1 != null && !px_ && p1 <= 30), up = (kv != null && kv >= 1.5) || (p1 != null && !px_ && p1 >= 70);
     var V = down && !up ? {ic: "🛡", t: "오늘은 지키는 날", c: "dn", s: "서둘러 팔기보다 비중·현금 점검"} : up && !down ? {ic: "🚀", t: "오늘은 담는 날", c: "up", s: "계획한 분할 매수를 진행할 때"} : {ic: "👀", t: "오늘은 지켜보는 날", c: "", s: "큰 결정은 미루고 흐름 확인"};
     if (down && fut != null && fut >= 0.8) V.s = "미국 선물 " + sg(fut) + " — 반등 기대도 있음 · 추격 매도 금지";
     /* 🐻 11/09 「쉬운 화면은 🔴 조심하는 장인데 여기는 🚀 담는 날?」 — 하루 등락·확률보다 하락장 계기판(종가 판정)이 먼저.
@@ -200,14 +201,14 @@
     } else if (yw && V.c === "up"){
       V = {ic: "👀", t: "오늘은 지켜보는 날", c: "", s: yw.name + " 조정(고점 " + sg(yw.dd) + ") · 오늘 강해도 추격 말고 계획대로 나눠서"};
     }
-    var one = d.brief && d.brief.one ? String(d.brief.one) : "";
+    var one = d.brief && d.brief.one ? String(d.brief.one).split(" ｜ ").pop() : "";   // 🧭 11/10 앞 절반(하락장 판정)은 바로 위 「오늘의 결론」과 같은 말
     var nums = [];
     if (ks) nums.push({l: "🇰🇷 코스피" + (kLive ? " 지금" : " " + md(d.kr.date)), v: kv});
     if (fut != null && kLive) nums.push({l: "🇺🇸 S&P 선물", v: fut}); else if (sp) nums.push({l: "🇺🇸 S&P500", v: sv});
-    var pr = p1 == null ? "" : '<span class="h2-np' + (p1 <= 15 || p1 >= 85 ? " x" : "") + '" data-goto="prob">🎲 ' + (pk && pk.open_now ? "오늘" : "다음 장") + ' 오를 확률 <b>' + p1 + '%</b>' + (p1 <= 15 || p1 >= 85 ? ' <em>극단값 · 참고만</em>' : '') + '</span>';
-    return '<section class="card h2-num wow-big" data-cz="done" data-goto="sector"><div class="h2-vd ' + V.c + '"><span>' + V.ic + '</span><b>' + V.t + '</b></div>' +
-      '<div class="h2-vs">' + e(V.s) + '</div>' + (one ? '<p>' + e(one) + '</p>' : '') +
-      '<div class="h2-nn">' + nums.map(function(n){ return '<div><small>' + e(n.l) + '</small><b class="' + cls(n.v) + '">' + sg(n.v) + '</b></div>'; }).join("") + '</div>' + pr + '</section>';
+    var pr = p1 == null ? "" : px_ ? '<span class="h2-np x" data-goto="prob">🎲 오늘은 확률이 극단으로 튀는 날 — 숫자는 참고하지 않아요 ›</span>' : '<span class="h2-np" data-goto="prob">🎲 ' + (pk && pk.open_now ? "오늘" : "다음 장") + ' 오를 확률 <b>' + p1 + '%</b></span>';
+    return '<section class="card h2-num wow-big no-clp" data-xc="1" data-cz="done" data-goto="sector"><div class="h2-vd ' + V.c + '"><span>' + V.ic + '</span><b>' + V.t + '</b></div>' +
+      '<div class="h2-vs">' + e(V.s) + '</div><div data-vd></div>' + (one ? '<p>' + e(one) + '</p>' : '') +
+      '<div class="h2-nn">' + nums.map(function(n){ return '<div><small>' + e(n.l) + '</small><b class="' + cls(n.v) + '">' + sg(n.v) + '</b></div>'; }).join("") + '</div>' + pr + '<div data-flow></div></section>';
   }
   /* ⑳ 하루 흐름 작은 선 — live_*.json 의 snaps([시각, 오른 수, 내린 수, 지수 등락, …]) */
   function spark(J){
@@ -247,7 +248,7 @@
     var hot = d.hot && d.hot.items ? Object.keys(d.hot.items).map(function(k){ return d.hot.items[k]; }).filter(function(x){ return x.lv === 1; }).sort(function(a, b){ return a.at < b.at ? 1 : -1; }) : [];
     if (hot.length) C.push({tab: "feed", c: ["#3a1d1d", "#e03131"], ic: "📰", k: "피드 🔴 핵심 · " + md(hot[0].at), big: hot[0].why.split(/ — |—/)[0].slice(0, 28), sub: (hot[0].why.split(/ — |—/)[1] || "").slice(0, 40), go: "피드 보기"});
     var L = window.luckToday && luckToday();
-    C.push({tab: "luck", c: ["#2b1747", "#c2255c"], ic: "🔮", k: L ? L.name + " 님 오늘 투자운" : "오늘의 운세 · 타로", big: L && L.inv != null ? L.inv + "점" : "생일만 넣으면", sub: L ? "재미로 보는 오늘 기운" : "점수 · 행운의 색 · 투자운까지", go: "운세 보기"});
+    if (L && L.inv != null) C.push({tab: "luck", c: ["#2b1747", "#c2255c"], ic: "🔮", k: L ? L.name + " 님 오늘 투자운" : "오늘의 운세 · 타로", big: L && L.inv != null ? L.inv + "점" : "생일만 넣으면", sub: L ? "재미로 보는 오늘 기운" : "점수 · 행운의 색 · 투자운까지", go: "운세 보기"});
     return '<section class="h2-disc"><div class="h2-hd"><b>✨ 오늘의 발견</b><span class="mut">옆으로 넘겨 보세요 · ' + C.length + '가지</span></div><div class="h2-dc" id="h2dc">' + C.map(function(x){
       return '<button type="button" class="h2-d" data-goto="' + x.tab + '" style="background:linear-gradient(150deg,' + x.c[0] + ',' + x.c[1] + ')"><span class="ic">' + x.ic + '</span><small>' + e(x.k) + '</small><b>' + e(x.big) + '</b><em>' + e(x.sub) + '</em><span class="go">' + e(x.go) + ' ›</span></button>'; }).join("") + '</div></section>';
   }

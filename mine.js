@@ -1,0 +1,199 @@
+/* CH Investing — 홈 4장 (11/10 냉정 분석 3차 · 사용자 「모든 걸 허락하고 다 실행」)
+   #7 ⭐ 내 종목 — 관심종목 등락·수급·뉴스·실적일 한 화면 (네이버증권식 · 「내 것」이 있어야 매일 옴)
+   #8 ⚡ 왜 움직였나 — 오늘 ±5% 넘게 움직인 대형주·관심종목에 이유 한 줄 (뉴스 제목 · 없으면 수급)
+   #9 📅 이번 주 — 경제 지표(미·한·중·일 중요) + 대형주·포트·관심종목 실적 (cal_week.json)
+   #10 💬 고객 질문 10 — 「지금 팔아야 해요?」 같은 질문에 오늘 숫자로 채운 답 + 카톡 복사
+   자리: 쉬운 화면 = 첫 상자 바로 아래 · 전체 메뉴 = 첫 결론 카드 아래. 고객 제안 탭 맨 위·🙋·검색에서도 💬 를 엶. AI·돈 안 씀. */
+(function(){
+  var RM = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/";
+  function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
+  function sg(v, d){ return v == null || isNaN(v) ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d == null ? 1 : d) + "%"; }
+  function cl(v){ return v > 0 ? "up" : v < 0 ? "dn" : ""; }
+  function kd(off){ return new Date(Date.now() + 9 * 3600e3 + (off || 0) * 864e5).toISOString().slice(0, 10); }
+  function md(d){ return d ? Number(d.slice(5, 7)) + "/" + Number(d.slice(8, 10)) : ""; }
+  function wd(d){ return ["일", "월", "화", "수", "목", "금", "토"][new Date(d + "T00:00:00Z").getUTCDay()]; }
+  function won(v){ if (v == null) return "–"; var a = Math.abs(v); return (v > 0 ? "+" : v < 0 ? "−" : "") + (a >= 10000 ? (a / 10000).toFixed(1) + "조" : Math.round(a).toLocaleString() + "억"); }
+  function px(v, kr){ return v == null ? "" : kr ? Math.round(v).toLocaleString() + "원" : "$" + (+v).toFixed(v >= 100 ? 1 : 2); }
+  function gj(u, ttl){ return getJSON(u + (u.indexOf("?") < 0 ? "?" : "&") + Math.floor(Date.now() / (ttl || 300000)), {ttl: ttl || 300000}).catch(function(){ return null; }); }
+  function EZ(){ return document.documentElement.getAttribute("data-ez") === "easy"; }
+  function cur(){ return (typeof window.cur !== "undefined" && window.cur) || ""; }
+  function wl(){ var W = (window.store && store.wl) || {}, L = []; for (var k in W) L.push({k: k, n: (W[k] && W[k].n) || k}); return L; }
+  function code6(k){ var m = /^(\d{6})/.exec(String(k)); return m ? m[1] : null; }
+  function tick(k){ return String(k).replace(/\.(KS|KQ)$/, ""); }
+
+  var DATA = null, DT = 0;
+  function load(){
+    if (DATA && Date.now() - DT < 120000) return Promise.resolve(DATA);
+    return Promise.all([gj("archive/x/wl_live.json", 120000), gj("archive/x/live_px.json", 120000), gj("archive/x/flow_kr.json", 600000), gj("archive/x/cal_week.json", 900000), gj("archive/x/earn_cal.json", 900000)])
+      .then(function(r){ DATA = {wl: r[0] || {}, px: r[1] || {}, fl: r[2] || {}, cal: r[3] || {}, ec: r[4] || {}}; DT = Date.now(); return DATA; });
+  }
+  function flowOf(D, c){ return c ? ((D.fl.stocks || []).filter(function(s){ return s.c === c; })[0] || null) : null; }
+  function earnOf(D, k){
+    var t = tick(k).toUpperCase(), lim = kd(14), a = (D.cal.earn || []).filter(function(x){ return x.s === t && x.d >= kd(0) && x.d <= lim; })[0];
+    if (a) return a.d; var b = ((D.ec.items || []).filter(function(x){ return (x.s === k || x.s === t || tick(x.s) === t) && x.d >= kd(0) && x.d <= lim; })[0]); return b ? b.d : null;
+  }
+
+  /* ── #7 ⭐ 내 종목 ── */
+  function mineHtml(D){
+    var L = wl();
+    if (!L.length) return '<section class="card mn-c no-clp" data-cz="done" data-xc="1" id="mnwl"><h3>⭐ 내 종목</h3><p class="mn-e">자주 보는 종목을 ⭐ 담아 두면 여기서 매일 <b>등락 · 외국인·기관 수급 · 뉴스 · 실적일</b>을 한 번에 봐요.</p><button type="button" class="mn-btn" data-goto="onepager">🔎 종목 찾아서 ⭐ 담기</button></section>';
+    var Q = D.wl.q || {}, P = (D.px.q || {}), live = D.px.date === kd(0);
+    var rows = L.slice(0, 12).map(function(o){
+      var c = code6(o.k), q = Q[c || tick(o.k)] || Q[o.k] || null, p = null, ch = null;
+      if (c && P[c]){ p = P[c][0]; ch = P[c][1]; } else if (q){ p = q.p; ch = q.chg; }
+      var f = flowOf(D, c), nw = q && (q.news || [])[0], ed = earnOf(D, o.k), nm = (q && q.n && !/^\d/.test(q.n) ? q.n : o.n) || o.k;
+      var sub = [];
+      if (f && f.f5 != null) sub.push('🧲 외 <i class="' + cl(f.f5) + '">' + won(f.f5) + '</i> · 기 <i class="' + cl(f.i5) + '">' + won(f.i5) + '</i> (5일)');
+      if (ed) sub.push('📅 실적 ' + md(ed) + '(' + wd(ed) + ')');
+      var why = ch != null && Math.abs(ch) >= 5 && nw ? '<p class="mn-why">' + (ch > 0 ? "🚀" : "🧊") + ' 왜? ' + e(nw.t) + '</p>' : (nw ? '<p class="mn-nw">📰 ' + e(nw.t) + '</p>' : '');
+      return {ch: ch == null ? 0 : Math.abs(ch), h: '<button type="button" class="mn-r" data-mnop="' + e(o.k) + '"><span class="mn-n"><b>' + e(String(nm).slice(0, 18)) + '</b><small>' + e(tick(o.k)) + '</small></span>' + (ch == null ? '<span class="mn-p"><small>시세 다음 갱신 때</small></span>' : '<span class="mn-p"><b class="' + cl(ch) + '">' + sg(ch) + '</b><small>' + px(p, !!c) + '</small></span>') +
+        (sub.length ? '<span class="mn-s">' + sub.join(" · ") + '</span>' : '') + why + '</button>'};
+    });
+    rows.sort(function(a, b){ return b.ch - a.ch; });   // 많이 움직인 것 먼저
+    var lim = EZ() ? 4 : 6;
+    return '<section class="card mn-c no-clp" data-cz="done" data-xc="1" id="mnwl"><h3>⭐ 내 종목 <span class="mut">' + L.length + '개 · ' + (live ? e(D.px.t || "") + " 실시간" : "마지막 장") + '</span></h3>' +
+      rows.slice(0, lim).map(function(r){ return r.h; }).join("") + (rows.length > lim ? '<details class="mn-more"><summary>＋ ' + (rows.length - lim) + '개 더</summary>' + rows.slice(lim).map(function(r){ return r.h; }).join("") + '</details>' : '') + '</section>';
+  }
+
+  /* ── #8 ⚡ 왜 움직였나 ── */
+  function whyHtml(D){
+    var W = (D.wl.why || []).filter(function(w){ return w.day === kd(0); });
+    if (!W.length) return "";
+    var lim = EZ() ? 3 : 5;
+    return '<section class="card mn-c no-clp" data-cz="done" data-xc="1" id="mnwhy"><h3>⚡ 크게 움직인 대형주 — 왜?</h3>' + W.slice(0, lim).map(function(w){
+      var f = flowOf(D, w.c), nw = (w.news || [])[0];
+      var why = nw ? e(nw.t) : (f && f.f5 != null ? '관련 뉴스 없음 — 외국인 5일 ' + won(f.f5) + ' · 기관 ' + won(f.i5) : '관련 뉴스 없음 — 업종·수급 영향일 수 있어요');
+      return '<button type="button" class="mn-r" data-mnop="' + e(w.s) + '"><span class="mn-n"><b>' + e(w.n) + '</b><small>' + e(w.c) + '</small></span><span class="mn-p"><b class="' + cl(w.r) + '">' + sg(w.r) + '</b><small>' + px(w.p, true) + '</small></span><p class="mn-why">' + why + '</p></button>'; }).join("") +
+      '<p class="mn-ft">뉴스 제목은 네이버 증권 · 제목이 이유를 다 말해 주진 않아요</p></section>';
+  }
+
+  /* ── #9 📅 이번 주 ── */
+  function calHtml(D){
+    var C = D.cal || {}, t0 = kd(0), mine = {}; wl().forEach(function(o){ mine[tick(o.k).toUpperCase()] = 1; });
+    var ev = (C.econ || []).filter(function(x){ return x.d >= t0; }).map(function(x){ return {d: x.d, t: x.t, h: x.f + ' ' + e(x.n) + (x.fc ? ' <small>예상 ' + e(x.fc) + (x.pv ? ' · 이전 ' + e(x.pv) : '') + '</small>' : ''), s: x.f === "🇺🇸" ? 1 : 2}; });
+    var er = (C.earn || []).filter(function(x){ return x.d >= t0 && x.d <= kd(7); }).map(function(x){ var my = mine[x.s] || x.w; return {d: x.d, t: x.tm === "장 전" ? "장 전" : x.tm === "장 뒤" ? "장 뒤" : "", h: (my ? "⭐" : "💼") + ' ' + e(x.n.replace(/,? (Inc|Corporation|Corp|Ltd|Holdings|Co)\.?$/i, "")) + ' <small>' + e(x.s) + ' 실적</small>', s: my ? 0 : 3}; });
+    var all = ev.concat(er).sort(function(a, b){ return a.d < b.d ? -1 : a.d > b.d ? 1 : a.s - b.s; });
+    if (!all.length) return "";
+    var lim = EZ() ? 4 : 6, days = {};
+    function row(x){ var first = !days[x.d]; days[x.d] = 1; return '<div class="mn-cal' + (x.d === t0 ? " today" : "") + '"><span class="mn-cd">' + (first ? (x.d === t0 ? "오늘" : md(x.d) + "(" + wd(x.d) + ")") : "") + '</span><span class="mn-ct">' + (x.t || "") + '</span><span class="mn-ce">' + x.h + '</span></div>'; }
+    var h = all.slice(0, lim).map(row).join(""); days = {}; all.slice(0, lim).forEach(function(x){ days[x.d] = 1; });
+    return '<section class="card mn-c no-clp" data-cz="done" data-xc="1" id="mncal"><h3>📅 이번 주 <span class="mut">한국 시각</span></h3>' + h +
+      (all.length > lim ? '<details class="mn-more"><summary>＋ ' + (all.length - lim) + '개 더</summary>' + all.slice(lim).map(row).join("") + '</details>' : '') +
+      '<p class="mn-ft">⭐ 내 종목 · 💼 대형주·포트 실적 · 미국 장 뒤 실적은 한국 다음 날 아침에 반영 · 일정은 바뀔 수 있어요</p></section>';
+  }
+
+  /* ── #10 💬 고객 질문 10 ── */
+  var QD = null;
+  function qload(){
+    if (QD) return Promise.resolve(QD);
+    return Promise.all([gj(RM + "bear.json", 600000), gj(RM + "port.json", 600000), gj("archive/x/flow_kr.json", 600000), gj("archive/x/wl_live.json", 120000), gj("archive/x/live_kr.json", 120000), gj("archive/x/products.json", 1800000)])
+      .then(function(r){ QD = {B: r[0] || {}, P: r[1] || {}, F: r[2] || {}, W: r[3] || {}, L: r[4] || {}, PR: r[5] || {}}; setTimeout(function(){ QD = null; }, 600000); return QD; });
+  }
+  function qa(Q){
+    var M = {}; (Q.B.markets || []).forEach(function(m){ M[m.key] = m; });
+    var k = M.kospi || {}, s = M.sp500 || {}, nq = M.nasdaq || {};
+    var hold = Q.P.hold || [], pc = function(re){ var t = 0; hold.forEach(function(h){ if (re.test(h.name)) t += +h.pct || 0; }); return Math.round(t * 10) / 10; };
+    var cash = pc(/현금/), gold = pc(/^금/), core = pc(/코어/);
+    var R = (Q.F.mkt || {}).KOSPI || [], r0 = R[0] || {}, U = Math.abs(r0.f || 0) > 1e6 ? 1e8 : 1, fs = 0; for (var i = 0; i < R.length; i++){ if (R[i].f && (R[i].f > 0) === (r0.f > 0)) fs++; else break; }
+    var f20 = 0; R.forEach(function(x){ f20 += (x.f || 0) / U; });
+    var topSell = (Q.F.stocks || []).slice().sort(function(a, b){ return (a.f5 || 0) - (b.f5 || 0); }).slice(0, 3).map(function(x){ return x.n; }).join(", ");
+    var topBuy = (Q.F.stocks || []).slice().sort(function(a, b){ return (b.f5 || 0) - (a.f5 || 0); }).slice(0, 3).map(function(x){ return x.n; }).join(", ");
+    var st = function(m){ return m.state === "🐻" ? "하락장" : m.state === "🟡" ? "조정" : "정상 흐름"; };
+    var rb = k.rebounds || {}, bn = k.n || 0;
+    var big = ((Q.L.date === kd(0) ? Q.L.value : null) || []).slice(0, 3).sort(function(a, b){ return Math.abs(b.r) - Math.abs(a.r); })[0];
+    var bigWhy = big ? ((Q.W.why || []).filter(function(w){ return w.c === big.s.slice(0, 6); })[0] || {}) : {}, bf = big ? (Q.F.stocks || []).filter(function(x){ return x.c === big.s.slice(0, 6); })[0] : null;
+    var fx = Q.W.fx || {}, krw = (Q.PR.krw || []).filter(function(b){ return b.kind === "국채" && b.after; }).sort(function(a, b){ return b.after - a.after; })[0], y10 = ((Q.PR.ust_hist || {}).y10 || []).slice(-1)[0];
+    var y10p = ((Q.PR.ust_hist || {}).y10 || []).slice(-21)[0];
+    var out = [];
+    out.push(["지금 팔아야 해요?", k.state === "🐻"
+      ? "국내 주식은 코스피가 고점보다 " + sg(k.dd, 0) + "로 하락장 규칙 구간이에요. 규칙은 국내 주식 몫을 현금 " + (k.cash || 100) + "%까지 줄이는 쪽이지만, 이미 많이 빠진 뒤라 한 번에 던지지 않고 반등 때 나눠서 줄이는 게 원칙이에요. 해외 ETF(S&P500 " + st(s) + ")는 배분 그대로 가져가요."
+      : "코스피는 " + st(k) + "(고점 " + sg(k.dd, 0) + "), S&P500은 " + st(s) + "이에요. 규칙상 서둘러 팔 구간은 아니고, 정해 둔 비중에서 크게 벗어난 것만 맞추면 돼요."]);
+    out.push(["지금 사도 돼요?", k.state === "🐻"
+      ? "국내 주식은 판정이 풀릴 때(고점 −10% 위 + 200일선 위)까지 새로 사지 않는 규칙이에요. 바닥 신호는 지금 " + bn + "/4개 — 2개 넘게 켜지면 나눠서 담기 시작해요. 해외 ETF는 배분표대로 나눠서 담아도 되는 구간이에요."
+      : "한 번에 사기보다 2~3번 나눠서 담는 걸 권해요. 지금 배분표는 지수 ETF(S&P500·나스닥) " + core + "% · 금 " + gold + "% · 현금 " + cash + "%예요."]);
+    if (big) out.push([big.n + " 왜 " + (big.r >= 0 ? "올라요?" : "빠져요?"), big.n + "는 오늘 " + sg(big.r) + "예요. " + ((bigWhy.news || [])[0] ? "관련 뉴스: 「" + bigWhy.news[0].t + "」. " : "") +
+      (bf ? "최근 5일 외국인 " + won(bf.f5) + ", 기관 " + won(bf.i5) + " 순매수였어요." : "") + " 하루 등락보다는 실적·업황 흐름으로 판단하는 게 좋아요."]);
+    if (r0.f != null) out.push(["외국인은 왜 " + (r0.f >= 0 ? "사요?" : "팔아요?"), "코스피에서 외국인은 " + Number(r0.d.slice(5, 7)) + "/" + Number(r0.d.slice(8)) + " 하루 " + won(r0.f / U) + (fs >= 2 ? "(" + fs + "일째)" : "") + ", 최근 20일 합계 " + won(f20) + "예요. 5일 동안 가장 많이 판 종목은 " + topSell + ", 많이 산 종목은 " + topBuy + "예요. " +
+      "다만 10년치를 돌려 보면 외국인·기관을 따라 사는 건 수익으로 이어지지 않았어요 — 흐름 참고용이에요."]);
+    out.push(["미국 주식은 괜찮아요?", "S&P500은 고점보다 " + sg(s.dd, 1) + "로 " + st(s) + "이고, " + (s.close && s.m200 ? (s.close > s.m200 ? "장기 평균선(200일) 위에 있어요." : "장기 평균선(200일) 아래로 내려왔어요.") : "") + " 나스닥은 " + sg(nq.dd, 1) + "(" + st(nq) + "). 규칙상 해외 ETF 비중은 " + (s.cash ? "현금 " + s.cash + "%까지 줄이는 구간이에요." : "그대로 유지하는 구간이에요.")]);
+    if (k.state === "🐻") out.push(["코스피 바닥은 언제예요?", "바닥을 미리 맞히는 방법은 없어요. 대신 규칙으로 봐요 — 이번 하락장(" + md(rb.from) + "~)에서 하루 +3% 넘는 반등이 " + (rb.n || 0) + "번 있었고 그중 " + (rb.broke || 0) + "번은 20일 안에 저점을 다시 깼어요. 바닥 신호 4개 중 " + bn + "개가 켜져 있고, 2개가 넘으면 나눠 담기를 시작해요."]);
+    out.push(["현금은 얼마나 들고 있어야 해요?", "국내 주식 몫은 " + (k.cash ? "지금 규칙상 현금 " + k.cash + "%까지" : "따로 현금을 늘릴 필요는 없어요") + ". 해외 ETF 포트는 현금 " + cash + "% · 금 " + gold + "%예요. 고객 성향(안정형일수록 더 많이)에 맞춰 조절해요."]);
+    if (gold) out.push(["금 지금 사도 돼요?", "지금 배분표의 금 비중은 " + gold + "%예요. 금은 주식이 흔들릴 때 덜 빠지는 방패 역할이라 한 번에 크게보다 정해 둔 비중만큼 나눠서 담아요."]);
+    if (krw || y10) out.push(["채권 금리 지금 어때요?", (krw ? "국고채는 세후 기준 최고 " + krw.after.toFixed(2) + "%(" + krw.name + ") 수준이에요. " : "") + (y10 ? "미국 10년 국채 금리는 " + (+y10[1]).toFixed(2) + "%" + (y10p ? "(한 달 전 " + (+y10p[1]).toFixed(2) + "%)" : "") + "예요. " : "") + "주식이 흔들릴 때 채권 비중을 갖고 있으면 전체 변동이 줄어요."]);
+    if (fx.p) out.push(["환율 어디로 가요?", "원/달러는 지금 " + (Math.round(fx.p * 10) / 10).toLocaleString() + "원(" + sg(fx.chg, 2) + ")이에요. 환율 방향은 아무도 맞히기 어려워서, 달러 자산은 한 번에 바꾸기보다 몇 번에 나눠 환전하는 게 원칙이에요."]);
+    return out.slice(0, 10);
+  }
+  function qaList(Q, lim){
+    var L = qa(Q);
+    return L.slice(0, lim || L.length).map(function(x, i){ return '<details class="mn-q"' + (i === 0 && !lim ? " open" : "") + '><summary>' + e(x[0]) + '</summary><p>' + e(x[1]) + '</p><button type="button" class="mn-qc" data-qcopy="' + i + '">📋 카톡용 복사</button></details>'; }).join("");
+  }
+  function copyQ(i){ qload().then(function(Q){ var x = qa(Q)[i]; if (!x) return; var t = "Q. " + x[0] + "\nA. " + x[1] + "\n※ 참고용 자료이며 투자 권유가 아닙니다. 투자 판단과 책임은 본인에게 있습니다.";
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ try { toast("📋 복사했어요 — 카톡에 붙여 넣기"); } catch(x2) {} }, function(){ window.prompt("길게 눌러 복사하세요", t); }); }); }
+  function qaCard(){
+    return '<section class="card mn-c no-clp" data-cz="done" data-xc="1" id="mnqa"><h3>💬 고객이 이렇게 물으면</h3><div id="mnqab"><div class="loading">불러오는 중…</div></div><button type="button" class="mn-btn" data-qaall="1">💬 10개 모두 보기</button></section>';
+  }
+  window.__qaOpen = function(){
+    var old = document.getElementById("qasheet"); if (old) old.remove();
+    var d = document.createElement("div"); d.id = "qasheet";
+    d.innerHTML = '<div class="qa-in"><div class="qa-h"><b>💬 고객이 이렇게 물으면</b><small>오늘 숫자로 채운 답 · 눌러서 펼치고 카톡으로 복사</small><button type="button" class="qa-x" aria-label="닫기">✕</button></div><div class="qa-b"><div class="loading">불러오는 중…</div></div><p class="mn-ft">참고용 · 고객 성향과 기간에 맞춰 조정하세요 · 투자 권유 아님</p></div>';
+    document.body.appendChild(d);
+    var off = function(){ var x = document.getElementById("qasheet"); if (x) x.remove(); window.removeEventListener("hashchange", off); window.removeEventListener("popstate", off); };
+    window.addEventListener("hashchange", off); window.addEventListener("popstate", off);
+    d.onclick = function(ev){ if (ev.target === d || ev.target.closest(".qa-x")) d.remove(); };
+    qload().then(function(Q){ var b = d.querySelector(".qa-b"); if (b) b.innerHTML = qaList(Q); });
+  };
+
+  /* ── 붙이기 ── */
+  function mount(){
+    if (cur() !== "home") return;
+    var hb = document.getElementById("hmbody"); if (!hb) return;
+    var host = document.getElementById("mnbox");
+    var anchor = EZ() ? document.getElementById("ezhero") : hb.querySelector(".h2-num");
+    if (!anchor) return;
+    if (!host || host.dataset.ez !== String(EZ())){
+      if (host) host.remove();
+      host = document.createElement("div"); host.id = "mnbox"; host.dataset.ez = String(EZ());
+      anchor.insertAdjacentElement("afterend", host); host.dataset.t = "0";
+    }
+    if (Date.now() - (+host.dataset.t || 0) < 90000) return;
+    host.dataset.t = String(Date.now());
+    load().then(function(D){ var h = document.getElementById("mnbox"); if (!h) return;
+      h.innerHTML = mineHtml(D) + whyHtml(D) + calHtml(D) + qaCard();
+      qload().then(function(Q){ var b = document.getElementById("mnqab"); if (b) b.innerHTML = qaList(Q, EZ() ? 2 : 3); });
+    });
+  }
+  function propBtn(){
+    if (cur() !== "prop") return; var m = document.getElementById("main"); if (!m || document.getElementById("qaprop")) return;
+    var hero = m.querySelector(".hero"); if (!hero) return;
+    var b = document.createElement("button"); b.type = "button"; b.id = "qaprop"; b.className = "mn-btn qa-prop"; b.innerHTML = "💬 고객이 이렇게 물으면? <small>오늘 숫자로 채운 답 10개 · 카톡 복사</small>";
+    b.onclick = window.__qaOpen; hero.insertAdjacentElement("afterend", b);
+  }
+  document.addEventListener("click", function(ev){
+    var t = ev.target.closest && ev.target.closest("[data-mnop],[data-qcopy],[data-qaall]"); if (!t) return;
+    ev.stopPropagation();
+    if (t.dataset.mnop != null){ if (window.openOP) openOP(t.dataset.mnop); return; }
+    if (t.dataset.qcopy != null){ copyQ(+t.dataset.qcopy); return; }
+    if (t.dataset.qaall) window.__qaOpen();
+  }, true);
+  var MT = 0; new MutationObserver(function(){ clearTimeout(MT); MT = setTimeout(function(){ try { mount(); propBtn(); } catch(x) {} }, 120); }).observe(document.documentElement, {childList: true, subtree: true});
+  setInterval(function(){ try { var h = document.getElementById("mnbox"); if (h) h.dataset.t = "0"; mount(); } catch(x) {} }, 180000);
+
+  (function(){ var st = document.createElement("style"); st.textContent =
+    "#mnbox .mn-c{margin-top:12px}.mn-c h3 .mut{font-size:12px}.mn-e{font-size:14px;line-height:1.6;color:var(--sub);margin:0 0 10px;word-break:keep-all}.mn-e b{color:var(--text)}" +
+    ".mn-btn{display:block;width:100%;border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text);border-radius:12px;padding:10px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px}.mn-btn small{display:block;font-weight:400;font-size:12px;color:var(--sub);margin-top:2px}" +
+    ".qa-prop{margin:0 0 12px;text-align:left;padding:12px 14px;border-color:rgba(124,156,255,.5)}" +
+    ".mn-r{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;width:100%;padding:10px 0;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}.mn-r:last-of-type{border-bottom:0}" +
+    ".mn-n{flex:1;min-width:0}.mn-n b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mn-n small{display:block;font-size:12px;color:var(--sub)}" +
+    ".mn-p{flex:0 0 auto;text-align:right;line-height:1.25}.mn-p b{display:block;font-size:16px;font-weight:800}.mn-p small{font-size:12px;color:var(--sub)}" +
+    ".mn-s{flex:1 0 100%;font-size:12.5px;color:var(--sub);margin-top:3px}.mn-s i{font-style:normal;font-weight:700}" +
+    ".mn-why,.mn-nw{flex:1 0 100%;margin:4px 0 0;font-size:13px;line-height:1.45;word-break:keep-all;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.mn-why{font-weight:700}.mn-nw{color:var(--sub)}" +
+    "#mnbox .up{color:var(--up)}#mnbox .dn{color:var(--down)}.mn-ft{font-size:12px;color:var(--sub);margin:8px 0 0;line-height:1.5}" +
+    ".mn-more summary{cursor:pointer;font-size:13px;color:var(--sub);padding:8px 0 2px;list-style:none;text-align:center}.mn-more summary::-webkit-details-marker{display:none}" +
+    ".mn-cal{display:flex;gap:8px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}.mn-cal:last-of-type{border-bottom:0}.mn-cal.today .mn-cd{color:var(--up);font-weight:800}" +
+    ".mn-cd{flex:0 0 66px;white-space:nowrap;font-size:12.5px;font-weight:700;color:var(--sub)}.mn-ct{flex:0 0 46px;font-size:12px;color:var(--sub);white-space:nowrap}.mn-ce{flex:1;min-width:0;line-height:1.4;word-break:keep-all}.mn-ce small{color:var(--sub);font-size:12px}" +
+    ".mn-q{border-bottom:1px solid var(--line);padding:2px 0}.mn-q summary{cursor:pointer;font-size:14.5px;font-weight:700;padding:9px 0;list-style:none}.mn-q summary::-webkit-details-marker{display:none}.mn-q summary:before{content:'Q. ';color:var(--acc,#7c9cff)}" +
+    ".mn-q p{margin:0 0 8px;font-size:14px;line-height:1.65;color:var(--text);word-break:keep-all}.mn-qc{border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;margin:0 0 8px;cursor:pointer}" +
+    "#qasheet{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}.qa-in{background:var(--bg,var(--panel));width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}" +
+    ".qa-h{position:relative;padding-right:36px;margin-bottom:6px}.qa-h b{display:block;font-size:18px}.qa-h small{color:var(--sub);font-size:12.5px}.qa-x{position:absolute;right:0;top:0;border:0;background:var(--panel2,transparent);color:var(--text);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer}";
+    document.head.appendChild(st); })();
+})();

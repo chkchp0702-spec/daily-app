@@ -87,6 +87,7 @@
     var lead = s === "morn" ? "좋은 아침이에요! " : s === "eve" ? "오늘 장 끝! " : s === "night" ? "밤이에요 🌙 " : s === "week" ? "주말이에요 🗓 " : "";
     S.say = lead + (b ? b.sh + " " + sg(b.v, 1) + "% · " : "") + W.say;
     if (s === "morn" && (H.focus || []).length) S.say2 = "오늘 볼 곳: " + H.focus.map(function(t){ return t.name; }).slice(0, 2).join(" · ");
+    else if (S.prob && (S.prob.p >= 85 || S.prob.p <= 15)) S.say2 = S.prob.day + " 코스피 확률은 극단값 — 오늘은 참고하지 않아요";   // 🎲 11/10 #2
     else if (S.prob && !S.prob.weak) S.say2 = S.prob.day + " 코스피 오를 확률 " + S.prob.p + "% (" + S.prob.tone + " · 아직 검증 중)";
     else if (S.prob) S.say2 = S.prob.day + " 코스피는 " + S.prob.tone + " · 실전 적중 " + Math.round(S.prob.hit) + "%라 참고만";   // 10/31 A4: 성적 낮을 땐 숫자 빼고 회색으로
     return S;
