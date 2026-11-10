@@ -188,6 +188,27 @@ def main():
             if k:
                 q["kr"] = {"c": twin[0], "n": twin[1], "p": k["p"], "chg": k["chg"], "t": k["t"]}
         out[code] = q
+    # ⚡ 11/10 #8 「왜 움직였나」 — 오늘 ±5% 넘게 움직인 시총 1조↑ 대형주(장중 나침반 live_kr.json) 최대 10개 · 뉴스 제목 1~2개 (50분마다)
+    why, W0 = [], {w["c"]: w for w in (old.get("why") or []) if w.get("day") == NOW.strftime("%Y-%m-%d")}
+    try:
+        LK = jl(os.path.join(X, "live_kr.json"), {}) or {}
+        if LK.get("date") == NOW.strftime("%Y-%m-%d"):
+            mv = [m for m in (LK.get("movers") or []) + (LK.get("losers") or []) if abs(m.get("r") or 0) >= 5]
+            mv = sorted({m["s"]: m for m in mv}.values(), key=lambda m: -abs(m["r"]))[:10]
+            for m in mv:
+                c = m["s"][:6]; w0 = W0.get(c) or {}
+                nw = w0.get("news")
+                if nw is None or w0.get("nt", "") < (NOW - dt.timedelta(minutes=50)).strftime("%Y-%m-%d %H:%M"):
+                    try:
+                        nw = [n for n in fresh(sorted(news_kr(c), key=lambda n: n["d"], reverse=True), 2)][:2]
+                    except Exception:
+                        nw = []
+                    nt = NOW.strftime("%Y-%m-%d %H:%M")
+                else:
+                    nt = w0.get("nt")
+                why.append({"c": c, "s": m["s"], "n": m["n"], "r": m["r"], "p": m.get("p"), "news": nw, "nt": nt, "day": NOW.strftime("%Y-%m-%d")})
+    except Exception as e:
+        print("왜 움직였나 실패", e)
     fx = None
     for u in ("https://api.stock.naver.com/marketindex/exchange/FX_USDKRW", "https://m.stock.naver.com/front-api/marketIndex/productDetail?category=exchange&reutersCode=FX_USDKRW"):
         try:   # 💱 서울 외환시장(네이버) 먼저 — 야후 KRW=X 는 장중 값이 10원 넘게 어긋날 때가 있음
@@ -231,7 +252,7 @@ def main():
             fx = {"p": round(last, 2), "prev": round(prev, 2) if prev else None, "chg": round((last / prev - 1) * 100, 2) if prev else None, "t": t}
     except Exception as e:
         print("환율 실패", e)
-    json.dump({"at": NOW.strftime("%Y-%m-%d %H:%M"), "fx": fx, "q": out}, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    json.dump({"at": NOW.strftime("%Y-%m-%d %H:%M"), "fx": fx, "q": out, "why": why}, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("관심종목", len(out), "/", len(S))
 
 

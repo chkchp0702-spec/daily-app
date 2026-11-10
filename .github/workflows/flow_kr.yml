@@ -26,4 +26,4 @@ jobs:
       - name: 수급 모으기
         run: python flow_kr.py
       - name: 저장
-        run: bash scripts/push.sh "flow_kr $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/flow_kr.json
+        run: bash scripts/push.sh "flow_kr $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/flow_kr.json archive/x/sent.json

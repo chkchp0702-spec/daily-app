@@ -95,6 +95,33 @@ def main():
     parts = [p for p in parts if not p.get("days") or max(p["days"]) >= cut]
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump({"v": 3, "lock": "운영자 전용 — 휴대폰에서 운영자 비밀번호로만 열림", "at": at, "seen": sorted(seen)[-3000:], "parts": parts}, open(OUT, "w"), ensure_ascii=False, separators=(",", ":"))
+    # 📊 11/10 #11 화면별 횟수만 공개 집계 (사용자 「모든 걸 허락」) — 기기 번호·이름·관심종목 없음. 날짜별 「몇 명이 열었나(수만)·어느 화면을 몇 번 봤나·무엇을 몇 번 눌렀나」
+    #    → 쓰지 않는 화면을 숫자로 가려 정리하기 위해. 잠근 원본(usage.json)은 그대로.
+    PP = os.path.join(os.path.dirname(OUT), "usage_pub.json")
+    try:
+        PU = json.load(open(PP, encoding="utf-8"))
+    except Exception:
+        PU = {"days": {}}
+    for day, D in days.items():
+        Q = PU["days"].setdefault(day, {"opens": 0, "dev": 0, "tabs": {}, "views": {}, "taps": {}, "tapdev": {}})
+        Q["opens"] += D.get("opens", 0)
+        Q.setdefault("_dev", [])
+        for d in D.get("dev", {}):          # 같은 날 여러 번 모아도 기기 수가 겹치지 않게 — 기기 번호 대신 짧은 해시만 하루 동안
+            import hashlib
+            h = hashlib.sha1((day + d).encode()).hexdigest()[:6]
+            if h not in Q["_dev"]:
+                Q["_dev"].append(h)
+        Q["dev"] = len(Q["_dev"])
+        for src, key in (("tabs", "tabs"), ("views", "views"), ("taps", "taps")):
+            for k, c in (D.get(src) or {}).items():
+                Q[key][k] = Q[key].get(k, 0) + c
+        for k, devs in (D.get("tapdev") or {}).items():
+            Q["tapdev"][k] = Q["tapdev"].get(k, 0) + len(devs)
+    cut2 = (dt.datetime.now(KST) - dt.timedelta(days=35)).strftime("%Y-%m-%d")
+    PU["days"] = {k: v for k, v in PU["days"].items() if k >= cut2}
+    PU["at"] = at
+    PU["note"] = "화면별·누른 것별 횟수만 (기기 번호·이름 없음) · tabs = 처음 연 화면 · views = 본 화면 · taps = 누른 것 · tapdev = 그걸 누른 사람 수(대략) · 11/10부터"
+    json.dump(PU, open(PP, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("새 신호", n, "· 몫", len(parts))
 
 

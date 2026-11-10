@@ -24,4 +24,4 @@ jobs:
       - name: 저장
         run: |
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/ideas.json archive/fb archive/x/usage.json archive/x/vote.json
+          bash scripts/push.sh "의견함 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/ideas.json archive/fb archive/x/usage.json archive/x/usage_pub.json archive/x/vote.json

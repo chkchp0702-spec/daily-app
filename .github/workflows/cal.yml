@@ -1,0 +1,28 @@
+name: cal
+# 📅 이번 주 달력 — 경제 지표(미·한·중·일 중요) + 7일 안 대형주·포트·관심종목 실적 → archive/x/cal_week.json (11/10 · 돈·AI 안 씀)
+on:
+  schedule:
+    - cron: "17 21 * * 0-4"   # KST 06:17 월~금 아침
+    - cron: "47 8 * * 1-5"    # KST 17:47 다시 (미국 장 전 갱신)
+    - cron: "13 23 * * 6"     # KST 일 08:13 (새 주)
+  push:
+    branches: [main]
+    paths: [cal_week.py, .github/workflows/cal.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: cal
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python cal_week.py
+      - name: 저장
+        run: bash scripts/push.sh "cal $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/cal_week.json

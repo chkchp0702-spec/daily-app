@@ -186,7 +186,8 @@ def main():
            "limit_dn": sum(1 for x in rows if x["r"] <= -29.5), "index": ix, "sectors": sectors, "strong": pool[:6],
            "weak": list(reversed(pool[-4:])) if len(pool) > 10 else [], "themes": themes[:8], "themes_weak": list(reversed(themes[-3:])) if len(themes) > 10 else [],
            "value": [dict(st(x), v=round(x["v"] / 1e8)) for x in tv], "snaps": snaps,
-           "movers": [st(x) for x in sorted([x for x in rows if x["cap"] >= 1e12], key=lambda x: -x["r"])[:8]]}
+           "movers": [st(x) for x in sorted([x for x in rows if x["cap"] >= 1e12], key=lambda x: -x["r"])[:8]],
+           "losers": [st(x) for x in sorted([x for x in rows if x["cap"] >= 1e12], key=lambda x: x["r"])[:8]]}   # ⚡ 11/10 #8 왜 움직였나 — 크게 빠진 대형주도
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("장중 나침반", t, f"상승 {up} 하락 {dn}", len(sectors), len(pool), len(themes))

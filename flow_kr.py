@@ -6,6 +6,9 @@
 자료: 다음 금융 investor/days(종목·시장) · 네이버 시총 순위. 결과 archive/x/flow_kr.json (돈·AI 안 씀)"""
 import json, os, re, sys, time, datetime as dt
 from kr_whale import get
+from subsec import sub_of
+
+OPD = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/"
 
 P = "archive/x/flow_kr.json"
 KST = dt.timezone(dt.timedelta(hours=9))
@@ -89,7 +92,56 @@ def market():
     return M, keys
 
 
+def sectors():
+    """🏭 11/10 #5 업종별 수급 — 장중 나침반(live.py)과 같은 세부 섹터(opdata sec.json + subsec)"""
+    try:
+        sec = get(OPD + "sec.json", "https://github.com/")
+    except Exception as e:
+        print("섹터 목록 실패", e); return {}
+    out = {}
+    for k, v in sec.items():
+        if k.endswith((".KS", ".KQ")) and isinstance(v, list) and len(v) >= 2:
+            r = sub_of(v[0], v[1])
+            if r:
+                out[k[:6]] = [r[2], r[1]]
+    return out
+
+
+def reversal_push(out):
+    """🔔 11/10 #6 수급 반전 알림 — 관심종목에서 외국인·기관이 5거래일 넘게 팔다가 사기로 돌아선 날, 사람마다 하루 한 번 묶어서"""
+    try:
+        import extras as X, plus
+    except Exception as e:
+        print("알림 모듈 실패", e); return
+    try:
+        U = json.load(open(os.path.join("archive", "x", "users.json"), encoding="utf-8"))
+    except Exception:
+        return
+    by = {s["c"]: s for s in out["stocks"]}
+
+    def turned(a):
+        return len(a) >= 6 and a[-1] > 0 and all(x < 0 for x in a[-6:-1])
+    n = 0
+    for uid, u in U.items():
+        hits = []
+        for it in u.get("wl") or []:
+            c = re.sub(r"\D", "", str(it[0]))[:6]
+            s = by.get(c)
+            if not s:
+                continue
+            for who, key in (("외국인", "sf"), ("기관", "si")):
+                if turned(s.get(key) or []):
+                    hits.append(f"{s['n']} {who} 매수 전환(+{s[key][-1]:,}억)")
+        if not hits:
+            continue
+        X.push("u", "🧲 관심종목 수급 반전", " · ".join(hits[:4]) + " — 5일 넘게 팔다가 어제 순매수로 돌아섰어요 · 사는 신호는 아님", "flow",
+               "flowrev:" + uid + ":" + out["day"], tags="magnet", quiet=tuple(u.get("quiet") or X.QUIET), full_topic=plus.user_topic(uid), log=False)
+        n += 1
+    print("수급 반전 알림", n, "명")
+
+
 def main():
+    SEC = sectors()
     uni = universe()
     S, bad, kseen = [], 0, []
     for cd, nm, mk, mv in uni:
@@ -120,6 +172,7 @@ def main():
              "f1": amt("f", 1), "f5": amt("f", 5), "f20": amt("f", min(20, len(rows))),
              "i1": amt("i", 1), "i5": amt("i", 5), "i20": amt("i", min(20, len(rows))),
              "fs": streak([r["f"] for r in rows]), "is": streak([r["i"] for r in rows]),
+             "sec": (SEC.get(cd) or [None])[0], "si_": (SEC.get(cd) or [None, None])[1],
              "fr": round(r0["rate"] * 100, 2) if r0.get("rate") else None,
              "fr20": round((r0["rate"] - rows[min(20, len(rows) - 1)]["rate"]) * 100, 2) if r0.get("rate") and rows[min(20, len(rows) - 1)].get("rate") else None,
              "sf": [round(r["f"] * r["c"] / 1e8) if r["f"] is not None else 0 for r in rows[:20]][::-1],
@@ -137,7 +190,35 @@ def main():
     out = {"v": 1, "at": dt.datetime.now(KST).strftime("%Y-%m-%d %H:%M"), "day": day, "n": len(S), "bad": bad,
            "note": "금액 = 순매수 수량 × 그날 종가(억원, 어림) · 시총 상위 300 · 사는 신호 아님(10/28 10년 검증)",
            "mkt": M, "stocks": S, "keys": {"stock": kseen, "mkt": mkeys}}
+    # 🏭 업종별 합계 (5일·20일)
+    G = {}
+    for s in S:
+        if not s.get("sec"):
+            continue
+        g = G.setdefault(s["sec"], {"n": s["sec"], "ic": s.get("si_") or "", "k": 0, "f5": 0, "i5": 0, "f20": 0, "i20": 0, "mc": 0, "top": []})
+        g["k"] += 1; g["mc"] += s.get("mc") or 0
+        for k in ("f5", "i5", "f20", "i20"):
+            g[k] += s.get(k) or 0
+        g["top"].append((s["n"], (s.get("f5") or 0) + (s.get("i5") or 0)))
+    secs = []
+    for g in G.values():
+        if g["k"] < 3:
+            continue
+        g["top"] = [x[0] for x in sorted(g["top"], key=lambda x: -abs(x[1]))[:3]]
+        for k in ("f5", "i5", "f20", "i20"):
+            g[k] = round(g[k], 1)
+        secs.append(g)
+    out["secs"] = sorted(secs, key=lambda g: -(g["f5"] + g["i5"]))
+    old = {}
+    try:
+        old = json.load(open(P, encoding="utf-8"))
+    except Exception:
+        pass
     json.dump(out, open(P, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    if old.get("day") != day or not old.get("pushed"):
+        reversal_push(out)
+        out["pushed"] = 1
+        json.dump(out, open(P, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print(day, "종목", len(S), "실패", bad, "기관 있음", sum(s["i1"] is not None for s in S))
 
 
