@@ -43,9 +43,9 @@
       gj(RAWM + "market/home.json" + q5()), sec ? gj("archive/sector/" + sec.id + "/compass.json") : null,
       gj("archive/x/whale_pick.json" + q5()), gj("archive/x/whale_x.json" + q5()), arc("cup", "cards.json"), arc("gap", "cards.json"),
       gj("archive/x/products.json" + q5(), 600000), gj("archive/x/prob.json" + q5()), gj(RAWM + "feeds/hot.json" + q5()), gj("archive/x/pbbrief.json" + q5(), 300000),   // 🎨 11/04: 오늘 한 줄(pbbrief)
-      window.SIGNMP || null, gj(RAWM + "market/bear.json" + q5())   // 🐻 11/09 하락장 계기판
+      window.SIGNMP || null, gj(RAWM + "market/bear.json" + q5()), gj(RAWM + "market/bubble.json" + q5())   // 🐻 11/09 하락장 계기판 · 🫧 11/10 버블 경보판
     ]).then(function(r){
-      D = {kr: r[0], us: r[1], jp: r[2], cn: r[3], hk: r[4], H: r[5] || {}, C: r[6], wp: r[7], wx: r[8], cup: r[9], gap: r[10], pd: r[11], pb: r[12], hot: r[13], brief: r[14], bear: r[16]};
+      D = {kr: r[0], us: r[1], jp: r[2], cn: r[3], hk: r[4], H: r[5] || {}, C: r[6], wp: r[7], wx: r[8], cup: r[9], gap: r[10], pd: r[11], pb: r[12], hot: r[13], brief: r[14], bear: r[16], bub: r[17]};
       DT = Date.now(); return D;
     });
   }
@@ -383,6 +383,7 @@
       b.insertBefore(rings, b.firstChild);
       var num = mk("h2num", numHtml(d)); b.insertBefore(num, b.firstChild);   // ⑰ 오늘의 숫자 맨 위
       var ob = document.getElementById("h2bear"); if (ob) ob.remove(); var bh = bearHtml(d); if (bh) num.insertAdjacentElement("afterend", mk("h2bear", bh));   // 🐻 11/09 결론 바로 아래
+      var obb = document.getElementById("h2bub"); if (obb) obb.remove(); try { var bbh = window.__bubCard ? __bubCard(d.bub) : ""; if (bbh) (document.getElementById("h2bear") || num).insertAdjacentElement("afterend", mk("h2bub", bbh)); } catch(x) {}   // 🫧 11/10 버블 경보판 — 계기판 바로 아래 (ux1110b.js)
       var orb = document.getElementById("h2reb"); if (orb) orb.remove();   // 📨 11/10 A11/10-1 반등 날 기록 — 🛡 결론 밑 · 계기판 위 (ux1110.js · 반등 날에만)
       try { var kx_ = ix(d.kr, "코스피"), rh = window.__rebCard && kx_ && d.kr && d.kr.date === new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10) ? __rebCard(d.bear, kx_.chg, "home") : ""; if (rh) num.insertAdjacentElement("afterend", mk("h2reb", rh)); } catch(x) {}
       var world = mk("h2world", worldHtml(d)), disc = mk("h2disc", discHtml(d)), map = mk("h2map", mapHtml(d)), cl = mk("h2cl", clientHtml(d));
@@ -403,6 +404,7 @@
     var more = b.querySelector(".hm-more"); if (more) more.classList.add("h2-hide");   // 아래 바로가기 줄 → 「오늘의 발견」이 대신
     var nm_ = document.getElementById("h2num"); if (nm_ && b.firstElementChild !== nm_) b.insertBefore(nm_, b.firstChild);
     var br_ = document.getElementById("h2bear"); if (nm_ && br_ && nm_.nextElementSibling !== br_) nm_.insertAdjacentElement("afterend", br_);
+    var bb_ = document.getElementById("h2bub"), ba_ = br_ || nm_; if (ba_ && bb_ && ba_.nextElementSibling !== bb_) ba_.insertAdjacentElement("afterend", bb_);
     var hz = document.getElementById("tdhero"), wz = document.getElementById("h2world"); if (hz && wz && wz.nextElementSibling !== hz) wz.insertAdjacentElement("afterend", hz);
     // 🔍 11/05 A3: ☀️ 오늘 한 장 · 📨 이번 주 한 장 카드는 「📨 오늘의 한 장」 탭으로 합쳤으니 홈에선 숨김(보내기 단추는 그대로 씀)
     var pb = document.getElementById("pbcard"); if (pb && document.getElementById("h2cl")) pb.classList.add("h2-hide");
@@ -415,7 +417,7 @@
   var T = 0;
   try { new MutationObserver(function(ms){
     if (!on()) return;
-    for (var i = 0; i < ms.length; i++){ var t = ms[i].target; if (t.closest && t.closest("#h2ringsw,#h2world,#h2disc,#h2map,#h2sv,#h2bear")) continue; if (T) return; T = setTimeout(function(){ T = 0; apply(); }, 200); return; }
+    for (var i = 0; i < ms.length; i++){ var t = ms[i].target; if (t.closest && t.closest("#h2ringsw,#h2world,#h2disc,#h2map,#h2sv,#h2bear,#h2bub")) continue; if (T) return; T = setTimeout(function(){ T = 0; apply(); }, 200); return; }
   }).observe(document.getElementById("main") || document.body, {childList: true, subtree: true}); } catch(x) {}
   setInterval(function(){ if (on() && !document.hidden && typeof cur !== "undefined" && cur === "home"){ DT = 0; var b = document.getElementById("hmbody"); if (b) b.removeAttribute("data-h2"); apply(); } }, 5 * 60e3);
 
