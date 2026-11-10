@@ -180,7 +180,10 @@
       more.innerHTML = '<button type="button" class="ez-open">▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small></button>' +
         '<div class="ez-drawer"><small>🎁 더보기</small><div>' + [["luck", "🔮", "운세"], ["saju", "📜", "사주"], ["tarot", "🃏", "타로"], ["lotto", "🎱", "로또"]].map(function(x){ return '<button type="button" data-ezgo="' + x[0] + '"><span>' + x[1] + '</span>' + x[2] + '</button>'; }).join("") + '</div></div>';
       h.insertAdjacentElement("afterend", more);
-      more.querySelector(".ez-open").onclick = function(){ var o = hb.classList.toggle("ez-open"); if (o && window.__h2apply) setTimeout(window.__h2apply, 30); this.innerHTML = o ? "▴ 접기" : '▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small>'; };   /* 🔧 11/05 자가 업그레이드: 펼칠 때 화면을 hb 맨 위로 끌어 「▴ 접기」가 화면 밖(383→−189px)으로 튀던 것 → 누른 단추 제자리, 내용은 바로 아래 */
+      more.querySelector(".ez-open").onclick = function(){ var o = hb.classList.toggle("ez-open"), btn = this, t0 = btn.getBoundingClientRect().top, end = Date.now() + 3000, stop = function(){ end = 0; };
+        /* 🔧 11/10 자가 업그레이드: 신호등이 막 그려진 뒤 바로 누르면 위 칸(🧭 결론·🧲 수급 등)이 늦게 채워지며 단추가 아래로 밀리던 것(건강검진 383→1802px) → 3초 동안 단추 자리를 붙잡음 · 손가락으로 움직이면 바로 놓음 */
+        addEventListener("touchstart", stop, {once: true, passive: true}); addEventListener("wheel", stop, {once: true, passive: true});
+        (function pin(){ if (!btn.isConnected) return; var d = btn.getBoundingClientRect().top - t0; if (Math.abs(d) > 2) scrollBy(0, d); if (Date.now() < end) requestAnimationFrame(pin); })(); if (o && window.__h2apply) setTimeout(window.__h2apply, 30); this.innerHTML = o ? "▴ 접기" : '▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small>'; };   /* 🔧 11/05 자가 업그레이드: 펼칠 때 화면을 hb 맨 위로 끌어 「▴ 접기」가 화면 밖(383→−189px)으로 튀던 것 → 누른 단추 제자리, 내용은 바로 아래 */
     }
     if (Date.now() - HB > 60000){ HB = Date.now();
       brief().then(function(b){ var x = document.getElementById("ezhero"); if (!x) return; x.innerHTML = b && (b.one || b.talk) ? heroHtml(b) : '<div class="ez-load">아직 오늘 자료가 안 올라왔어요 · 아래 「오늘 자세히 보기」를 눌러 주세요</div>'; }); }
