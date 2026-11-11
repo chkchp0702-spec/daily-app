@@ -82,7 +82,7 @@
       '<p class="mn-ft">⭐ 내 종목 · 💼 대형주·포트 실적 · 미국 장 뒤 실적은 한국 다음 날 아침에 반영 · 일정은 바뀔 수 있어요</p></section>';
   }
 
-  /* ── #10 💬 고객 질문 10 ── */
+  /* ── #10 💬 고객 질문 (11/10 10개 → 11/11 20개) ── */
   var QD = null;
   function qload(){
     if (QD) return Promise.resolve(QD);
@@ -136,22 +136,34 @@
     var r = ((Q.F.mkt || {}).KOSPI || [])[0]; if (r && r.f != null){ var U = Math.abs(r.f) > 1e6 ? 1e8 : 1; p.push("외국인 <b class=\"" + cl(r.f) + "\">" + won(r.f / U) + "</b> (" + md(r.d) + ")"); }
     return p.length ? '<div class="qa-now">⚡ 지금 · ' + p.join(" · ") + '</div>' : "";
   }
+  /* 🙌 11/11 사용자 「질문 20개까지 · 각 답변 닫기 버튼 · 뒤로 버튼 — 편의성」
+     → 답마다 「✕ 답 닫기」 · 하나 열면 다른 답은 접힘 · 시트 머리(늘 위에 붙어 있음)에 「← 뒤로」(답이 열려 있으면 「← 질문 목록」) · 휴대폰 뒤로 키도 같은 순서(답 → 시트)
+       · 20개라 갈래 칩(전체·주식·금리·환율·상품·연금 — qa.json 의 g)과 질문 번호(Q1~) */
+  var QG = [["all", "전체"], ["주식", "📈 주식"], ["금리", "💱 금리·환율"], ["상품", "🧺 상품·연금"]];
+  var CLS = '<button type="button" class="mn-qc qa-cl" data-qclose="1">✕ 답 닫기</button>';
   function richItem(x, i, open){
-    return '<details class="mn-q qa-r"' + (open ? " open" : "") + '><summary>' + e(x.q) + '<em>' + e(x.a) + '</em></summary><div class="qa-body">' +
+    return '<details class="mn-q qa-r" data-g="' + e(x.g || "") + '"' + (open ? " open" : "") + '><summary data-n="' + (i + 1) + '">' + e(x.q) + '<em>' + e(x.a) + '</em></summary><div class="qa-body">' +
       '<p class="qa-a">' + e(x.a) + '</p>' +
       '<ol class="qa-pts">' + (x.pts || []).map(function(p){ return '<li><b>' + e(p.k) + '</b>' + e(p.t) + '</li>'; }).join("") + '</ol>' +
       ((x.act || []).length ? '<div class="qa-act"><small>그래서 이렇게</small>' + x.act.map(function(a){ return '<div><b>' + e(a[0]) + '</b><span>' + e(a[1]) + '</span></div>'; }).join("") + '</div>' : '') +
       (x.flip ? '<p class="qa-flip"><b>🔁 이 답이 바뀌는 조건</b>' + e(x.flip) + '</p>' : '') +
       (x.watch ? '<p class="qa-watch">👀 다음에 볼 것 · ' + e(x.watch) + '</p>' : '') +
       (x.src ? '<p class="qa-src">근거: ' + e(x.src) + '</p>' : '') +
-      '<div class="qa-btn"><button type="button" class="mn-qc" data-qcopy="' + i + '" data-qm="s">📋 카톡용(짧게)</button><button type="button" class="mn-qc" data-qcopy="' + i + '" data-qm="f">📋 전체 복사</button></div></div></details>';
+      '<div class="qa-btn"><button type="button" class="mn-qc" data-qcopy="' + i + '" data-qm="s">📋 카톡용(짧게)</button><button type="button" class="mn-qc" data-qcopy="' + i + '" data-qm="f">📋 전체 복사</button>' + CLS + '</div></div></details>';
   }
+  function qaChips(Q){
+    var A = rich(Q); if (!A) return "";
+    var n = {}; A.items.forEach(function(x){ if (x.g) n[x.g] = (n[x.g] || 0) + 1; });
+    if (Object.keys(n).length < 2) return "";
+    return '<div class="qa-chips">' + QG.filter(function(g){ return g[0] === "all" || n[g[0]]; }).map(function(g){ return '<button type="button" data-qg="' + g[0] + '"' + (g[0] === "all" ? ' class="on"' : '') + '>' + g[1] + ' ' + (g[0] === "all" ? A.items.length : n[g[0]]) + '</button>'; }).join("") + '</div>';
+  }
+  function qaN(Q){ var A = rich(Q); return A ? A.items.length : qa(Q).length; }
   function qaList(Q, lim){
     var A = rich(Q);
     if (A) return (lim ? "" : '<p class="qa-meta">📝 ' + md(A.date) + ' ' + e(A.edition || "") + ' 시황으로 쓴 답 · ' + e(String(A.at || "").slice(5).replace("-", "/")) + ' 갱신' + (A.date !== kd(0) ? ' · <b>지난 시황 기준</b>' : '') + '</p>' + nowStrip(Q)) +
-      A.items.slice(0, lim || A.items.length).map(function(x, i){ return richItem(x, i, !lim && i === 0); }).join("");
+      A.items.slice(0, lim || A.items.length).map(function(x, i){ return richItem(x, i, false); }).join("");
     var L = qa(Q);
-    return L.slice(0, lim || L.length).map(function(x, i){ return '<details class="mn-q"' + (i === 0 && !lim ? " open" : "") + '><summary>' + e(x[0]) + '</summary><p>' + e(x[1]) + '</p><button type="button" class="mn-qc" data-qcopy="' + i + '">📋 카톡용 복사</button></details>'; }).join("");
+    return L.slice(0, lim || L.length).map(function(x, i){ return '<details class="mn-q"><summary>' + e(x[0]) + '</summary><p>' + e(x[1]) + '</p><div class="qa-btn"><button type="button" class="mn-qc" data-qcopy="' + i + '">📋 카톡용 복사</button>' + CLS + '</div></details>'; }).join("");
   }
   var NUM = ["①", "②", "③", "④"];
   function copyQ(i, mode){ qload().then(function(Q){
@@ -163,18 +175,59 @@
     } else { var y = qa(Q)[i]; if (!y) return; t = "Q. " + y[0] + "\nA. " + y[1] + tail; }
     (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ try { toast("📋 복사했어요 — 카톡에 붙여 넣기"); } catch(x2) {} }, function(){ window.prompt("길게 눌러 복사하세요", t); }); }); }
   function qaCard(){
-    return '<section class="card mn-c no-clp" data-cz="done" data-xc="1" id="mnqa"><h3>💬 고객이 이렇게 물으면 <span class="mut">오늘 시황으로 쓴 답</span></h3><div id="mnqab"><div class="loading">불러오는 중…</div></div><button type="button" class="mn-btn" data-qaall="1">💬 10개 모두 보기</button></section>';
+    return '<section class="card mn-c no-clp" data-cz="done" data-xc="1" id="mnqa"><h3>💬 고객이 이렇게 물으면 <span class="mut">오늘 시황으로 쓴 답</span></h3><div id="mnqab"><div class="loading">불러오는 중…</div></div><button type="button" class="mn-btn" data-qaall="1" id="mnqaall">💬 질문 모두 보기</button></section>';
   }
+  var QSAVED = null;
+  function qaOpenAns(d){ return d.querySelector("details.mn-q[open]"); }
+  function qaBk(){ var d = document.getElementById("qasheet"), b = d && d.querySelector(".qa-bk"); if (b) b.textContent = qaOpenAns(d) ? "← 질문 목록" : "← 뒤로"; }
+  function qaShut(){                                   // 시트 통째로 닫기 (✕ · 바깥 누르기 · 화면 이동)
+    var d = document.getElementById("qasheet"); if (!d) return; d.remove();
+    window.removeEventListener("hashchange", qaShut);
+    try { if (history.state && history.state.t === "qa") history.back(); } catch(z) {}      // 얹어 둔 기록 하나 걷기
+  }
+  function qaBack(){                                   // ← 뒤로: 답이 열려 있으면 답만 닫고, 아니면 시트를 닫음
+    try { if (history.state && history.state.t === "qa"){ history.back(); return; } } catch(z) {}
+    var d = document.getElementById("qasheet"); if (!d) return; var o = qaOpenAns(d);
+    if (o){ o.open = false; qaBk(); } else qaShut();
+  }
+  window.addEventListener("popstate", function(ev){    // 휴대폰 뒤로 키 = ← 뒤로 와 같은 순서 (smooth.js 미리 보기 창과 같은 방식)
+    var d = document.getElementById("qasheet");
+    if (d){
+      var o = qaOpenAns(d);
+      if (o){ o.open = false; qaBk(); try { history.pushState({t: "qa", d: ((QSAVED && QSAVED.d) || 0) + 1}, "", location.pathname + location.hash); } catch(z) {} return; }
+      d.remove(); window.removeEventListener("hashchange", qaShut);
+    }
+    if (ev.state && ev.state._qa){ try { history.replaceState(QSAVED, ""); } catch(z) {} if (window.updBack) try { updBack(); } catch(z) {} }
+  });
   window.__qaOpen = function(){
-    var old = document.getElementById("qasheet"); if (old) old.remove();
+    if (document.getElementById("qasheet")) return;
     var d = document.createElement("div"); d.id = "qasheet";
-    d.innerHTML = '<div class="qa-in"><div class="qa-h"><b>💬 고객이 이렇게 물으면</b><small>질문을 누르면 결론 → 근거 3개 → 행동 → 바뀌는 조건</small><button type="button" class="qa-x" aria-label="닫기">✕</button></div><div class="qa-b"><div class="loading">불러오는 중…</div></div><p class="mn-ft">참고용 · 고객 성향과 기간에 맞춰 조정하세요 · 투자 권유 아님</p></div>';
+    d.innerHTML = '<div class="qa-in"><div class="qa-h"><div class="qa-ht"><button type="button" class="qa-bk" aria-label="뒤로">← 뒤로</button><b>💬 고객이 이렇게 물으면</b><button type="button" class="qa-x" aria-label="닫기">✕</button></div><small>질문을 누르면 결론 → 근거 3개 → 행동 → 바뀌는 조건</small><div class="qa-cb"></div></div><div class="qa-b"><div class="loading">불러오는 중…</div></div><p class="mn-ft">참고용 · 고객 성향과 기간에 맞춰 조정하세요 · 투자 권유 아님</p></div>';
     document.body.appendChild(d);
-    var off = function(){ var x = document.getElementById("qasheet"); if (x) x.remove(); window.removeEventListener("hashchange", off); window.removeEventListener("popstate", off); };
-    window.addEventListener("hashchange", off); window.addEventListener("popstate", off);
-    d.onclick = function(ev){ if (ev.target === d || ev.target.closest(".qa-x")) d.remove(); };
-    qload().then(function(Q){ var b = d.querySelector(".qa-b"); if (b) b.innerHTML = qaList(Q); });
+    try { QSAVED = history.state;
+      history.replaceState(Object.assign({}, QSAVED || {}, {t: "xs", _qa: 1}), "");
+      history.pushState({t: "qa", d: ((QSAVED && QSAVED.d) || 0) + 1}, "", location.pathname + location.hash); } catch(z) {}
+    window.addEventListener("hashchange", qaShut);
+    d.onclick = function(ev){
+      if (ev.target === d || ev.target.closest(".qa-x")){ qaShut(); return; }
+      if (ev.target.closest(".qa-bk")){ qaBack(); return; }
+      var c = ev.target.closest("[data-qg]"); if (!c) return;
+      var g = c.dataset.qg; [].forEach.call(d.querySelectorAll("[data-qg]"), function(b){ b.classList.toggle("on", b === c); });
+      [].forEach.call(d.querySelectorAll(".qa-b details.mn-q"), function(x){ var hide = g !== "all" && x.dataset.g !== g; x.hidden = hide; if (hide) x.open = false; });
+      qaBk(); d.querySelector(".qa-in").scrollTop = 0;
+    };
+    qload().then(function(Q){ var c = d.querySelector(".qa-cb"); if (c) c.innerHTML = qaChips(Q); var b = d.querySelector(".qa-b"); if (b) b.innerHTML = qaList(Q); var n = d.querySelector(".qa-in"); if (n) n.scrollTop = 0; });
   };
+  // 답 하나를 열면 같은 묶음의 다른 답은 접고, 연 질문이 화면 위로 오게
+  document.addEventListener("toggle", function(ev){
+    var t = ev.target; if (!t || !t.classList || !t.classList.contains("mn-q")) return;
+    if (t.open){
+      [].forEach.call(t.parentNode.querySelectorAll("details.mn-q[open]"), function(o){ if (o !== t) o.open = false; });
+      var sh = !!t.closest("#qasheet");
+      setTimeout(function(){ try { if (t.open) t.scrollIntoView({block: sh ? "start" : "nearest", behavior: "smooth"}); } catch(z) {} }, 80);
+    }
+    qaBk();
+  }, true);
 
   /* ── 붙이기 ── */
   function mount(){
@@ -192,20 +245,21 @@
     host.dataset.t = String(Date.now());
     load().then(function(D){ var h = document.getElementById("mnbox"); if (!h) return;
       h.innerHTML = mineHtml(D) + whyHtml(D) + calHtml(D) + qaCard();
-      qload().then(function(Q){ var b = document.getElementById("mnqab"); if (b) b.innerHTML = qaList(Q, EZ() ? 2 : 3); });
+      qload().then(function(Q){ var b = document.getElementById("mnqab"); if (b) b.innerHTML = qaList(Q, EZ() ? 2 : 3); var a = document.getElementById("mnqaall"); if (a) a.textContent = "💬 " + qaN(Q) + "개 모두 보기"; });
     });
   }
   function propBtn(){
     if (cur() !== "prop") return; var m = document.getElementById("main"); if (!m || document.getElementById("qaprop")) return;
     var hero = m.querySelector(".hero"); if (!hero) return;
-    var b = document.createElement("button"); b.type = "button"; b.id = "qaprop"; b.className = "mn-btn qa-prop"; b.innerHTML = "💬 고객이 이렇게 물으면? <small>오늘 숫자로 채운 답 10개 · 카톡 복사</small>";
+    var b = document.createElement("button"); b.type = "button"; b.id = "qaprop"; b.className = "mn-btn qa-prop"; b.innerHTML = "💬 고객이 이렇게 물으면? <small>오늘 시황으로 쓴 답 20개 · 갈래별로 보기 · 카톡 복사</small>";
     b.onclick = window.__qaOpen; hero.insertAdjacentElement("afterend", b);
   }
   document.addEventListener("click", function(ev){
-    var t = ev.target.closest && ev.target.closest("[data-mnop],[data-qcopy],[data-qaall]"); if (!t) return;
+    var t = ev.target.closest && ev.target.closest("[data-mnop],[data-qcopy],[data-qaall],[data-qclose]"); if (!t) return;
     ev.stopPropagation();
     if (t.dataset.mnop != null){ if (window.openOP) openOP(t.dataset.mnop); return; }
     if (t.dataset.qcopy != null){ copyQ(+t.dataset.qcopy, t.dataset.qm); return; }
+    if (t.dataset.qclose){ var dt = t.closest("details"); if (dt){ dt.open = false; try { dt.scrollIntoView({block: "nearest"}); } catch(z) {} } return; }
     if (t.dataset.qaall) window.__qaOpen();
   }, true);
   var MT = 0; new MutationObserver(function(){ clearTimeout(MT); MT = setTimeout(function(){ try { mount(); propBtn(); } catch(x) {} }, 120); }).observe(document.documentElement, {childList: true, subtree: true});
@@ -226,7 +280,7 @@
     ".mn-cd{flex:0 0 66px;white-space:nowrap;font-size:12.5px;font-weight:700;color:var(--sub)}.mn-ct{flex:0 0 46px;font-size:12px;color:var(--sub);white-space:nowrap}.mn-ce{flex:1;min-width:0;line-height:1.4;word-break:keep-all}.mn-ce small{color:var(--sub);font-size:12px}" +
     ".mn-q{border-bottom:1px solid var(--line);padding:2px 0}.mn-q summary{cursor:pointer;font-size:14.5px;font-weight:700;padding:9px 0;list-style:none}.mn-q summary::-webkit-details-marker{display:none}.mn-q summary:before{content:'Q. ';color:var(--acc,#7c9cff)}" +
     ".mn-q p{margin:0 0 8px;font-size:14px;line-height:1.65;color:var(--text);word-break:keep-all}.mn-qc{border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;margin:0 0 8px;cursor:pointer}" +
-    ".qa-r summary em{display:block;font-style:normal;font-weight:500;font-size:13px;line-height:1.5;color:var(--sub);margin-top:3px;word-break:keep-all}.qa-r[open] summary em{display:none}.qa-r summary:before{content:'Q. ';color:var(--acc,#7c9cff)}" +
+    ".qa-r summary em{display:block;font-style:normal;font-weight:500;font-size:13px;line-height:1.5;color:var(--sub);margin-top:3px;word-break:keep-all}.qa-r[open] summary em{display:none}.qa-r summary:before{content:'Q' attr(data-n) '. ';color:var(--acc,#7c9cff)}" +
     ".qa-body{padding:0 0 12px}.qa-a{font-size:16px!important;font-weight:800;line-height:1.55!important;margin:2px 0 10px!important;padding:11px 13px;border-radius:12px;background:color-mix(in srgb,var(--acc,#7c9cff) 13%,transparent);word-break:keep-all}" +
     ".qa-pts{list-style:none;margin:0 0 10px;padding:0;counter-reset:q}.qa-pts li{counter-increment:q;position:relative;padding:8px 0 8px 30px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.6;word-break:keep-all}.qa-pts li:last-child{border-bottom:0}" +
     ".qa-pts li:before{content:counter(q);position:absolute;left:0;top:9px;width:21px;height:21px;border-radius:50%;background:var(--text);color:var(--panel,#fff);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}" +
@@ -234,9 +288,14 @@
     ".qa-act{border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:0 0 10px}.qa-act small{display:block;font-size:12px;font-weight:800;color:var(--sub);margin-bottom:2px}.qa-act div{padding:6px 0;border-bottom:1px dashed var(--line);font-size:13.5px;line-height:1.5;word-break:keep-all}.qa-act div:last-child{border-bottom:0}" +
     ".qa-act div b{display:block;font-size:13px}.qa-act div span{color:var(--text)}" +
     ".qa-flip{font-size:13.5px!important;line-height:1.6!important;margin:0 0 8px!important;padding:9px 12px;border-radius:12px;background:color-mix(in srgb,#f0a020 14%,transparent);word-break:keep-all}.qa-flip b{display:block;font-size:12.5px;margin-bottom:2px}" +
-    ".qa-watch{font-size:13px!important;margin:0 0 4px!important;line-height:1.5!important;color:var(--text)}.qa-src{font-size:12px!important;color:var(--sub)!important;margin:0 0 8px!important;line-height:1.5!important}.qa-btn{display:flex;gap:8px;flex-wrap:wrap}.qa-btn .mn-qc{margin:0}" +
+    ".qa-watch{font-size:13px!important;margin:0 0 4px!important;line-height:1.5!important;color:var(--text)}.qa-src{font-size:12px!important;color:var(--sub)!important;margin:0 0 8px!important;line-height:1.5!important}.qa-btn{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.qa-btn .mn-qc{margin:0;min-height:34px}.qa-btn .qa-cl{margin-left:auto;border-color:var(--text);font-weight:800}.mn-q>.qa-btn{margin:0 0 10px}.mn-q[hidden]{display:none}" +
     ".qa-meta{font-size:12.5px;color:var(--sub);margin:0 0 6px;line-height:1.5}.qa-meta b{color:var(--up)}.qa-now{font-size:13px;line-height:1.5;padding:8px 11px;border-radius:10px;background:var(--panel2,rgba(127,127,127,.08));margin:0 0 6px}.qa-now .up{color:var(--up)}.qa-now .dn{color:var(--down)}" +
     "#qasheet{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}.qa-in{background:var(--bg,var(--panel));width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}" +
-    ".qa-h{position:relative;padding-right:36px;margin-bottom:6px}.qa-h b{display:block;font-size:18px}.qa-h small{color:var(--sub);font-size:12.5px}.qa-x{position:absolute;right:0;top:0;border:0;background:var(--panel2,transparent);color:var(--text);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer}";
+    "#qasheet .qa-in{padding-top:0}.qa-h{position:sticky;top:0;z-index:3;background:var(--bg,var(--panel));margin:0 -16px 8px;padding:12px 16px 9px;border-bottom:1px solid var(--line);border-radius:20px 20px 0 0}.qa-ht{display:flex;align-items:center;gap:8px;margin-bottom:3px}" +
+    ".qa-ht b{flex:1;min-width:0;font-size:16.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.qa-h small{display:block;color:var(--sub);font-size:12.5px}" +
+    ".qa-bk{flex:0 0 auto;border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text);height:36px;padding:0 12px;border-radius:999px;font:inherit;font-size:13.5px;font-weight:800;white-space:nowrap;cursor:pointer}" +
+    ".qa-x{flex:0 0 auto;border:0;background:var(--panel2,rgba(127,127,127,.14));color:var(--text);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer}" +
+    ".qa-chips{display:flex;gap:6px;overflow-x:auto;padding-top:8px;scrollbar-width:none}.qa-chips::-webkit-scrollbar{display:none}.qa-chips button{flex:0 0 auto;border:1px solid var(--line);background:transparent;color:var(--sub);border-radius:999px;height:32px;padding:0 12px;font:inherit;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}" +
+    ".qa-chips button.on{background:var(--text);color:var(--bg,var(--panel,#fff));border-color:var(--text)}#qasheet .mn-q{scroll-margin-top:148px}#mnqab .mn-q{scroll-margin-top:70px}";
     document.head.appendChild(st); })();
 })();
