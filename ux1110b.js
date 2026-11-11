@@ -85,18 +85,20 @@
   function pastLine(){
     var RM = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/", t = "?t=" + Math.floor(Date.now() / 36e5);
     var gj = function(f){ return fetch(RM + f + t).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }); };
-    Promise.all([gj("bubble_bt.json"), gj("us_shield_bt.json")]).then(function(Z){
-      var R = Z[0], U = Z[1], el = document.getElementById("bck-past"); if (!el || !R || !R.markets) return;
+    Promise.all([gj("bubble_bt.json"), gj("best_bt.json")]).then(function(Z){
+      var R = Z[0], BT = Z[1], el = document.getElementById("bck-past"); if (!el || !R || !R.markets) return;
       var M = {}; R.markets.forEach(function(m){ M[m.key] = m; });
       var li = [];
       var fc = (R.free_crises || []).filter(function(c){ return !/지금/.test(c.name); }).map(function(c){ return c.name.replace(/ (\d{4}).*$/, " $1") + " " + c.max + "시"; }).join(" · ");
       if (fc) li.push('<li><b>과거 위기 때 바늘</b> — ' + e(fc) + (R.free_dist && R.free_dist["6"] != null ? ' · 6시를 넘은 날은 전체의 ' + R.free_dist["6"] + '%뿐' : '') + ' → <b>6시부터 조심, 9시면 위기 한복판</b>으로 읽어요.</li>');
-      if (U && U.markets){
-        var n = 0, ns = 0, gold = true; U.markets.forEach(function(m){ n += m.n; ns += m.n_shield; (m.shields || []).forEach(function(x){ if (x.alt !== "gold") gold = false; }); });
-        li.push('<li><b>🇺🇸 미국 — 대책 연구</b> · 현금으로 빼면 낙폭은 크게 줄지만 2013년 뒤엔 해마다 2~4%p 손해. 현금 대신 국채·금·방어주·S&P로 갈아타는 판 ' + n + '개 중 합격(수익 거의 안 깎고 낙폭 5%p↑ 줄임)은 ' + ns + '개' + (ns && gold ? ' — 전부 「경고등 + 200일선 아래일 때 금으로」' : '') + '. 금이 최근 강했던 덕일 수 있어 아직 규칙엔 연결 안 했어요.</li>');
-      }
-      var k = M.kospi && M.kospi.combo_k100, kp = k && k.best_plus;
-      if (kp) li.push('<li><b>🇰🇷 코스피</b> — 「기계 신용 칸이 다 울고 + 200일선 아래면 전부 현금」을 하락장 규칙에 더하면 2012년까지 연 ' + (kp.d_front > 0 ? '+' : '') + kp.d_front + '%p · 2013년부터 ' + (kp.d_back > 0 ? '+' : '') + kp.d_back + '%p · 최대 낙폭 ' + String(k.k100.full.mdd).replace('-', '−') + '% → ' + String(kp.full.mdd).replace('-', '−') + '%' + (k.ok ? ' → <b>🐻 계기판에 연결함</b>' : ' → 연결 안 함') + '</li>');
+      // 🏁 11/11 시장별 1등 방식 (best_bt.json — 앞·뒤 모두 보유를 이긴 것 중 전체 연수익 1등)
+      var NMB = {"dd10": "고점 −10%", "dd15": "고점 −15%", "dd20": "고점 −20%", "ma200": "200일선 아래", "clock4.5": "버블 시계 4.5시", "clock6": "버블 시계 6시", "credit200": "신용 경보+200일선 아래",
+                 "release": "판정 풀림", "floor3": "바닥 신호 3개", "floor14": "바닥 ①④", "ma200up": "200일선 위로", "off": "신호 꺼짐", "cash": "현금", "bond": "중기국채"};
+      var nmb = function(k){ return /^current\+/.test(k) ? "지금 규칙 + " + (NMB[k.slice(8)] || k.slice(8)) : k === "current" ? "지금 규칙" : (NMB[k] || k); };
+      if (BT && BT.markets) BT.markets.forEach(function(m){
+        var b = m.best, flag = /kos/.test(m.key) ? "🇰🇷 " : "🇺🇸 ";
+        li.push('<li><b>' + flag + e(m.name) + '</b> — ' + (b ? e(nmb(b.ent)) + ' → ' + e(nmb(b.exit)) + ' · ' + e(NMB[b.alt] || b.alt) + ' ' + Math.round(b.frac * 100) + '% · 연 ' + b.full.cagr + '% (그냥 들고 있기 ' + m.hold.cagr + '%) · 최대 낙폭 ' + String(b.full.mdd).replace('-', '−') + '% (' + String(m.hold.mdd).replace('-', '−') + '%)' : '판 ' + m.n + '개 중 앞·뒤 모두 보유를 이긴 방식이 없어 <b>그냥 들고 있기</b>') + '</li>');
+      });
       el.innerHTML = '<summary>🕰 과거엔? — 1999년부터 다시 돌려 봄</summary><ul>' + li.join("") + '</ul><small>손 칸(FCF·CDS·규제)은 옛 자료가 없어 기계 칸으로 만든 대리 시계라 앱 시계보다 낮게 나와요 · 2012년까지 고르고 2013년부터 확인 · ' + e(String(R.at || "").slice(5, 10).replace("-", "/")) + ' 계산 · 매수·매도 추천 아님</small>';
       el.hidden = false;
     });
