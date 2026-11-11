@@ -382,6 +382,31 @@ def jniv_daily():
     return s
 
 
+_CN10 = {}
+def cn10y_daily():
+    """11/11 16시 #101: 중국 국채 10년 금리 일별 — CNBC ts-api CN10Y-CN(2002-06~). 중국 날짜(중국 장 마감 = 미국 장 열리기 전)."""
+    if "s" in _CN10:
+        return _CN10["s"]
+    s = None
+    try:
+        import prob
+        if not prob.FAKE:
+            end = (pd.Timestamp.today() + pd.Timedelta(days=2)).strftime("%Y%m%d")
+            u = f"https://ts-api.cnbc.com/harmony/app/bars/CN10Y-CN/1D/20020101000000/{end}000000/adjusted/EST5EDT.json"
+            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                bars = json.loads(r.read().decode("utf-8")).get("barData", {}).get("priceBars", [])
+            v = pd.Series({pd.Timestamp(x["tradeTime"][:8]): float(x["close"]) for x in bars if x.get("close")}, dtype=float).sort_index()
+            v = v[~v.index.duplicated(keep="last")]
+            v = v[v > 0]
+            if len(v) > 1000:
+                s = v
+    except Exception:
+        s = None
+    _CN10["s"] = s
+    return s
+
+
 def rank252(x):
     return x.rolling(252, min_periods=120).rank(pct=True)
 
@@ -630,6 +655,26 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                     M[-1]["p1"] = None
         except Exception as e:
             research["epu_err"] = str(e)[:120]
+    # 🇨🇳 중국 10년 금리 5일 급락 (11/11 16시 #101 · probe/cn10_bt.py·cn10b_bt.py) — 미국 「일주일」만, 1년 하위 10% 날만
+    #   CNBC CN10Y-CN 2002-06~ 5,531일 · 5일 변화(%p)의 1년 백분위 ≤10% · 같은 날(중국 마감이 미국 개장 전)
+    #   S&P 5일 뒤 −3.0·−5.1%p(n 498·309, 2013-06 기준) · 미 10년·S&P 5일 꼬리 칸 위 걸어가기 0.2488→0.24675 · 0.24185→0.24036 · 최근5년 0.24485→0.24461
+    #   교차 로지스틱 앞→뒤 0.24102→0.24043 · 뒤→앞 0.24642→0.24545(계수 −0.30·−0.26) · 5일 간격 시작점 5개 앞 5/5·뒤 4/5 음수 · S&P 5일 급락 겹친 날 빼도 −7.0·−4.4
+    #   ➖ 꼬리 첫날만은 +3.9·−10.7 뒤집힘 · 해마다 음수 14/23 → w 0.3 · 중국·홍콩(가설 대상)·한·일·다음 날·급등·20일 ❌
+    if us:
+        try:
+            c10 = cn10y_daily()
+            if c10 is not None:
+                rk = rank252(c10.diff(5)).reindex(idx).ffill(limit=3); cv = rk.iloc[-1]
+                research["cn10"] = {"d": str(c10.index[-1].date()), "v": round(float(c10.iloc[-1]), 3),
+                                    "ch5": round(float(c10.diff(5).iloc[-1]), 3), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                if not pd.isna(cv) and cv <= 0.1:
+                    m = cond(d, (rk <= 0.1).fillna(False), "중국 10년 금리 5일 급락(1년 하위 10%)")
+                    add("cn10", "🇨🇳", "중국 금리 급락", "자금", m, 0.3,
+                        f"중국 10년 국채 금리 {float(c10.iloc[-1]):.2f}% · 5일 {float(c10.diff(5).iloc[-1])*100:+.0f}bp (1년 백분위 {cv*100:.0f}%) — 중국 금리가 빠르게 떨어질 때(경기 걱정) 미국 일주일이 평소보다 약했음(다음 날엔 안 씀)")
+                    if M and M[-1]["k"] == "cn10":
+                        M[-1]["p1"] = None
+        except Exception as e:
+            research["cn10_err"] = str(e)[:120]
     # 🌏 외국인 수급 (한국) — 20일 누적 순매수의 2년 백분위 + 연속 순매도 일수
     fr = ext.get("foreign")
     if mk == "KR" and fr is not None and 0 < len(fr) <= 120:
