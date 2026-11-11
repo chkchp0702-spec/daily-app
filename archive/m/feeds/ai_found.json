@@ -1,6 +1,126 @@
 {
  "items": [
   {
+   "title": "오늘 증시: 엔비디아 회복에 다우·S&P500·나스닥 상승, 10년물 5% 근처(재향군인의 날)",
+   "url": "https://sg.finance.yahoo.com/news/live/stock-market-today-wednesday-november-11-dow-sp-500-nasdaq-nvidia-treasurys-veterans-day-140638547.html",
+   "press": "Yahoo Finance",
+   "at": "2026-11-11 23:45",
+   "why": "미국 지수 ETF 칸·TSM bet — 채권 현물 휴장일 주식만 열린 AI 반등, 금리 판정은 내일로 미뤄짐",
+   "summary": "엔비디아 반등 주도로 3대 지수 상승 출발 · 10년물 5% 근처 · 재향군인의 날 채권시장 휴장(주식 정상)"
+  },
+  {
+   "title": "코어위브, 전망 상향·수요 강세에 상승 — 애널리스트 강세 유지",
+   "url": "https://seekingalpha.com/news/4631385-coreweave-rises-after-raised-outlook-demand-keeps-analysts-bullish",
+   "press": "Seeking Alpha",
+   "at": "2026-11-11 23:45",
+   "why": "AI 차입 가설 반례·「AI 안에서 갈린다」 — 빚으로 짓는 네오클라우드가 가이던스로 버팀, 상류(MU·TSM·AVGO)로 파급",
+   "summary": "연간 전망 상향 뒤 급등 · 수요 강세로 애널리스트 강세 유지 · 미국 개장 직후 +14.5%(55.81$, daily-app 23:33)"
+  },
+  {
+   "title": "TSMC 10월 매출 — 전월비 +14.7%·전년비 약 +60% (SEC 6-K 공시)",
+   "url": "https://www.sec.gov/Archives/edgar/data/0001046179/000104617926000796/tsm-revenue20261110.htm",
+   "press": "SEC / TSMC",
+   "at": "2026-11-11 21:45",
+   "why": "⚡ TSM 대기 bet·🧠 「AI 안에서 갈린다」 — 엔비디아가 사람 위험으로 빠져도 상류 공급사 숫자는 가속",
+   "summary": "10월 매출 전월비 +14.7%·전년비 +59%대(TIKR 정리). 엔비디아 하향 연쇄와 같은 날 「AI 둔화 아직 없음」 숫자."
+  },
+  {
+   "title": "베어드, 엔비디아 중립 하향·목표가 500→200달러 / 모건스탠리 최선호주 제외",
+   "url": "https://www.cnbc.com/2026/11/11/nvidia-baird-downgrade-ceo-ai-capex.html",
+   "press": "CNBC",
+   "at": "2026-11-11 21:45",
+   "why": "💬 3·5번 — CEO 위험이 의견 하향으로 번짐, 이틀 시총 −4,300억$(야후)",
+   "summary": "베어드: CEO 황 우려·AI 투자 불확실성으로 중립. 모건스탠리는 비중확대 유지하되 최선호주 제외(하나중국). 이사회는 와크텔 로펌으로 조사."
+  },
+  {
+   "title": "BofA 「10월 CPI, 12월 0.5%p 인상의 문을 열었다」",
+   "url": "https://www.investing.com/news/stock-market-news/bofa-says-the-october-cpi-report-opens-the-door-to-a-50bp-december-hike-5018493",
+   "press": "Investing.com",
+   "at": "2026-11-11 21:45",
+   "why": "🧠 「12/9 FOMC 분수령」·💬 12번 — 골드만 로빈 브룩스는 「0.5%p 안 한다」, 큰 곳끼리 갈림",
+   "summary": "BofA가 12월 50bp 가능성 언급. 같은 날 골드만은 25bp 유지+27년 3월 추가(3회). 국채 선물 하락 지속(블룸버그)."
+  },
+  {
+   "title": "골드만, 또 뜨거운 물가에 2027년 3월 인상 추가 — 인상 3회 전망",
+   "url": "https://www.investing.com/news/economy-news/goldman-adds-march-rate-hike-to-fed-forecast-after-another-hot-inflation-read-4949189",
+   "press": "Investing.com",
+   "at": "2026-11-11 20:45",
+   "why": "🧠 「12/9 FOMC 분수령」·💬 12번 — 큰 곳 기본값은 0.5%p 한 번보다 0.25%p 여러 번",
+   "summary": "12월 25bp 인상 유지 + 2027년 3월 추가 → 인상 3회. 첫 인하 2027년 12월로 미룸. 10월 CPI 전월비 +0.4%·근원 +0.3%가 계기."
+  },
+  {
+   "title": "엔비디아 이사회, 젠슨 황 사생활·중국 스파이 의혹 조사에 와크텔 립턴 선임",
+   "url": "https://www.cnbc.com/2026/11/10/nvidia-wachtell-lipton-huang-affair.html",
+   "press": "CNBC",
+   "at": "2026-11-11 20:45",
+   "why": "11/17 엔비디아 실적·「AI 안에서도 갈린다」 — 대장주 고유 악재(지배구조)가 AI 전체 할인으로 번지는지가 TSM·상류 bet 의 엣지",
+   "summary": "이사회 독립 조사 착수(11/10). 11/9 엔비디아 −4%, 11/10 −6.1%로 올해 상승분 반납. 트럼프 「후임」 발언 메시지가 텔레그램에 돌지만 「연습)」 표시 글로 미확인."
+  },
+  {
+   "title": "UBS 자산운용 「AI 빚의 그물」 — 차입 위험 과소평가",
+   "url": "https://www.ubs.com/ch/en/assetmanagement/insights/investment-outlook/the-red-thread/trt-end-year-2026/articles/webs-of-ai-debt.html",
+   "press": "UBS Asset Management",
+   "at": "2026-11-11 19:45",
+   "why": "🫧 「다음 약한 고리는 AI 차입」 가설(0.92)·버블 경보판 신용 칸 — 오늘 AI 되사기 반등의 반대 근거",
+   "summary": "소냐 라우드(UBS AM 공동 투자책임자, 11/11 블룸버그 TV): AI 투자 붐이 주식 이야기에서 빚 중심 대차대조표 이야기로 바뀜. 공·사모 빚과 지분이 얽힌 그물 위험을 시장이 과소평가."
+  },
+  {
+   "title": "JP모건 「미·이란 합의 시 브렌트 70달러 중반 가능」 — 공급 과잉 거래 재등장",
+   "url": "https://wallstreetcn.com/articles/3785726",
+   "press": "월스트리트CN(JP모건 보고서)",
+   "at": "2026-11-11 19:45",
+   "why": "XLE 내림 bet(열림 62.03)·장부 brent_95(에너지 13→10) — 하방 목표 근거",
+   "summary": "트럼프 행정부 남은 협상 기간 약 3주로 봄. 긴장 완화 가능성이 더 높고 합의 시 브렌트 70달러 중반. 구리·알루미늄도 공급 회복 압박. 브렌트 17:53 91.79(+0.33%)."
+  },
+  {
+   "title": "미 증시 장 전 AI 거래 회복 — 코어위브 +17%·엔비디아 +4%·메모리·광통신 상승",
+   "url": "https://wallstreetcn.com/articles/3785732",
+   "press": "월스트리트CN",
+   "at": "2026-11-11 19:45",
+   "why": "TSM 대기 bet(오늘 밤 시가)·「AI 안에서도 갈린다」 가설 — 수요 숫자(코어위브 가이던스 상향)가 가격을 되돌림",
+   "summary": "코어위브 3분기 매출 상회·연간 가이던스 상향에 장 전 +17%. SK하이닉스·샌디스크 약 +7%, 코히어런트 +9%·크레도·루멘텀 +8%. 나스닥100 선물 +1.6%·S&P +0.7%·다우 +0.2%."
+  },
+  {
+   "title": "알파벳, 첫 아시아 채권 — 홍콩·싱가포르 달러로 약 30억 달러 조달 검토",
+   "url": "https://www.newsbytesapp.com/news/business/google-parent-alphabet-eyes-3-billion-bond-sale-in-asia/story",
+   "press": "NewsBytes(블룸버그 인용)",
+   "at": "2026-11-11 18:45",
+   "why": "「AI 차입이 약한 고리」 가설 — 현금 많은 알파벳도 호주달러·엔화·아시아 통화로 빚을 늘림, 빅테크 채권 공급 부담",
+   "summary": "알파벳이 홍콩달러·싱가포르달러 표시 채권으로 약 30억 달러 조달 검토(소식통). 앞서 호주달러 첫 채권·엔화 채권 발행. 규모 등 세부는 미확정."
+  },
+  {
+   "title": "국고채 담합 과징금 철퇴 — 증권사 「충당금 폭탄」 우려",
+   "url": "https://www.newstomato.com/readnews.aspx?no=1309594",
+   "press": "뉴스토마토",
+   "at": "2026-11-11 18:45",
+   "why": "💬 채권 답·국고채 금리 — PD 제재가 국채 인수 여력·발행 시장에 부담, 증권주 실적 변수",
+   "summary": "공정위 국고채 PD 담합 제재 관련 증권사 충당금 우려(피드: 15개 PD 과징금 역대 최대 1.6조, 금투협 「국채 발행 차질·대외신인도 타격」). 업계 불복 소송 검토(매경)."
+  },
+  {
+   "title": "오픈AI 연환산 매출 3분기 70% 넘게 늘어 약 700억 달러 — 기업 매출 두 배",
+   "url": "https://www.newsquawk.com/headlines/openai-annualized-revenue-run-rate-grows-over-70-in-q3-nearly-usd-70bln-according-to-sources",
+   "press": "Newsquawk",
+   "at": "2026-11-11 17:45",
+   "why": "「AI 안에서도 갈린다」 가설·TSM 대기 bet — 최종 수요(모델 회사 매출)가 아직 가속, 엔비디아 실적(11/17) 앞 AI 수요 걱정을 더는 숫자",
+   "summary": "소식통 인용: 오픈AI 연환산 매출 3분기 +70%↑·약 700억 달러, 기업 매출 두 배. 피드엔 블룸버그 「3분기 매출 약 100억 달러·50% 가까이 증가」."
+  },
+  {
+   "title": "골드만삭스: 미국 지수, 3조 달러 IPO 파이프라인 감당 가능한가",
+   "url": "https://www.hellenicshippingnews.com/are-us-indices-prepared-for-a-3-trillion-ipo-pipeline-goldman-weighs-in/",
+   "press": "Hellenic Shipping News(골드만 인용)",
+   "at": "2026-11-11 17:45",
+   "why": "앤스로픽 11/18~20 상장(답 10번) · 「AI 차입」 가설 — 주식 공급 급증(골드만 「2027년 2000년 이후 최대 공급 충격」 피드 11/09)이 수급을 빨아들이는지",
+   "summary": "골드만, 대형 IPO 파이프라인 약 3조 달러 — 자사주 매입이 흡수할 수 있는지가 관건. 날짜는 미확인(기사 게시일 확인 필요)."
+  },
+  {
+   "title": "앤스로픽 나스닥 IPO 로드쇼 시작 — AI 밸류에이션 시험대",
+   "url": "https://www.roic.ai/news/anthropic-kicks-off-nasdaq-ipo-roadshow-as-ai-valuation-questions-loom-11-09-2026",
+   "press": "ROIC.ai",
+   "at": "2026-11-11 16:45",
+   "why": "11/18~20 상장 일정(답 10번)·「AI 차입」 가설 — 대형 AI 공모가 신용·수급을 빨아들이는지, 반대로 AI주에 불을 붙이는지(Axios)",
+   "summary": "CNBC 피드 기준 공모가 70~78달러·11/19 거래 시작 예정, 일본 물량 30~35억 달러(블룸버그, HANAchina/71949). 공모 규모·밸류 세부는 미확인."
+  },
+  {
    "title": "TSMC 이사회 결의 공시(Form 6-K) — 앤스로픽·오픈AI 지분 투자 승인",
    "url": "https://www.sec.gov/Archives/edgar/data/0001046179/000104617926000797/tsm-boardx202611xx.htm",
    "press": "SEC EDGAR",
@@ -519,127 +639,7 @@
    "at": "2026-11-10 00:40",
    "why": "🐻 현금 해제·고금리 정점 가설 — 내일 CPI가 오늘 반등의 지속 여부를 가른다",
    "summary": "10월 CPI는 9월보다 완만한 상승 예상. 유가 급락이 11월분부터 반영."
-  },
-  {
-   "title": "10월 CPI 예상치는 둔화, 그래도 12월 인상 가능성 높아",
-   "url": "https://www.morningstar.com/economy/october-cpi-forecasts-show-inflation-softening-december-rate-hike-still-looks-likely",
-   "press": "Morningstar",
-   "at": "2026-11-10 00:40",
-   "why": "美 10년 4.87%·12월 인상 확률 — 현금·단기채 칸, AI 차입 차환 비용과 연결",
-   "summary": "전망치는 물가 둔화를 가리키나 12월 연준 인상 시나리오는 유지. 수치 세부는 원문 확인."
-  },
-  {
-   "title": "골드만삭스, 2027년 美 주식 발행 6천억 달러 전망 — 공급 쇼크",
-   "url": "https://cryptobriefing.com/goldman-sachs-600-billion-equity-issuance-2027/",
-   "press": "Crypto Briefing",
-   "at": "2026-11-09 23:40",
-   "why": "앤트로픽·스페이스X·오픈AI 상장 물량이 수급을 누른다 — AI 차입 가설(0.92)·나스닥 칸 반등 속도 점검",
-   "summary": "골드만 2027년 美 주식 발행 약 6,000억$ 전망(기사 날짜 미확인). 피드(GS.US)는 「2000년 이후 최대 공급 쇼크」로 요약."
-  },
-  {
-   "title": "골드만 「AI 거래 흔들리자 소외된 지역이 이길 차례」",
-   "url": "https://www.devdiscourse.com/article/business/4000471-india-outperforms-global-markets-in-october-as-investors-rotate-away-from-ai-stocks-goldman-sachs",
-   "press": "Devdiscourse",
-   "at": "2026-11-09 23:40",
-   "why": "AI 쏠림 청산 시 비AI 지역(인도 등) 상대강세 — 해외 칸 분산 근거",
-   "summary": "골드만: 10월 인도가 AI주 이탈 순환매로 글로벌 대비 강세. 같은 날 MarketWatch 「소외 지역 아웃퍼폼」 기사(피드)와 같은 흐름(지역 명시는 미확인)."
-  },
-  {
-   "title": "월가 전략가들 「S&P 500 조정, 끝에 가까워졌다」 (RBC·JP모건·모건스탠리)",
-   "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-strategists-p-500-131059916.html?.tsrc=rss",
-   "press": "Investing.com via Yahoo",
-   "at": "2026-11-09 22:40",
-   "why": "🐻 현금 해제 타이밍·🇺🇸 SPY 칸 — IB 3곳 동시 바닥 콜, 계기판(VIX 20↓)과 대조",
-   "summary": "RBC·JP모건·모건스탠리가 고객 노트에서 최근 매도세가 막바지일 수 있다고 진단. 다만 2027년으로 갈수록 펀더멘털(이익)이 중요하다고 경고. 같은 날 씨티는 美 주식 중립 하향·유럽 상향."
-  },
-  {
-   "title": "메타, 선거일 460억$ 회사채 발행 — 2056년물 스프레드 4월 대비 90bp 확대",
-   "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5uRTFJcmVEXy04ZTJ5RUhMUU11WVExLWF3VzNSMVNvQ3NndU9uTWVlZkctRjRLV2VOZHFPbGJHMVZRX3k0eXNrc0p6REhKNnFMd1FsZGZVTm83R3p0YUh2Mms5TjZNMzhoY1JTblBOUUVyaWx1clE?oc=5",
-   "press": "BigGo Finance (Google News 월가 IB)",
-   "at": "2026-11-09 22:40",
-   "why": "AI 차입 가설 — 빅테크 장기채 스프레드가 넓어지는 숫자, 주가보다 크레딧이 먼저 신호",
-   "summary": "메타 460억$ 채권 발행(제목 기준, 본문 미확인). 2056년 만기 장기물 스프레드가 4월보다 90bp 넓어짐 — AI 설비 투자 자금 조달 비용 상승. 코어위브 채권 부실 수준과 같은 방향."
-  },
-  {
-   "title": "골드만삭스 「韓 반도체, 지금보다 주가 2배 오를 여력」",
-   "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFBReWFLYmlBV0hGMFVhODNiUGh2OUpQcXU0Y1VNUFJtN2xkYU9rdWZ1bWYyYTk0YnVOVmtlN0pqek5obG9fNzBqNUR2a0hjZmVOZ3N3MWdtd29LZw?oc=5",
-   "press": "Google News 한국 섹터",
-   "at": "2026-11-09 22:40",
-   "why": "🐻 코스피 하락장 판정과 반대 근거 — 밸류 바닥론(골드만 「PBR=내년 이익 −70% 반영」 11/9 오전과 같은 축)",
-   "summary": "골드만, 한국 메모리 업체 주가 2배 상승 여력 유지(세부 목표가 미확인). 한국만 급락 뒤 반등 못 함(연합 「수급 공백」)과 대조 — 외국인 현물 복귀가 확인점."
-  },
-  {
-   "title": "코어위브 채권, 부실채권처럼 거래 — AI 지출이 재무제표를 앞질러",
-   "url": "https://investinglive.com/stocks/coreweave-bonds-trade-like-distressed-debt-as-ai-spending-outpaces-balance-sheets/",
-   "press": "investingLive",
-   "at": "2026-11-09 21:40",
-   "why": "AI 차입(크레딧) 가설 0.92 — 주식 아닌 채권 가격으로 확인하는 근거, CRWV 11/10 실적",
-   "summary": "코어위브 회사채가 부실 수준 수익률에서 거래 — AI 인프라 확장 자금이 하이일드 채권에 기대는 구조. 기사 날짜 미확인."
-  },
-  {
-   "title": "코어위브 2032년물 수익률 15% 근접 — 크레딧 데스크는 중간선거 뒤를 기다린다",
-   "url": "https://fourweekmba.com/ai-coreweave-debt-yields-15-as-credit-desks-wait-for-midterms/",
-   "press": "FourWeekMBA",
-   "at": "2026-11-09 21:40",
-   "why": "네오클라우드 크레딧 스트레스의 숫자 기준 — 15% 이탈 여부를 AI 차입 가설 확인 지표로",
-   "summary": "CRWV 2032년물 수익률 ~15%·주가 −16% 날 보도. 날짜 정확히 미확인(중간선거 앞)."
-  },
-  {
-   "title": "AI 붐-버스트 논쟁: 오픈AI 자금조달 목표 축소·메타 크레딧 경고·현금흐름 대비 capex",
-   "url": "https://fortune.com/2026/10/31/ai-boom-bust-openai-fundraising-target-meta-credit-warning-cash-flow-capex",
-   "press": "Fortune",
-   "at": "2026-11-09 20:40",
-   "why": "AI 차입 가설(0.92) — 오늘 「OpenAI·Anthropic 몸값 하락」(Bloomberg)·「은행 AI 부채 경계」(Reuters)로 이어지는 흐름",
-   "summary": "10/31 기사: 오픈AI 자금조달 목표 하향, 메타 회사채에 크레딧 경고, 빅테크 capex가 영업현금흐름을 잠식한다는 분석(세부 숫자는 원문 확인)"
-  },
-  {
-   "title": "중국 공장출고가(PPI) 5.0% — 4년여 만에 최고, CPI는 0.9%로 격차 확대",
-   "url": "https://investinglive.com/news/china-factory-inflation-hits-5-fastest-in-over-four-years-as-cpi-lags-at-0-9/",
-   "press": "investingLive",
-   "at": "2026-11-09 20:40",
-   "why": "오늘 Caixin 「10월 PPI 4년 최고」와 같은 흐름 — 원자재·수입물가 경로로 韓 금리(한은 인상 전망)·고금리 정점 가설(0.45) 점검",
-   "summary": "9월 PPI +5.0%(4년여 최고)·CPI +0.9% — 중하류 기업 마진 압박. 10월 수치는 Caixin 피드 제목만 확인(숫자 미확인)"
-  },
-  {
-   "title": "모건스탠리 윌슨: 美 조정 끝나기 전 마지막 한 번의 매도 — 3가지 촉매 뒤 S&P 7,150 부근 바닥, 이후 8,000",
-   "url": "https://investinglive.com/stock-market-update/roadmap-morgan-stanley-sees-three-catalysts-ending-the-correction-to-~7150-then-s-p-500-to-8-000/",
-   "press": "investingLive",
-   "at": "2026-11-09 19:40",
-   "why": "🐻 현금 100% 해제 타이밍 — 「마지막 국면」 콜이 오늘 MarketWatch 기사와 같은 맥락(게시일 미확인)",
-   "summary": "윌슨 「조정 막바지, 마지막 매도 뒤 반등」·바닥 ~7,150·연말 목표 8,000 유지. 올해 3/30·10/19에도 「막바지」 콜 — 게시일 미확인"
-  },
-  {
-   "title": "엔비디아 황 CEO: 메가스피드는 칩을 중국으로 빼돌리지 않았고 관계는 「정상적」",
-   "url": "https://www.newsquawk.com/headlines/nvidia-nvda-ceo-huang-says-megaspeed-did-not-divert-chips-to-china-and-ties-to-firm-under-spying-probe-were-normal",
-   "press": "Newsquawk",
-   "at": "2026-11-09 19:40",
-   "why": "NVDA 키맨 위험의 범위 — 개인 스캔들이 수출통제·스파이 조사로 번지는지(AI 차입 가설·🇺🇸 칸)",
-   "summary": "황 「메가스피드 GPU 전수 확인, 중국 전용 없음」. 하원 의장들 비공개 브리핑 요구 보도도 — 게시일 미확인"
-  },
-  {
-   "title": "헤지펀드, 글로벌 기술주를 기록적 속도로 매도",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-09/hedge-funds-dump-tech-stocks-at-one-of-fastest-paces-on-record",
-   "press": "Bloomberg",
-   "at": "2026-11-09 17:58",
-   "why": "AI 차입 가설(0.92)·🇺🇸 칸 — 데이터센터 정치 반발이 AI 트레이드 재평가 촉발",
-   "summary": "지난주 헤지펀드가 글로벌 기술주를 사상 최고 수준 속도로 매도. 정치권 반대로 데이터센터 구축이 막힐 수 있다는 우려가 계기(세부 수치 미확인)."
-  },
-  {
-   "title": "엔비디아 −5%: 황 CEO와 中 스파이 의혹 인물 관계에 이사회 독립 조사",
-   "url": "https://www.cnbc.com/2026/11/09/nvidia-jensen-huang-chinese-spy-investigation.html",
-   "press": "CNBC",
-   "at": "2026-11-09 18:14",
-   "why": "AI 반도체 키맨 위험 — 나스닥 조정·SOXX, 11/10 CRWV 실적 앞 심리",
-   "summary": "황 CEO가 「외국 정보기관 공작」 표적이었다는 보도 뒤 이사회 독립 조사 착수, 황은 불륜 시인. NVDA 프리마켓 약 −5%. 반면 TSMC·하이닉스·삼성 등 아시아 칩주는 상승(investing 피드)."
-  },
-  {
-   "title": "호주 NextDC, 계약 없는 데이터센터 프로젝트 중단",
-   "url": "https://www.investing.com/news/stock-market-news/nextdc-pauses-uncontracted-projects-after-australian-data-centre-woes-5010826",
-   "press": "Investing.com",
-   "at": "2026-11-09 18:24",
-   "why": "AI 차입 가설 — MS·소프트뱅크 네오클라우드 재검토에 이어 공급자 쪽 투자 축소 확산",
-   "summary": "NextDC가 수요 불확실성으로 미계약 프로젝트 진행을 멈춤. 하이퍼스케일러 외부 용량 재검토 흐름과 같은 방향."
   }
  ],
- "at": "2026-11-11 15:45"
+ "at": "2026-11-11 20:45"
 }
