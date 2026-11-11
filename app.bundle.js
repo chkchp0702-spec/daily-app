@@ -19953,7 +19953,8 @@ window.VIDC = {
   function warnHtml(o, BR, BU){
     var s = "";
     if (o.red || o.yel) s += ruleHtml(o, BR).replace(/<summary>(?:🔴|🟡) 지금 규칙 · (?:현금 \d+%까지 · )?/, "<summary>📏 언제 다시 사나 · ");   // 🐻 경보일 때만 규칙 한 줄(펼치면 다시 사는 조건) — 현금 % 는 바로 위 결론 줄과 같은 말이라 뺌
-    if (BU && (BU.credit_on || (BU.red || 0) >= 3)) s += '<button type="button" class="ez-warn" data-ezbub="1">🫧 버블 경보 켜짐' + (BU.flow ? ' · ' + e(BU.flow) : '') + ' <i>›</i></button>';
+    if (BU && (BU.credit_on || (BU.red || 0) >= 3)) { var CK = window.__bubClock ? __bubClock(BU) : null;   // 🕰 11/11 버블 시계 한 줄
+      s += '<button type="button" class="ez-warn" data-ezbub="1">' + (CK ? '🫧 버블 시계 ' + e(CK.label) + (BU.credit_on ? ' · 신용 경보' : '') : '🫧 버블 경보 켜짐' + (BU.flow ? ' · ' + e(BU.flow) : '')) + ' <i>›</i></button>'; }
     if (o.mix) s += '<p class="ez-warn ez-warn-y">⚠ ' + e(o.mix) + '</p>';
     return s;
   }
@@ -20657,6 +20658,8 @@ window.VIDC = {
    ─ 📅 분수령 날짜(엔비디아 실적 · FOMC) D-day
    ─ 펼치면: 신용 / 바늘 / 완충 묶음별 칸 — 자동(야후 종가) · 손(두뇌가 출처와 함께 갱신) 꼬리표
    계산은 만드는 쪽(market-strategy-report src/bubble_gate.py → market/bubble.json) — 이 파일은 그리기만 */
+/* 🕰 11/11 버블 시계(A11/11-1 · 사용자 「둘 다 진행」) — 머리 띠 자리에 시계 하나: 전병서 순서 4단계(💳 신용 → 📈 금리·규제·유가 → 🧊 주식 속살·현금 도피 → 🛟 완충 꺼짐)
+   칸 점수 🔴1·🟠½·🟢0 · 단계마다 3시간 · 앞 단계가 ¾ 넘게 울어야 다음 단계로 · 테두리 11칸(누르면 그 칸 근거) · 어제 마지막 시각 → 지금(bubble_log) · 계산은 결과 보기 전 등록 */
 (function(){
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function md(s){ s = String(s || ""); return s.length >= 10 ? (+s.slice(5, 7)) + "/" + (+s.slice(8, 10)) : s; }
@@ -20667,6 +20670,65 @@ window.VIDC = {
   var GN = {"신용": "💳 신용 — 채권이 먼저 우는 곳", "바늘": "📌 바늘 — 풍선 곁에 모인 것", "완충": "🛟 완충 — 버텨 주는 것"};
   var SC = {"🔴": "r", "🟠": "o", "🟢": "g"};
 
+  // 🕰 버블 시계 — 순서는 전병서 「지금 몇 시인가」 틀(주식보다 신용이 먼저 운다)
+  var CQ = [
+    {t: "💳 신용", k: ["fcf", "bonds", "cds", "credit"]},
+    {t: "📈 금리·규제·유가", k: ["rate", "policy", "geo"]},
+    {t: "🧊 주식 속살·현금 도피", k: ["breadth", "flow"]},
+    {t: "🛟 완충 꺼짐", k: ["buffer", "recession"]}
+  ];
+  var PT = {"🔴": 1, "🟠": 0.5, "🟢": 0};
+  function clockOf(st){   // st = {key: "🔴"...} → {h, label, q:[{t, comp, r, o, n}]}
+    var h = 0, stop = false, q = CQ.map(function(Q){
+      var ks = Q.k.filter(function(k){ return st[k] != null; }), sum = 0, r = 0, o = 0;
+      ks.forEach(function(k){ sum += PT[st[k]] || 0; if (st[k] === "🔴") r++; if (st[k] === "🟠") o++; });
+      return {t: Q.t, comp: ks.length ? sum / ks.length : 0, r: r, o: o, n: ks.length};
+    });
+    q.forEach(function(x){ if (stop) return; h += 3 * x.comp; if (x.comp < 0.75) stop = true; });
+    var hh = Math.round(h * 2) / 2, w = Math.floor(hh), half = hh - w >= 0.5;
+    var label = hh <= 0 ? "12시 · 조용" : hh >= 12 ? "12시 · 다 울었음" : "약 " + w + "시" + (half ? " 반" : "");
+    if (hh > 0 && hh < 1) label = "약 12시 반";
+    return {h: h, hh: hh, label: label, q: q};
+  }
+  function stOf(B){ var st = {}; (B.items || []).forEach(function(x){ if (x.key) st[x.key] = x.state; }); return st; }
+  window.__bubClock = function(B){ try { return B && B.items ? clockOf(stOf(B)) : null; } catch(x) { return null; } };
+  function word(x){ return !x.n ? "자료 없음" : x.comp >= 0.999 ? "다 울었음" : x.comp >= 0.75 ? "거의 다 울었음" : x.comp > 0 ? (x.r ? "🔴 " + x.r : "") + (x.o ? (x.r ? " · " : "") + "🟠 " + x.o : "") + " / " + x.n + "칸" : "조용"; }
+  function pt(a, r){ var t = a * Math.PI / 180; return (60 + r * Math.sin(t)).toFixed(1) + " " + (60 - r * Math.cos(t)).toFixed(1); }
+  function clockSVG(B, C){
+    var byK = {}; (B.items || []).forEach(function(x){ if (x.key) byK[x.key] = x; });
+    var arcs = "", R = 47;
+    CQ.forEach(function(Q, qi){
+      var a0 = qi * 90, n = Q.k.length, step = 90 / n;
+      Q.k.forEach(function(k, i){
+        var x = byK[k], s0 = a0 + i * step + 2.2, s1 = a0 + (i + 1) * step - 2.2;
+        arcs += '<path class="bck ' + (x ? (SC[x.state] || "n") : "n") + '" data-bbk="' + k + '" d="M' + pt(s0, R) + ' A' + R + ' ' + R + ' 0 0 1 ' + pt(s1, R) + '"><title>' + e(x ? x.name + " " + x.state : k) + '</title></path>';
+      });
+    });
+    var nums = [[0, "12"], [90, "3"], [180, "6"], [270, "9"]].map(function(z){ var p = pt(z[0], 33).split(" "); return '<text x="' + p[0] + '" y="' + (+p[1] + 4) + '">' + z[1] + '</text>'; }).join("");
+    var ang = C.hh / 12 * 360, tip = pt(ang, 38).split(" ");
+    return '<svg class="bck-svg" viewBox="0 0 120 120" role="img" aria-label="버블 시계 ' + e(C.label) + '"><circle cx="60" cy="60" r="56" class="bck-face"/>' + arcs + nums +
+      '<line x1="60" y1="60" x2="' + tip[0] + '" y2="' + tip[1] + '" class="bck-hand"/><circle cx="60" cy="60" r="4.5" class="bck-hub"/></svg>';
+  }
+  function dur(h){ var m = Math.round(h * 60); return m >= 60 ? (m / 60) + '시간' : m + '분'; }
+  function chgLine(B, C){   // 어제 마지막 기록 → 지금
+    var RAW = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/bubble_log.json?t=" + Math.floor(Date.now() / 6e5);
+    fetch(RAW).then(function(r){ return r.ok ? r.json() : null; }).then(function(L){
+      var el = document.getElementById("bck-chg"); if (!el || !L || !L.length) return;
+      var today = String(B.at || "").slice(0, 10), prev = null;
+      for (var i = L.length - 1; i >= 0; i--) if (String(L[i].at || "").slice(0, 10) < today){ prev = L[i]; break; }
+      if (!prev){ el.textContent = "어제 기록 없음 — 오늘부터 바늘 흐름을 적어요"; return; }
+      var P = clockOf(prev.states || {}), d = C.hh - P.hh;
+      el.innerHTML = e(md(prev.at)) + ' 마지막 <b>' + e(P.label.replace(/^약 /, "")) + '</b> → 지금 <b>' + e(C.label.replace(/^약 /, "")) + '</b>' + (d > 0 ? ' <em class="up">▲' + dur(d) + '</em>' : d < 0 ? ' <em class="dn">▼' + dur(-d) + '</em>' : ' · 그대로');
+    }).catch(function(){});
+  }
+  function clockBlock(B){
+    var C = clockOf(stOf(B)); if (!C) return "";
+    setTimeout(function(){ chgLine(B, C); }, 0);
+    var rows = C.q.map(function(x, i){ return '<li class="' + (x.comp >= 0.75 ? "r" : x.comp > 0 ? "o" : "g") + '"><span>' + e(x.t) + '</span><b>' + e(word(x)) + '</b></li>'; }).join("");
+    return '<div class="bck">' + clockSVG(B, C) + '<div class="bck-t"><div class="bck-k">🕰 버블 시계</div><div class="bck-big">지금 ' + e(C.label) + '</div><ol>' + rows + '</ol><div class="bck-chg" id="bck-chg">어제와 비교 중…</div></div></div>' +
+      '<p class="bck-ru">순서: 전병서 「AI 버블, 지금 몇 시인가」 틀(채권·신용이 주식보다 먼저 울어요) · 속살·현금 도피 2칸은 「바늘」 묶음에서 떼어 3단계로 · 바늘 = 칸 점수(🔴 1 · 🟠 ½) × 단계마다 3시간 · 앞 단계가 ¾ 넘게 울어야 다음 단계로 넘어가요 · 테두리 칸을 누르면 그 칸 근거 · 생각의 틀 — 사라·팔라는 뜻 아님</p>';
+  }
+
   window.__bubCard = function(B){
     if (!B || !B.items || !B.items.length) return "";
     var n = (B.red || 0) + (B.orange || 0) + (B.green || 0) || B.items.length;
@@ -20676,14 +20738,14 @@ window.VIDC = {
     var groups = {}; B.items.forEach(function(x){ (groups[x.grp || "바늘"] = groups[x.grp || "바늘"] || []).push(x); });
     var det = ["신용", "바늘", "완충"].filter(function(g){ return groups[g]; }).map(function(g){
       return '<div class="bbx-g"><div class="bbx-gh">' + e(GN[g] || g) + '</div><ul>' + groups[g].map(function(x){
-        return '<li class="' + (SC[x.state] || "") + '"><i>' + e(x.state) + '</i><div><b>' + e(x.name) + ' <small>기준: ' + e(x.th) + '</small></b><p>' + e(x.now) + '</p><small class="bbx-src">' +
+        return '<li class="' + (SC[x.state] || "") + '" data-bbk="' + e(x.key || "") + '"><i>' + e(x.state) + '</i><div><b>' + e(x.name) + ' <small>기준: ' + e(x.th) + '</small></b><p>' + e(x.now) + '</p><small class="bbx-src">' +
           (x.auto ? '<em class="a">자동</em> 야후 종가 · ' + e(String(x.at || "").slice(5, 16).replace("-", "/")) : '<em>손</em> ' + e(x.src) + ' · ' + e(md(x.at))) + '</small></div></li>';
       }).join("") + '</ul></div>';
     }).join("");
     var fr = B.frame ? '<details class="bbx-f"><summary>이 틀은 어디서? — ' + e(B.frame.title) + '</summary><ul>' + (B.frame.lines || []).map(function(l){ return '<li>' + e(l) + '</li>'; }).join("") + '</ul></details>' : "";
     return '<section class="card bbx" id="bubble" data-cz="done">' +
       '<div class="bbx-h">🫧 버블 경보판 <small>' + e(md(B.at)) + ' ' + e(String(B.at || "").slice(11, 16)) + ' · 주식보다 채권이 먼저 울어요</small></div>' +
-      '<div class="bbx-bar">' + bar + '</div>' + cnt +
+      clockBlock(B) + cnt +
       '<p class="bbx-lead' + (B.credit_on || B.red >= 3 ? " warn" : "") + '">' + e(B.lead) + '</p>' + (B.sub ? '<p class="bbx-sub">' + e(B.sub) + '</p>' : '') +
       (dates ? '<ul class="bbx-d">' + dates + '</ul>' : '') +
       '<details class="bbx-det"><summary>' + n + '칸 펼치기 · 무엇이 울고 있나</summary>' + det + fr +
@@ -20705,7 +20767,131 @@ window.VIDC = {
     ".bbx-g li>i{font-style:normal;flex:0 0 auto}.bbx-g li>div{flex:1;min-width:0}.bbx-g li b{font-size:13px;font-weight:800}.bbx-g li b small{font-weight:600;color:var(--sub);font-size:11px;margin-left:4px}" +
     ".bbx-g li p{margin:3px 0 0;font-size:13px;line-height:1.45;word-break:keep-all;overflow-wrap:anywhere}.bbx-src{display:block;margin-top:3px;font-size:11px;color:var(--sub)}.bbx-src em{font-style:normal;font-weight:800;padding:0 5px;border-radius:5px;background:rgba(127,127,127,.18)}.bbx-src em.a{background:rgba(57,135,229,.18)}" +
     ".bbx-f{margin-top:12px}.bbx-f ul{margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.5;word-break:keep-all}.bbx-f li+li{margin-top:4px}.bbx-ru{margin-top:12px!important}";
+  css.textContent +=
+    ".bck{display:flex;gap:12px;align-items:center;margin:12px 0 8px}.bck-svg{flex:0 0 112px;width:112px;height:112px}" +
+    ".bck-face{fill:var(--panel,rgba(127,127,127,.08));stroke:rgba(127,127,127,.25);stroke-width:1}.bck-svg text{font-size:10px;font-weight:800;fill:var(--sub);text-anchor:middle}" +
+    ".bck-svg path.bck{fill:none;stroke-width:9;cursor:pointer}.bck-svg path.r{stroke:#e5484d}.bck-svg path.o{stroke:#f59e0b}.bck-svg path.g{stroke:#30a46c}.bck-svg path.n{stroke:rgba(127,127,127,.35)}" +
+    ".bck-hand{stroke:var(--text,#111);stroke-width:3.2;stroke-linecap:round}.bck-hub{fill:var(--text,#111)}" +
+    ".bck-t{flex:1;min-width:0}.bck-k{font-size:12px;font-weight:800;color:var(--sub)}.bck-big{font-size:21px;font-weight:900;letter-spacing:-.4px;margin:1px 0 6px}" +
+    ".bck-t ol{list-style:none;margin:0;padding:0;font-size:12px;line-height:1.35}.bck-t ol li{display:flex;justify-content:space-between;gap:6px}.bck-t ol li+li{margin-top:2px}.bck-t ol li span{color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bck-t ol li b{font-weight:800;white-space:nowrap}" +
+    ".bck-t ol li.r b{color:#e5484d}.bck-t ol li.o b{color:#d97706}.bck-t ol li.g b{color:#30a46c}" +
+    ".bck-chg{margin-top:6px;font-size:12px;color:var(--sub)}.bck-chg b{color:var(--text)}.bck-chg em{font-style:normal;font-weight:800}.bck-chg em.up{color:#e5484d}.bck-chg em.dn{color:#30a46c}" +
+    ".bck-ru{margin:0 0 8px;font-size:11px;line-height:1.45;color:var(--sub);word-break:keep-all}.bbx-g li.bck-hl{outline:2px solid var(--accent,#3987e5);outline-offset:1px}";
+  document.addEventListener("click", function(ev){
+    var t = ev.target.closest && ev.target.closest(".bck-svg [data-bbk]"); if (!t) return;
+    var card = t.closest(".bbx"); if (!card) return;
+    var det = card.querySelector(".bbx-det"); if (det) det.open = true;
+    var li = card.querySelector('.bbx-g li[data-bbk="' + t.getAttribute("data-bbk") + '"]'); if (!li) return;
+    li.scrollIntoView({behavior: "smooth", block: "center"}); li.classList.add("bck-hl"); setTimeout(function(){ li.classList.remove("bck-hl"); }, 1800);
+  }, true);
   document.head.appendChild(css);
   if (window.__h2apply) try { __h2apply(); } catch(x) {}
+})();
+;
+/* ======== ux1111.js ======== */
+/* 🔭 11/11 신호 탭 「지켜보는 중」 모드 (A11/11-2 · 사용자 「둘 다 진행」)
+   코스피가 🐻 하락장(현금 100% · 새로 사지 않기)인 동안 신호 탭(🐋 고래 · ☕ 컵 · 📈 갭 · 🔎 거르기 · ⚡ 단타 · 🤫 매집)이 같은 말을 하도록:
+   ─ 머리에 「🐻 지금은 지켜보는 중」 띠 (첫 화면 「국내 주식 → 새로 사지 않기」와 한 목소리)
+   ─ 🇰🇷 한국 종목 이름 옆에 「🔭 지켜봄」 꼬리표 — 카드는 숨기지 않음 · 미국·일본 종목은 그대로
+   ─ 「🔭 하락장 동안 쌓인 한국 신호 n개」 목록(만드는 쪽 bear_watch.py → archive/x/bear_watch.json · 앱은 그리기만)
+   ─ 판정이 풀리면 14일 동안 「하락장 동안 쌓인 신호 n개 ›」 한 줄만 (수익률 계산 없음 · 종목별 성적은 그 종목 화면 🧵)
+   판정은 market/bear.json 코스피 칸 그대로(매시간) · 매수·매도 권유 아님 */
+(function(){
+  var SIG = {whale: 1, cup: 1, gap: 1, screen: 1, danta: 1, accum: 1, sigmore: 1};
+  var RAWB = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/bear.json";
+  var KRA = /openOP\('(\d{6})(?:\.K[SQ])?'\)|m\.stock\.naver\.com\/domestic\/stock\/(\d{6})/;
+  var BEAR = null, W = null, got = 0;
+  function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
+  function md(s){ s = String(s || ""); return s.length >= 10 ? (+s.slice(5, 7)) + "/" + (+s.slice(8, 10)) : s; }
+  function tb(){ return Math.floor(Date.now() / 6e5); }
+  function gj(u){ return fetch(u + (u.indexOf("?") < 0 ? "?" : "&") + "t=" + tb(), {cache: "no-store"}).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }); }
+  function load(){
+    if (got && Date.now() - got < 6e5) return Promise.resolve();
+    return Promise.all([gj(RAWB), gj("archive/x/bear_watch.json")]).then(function(r){
+      var k = r[0] && (r[0].markets || []).filter(function(m){ return m.key === "kospi"; })[0];
+      BEAR = k || null; W = r[1]; got = Date.now();
+    });
+  }
+  function tab(){ return (typeof window.cur !== "undefined" && window.cur) || (location.hash || "").slice(1); }
+  function isSig(){ return !!SIG[tab()] || !!document.querySelector("#main #sgleg"); }
+  function bearOn(){ return BEAR && BEAR.state === "🐻"; }
+  function endedRecent(){
+    if (!W || !W.ended || bearOn()) return false;
+    return (Date.now() - Date.parse(W.ended + "T00:00:00+09:00")) / 864e5 <= 14;
+  }
+  function row(r){
+    return '<li><button type="button" data-bwc="' + e(r.c) + '"><div><b>' + e(r.n) + '</b> <small>' + e(r.c) + '</small></div><span>' + e((r.s || []).join(" · ")) + '</span>' +
+      '<em>' + (r.first === r.last ? md(r.first) : md(r.first) + "~" + md(r.last)) + ' · ' + r.days + '일</em></button></li>';
+  }
+  function list(){
+    if (!W || !W.rows || !W.rows.length) return "";
+    W.rows.forEach(function(r){ if ((r.s || []).indexOf('☕ 컵 돌파') >= 0) r.s = r.s.filter(function(x){ return x !== '☕ 컵'; }); });
+    var L = W.last_day, today = W.rows.filter(function(r){ return r.last === L; }), rest = W.rows.filter(function(r){ return r.last !== L; });
+    return '<details class="bw-d"><summary>🔭 하락장 동안 쌓인 한국 신호 <b>' + W.n + '개</b>' + (W.new_last ? ' <i>' + md(L) + ' 새로 ' + W.new_last + '</i>' : '') + ' <u>▾</u></summary>' +
+      (today.length ? '<div class="bw-gh">' + md(L) + '에 뜬 ' + today.length + '개</div><ul>' + today.map(row).join("") + '</ul>' : '') +
+      (rest.length ? '<details class="bw-more"><summary>그 전에 떴던 ' + rest.length + '개 ▾</summary><ul>' + rest.slice(0, 80).map(row).join("") + '</ul>' + (rest.length > 80 ? '<p class="bw-n">＋ ' + (rest.length - 80) + '개 더(오래된 것)</p>' : '') + '</details>' : '') +
+      '<p class="bw-n">' + md(W.rec_from) + '부터 앱 기록(하락장 시작 ' + md(W.from) + ') · ☕ 컵 · 📈 갭 · ⚡ 단타 · 🤫 매집에 뜬 🇰🇷 종목 · 누르면 그 종목 화면 · 수익률은 계산하지 않아요 — 종목별 성적은 그 종목 화면 🧵 · 기록일 뿐 사라는 뜻 아님</p></details>';
+  }
+  function banner(){
+    if (bearOn()){
+      return '<section class="bw-b" id="bw-b"><div class="bw-h">🐻 지금은 <b>지켜보는 중</b></div>' +
+        '<p>코스피 하락장(고점 ' + e(BEAR.dd) + '% · ' + md(BEAR.asof) + ' 종가 판정) — 국내 주식은 판정 풀릴 때까지 <b>새로 사지 않기</b>. 이 탭의 🇰🇷 한국 종목엔 <span class="bw-tg">🔭 지켜봄</span> 꼬리표만 붙여 기록해요 · 미국·일본 종목은 그대로.</p>' + list() + '</section>';
+    }
+    if (endedRecent()){
+      return '<section class="bw-b ok" id="bw-b"><div class="bw-h">✅ 코스피 하락장 판정 풀림 <small>' + md(W.ended) + '</small></div>' + list() + '</section>';
+    }
+    return "";
+  }
+  function apply(){
+    var M = document.getElementById("main"); if (!M) return;
+    var on = isSig() && (bearOn() || endedRecent());
+    document.documentElement.classList.toggle("bw-on", !!(on && bearOn()));
+    var old = document.getElementById("bw-b");
+    if (!on){ if (old) old.remove(); return; }
+    if (!old){
+      var html = banner(); if (!html) return;
+      var box = document.createElement("div"); box.innerHTML = html; var b = box.firstChild;
+      var leg = M.querySelector("#sgleg"), hero = M.querySelector(".hero");
+      if (hero && hero.parentNode === M) hero.insertAdjacentElement("afterend", b);
+      else if (leg) leg.insertAdjacentElement("afterend", b);
+      else M.insertBefore(b, M.firstChild);
+    }
+    if (!bearOn()) return;
+    M.querySelectorAll("a[href]:not([data-bw])").forEach(function(a){
+      a.setAttribute("data-bw", "1");
+      if (a.closest("#bw-b")) return;
+      if (KRA.test(a.getAttribute("href") || "")) a.classList.add("bw-kr");
+    });
+  }
+  var T = 0;   // 모아서 한 번(계속 바뀌는 화면이 있어도 0.3초 안에 꼭 돌게 — 늦추기만 하면 굶음)
+  function run(){ T = 0; if (!isSig()){ apply(); return; } load().then(apply); }
+  function soon(){ if (!T) T = setTimeout(run, 300); }
+  function boot(){
+    var M = document.getElementById("main"); if (!M){ setTimeout(boot, 300); return; }
+    new MutationObserver(function(ms){
+      for (var i = 0; i < ms.length; i++){ var t = ms[i].target; if (t.closest && t.closest("#bw-b")) continue; soon(); return; }
+    }).observe(M, {childList: true, subtree: true});
+    window.addEventListener("hashchange", soon); soon();
+  }
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest && ev.target.closest("[data-bwc]"); if (!b) return;
+    ev.preventDefault(); ev.stopPropagation();
+    if (typeof window.openOP === "function") window.openOP(b.getAttribute("data-bwc"));
+  }, true);
+
+  var css = document.createElement("style");
+  css.textContent =
+    ".bw-b{margin:10px 0 12px;padding:13px 14px;border-radius:16px;background:rgba(229,72,77,.08);box-shadow:inset 0 0 0 1px rgba(229,72,77,.28)}.bw-b.ok{background:rgba(48,164,108,.08);box-shadow:inset 0 0 0 1px rgba(48,164,108,.3)}" +
+    ".bw-h{font-size:16px;font-weight:900;letter-spacing:-.3px}.bw-h small{font-size:12px;color:var(--sub);font-weight:700;margin-left:4px}.bw-b>p{margin:6px 0 0;font-size:13px;line-height:1.5;word-break:keep-all}" +
+    ".bw-tg{display:inline-block;font-size:11px;font-weight:800;padding:0 6px;border-radius:6px;background:rgba(127,127,127,.18);white-space:nowrap}" +
+    ".bw-d{margin-top:10px}.bw-d>summary,.bw-more>summary{cursor:pointer;list-style:none;font-size:13px;font-weight:800;color:var(--accent,#3987e5)}.bw-d>summary::-webkit-details-marker,.bw-more>summary::-webkit-details-marker{display:none}" +
+    ".bw-d>summary i{font-style:normal;font-size:11px;font-weight:800;color:#e5484d;margin-left:4px}.bw-d>summary u{text-decoration:none}" +
+    ".bw-gh{margin:10px 0 4px;font-size:12px;font-weight:800;color:var(--sub)}.bw-d ul{list-style:none;margin:0;padding:0}.bw-d li+li{margin-top:4px}" +
+    ".bw-d li button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:1fr auto;gap:1px 8px;width:100%;padding:7px 10px;border-radius:10px;background:var(--panel,rgba(127,127,127,.07));cursor:pointer;font-size:13px}" +
+    ".bw-d li div{grid-column:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bw-d li b{font-weight:800}.bw-d li small{color:var(--sub);font-size:11px}.bw-d li span{grid-column:1;font-size:12px;color:var(--sub)}.bw-d li em{grid-column:2;grid-row:1/3;align-self:center;font-style:normal;font-size:11px;color:var(--sub);white-space:nowrap}" +
+    ".bw-more{margin-top:8px}.bw-n{margin:8px 0 0;font-size:11px;line-height:1.45;color:var(--sub);word-break:keep-all}" +
+    "html.bw-on #main a.bw-kr::after{content:'🔭 지켜봄';display:inline-block;margin-left:5px;padding:0 5px;border-radius:6px;font-size:10px;font-weight:800;line-height:16px;vertical-align:1px;color:var(--sub);background:rgba(127,127,127,.18);white-space:nowrap}";
+  document.head.appendChild(css);
+  boot();
 })();
 ;

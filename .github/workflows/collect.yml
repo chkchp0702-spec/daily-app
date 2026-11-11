@@ -39,6 +39,8 @@ jobs:
             GIT_LFS_SKIP_SMUDGE=1 git clone -q --depth 1 https://github.com/chkchp0702-spec/$r _src/$r || echo "fail $r"
           done
       - run: python collect.py
+      - name: 🔭 하락장 관찰 목록 (11/11 · 코스피 🐻 동안 신호 탭 한국 종목 → archive/x/bear_watch.json)
+        run: python bear_watch.py || echo "bear_watch 실패"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

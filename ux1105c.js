@@ -152,7 +152,8 @@
   function warnHtml(o, BR, BU){
     var s = "";
     if (o.red || o.yel) s += ruleHtml(o, BR).replace(/<summary>(?:🔴|🟡) 지금 규칙 · (?:현금 \d+%까지 · )?/, "<summary>📏 언제 다시 사나 · ");   // 🐻 경보일 때만 규칙 한 줄(펼치면 다시 사는 조건) — 현금 % 는 바로 위 결론 줄과 같은 말이라 뺌
-    if (BU && (BU.credit_on || (BU.red || 0) >= 3)) s += '<button type="button" class="ez-warn" data-ezbub="1">🫧 버블 경보 켜짐' + (BU.flow ? ' · ' + e(BU.flow) : '') + ' <i>›</i></button>';
+    if (BU && (BU.credit_on || (BU.red || 0) >= 3)) { var CK = window.__bubClock ? __bubClock(BU) : null;   // 🕰 11/11 버블 시계 한 줄
+      s += '<button type="button" class="ez-warn" data-ezbub="1">' + (CK ? '🫧 버블 시계 ' + e(CK.label) + (BU.credit_on ? ' · 신용 경보' : '') : '🫧 버블 경보 켜짐' + (BU.flow ? ' · ' + e(BU.flow) : '')) + ' <i>›</i></button>'; }
     if (o.mix) s += '<p class="ez-warn ez-warn-y">⚠ ' + e(o.mix) + '</p>';
     return s;
   }
