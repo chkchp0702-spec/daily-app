@@ -1,6 +1,70 @@
 {
  "items": [
   {
+   "title": "한국 10월 수출 1,153억 달러 — 반도체 사상 최대 판매",
+   "url": "https://www.koreatimes.co.kr/economy/20261101/koreas-monthly-exports-hit-1153-bil-in-oct-on-record-chip-sales",
+   "press": "Korea Times",
+   "at": "2026-11-11 09:45",
+   "why": "코스피 하락장 판정·외국인 반도체 매도와 정반대 숫자 — 11/1~10 수출 +111.9%(연합) 와 이어서 보는 바닥 근거",
+   "summary": "10월 수출 1,153억 달러로 역대 2위, 반도체가 사상 최대 판매 견인. 11월 1~10일 수출 335억 달러(+111.9%, 일평균 +97.7%) — 반도체 단가 상승이 실적으로 확인되는 중."
+  },
+  {
+   "title": "앤스로픽, 나스닥 상장 신청 — 종목 코드 ANT",
+   "url": "https://investinglive.com/news/anthropic-files-for-ipo-on-nasdaq-will-use-the-symbol-ant/",
+   "press": "investingLive",
+   "at": "2026-11-11 09:45",
+   "why": "🫧 버블 경보판 「상장 창」·AI 차입 가설 — 11/19 상장(공모가 70~78달러), 조달 규모가 10월 기대보다 30~40% 줄어든 게 시장 체온",
+   "summary": "나스닥 상장·코드 ANT. 국내 보도(11/11)로는 11/19 상장·공모가 70~78달러·약 86조원 조달 추진, 대표주관 골드만은 2026~30 매출 연평균 +90% 추정."
+  },
+  {
+   "title": "마이크로소프트, 엔비디아 −6% 속 시가총액 추월 — 2025년 6월 이후 처음",
+   "url": "https://finance.yahoo.com/markets/stocks/articles/microsoft-tops-nvidia-market-cap-193114512.html",
+   "press": "Yahoo Finance",
+   "at": "2026-11-11 08:45",
+   "why": "「AI 안에서도 갈린다」(0.6) — 현금 도는 MS vs 대장주 단독 위험 엔비디아 · 💬 3·5번",
+   "summary": "엔비디아 이틀 −10%대 하락으로 MS가 시총 2위 탈환 · CEO 의혹 조사로 엔비디아 시총 약 4,700억 달러 감소 위험 거론(ibtimes)"
+  },
+  {
+   "title": "Microsoft Overtakes Nvidia as Jensen Huang Affair Probe Threatens $470 Billion Market Value Loss",
+   "url": "https://www.ibtimes.co.uk/microsoft-overtakes-nvidia-amid-jensen-huang-reports-1831499",
+   "press": "IBTimes UK",
+   "at": "2026-11-11 08:45",
+   "why": "엔비디아 단일 위험(CEO 조사)이 AI 수요와 분리돼 값을 깎는 중 — 11/17 실적·11/18 하원 브리핑 전 SMH·한국 반도체 상대강도",
+   "summary": "CEO 조사로 엔비디아 시총 약 4,700억 달러 손실 위험 · MS 시총 약 4.03조 달러로 2위(미확인 수치 — 매체별 상이)"
+  },
+  {
+   "title": "코어위브 시간외 +13% — AI 연산 수요로 매출 두 배 넘게, 연간 전망 상향",
+   "url": "https://stocktwits.com/news-articles/markets/equity/ai-compute-demand-has-pushed-core-weave-revenue-to-more-than-double/cZoNQHURJXn",
+   "press": "Stocktwits",
+   "at": "2026-11-11 07:40",
+   "why": "「AI 차입이 약한 고리」(0.92) 반례 — 수요는 강하고 경색은 조달 쪽 · CRWV·SMH·한국 반도체 아침 갭",
+   "summary": "3분기 매출 36.6억$(+168%, 하나 중국 텔레그램) · 연간 가이던스 상향 · 시간외 +13%(stocktwits, 정확한 마감 뒤 수치 미확인)"
+  },
+  {
+   "title": "美 10년 금리 5%로 질주 — CPI·월러 발언에 인상 기대",
+   "url": "https://www.cnbc.com/2026/11/10/us-bonds-treasurys-yields.html",
+   "press": "CNBC",
+   "at": "2026-11-11 07:40",
+   "why": "「고금리 정점」(0.35) 판정 — 종가 4.985%로 5% 아래 마감, 깨짐 선 미달 · 장기채 나눠 사기 시점",
+   "summary": "10년 4.9854%(+10.3bp)·2년 4.7335%(+17.2bp)·10Y-2Y 25bp로 축소(globalmktinsight 07:20) · FedWatch 12월 인상 확률 100%"
+  },
+  {
+   "title": "마이크로소프트, 엔스케일 영국 데이터센터 계약서 빠져 — 350억 달러 상장 흔들",
+   "url": "https://computing.co.uk/news/2026/ai/microsoft-exits-nscale-deal-ipo-at-risk",
+   "press": "Computing",
+   "at": "2026-11-11 05:45",
+   "why": "「다음 약한 고리는 AI 차입」·「AI 안에서도 갈린다」 — 빚으로 짓는 네오클라우드 쪽 자금 조달 경색(🫧 신용 칸)",
+   "summary": "MS가 엔스케일 영국(러프턴) 사이트에서 철수 보도 · 텔레그래프 「350억$ 상장 연기 검토」(로이터 인용, 피드 11/11) · 투자자 역제시 160억~190억$ 보도도(aiweekly)"
+  },
+  {
+   "title": "엔스케일 350억 달러 상장, 노르웨이 건설 지연·바이트댄스 누락으로 흔들",
+   "url": "https://aiweekly.co/alerts/nscales-35b-ipo-shaken-by-norway-build-lag-bytedance-omission",
+   "press": "AI Weekly",
+   "at": "2026-11-11 05:45",
+   "why": "AI 인프라 상장 가격 결정 주간(앤스로픽 11/18)과 같은 시기 — 비상장 AI 인프라 밸류에이션 압박, QQQ·SMH 수급 관찰",
+   "summary": "건설 지연·고객 공시 누락 문제 제기 · 상장 일정 미확인(날짜 미확인)"
+  },
+  {
    "title": "반도체주 하락 5조 달러 육박 — 엔비디아 2019년 이후 가장 극단적 매도 수준",
    "url": "https://finance.yahoo.com/markets/article/chip-stocks-slide-nears-5-trillion-as-nvidia-hits-most-extreme-selling-level-since-2019-191532559.html",
    "press": "Yahoo Finance",
@@ -575,71 +639,7 @@
    "at": "2026-11-09 11:40",
    "why": "브렌트 95 장부 조건(에너지 13→10) — 11/9 「철의 문」 봉쇄 전면 시행 재확인, 오전 「공격 안 할 듯」과 상충",
    "summary": "미군의 이란 항만 봉쇄가 장기화될 수 있다는 트럼프 발언. 봉쇄는 4월 이후 지속 중(기사 날짜 미확인). 유가 상방 위험 요인."
-  },
-  {
-   "title": "코어위브, 3분기 실적 발표일 공지(11/10 장 마감 뒤)",
-   "url": "https://investors.coreweave.com/news/news-details/2026/CoreWeave-Announces-Date-of-Third-Quarter-2026-Financial-Results-and-Conference-Call/default.aspx",
-   "press": "CoreWeave IR",
-   "at": "2026-11-09 10:45",
-   "why": "AI 차입 가설(0.92)·나스닥 조정 watch의 이번 주 변곡 — 네오클라우드 신용 판정일",
-   "summary": "공식 IR 공지 — 11/10(美) 장 마감 후 실적·컨퍼런스콜. 주가 한 달 −45%(Morningstar) 상태에서 맞는 첫 시험대."
-  },
-  {
-   "title": "아시아 반발 — 칩 반등·일본 연기금 자금 기대·이란 위험 완화",
-   "url": "https://investinglive.com/stock-market-update/asia-rallies-on-chip-rebound-and-japan-pension-flow-hopes-as-iran-risk-fades/",
-   "press": "investingLive",
-   "at": "2026-11-09 10:45",
-   "why": "🐻 하락장 watch — 대만 +3%(40,903)·TOPIX +3%와 같은 흐름, 반발이 칩 단독인지 아시아 전반인지 확인용",
-   "summary": "美 반도체 반등·트럼프 이란 공격 가능성 낮춤 발언으로 아시아 위험 선호 회복. 기사 날짜 미확인 — 피드 HANAchina/71780 숫자로 교차 확인."
-  },
-  {
-   "title": "10월 고용 호조로 12월 연준 인상 확률 약 80%",
-   "url": "https://www.bisnow.com/news/national/economy/80-likelihood-of-fed-rate-hike-following-job-gains-67292",
-   "press": "Bisnow",
-   "at": "2026-11-09 09:40",
-   "why": "이번 주 CPI 가 12월 인상을 굳히면 성장주·나스닥 조정 연장 — 고금리 정점 가설(0.45) 반대 근거",
-   "summary": "10월 비농업 +16.5만으로 예상 상회. 12월 인상 확률 약 80%로 반영(원문)."
-  },
-  {
-   "title": "코어위브 주가 한 달 −45% — 11/10 실적 앞두고 매수할 만한가",
-   "url": "https://www.morningstar.com/stocks/coreweave-shares-are-down-45-past-month-is-stock-buy-ahead-earnings",
-   "press": "Morningstar",
-   "at": "2026-11-09 09:40",
-   "why": "AI 차입(크레딧) 가설 0.92 의 시험대 — 11/10 실적이 네오클라우드 채권·빅테크 스프레드 분리 여부를 가른다",
-   "summary": "코어위브 지난 한 달 −45%. 11/10 3분기 실적 발표. 마진·부채 조달이 관건(원문)."
-  },
-  {
-   "title": "대만, AI 매도세 막으려 시장 안정 조치 가동(국가금융안정기금 개입·공매도 억제)",
-   "url": "https://www.siliconreport.com/taiwan-activates-market-stabilization-measures-to-stem-ai-selloff",
-   "press": "Silicon Report",
-   "at": "2026-11-09 08:40",
-   "why": "🐻 하락장 판정 watch — 한국(신용 담보 면제)에 이어 대만도 정책 바닥 조치, 아시아 반도체 강제 매도 정점 신호 후보",
-   "summary": "대만 당국이 국안기금 개입과 대차 매도 한도 축소·신용공매도 증거금 상향을 병행(HANAchina/71772: 10번째 개입, 과거 개입 1개월 뒤 상승 확률 약 77.7%). 세부 금액은 미확인."
-  },
-  {
-   "title": "「5조 달러 AI 폭락」 뒤 美 선물 반등 — CPI·실적 몰린 한 주",
-   "url": "https://tradezero.com/blog/stock-futures-jump-ahead-of-a-monster-week-after-a-usd5-trillion-ai-rout",
-   "press": "TradeZero",
-   "at": "2026-11-09 08:40",
-   "why": "美 선물 첫 반응이 황 조사 악재를 흡수 — 월요일 「풀리는 날」 확인(VIX 하락 전환) 여부와 SPY·QQQ 재진입 판단",
-   "summary": "일요일 밤 개장 美 지수 선물 반등, 이번 주 CPI·AI 실적이 방향 결정. 피드: 나스닥100 선물 장 초 낙폭 전부 회복·녹색 전환(kimu_nim/48365). 정확한 % 는 미확인."
-  },
-  {
-   "title": "엔비디아 「황 CEO 관련 칩 전용 의혹은 조사 뒤 근거 없음」 반박(CNBC 보도 인용)",
-   "url": "https://www.newsquawk.com/headlines/nvidia-nvda-responds-to-report-ceo-huang-was-target-of-chinese-asset-says-diversion-allegations-were-investigated-and-debunked-reports-cnbc",
-   "press": "Newsquawk",
-   "at": "2026-11-09 07:40",
-   "why": "황 키맨 악재가 「개인 스캔들」에 그치나 「수출 통제 위반」으로 번지나 — AI 반도체(SMH·091160) 월요일 갭 크기 결정",
-   "summary": "엔비디아는 中 정보 자산 표적 보도에 대해 칩 전용 의혹은 이미 조사해 근거 없다고 반박. 이사회 독립 조사는 진행. 주가 영향 숫자는 미확인."
-  },
-  {
-   "title": "IC 설계사, 파운드리 원가 상승에 26년 말~27년 초 5%~두 자릿수 가격 인상 검토(TrendForce)",
-   "url": "https://www.trendforce.com/news/2026/10/05/news-ic-designers-reportedly-eye-5-to-double-digit-price-hikes-in-late-2026-early-2027-as-foundry-costs-rise/",
-   "press": "TrendForce",
-   "at": "2026-11-09 07:40",
-   "why": "파운드리 가격 인상(TSMC 27년 1월·PSMC 10~20%, HANAchina/71766) — 반도체 급락 속 실적 쪽 버팀목, 반도체 ETF 반등 신호 붙을 때 근거",
-   "summary": "파운드리 원가 상승을 반영해 팹리스들이 5%~두 자릿수 인상 검토. PSMC 3Q 로직 평균가 QoQ +8~10%(HANAchina 인용)."
   }
  ],
- "at": "2026-11-11 02:45"
+ "at": "2026-11-11 09:45"
 }
