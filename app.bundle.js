@@ -19838,9 +19838,9 @@ window.VIDC = {
   // ⑬ 오늘 할 일 1개 — 역할·장 상태에 맞춘 행동 하나
   function todo(o){
     var r = ROLE();
-    if (r === "inv") return '<p class="ez-todo">✅ 오늘 할 일 1개</p><button type="button" class="ez-cta' + (o.red ? ' red' : '') + '" data-ezgo="port">' + (o.red ? '💼 하락장 규칙대로 비중 확인하기' : '💼 지금 뭘 얼마나 사나 보기') + '</button>';
-    if (r === "look") return '<p class="ez-todo">✅ 오늘 할 일 1개</p><button type="button" class="ez-cta" data-ezask="1">🙋 궁금한 것 골라 보기</button>';
-    return '<p class="ez-todo">✅ 오늘 할 일 1개</p><button type="button" class="ez-cta' + (o.red ? ' red' : '') + '" data-pbsend="1">' + (o.red ? '📨 하락장 안내 한 장 고객에게 보내기' : '📨 고객에게 오늘 한 장 보내기') + '</button>';
+    if (r === "inv") return '<button type="button" class="ez-cta' + (o.red ? ' red' : '') + '" data-ezgo="port">' + (o.red ? '💼 하락장 규칙대로 비중 확인하기' : '💼 지금 뭘 얼마나 사나 보기') + '</button>';
+    if (r === "look") return '<button type="button" class="ez-cta" data-ezask="1">🙋 궁금한 것 골라 보기</button>';
+    return '<button type="button" class="ez-cta' + (o.red ? ' red' : '') + '" data-pbsend="1">' + (o.red ? '📨 하락장 안내 한 장 고객에게 보내기' : '📨 고객에게 오늘 한 장 보내기') + '</button>';
   }
   document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-ezask]"); if (!b) return; ev.stopPropagation(); help(); });
   var EASY_TABS = {home: 1, port: 1, score: 1, prop: 1, luck: 1, saju: 1, tarot: 1, lotto: 1};
@@ -19875,8 +19875,8 @@ window.VIDC = {
     if (B && Date.now() - BT < 300000) return Promise.resolve(B);
     var p = window.__pbbrief ? window.__pbbrief() : gj5("archive/x/pbbrief.json");
     // 🧊 11/09: 신호등 판정에 🐻 하락장 계기판 · 적중률(scores) · 지수 값(live_kr·선물) · 바뀐 것(home.json) 같이
-    return Promise.all([Promise.resolve(p).catch(function(){ return null; }), gj5(RM + "bear.json"), gj5(RM + "scores.json", 900000), gj5("archive/x/live_kr.json", 120000), gj5("archive/x/live_us_pre.json", 120000), gj5(RM + "home.json")])
-      .then(function(r){ var d = r[0]; if (d){ d = Object.assign({}, d, {_bear: r[1], _sc: r[2], _kr: r[3], _fut: r[4], _home: r[5]}); B = d; BT = Date.now(); } return d || B; }).catch(function(){ return B; });
+    return Promise.all([Promise.resolve(p).catch(function(){ return null; }), gj5(RM + "bear.json"), gj5(RM + "scores.json", 900000), gj5("archive/x/live_kr.json", 120000), gj5("archive/x/live_us_pre.json", 120000), gj5(RM + "home.json"), gj5(RM + "bubble.json", 900000)])
+      .then(function(r){ var d = r[0]; if (d){ d = Object.assign({}, d, {_bear: r[1], _sc: r[2], _kr: r[3], _fut: r[4], _home: r[5], _bub: r[6]}); B = d; BT = Date.now(); } return d || B; }).catch(function(){ return B; });
   }
   window.__ezBrief = function(){ return B; };
   function read(b){
@@ -19943,39 +19943,63 @@ window.VIDC = {
     var parts = String(c.why).split(" — "), first = parts[0].split(" · ")[0].replace(/^🧭\s*/, ""), why = (parts[0].split(" · ")[1] || "").replace(/\(.*$/, "").trim();
     return '<div class="ez-chg" data-ezgo="port"><small>🔁 ' + (ago === 0 ? "오늘" : String(c.date).slice(5).replace("-", "/")) + ' 포트에서 달라진 것</small><p>' + e(first.slice(0, 60)) + '</p>' + (why ? '<em>이유: ' + e(why.slice(0, 70)) + '</em>' : '') + '</div>';
   }
+  /* 🧹 11/11 첫 화면 간결화 9가지 (사용자 「첫 화면이 좀 어수선 — 더 간결하게」 → 「다 진행해」) — 지운 기능 없음 · 자리만 옮김
+     ① 한 장 규칙: 신호등(결론 포함) · 숫자 3개 · 버튼 하나 = 스크롤 없이 한 화면
+     ② 신호등 + 🧭 결론 합침(국내·해외 두 줄이 신호등 안으로) ③ 🐻 규칙·🫧 버블은 경보일 때만 신호등 밑 한 줄
+     ④ 나머지(뉴스·수급·적중률·달라진 것·내 종목·대형주·이번 주·고객 질문)는 「한 줄 목록」 — 누르면 펼침
+     ⑤ 맨 위 회색 한 줄 ⑥ 첫 화면 색은 신호등 색 하나 · 이모지 줄당 하나 ⑦ 시간대별로 목록 맨 위가 바뀜(아침 뉴스·이번 주 / 장중 수급·대형주 / 마감 성적·달라진 것)
+     ⑧ 자리 미리 잡기(늦게 오는 칸 높이 고정) ⑨ 첫 화면엔 버튼 하나 — 머리줄 📨 · 떠 있는 단추 숨김 */
+  var PHN = ["아침", "장중", "마감"];
+  function warnHtml(o, BR, BU){
+    var s = "";
+    if (o.red || o.yel) s += ruleHtml(o, BR).replace(/<summary>(?:🔴|🟡) 지금 규칙 · (?:현금 \d+%까지 · )?/, "<summary>📏 언제 다시 사나 · ");   // 🐻 경보일 때만 규칙 한 줄(펼치면 다시 사는 조건) — 현금 % 는 바로 위 결론 줄과 같은 말이라 뺌
+    if (BU && (BU.credit_on || (BU.red || 0) >= 3)) s += '<button type="button" class="ez-warn" data-ezbub="1">🫧 버블 경보 켜짐' + (BU.flow ? ' · ' + e(BU.flow) : '') + ' <i>›</i></button>';
+    if (o.mix) s += '<p class="ez-warn ez-warn-y">⚠ ' + e(o.mix) + '</p>';
+    return s;
+  }
   function heroHtml(b){
     var o = read(b), N = [];
     if (o.k != null) N.push(["코스피", o.kv || "", o.k]);
     if (o.q != null) N.push(["코스닥", o.qv || "", o.q]);
     if (o.s != null) N.push([o.sl, o.sv || "", o.s]);
-    var PH = [["☀️", "아침"], ["⚡", "장중"], ["🌙", "마감"]];
-    return '<div class="ez-top"><span>🔄 ' + e(String(b.asof || b.at || "").slice(11, 16) || b.label || "") + ' 갱신</span><span class="ez-ph">' +
-        PH.map(function(p, i){ return '<i class="' + (i === o.ph ? "on" : "") + '">' + p[0] + ' ' + p[1] + '</i>'; }).join("") + '</span></div>' +
-      '<div class="ez-light ' + o.L[0] + '"><b>' + o.L[1] + '</b><div><small>오늘 장' + (o.early ? ' <i class="ez-early">09:30 전 · 전날 마감 기준</i>' : '') + '</small><strong>' + e(o.L[2]) + '</strong><em>' + e(o.L[3]) + '</em></div></div>' +
-      '<div data-vd></div>' +   /* 🧭 11/10 결론 통일 — 국내·해외(포트) 한 줄씩 (verdict.js) */
-      hitHtml(b._sc) + ruleHtml(o, b._bear) +
-      (o.mix ? '<p class="ez-mix">⚠ ' + e(o.mix) + '</p>' : '') +
-      (b.one ? '<p class="ez-one">' + e(String(b.one).split(" ｜ ").pop()) + '</p>' : '') +   /* 11/10: 앞 절반(하락장 판정)은 바로 위 상자와 같은 말 → 뉴스 한 줄만 */
+    return '<p class="ez-top">' + e(String(b.asof || b.at || "").slice(11, 16) || b.label || "") + ' 갱신 · ' + PHN[o.ph] + (o.early ? ' · 09:30 전이라 전날 마감 기준' : '') + '</p>' +
+      '<div class="ez-light ' + o.L[0] + '"><div class="ez-lh"><b>' + o.L[1] + '</b><div><strong>' + e(o.L[2]) + '</strong><em>' + e(o.L[3].replace(/ · 오늘 .*$/, "")) + '</em></div></div>' +
+        '<div data-vd class="vd-mini"></div>' +   /* 🧭 결론 두 줄(verdict.js)이 신호등 안으로 */
+        warnHtml(o, b._bear, b._bub) + '</div>' +
+      (window.__rebCard ? __rebCard(b._bear, o.k, "ez") : '') +   // 📨 반등 날에만
       (N.length ? '<div class="ez-nums">' + N.slice(0, 3).map(function(n){ return '<div><small>' + e(n[0]) + '</small><b class="' + cl(n[2]) + '">' + sg(n[2]) + '</b>' + (n[1] ? '<em>' + e(n[1]) + '</em>' : '') + '</div>'; }).join("") + '</div>' : '') +
-      '<div data-flow></div>' +   /* 🧲 11/10 #3 수급 한 줄 (flow.js) */
-      (o.act ? '<div class="ez-act"><small>그래서 오늘은</small><p>👉 ' + e(o.red ? redAct(o.red) : o.act) + '</p></div>' : '') +
-      (window.__rebCard ? __rebCard(b._bear, o.k, "ez") : '') +   // 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (ux1110.js · 반등 날에만)
-      chgHtml(b._home) +
-      (ROLE() ? todo(o) : roleHtml()) +
-      '<p class="ez-note">' + e(b.note || "참고용 · 사라·팔라는 뜻이 아니에요") + '</p>';
+      (ROLE() ? todo(o) : roleHtml());
   }
+  // ④ ⑦ 한 줄 목록 — 시간대(아침 0 · 장중 1 · 마감 2)마다 맨 위가 바뀜
+  var ROWORD = {act: [1, 2, 4], news: [0, 3, 5], flow: [3, 0, 2], hit: [5, 5, 0], chg: [4, 4, 1], rule: [6, 6, 6]};
+  var MNORD = {mncal: [0, 3, 3], mnwhy: [2, 0, 1], mnwl: [1, 1, 2], mnqa: [3, 2, 0]};
+  function rowsHtml(b){
+    var o = read(b), ph = o.ph, R = [];
+    function row(k, h){ R.push('<div class="ez-row" style="order:' + ROWORD[k][ph] + '">' + h + '</div>'); }
+    if (o.act && !o.red) row("act", '<button type="button" class="ez-r ez-clamp" data-ezclamp="1"><small>그래서 오늘은</small>' + e(o.act) + '</button>');
+    if (b.one) row("news", '<button type="button" class="ez-r ez-clamp" data-ezclamp="1"><small>오늘 뉴스</small>' + e(String(b.one).split(" ｜ ").pop()) + '</button>');
+    row("flow", '<div data-flow class="ez-flow"><span class="ez-r ez-ph">외국인·기관 수급 불러오는 중…</span></div>');
+    var S = b._sc && (b._sc.rows || []).filter(function(x){ return x.k === "report"; })[0];
+    if (S && S.n) row("hit", '<button type="button" class="ez-r" data-ezgo="score"><small>시황 예고 적중</small><b>' + S.rate + '%</b> · ' + S.n + '건 <i>›</i></button>');
+    var c = b._home && b._home.port && b._home.port.change;
+    if (c && c.why){ var td = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10), ago = (Date.parse(td) - Date.parse(c.date)) / 864e5;
+      if (ago >= 0 && ago <= 2) row("chg", '<button type="button" class="ez-r ez-clamp" data-ezgo="port"><small>' + (ago === 0 ? "오늘" : String(c.date).slice(5).replace("-", "/")) + ' 포트에서 달라진 것</small>' + e(String(c.why).split(" — ")[0].split(" · ")[0].replace(/^🧭\s*/, "").slice(0, 60)) + ' <i>›</i></button>'); }
+    if (!o.red && !o.yel) row("rule", ruleHtml(o, b._bear).replace('class="ez-rule"', 'class="ez-rule ez-r"'));
+    return '<p class="ez-rh">오늘 한 줄씩 <small>' + ["아침엔 뉴스·일정 먼저", "장중엔 수급·대형주 먼저", "마감엔 성적·달라진 것 먼저"][ph] + '</small></p><div class="ez-rows">' + R.join("") + '</div>';
+  }
+  window.__ezPh = function(){ return B ? read(B).ph : 0; };
   var HB = 0;
   function home(){
     var main = document.getElementById("main"), hb = document.getElementById("hmbody");
     var h = document.getElementById("ezhero"), more = document.getElementById("ezmore"), pl = document.getElementById("ezpro");
     if (cur() !== "home" || !main || !hb){ return; }
     if (!EZ()){
-      if (h) h.remove(); if (more) more.remove(); hb.classList.remove("ez-open");
+      if (h) h.remove(); if (more) more.remove(); hb.classList.remove("ez-open"); var rw0 = document.getElementById("ezrows"); if (rw0) rw0.remove();
       if (!pl){ pl = document.createElement("button"); pl.id = "ezpro"; pl.type = "button"; pl.textContent = "🔰 쉬운 화면으로 보기"; pl.onclick = function(){ setMode("easy"); }; hb.parentNode.insertBefore(pl, hb); }
       return;
     }
     if (pl) pl.remove();
-    if (!h){ h = document.createElement("section"); h.id = "ezhero"; h.className = "ez-hero"; h.setAttribute("data-noemo", "1"); h.innerHTML = '<div class="ez-load">오늘 시장을 한 장으로 모으는 중…</div>'; hb.parentNode.insertBefore(h, hb); HB = 0; }
+    if (!h){ h = document.createElement("section"); h.id = "ezhero"; h.className = "ez-hero"; h.setAttribute("data-noemo", "1"); h.innerHTML = '<div class="ez-load ez-skel"><i></i><i></i><i></i></div>'; hb.parentNode.insertBefore(h, hb); HB = 0; }
     if (!more){
       more = document.createElement("div"); more.id = "ezmore";
       more.innerHTML = '<button type="button" class="ez-open">▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small></button>' +
@@ -19986,9 +20010,35 @@ window.VIDC = {
         addEventListener("touchstart", stop, {once: true, passive: true}); addEventListener("wheel", stop, {once: true, passive: true});
         (function pin(){ if (!btn.isConnected) return; var d = btn.getBoundingClientRect().top - t0; if (Math.abs(d) > 2) scrollBy(0, d); if (Date.now() < end) requestAnimationFrame(pin); })(); if (o && window.__h2apply) setTimeout(window.__h2apply, 30); this.innerHTML = o ? "▴ 접기" : '▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small>'; };   /* 🔧 11/05 자가 업그레이드: 펼칠 때 화면을 hb 맨 위로 끌어 「▴ 접기」가 화면 밖(383→−189px)으로 튀던 것 → 누른 단추 제자리, 내용은 바로 아래 */
     }
+    // 🧹 11/11 ④ 한 줄 목록은 신호등 상자 바로 아래(내 종목·대형주·이번 주·고객 질문 칸 #mnbox 보다 위)
+    var rw = document.getElementById("ezrows");
+    if (!rw){ rw = document.createElement("section"); rw.id = "ezrows"; rw.setAttribute("data-noemo", "1"); rw.innerHTML = '<p class="ez-rh">오늘 한 줄씩</p><div class="ez-rows"><div class="ez-row"><span class="ez-r ez-ph">불러오는 중…</span></div></div>'; }
+    if (h.nextElementSibling !== rw) h.insertAdjacentElement("afterend", rw);
+    mnFold();
     if (Date.now() - HB > 60000){ HB = Date.now();
-      brief().then(function(b){ var x = document.getElementById("ezhero"); if (!x) return; x.innerHTML = b && (b.one || b.talk) ? heroHtml(b) : '<div class="ez-load">아직 오늘 자료가 안 올라왔어요 · 아래 「오늘 자세히 보기」를 눌러 주세요</div>'; }); }
+      brief().then(function(b){ var x = document.getElementById("ezhero"), y = document.getElementById("ezrows"); if (!x) return; var ok = b && (b.one || b.talk);
+        x.innerHTML = ok ? heroHtml(b) : '<div class="ez-load">아직 오늘 자료가 안 올라왔어요 · 아래 「오늘 자세히 보기」를 눌러 주세요</div>';
+        if (y) y.innerHTML = ok ? rowsHtml(b) : '';   /* 참고용 문구는 화면 맨 아래 공통 고지가 맡음 */
+        x.classList.add("ez-done"); }); }
   }
+
+  /* 🧹 11/11 ④ ⑦ 내 종목·대형주·이번 주·고객 질문(#mnbox, mine.js) — 쉬운 첫 화면에선 제목 한 줄씩, 누르면 펼침 · 시간대별 순서 */
+  var MNOPEN = {};
+  function mnFold(){
+    var m = document.getElementById("mnbox"); if (!m || !EZ()) return;
+    var ph = window.__ezPh ? __ezPh() : 0;
+    [].forEach.call(m.children, function(c){ if (!c.id) return; c.classList.add("ez-f"); c.classList.toggle("ez-x", !!MNOPEN[c.id]); if (MNORD[c.id]) c.style.order = MNORD[c.id][ph]; });
+  }
+  document.addEventListener("click", function(ev){
+    if (!EZ() || !ev.target.closest) return;
+    var h = ev.target.closest("#mnbox .ez-f > h3");
+    if (h && !ev.target.closest(".gd,.gdk,[data-gd],img")){ var c = h.parentNode; MNOPEN[c.id] = !MNOPEN[c.id]; c.classList.toggle("ez-x", MNOPEN[c.id]); ev.stopPropagation(); return; }
+    var k = ev.target.closest("[data-ezclamp]"); if (k){ k.classList.toggle("ez-open1"); return; }
+    var bb = ev.target.closest("[data-ezbub]"); if (bb){ ev.stopPropagation();   // 🫧 버블 경보 → 「오늘 자세히 보기」를 열고 버블 경보판으로
+      var hb = document.getElementById("hmbody"), op = document.querySelector("#ezmore .ez-open"); if (hb && !hb.classList.contains("ez-open") && op) op.click();
+      var n = 0; (function seek(){ var x = document.getElementById("bubble"); if (x){ x.scrollIntoView({behavior: "smooth", block: "start"}); return; } if (++n < 20) setTimeout(seek, 250); })(); }
+  }, true);
+  function homeFlag(){ D.classList.toggle("ez-home", EZ() && cur() === "home"); }
 
   /* ── ⑥ 🙋 뭐 보면 돼요? ── */
   var ASK = [
@@ -20139,7 +20189,7 @@ window.VIDC = {
   function tick(){ q = 0;
     try { bar(); } catch(x) {}
     try { askBtn(); } catch(x) {}
-    try { home(); } catch(x) { console.warn("ez home", x); }
+    try { homeFlag(); home(); } catch(x) { console.warn("ez home", x); }
     try { wiz(); } catch(x) {}
     try { watchView(); } catch(x) {}
     if (cur() === "home") setTimeout(tour, 1800);
@@ -20207,6 +20257,45 @@ window.VIDC = {
     ".ezt-tip div{display:flex;gap:8px;justify-content:flex-end}.ezt-tip button{font:inherit;font-size:15px;font-weight:700;border:0;border-radius:12px;padding:10px 16px;background:#f2f4f6;color:#4e5968}.ezt-tip button.go{background:#3182f6;color:#fff}" +
     ".ez-toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 130px);transform:translateX(-50%);z-index:9999;background:rgba(25,31,40,.94);color:#fff;font-size:14.5px;font-weight:700;padding:11px 16px;border-radius:14px;max-width:90vw;text-align:center;transition:opacity .4s}.ez-toast.out{opacity:0}";
   document.head.appendChild(st);
+  /* 🧹 11/11 첫 화면 간결화 — 모양 (위 규칙을 덮어씀) */
+  var st2 = document.createElement("style");
+  st2.textContent =
+    ".ez-hero{padding:14px 14px 14px;min-height:420px}.ez-hero.ez-done{min-height:0}" +   /* ⑧ 자리 미리 잡기 */
+    ".ez-skel{display:flex;flex-direction:column;gap:12px;padding:6px 0}.ez-skel i{display:block;border-radius:16px;background:var(--panel2,rgba(127,127,127,.12));animation:ezsk 1.2s ease-in-out infinite alternate}.ez-skel i:nth-child(1){height:230px}.ez-skel i:nth-child(2){height:72px}.ez-skel i:nth-child(3){height:56px}@keyframes ezsk{to{opacity:.45}}" +
+    ".ez-hero .ez-top{display:block;margin:0 2px 10px;font-size:12.5px!important;color:var(--dim,var(--sub));font-weight:600}" +   /* ⑤ 회색 한 줄 */
+    ".ez-light{display:block;padding:14px 14px 10px;margin-bottom:10px}.ez-lh{display:flex;align-items:center;gap:12px}" +
+    ".ez-light .ez-lh>b{font-size:40px;line-height:1}.ez-light strong{font-size:26px}.ez-light em{font-size:14.5px!important}" +
+    /* ② 결론 두 줄 — 신호등 안, 상자·제목 없이 */
+    ".vd-mini{margin:10px 0 0;min-height:58px}.vd-mini .vd-in{border:0;background:transparent;padding:0}.vd-mini .vd-h,.vd-mini .vd-n,.vd-mini .vd-l b small{display:none!important}" +
+    ".vd-mini .vd-r{padding:6px 0;border-top:1px solid rgba(127,127,127,.18);gap:8px}.vd-mini .vd-f{font-size:17px}.vd-mini .vd-l{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 6px}" +
+    ".vd-mini .vd-l b{display:inline;font-size:13.5px!important;font-weight:700!important;color:var(--sub)!important}.vd-mini .vd-r em{display:inline;margin:0;font-size:15px!important;color:var(--text)!important}" +
+    /* ③ 경보 한 줄 */
+    ".ez-light .ez-rule{margin:6px 0 0;border:0;border-top:1px solid rgba(127,127,127,.18);border-radius:0;padding:8px 0 0;font-size:14px;background:transparent}" +
+    ".ez-warn{display:block;width:100%;text-align:left;font:inherit;font-size:14px;font-weight:800;color:var(--text);background:transparent;border:0;border-top:1px solid rgba(127,127,127,.18);padding:8px 0 0;margin:6px 0 0;cursor:pointer;word-break:keep-all}.ez-warn i{font-style:normal;color:var(--sub)}" +
+    ".ez-warn-y{font-weight:700;color:var(--sub);cursor:default}" +
+    ".ez-nums{margin-bottom:10px;gap:6px}.ez-nums div{padding:8px 6px}.ez-nums b{font-size:20px}.ez-nums em{font-size:12px!important}" +
+    ".ez-cta{font-size:17px;padding:14px 12px}.ez-cta.red{background:#e5484d}" +
+    /* ④ 한 줄 목록 */
+    "#ezrows{background:var(--panel);border:1px solid var(--line);border-radius:22px 22px 0 0;border-bottom:0;padding:12px 14px 4px;margin:0}" +
+    "html[data-ez=easy] #ezrows+#mnbox{background:var(--panel);border:1px solid var(--line);border-top:0;border-radius:0 0 22px 22px;padding:0 14px 8px;margin:0 0 12px;display:flex;flex-direction:column}" +
+    ".ez-rh{margin:0 2px 4px;font-size:15px;font-weight:800}.ez-rh small{font-size:12px!important;font-weight:500;color:var(--sub);margin-left:6px}" +
+    ".ez-rows{display:flex;flex-direction:column}.ez-row{border-top:1px solid var(--line)}.ez-row:first-child{border-top:0}" +
+    ".ez-r{display:block;width:100%;text-align:left;font:inherit;font-size:15px;line-height:1.45;font-weight:600;color:var(--text);background:transparent;border:0;padding:11px 2px;cursor:pointer;word-break:keep-all;min-height:46px}" +
+    ".ez-r small{display:block;font-size:12px!important;font-weight:700;color:var(--sub);margin-bottom:1px}.ez-r i{font-style:normal;color:var(--sub);float:right}.ez-r b{font-weight:900}" +
+    ".ez-clamp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}.ez-clamp.ez-open1{-webkit-line-clamp:unset;display:block}" +
+    ".ez-ph{color:var(--sub);font-weight:500}.ez-flow{min-height:46px}.ez-flow .fl-line{display:block;width:100%;text-align:left;font:inherit;font-size:15px;line-height:1.45;font-weight:600;color:var(--text);background:transparent;border:0;padding:11px 2px;word-break:keep-all;cursor:pointer}.ez-flow .fl-line i{font-style:normal;color:var(--sub);float:right}" +
+    ".ez-rows .ez-rule.ez-r{border:0;border-radius:0;padding:11px 2px;background:transparent;font-size:15px}.ez-rows .ez-rule summary{font-weight:600}" +
+    "#ezrows .ez-note{margin:4px 0 6px;font-size:12px!important}" +
+    /* ④ #mnbox 칸 — 제목 한 줄 · 누르면 펼침 */
+    "html[data-ez=easy] #mnbox .ez-f{background:transparent!important;border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important;box-shadow:none!important;margin:0!important;padding:0!important}" +
+    "html[data-ez=easy] #mnbox .ez-f>h3{margin:0!important;padding:12px 2px!important;font-size:15px!important;font-weight:700!important;cursor:pointer;display:flex;align-items:center;gap:6px}" +
+    "html[data-ez=easy] #mnbox .ez-f>h3::after{content:'▾';margin-left:auto;color:var(--sub);font-size:13px}html[data-ez=easy] #mnbox .ez-f.ez-x>h3::after{content:'▴'}" +
+    "html[data-ez=easy] #mnbox .ez-f>h3 .mut{font-size:12px!important;color:var(--sub);font-weight:500}" +
+    "html[data-ez=easy] #mnbox .ez-f:not(.ez-x)>:not(h3){display:none!important}html[data-ez=easy] #mnbox .ez-f.ez-x{padding-bottom:10px!important}" +
+    "html[data-ez=easy] #mnbox:empty{min-height:0}" +
+    /* ⑨ 첫 화면엔 버튼 하나 — 머리줄 📨 · 뒤로 숨김 */
+    "html.ez-home[data-ez=easy] body header .top #opbtn,html.ez-home[data-ez=easy] body #opbtn,html.ez-home[data-ez=easy] body #backbtn{display:none!important}";
+  document.head.appendChild(st2);
 })();
 ;
 /* ======== ux1109.js ======== */
