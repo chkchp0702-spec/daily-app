@@ -9675,11 +9675,11 @@
       '<p class="note" style="margin:6px 0 0">셋 다 「규칙대로 했다면」 계산이지 매수 추천이 아니에요.</p></div></details>';
   }
   // ---- 🐻 11/09 A11/9-2 하락장 규칙 겹쳐 보기 ----
-  var BMK = {kospi: "🇰🇷 코스피", sp500: "🇺🇸 S&P500", nasdaq: "🇺🇸 나스닥"}, BNM = {"🟢": "정상", "🟡": "조정", "🐻": "하락장"};
+  var BMK = {kospi: "🇰🇷 코스피", kosdaq: "🇰🇷 코스닥", sp500: "🇺🇸 S&P500", nasdaq: "🇺🇸 나스닥"}, BNM = {"🟢": "정상", "🟡": "조정", "🐻": "하락장"};
   function bearM(){ var o = {}; ((BR && BR.markets) || []).forEach(function(m){ o[m.key] = m; }); return o; }
   function bearAny(){ return ((BR && BR.markets) || []).some(function(m){ return m.state !== "🟢"; }); }
   function bearOn(){ return BEARON && bearAny(); }
-  function bearHead(){ return ((BR && BR.markets) || []).map(function(m){ return m.state + m.name + (m.cash ? " " + (m.to || "현금") + " " + m.cash + "%" : ""); }).join(" · ") + " · " + md((BR.markets[0] || {}).asof) + " 종가 판정"; }
+  function bearHead(){ return ((BR && BR.markets) || []).filter(function(m){ return m.key !== "kosdaq"; }).map(function(m){ return m.state + m.name + (m.cash ? " " + (m.to || "현금") + " " + m.cash + "%" : ""); }).join(" · ") + " · " + md((BR.markets[0] || {}).asof) + " 종가 판정"; }
   function bearBtn(){
     if (!bearAny()) return '';
     return '<div class="po-hv po-brt"><button type="button" id="pobrt" class="' + (BEARON ? "on" : "") + '">' + (BEARON ? "🐻 하락장 규칙 겹쳐 보는 중" : "🐻 하락장 규칙 겹쳐 보기") + '</button><small>' + (BEARON ? "보기 전용 · 끄면 원래 배분표" : "켜면 시장마다 그 시장 칸에 계기판 현금 권고를 겹쳐 주황으로") + '</small></div>';
@@ -9733,7 +9733,7 @@
     var cut = PL._cut || 0, used = {};
     PL.forEach(function(p){ var mk = rowMk(p); if (!mk) return; if (mk === "item") p.items.forEach(function(it){ used[itemMk(it)] = 1; }); else used[mk] = 1; });
     var cr = PL.filter(function(p){ return p.bcash; })[0];
-    var lines = ((BR && BR.markets) || []).map(function(m){
+    var lines = ((BR && BR.markets) || []).filter(function(m){ return m.key !== "kosdaq"; }).map(function(m){   // 🌱 11/11 코스닥은 판정·알림만(포트 칸 없음)
       var off = m.rule && m.rule.id === "OFF";
       var tx = off ? "현금 규칙 꺼 둠 — 그대로" : !m.cash ? "그대로" : !used[m.key] ? "이 포트엔 " + (m.key === "kospi" ? "한국 주식 칸이 없어 해당 없음" : "그 시장 칸이 없어 해당 없음") : "그 시장 주식 칸의 " + m.cash + "% 덜기";
       return '<li><b>' + BMK[m.key] + ' ' + m.state + ' ' + BNM[m.state] + '</b>' + (m.cash ? ' ' + (m.to || '현금') + ' ' + m.cash + '%' : '') + ' → ' + tx + '</li>'; }).join("");
