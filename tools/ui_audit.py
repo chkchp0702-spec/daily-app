@@ -36,7 +36,8 @@ async def main():
                 info=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); if(!e||!e.isConnected) return null; e.scrollIntoView({{block:'center'}}); var r=e.getBoundingClientRect(); return [Math.round(r.top),(e.innerText||e.getAttribute('aria-label')||'').trim().slice(0,22).replace(/\\s+/g,' ')]}})()""")
                 if not info: continue
                 await pg.wait_for_timeout(120)
-                info=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); var r=e.getBoundingClientRect(); return [Math.round(r.top),((e.innerText||'').trim().slice(0,22).replace(/\\s+/g,' '))||e.outerHTML.slice(0,140)]}})()""")
+                info=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); if(!e||!e.isConnected) return null; var r=e.getBoundingClientRect(); return [Math.round(r.top),((e.innerText||'').trim().slice(0,22).replace(/\\s+/g,' '))||e.outerHTML.slice(0,140)]}})()""")
+                if not info: continue   # 11/11 0.12초 사이 다시 그려져 사라진 버튼 — 건너뜀(전에는 점검 전체가 멈춤)
                 jumpby=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); return !!(e&&e.closest('[data-j]'))}})()""")   # 10/20 「숫자 누르면 그 종목으로」(ux1015c sigJump) — 옮겨 가는 게 정답
                 try:
                     await pg.evaluate(f"""document.querySelector('[data-au="{i}"]').click()""")

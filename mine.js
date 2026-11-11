@@ -224,7 +224,9 @@
     if (t.open){
       [].forEach.call(t.parentNode.querySelectorAll("details.mn-q[open]"), function(o){ if (o !== t) o.open = false; });
       var sh = !!t.closest("#qasheet");
-      setTimeout(function(){ try { if (t.open) t.scrollIntoView({block: sh ? "start" : "nearest", behavior: "smooth"}); } catch(z) {} }, 80);
+      // 🔧 11/11 자가 업그레이드: 홈 카드에선 연 질문이 이미 화면 위쪽 60% 안에 있으면 그대로 둠(전엔 「nearest」가 긴 답을 맞추느라 질문을 378→72px 로 끌어올림 — 🩺 건강검진 튐)
+      setTimeout(function(){ try { if (!t.open) return; if (sh){ t.scrollIntoView({block: "start", behavior: "smooth"}); return; }
+        var y = t.querySelector("summary").getBoundingClientRect().top; if (y < 0 || y > innerHeight * 0.6) t.scrollIntoView({block: "start", behavior: "smooth"}); } catch(z) {} }, 80);
     }
     qaBk();
   }, true);
@@ -259,7 +261,8 @@
     ev.stopPropagation();
     if (t.dataset.mnop != null){ if (window.openOP) openOP(t.dataset.mnop); return; }
     if (t.dataset.qcopy != null){ copyQ(+t.dataset.qcopy, t.dataset.qm); return; }
-    if (t.dataset.qclose){ var dt = t.closest("details"); if (dt){ dt.open = false; try { dt.scrollIntoView({block: "nearest"}); } catch(z) {} } return; }
+    if (t.dataset.qclose){ var dt = t.closest("details"); if (dt){ var y0 = t.getBoundingClientRect().top; dt.open = false;   // 🔧 11/11: 닫은 질문이 「✕ 답 닫기」를 누른 그 자리에 오게(손가락 밑) — 시트 안이면 시트를, 아니면 화면을 굴림
+        try { var dy = dt.getBoundingClientRect().top - y0, sc = dt.closest(".qa-in"); if (sc) sc.scrollTop += dy; else window.scrollBy(0, dy); } catch(z) {} } return; }
     if (t.dataset.qaall) window.__qaOpen();
   }, true);
   var MT = 0; new MutationObserver(function(){ clearTimeout(MT); MT = setTimeout(function(){ try { mount(); propBtn(); } catch(x) {} }, 120); }).observe(document.documentElement, {childList: true, subtree: true});
