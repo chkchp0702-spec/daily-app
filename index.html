@@ -1560,7 +1560,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261111d";
+var APPV = "20261111e";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1612,7 +1612,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합친 한 파일. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.bundle.js?v=46bd3eb553"></script>
+<script defer src="app.bundle.js?v=7610ad89ec"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1691,7 +1691,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1109.js?v=1"></script>   <!· 🧊 11/09 냉정 재점검 17 — 뭐 살까 순서·정직 한 줄·카드 5개·머리 아이콘·전문어 밑줄 ·>
 <script defer src="ux1109b.js?v=3"></script>   <!· 🌱 11/09 A11/9-1 바닥 신호 4개의 과거 성적표 (계기판 체크리스트) ·>
 <script defer src="ux1110.js?v=1"></script>   <!· 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (반등 날에만) ·>
-<script defer src="ux1110b.js?v=3"></script>   <!· 🫧 11/10 버블 경보판 (전병서 11/11 경보표 · 계기판 아래) · 🕰 11/11 버블 시계 ·>
+<script defer src="ux1110b.js?v=4"></script>   <!· 🫧 11/10 버블 경보판 (전병서 11/11 경보표 · 계기판 아래) · 🕰 11/11 버블 시계 ·>
 <script defer src="ux1111.js?v=1"></script>   <!· 🔭 11/11 신호 탭 「지켜보는 중」 모드 (코스피 🐻 동안 · bear_watch.json) ·>
 📦list-->
 <!-- 📦/JS -->
