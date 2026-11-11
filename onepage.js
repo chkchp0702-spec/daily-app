@@ -15,6 +15,29 @@
   function gj(u){ return (window.getJSON ? getJSON(u, {ttl: 600000}) : fetch(u).then(function(r){ return r.json(); })).catch(function(){ return null; }); }
   function q(){ return "?" + Math.floor(Date.now() / 300000); }
   function pbname(){ var n = ls("pbname"); if (n != null) return n; n = prompt("한 장 위에 넣을 내 이름 (예: 김OO PB · 비워도 돼요)", "") || ""; ls("pbname", n.trim().slice(0, 30)); return ls("pbname") || ""; }
+  /* 💌 11/12 사용자 「오늘의 한 장 고객에게 보낼 때 고객 이름 넣는 칸 — 나만을 위해 보냈다는 생각이 들게」
+     보내기 창마다 「받는 분」 칸 · 비우면 예전 그대로 · 한 번 보낸 뒤엔 비워짐(다른 고객에게 잘못 가지 않게) · 최근 이름 8개는 칩으로 한 번에 */
+  var CLIENT = "";
+  function cliLab(){ var c = String(CLIENT || "").replace(/\s+/g, " ").trim(); if (!c) return ""; return /님$/.test(c) ? c : c + " 고객님"; }
+  function cliRecent(){ try { var a = JSON.parse(ls("op_clients") || "[]"); return Array.isArray(a) ? a.filter(function(x){ return typeof x === "string" && x; }).slice(0, 8) : []; } catch(x){ return []; } }
+  function cliSave(){ var c = String(CLIENT || "").trim(); if (!c) return; var a = cliRecent().filter(function(x){ return x !== c; }); a.unshift(c); ls("op_clients", JSON.stringify(a.slice(0, 8))); }
+  function cliDone(){ cliSave(); CLIENT = ""; }
+  function cliHTML(){ var e = function(t){ return String(t).replace(/[&<>"]/g, ""); }, R = cliRecent();
+    return '<label class="opc-n opc-cl">💌 받는 분 <input id="opccl" maxlength="20" placeholder="고객 이름 (예: 홍길동 · 비워도 돼요)" autocomplete="off"></label>' +
+      (R.length ? '<div class="opc-rc">' + R.map(function(n){ return '<button type="button" data-cl="' + e(n) + '">' + e(n) + '</button>'; }).join("") + '</div>' : '') +
+      '<p class="opc-tip">이름을 넣으면 한 장 맨 위에 「○○ 고객님께」로 들어가요</p>'; }
+  function cliBind(box){ CLIENT = ""; var I = box.querySelector("#opccl"); if (!I) return;
+    I.addEventListener("input", function(){ CLIENT = I.value.trim().slice(0, 20); [].forEach.call(box.querySelectorAll("[data-cl]"), function(b){ b.classList.toggle("on", b.dataset.cl === CLIENT); }); });
+    box.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-cl]"); if (!b) return; ev.stopPropagation(); var on = CLIENT !== b.dataset.cl; I.value = on ? b.dataset.cl : ""; I.dispatchEvent(new Event("input")); }, true); }
+  // 캔버스 맨 위 한 줄 — 왼쪽 「○○ 고객님께」 · 오른쪽 날짜·보내는 사람 (넘치면 글자를 줄임)
+  function headLine(g, name, y, cL, cR, cN){
+    var d = kst(), ds = d.getUTCFullYear() + "년 " + (d.getUTCMonth() + 1) + "월 " + d.getUTCDate() + "일 (" + "일월화수목금토"[d.getUTCDay()] + ")", cl = cliLab();
+    if (!cl){ g.fillStyle = cL; font(g, 600, 24); g.fillText(ds, MX, y); if (name){ g.textAlign = "right"; g.fillStyle = cN || cL; font(g, 700, 24); g.fillText(name, W - MX, y); g.textAlign = "left"; } return; }
+    var L = "💌 " + cl + "께", Rt = ds.replace(/^\d+년 /, "") + (name ? " · " + name + " 드림" : ""), fs = 30, fr = 22;
+    for (var k = 0; k < 8; k++){ font(g, 800, fs); var lw = g.measureText(L).width; font(g, 600, fr); var rw = g.measureText(Rt).width; if (lw + rw + 28 <= CW) break; if (fs > 24) fs -= 2; else if (fr > 17) fr -= 1; else break; }
+    g.fillStyle = cR; font(g, 800, fs); g.fillText(L, MX, y + 2);
+    g.textAlign = "right"; g.fillStyle = cN || cL; font(g, 600, fr); g.fillText(Rt, W - MX, y); g.textAlign = "left";
+  }
   function pct(v, d){ return v == null || isNaN(v) ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(+v).toFixed(d == null ? 1 : d) + "%"; }
   function cur(){ return (typeof window.cur !== "undefined" && window.cur) || ""; }
   function latest(cat){ var L = (window.M && M.cats && M.cats[cat]) || []; return L.length ? L[0] : null; }
@@ -421,7 +444,9 @@
     h = 70 + nRead * 42 + 22 + (A.watch && A.watch.length ? 44 + A.watch.length * 40 + 16 : 0) + (nPlan ? 44 + nPlan * 36 + (A.plan.length * 8) : 0) + 20;
     rr(g, MX, y, CW, h, 24, "#1f2d4d");
     g.fillStyle = "#d9a441"; g.fillRect(MX, y + 24, 8, 44);
-    g.fillStyle = "#fff"; font(g, 800, 30); g.fillText("📌 " + (name ? name + "의 " : "PB ") + "코멘트" + (A.title ? " — " + A.title : " — 그래서 앞으로"), MX + pad, y + 56);
+    var aT = cliLab() ? "📌 " + cliLab() + "께 드리는 말씀" + (A.title ? " — " + A.title : "") : "📌 " + (name ? name + "의 " : "PB ") + "코멘트" + (A.title ? " — " + A.title : " — 그래서 앞으로"), aF = 30;
+    font(g, 800, aF); while (g.measureText(aT).width > CW - pad * 2 && aF > 22){ aF -= 2; font(g, 800, aF); }
+    g.fillStyle = "#fff"; g.fillText(aT, MX + pad, y + 56);
     yy = y + 70;
     g.fillStyle = "#f3f5fa"; font(g, 600, 30); yy += wrap(g, A.read, MX + pad, yy + 34, tw, 42, RL) + 22;
     if (A.watch && A.watch.length){
@@ -521,10 +546,7 @@
   }
   var LUP = "#ff8f80", LDN = "#8fb8ff";
   function lcls(v){ return v == null || v === 0 ? "#fff" : v > 0 ? LUP : LDN; }
-  function topLine(g, name){
-    var d = kst(); g.fillStyle = "rgba(255,255,255,.8)"; font(g, 600, 24); g.fillText(d.getUTCFullYear() + "년 " + (d.getUTCMonth() + 1) + "월 " + d.getUTCDate() + "일 (" + "일월화수목금토"[d.getUTCDay()] + ")", MX, 58);
-    if (name){ g.textAlign = "right"; font(g, 700, 24); g.fillText(name, W - MX, 58); g.textAlign = "left"; }
-  }
+  function topLine(g, name){ headLine(g, name, 58, "rgba(255,255,255,.8)", "#fff"); }
   function spark(g, ser, x0, y0, x1, y1, zero, labs){
     if (!ser || ser.length < 3) return;
     var mn = Math.min.apply(null, ser), mx = Math.max.apply(null, ser); if (zero){ mn = Math.min(mn, 0); mx = Math.max(mx, 0); } if (mx === mn) mx = mn + 1;
@@ -690,8 +712,7 @@
     else if (C.kind === "stock") y = bannerStock(g, C, name);
     else if (C.kind === "screen") y = bannerScreen(g, C, name);
     else {
-      g.fillStyle = MUT; font(g, 600, 24); g.fillText(d.getUTCFullYear() + "년 " + (d.getUTCMonth() + 1) + "월 " + d.getUTCDate() + "일", MX, y);
-      if (name){ g.textAlign = "right"; g.fillStyle = SUB; font(g, 700, 24); g.fillText(name, W - MX, y); g.textAlign = "left"; }
+      headLine(g, name, y, MUT, INK, SUB);
       y += 20; g.fillStyle = INK; font(g, 800, 52); y += wrap(g, C.title, MX, y + 52, CW, 60, 2);
       if (C.sub){ g.fillStyle = SUB; font(g, 500, 26); y += wrap(g, C.sub, MX, y + 36, CW, 34, 2) + 6; }
       y += 24;
@@ -941,13 +962,13 @@
     var box = document.createElement("div"); box.id = "opch";
     var row = function(it, i){ var ic = it.kind === "stock" ? "⭐" : it.kind === "myels" ? "🎯" : it.kind === "fund" ? "📦" : "🏦"; return '<label class="opc-r"><input type="checkbox" data-i="' + i + '"><span>' + ic + '</span><b>' + String(it.nm).replace(/[<>&]/g, "").slice(0, 26) + '</b><small>' + (it.kind === "stock" ? it.id : it.kind === "myels" ? "내 ELS" : it.kind === "fund" ? "펀드" : "채권") + '</small></label>'; };
     box.innerHTML = '<div class="opc-s"><h3>📨 보내기</h3>' +
-      '<label class="opc-n">✍️ 보내는 사람 <input id="opcnm" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + String(ls("pbname") || "").replace(/[&<>"]/g, "") + '"></label>' +
+      '<label class="opc-n">✍️ 보내는 사람 <input id="opcnm" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + String(ls("pbname") || "").replace(/[&<>"]/g, "") + '"></label>' + cliHTML() +
       '<button class="opc-b main" data-m="mkt">📊 시황만 <small>시장 한 장</small></button>' +
       '<button class="opc-b" data-m="pick">⭐ 종목·상품 고르기 <small>고른 종목·상품 한 장씩 · 시황은 넣어도 빼도 돼요</small></button>' +
       '<div id="opcl" hidden>' + (all.length ? '<label class="opc-wm"><span>📊 시황 한 장도 같이 보내기</span><input type="checkbox" role="switch" id="opcwm"' + (ls("opc_wm") === "0" ? "" : " checked") + '><i></i></label><div class="opc-h"><span>보낼 것 고르기</span><button type="button" data-all="1">전체</button></div><div class="opc-list">' + all.map(row).join("") + '</div><button class="opc-go" id="opcgo" disabled>골라 주세요</button>' :
         '<p class="note">⭐ 관심종목이나 📌 담아 둔 상품이 아직 없어요. 종목 화면의 ☆, 상품 카드의 「📌 담아 두기」, ELS 관제탑으로 담아 주세요.</p>') + '</div>' +
       '<button class="opc-x" data-x="1">닫기</button></div>';
-    document.body.appendChild(box);
+    document.body.appendChild(box); cliBind(box);
     // 11/02 진짜 원인: 「📊 시황 한 장도 같이」 스위치도 체크박스라 고른 목록에 빈 항목으로 끼어들어 → 만들기 첫 줄에서 오류로 멈춤(시황만·종목 화면에서 보내기는 됨)
     var sel = function(){ return [].filter.call(box.querySelectorAll('input[type=checkbox][data-i]'), function(c){ return c.checked; }).map(function(c){ return all[+c.dataset.i]; }).filter(Boolean); };
     var withM = function(){ var c = document.getElementById("opcwm"); return !c || c.checked; };
@@ -956,13 +977,13 @@
     var nmI = document.getElementById("opcnm"); if (nmI) nmI.addEventListener("input", function(){ ls("pbname", nmI.value.trim().slice(0, 30)); });
     box.addEventListener("click", function(ev){
       var t = ev.target; if (t === box || t.closest("[data-x]")){ box.remove(); return; }
-      var m = t.closest("[data-m]"); if (m){ if (m.dataset.m === "mkt"){ box.remove(); go(null); } else { document.getElementById("opcl").hidden = false; m.classList.add("on"); } return; }
+      var m = t.closest("[data-m]"); if (m){ if (m.dataset.m === "mkt"){ box.remove(); go(null, true); } else { document.getElementById("opcl").hidden = false; m.classList.add("on"); } return; }
       if (t.closest("[data-all]")){ var cs = box.querySelectorAll('input[type=checkbox][data-i]'), on = [].some.call(cs, function(c){ return !c.checked; }); [].forEach.call(cs, function(c){ c.checked = on; }); upd(); return; }
       if (t.closest("#opcgo")){ var L = sel(), wm = withM(); box.remove(); goMany(L, wm); }
     });
   }
   // 🔍 종목리포트 화면에서 그 종목 한 장만 바로 (10/28 14:25)
-  document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-opstk]"); if (!b) return; ev.stopPropagation(); goMany([{kind: "stock", id: b.dataset.opstk, nm: b.dataset.nm || ""}], false); }, true);
+  document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-opstk]"); if (!b) return; ev.stopPropagation(); ask("이 종목 한 장 보내기", function(){ goMany([{kind: "stock", id: b.dataset.opstk, nm: b.dataset.nm || ""}], false); }); }, true);
   // 🔧 11/02 보내기 진단 — 어느 단계에서 막히는지 화면에 그대로 보여 줌 (사진 한 장이면 원인을 바로 앎)
   var DG = [];
   function dgLive(){ var o = document.getElementById("oplive"); if (!o) return; o.innerHTML = '<pre style="margin:0;font:inherit;white-space:pre-wrap;color:#e8e8e8">' + esc0("📨 만드는 중 · 앱 " + (window.APPV || "?") + "\n" + DG.slice(-6).join("\n")) + '</pre>'; }
@@ -1001,12 +1022,12 @@
         dg("파일 " + (j + 1) + " 바꾸는 중…");
         return blobOf(c).then(function(b){ try { c.width = c.height = 0; } catch(x) {}
           dg("파일 " + (j + 1) + " " + (b ? Math.round(b.size / 1024) + "KB " + b.type : "못 만듦"));
-          if (b) fs.push(new File([b], (j + 1) + "_" + (C.title || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 24) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + (b.type === "image/jpeg" ? ".jpg" : ".png"), {type: b.type || "image/png"})); });
+          if (b) fs.push(new File([b], (j + 1) + "_" + (cliLab() ? CLIENT.replace(/[^\w가-힣]+/g, "") + "님_" : "") + (C.title || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 24) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + (b.type === "image/jpeg" ? ".jpg" : ".png"), {type: b.type || "image/png"})); });
       }); }, Promise.resolve()).then(function(){
         done = true; clearTimeout(wd);
         if (!fs.length){ dgShow("파일을 못 만듦"); toast("만들지 못했어요"); return; }
         dg("준비 창 열기 · " + fs.length + "장 · canShare " + (function(){ try { return navigator.canShare ? navigator.canShare({files: fs}) : "없음"; } catch(e){ return "오류 " + e.name; } })());
-        readySheet(fs, "시장 한 장" + (fs.length > 1 ? " 외 " + (fs.length - 1) + "장" : ""));
+        cliDone(); readySheet(fs, "시장 한 장" + (fs.length > 1 ? " 외 " + (fs.length - 1) + "장" : ""));
         if (miss) toast(miss + "개는 자료가 없어 뺐어요");
       });
     }).catch(function(e){ done = true; clearTimeout(wd); console.warn(e); dg("멈춤 " + ((e && (e.name + ": " + e.message)) || e)); toast("만들지 못했어요 (" + ((e && e.name) || "?") + ")"); dgShow("만들기 실패"); });
@@ -1441,29 +1462,40 @@
     if (R) opts.push(["prod", "📦 펼친 이 상품 한 장", cl(R.o && (R.o.n || R.o.name) || "")]);
     if (sum && !sh) opts.push(["sum", "🗂 이 화면 요약 한 장", heroName() + (document.querySelector("#pdseg .on") ? " · " + cl(document.querySelector("#pdseg .on").innerText) : "")]);
     opts.push(["view", sh ? "📄 열어 둔 이 내용 한 장" : "📄 지금 보고 있는 부분 한 장", vt || "화면에 보이는 카드"]);
-    if (opts.length === 1 && !R){ go2("view"); return; }
     var box = document.createElement("div"); box.id = "opch";
-    box.innerHTML = '<div class="opc-s"><h3>📨 보내기</h3><label class="opc-n">✍️ 보내는 사람 <input id="opcnm" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + String(ls("pbname") || "").replace(/[&<>"]/g, "") + '"></label>' +
+    box.innerHTML = '<div class="opc-s"><h3>📨 보내기</h3><label class="opc-n">✍️ 보내는 사람 <input id="opcnm" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + String(ls("pbname") || "").replace(/[&<>"]/g, "") + '"></label>' + cliHTML() +
       opts.map(function(o, i){ return '<button class="opc-b' + (i === 0 ? " main" : "") + '" data-o="' + o[0] + '">' + o[1] + ' <small>' + String(o[2]).replace(/[&<>"]/g, "").slice(0, 80) + '</small></button>'; }).join("") +
       '<button class="opc-x" data-x="1">닫기</button></div>';
-    document.body.appendChild(box);
+    document.body.appendChild(box); cliBind(box);
     var nmI = document.getElementById("opcnm"); if (nmI) nmI.addEventListener("input", function(){ ls("pbname", nmI.value.trim().slice(0, 30)); });
     box.addEventListener("click", function(ev){ var t = ev.target; if (t === box || t.closest("[data-x]")){ box.remove(); return; } var o = t.closest("[data-o]"); if (!o) return; box.remove(); go2(o.dataset.o, R, sum); });
   }
   function go2(o, R, sum){
     var p = o === "prod" ? mkProduct(R) : o === "sum" ? sum() : domScreen();
     toast("한 장 만드는 중…");
-    p.then(function(C){ if (!C){ toast("이 화면은 한 장으로 옮길 내용이 없어요"); return; } if (C.refuse){ toast(C.refuse); return; } return share(draw(C, pbname()), C.title); }).catch(function(e){ console.warn(e); toast("만들지 못했어요"); });
+    p.then(function(C){ if (!C){ toast("이 화면은 한 장으로 옮길 내용이 없어요"); return; } if (C.refuse){ toast(C.refuse); return; } var cv = draw(C, pbname()), sp = share(cv, C.title); cliDone(); return sp; }).catch(function(e){ console.warn(e); toast("만들지 못했어요"); });
   }
   /* ───────────── 공유 ───────────── */
   function share(c, title){
+    var pre = cliLab() ? CLIENT.replace(/[^\w가-힣]+/g, "") + "님_" : "";
     return blobOf(c).then(function(b){
       if (!b) throw new Error("blob");
-      var f = new File([b], (title || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 30) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + (b.type === "image/jpeg" ? ".jpg" : ".png"), {type: b.type || "image/png"});
+      var f = new File([b], pre + (title || "한장").replace(/[^\w가-힣]+/g, "_").slice(0, 30) + "_" + kst().toISOString().slice(5, 10).replace("-", "") + (b.type === "image/jpeg" ? ".jpg" : ".png"), {type: b.type || "image/png"});
       readySheet([f], title || "한 장");
     });
   }
-  function go(R){
+  // 💌 바로 만들던 곳(종목 화면 📨 · 상품 줄 「이 상품 한 장 보내기」 · 종목 한 장)도 이름 칸을 한 번 거치게
+  function ask(title, run){
+    var old = document.getElementById("opch"); if (old) old.remove();
+    var box = document.createElement("div"); box.id = "opch";
+    box.innerHTML = '<div class="opc-s"><h3>📨 ' + String(title || "보내기").replace(/[&<>"]/g, "") + '</h3><label class="opc-n">✍️ 보내는 사람 <input id="opcnm" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + String(ls("pbname") || "").replace(/[&<>"]/g, "") + '"></label>' + cliHTML() +
+      '<button class="opc-go" data-go="1">한 장 만들기</button><button class="opc-x" data-x="1">닫기</button></div>';
+    document.body.appendChild(box); cliBind(box);
+    var nmI = document.getElementById("opcnm"); if (nmI) nmI.addEventListener("input", function(){ ls("pbname", nmI.value.trim().slice(0, 30)); });
+    box.addEventListener("click", function(ev){ var t = ev.target; if (t === box || t.closest("[data-x]")){ box.remove(); return; } if (t.closest("[data-go]")){ box.remove(); run(); } });
+  }
+  function go(R, now){
+    if (!now){ ask(R ? "이 상품 한 장 보내기" : "한 장 보내기", function(){ go(R, true); }); return; }
     var k = cur(), p = null;
     if (R) p = mkProduct(R);
     else if (k === "onepager"){ var ob = document.querySelector("[data-opstk]"); p = ob ? mkStock(ob.dataset.opstk, ob.dataset.nm) : null; if (!ob){ toast("종목을 하나 연 뒤 눌러 주세요"); return; } }
@@ -1475,7 +1507,7 @@
     p.then(function(C){
       if (!C){ toast("자료를 못 가져왔어요"); return; }
       if (C.refuse){ toast(C.refuse); return; }
-      var nm = pbname(); return share(safeDraw(C, nm), C.title);
+      var nm = pbname(), sp = share(safeDraw(C, nm), C.title); cliDone(); return sp;
     }).catch(function(e){ console.warn(e); toast("만들지 못했어요"); });
   }
 
@@ -1500,7 +1532,7 @@
   var css = document.createElement("style");
   css.textContent = "#opbtn{position:fixed;left:16px;bottom:calc(env(safe-area-inset-bottom) + 74px);z-index:80;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:rgba(18,24,38,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--text);font:inherit;font-size:14px;font-weight:800;padding:9px 14px;border-radius:999px;box-shadow:0 6px 24px rgba(0,0,0,.45)}" +
     "#opch{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}.opc-s{width:100%;max-width:520px;max-height:85vh;overflow:auto;background:var(--panel);color:var(--text);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom) + 20px);box-sizing:border-box}.opc-s h3{margin:0 0 12px;font-size:17px}" +
-    ".opc-n{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub,#aab);margin:0 0 10px}.opc-n input{flex:1;min-width:0;font:inherit;font-size:15px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}" +
+    ".opc-n{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub,#aab);margin:0 0 10px}.opc-rc{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 8px}.opc-rc button{font:inherit;font-size:13px;font-weight:700;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}.opc-rc button.on{border-color:var(--acc,#7c9cff);background:rgba(124,156,255,.18)}.opc-tip{margin:-2px 0 12px;font-size:12px;color:var(--mut,#8a94a8)}.opc-n input{flex:1;min-width:0;font:inherit;font-size:15px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}" +
     ".opc-b{display:block;width:100%;text-align:left;font:inherit;font-size:16px;font-weight:800;padding:14px;margin:0 0 8px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel2);color:var(--text)}.opc-b small{display:block;font-weight:500;font-size:12.5px;color:var(--sub,#aab);margin-top:3px}.opc-b.main,.opc-b.on{border-color:var(--acc,#7c9cff)}" +
     ".opc-wm{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px;font-weight:800;margin:4px 0 8px;padding:12px 14px;border-radius:14px;background:var(--panel2);border:1.5px solid var(--line)}" +
     ".opc-wm input{position:absolute;opacity:0;width:1px;height:1px}.opc-wm i{flex:none;width:50px;height:30px;border-radius:15px;background:#8a94a8;position:relative;transition:.2s}.opc-wm i:after{content:'';position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}" +
