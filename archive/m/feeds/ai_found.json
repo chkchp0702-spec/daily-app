@@ -1,6 +1,94 @@
 {
  "items": [
   {
+   "title": "앤스로픽, 추수감사절 전 1.5조 달러 상장 강행 보도",
+   "url": "https://fourweekmba.com/ai-anthropic-said-to-press-on-with-1-5t-pre-thanksgiving-ipo/",
+   "press": "FourWeekMBA",
+   "at": "2026-11-12 06:45",
+   "why": "11/18~20 대형 상장 — AI 수급 흡수·상류(TSMC 지분) 재평가 · qa 11",
+   "summary": "주관사들이 공모 기업가치 최소 1.5조 달러 검토(FT 인용) · 앞서 2조 논의에서 낮춘 숫자 · 추수감사절 전 상장 일정 유지"
+  },
+  {
+   "title": "앤스로픽 투자자들, 상장 가치 2조→1.5조 달러 저울질",
+   "url": "https://fourweekmba.com/ai-anthropic-investors-weigh-1-5t-ipo-value-down-from-2t/",
+   "press": "FourWeekMBA",
+   "at": "2026-11-12 06:45",
+   "why": "AI 비상장 가치 눈높이 조정 — 🫧 버블 경보판 참고",
+   "summary": "기업가치 기대치 2조→1.5조 달러로 낮춰 논의 · 공모 규모·수요가 AI 위험선호 온도계"
+  },
+  {
+   "title": "엔비디아, 모건스탠리 최선호주에서 교체 — AI 애널리스트 의견 5건",
+   "url": "https://ng.investing.com/news/stock-market-news/5-big-analyst-ai-moves-nvidia-replaced-as-top-pick-pinterest-downgraded-2195960",
+   "press": "Investing.com",
+   "at": "2026-11-12 05:45",
+   "why": "엔비디아 하향 몰린 날 SOXX +6%대 — 「악재 소진」 판단·11/17 실적 앞 TSM bet·「AI 안에서 갈린다」",
+   "summary": "모건스탠리가 엔비디아를 최선호 목록에서 교체(피드 gn_kr_global: 베어드 「중립」 하향과 같은 날). 세부 목표가는 미확인."
+  },
+  {
+   "title": "공매도사 컬퍼, 6개월 전 이미 젠슨 황-앨리스 황 관계를 지목",
+   "url": "https://officechai.com/ai/how-short-seller-culper-research-had-highlighted-jensen-huangs-uncomfortably-close-relationship-with-alice-huang-6-months-before-their-affair-was-revealed/",
+   "press": "OfficeChai",
+   "at": "2026-11-12 04:45",
+   "why": "엔비디아 CEO 위험이 「새 악재」가 아니라 5월부터 알려진 이야기 — 반등이 악재 소진인지 판단 · TSM bet·「AI 안에서 갈린다」",
+   "summary": "컬퍼 리서치 5월 공매도 보고서가 황 CEO와 중국 사업가 관계·중국 우회 매출 20%를 지적. 11/9 보도 뒤 시총 약 2,700억$ 증발(ynet)."
+  },
+  {
+   "title": "美·세계 경제, AI 붕괴 위험에 노출",
+   "url": "https://www.globalcapital.com/globalmarkets/article/2fh1r82dhf7r0tafmj7r4/people-and-markets/market-news/us-and-world-economy-at-risk-from-ai-bust",
+   "press": "GlobalCapital",
+   "at": "2026-11-12 04:45",
+   "why": "WSJ 「세계 경제 AI 붕괴에 취약」과 같은 결 — AI 투자가 성장의 큰 몫이라 꺾이면 경기까지 · 🫧 버블 경보판·닷컴 3막 가설",
+   "summary": "AI 설비 투자가 미국 성장 기여의 큰 몫 — 투자 둔화 시 침체 위험(BIS 6월 경고와 같은 논지)."
+  },
+  {
+   "title": "엔비디아, 6월 청문회 거절 — 민주당 2027년 상임위원장 확보로 감독 강화 예고",
+   "url": "https://fourweekmba.com/ai-nvidia-declined-a-june-hearing-democrats-win-2027-gavels/",
+   "press": "FourWeekMBA",
+   "at": "2026-11-12 03:45",
+   "why": "중간선거 블루웨이브 뒤 빅테크·AI 칩 수출 감독이 내년 더 세질 수 있음 — 「AI 안에서 갈린다」 가설의 정책 리스크",
+   "summary": "엔비디아는 6월 청문회 출석을 거절한 전력. 2027년 민주당이 하원 상임위를 맡으면 AI 칩 수출·감독 입법(AI Overwatch Act 등)이 다시 올라올 수 있음."
+  },
+  {
+   "title": "엔비디아 CEO 조사, 실적 앞 지배구조 위험 키워 — 주가 하락",
+   "url": "https://beinsure.com/news/nvidia-nvda-stock-forecast-shares-fall-as-ceo-investigation-raises-governance-risks-ahead-of-earnings/",
+   "press": "Beinsure",
+   "at": "2026-11-12 02:45",
+   "why": "11/17 엔비디아 실적 앞 「CEO 한 사람 위험」 — 💬 2번·「AI 안에서 갈린다」 가설, 칩 상류(TSM bet)와 분리되는지",
+   "summary": "이사회가 젠슨 황 CEO 관련 외부 조사 착수 뒤 지배구조 위험이 실적 앞 변수로 부각. 11/11 밤 증권사 하향에도 주가는 +4.5% 반등(02:34, daily-app)."
+  },
+  {
+   "title": "엔비디아, 젠슨 황 조사로 「결정적 시험대」 — 칩주 변동성 키워",
+   "url": "https://www.scmp.com/tech/big-tech/article/3373825/nvidia-faces-defining-test-jensen-huang-probe-adds-chip-stock-turbulence",
+   "press": "SCMP",
+   "at": "2026-11-12 02:45",
+   "why": "중국 시각 — 엔비디아 중국 판매·조사 변수가 아시아 반도체(삼성·하이닉스·TSMC)에 번지는지",
+   "summary": "젠슨 황 조사가 칩주 전반 변동성을 키웠다는 분석. 같은 날 SOXX는 +8.0%로 상류 칩은 오히려 강세(02:34)."
+  },
+  {
+   "title": "「연준은 엉뚱한 물가와 싸운다」 — 전략가, 10월 CPI 뒤 0.5%p 인상은 '무모'하다고 경고",
+   "url": "https://www.benzinga.com/news/macro-notification/26/11/63132004/fed-is-fighting-the-wrong-inflation-strategist-warns-kevin-warsh-against-reckless-50-basis-point-rate-hike-after-hotter-than-expected-october-cpi",
+   "press": "Benzinga",
+   "at": "2026-11-12 01:45",
+   "why": "12/9 FOMC 분수령 가설의 반대 근거 — 0.5%p 인상 반대론이 커지는지가 「완화로 말 바꾸기」 신호",
+   "summary": "10월 CPI 상회 뒤 0.5%p 인상론에 맞서 '공급·관세 물가에 금리로 대응하는 건 무모' 주장. 시장은 12월 인상은 가격에 넣었고 폭이 쟁점."
+  },
+  {
+   "title": "10월 CPI 충격에 미 국채금리 급등 — 연준 긴축 베팅 되살아나",
+   "url": "https://www.investing.com/news/economy-news/us-treasury-yields-surge-as-hot-cpi-revives-fed-tightening-bets-93CH-5016707",
+   "press": "Investing.com",
+   "at": "2026-11-12 01:45",
+   "why": "美 10년 5% 감시선 — 11/11 휴장 뒤 오늘 밤 재개 때 5% 재돌파 여부가 반도체 반등의 확인 조건",
+   "summary": "CPI 상회로 2년·10년 금리 급등, 10년 장중 5% 돌파 후 4.985% 마감. 12월 인상 확률 사실상 100%."
+  },
+  {
+   "title": "댈러스 연은 로건: 「최소 두 차례 더 0.25%p 인상 필요」",
+   "url": "https://investinglive.com/central-banks/fed-s-logan-at-least-two-more-quarter-point-rate-hikes-needed/",
+   "press": "investingLive",
+   "at": "2026-11-12 00:45",
+   "why": "🧠 12/9 FOMC 분수령 가설·💬 11번 — 2026 투표권자 매파가 인상 경로를 다시 못박음, 10년 5% 재돌파 위험",
+   "summary": "로건 총재 「물가 안정 회복엔 최소 두 번 더 0.25%p 인상」 · 연합인포맥스 11/12 「겨울엔 속도 높일 수도」 · 11/11 채권 휴장으로 금리 재가격은 오늘 밤"
+  },
+  {
    "title": "오늘 증시: 엔비디아 회복에 다우·S&P500·나스닥 상승, 10년물 5% 근처(재향군인의 날)",
    "url": "https://sg.finance.yahoo.com/news/live/stock-market-today-wednesday-november-11-dow-sp-500-nasdaq-nvidia-treasurys-veterans-day-140638547.html",
    "press": "Yahoo Finance",
@@ -551,95 +639,7 @@
    "at": "2026-11-10 08:40",
    "why": "오늘 밤 10월 CPI 뒤 다음 달 에너지 물가 하향 근거 — 인플레 정점·금리 가설과 연결",
    "summary": "트럼프 「이란 분쟁 종식 쪽 모멘텀」 발언 뒤 유가 최대 7% 하락. 브렌트 92$대·WTI 86~87$(latest)."
-  },
-  {
-   "title": "美 하원 3개 위원회장, 젠슨 황에 「메가스피드 첩보 연루」 비공개 브리핑 요구",
-   "url": "https://thenextweb.com/news/house-chairs-jensen-huang-briefing-megaspeed",
-   "press": "The Next Web",
-   "at": "2026-11-10 07:40",
-   "why": "NVDA 스캔들이 사생활→수출통제·의회 조사로 번지는 경로 — 반도체 칸·AI 대장주 분화(SOX↑·NVDA↓) 지속 여부",
-   "summary": "공화당 하원 위원장들이 메가스피드(싱가포르) 칩 밀수·中 정보기관 연계 의혹 관련 황 CEO 비공개 브리핑 요구. 11/9 NVDA −4.3%, SOX +6.9%로 대장주만 빠진 반등."
-  },
-  {
-   "title": "GOP 하원 지도부, 엔비디아 황 CEO 비공개 청문 요청",
-   "url": "https://implicator.ai/gop-leaders-three-house-committees-ask-jensen-huang-closed",
-   "press": "Implicator",
-   "at": "2026-11-10 07:40",
-   "why": "민주당(제프리스)에 이어 공화당도 요구 — 초당적 압박이면 대중 칩 규제 강화 재료",
-   "summary": "3개 위원회 공동 요청. 앞서 하원 민주당 대표는 대중 칩 제한 강화 요구(investing_en)."
-  },
-  {
-   "title": "다우 600p↑ — 유가 하락, 엔비디아만 급락",
-   "url": "https://qz.com/dow-jumps-600-points-oil-slides-nvidia-stock-110926",
-   "press": "Quartz",
-   "at": "2026-11-10 04:40",
-   "why": "🐻 하락장 현금 해제 판단 — 지수 반등 vs AI 대장주 분화(AI 차입 가설)",
-   "summary": "11/9 美 정규장 S&P +2%대·다우 +600p, 유가 −4%대(이란 자제 신호), NVDA −6%대 황 CEO 조사 여파. 대장주 빼고 넓게 오른 반등"
-  },
-  {
-   "title": "골드만 「한국 AI주 매도 과도 — 강세 견해 유지」",
-   "url": "https://www.hl.co.uk/news/goldman-says-koreas-ai-stock-selloff-has-gone-too-far-doubles-down-on-bull-case",
-   "press": "Hargreaves Lansdown(로이터)",
-   "at": "2026-11-10 04:40",
-   "why": "🐻 코스피 현금 100% 의 반대 근거 — 091160 다시 사기 규칙 확인용",
-   "summary": "골드만, 한국 반도체 급락은 과도하다며 강세 유지(서울경제 「2배 가능」 보도와 같은 줄기). 숫자 세부는 원문 확인 필요"
-  },
-  {
-   "title": "사우디 동서 송유관 메디나 구간 피격 — 에너지부 「운영 영향 없음」",
-   "url": "https://newscord.org/article/saudi-energy-ministry-says-east-west-pipeline-in-madinah-targeted-operations-una--Story_20261109_7f9db0af",
-   "press": "Newscord(10개 매체 비교)·TASS",
-   "at": "2026-11-10 03:40",
-   "why": "유가 하락이 반등장 동력 — 송유관 리스크 재점화 시 CPI·🐻 현금 해제 조건에 직결",
-   "summary": "11/9 사우디 동서 송유관 메디나 지역 피격, 당국은 운영 차질 없다고 발표. 9월 피격 땐 수주 중단·브렌트 107$↑ 전례."
-  },
-  {
-   "title": "유가 5% 가까이 급락 — 트럼프 이란 자제 신호",
-   "url": "https://www.koreatimes.co.kr/world/20261110/oil-falls-almost-5-as-trump-signals-restraint-on-iran",
-   "press": "Korea Times",
-   "at": "2026-11-10 03:40",
-   "why": "송유관 피격에도 유가가 내린 이유 — 지정학 프리미엄 축소가 오늘 美 반등의 주연",
-   "summary": "11/9 유가 약 5% 하락(브렌트 94$ 부근), 트럼프 이란 대응 자제 시사. 피격 뉴스보다 외교 신호가 컸다."
-  },
-  {
-   "title": "리치먼드 연은 바킨 「통화정책 방향은 분명, 속도가 문제」",
-   "url": "https://www.newsquawk.com/headlines/feds-barkin-says-the-direction-of-travel-for-monetary-policy-is-straightforward-but-the-question-is-the-pace",
-   "press": "Newsquawk",
-   "at": "2026-11-10 02:40",
-   "why": "고금리 정점 가설 — 굴스비에 이어 연준 인사 매파 기조(점진 인상) 재확인, CPI 하루 전",
-   "summary": "바킨: 방향(긴축)은 분명하나 속도는 신중하게. 11/5엔 「인플레가 최대 위험, 점진 인상 여전히 선택지」."
-  },
-  {
-   "title": "모건스탠리 윌슨 「조정 거의 끝, S&P 8,500」",
-   "url": "https://www.webull.com/news/15781581357556736",
-   "press": "Webull/Benzinga",
-   "at": "2026-11-10 02:40",
-   "why": "🐻 현금 해제 판단 — 대표 전략가의 「조정 막바지」 판단, 골드만 PB 헤지펀드 청산 막바지 보도와 같은 방향",
-   "summary": "윌슨, 시장 조정이 거의 끝났다고 보고 S&P 500 8,500 제시(작성일 미확인 — 피드 yahoo 11/9 「2027 대담한 콜」과 같은 맥락)."
-  },
-  {
-   "title": "골드만 PB: 헤지펀드, 美 기술주 노출 기록적 속도로 축소",
-   "url": "https://www.hedgeweek.com/hedge-funds-slash-us-technology-exposure-as-ai-trade-unwind-accelerates-says-goldman-sachs/",
-   "press": "Hedgeweek",
-   "at": "2026-11-10 01:40",
-   "why": "🇺🇸 기술·반도체 칸, AI 차입 가설 — 숏·청산이 쌓인 곳은 반등 탄력도 큼(포지션 바닥 신호 후보)",
-   "summary": "골드만 프라임 데이터상 헤지펀드가 美 기술주 노출을 사상 최고 수준 속도로 줄임. 지난주 나스닥 −6.4%와 겹침."
-  },
-  {
-   "title": "굴스비 시카고 연은 총재 「인플레 대응 실패 인정해야」",
-   "url": "https://www.fxstreet.com/news/feds-goolsbee-warns-hot-cpi-unacceptable-as-services-inflation-bites-202610141924",
-   "press": "FXStreet(이전 발언 맥락)·블룸버그 11/9",
-   "at": "2026-11-10 01:40",
-   "why": "고금리 정점 가설 — 11/10 CPI 앞 연준 매파 톤 유지, 금리 하락 기대 제한",
-   "summary": "굴스비 「서비스 물가 다시 상승」 경고(블룸버그 11/9 피드). 10월에도 「뜨거운 CPI 용납 못해」 발언."
-  },
-  {
-   "title": "美 10월 CPI 프리뷰(11/10 발표) — 「더 완만한 달」",
-   "url": "https://continuumeconomics.com/a/1883e5a0/preview-due-november-10-us-october-cpi-a-more-moderate-month",
-   "press": "Continuum Economics",
-   "at": "2026-11-10 00:40",
-   "why": "🐻 현금 해제·고금리 정점 가설 — 내일 CPI가 오늘 반등의 지속 여부를 가른다",
-   "summary": "10월 CPI는 9월보다 완만한 상승 예상. 유가 급락이 11월분부터 반영."
   }
  ],
- "at": "2026-11-11 20:45"
+ "at": "2026-11-12 05:45"
 }

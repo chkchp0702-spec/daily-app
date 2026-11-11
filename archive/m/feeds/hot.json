@@ -1,26 +1,11 @@
 {
- "at": "2026-11-11 23:45",
+ "at": "2026-11-12 06:45",
  "rule": "🔴 핵심 = 정말 큰 것만(하루 0~3개, 대부분 시간은 0개): 연준·한은 깜짝·지수 −3%↓ 급변·보유 칸/킥 종목 직격·핵심 가설을 뒤집는 숫자 / 🟡 주목 = 그다음 중요한 것만(시간당 0~3개) · 나머지는 표시 안 함",
  "items": {
-  "kwusa/61717": {
-   "lv": 1,
-   "why": "앤트로픽 IPO 가치 2조→1.5조$ 하향설 — AI 자본조달 창구 위축, AI 차입 가설 +1",
-   "at": "2026-11-09 15:40"
-  },
-  "n/swwwftcomcontentefe9653b6802485e8eae97fa2e6df770syn25a6b1a61": {
-   "lv": 1,
-   "why": "AI 차입·대장주 가설 — FT 「AI 강세장 끝났나 우려에 방어주로 자금 이동」: 반도체 칸 축소·🐻 현금 유지와 같은 방향, 오늘 밤 CPI 전 회전 신호",
-   "at": "2026-11-10 14:40"
-  },
   "n/s20261110fedswallerbacksdecemberratehikesaysopentolargermove": {
    "lv": 1,
    "why": "논지 「12/9 FOMC 분수령」·AI 차입 — 월러 12월 인상 지지·50bp 가능, 오늘 밤 CPI 민감도↑",
    "at": "2026-11-10 18:40"
-  },
-  "n/1110coreweaveboostsannualforecasteasingconcernsaboutslowdown": {
-   "lv": 1,
-   "why": "🧠 「AI 차입이 약한 고리」(0.92) 반례 — 네오클라우드 실적 가이던스 상향, 엔스케일 상장 연기와 대비 · CRWV·SMH",
-   "at": "2026-11-11 06:45"
   },
   "kwusa/61751": {
    "lv": 1,
@@ -31,11 +16,6 @@
    "lv": 1,
    "why": "🫧 「상장 창」·AI 차입 가설 — 앤스로픽 기업가치 1.5조 달러↑로 상향 검토(FT) = 1시간 전 「조달 30~40% 축소」 보도와 반대, 수요는 뜨겁고 공급 물량은 커짐 · 11/18 가격 결정 · QQQ·SMH",
    "at": "2026-11-11 10:45"
-  },
-  "n/Wh0dUpmM1IxRTVmRTlsZ2tRZnJrMUwzT1hUaW5UZGJLNFNNemdQRmNyUQoc5": {
-   "lv": 1,
-   "why": "배런스 「12월 0.5%p 인상」 논거 — thesis 「12/9 FOMC 분수령」·💬 11번 인상 폭 질문 직결",
-   "at": "2026-11-11 12:45"
   },
   "HANAchina/71950": {
    "lv": 1,
@@ -52,40 +32,65 @@
    "why": "TSM 대기 bet(오늘 밤 미국 시가)·「AI 안에서도 갈린다」 — 장 전 코어위브 +17%·엔비디아 +4%·메모리·광통신 일제 상승, 나스닥100 선물 +1.6%",
    "at": "2026-11-11 19:45"
   },
-  "n/svideos20261111ubslaudseesunderpricedriskinaiswebofdebtvideo": {
-   "lv": 1,
-   "why": "🫧 「다음 약한 고리는 AI 차입」(0.92) — UBS 자산운용 「AI가 빚 이야기로, 공·사모 빚 그물 위험 과소평가」 · 오늘 AI 되사기와 반대 근거",
-   "at": "2026-11-11 19:45"
-  },
   "HANAchina/71960": {
    "lv": 1,
    "why": "XLE 내림 bet(열림)·장부 brent_95 — JP모건 「미·이란 합의 시 브렌트 70달러 중반, 협상 시한 약 3주」",
    "at": "2026-11-11 19:45"
-  },
-  "n/httpwwwedailycokrnewsnewspathaspnewsid05926966645644736": {
-   "lv": 1,
-   "why": "TSM 대기 bet(오늘 밤 시가)·「AI 안에서도 갈린다」 — TSMC 이사회 앤스로픽(공모가 기준 최대 5억$)·오픈AI 우선주(최대 5억$) 투자 승인, 장 전 강세 = 현금 도는 상류가 모델사 지분까지",
-   "at": "2026-11-11 20:45"
   },
   "HANAchina/71971": {
    "lv": 1,
    "why": "💬 3·5번·🧠 「AI 안에서 갈린다」 — 모건스탠리 최선호주 제외·베어드 중립(목표 500→200$), 엔비디아 사람 위험이 의견 하향으로 번짐",
    "at": "2026-11-11 21:45"
   },
-  "n/aystheoctobercpireportopensthedoortoa50bpdecemberhike5018493": {
+  "n/httpwwwedailycokrnewsnewspathaspnewsid01262806645645064": {
    "lv": 1,
-   "why": "🧠 「12/9 FOMC 분수령」·💬 12번 — BofA가 12월 0.5%p 가능성 언급, 골드만(0.25%p×3)과 갈림",
-   "at": "2026-11-11 21:45"
+   "why": "🧠 「12/9 FOMC 분수령」·💬 11번 — 골드만 메리클 「12월 뒤 3월에도 0.25%p 추가 인상」, 인상 경로가 길어짐",
+   "at": "2026-11-12 02:45"
   },
-  "n/httpswwwcnbccom20261111coreweavecrwvoutlookearningsaihtml": {
+  "n/lk3R0dCcHhOdjZwcmg3cjJpY3NXWEhfdkl6Xy1FcVl0Vkp3SnUwQVRtdwoc5": {
    "lv": 1,
-   "why": "AI 차입 가설(0.92) 반례 — 네오클라우드 전망 상향으로 자금 조달 우려 완화, 미국 개장 AI·메모리 일제 반등 · TSM 대기 bet",
-   "at": "2026-11-11 23:45"
+   "why": "엔비디아 CEO 리스크가 의회로 — 11/18(실적 다음 날) 브리핑 요구 · TSM bet·「AI 안에서 갈린다」 가설",
+   "at": "2026-11-12 03:45"
   },
-  "n/hKNnFMd1FsZGZVTm83R3p0YUh2Mms5TjZNMzhoY1JTblBOUUVyaWx1clEoc5": {
+  "n/wwwcnbccom20261111nvidiajensenhuangaifinancialsystemriskhtml": {
    "lv": 1,
-   "why": "AI 차입 가설 근거 — 메타 2056년 장기채 스프레드 4월 대비 +90bp, 주식 반등과 달리 채권은 AI 장기 차입을 할인 중 · 🫧 신용 경보",
-   "at": "2026-11-11 23:45"
+   "why": "엔비디아 중심 AI 금융 고리(투자·외상) 점검 — 「AI 차입이 다음 약한 고리」 가설 근거",
+   "at": "2026-11-12 03:45"
+  },
+  "n/0261111credittradersfumeas1billionutzloancrumbleswithinweeks": {
+   "lv": 1,
+   "why": "레버리지론 10억$가 몇 주 만에 무너짐 — 주가 반등 밤에도 신용은 약함 · 🫧 신용 경보·AI 차입 가설",
+   "at": "2026-11-12 04:45"
+  },
+  "n/UtEbUVQZGlFN0lBdmE0TDIyZ1BsNFNRWnY1Z3dnSUcybWZpTE9fT0hwNAoc5": {
+   "lv": 1,
+   "why": "사모신용 큰손 식스스트리트 CEO 「AI 경쟁 투기적 행동」 — 막스에 이어 신용 쪽 경고 · AI 차입 가설",
+   "at": "2026-11-12 04:45"
+  },
+  "n/httpwwwedailycokrnewsnewspathaspnewsid01649846645645064": {
+   "lv": 1,
+   "why": "마이크론 +12.8% 817.8달러(한 달 −21% 뒤 되사기) — 오늘 SK하이닉스·삼성 시초가·qa 3번",
+   "at": "2026-11-12 05:45"
+  },
+  "HANAchina/71979": {
+   "lv": 1,
+   "why": "밴스 부통령 이란 직접 회담 검토 — 브렌트 하락 재료 · XLE 내림 bet·brent_95 조건",
+   "at": "2026-11-12 05:45"
+  },
+  "n/JzbFNHUkg4QzNmOEFvNk0tLWpHeFpzNVpLdlYxOHpNMmJRTUp6ZzBxS2Moc5": {
+   "lv": 1,
+   "why": "달러 19개월 최고(연준 인상 베팅) — 원/달러·엔 159엔·「12/9 FOMC」 가설",
+   "at": "2026-11-12 05:45"
+  },
+  "n/nthropicbankersmullraisingipovaluationtomin15tft432SI5019795": {
+   "lv": 1,
+   "why": "앤스로픽 공모가치 1.5조 상향 검토(FT) — 11/18~20 상장이 시장 돈을 끌어가는 일정 · qa 5·11",
+   "at": "2026-11-12 06:45"
+  },
+  "n/httpwwwedailycokrnewsnewspathaspnewsid01771206645645064": {
+   "lv": 1,
+   "why": "코어위브 CEO 주식 매도 중단 — 🫧 AI 차입 가설·네오클라우드 신뢰 회복 신호 · qa 3",
+   "at": "2026-11-12 06:45"
   }
  }
 }
