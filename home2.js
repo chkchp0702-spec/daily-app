@@ -342,12 +342,48 @@
   var CUR_S = null, BUSY = false;
   /* 🐻 11/09 하락장 계기판 — 사용자 「하락장이면 현금 늘리라 권하고, 바닥이면 이 조건 충족 시 비중 늘리자 — 네가 설명하고 이끌어」
      market/bear.json(src/bear_gate.py, 종가 기계 판정): 시장별 🟢/🟡/🐻 · 현금 권고 · 🌱 바닥 신호 4개. 결론 한 줄 + 펼치면 체크리스트 */
+  /* 🏁 11/11 사용자 「각 시장에 고친 방식을 적용하고 신호, 설명창도 추가」 — 시장마다 채택한 방식(best_bt 1등) · 지금 켜진 신호 · 누르면 쉬운 설명 */
+  var METH = {
+    kospi: {t: "흔들리면 전부 현금", how: "하락장(고점 −20%) · 신용 경보 + 200일선 아래 · 버블 시계 4시 반 — 셋 중 하나라도 켜지면 주식 몫 전부 현금",
+            back: "바닥이 다져지고(저점 10일 넘게 안 깨짐) 50일선 위로 올라오면 다시 주식 (하락장은 판정이 풀릴 때)",
+            why: "1999년부터 다시 돌려 보니 1년 수익 9.7% → 10.7% · 가장 크게 잃은 폭 −29% → −26% (그냥 들고 있기 8.8% · −56%)",
+            note: "2013년 뒤만 보면 이전 규칙보다 조금 낮았어요(9.1% → 7.9%) — 2000·2008 같은 큰 하락을 피한 덕이 커요"},
+    kosdaq: {t: "버블 시계 6시면 전부 현금", how: "버블 시계가 6시를 넘으면 주식 몫 전부 현금",
+            back: "신저가가 나온 뒤 바닥 신호가 4개 중 3개 켜지면 다시 주식",
+            why: "그냥 들고 있으면 1년 −0.8%(손해)였는데 이 방식은 +4.7% · 가장 크게 잃은 폭 −72% → −51%", note: ""},
+    sp500: {t: "흔들리면 절반만 채권", how: "고점 −10%(조정) · 또는 신용 경보 + 200일선 아래 — 켜지면 주식 몫 절반을 채권형(중기국채)으로",
+            back: "신저가가 나온 뒤 바닥 신호가 켜지면 다시 주식 (신저가 없이 회복하면 바로 복귀)",
+            why: "1년 수익 8.6% → 9.4% · 가장 크게 잃은 폭 −55% → −40% · 현금으로 빼면 2013년 뒤엔 손해였고 채권 절반이 가장 나았어요", note: ""},
+    nasdaq: {t: "그냥 들고 있기", how: "신호가 와도 팔지 않아요", back: "—",
+            why: "200가지 넘게 돌려 봤는데 2012년까지와 2013년 뒤를 둘 다 이긴 방식이 없었어요 — 크게 빠져도 빨리 회복해서 팔면 손해", note: "크게 흔들리는 시장이라 처음부터 비중을 적당히 두는 게 방패예요"}
+  };
+  function methHtml(B){
+    var FL = {kr: "🇰🇷", us: "🇺🇸"};
+    var rows = (B.markets || []).map(function(m){
+      var D = METH[m.key]; if (!D) return "";
+      var b = m.best || {}, ck = m.checks || [], nb = ck.filter(function(c){ return c.on; }).length;
+      var sig = [];
+      if (m.key === "kospi") sig = [["하락장", m.state === "🐻"], ["신용 경보", !!(m.clock && m.clock.kospi_on)], ["시계 4시 반", !!b.on]];
+      else if (m.key === "kosdaq") sig = [["시계 6시", !!b.on]];
+      else if (m.key === "sp500") sig = [["고점 −10%", !!(m.b50 && m.b50.on)], ["신용 경보+200일선", !!b.on]];
+      var out = m.cash || 0, to = m.to || "현금";
+      var now = m.key === "nasdaq" ? "주식 그대로" : out ? "주식 " + (100 - out) + "% · " + to + " " + out + "%" : "주식 100%";
+      var backNow = out && m.key !== "nasdaq" ? '<div class="bm-back">🌱 다시 사는 신호 <b>' + nb + '/4</b> — ' + e(D.back) + '</div>' : "";
+      return '<details class="bm-r' + (out ? " on" : "") + '"><summary><span class="bm-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small>' + e(D.t) + '</small></span>' +
+        '<span class="bm-now"><b>' + e(now) + '</b>' + (sig.length ? '<span class="bm-sg">' + sig.map(function(x){ return '<i class="' + (x[1] ? "on" : "") + '">' + (x[1] ? "🔴 " : "⚪ ") + e(x[0]) + '</i>'; }).join("") + '</span>' : '') + '</span></summary>' +
+        '<div class="bm-x"><p><b>언제 옮기나</b> ' + e(D.how) + '</p>' + (m.key !== "nasdaq" ? '<p><b>언제 다시 사나</b> ' + e(D.back) + '</p>' : '') +
+        '<p><b>왜 이 방식</b> ' + e(D.why) + '</p>' + (D.note ? '<p class="bm-note">' + e(D.note) + '</p>' : '') +
+        (b.since && b.on ? '<p class="bm-note">' + e((sig.filter(function(x){ return x[0].indexOf("시계") >= 0 || x[0].indexOf("신용") >= 0; })[0] || ["신호"])[0]) + ' 켜진 날 ' + e(md(b.since)) + ' · 대리 버블 시계 지금 ' + (b.h_free != null ? b.h_free + "시" : "–") + '</p>' : '') +
+        '</div>' + backNow + '</details>';
+    }).join("");
+    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>1999년부터 200여 가지를 돌려 고른 1등 · 누르면 설명</small></div>' + rows + '</div>';
+  }
   function bearHtml(d){
     var B = d.bear; if (!B || !B.markets || !B.markets.length) return "";
     var M_ = B.markets, bad = M_.filter(function(m){ return m.state !== "🟢"; });
     var FL = {kr: "🇰🇷", us: "🇺🇸"}, NM = {"🟢": "정상", "🟡": "조정", "🐻": "하락장"};
     var chips = M_.map(function(m){ return '<span class="bg-c s' + (m.state === "🐻" ? 3 : m.state === "🟡" ? 2 : 1) + '">' + FL[m.nat] + ' ' + e(m.name) + ' <b>' + m.state + ' ' + NM[m.state] + '</b><small>' + sg(m.dd, 0) + '</small></span>'; }).join("");
-    var lead = bad.length ? B.lead : "세 시장 모두 정상 — 현금을 따로 늘릴 때 아님";
+    var lead = bad.length ? B.lead : "네 시장 모두 정상 — 현금을 따로 늘릴 때 아님";
     var det = bad.map(function(m){
       var ladder = m.state === "🐻" ? [30, 30, 20, 10, 0] : [10, 10, 5, 0, 0];
       return '<div class="bg-m"><div class="bg-mh">' + FL[m.nat] + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' · 고점보다 ' + sg(m.dd) + ' · 지금 권고 현금 <b>' + m.cash + '%</b></div>' +
@@ -360,9 +396,9 @@
         '<p class="bg-ad">' + e(m.advice) + '</p></div>';
     }).join("");
     return '<section class="card h2-bear" id="bear" data-cz="done"><div class="bg-h">🐻 하락장 계기판 <small>' + e(md(B.at)) + ' ' + e(String(B.at || "").slice(11, 16)) + ' · 종가 판정</small></div>' +
-      '<div class="bg-cs">' + chips + '</div><p class="bg-lead' + (bad.length ? " warn" : "") + '">' + e(lead) + '</p>' +
+      '<div class="bg-cs">' + chips + '</div><p class="bg-lead' + (bad.length ? " warn" : "") + '">' + e(lead) + '</p>' + methHtml(B) +
       (bad.length ? '<details class="bg-d"><summary>무엇을 보면 다시 사나 · 체크리스트 펼치기</summary>' + det +
-        '<p class="note bg-ru">판정: 고점보다 −10% 조정 · −20% 하락장 (종가) · 현금 권고(11/09 오후부터 시장별): 🇰🇷 코스피 하락장이면 주식 몫 전부 현금(100%) · 판정 풀릴 때(고점 −10% 위 + 200일선 위)까지 · 조정은 0% / 🇺🇸 S&P·나스닥 현금 규칙 꺼 둠 — 2000년부터 판 60여 개, 2012년 앞에서 고르고 뒤에서 확인(lab b1109_cash). 판정 규칙은 결과 보기 전 등록 · 매수·매도 추천 아님 — 고객 성향·기간에 맞춰 판단.</p></details>' : '') +
+        '<p class="note bg-ru">판정: 고점보다 −10% 조정 · −20% 하락장 (종가) · 현금 권고(11/11부터): 위 🏁 시장별 방식 — 1999년부터 200여 가지를 돌려 2012년까지·2013년 뒤 둘 다 그냥 들고 있기를 이긴 것 중 수익 1등(best_bt). 판정 규칙은 결과 보기 전 등록 · 매수·매도 추천 아님 — 고객 성향·기간에 맞춰 판단.</p></details>' : '') +
       '</section>';
   }
   function apply(){
@@ -432,6 +468,11 @@
     ".bg-m{background:var(--panel2);border-radius:14px;padding:12px;margin-top:10px}.bg-mh{font-size:14.5px;line-height:1.5;word-break:keep-all}.bg-n{font-size:14px;font-weight:700;margin:6px 0 4px}" +
     ".bg-ck{list-style:none;margin:0;padding:0}.bg-ck li{display:grid;grid-template-columns:22px 1fr;column-gap:4px;padding:5px 0;border-top:1px solid var(--line,rgba(0,0,0,.06));font-size:14px}.bg-ck li i{font-style:normal;grid-row:span 2}.bg-ck li b{font-weight:700}.bg-ck li small{color:var(--sub);font-size:12.5px;word-break:keep-all}.bg-ck li.on b{color:var(--up,#f04452)}" +
     ".bg-lad{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:8px 0 6px}.bg-lad span{text-align:center;border-radius:10px;padding:6px 2px;background:var(--panel,#fff);opacity:.6}.bg-lad span.now{opacity:1;box-shadow:inset 0 0 0 2px var(--accent,#3182f6)}.bg-lad small{display:block;font-size:11.5px;color:var(--sub);font-weight:700}.bg-lad b{font-size:14px;font-weight:900}" +
+    ".bm{margin:12px 0 4px}.bm-h{font-size:14px;font-weight:900;margin-bottom:6px}.bm-h small{display:block;font-size:11.5px;font-weight:600;color:var(--sub);margin-top:1px}" +
+    ".bm-r{border-radius:12px;background:var(--panel,rgba(127,127,127,.07));padding:10px 12px;margin-top:6px}.bm-r.on{box-shadow:inset 3px 0 0 #e5484d}.bm-r>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.bm-r>summary::-webkit-details-marker{display:none}" +
+    ".bm-n{min-width:0}.bm-n b{font-size:14px;font-weight:900}.bm-n small{display:block;font-size:12px;color:var(--sub);font-weight:700;margin-top:1px}.bm-now{text-align:right;flex:0 0 auto;max-width:58%}.bm-now>b{font-size:13.5px;font-weight:900;white-space:nowrap}" +
+    ".bm-sg{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:3px;margin-top:4px}.bm-sg i{font-style:normal;font-size:11px;font-weight:700;padding:1px 6px;border-radius:999px;background:rgba(127,127,127,.12);color:var(--sub);white-space:nowrap}.bm-sg i.on{background:rgba(229,72,77,.14);color:#e5484d}" +
+    ".bm-x{margin-top:8px;font-size:13px;line-height:1.55;word-break:keep-all}.bm-x p{margin:4px 0 0}.bm-x b{font-weight:800;margin-right:4px}.bm-note{color:var(--sub);font-size:12px}.bm-back{margin-top:6px;font-size:12.5px;font-weight:600;word-break:keep-all}.bm-back b{color:#30a46c}" +
     ".bg-ad{margin:4px 0 0;font-size:14px;line-height:1.5;font-weight:600;word-break:keep-all}.bg-ru{font-size:12px;margin:10px 0 0}" +
     /* 🔍 11/05 A1 오늘의 결론 · A3 한 장 탭 */
     ".h2-vd{display:flex;align-items:center;gap:8px;margin:0 0 2px}.h2-num .h2-vd span{font-size:28px}.h2-num .h2-vd b{display:inline;margin:0;font-size:clamp(26px,8vw,32px);font-weight:900;letter-spacing:-1px;line-height:1.15}.h2-num .h2-vd.dn b{color:var(--down,#3182f6)}.h2-num .h2-vd.up b{color:var(--up,#f04452)}" +
