@@ -18592,7 +18592,7 @@ window.VIDC = {
         '<span class="bm-now"><b>' + e(now) + '</b>' + (sig.length ? '<span class="bm-sg">' + sig.map(function(x){ return '<i class="' + (x[1] ? "on" : "") + '">' + (x[1] ? "🔴 " : "⚪ ") + e(x[0]) + '</i>'; }).join("") + '</span>' : '') + '</span></summary>' +
         '<div class="bm-x"><p><b>언제 옮기나</b> ' + e(D.how) + '</p>' + (m.key !== "nasdaq" ? '<p><b>언제 다시 사나</b> ' + e(D.back) + '</p>' : '') +
         '<p><b>왜 이 방식</b> ' + e(D.why) + '</p>' + (D.note ? '<p class="bm-note">' + e(D.note) + '</p>' : '') +
-        (b.since && b.on ? '<p class="bm-note">' + e((sig.filter(function(x){ return x[0].indexOf("시계") >= 0 || x[0].indexOf("신용") >= 0; })[0] || ["신호"])[0]) + ' 켜진 날 ' + e(md(b.since)) + ' · 대리 버블 시계 지금 ' + (b.h_free != null ? b.h_free + "시" : "–") + '</p>' : '') +
+        (b.since && b.on ? '<p class="bm-note">' + e(b.ent === "credit200" ? "신용 경보+200일선" : b.ent === "clock6" ? "시계 6시" : b.ent === "clock4.5" ? "시계 4시 반" : "신호") + ' 켜진 날 ' + e(md(b.since)) + ' · 대리 버블 시계 지금 ' + (b.h_free != null ? b.h_free + "시" : "–") + '</p>' : '') +
         '</div>' + backNow + '</details>';
     }).join("");
     return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>1999년부터 200여 가지를 돌려 고른 1등 · 누르면 설명</small></div>' + rows + '</div>';
