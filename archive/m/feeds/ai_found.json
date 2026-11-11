@@ -1,6 +1,94 @@
 {
  "items": [
   {
+   "title": "TSMC 이사회 결의 공시(Form 6-K) — 앤스로픽·오픈AI 지분 투자 승인",
+   "url": "https://www.sec.gov/Archives/edgar/data/0001046179/000104617926000797/tsm-boardx202611xx.htm",
+   "press": "SEC EDGAR",
+   "at": "2026-11-11 15:45",
+   "why": "TSM 대기 bet(11/11 미국 시가)의 새 재료 — 파운드리가 AI 모델 회사 지분까지 가져가는 「현금 도는 삽 장수」 가설",
+   "summary": "11월 이사회 결의 공시. 인베스팅 보도 기준 앤스로픽·오픈AI에 약 10억 달러 투자 승인, 대만 가권 +3.11%·TSMC 급등 마감. 세부 금액 배분은 공시 원문 확인 필요(미확인)."
+  },
+  {
+   "title": "우크라 드론, 러시아 발트해 우스트루가 원유 선적대·저장탱크 손상",
+   "url": "https://www.newsquawk.com/headlines/ukrainian-drones-damaged-oil-loading-stands-crude-oil-and-petroleum-products-reservoirs-at-russias-port-of-ust-luga",
+   "press": "Newsquawk",
+   "at": "2026-11-11 14:45",
+   "why": "🛢️ brent_95 조건(에너지 13→10) — 브렌트 90 근처에서 공급 차질 반등 재료",
+   "summary": "블룸버그 11/11 「우스트루가 항 드론 공격 화재·3명 부상」(피드) · 발트해 터미널 차질 시 하루 최대 150만 배럴 수출 위협(과거 블룸버그 추정) · 이번 차질 규모는 미확인"
+  },
+  {
+   "title": "ABA 데이터뱅크: AI 관련 신용위험 상승",
+   "url": "https://bankingjournal.aba.com/2026/10/aba-databank-ai-credit-risk-is-rising/",
+   "press": "ABA Banking Journal",
+   "at": "2026-11-11 14:45",
+   "why": "🫧 신용 경보 — FT 「은행, AI 대출 한도 닿아 신용보험으로」와 같은 방향",
+   "summary": "미국 은행권 자료로 AI 관련 신용위험이 커진다는 분석(10월) · 세부 숫자는 원문 확인 필요(미확인)"
+  },
+  {
+   "title": "인피니언, AI 데이터센터 수요에 연간 가이던스 상향",
+   "url": "https://www.marketscreener.com/news/chip-maker-infineon-lifts-guidance-as-ai-boom-gains-strength-update-ce7f58dddc89f123",
+   "press": "MarketScreener(다우존스)",
+   "at": "2026-11-11 13:45",
+   "why": "「AI 안에서도 갈린다」 — 전력 반도체(현금 도는 삽 장수) 쪽 실적 확인, 소프트뱅크 −11%와 대비",
+   "summary": "WSJ 피드 11/11 「AI 매출 목표 상향」과 같은 사건 · 데이터센터 전원 수요가 성장 동력 · 세부 숫자는 원문 확인 필요(미확인)"
+  },
+  {
+   "title": "연준 10월 동결·12월 인상 — 로이터 이코노미스트 조사(10/20)",
+   "url": "https://kfgo.com/2026/10/20/fed-to-skip-october-but-raise-rates-again-in-december-nearly-all-economists-say-reuters-poll/",
+   "press": "로이터(KFGO 전재)",
+   "at": "2026-11-11 13:45",
+   "why": "오늘 로이터 새 조사(12월 한 번 더 인상)의 앞 조사 — 한 달째 인상 컨센서스 유지, 12/9 FOMC 가설",
+   "summary": "10/20 조사: 거의 모든 이코노미스트가 10월 동결·12월 인상 예상 · 11/11 새 조사도 「12월 한 번 더」(피드 reuters 제목) — 0.5%p 비중은 미확인"
+  },
+  {
+   "title": "국채 발행 당사자는 잘했다는데 공정위는 담합 과징금 — 국고채 담합 쟁점",
+   "url": "https://news.bizwatch.co.kr/article/market/2026/11/03/0021",
+   "press": "비즈워치",
+   "at": "2026-11-11 12:45",
+   "why": "오늘 과징금 1.6조·7곳 고발 확정의 배경 — 국고채 전문딜러 입찰 위축 시 장기물 금리 상승 압력(💬 12·18번)",
+   "summary": "11/3 기사: 기재부는 딜러 정보 교환이 시장 조성이라는 입장, 공정위는 담합으로 봄 · 8월 심의 때 최대 15조 과징금 거론(MTN) → 11/11 1.6조로 확정(연합)"
+  },
+  {
+   "title": "12월 연준 인상을 멈출 수 있는 것은 무엇인가",
+   "url": "https://investinglive.com/education/what-could-stop-the-fed-raising-rates-in-december/",
+   "press": "investingLive",
+   "at": "2026-11-11 12:45",
+   "why": "12/9 FOMC 분수령 thesis의 반대 갈래 점검 — PPI(11/13)·고용 약세가 브레이크 조건",
+   "summary": "인상 경로를 바꿀 변수 정리(물가 둔화·고용 급랭·신용 사고) · 게시 날짜 미확인"
+  },
+  {
+   "title": "모건스탠리: 전 세계 주식 헤지펀드 위험 축소, 10여 년 만에 최대",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-11/hedge-fund-risk-retreat-largest-in-a-decade-says-morgan-stanley",
+   "press": "블룸버그",
+   "at": "2026-11-11 11:17",
+   "why": "🧠 「12/9 FOMC 2018 분수령」·🫧 신용 경보 — 외국인 한국 반도체 매도가 글로벌 디레버리징의 일부인지",
+   "summary": "MS 프라임 브로커 노트(11/10): 11월 첫 주까지 글로벌 주식 헤지펀드가 10여 년 만에 가장 가파르게 위험 축소 · 광범위한 포지션 청산(언와인드) 확산"
+  },
+  {
+   "title": "룰라 경제팀, 시장 달랠 재정 목표 이행안 다음 주까지 의회 제출 준비",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-11/lula-team-readies-brazil-fiscal-plan-in-bid-to-calm-market-jitters",
+   "press": "블룸버그",
+   "at": "2026-11-11 11:05",
+   "why": "💬 9번 🇧🇷 브라질 국채 — 재정 걱정 진정 여부(헤알/원 250원·10년 14%대 조건)",
+   "summary": "재정 목표 이행 방안을 다음 주까지 의회에 · 브라질 10년 15.23%(11/10, brl_live)·Trading Economics 15.19% 부근 · 세부 내용 미확인"
+  },
+  {
+   "title": "코어위브, 26억 달러 AI 대출 — 가산금리 넓어져(SOFR+5.5%대, 네비우스의 약 3배)",
+   "url": "https://theenergymag.com/news/2026-08-11/coreweave-ai-2-6-billion-wider-spread/",
+   "press": "The Energy Mag",
+   "at": "2026-11-11 10:45",
+   "why": "🧠 「AI 차입」 가설·🫧 신용 칸 — 코어위브가 이번엔 칩 담보 빚+고객 선급금으로 조달(FT 11/11), 앞선 대출 금리가 이미 넓어졌던 배경",
+   "summary": "8월 26억 달러 대출 가산금리가 이전보다 넓어짐(dealroom: SOFR+5.5, 네비우스의 3배) · 11/11 FT 「칩 담보 수십억 달러 빚」 = 무담보 회사채 대신 담보·선급금으로 방식 전환"
+  },
+  {
+   "title": "코어위브, 메타 계약 담보 GPU 대출 85억 달러 — 투자등급",
+   "url": "https://www.bloomberg.com/news/articles/2026-03-31/coreweave-crwv-raises-8-5-billion-gpu-loan-backed-by-meta-deal",
+   "press": "Bloomberg",
+   "at": "2026-11-11 10:45",
+   "why": "AI 안에서도 갈린다 — 「계약(현금흐름)이 붙은 빚」은 투자등급, 붙지 않은 빚은 비싸짐 → 네오클라우드 중 수요 확인된 쪽만 남는 근거",
+   "summary": "3/31 메타 계약을 담보로 85억 달러 GPU 대출, 투자등급 · 같은 회사도 담보 유무로 금리가 크게 갈림"
+  },
+  {
    "title": "한국 10월 수출 1,153억 달러 — 반도체 사상 최대 판매",
    "url": "https://www.koreatimes.co.kr/economy/20261101/koreas-monthly-exports-hit-1153-bil-in-oct-on-record-chip-sales",
    "press": "Korea Times",
@@ -551,95 +639,7 @@
    "at": "2026-11-09 18:24",
    "why": "AI 차입 가설 — MS·소프트뱅크 네오클라우드 재검토에 이어 공급자 쪽 투자 축소 확산",
    "summary": "NextDC가 수요 불확실성으로 미계약 프로젝트 진행을 멈춤. 하이퍼스케일러 외부 용량 재검토 흐름과 같은 방향."
-  },
-  {
-   "title": "골드만 「美 국채·글로벌 10년물 금리 방향 전환 조건 갖춰져」",
-   "url": "https://www.cnbc.com/2026/11/09/goldman-treasury-yields-bonds.html",
-   "press": "CNBC",
-   "at": "2026-11-09 17:19",
-   "why": "고금리 정점 가설(0.45)·채권 칸 중장기채 전환 여부 — 美 10년 4.85% 근처",
-   "summary": "골드만, 美·글로벌 10년물 금리 흐름 전환의 재료가 갖춰졌다고 평가(세부 수치 미확인). 美 10년 4.849%(11/9 아시아장)·30년 5.254%, 연준 12월 인상 베팅 80% 속 CPI 대기."
-  },
-  {
-   "title": "젠슨 황 혼외 관계 시인 뒤 엔비디아 신규 숏 910만 달러",
-   "url": "https://www.thestreet.com/crypto/markets/traders-open-9-1-million-in-nvidia-shorts-as-ceo-admits-to-affair",
-   "press": "TheStreet",
-   "at": "2026-11-09 17:00",
-   "why": "NVDA 전저점 이탈·이사회 조사 — AI 차입 가설·SOXX/091160 관찰과 이어짐",
-   "summary": "상위 25개 포지션 중 3개 계정이 일요일 약 910만 달러 NVDA 신규 숏. 중국 관영매체는 간첩 연루 의혹 일축, 미·중 관계 악화 경고."
-  },
-  {
-   "title": "MS, 오라클 AI 클라우드 임대(2023년 계약) 단계적 종료 — 구형 엔비디아 칩 용량",
-   "url": "https://fourweekmba.com/ai-microsoft-said-to-wind-down-oracle-ai-rental-backlog-664b/",
-   "press": "FourWeekMBA(블룸버그·배런스 인용)",
-   "at": "2026-11-09 15:40",
-   "why": "AI 차입 가설 — 하이퍼스케일러가 외부·네오클라우드 용량을 줄이면 오라클·코어위브 등 차입형 AI 인프라 신용에 압력, CRWV 11/10 실적 앞",
-   "summary": "MS가 오라클에서 빌리던 AI 컴퓨팅 용량을 수개월간 줄였고 만료 뒤 갱신 안 함. 네오클라우드·외부 클라우드 계약 전반 재검토의 일부. 보도 뒤 오라클 약 −3%, 오라클 잔고 6,640억$."
-  },
-  {
-   "title": "WSJ: 앤트로픽 IPO 투자자들, 기술주 급락 뒤 기업가치 1.5조$로 하향 요구",
-   "url": "https://investinglive.com/stocks/wsj-anthropic-ipo-investors-push-for-lower-1-5-trillion-valuation-after-tech-selloff/",
-   "press": "investingLive(WSJ 인용)",
-   "at": "2026-11-09 15:40",
-   "why": "AI 자금조달 창구 위축 신호 — AI 차입 가설·AI 인프라 칸(반도체·광통신) 수요 기대 하향 재료",
-   "summary": "앤트로픽은 IPO 가치 2조$를 노렸으나 지난주 나스닥 −5%대 급락 뒤 투자자들이 1.5조$로 낮추길 요구. 일부는 1.5조$도 불확실하다고 봄(CNBC)."
-  },
-  {
-   "title": "골드만삭스, 2026 금 목표 5,400→4,900달러 하향 — 매파 연준",
-   "url": "https://www.mining.com/?p=1208966",
-   "press": "Mining.com",
-   "at": "2026-11-09 14:40",
-   "why": "금 칸·gold_test — IB 목표 하향, 금리 인상 경로가 금의 역풍",
-   "summary": "골드만 2026년 말 금 목표 온스당 4,900달러(종전 5,400). 연준 매파 전환이 이유, 장기 강세 시각은 유지. 발표일 금 −1.5%(XTB)."
-  },
-  {
-   "title": "이란 종전 협상 지속에 유가 1% 넘게 하락",
-   "url": "https://www.nst.com.my/amp/business/economy/2026/11/1568718/oil-slips-more-1-cent-talks-continue-ending-iran-war",
-   "press": "New Straits Times",
-   "at": "2026-11-09 14:40",
-   "why": "에너지 칸 brent_95 조건 — 봉쇄 재확인과 상충하는 종전 협상 재료",
-   "summary": "이란 전쟁 종식 협상 지속 보도에 유가 1%↑ 하락. 브렌트 95 종가 하회 여부는 미확인."
-  },
-  {
-   "title": "MS, 코어위브 일부 약정에서 발 빼(FT 보도) — 코어위브는 계약 취소 부인",
-   "url": "https://www.tipranks.com/news/the-fly/coreweave-denies-contract-cancellations-with-microsoft-reuters-reports",
-   "press": "TipRanks/The Fly",
-   "at": "2026-11-09 13:40",
-   "why": "11/10 CRWV 실적 앞 AI 인프라 차입 가설 직격 — 반도체·네오클라우드 반발 지속성 판단",
-   "summary": "FT: MS 가 코어위브 일부 약정 축소 · 로이터: 코어위브 취소 부인 · 피드: 코어위브·아이렌 동반 압박"
-  },
-  {
-   "title": "대만, 대만지수 2001년 이후 최악의 주 이후 공매도 제한·국안기금 가동",
-   "url": "https://www.newsbytesapp.com/news/business/taiwan-limits-short-selling-after-taiex-worst-week-since-2001/tldr",
-   "press": "NewsBytes",
-   "at": "2026-11-09 13:40",
-   "why": "정책 바닥 신호(대만·한국 동시) — 하락장 계기판 「정책 대응」 칸, 오늘 대만 +5~6% 반발의 배경",
-   "summary": "대만 금융당국 공매도 제한 · 약 150억$ 안정기금 가동 · 한국도 신용 규정 완화로 동반 대응(uanalyze)"
-  },
-  {
-   "title": "중국 공장 물가 4년 만에 최고",
-   "url": "https://www.newsbytesapp.com/news/business/china-factory-inflation-hits-4-year-high/story",
-   "press": "NewsBytes",
-   "at": "2026-11-09 12:40",
-   "why": "고금리 정점 가설·美 CPI 주간 — 중국발 수입물가 상승이 연준 인상 전망을 받칠 수 있음",
-   "summary": "중국 10월 생산자물가(PPI) 전년비 4년여 만에 최고(국내 보도 5.7%). 유가·미국-이란 갈등이 원인, 소비자물가는 상대적으로 낮음."
-  },
-  {
-   "title": "日 JIC, JSR 를 미쓰이화학에 매각 — 82억$↑ 규모, 반도체 소재 재편",
-   "url": "https://www.dealstreetasia.com/stories/japans-jic-plans-to-sell-jsr-to-mitsui-chemicals-in-over-8-2b-deal-500114/",
-   "press": "DealStreetAsia",
-   "at": "2026-11-09 11:40",
-   "why": "일본 반도체 소재 재편 — 오늘 미쓰이화학 공식 발표(gn_jp, DBJ 공동 1.8조엔), 일본 반도체 ETF·소재 테마 관찰",
-   "summary": "JIC 가 보유 JSR 을 미쓰이화학에 매각 추진(약 1.3~1.4조엔 보도). 11/9 미쓰이화학 인수 발표, 일본 화학업계 사상 최대 M&A."
-  },
-  {
-   "title": "트럼프 「이란 봉쇄 수개월 갈 수도」 — 해상 봉쇄로 갈등이 경제 대치로",
-   "url": "https://www.scmp.com/news/world/middle-east/article/3351904/trump-says-us-blockade-could-last-months-warns-iran-get-smart-soon",
-   "press": "SCMP",
-   "at": "2026-11-09 11:40",
-   "why": "브렌트 95 장부 조건(에너지 13→10) — 11/9 「철의 문」 봉쇄 전면 시행 재확인, 오전 「공격 안 할 듯」과 상충",
-   "summary": "미군의 이란 항만 봉쇄가 장기화될 수 있다는 트럼프 발언. 봉쇄는 4월 이후 지속 중(기사 날짜 미확인). 유가 상방 위험 요인."
   }
  ],
- "at": "2026-11-11 09:45"
+ "at": "2026-11-11 15:45"
 }
