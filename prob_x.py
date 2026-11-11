@@ -97,7 +97,26 @@ def load_ext(fake=False):
             out["pcr"] = pc
     except Exception as e:
         print("풋콜 비율 실패", e)
+    try:
+        ep = load_epu()
+        if len(ep) > 3000:
+            out["epu"] = ep
+    except Exception as e:
+        print("정책 불확실성(EPU) 실패", e)
     return out
+
+
+def load_epu():
+    """미국 일별 경제정책 불확실성(EPU 뉴스 지수) (11/11 13시 #98b · probe/epu98b_bt.py)
+       https://www.policyuncertainty.com/media/All_Daily_Policy_Data.csv (1985~, 매일)"""
+    import io
+    req = urllib.request.Request("https://www.policyuncertainty.com/media/All_Daily_Policy_Data.csv", headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        t = pd.read_csv(io.StringIO(r.read().decode("utf-8", "ignore")))
+    e = pd.Series(pd.to_numeric(t["daily_policy_index"], errors="coerce").values,
+                  index=pd.to_datetime(dict(year=t["year"], month=t["month"], day=t["day"]))).dropna().sort_index()
+    print("정책 불확실성(EPU)", len(e), e.index[0].date(), "→", e.index[-1].date(), "마지막", e.iloc[-1])
+    return e
 
 
 def load_kofia():
@@ -590,6 +609,27 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
             add("kofia", "🏦", "투자자예탁금 급감", "자금", m, 0.5, f"투자자예탁금 20일 {dch.iloc[-1]*100:+.1f}% (1년 백분위 {cv*100:.0f}%) — 개인 대기자금이 빠르게 빠질 때 코스피 일주일이 평소보다 약했음(다음 날엔 안 씀)")
             if M and M[-1]["k"] == "kofia":
                 M[-1]["p1"] = None
+    # 🗞️ 정책 뉴스 「아주 잠잠」 (11/11 13시 #98b · probe/epu98b_bt.py · https://ouci.dntb.gov.ua/works/42rPkVB4) — 한국·중국 「일주일」만, 하위 10% 날만
+    #   미국 일별 EPU 7일 평균(하루 늦게) 로그의 1년 백분위 ≤10% · 2008~, 2018-05 기준 앞/뒤 · 걸어가며 사전 100 브라이어
+    #   한국 5일 −6.1·−5.1%p(n 295·298) · VIX 수준 칸 안에서도 −5.4·−4.5 · 🌡️ VIX÷VIX3M 칸 위 0.24774→0.24763 · 0.24615→0.24608 · 최근5년 0.24677→0.24617
+    #   중국 −3.6·−6.9%p(n 290·296) · 칸 안 −4.1·−5.7 · VIX3M 칸 위 0.25086→0.25066 · 0.24931→0.24902 · 0.25035→0.24955
+    #   ➖ 두 시장 묶은 5일 간격 교차 로지스틱 앞→뒤 0.24517→0.24522 아주 조금 나빠짐(뒤→앞 0.25034→0.24953) · VIX 수준 칸 위 한국 앞 나빠짐 → w 0.3
+    #   절대 수준 하위 20%·5일 급등·다음 날·일·홍·미 ❌
+    ep = ext.get("epu")
+    if mk in ("KR", "CN") and ep is not None and len(ep) > 3000:
+        try:
+            m7 = ep.rolling(7, min_periods=5).mean()
+            m7 = m7.reindex(pd.bdate_range(m7.index[0], m7.index[-1])).ffill().shift(1).dropna()
+            rk = align(rank252(np.log(m7)), idx); cv = rk.iloc[-1]
+            research["epu"] = {"d": str(ep.index[-1].date()), "m7": round(float(m7.iloc[-1]), 1), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+            if not pd.isna(cv) and cv <= 0.1:
+                m = cond(d, (rk <= 0.1).fillna(False), "정책 뉴스 아주 잠잠(1년 하위 10%)")
+                add("epu", "🗞️", "정책 뉴스 잠잠(EPU)", "심리", m, 0.3,
+                    f"미국 정책 불확실성 뉴스 지수 7일 평균 {float(m7.iloc[-1]):.0f} (1년 백분위 {cv*100:.0f}%) — 정책 뉴스가 유난히 조용할 때(방심) 한국·중국 일주일이 평소보다 덜 올랐음(다음 날엔 안 씀)")
+                if M and M[-1]["k"] == "epu":
+                    M[-1]["p1"] = None
+        except Exception as e:
+            research["epu_err"] = str(e)[:120]
     # 🌏 외국인 수급 (한국) — 20일 누적 순매수의 2년 백분위 + 연속 순매도 일수
     fr = ext.get("foreign")
     if mk == "KR" and fr is not None and 0 < len(fr) <= 120:
