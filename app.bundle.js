@@ -20744,7 +20744,8 @@ window.VIDC = {
       ks.forEach(function(k){ sum += PT[st[k]] || 0; if (st[k] === "🔴") r++; if (st[k] === "🟠") o++; });
       return {t: Q.t, comp: ks.length ? sum / ks.length : 0, r: r, o: o, n: ks.length};
     });
-    q.forEach(function(x){ if (stop){ x.wait = true; return; } h += 3 * x.comp; if (x.comp < 0.75) stop = true; });
+    // 🕰 11/11 구조 손질(사용자 「구조를 손봐」): 순서 문(앞 단계 ¾) 없앰 — 과거 위기 때 금리가 내려 2단계가 못 채워 바늘이 4시 반에 묶였음(닷컴·금융위기) → 네 단계가 운 만큼 그냥 더함
+    q.forEach(function(x){ h += 3 * x.comp; });
     var hh = Math.round(h * 2) / 2, w = Math.floor(hh), half = hh - w >= 0.5;
     var label = hh <= 0 ? "12시 · 조용" : hh >= 12 ? "12시 · 다 울었음" : "약 " + w + "시" + (half ? " 반" : "");
     if (hh > 0 && hh < 1) label = "약 12시 반";
@@ -20795,27 +20796,30 @@ window.VIDC = {
   }
   // 🕰 11/11 「과거엔?」 — 기계 칸만으로 1999년부터 다시 돌린 시계(market/bubble_bt.json · src/bubble_bt.py)
   function pastLine(){
-    var RAW = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/bubble_bt.json?t=" + Math.floor(Date.now() / 36e5);
-    fetch(RAW).then(function(r){ return r.ok ? r.json() : null; }).then(function(R){
-      var el = document.getElementById("bck-past"); if (!el || !R || !R.markets) return;
+    var RM = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/", t = "?t=" + Math.floor(Date.now() / 36e5);
+    var gj = function(f){ return fetch(RM + f + t).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }); };
+    Promise.all([gj("bubble_bt.json"), gj("us_shield_bt.json")]).then(function(Z){
+      var R = Z[0], U = Z[1], el = document.getElementById("bck-past"); if (!el || !R || !R.markets) return;
       var M = {}; R.markets.forEach(function(m){ M[m.key] = m; });
-      var cr = (R.crises || []).filter(function(c){ return /닷컴|금융위기/.test(c.name); }).map(function(c){ return c.name.split(" ")[0] + " 최고 " + c.max + "시"; }).join(" · ");
-      var us = [M.sp500, M.nasdaq].filter(Boolean), usOk = us.some(function(m){ return m.n_ok > 0 || (m.free && m.free.n_ok > 0); });
-      var k = M.kospi && M.kospi.combo_k100, kp = k && k.best_plus;
       var li = [];
-      li.push('<li><b>시계가 6시를 거의 못 넘음</b> — ' + e(cr) + '. 위기 땐 금리가 오히려 내려가서 2단계(금리·유가)가 ¾을 못 채우고 멈춰요. 「6시부터 현금화」는 과거엔 한 번도 안 켜졌을 규칙이에요.</li>');
-      li.push('<li><b>🇺🇸 미국</b> — ' + (usOk ? '일부 판이 앞·뒤 모두 이김 (자세히는 bubble_bt.json)' : '몇 시에 팔아도(판 ' + (us[0].grid.length + ((us[0].free || {}).grid || []).length) + '개) 2013년 뒤엔 그냥 들고 있기에 짐 → 미국 현금 규칙엔 안 써요') + '</li>');
-      if (kp) li.push('<li><b>🇰🇷 코스피</b> — 「' + kp.T + '시(신용 다 울음) + 200일선 아래면 전부 현금」을 하락장 규칙에 더하면 2012년까지 연 ' + (kp.d_front > 0 ? '+' : '') + kp.d_front + '%p · 2013년부터 ' + (kp.d_back > 0 ? '+' : '') + kp.d_back + '%p · 최대 낙폭 ' + String(k.k100.full.mdd).replace('-', '−') + '% → ' + String(kp.full.mdd).replace('-', '−') + '%' + (k.ok ? ' → <b>🐻 계기판에 연결함</b>' : ' → 연결 안 함') + '</li>');
-      el.innerHTML = '<summary>🕰 과거엔? — 1999년부터 다시 돌려 봄</summary><ul>' + li.join("") + '</ul><small>손 칸(FCF·CDS·규제)은 옛 자료가 없어 기계 칸으로 만든 대리 시계 · 2012년까지 고르고 2013년부터 확인 · 현금 연 2%·매매 0.1% · ' + e(String(R.at || "").slice(5, 10).replace("-", "/")) + ' 계산 · 매수·매도 추천 아님</small>';
+      var fc = (R.free_crises || []).filter(function(c){ return !/지금/.test(c.name); }).map(function(c){ return c.name.replace(/ (\d{4}).*$/, " $1") + " " + c.max + "시"; }).join(" · ");
+      if (fc) li.push('<li><b>과거 위기 때 바늘</b> — ' + e(fc) + (R.free_dist && R.free_dist["6"] != null ? ' · 6시를 넘은 날은 전체의 ' + R.free_dist["6"] + '%뿐' : '') + ' → <b>6시부터 조심, 9시면 위기 한복판</b>으로 읽어요.</li>');
+      if (U && U.markets){
+        var n = 0, ns = 0, gold = true; U.markets.forEach(function(m){ n += m.n; ns += m.n_shield; (m.shields || []).forEach(function(x){ if (x.alt !== "gold") gold = false; }); });
+        li.push('<li><b>🇺🇸 미국 — 대책 연구</b> · 현금으로 빼면 낙폭은 크게 줄지만 2013년 뒤엔 해마다 2~4%p 손해. 현금 대신 국채·금·방어주·S&P로 갈아타는 판 ' + n + '개 중 합격(수익 거의 안 깎고 낙폭 5%p↑ 줄임)은 ' + ns + '개' + (ns && gold ? ' — 전부 「경고등 + 200일선 아래일 때 금으로」' : '') + '. 금이 최근 강했던 덕일 수 있어 아직 규칙엔 연결 안 했어요.</li>');
+      }
+      var k = M.kospi && M.kospi.combo_k100, kp = k && k.best_plus;
+      if (kp) li.push('<li><b>🇰🇷 코스피</b> — 「기계 신용 칸이 다 울고 + 200일선 아래면 전부 현금」을 하락장 규칙에 더하면 2012년까지 연 ' + (kp.d_front > 0 ? '+' : '') + kp.d_front + '%p · 2013년부터 ' + (kp.d_back > 0 ? '+' : '') + kp.d_back + '%p · 최대 낙폭 ' + String(k.k100.full.mdd).replace('-', '−') + '% → ' + String(kp.full.mdd).replace('-', '−') + '%' + (k.ok ? ' → <b>🐻 계기판에 연결함</b>' : ' → 연결 안 함') + '</li>');
+      el.innerHTML = '<summary>🕰 과거엔? — 1999년부터 다시 돌려 봄</summary><ul>' + li.join("") + '</ul><small>손 칸(FCF·CDS·규제)은 옛 자료가 없어 기계 칸으로 만든 대리 시계라 앱 시계보다 낮게 나와요 · 2012년까지 고르고 2013년부터 확인 · ' + e(String(R.at || "").slice(5, 10).replace("-", "/")) + ' 계산 · 매수·매도 추천 아님</small>';
       el.hidden = false;
-    }).catch(function(){});
+    });
   }
   function clockBlock(B){
     var C = clockOf(stOf(B)); if (!C) return "";
     setTimeout(function(){ chgLine(B, C); pastLine(); }, 0);
     var rows = C.q.map(function(x, i){ return '<li class="' + (x.wait && x.comp > 0 ? "w" : x.comp >= 0.75 ? "r" : x.comp > 0 ? "o" : "g") + '"><span>' + e(x.t) + '</span><b>' + e(word(x)) + '</b></li>'; }).join("");
     return '<div class="bck">' + clockSVG(B, C) + '<div class="bck-t"><div class="bck-k">🕰 버블 시계</div><div class="bck-big">지금 ' + e(C.label) + '</div><ol>' + rows + '</ol><div class="bck-chg" id="bck-chg">어제와 비교 중…</div></div></div>' +
-      '<p class="bck-ru">순서: 전병서 「AI 버블, 지금 몇 시인가」 틀(채권·신용이 주식보다 먼저 울어요) · 12시에서 출발해 한 바퀴 돌아 다시 12시면 다 울었음 · 단계마다 3시간(12→3 신용 · 3→6 금리·규제·유가 · 6→9 주식 속살·현금 도피 · 9→12 완충) · 바늘 = 칸 점수(🔴 1 · 🟠 ½)만큼 · 「절반」은 그 단계 3시간 중 절반이 찼다는 뜻 · 앞 단계가 ¾ 넘게 울어야 다음 단계로 — 그 전엔 울어도 「⏸ 대기」(흐린 칸)로 바늘에 안 더해요 ·테두리 칸을 누르면 그 칸 근거 · 생각의 틀 — 사라·팔라는 뜻 아님</p><details class="bck-past" id="bck-past" hidden></details>';
+      '<p class="bck-ru">순서: 전병서 「AI 버블, 지금 몇 시인가」 틀(채권·신용이 주식보다 먼저 울어요) · 테두리는 단계마다 3시간씩(12→3 신용 · 3→6 금리·규제·유가 · 6→9 주식 속살·현금 도피 · 9→12 완충) · 바늘 = 네 단계가 운 만큼을 다 더한 것(🔴 1 · 🟠 ½) — 전부 울면 한 바퀴 돌아 12시 · 「절반」은 그 단계 3시간 중 절반 · 바늘 위치는 「어느 단계냐」가 아니라 「얼마나 많이 우나」예요(어느 칸이 우는지는 테두리 색) · 11/11 손질: 앞 단계가 ¾ 울어야 다음 단계를 더하던 규칙을 없앰(과거 위기 때 바늘이 4시 반에 묶였음) · 테두리 칸을 누르면 그 칸 근거 · 생각의 틀 — 사라·팔라는 뜻 아님</p><details class="bck-past" id="bck-past" hidden></details>';
   }
 
   window.__bubCard = function(B){
