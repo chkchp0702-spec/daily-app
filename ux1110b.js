@@ -24,13 +24,14 @@
     {t: "🛟 완충 꺼짐", k: ["buffer", "recession"]}
   ];
   var PT = {"🔴": 1, "🟠": 0.5, "🟢": 0};
+  var KN = {fcf: "빅테크 현금흐름", bonds: "회사채", cds: "AI CDS", credit: "신용스프레드", rate: "금리", policy: "규제", geo: "유가", breadth: "평균 종목", flow: "현금 도피", buffer: "완충", recession: "경기"};
   function clockOf(st){   // st = {key: "🔴"...} → {h, label, q:[{t, comp, r, o, n}]}
     var h = 0, stop = false, q = CQ.map(function(Q){
       var ks = Q.k.filter(function(k){ return st[k] != null; }), sum = 0, r = 0, o = 0;
       ks.forEach(function(k){ sum += PT[st[k]] || 0; if (st[k] === "🔴") r++; if (st[k] === "🟠") o++; });
       return {t: Q.t, comp: ks.length ? sum / ks.length : 0, r: r, o: o, n: ks.length};
     });
-    q.forEach(function(x){ if (stop) return; h += 3 * x.comp; if (x.comp < 0.75) stop = true; });
+    q.forEach(function(x){ if (stop){ x.wait = true; return; } h += 3 * x.comp; if (x.comp < 0.75) stop = true; });
     var hh = Math.round(h * 2) / 2, w = Math.floor(hh), half = hh - w >= 0.5;
     var label = hh <= 0 ? "12시 · 조용" : hh >= 12 ? "12시 · 다 울었음" : "약 " + w + "시" + (half ? " 반" : "");
     if (hh > 0 && hh < 1) label = "약 12시 반";
@@ -38,7 +39,14 @@
   }
   function stOf(B){ var st = {}; (B.items || []).forEach(function(x){ if (x.key) st[x.key] = x.state; }); return st; }
   window.__bubClock = function(B){ try { return B && B.items ? clockOf(stOf(B)) : null; } catch(x) { return null; } };
-  function word(x){ return !x.n ? "자료 없음" : x.comp >= 0.999 ? "다 울었음" : x.comp >= 0.75 ? "거의 다 울었음" : x.comp > 0 ? (x.r ? "🔴 " + x.r : "") + (x.o ? (x.r ? " · " : "") + "🟠 " + x.o : "") + " / " + x.n + "칸" : "조용"; }
+  // 🕰 11/11 정직 표기 — 「🟠 3 / 3칸」이 꽉 찬 것처럼 읽혀서: 시계에 실제로 찬 만큼(절반·¾…)을 씀 · 앞 단계에 막힌 단계는 「⏸ 대기」
+  function frac(c){ var F = [[1/4, "¼"], [1/3, "⅓"], [1/2, "절반"], [2/3, "⅔"], [3/4, "¾"]]; for (var i = 0; i < F.length; i++) if (Math.abs(c - F[i][0]) < 0.01) return F[i][1]; return Math.round(c * 100) + "%"; }
+  function cnt(x){ return (x.r ? "🔴" + x.r : "") + (x.o ? (x.r ? " " : "") + "🟠" + x.o : ""); }
+  function word(x){
+    if (!x.n) return "자료 없음";
+    if (x.wait) return x.comp > 0 ? cnt(x) + " · ⏸ 대기" : "조용";
+    return x.comp >= 0.999 ? "다 울었음" : x.comp > 0 ? cnt(x) + " · " + frac(x.comp) : "조용";
+  }
   function pt(a, r){ var t = a * Math.PI / 180; return (60 + r * Math.sin(t)).toFixed(1) + " " + (60 - r * Math.cos(t)).toFixed(1); }
   function clockSVG(B, C){
     var byK = {}; (B.items || []).forEach(function(x){ if (x.key) byK[x.key] = x; });
@@ -47,10 +55,11 @@
       var a0 = qi * 90, n = Q.k.length, step = 90 / n;
       Q.k.forEach(function(k, i){
         var x = byK[k], s0 = a0 + i * step + 2.2, s1 = a0 + (i + 1) * step - 2.2;
-        arcs += '<path class="bck ' + (x ? (SC[x.state] || "n") : "n") + '" data-bbk="' + k + '" d="M' + pt(s0, R) + ' A' + R + ' ' + R + ' 0 0 1 ' + pt(s1, R) + '"><title>' + e(x ? x.name + " " + x.state : k) + '</title></path>';
+        arcs += '<path class="bck ' + (x ? (SC[x.state] || "n") : "n") + (C.q[qi] && C.q[qi].wait ? " w" : "") + '" data-bbk="' + k + '" d="M' + pt(s0, R) + ' A' + R + ' ' + R + ' 0 0 1 ' + pt(s1, R) + '"><title>' + e(x ? x.name + " " + x.state : k) + '</title></path>';
       });
     });
-    var nums = [[0, "12"], [90, "3"], [180, "6"], [270, "9"]].map(function(z){ var p = pt(z[0], 33).split(" "); return '<text x="' + p[0] + '" y="' + (+p[1] + 4) + '">' + z[1] + '</text>'; }).join("");
+    var nums = [[0, "12"], [90, "3"], [180, "6"], [270, "9"]].map(function(z){ var p = pt(z[0], 33).split(" "); return '<text x="' + p[0] + '" y="' + (+p[1] + 4) + '">' + z[1] + '</text>'; }).join("") +
+      '<text x="60" y="38" class="bck-12">출발·터짐</text>';   // 12시 = 출발점이자 한 바퀴 끝(다 울었음)
     var ang = C.hh / 12 * 360, tip = pt(ang, 38).split(" ");
     return '<svg class="bck-svg" viewBox="0 0 120 120" role="img" aria-label="버블 시계 ' + e(C.label) + '"><circle cx="60" cy="60" r="56" class="bck-face"/>' + arcs + nums +
       '<line x1="60" y1="60" x2="' + tip[0] + '" y2="' + tip[1] + '" class="bck-hand"/><circle cx="60" cy="60" r="4.5" class="bck-hub"/></svg>';
@@ -64,15 +73,19 @@
       for (var i = L.length - 1; i >= 0; i--) if (String(L[i].at || "").slice(0, 10) < today){ prev = L[i]; break; }
       if (!prev){ el.textContent = "어제 기록 없음 — 오늘부터 바늘 흐름을 적어요"; return; }
       var P = clockOf(prev.states || {}), d = C.hh - P.hh;
-      el.innerHTML = e(md(prev.at)) + ' 마지막 <b>' + e(P.label.replace(/^약 /, "")) + '</b> → 지금 <b>' + e(C.label.replace(/^약 /, "")) + '</b>' + (d > 0 ? ' <em class="up">▲' + dur(d) + '</em>' : d < 0 ? ' <em class="dn">▼' + dur(-d) + '</em>' : ' · 그대로');
+      // 왜 움직였나 — 바뀐 칸(최대 2개)을 「유가 🟢→🟠」처럼
+      var ps = prev.states || {}, cs = stOf(B), why = [];
+      CQ.forEach(function(Q){ Q.k.forEach(function(k){ if (ps[k] && cs[k] && ps[k] !== cs[k] && why.length < 2) why.push((KN[k] || k) + " " + ps[k] + "→" + cs[k]); }); });
+      el.innerHTML = e(md(prev.at)) + ' 마지막 <b>' + e(P.label.replace(/^약 /, "")) + '</b> → 지금 <b>' + e(C.label.replace(/^약 /, "")) + '</b>' + (d > 0 ? ' <em class="up">▲' + dur(d) + '</em>' : d < 0 ? ' <em class="dn">▼' + dur(-d) + '</em>' : ' · 그대로') +
+        (why.length ? '<small class="bck-why">' + e(why.join(" · ")) + '</small>' : '');
     }).catch(function(){});
   }
   function clockBlock(B){
     var C = clockOf(stOf(B)); if (!C) return "";
     setTimeout(function(){ chgLine(B, C); }, 0);
-    var rows = C.q.map(function(x, i){ return '<li class="' + (x.comp >= 0.75 ? "r" : x.comp > 0 ? "o" : "g") + '"><span>' + e(x.t) + '</span><b>' + e(word(x)) + '</b></li>'; }).join("");
+    var rows = C.q.map(function(x, i){ return '<li class="' + (x.wait && x.comp > 0 ? "w" : x.comp >= 0.75 ? "r" : x.comp > 0 ? "o" : "g") + '"><span>' + e(x.t) + '</span><b>' + e(word(x)) + '</b></li>'; }).join("");
     return '<div class="bck">' + clockSVG(B, C) + '<div class="bck-t"><div class="bck-k">🕰 버블 시계</div><div class="bck-big">지금 ' + e(C.label) + '</div><ol>' + rows + '</ol><div class="bck-chg" id="bck-chg">어제와 비교 중…</div></div></div>' +
-      '<p class="bck-ru">순서: 전병서 「AI 버블, 지금 몇 시인가」 틀(채권·신용이 주식보다 먼저 울어요) · 속살·현금 도피 2칸은 「바늘」 묶음에서 떼어 3단계로 · 바늘 = 칸 점수(🔴 1 · 🟠 ½) × 단계마다 3시간 · 앞 단계가 ¾ 넘게 울어야 다음 단계로 넘어가요 · 테두리 칸을 누르면 그 칸 근거 · 생각의 틀 — 사라·팔라는 뜻 아님</p>';
+      '<p class="bck-ru">순서: 전병서 「AI 버블, 지금 몇 시인가」 틀(채권·신용이 주식보다 먼저 울어요) · 12시에서 출발해 한 바퀴 돌아 다시 12시면 다 울었음 · 단계마다 3시간(12→3 신용 · 3→6 금리·규제·유가 · 6→9 주식 속살·현금 도피 · 9→12 완충) · 바늘 = 칸 점수(🔴 1 · 🟠 ½)만큼 · 「절반」은 그 단계 3시간 중 절반이 찼다는 뜻 · 앞 단계가 ¾ 넘게 울어야 다음 단계로 — 그 전엔 울어도 「⏸ 대기」(흐린 칸)로 바늘에 안 더해요 ·테두리 칸을 누르면 그 칸 근거 · 생각의 틀 — 사라·팔라는 뜻 아님</p>';
   }
 
   window.__bubCard = function(B){
@@ -116,7 +129,8 @@
   css.textContent +=
     ".bck{display:flex;gap:12px;align-items:center;margin:12px 0 8px}.bck-svg{flex:0 0 112px;width:112px;height:112px}" +
     ".bck-face{fill:var(--panel,rgba(127,127,127,.08));stroke:rgba(127,127,127,.25);stroke-width:1}.bck-svg text{font-size:10px;font-weight:800;fill:var(--sub);text-anchor:middle}" +
-    ".bck-svg path.bck{fill:none;stroke-width:9;cursor:pointer}.bck-svg path.r{stroke:#e5484d}.bck-svg path.o{stroke:#f59e0b}.bck-svg path.g{stroke:#30a46c}.bck-svg path.n{stroke:rgba(127,127,127,.35)}" +
+    ".bck-svg path.bck{fill:none;stroke-width:9;cursor:pointer}.bck-svg path.r{stroke:#e5484d}.bck-svg path.o{stroke:#f59e0b}.bck-svg path.g{stroke:#30a46c}.bck-svg path.n{stroke:rgba(127,127,127,.35)}.bck-svg path.w{opacity:.32;stroke-dasharray:3 2}.bck-svg text.bck-12{font-size:6.5px;font-weight:700;opacity:.8}" +
+    ".bck-t ol li.w b{color:var(--sub)}.bck-why{display:block;margin-top:2px;font-size:11px;color:var(--sub)}" +
     ".bck-hand{stroke:var(--text,#111);stroke-width:3.2;stroke-linecap:round}.bck-hub{fill:var(--text,#111)}" +
     ".bck-t{flex:1;min-width:0}.bck-k{font-size:12px;font-weight:800;color:var(--sub)}.bck-big{font-size:21px;font-weight:900;letter-spacing:-.4px;margin:1px 0 6px}" +
     ".bck-t ol{list-style:none;margin:0;padding:0;font-size:12px;line-height:1.35}.bck-t ol li{display:flex;justify-content:space-between;gap:6px}.bck-t ol li+li{margin-top:2px}.bck-t ol li span{color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bck-t ol li b{font-weight:800;white-space:nowrap}" +
