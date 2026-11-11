@@ -24,8 +24,8 @@
     function line(m, isPort){
       var st = ST[m.state] || ["", m.state];
       var act = isPort
-        ? (m.cash ? "주식 줄이고 현금 " + m.cash + "%까지" : "배분표 그대로" + (cash != null ? " · 현금 " + Math.round(cash) + "%" : ""))
-        : (m.state === "🐻" ? "현금 " + (m.cash || 30) + "%까지 · 새로 사지 않기" : m.state === "🟡" ? "현금 " + (m.cash || 10) + "% · 추격 금지" : "현금 늘릴 필요 없음");
+        ? (m.cash ? "주식 줄이고 " + (m.to || "현금") + " " + m.cash + "%까지" : "배분표 그대로" + (cash != null ? " · 현금 " + Math.round(cash) + "%" : ""))
+        : (m.to ? (m.cash ? "주식 몫 " + m.cash + "% " + m.to + "으로 · 바닥 신호 3개면 복귀" : "배분표 그대로") : m.state === "🐻" ? "현금 " + (m.cash || 30) + "%까지 · 새로 사지 않기" : m.state === "🟡" ? "현금 " + (m.cash || 10) + "% · 추격 금지" : "현금 늘릴 필요 없음");
       return {c: st[0], st: m.state + " " + st[1], dd: m.dd, act: act, idx: m.name};
     }
     var o = {kr: line(k, false), us: line(s, true), asof: k.asof || s.asof};

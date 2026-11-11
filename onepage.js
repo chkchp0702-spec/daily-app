@@ -81,7 +81,7 @@
         var on_ = (bk.checks || []).filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙(rule)
         if (bk.rule && !bk.nuse){} else if (bk.checks && bk.checks.length) bearN.t += " · 다시 사는 조건 " + on_ + "/" + (bk.nuse || bk.checks.length) + "개 켜짐";
         var sp_ = (BR.markets || []).filter(function(m){ return m.key === "sp500"; })[0];   // 🧭 11/10 결론 통일 — 해외 ETF 포트는 S&P500 판정을 따름
-        if (sp_ && sp_.state !== bk.state) bearN.t += " | 🌏 해외 주식(포트)은 S&P500 " + sp_.state + (sp_.state === "🟢" ? " 정상 → 배분 그대로" : " → 현금 " + (sp_.cash || 0) + "%");
+        if (sp_ && sp_.state !== bk.state) bearN.t += " | 🌏 해외 주식(포트)은 S&P500 " + sp_.state + (sp_.state === "🟢" ? " 정상 → 배분 그대로" : " → " + (sp_.to || "현금") + " " + (sp_.cash || 0) + "%");
         bearN.max = 4;
         if (adv && adv.plan) adv.plan = adv.plan.filter(function(x){ return !/상승 추세|비중을 그대로/.test(x); });
       }

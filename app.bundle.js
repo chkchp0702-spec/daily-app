@@ -2055,8 +2055,8 @@
     function line(m, isPort){
       var st = ST[m.state] || ["", m.state];
       var act = isPort
-        ? (m.cash ? "주식 줄이고 현금 " + m.cash + "%까지" : "배분표 그대로" + (cash != null ? " · 현금 " + Math.round(cash) + "%" : ""))
-        : (m.state === "🐻" ? "현금 " + (m.cash || 30) + "%까지 · 새로 사지 않기" : m.state === "🟡" ? "현금 " + (m.cash || 10) + "% · 추격 금지" : "현금 늘릴 필요 없음");
+        ? (m.cash ? "주식 줄이고 " + (m.to || "현금") + " " + m.cash + "%까지" : "배분표 그대로" + (cash != null ? " · 현금 " + Math.round(cash) + "%" : ""))
+        : (m.to ? (m.cash ? "주식 몫 " + m.cash + "% " + m.to + "으로 · 바닥 신호 3개면 복귀" : "배분표 그대로") : m.state === "🐻" ? "현금 " + (m.cash || 30) + "%까지 · 새로 사지 않기" : m.state === "🟡" ? "현금 " + (m.cash || 10) + "% · 추격 금지" : "현금 늘릴 필요 없음");
       return {c: st[0], st: m.state + " " + st[1], dd: m.dd, act: act, idx: m.name};
     }
     var o = {kr: line(k, false), us: line(s, true), asof: k.asof || s.asof};
@@ -2209,7 +2209,7 @@
       (bf ? "최근 5일 외국인 " + won(bf.f5) + ", 기관 " + won(bf.i5) + " 순매수였어요." : "") + " 하루 등락보다는 실적·업황 흐름으로 판단하는 게 좋아요."]);
     if (r0.f != null) out.push(["외국인은 왜 " + (r0.f >= 0 ? "사요?" : "팔아요?"), "코스피에서 외국인은 " + Number(r0.d.slice(5, 7)) + "/" + Number(r0.d.slice(8)) + " 하루 " + won(r0.f / U) + (fs >= 2 ? "(" + fs + "일째)" : "") + ", 최근 20일 합계 " + won(f20) + "예요. 5일 동안 가장 많이 판 종목은 " + topSell + ", 많이 산 종목은 " + topBuy + "예요. " +
       "다만 10년치를 돌려 보면 외국인·기관을 따라 사는 건 수익으로 이어지지 않았어요 — 흐름 참고용이에요."]);
-    out.push(["미국 주식은 괜찮아요?", "S&P500은 고점보다 " + sg(s.dd, 1) + "로 " + st(s) + "이고, " + (s.close && s.m200 ? (s.close > s.m200 ? "장기 평균선(200일) 위에 있어요." : "장기 평균선(200일) 아래로 내려왔어요.") : "") + " 나스닥은 " + sg(nq.dd, 1) + "(" + st(nq) + "). 규칙상 해외 ETF 비중은 " + (s.cash ? "현금 " + s.cash + "%까지 줄이는 구간이에요." : "그대로 유지하는 구간이에요.")]);
+    out.push(["미국 주식은 괜찮아요?", "S&P500은 고점보다 " + sg(s.dd, 1) + "로 " + st(s) + "이고, " + (s.close && s.m200 ? (s.close > s.m200 ? "장기 평균선(200일) 위에 있어요." : "장기 평균선(200일) 아래로 내려왔어요.") : "") + " 나스닥은 " + sg(nq.dd, 1) + "(" + st(nq) + "). 규칙상 해외 ETF 비중은 " + (s.cash ? "주식 몫 " + s.cash + "%를 " + (s.to || "현금") + "으로 옮기는 구간이에요(바닥 신호 3개 켜지면 복귀)." : "그대로 유지하는 구간이에요.")]);
     if (k.state === "🐻") out.push(["코스피 바닥은 언제예요?", "바닥을 미리 맞히는 방법은 없어요. 대신 규칙으로 봐요 — 이번 하락장(" + md(rb.from) + "~)에서 하루 +3% 넘는 반등이 " + (rb.n || 0) + "번 있었고 그중 " + (rb.broke || 0) + "번은 20일 안에 저점을 다시 깼어요. 바닥 신호 4개 중 " + bn + "개가 켜져 있고, 2개가 넘으면 나눠 담기를 시작해요."]);
     out.push(["현금은 얼마나 들고 있어야 해요?", "국내 주식 몫은 " + (k.cash ? "지금 규칙상 현금 " + k.cash + "%까지" : "따로 현금을 늘릴 필요는 없어요") + ". 해외 ETF 포트는 현금 " + cash + "% · 금 " + gold + "%예요. 고객 성향(안정형일수록 더 많이)에 맞춰 조절해요."]);
     if (gold) out.push(["금 지금 사도 돼요?", "지금 배분표의 금 비중은 " + gold + "%예요. 금은 주식이 흔들릴 때 덜 빠지는 방패 역할이라 한 번에 크게보다 정해 둔 비중만큼 나눠서 담아요."]);
@@ -4533,7 +4533,7 @@
         var on_ = (bk.checks || []).filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙(rule)
         if (bk.rule && !bk.nuse){} else if (bk.checks && bk.checks.length) bearN.t += " · 다시 사는 조건 " + on_ + "/" + (bk.nuse || bk.checks.length) + "개 켜짐";
         var sp_ = (BR.markets || []).filter(function(m){ return m.key === "sp500"; })[0];   // 🧭 11/10 결론 통일 — 해외 ETF 포트는 S&P500 판정을 따름
-        if (sp_ && sp_.state !== bk.state) bearN.t += " | 🌏 해외 주식(포트)은 S&P500 " + sp_.state + (sp_.state === "🟢" ? " 정상 → 배분 그대로" : " → 현금 " + (sp_.cash || 0) + "%");
+        if (sp_ && sp_.state !== bk.state) bearN.t += " | 🌏 해외 주식(포트)은 S&P500 " + sp_.state + (sp_.state === "🟢" ? " 정상 → 배분 그대로" : " → " + (sp_.to || "현금") + " " + (sp_.cash || 0) + "%");
         bearN.max = 4;
         if (adv && adv.plan) adv.plan = adv.plan.filter(function(x){ return !/상승 추세|비중을 그대로/.test(x); });
       }
@@ -9679,7 +9679,7 @@
   function bearM(){ var o = {}; ((BR && BR.markets) || []).forEach(function(m){ o[m.key] = m; }); return o; }
   function bearAny(){ return ((BR && BR.markets) || []).some(function(m){ return m.state !== "🟢"; }); }
   function bearOn(){ return BEARON && bearAny(); }
-  function bearHead(){ return ((BR && BR.markets) || []).map(function(m){ return m.state + m.name + (m.cash ? " 현금 " + m.cash + "%" : ""); }).join(" · ") + " · " + md((BR.markets[0] || {}).asof) + " 종가 판정"; }
+  function bearHead(){ return ((BR && BR.markets) || []).map(function(m){ return m.state + m.name + (m.cash ? " " + (m.to || "현금") + " " + m.cash + "%" : ""); }).join(" · ") + " · " + md((BR.markets[0] || {}).asof) + " 종가 판정"; }
   function bearBtn(){
     if (!bearAny()) return '';
     return '<div class="po-hv po-brt"><button type="button" id="pobrt" class="' + (BEARON ? "on" : "") + '">' + (BEARON ? "🐻 하락장 규칙 겹쳐 보는 중" : "🐻 하락장 규칙 겹쳐 보기") + '</button><small>' + (BEARON ? "보기 전용 · 끄면 원래 배분표" : "켜면 시장마다 그 시장 칸에 계기판 현금 권고를 겹쳐 주황으로") + '</small></div>';
@@ -9736,7 +9736,7 @@
     var lines = ((BR && BR.markets) || []).map(function(m){
       var off = m.rule && m.rule.id === "OFF";
       var tx = off ? "현금 규칙 꺼 둠 — 그대로" : !m.cash ? "그대로" : !used[m.key] ? "이 포트엔 " + (m.key === "kospi" ? "한국 주식 칸이 없어 해당 없음" : "그 시장 칸이 없어 해당 없음") : "그 시장 주식 칸의 " + m.cash + "% 덜기";
-      return '<li><b>' + BMK[m.key] + ' ' + m.state + ' ' + BNM[m.state] + '</b>' + (m.cash ? ' 현금 ' + m.cash + '%' : '') + ' → ' + tx + '</li>'; }).join("");
+      return '<li><b>' + BMK[m.key] + ' ' + m.state + ' ' + BNM[m.state] + '</b>' + (m.cash ? ' ' + (m.to || '현금') + ' ' + m.cash + '%' : '') + ' → ' + tx + '</li>'; }).join("");
     bx.innerHTML = '<div class="po-brs"><div class="po-brh">🐻 하락장 규칙 겹쳐 봄 <small>' + e(md((BR.markets[0] || {}).asof)) + ' 종가 판정</small></div>' +
       '<div class="po-brn">현금·단기 <b>' + (cr ? cr.x.pct0 : 0) + '%</b> → <b class="po-bcv">' + (cr ? cr.x.pct : 0) + '%</b> <small>(' + (cut ? '+' + won(cut) + '원' : '바뀌는 줄 없음') + ')</small></div>' +
       '<ul>' + lines + '</ul>' +
@@ -18572,7 +18572,7 @@ window.VIDC = {
           : '<div class="bg-n">🌱 다시 사는 조건 <b>' + m.n + '/' + (m.nuse || 4) + '</b> — ' + e(m.rule ? m.rule.name : "켜질수록 3분의 1씩 다시 사기") + '</div>') +   // 🌱 11/09 시장별 다시 사기 규칙
         (window.__bearSigHead ? __bearSigHead(m) : '') +   // 🌱 11/09 A11/9-1 과거 성적표 (ux1109b.js)
         '<ul class="bg-ck">' + (m.checks || []).map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '"><i>' + (c.on ? "✅" : "⬜") + '</i><b>' + e(c.k) + (c.use === false ? ' <em class="bg-ref">참고</em>' : '') + '</b><small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(m, k) : '') + '</li>'; }).join("") + '</ul>' +
-        '<div class="bg-lad">' + (m.ladder ? m.ladder.map(function(x){ return [x[0], x[1]]; }) : [[ladder[0], "신호 0~1개"], [ladder[2], "2개"], [ladder[3], "3개"], [ladder[4], "4개"]]).map(function(x, i, A){ var now = m.ladder && m.ladder.length ? x[0] === m.cash : Math.max(0, m.n - 1) === i; return '<span class="' + (now ? "now" : "") + '"><small>' + e(x[1]) + '</small><b>현금 ' + x[0] + '%</b></span>'; }).join("") + '</div>' +
+        '<div class="bg-lad">' + (m.ladder ? m.ladder.map(function(x){ return [x[0], x[1]]; }) : [[ladder[0], "신호 0~1개"], [ladder[2], "2개"], [ladder[3], "3개"], [ladder[4], "4개"]]).map(function(x, i, A){ var now = m.ladder && m.ladder.length ? x[0] === m.cash : Math.max(0, m.n - 1) === i; return '<span class="' + (now ? "now" : "") + '"><small>' + e(x[1]) + '</small><b>' + e(m.to || '현금') + ' ' + x[0] + '%</b></span>'; }).join("") + '</div>' +
         '<p class="bg-ad">' + e(m.advice) + '</p></div>';
     }).join("");
     return '<section class="card h2-bear" id="bear" data-cz="done"><div class="bg-h">🐻 하락장 계기판 <small>' + e(md(B.at)) + ' ' + e(String(B.at || "").slice(11, 16)) + ' · 종가 판정</small></div>' +
@@ -19987,7 +19987,7 @@ window.VIDC = {
     if (w){
       var ck = (w.checks || []), F_ = w.rule && w.rule.id === "F", nu = w.nuse || ck.length, on = ck.filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙
       var tail = w.rule && w.rule.id === "OFF" ? '현금 규칙 꺼 둠' : (w.rule && !w.nuse) || F_ ? '판정 풀릴 때까지' : '다시 사는 조건 ' + on + '/' + nu;
-      return '<details class="ez-rule"><summary>' + (o.red ? '🔴 지금 규칙 · 현금 ' + (w.cash || 0) + '%까지 · ' + tail : '🟡 지금 규칙 · ' + tail) + '</summary>' +
+      return '<details class="ez-rule"><summary>' + (o.red ? '🔴 지금 규칙 · ' + (w.to || '현금') + ' ' + (w.cash || 0) + '%까지 · ' + tail : '🟡 지금 규칙 · ' + tail) + '</summary>' +
         '<p>' + e(w.advice || (BR && BR.lead) || "") + '</p>' + (window.__bearSigHead ? __bearSigHead(w) : '') + '<ul>' + ck.map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '">' + (c.on ? "✅" : "⬜") + ' ' + e(c.k) + (c.use === false ? ' <em class="ez-ref">참고</em>' : '') + ' <small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(w, k) : '') + '</li>'; }).join("") + '</ul>' +
         '<p class="ez-rule-n">' + (w.rule ? '다시 사는 규칙(' + e(w.name) + '): ' + e(w.rule.name) : '') + ' · 종가 판정 · 사라·팔라는 뜻 아님</p></details>';
     }
