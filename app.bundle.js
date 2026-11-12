@@ -12951,7 +12951,8 @@
       if (!m || !m.dates) return; PERF = m;
       var col = function(c){ if (c == null || isNaN(c)) return "transparent"; if (Math.abs(c) < 0.05) return "color-mix(in srgb,var(--dim) 60%,transparent)";
         var a = Math.min(1, 0.3 + Math.abs(c) / 3).toFixed(2); return c > 0 ? "rgba(255,107,107," + a + ")" : "rgba(90,169,255," + a + ")"; };
-      var chg = function(arr, i){ return i > 0 && arr && arr[i] != null && arr[i - 1] ? (arr[i] / arr[i - 1] - 1) * 100 : null; };
+      // 🧹 11/12 「코스피 0.0%」 고침 — 야후가 그날 종가를 아직 안 줘서 앞날 값을 그대로 이어 붙인 날(값이 똑같음)은 0.0% 가 아니라 「–」
+      var chg = function(arr, i){ return i > 0 && arr && arr[i] != null && arr[i - 1] && arr[i] !== arr[i - 1] ? (arr[i] / arr[i - 1] - 1) * 100 : null; };
       bs.forEach(function(b){
         var d = (b.dataset.id || "").slice(0, 10), md = d.slice(5).replace("-", "/"), i = m.dates.indexOf(md); if (i < 1) return;
         var k = chg(m.kospi, i), s = chg(m.sp500, i);
