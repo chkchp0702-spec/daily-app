@@ -2322,8 +2322,10 @@
   document.addEventListener("toggle", function(ev){
     var t = ev.target; if (!t || !t.classList || !t.classList.contains("mn-q")) return;
     if (t.open){
+      var sm = t.querySelector("summary"), y0 = sm ? sm.getBoundingClientRect().top : 0, sh = !!t.closest("#qasheet");
       [].forEach.call(t.parentNode.querySelectorAll("details.mn-q[open]"), function(o){ if (o !== t) o.open = false; });
-      var sh = !!t.closest("#qasheet");
+      // 🔧 11/12 자가 업그레이드: 위에 열려 있던 답이 접히면 새로 연 질문이 그만큼 위로 끌려 올라가 화면 밖으로 나가던 것(🩺 「지금 사도 돼요?」 367→−80px) → 누른 질문을 손가락 밑 그 자리에 붙잡음
+      try { var dy = sm ? sm.getBoundingClientRect().top - y0 : 0; if (Math.abs(dy) > 1){ var sc = t.closest(".qa-in"); if (sc) sc.scrollTop += dy; else window.scrollBy(0, dy); } } catch(z) {}
       // 🔧 11/11 자가 업그레이드: 홈 카드에선 연 질문이 이미 화면 위쪽 60% 안에 있으면 그대로 둠(전엔 「nearest」가 긴 답을 맞추느라 질문을 378→72px 로 끌어올림 — 🩺 건강검진 튐)
       setTimeout(function(){ try { if (!t.open) return; if (sh){ t.scrollIntoView({block: "start", behavior: "smooth"}); return; }
         var y = t.querySelector("summary").getBoundingClientRect().top; if (y < 0 || y > innerHeight * 0.6) t.scrollIntoView({block: "start", behavior: "smooth"}); } catch(z) {} }, 80);

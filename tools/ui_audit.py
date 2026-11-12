@@ -8,7 +8,7 @@ APP=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); MSR=os.path.joi
 TABS=sys.argv[1].split(",")
 SEL="#main button, #main .fold, #main summary, #main [data-pf], #main [data-m], #main [data-f], #main [data-win], #main [data-bg], #main [data-cm], #main .chip[data-k]"
 # 🔧 11/09: 「처음엔 접어 두기」(calm.js .cz) 로 📊 성적표가 전부 접혀 버튼 0개만 검사하던 것 — 목록 만들기 전에 접힌 카드를 모두 펼치고(「접기 ▴」는 접으며 위로 올라가는 게 정상이라 뺌) 안의 버튼까지 누름
-JS_LIST="""(sel)=>{[].forEach.call(document.querySelectorAll('#main .cz.cz-on > .cz-h'),function(h){h.click()}); var a=[].slice.call(document.querySelectorAll(sel)).filter(function(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0&&!e.closest('a[href^=http]')&&!/공유|복사|📤|PDF|크게 보기|새 창|^접기 ▴|^✕ 빼기$|^[−+]$/.test((e.innerText||'').trim());});
+JS_LIST="""(sel)=>{[].forEach.call(document.querySelectorAll('#main .cz.cz-on > .cz-h'),function(h){h.click()}); var a=[].slice.call(document.querySelectorAll(sel)).filter(function(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0&&(!e.checkVisibility||e.checkVisibility())&&!e.closest('a[href^=http]')&&!/공유|복사|📤|PDF|크게 보기|새 창|^접기 ▴|^✕ 빼기$|^[−+]$/.test((e.innerText||'').trim());});
   a.forEach(function(e,i){e.setAttribute('data-au',i)}); return a.length;}"""
 async def main():
     async with async_playwright() as p:
@@ -49,10 +49,10 @@ async def main():
                     await pg.goto("http://app/index.html#"+tab); await pg.wait_for_timeout(2500); await pg.evaluate(JS_LIST, SEL); continue
                 if h1!=h0:      # 다른 화면으로 가는 버튼 — 되돌리고 계속
                     await pg.goto("http://app/index.html#"+tab); await pg.wait_for_timeout(2500); await pg.evaluate(JS_LIST, SEL); continue
-                aft=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); var H=document.documentElement.scrollHeight, y=scrollY; if(!e||!e.isConnected) return [null,y,H]; var r=e.getBoundingClientRect(); return [Math.round(r.top),y,H]}})()""")
+                aft=await pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); var H=document.documentElement.scrollHeight, y=scrollY; if(!e||!e.isConnected||(e.checkVisibility&&!e.checkVisibility())) return [null,y,H];   /* 11/12 접힌 details 속으로 숨음 = 사라짐 */ var r=e.getBoundingClientRect(); return [Math.round(r.top),y,H]}})()""")
                 if aft[0] is None:
                     # 다시 그려져 버튼이 바뀜 — 같은 글자의 버튼을 찾아 위치 비교
-                    aft2=await pg.evaluate("""(t)=>{var c=[].slice.call(document.querySelectorAll('#main button,#main [data-m],#main [data-pf],#main .fold')).filter(function(e){return (e.innerText||'').trim().slice(0,22).replace(/\\s+/g,' ')===t}); if(!c.length) return null; var best=c.map(function(e){return Math.round(e.getBoundingClientRect().top)}); return best}""", info[1])
+                    aft2=await pg.evaluate("""(t)=>{var c=[].slice.call(document.querySelectorAll('#main button,#main [data-m],#main [data-pf],#main .fold')).filter(function(e){return (!e.checkVisibility||e.checkVisibility())&&(e.innerText||'').trim().slice(0,22).replace(/\\s+/g,' ')===t}); if(!c.length) return null; var best=c.map(function(e){return Math.round(e.getBoundingClientRect().top)}); return best}""", info[1])
                     if aft2 and min(abs(x-info[0]) for x in aft2) > 150:
                         bad.append({"btn":info[1],"before":info[0],"after":aft2[:3],"note":"다시 그려진 뒤 위치"})
                     await pg.evaluate(JS_LIST, SEL)

@@ -166,7 +166,8 @@ def facts(texts, src, now):
 
 # ───────── ③ 버튼 다 눌러 보기 ─────────
 SEL = "#main button, #main .fold, #main summary, #main [data-pf], #main [data-m], #main [data-f], #main [data-win], #main [data-bg], #main [data-cm], #main .chip[data-k], #main [data-goto]"
-LIST_JS = """(sel)=>{var a=[].slice.call(document.querySelectorAll(sel)).filter(function(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0&&!e.closest('a[href^=http]')&&!/공유|복사|📤|PDF|PPT|크게 보기|새 창|보내기|내려받|다운/.test(e.innerText||'');});
+# 🔧 11/12: 접힌 <details> 속 단추는 크롬에서 크기·위치가 그대로 잡혀(content-visibility) 「안 보이는 단추를 눌러 튐」 가짜 경보(🏠 ✕ 답 닫기 404→2125 · 📝 ▴ 접기 402→1227) → checkVisibility 로 보이는 것만 · 누른 뒤 숨으면 사라진 것
+LIST_JS = """(sel)=>{var a=[].slice.call(document.querySelectorAll(sel)).filter(function(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0&&(!e.checkVisibility||e.checkVisibility())&&!e.closest('a[href^=http]')&&!/공유|복사|📤|PDF|PPT|크게 보기|새 창|보내기|내려받|다운/.test(e.innerText||'');});
   a.forEach(function(e,i){e.setAttribute('data-au',i)}); return a.length;}"""
 EXPAND = re.compile(r"보기 ▾|더 보기|펼치기|전체 보기|열기|▾|▸|추가|고치기|편집|✏️")   # 펼침·입력 칸 열기(그 칸으로 옮겨 감)는 정상
 
@@ -193,7 +194,7 @@ def sweep(pg, url, tab, cap=45):
             top1 = pg.evaluate("((document.getElementById('main')||{}).innerText||'').slice(0,80)")
             if h1 != h0 or peek or info[3] or top1 != top0:   # 다른 화면으로 감(종목 화면 열기 등) — 튐 아님, 돌아와서 계속
                 pg.goto(url, wait_until="domcontentloaded", timeout=45000); pg.wait_for_timeout(2200); pg.evaluate(LIST_JS, SEL); continue
-            aft = pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); if(!e||!e.isConnected||!e.getClientRects().length) return [null, document.body.innerHTML.length]; return [Math.round(e.getBoundingClientRect().top), document.body.innerHTML.length]}})()""")
+            aft = pg.evaluate(f"""(()=>{{var e=document.querySelector('[data-au="{i}"]'); if(!e||!e.isConnected||!e.getClientRects().length||(e.checkVisibility&&!e.checkVisibility())) return [null, document.body.innerHTML.length]; return [Math.round(e.getBoundingClientRect().top), document.body.innerHTML.length]}})()""")
             if aft[0] is not None and abs(aft[0] - info[0]) > 150 and not EXPAND.search(info[1]):
                 jumps.append(f"「{info[1]}」 {info[0]}→{aft[0]}px")
             if aft[0] is None: pg.evaluate(LIST_JS, SEL)   # 🔧 11/05: 사라진 단추(카드 맨 아래 「접기 ▴」 — 접히면 숨음)는 튐이 아님
