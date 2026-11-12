@@ -21219,7 +21219,7 @@ window.VIDC = {
   var LABS = [
     ["💼 내 포트", [["port", "💼", "포트", "지금 뭘 얼마나 담나"], ["score", "📊", "성적표", "맞았나 틀렸나"], ["prob", "🎲", "오를 확률", "5개 시장 · 매일 채점"]]],
     ["🎯 신호", [["whale", "🐋", "큰손", "기관·유명 투자자 보유 변화"], ["cup", "☕", "컵 차트", "돌파 후보"], ["gap", "📈", "갭 상승", "갭 돌파 후보"], ["screen", "🔎", "종목 찾기", "매일 아침 거름망"], ["sigmore", "🗂", "더 보기", "예측 채점 · 상세"]]],
-    ["🧪 연구", [["@bubble", "🕰", "버블 시계 · 하락장 계기판", "오늘 탭 「자세히 보기」 안"], ["@bt40", "📏", "40주선 백테스트", "지수·대표 주식"]]],
+    ["🧪 연구", [["@bubble", "🕰", "버블 시계 · 하락장 계기판", "오늘 탭 「자세히 보기」 안"], ["@season", "🧭", "계절 시계", "5개국 지수 흐름 · 3개월 뒤 확률"], ["@bt40", "📏", "40주선 백테스트", "지수·대표 주식"]]],
     ["🔮 재미", [["luck", "🔮", "오늘의 운세", "생일만 넣으면"], ["saju", "📜", "사주 리포트", "PDF 저장"], ["tarot", "🃏", "타로", "질문 → 카드"], ["lotto", "🎱", "로또", "번호 분석"]]],
     ["⚙️ 앱", [["@wlbtn", "★", "관심종목", "담아 둔 종목"], ["@uibtn", "⚙️", "보기 설정", "글자 크기 · 화면 색"], ["alarm", "🔔", "알림", "켜고 끄기"], ["idea", "💬", "의견함", "바라는 점 남기기"], ["@help", "🙋", "뭐 보면 돼요?", "궁금한 것 → 그 화면으로"]]]
   ];
@@ -21260,10 +21260,10 @@ window.VIDC = {
     if (k === "@wlbtn" || k === "@uibtn"){ var o = document.getElementById(k.slice(1)); if (o) o.click(); return; }
     if (k === "@help"){ if (window.__ezHelp) __ezHelp(); return; }
     if (k === "@bt40"){ location.href = "bt40.html"; return; }
-    if (k === "@bubble"){ if (typeof window.go === "function") go("home");
+    if (k === "@bubble" || k === "@season"){ var tid = k === "@season" ? "season" : "bubble"; if (typeof window.go === "function") go("home");
       var n = 0; (function seek(){ var hb = document.getElementById("hmbody"), op = document.querySelector("#ezmore .ez-open");
         if (hb && !hb.classList.contains("ez-open") && op) op.click();
-        var x = document.getElementById("bubble"); if (x){ x.scrollIntoView({behavior: "smooth", block: "start"}); return; } if (++n < 30) setTimeout(seek, 300); })(); return; }
+        var x = document.getElementById(tid); if (x){ x.scrollIntoView({behavior: "smooth", block: "start"}); return; } if (++n < 30) setTimeout(seek, 300); })(); return; }
     if (typeof window.go === "function"){ go(k); window.scrollTo(0, 0); }
   });
 
