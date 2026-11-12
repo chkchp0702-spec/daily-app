@@ -47,6 +47,15 @@
       '<table><tr><th>방식(닮은 날부터 2년)</th><th>가운데</th><th>최악</th><th>현금보다</th></tr>' + tb + '</table>' +
       '<details class="an-e"><summary>닮았던 때 ' + n + '번 보기</summary><ul>' + eps + '</ul><small>' + e(sens) + '</small></details></div></details>';
   }
+  function pickHtml(A){
+    var P = A.markets.filter(function(m){ return m.pick; }); if (!P.length) return "";
+    var rows = P.map(function(m){ var p = m.pick;
+      return '<li class="' + (p.ok ? "" : "no") + '"><span>' + FL[m.nat] + ' <b>' + e(m.name) + '</b></span>' +
+        (p.ok ? '<em>주식 ' + p.stock + '%</em><small><b>' + e(SHORT[p.k] || p.rule) + '</b> · 다음: ' + e(p.next) + '</small>'
+              : '<em class="no">정하지 않음</em><small>통하는 방식이 없었어요 — 한 번에 사지 말고 나눠 사기만 참고</small>') + '</li>'; }).join("");
+    return '<div class="an-pk"><div class="an-pkh">📌 지금 규칙 <small>닮은 장에서 2년 뒤 가운데값이 가장 좋았던 방식</small></div><ul>' + rows + '</ul>' +
+      '<p>고른 방식이 우연인지 보려고 닮은 때 하나를 빼고 고른 뒤 그 하나에 적용해 봤어요(12번 반복). 그 결과가 계속 현금(2년 약 ' + (A.cash2 || 4) + '%)보다 못한 곳은 정하지 않았어요. 🇰🇷🇺🇸 네 시장은 하락장 계기판의 현금 몫에 그대로 반영돼요.</p></div>';
+  }
   window.__analogCard = function(A){
     if (!A || !A.markets || !A.markets.length) return "";
     var by = {buy: [], wait: [], mid: []}; A.markets.forEach(function(m){ by[verdict(m)[0]].push(m.name); });
@@ -54,11 +63,12 @@
     return '<section class="card an" id="analog" data-cz="done"><div class="an-h">🔁 닮은 장 백테스트 <small>' + e(String(A.at || "").slice(5, 16).replace("-", "/")) + ' · 종가 기준</small></div>' +
       '<p class="an-lead">' + e(lead) + '</p>' +
       '<p class="an-sum">지금 장과 <b>닮았던 때만</b> 골라 그 뒤 2년을 봤어요. 닮았다 = 고점 전 급등 폭 · 고점에서 빠진 폭 · 고점 뒤 며칠째 · 200일선·5년 평균선과의 거리 · 출렁임이 지금과 가까운 날(9개 지수 + 나스닥100 + 반도체 지수 · 1985년~ · 지수마다 12번).</p>' +
-      A.markets.map(row).join("") +
+      pickHtml(A) + A.markets.map(row).join("") +
       '<p class="an-note">닮은 때가 12번뿐이라 「12번 중 몇 번」으로만 읽어 주세요. 닮음의 기준에 싼지 비싼지(PER·CAPE)·금리는 들어 있지 않아요. 현금 연 2% · 바꿀 때 0.1% · 가격지수(배당 제외) · 매수·매도 추천 아님</p></section>';
   };
   var css = document.createElement("style");
   css.textContent =
+    ".an-pk{margin:6px 0 10px;padding:10px 12px;border-radius:14px;background:var(--bg2,rgba(127,127,127,.08))}.an-pkh{font-size:15px;font-weight:900}.an-pkh small{display:block;font-size:12px;font-weight:600;color:var(--sub);margin-top:2px}.an-pk ul{list-style:none;margin:8px 0 6px;padding:0}.an-pk li{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:7px 0;border-top:1px solid var(--line,rgba(127,127,127,.18));font-size:14px}.an-pk li em{font-style:normal;font-weight:900}.an-pk li em.no{color:var(--sub);font-weight:700}.an-pk li small{grid-column:1/-1;font-size:12.5px;line-height:1.45;color:var(--sub);word-break:keep-all}.an-pk li small b{color:var(--text)}.an-pk p{margin:0;font-size:12px;line-height:1.5;color:var(--sub);word-break:keep-all}" +
     ".an-h{font-size:17px;font-weight:900}.an-h small{font-size:12px;font-weight:600;color:var(--sub);margin-left:6px}.an-lead{margin:6px 0 4px;font-size:15px;font-weight:800;line-height:1.45;word-break:keep-all}.an-sum{margin:0 0 8px;font-size:13px;line-height:1.55;color:var(--sub);word-break:keep-all}.an-sum b{color:var(--text,inherit)}" +
     ".an-r{border-radius:12px;background:var(--panel,rgba(127,127,127,.07));padding:10px 12px;margin-top:6px}.an-r>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px}.an-r>summary::-webkit-details-marker{display:none}" +
     ".an-n{min-width:0}.an-n b{font-size:14.5px;font-weight:900}.an-n small{display:block;font-size:11.5px;color:var(--sub);font-weight:700;margin-top:1px;word-break:keep-all}.an-v{flex:0 0 auto}.an-v b{display:inline-block;font-size:12.5px;font-weight:900;padding:3px 9px;border-radius:999px;white-space:nowrap}" +

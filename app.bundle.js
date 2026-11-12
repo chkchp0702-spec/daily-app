@@ -18617,22 +18617,27 @@ window.VIDC = {
     var FL = {kr: "🇰🇷", us: "🇺🇸"};
     var rows = (B.markets || []).map(function(m){
       var D = METH[m.key]; if (!D) return "";
+      var ap = m.analog;   // 🔁 11/12 닮은 장 규칙 채택 — 설명을 그 규칙으로 바꿔 보여 줌
+      if (ap) D = {t: "🔁 " + ap.rule, how: "지금 장과 닮았던 " + ap.n + "번에서 2년 뒤 가운데값이 가장 좋았던 방식이에요 — " + ap.rule, back: ap.next,
+        why: "닮은 때 2년 뒤 가운데값 " + sg(ap.y2_med) + " · 가장 나빴던 때 " + sg(ap.y2_worst) + " · 현금보다 나았던 때 " + ap.beat_cash + "/" + ap.n + "번 (지금 다 샀다면 가운데 " + sg(ap.lump_med) + " · 최악 " + sg(ap.lump_worst) + ")",
+        note: "하나 빼고 고르기 검증: 가운데 " + sg(ap.loo.med) + " · 최악 " + sg(ap.loo.worst) + (m.cash_old != null && m.cash_old !== m.cash ? " · 예전 규칙이면 " + (m.to || "현금") + " " + m.cash_old + "% — " + METH[m.key].t : " · 예전 방식: " + METH[m.key].t)};
       var b = m.best || {}, ck = m.checks || [], nb = ck.filter(function(c){ return c.on; }).length;
       var sig = [];
-      if (m.key === "kospi") sig = [["하락장", m.state === "🐻"], ["신용 경보", !!(m.clock && m.clock.kospi_on)], ["시계 4시 반", !!b.on], ["🌱 아주 쌈", !!((m.overlay && m.overlay.parts) || []).filter(function(p){ return p.on; }).length]];
+      if (ap) sig = [];
+      else if (m.key === "kospi") sig = [["하락장", m.state === "🐻"], ["신용 경보", !!(m.clock && m.clock.kospi_on)], ["시계 4시 반", !!b.on], ["🌱 아주 쌈", !!((m.overlay && m.overlay.parts) || []).filter(function(p){ return p.on; }).length]];
       else if (m.key === "kosdaq") sig = [["시계 6시", !!b.on], ["미국 CAPE 비쌈", !!((m.overlay && m.overlay.parts) || []).filter(function(p){ return p.on; }).length]];
       else if (m.key === "sp500") sig = [["고점 −10%", !!(m.b50 && m.b50.on)], ["신용 경보+200일선", !!b.on]];
       var out = m.cash || 0, to = m.to || "현금";
-      var now = m.key === "nasdaq" ? "주식 그대로" : out ? "주식 " + (100 - out) + "% · " + to + " " + out + "%" : "주식 100%";
-      var backNow = out && m.key !== "nasdaq" ? '<div class="bm-back">🌱 다시 사는 신호 <b>' + nb + '/4</b> — ' + e(D.back) + '</div>' : "";
+      var now = m.key === "nasdaq" && !ap ? "주식 그대로" : out ? "주식 " + (100 - out) + "% · " + to + " " + out + "%" : "주식 100%";
+      var backNow = ap ? "" : out && m.key !== "nasdaq" ? '<div class="bm-back">🌱 다시 사는 신호 <b>' + nb + '/4</b> — ' + e(D.back) + '</div>' : "";
       return '<details class="bm-r' + (out ? " on" : "") + '"><summary><span class="bm-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small>' + e(D.t) + '</small></span>' +
         '<span class="bm-now"><b>' + e(now) + '</b>' + (sig.length ? '<span class="bm-sg">' + sig.map(function(x){ return '<i class="' + (x[1] ? "on" : "") + '">' + (x[1] ? "🔴 " : "⚪ ") + e(x[0]) + '</i>'; }).join("") + '</span>' : '') + '</span></summary>' +
-        '<div class="bm-x"><p><b>언제 옮기나</b> ' + e(D.how) + '</p>' + (m.key !== "nasdaq" ? '<p><b>언제 다시 사나</b> ' + e(D.back) + '</p>' : '') +
+        '<div class="bm-x"><p><b>' + (ap ? "어떤 방식" : "언제 옮기나") + '</b> ' + e(D.how) + '</p>' + (ap ? '<p><b>다음에 바뀌는 때</b> ' + e(D.back) + '</p>' : m.key !== "nasdaq" ? '<p><b>언제 다시 사나</b> ' + e(D.back) + '</p>' : '') +
         '<p><b>왜 이 방식</b> ' + e(D.why) + '</p>' + (D.note ? '<p class="bm-note">' + e(D.note) + '</p>' : '') +
         (b.since && b.on ? '<p class="bm-note">' + e(b.ent === "credit200" ? "신용 경보+200일선" : b.ent === "clock6" ? "시계 6시" : b.ent === "clock4.5" ? "시계 4시 반" : "신호") + ' 켜진 날 ' + e(md(b.since)) + ' · 대리 버블 시계 지금 ' + (b.h_free != null ? b.h_free + "시" : "–") + '</p>' : '') +
         '</div>' + backNow + '</details>';
     }).join("");
-    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>1999년부터 200여 가지를 돌려 고른 1등 · 누르면 설명</small></div>' + rows + '</div>';
+    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🔁 지금 장과 닮았던 때에서 가장 나았던 방식 · 누르면 설명</small></div>' + rows + '</div>';
   }
   function bearHtml(d){
     var B = d.bear; if (!B || !B.markets || !B.markets.length) return "";
@@ -18643,7 +18648,8 @@ window.VIDC = {
     var det = bad.map(function(m){
       var ladder = m.state === "🐻" ? [30, 30, 20, 10, 0] : [10, 10, 5, 0, 0];
       return '<div class="bg-m"><div class="bg-mh">' + FL[m.nat] + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' · 고점보다 ' + sg(m.dd) + ' · 지금 권고 현금 <b>' + m.cash + '%</b></div>' +
-        (m.rule && m.rule.id === "OFF" ? '<div class="bg-n">⏸ 이 시장은 현금 규칙을 꺼 뒀어요 — 2013년 이후엔 어떤 현금 규칙도 그냥 보유를 못 이겼어요 · 판정과 아래 신호는 참고</div>'
+        (m.analog ? '<div class="bg-n">🔁 닮은 장 규칙 — <b>' + e(m.analog.rule) + '</b> · 다음: ' + e(m.analog.next) + ' · 아래 신호는 참고</div>'
+          : m.rule && m.rule.id === "OFF" ? '<div class="bg-n">⏸ 이 시장은 현금 규칙을 꺼 뒀어요 — 2013년 이후엔 어떤 현금 규칙도 그냥 보유를 못 이겼어요 · 판정과 아래 신호는 참고</div>'
           : m.rule && !m.nuse ? '<div class="bg-n">🌱 ' + e(m.rule.name) + ' · 아래 신호는 참고</div>'
           : '<div class="bg-n">🌱 다시 사는 조건 <b>' + m.n + '/' + (m.nuse || 4) + '</b> — ' + e(m.rule ? m.rule.name : "켜질수록 3분의 1씩 다시 사기") + '</div>') +   // 🌱 11/09 시장별 다시 사기 규칙
         (window.__bearSigHead ? __bearSigHead(m) : '') +   // 🌱 11/09 A11/9-1 과거 성적표 (ux1109b.js)
@@ -21600,6 +21606,15 @@ window.VIDC = {
       '<table><tr><th>방식(닮은 날부터 2년)</th><th>가운데</th><th>최악</th><th>현금보다</th></tr>' + tb + '</table>' +
       '<details class="an-e"><summary>닮았던 때 ' + n + '번 보기</summary><ul>' + eps + '</ul><small>' + e(sens) + '</small></details></div></details>';
   }
+  function pickHtml(A){
+    var P = A.markets.filter(function(m){ return m.pick; }); if (!P.length) return "";
+    var rows = P.map(function(m){ var p = m.pick;
+      return '<li class="' + (p.ok ? "" : "no") + '"><span>' + FL[m.nat] + ' <b>' + e(m.name) + '</b></span>' +
+        (p.ok ? '<em>주식 ' + p.stock + '%</em><small><b>' + e(SHORT[p.k] || p.rule) + '</b> · 다음: ' + e(p.next) + '</small>'
+              : '<em class="no">정하지 않음</em><small>통하는 방식이 없었어요 — 한 번에 사지 말고 나눠 사기만 참고</small>') + '</li>'; }).join("");
+    return '<div class="an-pk"><div class="an-pkh">📌 지금 규칙 <small>닮은 장에서 2년 뒤 가운데값이 가장 좋았던 방식</small></div><ul>' + rows + '</ul>' +
+      '<p>고른 방식이 우연인지 보려고 닮은 때 하나를 빼고 고른 뒤 그 하나에 적용해 봤어요(12번 반복). 그 결과가 계속 현금(2년 약 ' + (A.cash2 || 4) + '%)보다 못한 곳은 정하지 않았어요. 🇰🇷🇺🇸 네 시장은 하락장 계기판의 현금 몫에 그대로 반영돼요.</p></div>';
+  }
   window.__analogCard = function(A){
     if (!A || !A.markets || !A.markets.length) return "";
     var by = {buy: [], wait: [], mid: []}; A.markets.forEach(function(m){ by[verdict(m)[0]].push(m.name); });
@@ -21607,11 +21622,12 @@ window.VIDC = {
     return '<section class="card an" id="analog" data-cz="done"><div class="an-h">🔁 닮은 장 백테스트 <small>' + e(String(A.at || "").slice(5, 16).replace("-", "/")) + ' · 종가 기준</small></div>' +
       '<p class="an-lead">' + e(lead) + '</p>' +
       '<p class="an-sum">지금 장과 <b>닮았던 때만</b> 골라 그 뒤 2년을 봤어요. 닮았다 = 고점 전 급등 폭 · 고점에서 빠진 폭 · 고점 뒤 며칠째 · 200일선·5년 평균선과의 거리 · 출렁임이 지금과 가까운 날(9개 지수 + 나스닥100 + 반도체 지수 · 1985년~ · 지수마다 12번).</p>' +
-      A.markets.map(row).join("") +
+      pickHtml(A) + A.markets.map(row).join("") +
       '<p class="an-note">닮은 때가 12번뿐이라 「12번 중 몇 번」으로만 읽어 주세요. 닮음의 기준에 싼지 비싼지(PER·CAPE)·금리는 들어 있지 않아요. 현금 연 2% · 바꿀 때 0.1% · 가격지수(배당 제외) · 매수·매도 추천 아님</p></section>';
   };
   var css = document.createElement("style");
   css.textContent =
+    ".an-pk{margin:6px 0 10px;padding:10px 12px;border-radius:14px;background:var(--bg2,rgba(127,127,127,.08))}.an-pkh{font-size:15px;font-weight:900}.an-pkh small{display:block;font-size:12px;font-weight:600;color:var(--sub);margin-top:2px}.an-pk ul{list-style:none;margin:8px 0 6px;padding:0}.an-pk li{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:7px 0;border-top:1px solid var(--line,rgba(127,127,127,.18));font-size:14px}.an-pk li em{font-style:normal;font-weight:900}.an-pk li em.no{color:var(--sub);font-weight:700}.an-pk li small{grid-column:1/-1;font-size:12.5px;line-height:1.45;color:var(--sub);word-break:keep-all}.an-pk li small b{color:var(--text)}.an-pk p{margin:0;font-size:12px;line-height:1.5;color:var(--sub);word-break:keep-all}" +
     ".an-h{font-size:17px;font-weight:900}.an-h small{font-size:12px;font-weight:600;color:var(--sub);margin-left:6px}.an-lead{margin:6px 0 4px;font-size:15px;font-weight:800;line-height:1.45;word-break:keep-all}.an-sum{margin:0 0 8px;font-size:13px;line-height:1.55;color:var(--sub);word-break:keep-all}.an-sum b{color:var(--text,inherit)}" +
     ".an-r{border-radius:12px;background:var(--panel,rgba(127,127,127,.07));padding:10px 12px;margin-top:6px}.an-r>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px}.an-r>summary::-webkit-details-marker{display:none}" +
     ".an-n{min-width:0}.an-n b{font-size:14.5px;font-weight:900}.an-n small{display:block;font-size:11.5px;color:var(--sub);font-weight:700;margin-top:1px;word-break:keep-all}.an-v{flex:0 0 auto}.an-v b{display:inline-block;font-size:12.5px;font-weight:900;padding:3px 9px;border-radius:999px;white-space:nowrap}" +
