@@ -420,6 +420,7 @@
       var num = mk("h2num", numHtml(d)); b.insertBefore(num, b.firstChild);   // ⑰ 오늘의 숫자 맨 위
       var ob = document.getElementById("h2bear"); if (ob) ob.remove(); var bh = bearHtml(d); if (bh) num.insertAdjacentElement("afterend", mk("h2bear", bh));   // 🐻 11/09 결론 바로 아래
       var obb = document.getElementById("h2bub"); if (obb) obb.remove(); try { var bbh = window.__bubCard ? __bubCard(d.bub) : ""; if (bbh) (document.getElementById("h2bear") || num).insertAdjacentElement("afterend", mk("h2bub", bbh)); } catch(x) {}   // 🫧 11/10 버블 경보판 — 계기판 바로 아래 (ux1110b.js)
+      var osc = document.getElementById("h2season"); if (osc) osc.remove(); try { var sch = window.__seasonCard && window.__seasonData ? __seasonCard(window.__seasonData) : ""; if (sch) (document.getElementById("h2bub") || document.getElementById("h2bear") || num).insertAdjacentElement("afterend", mk("h2season", sch)); } catch(x) {}   // 🧭 11/12 계절 시계 (ux1112.js)
       var orb = document.getElementById("h2reb"); if (orb) orb.remove();   // 📨 11/10 A11/10-1 반등 날 기록 — 🛡 결론 밑 · 계기판 위 (ux1110.js · 반등 날에만)
       try { var kx_ = ix(d.kr, "코스피"), rh = window.__rebCard && kx_ && d.kr && d.kr.date === new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10) ? __rebCard(d.bear, kx_.chg, "home") : ""; if (rh) num.insertAdjacentElement("afterend", mk("h2reb", rh)); } catch(x) {}
       var world = mk("h2world", worldHtml(d)), disc = mk("h2disc", discHtml(d)), map = mk("h2map", mapHtml(d)), cl = mk("h2cl", clientHtml(d));
