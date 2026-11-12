@@ -2060,6 +2060,11 @@
       return {c: st[0], st: m.state + " " + st[1], dd: m.dd, act: act, idx: m.name};
     }
     var o = {kr: line(k, false), us: line(s, true), asof: k.asof || s.asof};
+    // 🔁 11/12 닮은 장 규칙 — 국내 주식 줄은 코스피·코스닥을 따로 (사용자 「코스닥 사라고 하고 이러면 이상하지 않니?」)
+    function an(m){ var a = m && m.analog; if (!a) return null; return m.name + " 주식 " + a.stock + "%" + (a.stock < 100 ? " · " + a.next.replace(/ 위로 올라오면.*$/, a.stock ? " 넘으면 더 사기" : " 넘으면 사기").replace(/^월말 종가가 /, "") : ""); }
+    var ka = an(k), qa = an(M.kosdaq);
+    if (ka || qa) o.kr.act = [ka, qa].filter(Boolean).join(" / ");
+    if (s.analog) o.us.act = s.analog.stock >= 100 ? "배분표 그대로" + (cash != null ? " · 현금 " + Math.round(cash) + "%" : "") : "주식 " + s.analog.stock + "% · " + s.analog.next;
     o.split = k.state !== s.state;
     o.text = "🇰🇷 국내 주식: " + o.kr.st + " → " + o.kr.act + "\n🌏 해외 주식(포트): S&P500 " + o.us.st + " → " + o.us.act;
     return o;
@@ -2185,7 +2190,7 @@
   }
   function qa(Q){
     var M = {}; (Q.B.markets || []).forEach(function(m){ M[m.key] = m; });
-    var k = M.kospi || {}, s = M.sp500 || {}, nq = M.nasdaq || {};
+    var k = M.kospi || {}, s = M.sp500 || {}, nq = M.nasdaq || {}, QD = M.kosdaq || null;
     var hold = Q.P.hold || [], pc = function(re){ var t = 0; hold.forEach(function(h){ if (re.test(h.name)) t += +h.pct || 0; }); return Math.round(t * 10) / 10; };
     var cash = pc(/현금/), gold = pc(/^금/), core = pc(/코어/);
     var R = (Q.F.mkt || {}).KOSPI || [], r0 = R[0] || {}, U = Math.abs(r0.f || 0) > 1e6 ? 1e8 : 1, fs = 0; for (var i = 0; i < R.length; i++){ if (R[i].f && (R[i].f > 0) === (r0.f > 0)) fs++; else break; }
@@ -2203,7 +2208,7 @@
       ? "국내 주식은 코스피가 고점보다 " + sg(k.dd, 0) + "로 하락장 규칙 구간이에요. 규칙은 국내 주식 몫을 현금 " + (k.cash || 100) + "%까지 줄이는 쪽이지만, 이미 많이 빠진 뒤라 한 번에 던지지 않고 반등 때 나눠서 줄이는 게 원칙이에요. 해외 ETF(S&P500 " + st(s) + ")는 배분 그대로 가져가요."
       : "코스피는 " + st(k) + "(고점 " + sg(k.dd, 0) + "), S&P500은 " + st(s) + "이에요. 규칙상 서둘러 팔 구간은 아니고, 정해 둔 비중에서 크게 벗어난 것만 맞추면 돼요."]);
     out.push(["지금 사도 돼요?", k.state === "🐻"
-      ? "국내 주식은 판정이 풀릴 때(고점 −10% 위 + 200일선 위)까지 새로 사지 않는 규칙이에요. 바닥 신호는 지금 " + bn + "/4개 — 2개 넘게 켜지면 나눠서 담기 시작해요. 해외 ETF는 배분표대로 나눠서 담아도 되는 구간이에요."
+      ? (k.analog ? "국내 주식은 지금 장과 닮았던 때를 보고 정한 규칙을 따라요. 코스피는 주식 " + k.analog.stock + "% — " + k.analog.next + "." + (QD && QD.analog ? " 코스닥은 주식 " + QD.analog.stock + "% — " + QD.analog.next + "." : "") : "국내 주식은 판정이 풀릴 때(고점 −10% 위 + 200일선 위)까지 새로 사지 않는 규칙이에요. 바닥 신호는 지금 " + bn + "/4개 — 2개 넘게 켜지면 나눠서 담기 시작해요.") + " 해외 ETF는 배분표대로 나눠서 담아도 되는 구간이에요."
       : "한 번에 사기보다 2~3번 나눠서 담는 걸 권해요. 지금 배분표는 지수 ETF(S&P500·나스닥) " + core + "% · 금 " + gold + "% · 현금 " + cash + "%예요."]);
     if (big) out.push([big.n + " 왜 " + (big.r >= 0 ? "올라요?" : "빠져요?"), big.n + "는 오늘 " + sg(big.r) + "예요. " + ((bigWhy.news || [])[0] ? "관련 뉴스: 「" + bigWhy.news[0].t + "」. " : "") +
       (bf ? "최근 5일 외국인 " + won(bf.f5) + ", 기관 " + won(bf.i5) + " 순매수였어요." : "") + " 하루 등락보다는 실적·업황 흐름으로 판단하는 게 좋아요."]);
@@ -20074,7 +20079,7 @@ window.VIDC = {
     var w = o.red || o.yel, M = (BR && BR.markets) || [];
     if (w){
       var ck = (w.checks || []), F_ = w.rule && w.rule.id === "F", nu = w.nuse || ck.length, on = ck.filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙
-      var tail = w.rule && w.rule.id === "OFF" ? '현금 규칙 꺼 둠' : (w.rule && !w.nuse) || F_ ? '판정 풀릴 때까지' : '다시 사는 조건 ' + on + '/' + nu;
+      var tail = w.analog ? '다음: ' + w.analog.next : w.rule && w.rule.id === "OFF" ? '현금 규칙 꺼 둠' : (w.rule && !w.nuse) || F_ ? '판정 풀릴 때까지' : '다시 사는 조건 ' + on + '/' + nu;
       return '<details class="ez-rule"><summary>' + (o.red ? '🔴 지금 규칙 · ' + (w.to || '현금') + ' ' + (w.cash || 0) + '%까지 · ' + tail : '🟡 지금 규칙 · ' + tail) + '</summary>' +
         '<p>' + e(w.advice || (BR && BR.lead) || "") + '</p>' + (window.__bearSigHead ? __bearSigHead(w) : '') + '<ul>' + ck.map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '">' + (c.on ? "✅" : "⬜") + ' ' + e(c.k) + (c.use === false ? ' <em class="ez-ref">참고</em>' : '') + ' <small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(w, k) : '') + '</li>'; }).join("") + '</ul>' +
         '<p class="ez-rule-n">' + (w.rule ? '다시 사는 규칙(' + e(w.name) + '): ' + e(w.rule.name) : '') + ' · 종가 판정 · 사라·팔라는 뜻 아님</p></details>';
@@ -20082,7 +20087,7 @@ window.VIDC = {
     return '<details class="ez-rule"><summary>🔴이 되면 이렇게 바뀌어요</summary><p>코스피나 S&P500이 고점보다 <b>−20%</b>(종가)면 🔴 하락장 — 현금을 30%까지 늘리고 새로 사지 않아요. <b>−10%</b>면 🟡 조정 — 현금 10%.</p>' +
       '<p>지금: ' + M.map(function(m){ return m.state + ' ' + e(m.name) + ' ' + sg(m.dd); }).join(" · ") + '</p><p class="ez-rule-n">⚡ 공격 포트는 종목마다 −5%면 손절 · 판정은 종가</p></details>';
   }
-  function redAct(w){ return w.name + " 하락장 — 현금 " + (w.cash || 30) + "%까지 늘리고 새로 사지 않기. 단, 이미 크게 빠졌으니 투매는 금지 · 반등 때 나눠 덜기."; }
+  function redAct(w){ if (w.analog) return w.name + " 하락장 — " + w.analog.rule + " · 지금 주식 " + w.analog.stock + "% · 다음: " + w.analog.next; return w.name + " 하락장 — 현금 " + (w.cash || 30) + "%까지 늘리고 새로 사지 않기. 단, 이미 크게 빠졌으니 투매는 금지 · 반등 때 나눠 덜기."; }
   // ⑯ 비중이 바뀐 날 「달라진 것 1개 + 이유 1줄」 (home.json port.change)
   function chgHtml(H){
     var c = H && H.port && H.port.change; if (!c || !c.why) return "";
@@ -21112,7 +21117,7 @@ window.VIDC = {
   var SIG = {whale: 1, cup: 1, gap: 1, screen: 1, danta: 1, accum: 1, sigmore: 1};
   var RAWB = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/bear.json";
   var KRA = /openOP\('(\d{6})(?:\.K[SQ])?'\)|m\.stock\.naver\.com\/domestic\/stock\/(\d{6})/;
-  var BEAR = null, W = null, got = 0;
+  var KQ = null, BEAR = null, W = null, got = 0;
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function md(s){ s = String(s || ""); return s.length >= 10 ? (+s.slice(5, 7)) + "/" + (+s.slice(8, 10)) : s; }
   function tb(){ return Math.floor(Date.now() / 6e5); }
@@ -21121,7 +21126,7 @@ window.VIDC = {
     if (got && Date.now() - got < 6e5) return Promise.resolve();
     return Promise.all([gj(RAWB), gj("archive/x/bear_watch.json")]).then(function(r){
       var k = r[0] && (r[0].markets || []).filter(function(m){ return m.key === "kospi"; })[0];
-      BEAR = k || null; W = r[1]; got = Date.now();
+      BEAR = k || null; KQ = r[0] && (r[0].markets || []).filter(function(m){ return m.key === "kosdaq"; })[0] || null; W = r[1]; got = Date.now();
     });
   }
   function tab(){ return (typeof window.cur !== "undefined" && window.cur) || (location.hash || "").slice(1); }
@@ -21147,7 +21152,7 @@ window.VIDC = {
   function banner(){
     if (bearOn()){
       return '<section class="bw-b" id="bw-b"><div class="bw-h">🐻 지금은 <b>지켜보는 중</b></div>' +
-        '<p>코스피 하락장(고점 ' + e(BEAR.dd) + '% · ' + md(BEAR.asof) + ' 종가 판정) — 국내 주식은 판정 풀릴 때까지 <b>새로 사지 않기</b>. 이 탭의 🇰🇷 한국 종목엔 <span class="bw-tg">🔭 지켜봄</span> 꼬리표만 붙여 기록해요 · 미국·일본 종목은 그대로.</p>' + list() + '</section>';
+        '<p>코스피 하락장(고점 ' + e(BEAR.dd) + '% · ' + md(BEAR.asof) + ' 종가 판정) — 국내 주식은 ' + (BEAR.analog ? '코스피 <b>' + e(BEAR.analog.next) + '</b>' + (KQ && KQ.analog ? ' · 코스닥은 주식 ' + KQ.analog.stock + '%' : '') : '판정 풀릴 때까지 <b>새로 사지 않기</b>') + '. 이 탭의 🇰🇷 한국 종목엔 <span class="bw-tg">🔭 지켜봄</span> 꼬리표만 붙여 기록해요 · 미국·일본 종목은 그대로.</p>' + list() + '</section>';
     }
     if (endedRecent()){
       return '<section class="bw-b ok" id="bw-b"><div class="bw-h">✅ 코스피 하락장 판정 풀림 <small>' + md(W.ended) + '</small></div>' + list() + '</section>';

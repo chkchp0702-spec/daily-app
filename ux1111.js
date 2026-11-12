@@ -9,7 +9,7 @@
   var SIG = {whale: 1, cup: 1, gap: 1, screen: 1, danta: 1, accum: 1, sigmore: 1};
   var RAWB = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/bear.json";
   var KRA = /openOP\('(\d{6})(?:\.K[SQ])?'\)|m\.stock\.naver\.com\/domestic\/stock\/(\d{6})/;
-  var BEAR = null, W = null, got = 0;
+  var KQ = null, BEAR = null, W = null, got = 0;
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function md(s){ s = String(s || ""); return s.length >= 10 ? (+s.slice(5, 7)) + "/" + (+s.slice(8, 10)) : s; }
   function tb(){ return Math.floor(Date.now() / 6e5); }
@@ -18,7 +18,7 @@
     if (got && Date.now() - got < 6e5) return Promise.resolve();
     return Promise.all([gj(RAWB), gj("archive/x/bear_watch.json")]).then(function(r){
       var k = r[0] && (r[0].markets || []).filter(function(m){ return m.key === "kospi"; })[0];
-      BEAR = k || null; W = r[1]; got = Date.now();
+      BEAR = k || null; KQ = r[0] && (r[0].markets || []).filter(function(m){ return m.key === "kosdaq"; })[0] || null; W = r[1]; got = Date.now();
     });
   }
   function tab(){ return (typeof window.cur !== "undefined" && window.cur) || (location.hash || "").slice(1); }
@@ -44,7 +44,7 @@
   function banner(){
     if (bearOn()){
       return '<section class="bw-b" id="bw-b"><div class="bw-h">🐻 지금은 <b>지켜보는 중</b></div>' +
-        '<p>코스피 하락장(고점 ' + e(BEAR.dd) + '% · ' + md(BEAR.asof) + ' 종가 판정) — 국내 주식은 판정 풀릴 때까지 <b>새로 사지 않기</b>. 이 탭의 🇰🇷 한국 종목엔 <span class="bw-tg">🔭 지켜봄</span> 꼬리표만 붙여 기록해요 · 미국·일본 종목은 그대로.</p>' + list() + '</section>';
+        '<p>코스피 하락장(고점 ' + e(BEAR.dd) + '% · ' + md(BEAR.asof) + ' 종가 판정) — 국내 주식은 ' + (BEAR.analog ? '코스피 <b>' + e(BEAR.analog.next) + '</b>' + (KQ && KQ.analog ? ' · 코스닥은 주식 ' + KQ.analog.stock + '%' : '') : '판정 풀릴 때까지 <b>새로 사지 않기</b>') + '. 이 탭의 🇰🇷 한국 종목엔 <span class="bw-tg">🔭 지켜봄</span> 꼬리표만 붙여 기록해요 · 미국·일본 종목은 그대로.</p>' + list() + '</section>';
     }
     if (endedRecent()){
       return '<section class="bw-b ok" id="bw-b"><div class="bw-h">✅ 코스피 하락장 판정 풀림 <small>' + md(W.ended) + '</small></div>' + list() + '</section>';

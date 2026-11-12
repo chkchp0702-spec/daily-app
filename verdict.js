@@ -29,6 +29,11 @@
       return {c: st[0], st: m.state + " " + st[1], dd: m.dd, act: act, idx: m.name};
     }
     var o = {kr: line(k, false), us: line(s, true), asof: k.asof || s.asof};
+    // 🔁 11/12 닮은 장 규칙 — 국내 주식 줄은 코스피·코스닥을 따로 (사용자 「코스닥 사라고 하고 이러면 이상하지 않니?」)
+    function an(m){ var a = m && m.analog; if (!a) return null; return m.name + " 주식 " + a.stock + "%" + (a.stock < 100 ? " · " + a.next.replace(/ 위로 올라오면.*$/, a.stock ? " 넘으면 더 사기" : " 넘으면 사기").replace(/^월말 종가가 /, "") : ""); }
+    var ka = an(k), qa = an(M.kosdaq);
+    if (ka || qa) o.kr.act = [ka, qa].filter(Boolean).join(" / ");
+    if (s.analog) o.us.act = s.analog.stock >= 100 ? "배분표 그대로" + (cash != null ? " · 현금 " + Math.round(cash) + "%" : "") : "주식 " + s.analog.stock + "% · " + s.analog.next;
     o.split = k.state !== s.state;
     o.text = "🇰🇷 국내 주식: " + o.kr.st + " → " + o.kr.act + "\n🌏 해외 주식(포트): S&P500 " + o.us.st + " → " + o.us.act;
     return o;

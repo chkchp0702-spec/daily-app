@@ -114,7 +114,7 @@
     var w = o.red || o.yel, M = (BR && BR.markets) || [];
     if (w){
       var ck = (w.checks || []), F_ = w.rule && w.rule.id === "F", nu = w.nuse || ck.length, on = ck.filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙
-      var tail = w.rule && w.rule.id === "OFF" ? '현금 규칙 꺼 둠' : (w.rule && !w.nuse) || F_ ? '판정 풀릴 때까지' : '다시 사는 조건 ' + on + '/' + nu;
+      var tail = w.analog ? '다음: ' + w.analog.next : w.rule && w.rule.id === "OFF" ? '현금 규칙 꺼 둠' : (w.rule && !w.nuse) || F_ ? '판정 풀릴 때까지' : '다시 사는 조건 ' + on + '/' + nu;
       return '<details class="ez-rule"><summary>' + (o.red ? '🔴 지금 규칙 · ' + (w.to || '현금') + ' ' + (w.cash || 0) + '%까지 · ' + tail : '🟡 지금 규칙 · ' + tail) + '</summary>' +
         '<p>' + e(w.advice || (BR && BR.lead) || "") + '</p>' + (window.__bearSigHead ? __bearSigHead(w) : '') + '<ul>' + ck.map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '">' + (c.on ? "✅" : "⬜") + ' ' + e(c.k) + (c.use === false ? ' <em class="ez-ref">참고</em>' : '') + ' <small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(w, k) : '') + '</li>'; }).join("") + '</ul>' +
         '<p class="ez-rule-n">' + (w.rule ? '다시 사는 규칙(' + e(w.name) + '): ' + e(w.rule.name) : '') + ' · 종가 판정 · 사라·팔라는 뜻 아님</p></details>';
@@ -122,7 +122,7 @@
     return '<details class="ez-rule"><summary>🔴이 되면 이렇게 바뀌어요</summary><p>코스피나 S&P500이 고점보다 <b>−20%</b>(종가)면 🔴 하락장 — 현금을 30%까지 늘리고 새로 사지 않아요. <b>−10%</b>면 🟡 조정 — 현금 10%.</p>' +
       '<p>지금: ' + M.map(function(m){ return m.state + ' ' + e(m.name) + ' ' + sg(m.dd); }).join(" · ") + '</p><p class="ez-rule-n">⚡ 공격 포트는 종목마다 −5%면 손절 · 판정은 종가</p></details>';
   }
-  function redAct(w){ return w.name + " 하락장 — 현금 " + (w.cash || 30) + "%까지 늘리고 새로 사지 않기. 단, 이미 크게 빠졌으니 투매는 금지 · 반등 때 나눠 덜기."; }
+  function redAct(w){ if (w.analog) return w.name + " 하락장 — " + w.analog.rule + " · 지금 주식 " + w.analog.stock + "% · 다음: " + w.analog.next; return w.name + " 하락장 — 현금 " + (w.cash || 30) + "%까지 늘리고 새로 사지 않기. 단, 이미 크게 빠졌으니 투매는 금지 · 반등 때 나눠 덜기."; }
   // ⑯ 비중이 바뀐 날 「달라진 것 1개 + 이유 1줄」 (home.json port.change)
   function chgHtml(H){
     var c = H && H.port && H.port.change; if (!c || !c.why) return "";

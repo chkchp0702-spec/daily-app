@@ -91,7 +91,7 @@
   }
   function qa(Q){
     var M = {}; (Q.B.markets || []).forEach(function(m){ M[m.key] = m; });
-    var k = M.kospi || {}, s = M.sp500 || {}, nq = M.nasdaq || {};
+    var k = M.kospi || {}, s = M.sp500 || {}, nq = M.nasdaq || {}, QD = M.kosdaq || null;
     var hold = Q.P.hold || [], pc = function(re){ var t = 0; hold.forEach(function(h){ if (re.test(h.name)) t += +h.pct || 0; }); return Math.round(t * 10) / 10; };
     var cash = pc(/현금/), gold = pc(/^금/), core = pc(/코어/);
     var R = (Q.F.mkt || {}).KOSPI || [], r0 = R[0] || {}, U = Math.abs(r0.f || 0) > 1e6 ? 1e8 : 1, fs = 0; for (var i = 0; i < R.length; i++){ if (R[i].f && (R[i].f > 0) === (r0.f > 0)) fs++; else break; }
@@ -109,7 +109,7 @@
       ? "국내 주식은 코스피가 고점보다 " + sg(k.dd, 0) + "로 하락장 규칙 구간이에요. 규칙은 국내 주식 몫을 현금 " + (k.cash || 100) + "%까지 줄이는 쪽이지만, 이미 많이 빠진 뒤라 한 번에 던지지 않고 반등 때 나눠서 줄이는 게 원칙이에요. 해외 ETF(S&P500 " + st(s) + ")는 배분 그대로 가져가요."
       : "코스피는 " + st(k) + "(고점 " + sg(k.dd, 0) + "), S&P500은 " + st(s) + "이에요. 규칙상 서둘러 팔 구간은 아니고, 정해 둔 비중에서 크게 벗어난 것만 맞추면 돼요."]);
     out.push(["지금 사도 돼요?", k.state === "🐻"
-      ? "국내 주식은 판정이 풀릴 때(고점 −10% 위 + 200일선 위)까지 새로 사지 않는 규칙이에요. 바닥 신호는 지금 " + bn + "/4개 — 2개 넘게 켜지면 나눠서 담기 시작해요. 해외 ETF는 배분표대로 나눠서 담아도 되는 구간이에요."
+      ? (k.analog ? "국내 주식은 지금 장과 닮았던 때를 보고 정한 규칙을 따라요. 코스피는 주식 " + k.analog.stock + "% — " + k.analog.next + "." + (QD && QD.analog ? " 코스닥은 주식 " + QD.analog.stock + "% — " + QD.analog.next + "." : "") : "국내 주식은 판정이 풀릴 때(고점 −10% 위 + 200일선 위)까지 새로 사지 않는 규칙이에요. 바닥 신호는 지금 " + bn + "/4개 — 2개 넘게 켜지면 나눠서 담기 시작해요.") + " 해외 ETF는 배분표대로 나눠서 담아도 되는 구간이에요."
       : "한 번에 사기보다 2~3번 나눠서 담는 걸 권해요. 지금 배분표는 지수 ETF(S&P500·나스닥) " + core + "% · 금 " + gold + "% · 현금 " + cash + "%예요."]);
     if (big) out.push([big.n + " 왜 " + (big.r >= 0 ? "올라요?" : "빠져요?"), big.n + "는 오늘 " + sg(big.r) + "예요. " + ((bigWhy.news || [])[0] ? "관련 뉴스: 「" + bigWhy.news[0].t + "」. " : "") +
       (bf ? "최근 5일 외국인 " + won(bf.f5) + ", 기관 " + won(bf.i5) + " 순매수였어요." : "") + " 하루 등락보다는 실적·업황 흐름으로 판단하는 게 좋아요."]);
