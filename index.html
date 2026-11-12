@@ -500,7 +500,7 @@ var CATS = [
   {key:"danta",  name:"단타", short:"단타",     icon:"⚡", color:"#ff6b6b", desc:"장중 단타 알람 · 이후 수익률 추적 · 시험 중"},
   {key:"alarm",  name:"알림", short:"알림",     icon:"🔔", color:"#ffd166", desc:"이 휴대폰으로 알림 받을지 켜고 끄기"},
   {key:"idea",   name:"의견함", short:"의견",   icon:"💬", color:"#9ad0ff", desc:"앱에 바라는 점을 남겨 주세요 · 사진·파일 첨부 가능"},
-  // 🧊 11/12 할 일 5칸: 📨 보내기(한 장·고객 질문 한곳) · 🔬 연구실(포트·신호·성적표·운세 모음) — ux1112.js
+  // 🧊 11/12 할 일 5칸: 📨 보내기(한 장·고객 질문 한곳) · 🔬 연구실(포트·신호·성적표·운세 모음) — ux1112b.js
   {key:"send",   name:"고객에게 보내기", short:"보내기", icon:"📨", color:"#3182f6", desc:"오늘 시장 한 장 · 고객 질문 답 — 카톡으로 바로"},
   {key:"lab",    name:"연구실", short:"연구실", icon:"🔬", color:"#a0a8b8", desc:"포트 · 성적표 · 신호 · 확률 · 운세 — 깊이 보는 것 모음"},
   {key:"feed",   name:"내 피드", short:"피드",  icon:"📰", color:"#f4a261", desc:"매일 보는 블로그·텔레그램 한곳에 · 시황리포트 재료"},
@@ -1564,7 +1564,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261112b";
+var APPV = "20261112d";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1616,7 +1616,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합친 한 파일. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.bundle.js?v=d78c3748ce"></script>
+<script defer src="app.bundle.js?v=481e4c49fe"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1685,7 +1685,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="guide.js?v=36"></script>   <!· 🧒 10/22 꼬마 안내원 ·>
 <script defer src="easy.js?v=5"></script>   <!· 🗣 10/28 쉬운 말 (끄기: localStorage easy=off) ·>
 <script defer src="habit.js?v=2"></script>   <!· 🏠 10/31 다시 오게: 홈 접기·1탭 예측·배지·운세 다리·장중 바뀐 것·이번 주 한 장·본 뒤 바뀐 것 ·>
-<script defer src="home2.js?v=12"></script>   <!· 🏠 10/31 오늘 v2 — 기본으로 켬 (예전 홈 ?home2=0) ·>
+<script defer src="home2.js?v=13"></script>   <!· 🏠 10/31 오늘 v2 — 기본으로 켬 (예전 홈 ?home2=0) ·>
 <script defer src="design.js?v=3"></script>   <!· 🎨 10/22 디자인 한 벌 ·>
 <script defer src="wow.js?v=2"></script>   <!· 🎨 11/04 「우와」 한 벌 2 (냉정 점검 31) ·>
 <script defer src="ux1105.js?v=1"></script>   <!· 🔍 11/05 냉정 분석 다 진행 — 13px·빈 카드 띠·운세 줄·첫 안내 ·>
@@ -1696,8 +1696,9 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1109b.js?v=3"></script>   <!· 🌱 11/09 A11/9-1 바닥 신호 4개의 과거 성적표 (계기판 체크리스트) ·>
 <script defer src="ux1110.js?v=1"></script>   <!· 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (반등 날에만) ·>
 <script defer src="ux1110b.js?v=6"></script>   <!· 🫧 11/10 버블 경보판 (전병서 11/11 경보표 · 계기판 아래) · 🕰 11/11 버블 시계 ·>
+<script defer src="ux1112.js?v=2"></script>   <!· 🧭 11/12 계절 시계 (5개국 지수 달력·추세 · 버블 경보판 아래) ·>
 <script defer src="ux1111.js?v=1"></script>   <!· 🔭 11/11 신호 탭 「지켜보는 중」 모드 (코스피 🐻 동안 · bear_watch.json) ·>
-<script defer src="ux1112.js?v=1"></script>   <!· 🧊 11/12 한 화면 · 할 일 5칸 · 🔬 연구실 · 첫 화면 기능 지도 · 디자인 통일 (되돌리기: 브랜치 backup-before-job5-1112) ·>
+<script defer src="ux1112b.js?v=1"></script>   <!· 🧊 11/12 한 화면 · 할 일 5칸 · 🔬 연구실 · 첫 화면 기능 지도 (되돌리기: 브랜치 backup-before-job5-1112) ·>
 📦list-->
 <!-- 📦/JS -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
