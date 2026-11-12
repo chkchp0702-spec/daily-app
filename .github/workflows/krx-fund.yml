@@ -1,0 +1,29 @@
+name: krx-fund
+# 🔑 KRX 지수 PER·PBR (tools/krx_fund.py → archive/x/kr_fund.csv) — 비밀값 KRX_ID·KRX_PW · 평일 아침 · 시황리포트 alt_fetch 가 받아 감
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 22 * * 0-4"   # KST 월~금 07:20
+permissions:
+  contents: write
+concurrency:
+  group: push-${{ github.repository }}-krx
+  cancel-in-progress: false
+jobs:
+  k:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q pykrx pandas
+      - run: python tools/krx_fund.py
+        env:
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
+      - name: 저장
+        run: |
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          bash scripts/push.sh "krx-fund $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/kr_fund.csv
