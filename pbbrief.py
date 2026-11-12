@@ -269,6 +269,15 @@ def advice(d):
     badge = strip(((d.get("decision") or {}).get("badges") or [""])[0])
     green = "🟢" in badge or "+" in seen.split("200일선")[-1][:8] if seen else "🟢" in badge
     plan = []
+    try:   # 🔁 11/12 닮은 장 규칙 — 국내 주식 몫을 맨 앞에 (사용자 「어플 전체에 스며들게」)
+        import json as _j, urllib.request as _u
+        B = _j.loads(_u.urlopen("https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/bear.json", timeout=15).read().decode("utf-8"))
+        M = {m["key"]: m for m in B.get("markets", [])}
+        ka, qa_ = (M.get("kospi") or {}).get("analog"), (M.get("kosdaq") or {}).get("analog")
+        if ka:
+            plan.append(f"국내 주식은 코스피 주식 {ka['stock']}%({ka['next']})" + (f" · 코스닥 주식 {qa_['stock']}%" if qa_ else "") + " — 지금 장과 닮았던 과거 12번에서 가장 나았던 방식이에요.")
+    except Exception:
+        pass
     if green:
         plan.append("큰 그림은 아직 상승 추세예요(미국 S&P500이 200일 평균 위). 자산배분은 주식 비중을 그대로 두는 게 원칙이에요.")
     else:
@@ -280,7 +289,7 @@ def advice(d):
     ls_ = strip((d.get("leaders") or {}).get("short"))
     if ls_:
         plan.append("요즘 돈이 몰리는 곳은 " + plain(ls_.split(" — ")[0])[:60] + " — 쫓아 사기보다 쉬어 갈 때 나눠 담는 쪽이에요.")
-    return {"read": plain(read), "watch": watch[:3], "plan": plan[:3]}
+    return {"read": plain(read), "watch": watch[:3], "plan": plan[:4]}
 
 
 def main():

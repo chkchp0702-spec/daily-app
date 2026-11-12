@@ -37,13 +37,13 @@
   // 체크리스트 위에 붙는 머리 (그 시장 다시 사기 규칙의 단계에 처음 닿은 날 뒤 6개월)
   window.__bearSigHead = function(m){
     var h = m && m.hist; if (!h || !h.stages || !h.stages.length) return "";
-    var nm = m.name || "", S = h.stages, eps = S[0].eps, F_ = h.rule !== "E", OFF_ = h.rule === "OFF";
+    var nm = m.name || "", S = h.stages, eps = S[0].eps, F_ = h.rule !== "E", OFF_ = h.rule === "OFF" || !!m.analog;   // 🔁 11/12 닮은 장 규칙이 정하면 이 과거 기록은 예전 규칙 참고
     var merged = !F_ && S.length === 2 && S[1].same_prev === S[1].hit && S[0].hit === S[1].hit;
     var now = h.now && h.now.fake ? h.now.fake.map(function(n, i){ return n && (!m.checks || !m.checks[i] || m.checks[i].use !== false) ? NUM[i] + ' ' + n + '회' : ""; }).filter(Boolean) : [];
     return '<div class="bs-h"><div class="bs-ht">📜 ' + (OFF_ ? '참고 — ' : '이 규칙대로였다면 — ') + '과거 ' + e(nm) + ' 하락장 ' + (eps || "") + '번 <small>' + e(String(h.from || "").slice(0, 4)) + '년부터 · 종가</small></div><ul class="bs-ul">' +
       (merged ? stageLine(S[1], nm, true) : S.map(function(s){ return stageLine(s, nm); }).join("")) + '</ul>' +
       (h.now && !F_ ? '<p class="bs-now">이번 하락장(' + md(h.now.in) + '부터 ' + h.now.len + '거래일): ' + (now.length ? '켜졌다가 도로 꺼진 조건 ' + now.join(" · ") : '아직 켜졌다 꺼진 조건 없음') + '</p>' : '') +
-      (OFF_ ? '<p class="bs-now">이 시장은 현금 규칙을 꺼 뒀어요 — 위 줄은 「판정이 풀린 날」 기준 참고예요</p>' : F_ ? '<p class="bs-now">이 시장은 바닥 신호로 미리 다시 사지 않아요 — 늦게 사는 대신 「바닥이 더 남았는데 산」 일이 없어요</p>' : '') +
+      (m.analog ? '<p class="bs-now">지금은 🔁 닮은 장 규칙(' + e(m.analog.rule) + ')이 정해요 — 위 기록은 예전 규칙 참고예요</p>' : OFF_ ? '<p class="bs-now">이 시장은 현금 규칙을 꺼 뒀어요 — 위 줄은 「판정이 풀린 날」 기준 참고예요</p>' : F_ ? '<p class="bs-now">이 시장은 바닥 신호로 미리 다시 사지 않아요 — 늦게 사는 대신 「바닥이 더 남았는데 산」 일이 없어요</p>' : '') +
       '<p class="bs-n">하락장 수가 적어 「몇 번 중 몇 번」으로만 봐요 · 과거일 뿐 앞날 보장 아님 · 사라·팔라는 뜻 아님' + (h.note4 ? ' · ' + e(h.note4) : '') + '</p></div>';
   };
 

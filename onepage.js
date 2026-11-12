@@ -101,8 +101,10 @@
       var bk = BR && (BR.markets || []).filter(function(m){ return m.key === "kospi"; })[0], bearN = null;
       if (bk && (bk.state === "🐻" || bk.state === "🟡")){
         bearN = {h: (bk.state === "🐻" ? "🐻 코스피 하락장" : "🟡 코스피 조정") + " · 고점보다 " + pct(bk.dd), t: String(bk.advice || BR.lead || "").replace(/^코스피 (하락장|조정)\s*—\s*/, ""), tone: "warn", max: 3};
-        var on_ = (bk.checks || []).filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙(rule)
-        if (bk.rule && !bk.nuse){} else if (bk.checks && bk.checks.length) bearN.t += " · 다시 사는 조건 " + on_ + "/" + (bk.nuse || bk.checks.length) + "개 켜짐";
+        var kq_ = (BR.markets || []).filter(function(m){ return m.key === "kosdaq"; })[0];
+        if (bk.analog) bearN.t = "코스피는 주식 " + bk.analog.stock + "% — " + bk.analog.next + (kq_ && kq_.analog ? " · 코스닥은 주식 " + kq_.analog.stock + "% — " + kq_.analog.next : "") + " (지금 장과 닮았던 과거 12번에서 가장 나았던 방식)";
+        var on_ = bk.analog ? 0 : (bk.checks || []).filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙(rule)
+        if (bk.analog || (bk.rule && !bk.nuse)){} else if (bk.checks && bk.checks.length) bearN.t += " · 다시 사는 조건 " + on_ + "/" + (bk.nuse || bk.checks.length) + "개 켜짐";
         var sp_ = (BR.markets || []).filter(function(m){ return m.key === "sp500"; })[0];   // 🧭 11/10 결론 통일 — 해외 ETF 포트는 S&P500 판정을 따름
         if (sp_ && sp_.state !== bk.state) bearN.t += " | 🌏 해외 주식(포트)은 S&P500 " + sp_.state + (sp_.state === "🟢" ? " 정상 → 배분 그대로" : " → " + (sp_.to || "현금") + " " + (sp_.cash || 0) + "%");
         bearN.max = 4;

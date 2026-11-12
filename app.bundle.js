@@ -2205,7 +2205,7 @@
     var y10p = ((Q.PR.ust_hist || {}).y10 || []).slice(-21)[0];
     var out = [];
     out.push(["지금 팔아야 해요?", k.state === "🐻"
-      ? "국내 주식은 코스피가 고점보다 " + sg(k.dd, 0) + "로 하락장 규칙 구간이에요. 규칙은 국내 주식 몫을 현금 " + (k.cash || 100) + "%까지 줄이는 쪽이지만, 이미 많이 빠진 뒤라 한 번에 던지지 않고 반등 때 나눠서 줄이는 게 원칙이에요. 해외 ETF(S&P500 " + st(s) + ")는 배분 그대로 가져가요."
+      ? "국내 주식은 코스피가 고점보다 " + sg(k.dd, 0) + "로 하락장이에요. " + (k.analog ? "규칙상 코스피 몫은 주식 " + k.analog.stock + "%(" + k.analog.next + ")" + (QD && QD.analog ? ", 코스닥 몫은 주식 " + QD.analog.stock + "%예요" : "예요") + ". 줄일 때도" : "규칙은 국내 주식 몫을 현금 " + (k.cash || 100) + "%까지 줄이는 쪽이지만,") + " 이미 많이 빠진 뒤라 한 번에 던지지 않고 반등 때 나눠서 줄이는 게 원칙이에요. 해외 ETF(S&P500 " + st(s) + ")는 배분 그대로 가져가요."
       : "코스피는 " + st(k) + "(고점 " + sg(k.dd, 0) + "), S&P500은 " + st(s) + "이에요. 규칙상 서둘러 팔 구간은 아니고, 정해 둔 비중에서 크게 벗어난 것만 맞추면 돼요."]);
     out.push(["지금 사도 돼요?", k.state === "🐻"
       ? (k.analog ? "국내 주식은 지금 장과 닮았던 때를 보고 정한 규칙을 따라요. 코스피는 주식 " + k.analog.stock + "% — " + k.analog.next + "." + (QD && QD.analog ? " 코스닥은 주식 " + QD.analog.stock + "% — " + QD.analog.next + "." : "") : "국내 주식은 판정이 풀릴 때(고점 −10% 위 + 200일선 위)까지 새로 사지 않는 규칙이에요. 바닥 신호는 지금 " + bn + "/4개 — 2개 넘게 켜지면 나눠서 담기 시작해요.") + " 해외 ETF는 배분표대로 나눠서 담아도 되는 구간이에요."
@@ -2215,8 +2215,8 @@
     if (r0.f != null) out.push(["외국인은 왜 " + (r0.f >= 0 ? "사요?" : "팔아요?"), "코스피에서 외국인은 " + Number(r0.d.slice(5, 7)) + "/" + Number(r0.d.slice(8)) + " 하루 " + won(r0.f / U) + (fs >= 2 ? "(" + fs + "일째)" : "") + ", 최근 20일 합계 " + won(f20) + "예요. 5일 동안 가장 많이 판 종목은 " + topSell + ", 많이 산 종목은 " + topBuy + "예요. " +
       "다만 10년치를 돌려 보면 외국인·기관을 따라 사는 건 수익으로 이어지지 않았어요 — 흐름 참고용이에요."]);
     out.push(["미국 주식은 괜찮아요?", "S&P500은 고점보다 " + sg(s.dd, 1) + "로 " + st(s) + "이고, " + (s.close && s.m200 ? (s.close > s.m200 ? "장기 평균선(200일) 위에 있어요." : "장기 평균선(200일) 아래로 내려왔어요.") : "") + " 나스닥은 " + sg(nq.dd, 1) + "(" + st(nq) + "). 규칙상 해외 ETF 비중은 " + (s.cash ? "주식 몫 " + s.cash + "%를 " + (s.to || "현금") + "으로 옮기는 구간이에요(바닥 신호 3개 켜지면 복귀)." : "그대로 유지하는 구간이에요.")]);
-    if (k.state === "🐻") out.push(["코스피 바닥은 언제예요?", "바닥을 미리 맞히는 방법은 없어요. 대신 규칙으로 봐요 — 이번 하락장(" + md(rb.from) + "~)에서 하루 +3% 넘는 반등이 " + (rb.n || 0) + "번 있었고 그중 " + (rb.broke || 0) + "번은 20일 안에 저점을 다시 깼어요. 바닥 신호 4개 중 " + bn + "개가 켜져 있고, 2개가 넘으면 나눠 담기를 시작해요."]);
-    out.push(["현금은 얼마나 들고 있어야 해요?", "국내 주식 몫은 " + (k.cash ? "지금 규칙상 현금 " + k.cash + "%까지" : "따로 현금을 늘릴 필요는 없어요") + ". 해외 ETF 포트는 현금 " + cash + "% · 금 " + gold + "%예요. 고객 성향(안정형일수록 더 많이)에 맞춰 조절해요."]);
+    if (k.state === "🐻") out.push(["코스피 바닥은 언제예요?", "바닥을 미리 맞히는 방법은 없어요. 대신 규칙으로 봐요 — 이번 하락장(" + md(rb.from) + "~)에서 하루 +3% 넘는 반등이 " + (rb.n || 0) + "번 있었고 그중 " + (rb.broke || 0) + "번은 20일 안에 저점을 다시 깼어요. " + (k.analog ? "규칙상 다음 단계: " + k.analog.next + " (지금 장과 닮았던 과거 12번에서 가장 나았던 방식)." : "바닥 신호 4개 중 " + bn + "개가 켜져 있고, 2개가 넘으면 나눠 담기를 시작해요.")]);
+    out.push(["현금은 얼마나 들고 있어야 해요?", "국내 주식 몫은 " + (k.analog ? "코스피 현금 " + k.cash + "%" + (QD && QD.analog ? " · 코스닥 현금 " + QD.cash + "%" : "") + "(🔁 닮은 장 규칙)" : k.cash ? "지금 규칙상 현금 " + k.cash + "%까지" : "따로 현금을 늘릴 필요는 없어요") + ". 해외 ETF 포트는 현금 " + cash + "% · 금 " + gold + "%예요. 고객 성향(안정형일수록 더 많이)에 맞춰 조절해요."]);
     if (gold) out.push(["금 지금 사도 돼요?", "지금 배분표의 금 비중은 " + gold + "%예요. 금은 주식이 흔들릴 때 덜 빠지는 방패 역할이라 한 번에 크게보다 정해 둔 비중만큼 나눠서 담아요."]);
     var br = (Q.PR.td || []).filter(function(t){ return /Prefixado 2032/.test(t.n); })[0], bfx = ((Q.PR.brl || {}).fx || []), bf1 = bfx.slice(-1)[0], bf0 = bfx.slice(-22)[0];
     if (krw || y10 || br) out.push(["채권 금리 지금 어때요? (한국·미국·브라질)", (krw ? "🇰🇷 국고채는 세후 기준 최고 " + krw.after.toFixed(2) + "%(" + krw.name + ") 수준이에요. " : "") + (y10 ? "🇺🇸 미국 10년 국채 금리는 " + (+y10[1]).toFixed(2) + "%" + (y10p ? "(한 달 전 " + (+y10p[1]).toFixed(2) + "%)" : "") + "예요. " : "") +
@@ -4561,8 +4561,10 @@
       var bk = BR && (BR.markets || []).filter(function(m){ return m.key === "kospi"; })[0], bearN = null;
       if (bk && (bk.state === "🐻" || bk.state === "🟡")){
         bearN = {h: (bk.state === "🐻" ? "🐻 코스피 하락장" : "🟡 코스피 조정") + " · 고점보다 " + pct(bk.dd), t: String(bk.advice || BR.lead || "").replace(/^코스피 (하락장|조정)\s*—\s*/, ""), tone: "warn", max: 3};
-        var on_ = (bk.checks || []).filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙(rule)
-        if (bk.rule && !bk.nuse){} else if (bk.checks && bk.checks.length) bearN.t += " · 다시 사는 조건 " + on_ + "/" + (bk.nuse || bk.checks.length) + "개 켜짐";
+        var kq_ = (BR.markets || []).filter(function(m){ return m.key === "kosdaq"; })[0];
+        if (bk.analog) bearN.t = "코스피는 주식 " + bk.analog.stock + "% — " + bk.analog.next + (kq_ && kq_.analog ? " · 코스닥은 주식 " + kq_.analog.stock + "% — " + kq_.analog.next : "") + " (지금 장과 닮았던 과거 12번에서 가장 나았던 방식)";
+        var on_ = bk.analog ? 0 : (bk.checks || []).filter(function(c){ return c.on && (c.use == null || c.use); }).length;   // 🌱 11/09 시장별 다시 사기 규칙(rule)
+        if (bk.analog || (bk.rule && !bk.nuse)){} else if (bk.checks && bk.checks.length) bearN.t += " · 다시 사는 조건 " + on_ + "/" + (bk.nuse || bk.checks.length) + "개 켜짐";
         var sp_ = (BR.markets || []).filter(function(m){ return m.key === "sp500"; })[0];   // 🧭 11/10 결론 통일 — 해외 ETF 포트는 S&P500 판정을 따름
         if (sp_ && sp_.state !== bk.state) bearN.t += " | 🌏 해외 주식(포트)은 S&P500 " + sp_.state + (sp_.state === "🟢" ? " 정상 → 배분 그대로" : " → " + (sp_.to || "현금") + " " + (sp_.cash || 0) + "%");
         bearN.max = 4;
@@ -20192,7 +20194,7 @@ window.VIDC = {
         '<p>' + e(w.advice || (BR && BR.lead) || "") + '</p>' + (window.__bearSigHead ? __bearSigHead(w) : '') + '<ul>' + ck.map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '">' + (c.on ? "✅" : "⬜") + ' ' + e(c.k) + (c.use === false ? ' <em class="ez-ref">참고</em>' : '') + ' <small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(w, k) : '') + '</li>'; }).join("") + '</ul>' +
         '<p class="ez-rule-n">' + (w.rule ? '다시 사는 규칙(' + e(w.name) + '): ' + e(w.rule.name) : '') + ' · 종가 판정 · 사라·팔라는 뜻 아님</p></details>';
     }
-    return '<details class="ez-rule"><summary>🔴이 되면 이렇게 바뀌어요</summary><p>코스피나 S&P500이 고점보다 <b>−20%</b>(종가)면 🔴 하락장 — 현금을 30%까지 늘리고 새로 사지 않아요. <b>−10%</b>면 🟡 조정 — 현금 10%.</p>' +
+    return '<details class="ez-rule"><summary>🔴이 되면 이렇게 바뀌어요</summary><p>코스피나 S&P500이 고점보다 <b>−20%</b>(종가)면 🔴 하락장, <b>−10%</b>면 🟡 조정이에요. 얼마나 들고 있을지는 🔁 닮은 장 규칙이 시장마다 정해요(지금 장과 닮았던 과거 12번에서 가장 나았던 방식).</p>' +
       '<p>지금: ' + M.map(function(m){ return m.state + ' ' + e(m.name) + ' ' + sg(m.dd); }).join(" · ") + '</p><p class="ez-rule-n">⚡ 공격 포트는 종목마다 −5%면 손절 · 판정은 종가</p></details>';
   }
   function redAct(w){ if (w.analog) return w.name + " 하락장 — " + w.analog.rule + " · 지금 주식 " + w.analog.stock + "% · 다음: " + w.analog.next; return w.name + " 하락장 — 현금 " + (w.cash || 30) + "%까지 늘리고 새로 사지 않기. 단, 이미 크게 빠졌으니 투매는 금지 · 반등 때 나눠 덜기."; }
@@ -20664,7 +20666,8 @@ window.VIDC = {
 
   /* ── ⑮ 어려운 말 점선 밑줄 (쉬운 화면) ── */
   var TERMS = [
-    ["하락장", "고점보다 20% 넘게 빠진 장 (종가 기준). 이때는 현금을 늘리고 새로 사지 않는 게 앱의 규칙임."],
+    ["하락장", "고점보다 20% 넘게 빠진 장 (종가 기준). 이때 얼마나 들고 있을지는 🔁 닮은 장 규칙이 시장마다 정함 (예: 코스피는 50일선 넘으면 사기 · 코스닥은 절반 들고 감)."],
+    ["닮은 장 규칙", "지금 장과 숫자가 닮았던 과거 12번을 찾아, 그때 2년 뒤 가장 나았던 방식을 지금 규칙으로 씀 (11/12부터)."],
     ["조정", "고점보다 10~20% 빠진 상태. 하락장의 앞 단계 — 현금을 조금(10%) 늘림."],
     ["바닥 신호", "하락장이 끝나 가는지 보는 4가지 체크 (저점 다지기·20일선 회복·공포 진정·외국인 순매수). 켜진 개수만큼 다시 담음."],
     ["장기 평균선", "최근 200거래일(약 10개월) 평균 가격. 지수가 그 위면 큰 흐름이 위."],
@@ -20798,13 +20801,13 @@ window.VIDC = {
   // 체크리스트 위에 붙는 머리 (그 시장 다시 사기 규칙의 단계에 처음 닿은 날 뒤 6개월)
   window.__bearSigHead = function(m){
     var h = m && m.hist; if (!h || !h.stages || !h.stages.length) return "";
-    var nm = m.name || "", S = h.stages, eps = S[0].eps, F_ = h.rule !== "E", OFF_ = h.rule === "OFF";
+    var nm = m.name || "", S = h.stages, eps = S[0].eps, F_ = h.rule !== "E", OFF_ = h.rule === "OFF" || !!m.analog;   // 🔁 11/12 닮은 장 규칙이 정하면 이 과거 기록은 예전 규칙 참고
     var merged = !F_ && S.length === 2 && S[1].same_prev === S[1].hit && S[0].hit === S[1].hit;
     var now = h.now && h.now.fake ? h.now.fake.map(function(n, i){ return n && (!m.checks || !m.checks[i] || m.checks[i].use !== false) ? NUM[i] + ' ' + n + '회' : ""; }).filter(Boolean) : [];
     return '<div class="bs-h"><div class="bs-ht">📜 ' + (OFF_ ? '참고 — ' : '이 규칙대로였다면 — ') + '과거 ' + e(nm) + ' 하락장 ' + (eps || "") + '번 <small>' + e(String(h.from || "").slice(0, 4)) + '년부터 · 종가</small></div><ul class="bs-ul">' +
       (merged ? stageLine(S[1], nm, true) : S.map(function(s){ return stageLine(s, nm); }).join("")) + '</ul>' +
       (h.now && !F_ ? '<p class="bs-now">이번 하락장(' + md(h.now.in) + '부터 ' + h.now.len + '거래일): ' + (now.length ? '켜졌다가 도로 꺼진 조건 ' + now.join(" · ") : '아직 켜졌다 꺼진 조건 없음') + '</p>' : '') +
-      (OFF_ ? '<p class="bs-now">이 시장은 현금 규칙을 꺼 뒀어요 — 위 줄은 「판정이 풀린 날」 기준 참고예요</p>' : F_ ? '<p class="bs-now">이 시장은 바닥 신호로 미리 다시 사지 않아요 — 늦게 사는 대신 「바닥이 더 남았는데 산」 일이 없어요</p>' : '') +
+      (m.analog ? '<p class="bs-now">지금은 🔁 닮은 장 규칙(' + e(m.analog.rule) + ')이 정해요 — 위 기록은 예전 규칙 참고예요</p>' : OFF_ ? '<p class="bs-now">이 시장은 현금 규칙을 꺼 뒀어요 — 위 줄은 「판정이 풀린 날」 기준 참고예요</p>' : F_ ? '<p class="bs-now">이 시장은 바닥 신호로 미리 다시 사지 않아요 — 늦게 사는 대신 「바닥이 더 남았는데 산」 일이 없어요</p>' : '') +
       '<p class="bs-n">하락장 수가 적어 「몇 번 중 몇 번」으로만 봐요 · 과거일 뿐 앞날 보장 아님 · 사라·팔라는 뜻 아님' + (h.note4 ? ' · ' + e(h.note4) : '') + '</p></div>';
   };
 

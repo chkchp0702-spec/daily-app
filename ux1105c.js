@@ -119,7 +119,7 @@
         '<p>' + e(w.advice || (BR && BR.lead) || "") + '</p>' + (window.__bearSigHead ? __bearSigHead(w) : '') + '<ul>' + ck.map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '">' + (c.on ? "✅" : "⬜") + ' ' + e(c.k) + (c.use === false ? ' <em class="ez-ref">참고</em>' : '') + ' <small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(w, k) : '') + '</li>'; }).join("") + '</ul>' +
         '<p class="ez-rule-n">' + (w.rule ? '다시 사는 규칙(' + e(w.name) + '): ' + e(w.rule.name) : '') + ' · 종가 판정 · 사라·팔라는 뜻 아님</p></details>';
     }
-    return '<details class="ez-rule"><summary>🔴이 되면 이렇게 바뀌어요</summary><p>코스피나 S&P500이 고점보다 <b>−20%</b>(종가)면 🔴 하락장 — 현금을 30%까지 늘리고 새로 사지 않아요. <b>−10%</b>면 🟡 조정 — 현금 10%.</p>' +
+    return '<details class="ez-rule"><summary>🔴이 되면 이렇게 바뀌어요</summary><p>코스피나 S&P500이 고점보다 <b>−20%</b>(종가)면 🔴 하락장, <b>−10%</b>면 🟡 조정이에요. 얼마나 들고 있을지는 🔁 닮은 장 규칙이 시장마다 정해요(지금 장과 닮았던 과거 12번에서 가장 나았던 방식).</p>' +
       '<p>지금: ' + M.map(function(m){ return m.state + ' ' + e(m.name) + ' ' + sg(m.dd); }).join(" · ") + '</p><p class="ez-rule-n">⚡ 공격 포트는 종목마다 −5%면 손절 · 판정은 종가</p></details>';
   }
   function redAct(w){ if (w.analog) return w.name + " 하락장 — " + w.analog.rule + " · 지금 주식 " + w.analog.stock + "% · 다음: " + w.analog.next; return w.name + " 하락장 — 현금 " + (w.cash || 30) + "%까지 늘리고 새로 사지 않기. 단, 이미 크게 빠졌으니 투매는 금지 · 반등 때 나눠 덜기."; }
