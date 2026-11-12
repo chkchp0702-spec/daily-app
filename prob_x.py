@@ -22,7 +22,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 
-XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF", "^VVIX", "^SKEW", "1306.T", "^VIX9D"]
+XSYMS = ["^VIX3M", "HYG", "LQD", "TLT", "XLY", "XLP", "GC=F", "DX-Y.NYB", "^KQ11", "KRW=X", "JPY=X", "CNY=X", "^TNX", "^IRX", "HG=F", "^MOVE", "SI=F", "EMB", "IEF", "^VVIX", "^SKEW", "1306.T", "^VIX9D", "BTC-USD"]
 FX = {"KR": ("KRW=X", "원/달러"), "JP": ("JPY=X", "엔/달러"), "CN": ("CNY=X", "위안/달러"), "HK": ("CNY=X", "위안/달러"), "US": ("DX-Y.NYB", "달러 인덱스")}
 
 
@@ -675,6 +675,28 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p1"] = None
         except Exception as e:
             research["cn10_err"] = str(e)[:120]
+    # ₿ 비트코인 5일 꼬리 (11/12 10시 #102 · probe/btc102_bt.py·btc102b_bt.py · https://scholar.kyobobook.co.kr/article/detail/4010068533303) — 한국·중국 「일주일」만
+    #   야후 BTC-USD 일봉(UTC 자정 = 한국 09:00, 주말 포함 달력) 5일 로그 등락의 rank252 · 날짜 t 종가 → 아시아 행 t(다음 날 개장 전에 앎) · 2015-10~, 2021-04 기준 앞/뒤
+    #   한국 「급락 ≤10」 5일 +2.3·+7.2%p(n 131·125) · S&P 5일 꼬리 아닌 날 +8.2·+10.4 · 첫날만 +7.7·+4.7 · 걸어가기(자기·S&P 5·20일 위) 0.25174→0.25152 · 0.24964→0.24927 · 최근5년 0.25062→0.25036 · 5일 간격 앞 3/5·뒤 4/5 양수 → w 0.4
+    #   중국 「급등 ≥90」 5일 +8.5·+7.4%p(n 168·112) · 5일 간격 앞 5/5·뒤 4/5 · 첫날 +6.0·+5.9 · 걸어가기 0.24776→0.24677 · 0.25196→0.2518 · ➖ 최근5년 0.25165→0.25181 → w 0.3
+    #   홍콩 급등(걸어가기 뒤·최근5년 나빠짐)·일본·미국·다음 날(닻 위 z, 교차 한쪽 나빠짐) ❌
+    if mk in ("KR", "CN"):
+        try:
+            bt = _c(H, "BTC-USD")
+            if bt is not None and len(bt) > 1500:
+                bt = bt.dropna(); bt = bt[~bt.index.duplicated(keep="last")]
+                rk = align(rank252(np.log(bt).diff(5)), idx); cv = rk.iloc[-1]
+                ch5 = float(np.log(bt).diff(5).iloc[-1]) * 100
+                research["btc5"] = {"d": str(bt.index[-1].date()), "v": round(float(bt.iloc[-1]), 0), "ch5": round(ch5, 1), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+                tail = (rk <= 0.1) if mk == "KR" else (rk >= 0.9)
+                if not pd.isna(cv) and ((mk == "KR" and cv <= 0.1) or (mk == "CN" and cv >= 0.9)):
+                    m = cond(d, tail.fillna(False), "비트코인 5일 " + ("급락(하위 10%)" if mk == "KR" else "급등(상위 10%)"))
+                    add("btc5", "₿", "비트코인 5일 " + ("급락" if mk == "KR" else "급등"), "심리", m, 0.4 if mk == "KR" else 0.3,
+                        f"비트코인 5일 {ch5:+.1f}% (1년 순위 {cv*100:.0f}%) — " + ("비트코인이 빠르게 빠진 뒤 코스피 일주일은 평소보다 잘 올랐음(투기 자금이 주식으로 돌아옴)" if mk == "KR" else "비트코인이 빠르게 오른 뒤 상해 일주일이 평소보다 잘 올랐음(위험선호)") + "(다음 날엔 안 씀)")
+                    if M and M[-1]["k"] == "btc5":
+                        M[-1]["p1"] = None
+        except Exception as e:
+            research["btc5_err"] = str(e)[:120]
     # 🌏 외국인 수급 (한국) — 20일 누적 순매수의 2년 백분위 + 연속 순매도 일수
     fr = ext.get("foreign")
     if mk == "KR" and fr is not None and 0 < len(fr) <= 120:
