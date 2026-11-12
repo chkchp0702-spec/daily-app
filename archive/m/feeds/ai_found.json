@@ -1,6 +1,158 @@
 {
  "items": [
   {
+   "title": "데일리 샌프란시스코 연은 총재 「인플레 너무 오래 — 추가 인상 필요할 가능성이 더 크다」",
+   "url": "https://www.mpamag.com/us/mortgage-industry/industry-trends/feds-daly-signals-more-rate-hikes/596733",
+   "press": "MPA",
+   "at": "2026-11-13 04:45",
+   "why": "2027 투표권자까지 인상 쪽 — 12/9 FOMC 분수령 가설·채권 나눠 사기 칸",
+   "summary": "데일리 「추가 인상이 필요할 가능성이 그렇지 않을 가능성보다 크다, 다만 서두르지 않는다」(뉴스퀵). 같은 날 JP모건 버로 「12월 인상은 이미 가격에 반영」(블룸버그)."
+  },
+  {
+   "title": "美 기존주택 판매, 2010년 이후 최저로 추락",
+   "url": "https://www.nationalmortgagenews.com/articles/existing-home-sales-slide-further-still-lowest-since-2010",
+   "press": "National Mortgage News",
+   "at": "2026-11-13 04:45",
+   "why": "10년 5%대 금리가 주택 실물을 누름 — 「고금리 정점」 가설·주택·금리 민감주",
+   "summary": "10월 기존주택 판매 2010년 이후 최저(FT·WSJ 「16년 최저」). 모기지 금리 급등 영향."
+  },
+  {
+   "title": "엔비디아 장중 −14% 뒤 낙폭 절반 회복, 10년 5.07%·브로드컴 +5.3%·코어위브 −9%",
+   "url": "https://www.pbs.org/newshour/economy/sharp-swings-for-nvidia-and-oil-prices-weigh-on-wall-street",
+   "press": "AP/PBS",
+   "at": "2026-11-13 04:45",
+   "why": "「대장주 단독 · 업종 갈아타기」 판정 근거 — 닷컴 3막·AI 안 갈림 가설",
+   "summary": "11/12 오전 S&P −0.4%·나스닥 −0.6%, NVDA −6.1%·AVGO +5.3%·MU −4.9%·CRWV −9%, 브렌트 93.79(+1.1%), 10년 5.07%(화 4.98%)."
+  },
+  {
+   "title": "월가, 엔비디아 −13% 출발·유가 급등락 흡수하며 장 초반 낙폭 지워",
+   "url": "https://www.bnnbloomberg.ca/markets/2026/11/12/nvidia-shares-plunge-13-at-open-after-ceo-jensen-huang-resigns/",
+   "press": "BNN Bloomberg(AP)",
+   "at": "2026-11-13 03:36",
+   "why": "「대장주 단독 충격」 가설 — 지수는 NVDA 경영 공백을 흡수 중, 🟢 S&P 정상 판정 유지 근거",
+   "summary": "엔비디아 황 사임으로 개장 −13% → 지수는 초반 손실을 지움. 나스닥100도 NVDA −5%에도 플러스 전환(구글뉴스). 압력은 금리(10년 5% 위)."
+  },
+  {
+   "title": "연준 2027년 FOMC 일정 개편 — 금리 결정 회의 8→7회(10월은 전략 회의)",
+   "url": "https://gulfnews.com/business/economy/fewer-fed-rate-votes-more-debate-fomc-calendar-reset-1.500727856",
+   "press": "Gulf News",
+   "at": "2026-11-13 03:36",
+   "why": "12/9 FOMC 분수령 가설 — 워시 의장 체제의 「가이던스 축소」, 회의당 결정 무게가 커져 금리 변동성↑",
+   "summary": "연준이 11/12 2027년 잠정 일정 수정 발표 — 10월 회의는 금리 표결 없음. 2028년엔 6회. 클리블랜드 해맥 「작은 폭으로 꾸준히 인상」과 같은 날."
+  },
+  {
+   "title": "엔, 개입 경계에 다시 오름 — 160엔 돌파 뒤 되돌림",
+   "url": "https://www.tastyfx.com/news/yen-climbs-again-as-intervention-fears-bite/",
+   "press": "tastyfx",
+   "at": "2026-11-13 02:45",
+   "why": "엔 160 = 日 개입선 · 엔 캐리 되감기면 원/달러·아시아 반도체 흔들림 — 💬 17번 환율 답과 이어짐",
+   "summary": "달러/엔 160 돌파 직후 개입 경계로 엔 반등. 일본은 앞서 하루 500억 달러 사상 최대 개입(WSJ 11/8 보도) 전례."
+  },
+  {
+   "title": "굴스비 「AI 데이터센터 붐은 옛날식 수요 과열」 — 인플레 위험 경고",
+   "url": "https://247wallst.com/investing/2026/11/10/feds-goolsbee-says-ai-data-centers-look-like-old-fashioned-overheating/",
+   "press": "24/7 Wall St.",
+   "at": "2026-11-13 02:45",
+   "why": "비둘기 쪽이던 굴스비까지 과열 경고 — 12/9 FOMC 인상 폭(0.25 vs 0.5) 가설과 10년 5% 압력에 직결",
+   "summary": "시카고 연은 굴스비: 서비스 물가 상승, AI 데이터센터 투자 = 수요 과열. 11/12 밤 「뜨거운 물가는 우연 아님」 추가 발언(피드)."
+  },
+  {
+   "title": "월가 혼조 — 엔비디아 다시 낙폭 키워",
+   "url": "https://bizneworleans.com/wall-street-is-mixed-as-nvidia-gets-back-to-falling/",
+   "press": "AP(Biz New Orleans)",
+   "at": "2026-11-13 02:45",
+   "why": "오후 들어 지수 플러스 전환이 꺾임 — 「대장주 단독」 vs 「현금 도피」 판정의 마감 증거",
+   "summary": "엔비디아 장중 낙폭 회복 뒤 다시 하락, 지수 혼조. daily-app 02:14 NVDA −5.2%·SOXX −0.3%."
+  },
+  {
+   "title": "월가, 엔비디아 주가·유가 큰 출렁임 흡수하고 안정",
+   "url": "https://www.sooleader.com/michigan-news-ap/wall-street-steadies-after-absorbing-big-swings-for-nvidias-stock-and-oil-prices-13008049",
+   "press": "AP",
+   "at": "2026-11-13 01:45",
+   "why": "S&P 「정상」 판정 유지 근거 · 유가(brent_95 선) 출렁임 함께",
+   "summary": "엔비디아 급락·유가 급등락에도 미국 지수 안정 — 세부 숫자는 원문 확인(미확인)."
+  },
+  {
+   "title": "월가 하락 출발 전망 — 엔비디아 폭풍 지속, 美 국채 금리 5% 언저리",
+   "url": "https://www.kitco.com/news/off-the-wire/2026-11-12/wall-street-set-dip-nvidia-storm-continues-treasury-yields-bob-5",
+   "press": "Kitco(로이터 전재)",
+   "at": "2026-11-13 00:45",
+   "why": "🫧 신용 경보·「고금리 정점」 가설 — 10년 5% 문턱과 엔비디아 사건이 같은 날 겹침",
+   "summary": "11/12 美 개장 전 — 엔비디아 사태 지속에 지수 선물 약세, 10년 국채 금리가 5% 안팎에서 오르내림(세부 숫자 미확인)."
+  },
+  {
+   "title": "트럼프 「이란 합의 필요 없다」 뒤 美 10년 금리 5% 돌파·유가 상승",
+   "url": "https://mlq.ai/news/10-year-treasury-yield-tops-5-and-oil-rises-after-trump-says-the-us-doesnt-need-an-iran-deal/",
+   "press": "MLQ.ai",
+   "at": "2026-11-13 00:45",
+   "why": "열린 XLE 내림 bet·🛢️ 브렌트 95 조건·美 10년 5% 관찰과 바로 이어짐",
+   "summary": "트럼프 발언 뒤 유가 반등과 함께 10년물이 5%를 넘음 — 금리·유가 동반 상승은 인상 기대를 키우는 조합(정확한 수치 미확인)."
+  },
+  {
+   "title": "모닝 킥스타트: 금리 상승·엔비디아 핵심 지지선 이탈",
+   "url": "https://investinglive.com/technical-analysis/morning-kickstart-yields-climb-as-nvidia-slides-below-key-support-usd-mixed/",
+   "press": "investingLive",
+   "at": "2026-11-13 00:45",
+   "why": "NVDA 기술적 지지선 이탈 vs SOXX 상대 강세 — 「대장주 단독」 판정 근거",
+   "summary": "금리 상승 속 엔비디아가 핵심 지지선 아래로, 달러는 혼조. 정규장에선 개장 −13%대 뒤 00:14 −6.9%(161.76, daily-app)로 낙폭 절반 회복."
+  },
+  {
+   "title": "젠슨 황 엔비디아 CEO 사임, 콜레트 크레스 임시 CEO — 라이브",
+   "url": "https://www.cnbc.com/2026/11/12/nvidia-jensen-huang-ceo-live-updates.html",
+   "press": "CNBC",
+   "at": "2026-11-12 23:45",
+   "why": "반도체 칸·qa 3·9 flip 조건 — 대장주 단독 vs 현금 도피 판정의 출발점",
+   "summary": "황 CEO 즉시 사임(CEO·사장·이사직), 크레스 CFO 임시 CEO. 정규장 개장 직후 NVDA 155.78(−10.3%)·SOXX −2.2%(daily-app 23:34)."
+  },
+  {
+   "title": "AMD, 엔비디아 「리더십 공백」 수혜로 투자의견 상향(윌리엄블레어)",
+   "url": "https://www.cnbc.com/2026/11/12/amd-upgraded-because-it-will-benefit-from-nvidias-leadership-vacuum.html",
+   "press": "CNBC",
+   "at": "2026-11-12 23:45",
+   "why": "대장주 사건 때 2·3위로 돈이 가는지 — 「AI 안에서 갈린다」·ideas 21:45 검증 표본",
+   "summary": "윌리엄블레어가 AMD 상향, 엔비디아 경영 공백 기간 고객 이탈 수혜 기대. 장전 AMD·AVGO +2%대(트레이딩키 21:45)."
+  },
+  {
+   "title": "네비우스, 매출 급증에도 전망 실망에 급락 — 네오클라우드 동반 약세",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-12/nebius-shares-drop-on-neocloud-s-disappointing-revenue-outlook",
+   "press": "블룸버그",
+   "at": "2026-11-12 23:45",
+   "why": "「빚으로 짓는 곳(네오클라우드)이 약하다」 가설·🫧 신용 경보판",
+   "summary": "연간 매출 전망 실망에 장 초반 약 −10%(블룸버그)·한국 보도 −13%(매출 +571%에도 투자비 폭증 실망). 배런스 「황 사태가 코어위브 등 다른 AI 종목에 부담」."
+  },
+  {
+   "title": "엔비디아 리더십 위기에 美 선물 하락·AI 매매 압박",
+   "url": "https://www.marketscreener.com/news/nvidia-leadership-crisis-drags-on-u-s-stock-futures-pressures-ai-trade-update-ce785ed8da8afe27",
+   "press": "다우존스(마켓스크리너)",
+   "at": "2026-11-12 22:45",
+   "why": "오늘 밤 NVDA 정규장 — 「대장주 단독」 vs 「현금 도피」 판정, 반도체 칸·qa 3·9",
+   "summary": "이사회 거취 결정 대기 속 나스닥100 선물 약세. 22:33 나스닥100 선물 −1.29%·S&P500 −0.68%·다우 −0.29%(daily-app 프리마켓)."
+  },
+  {
+   "title": "美 선물 하락 — 엔비디아 급락, 트럼프 「이란과 합의 필요 없다」",
+   "url": "https://www.cnbc.com/2026/11/11/stock-market-today-live-updates.html",
+   "press": "CNBC",
+   "at": "2026-11-12 22:45",
+   "why": "유가 협상 기대 후퇴 → XLE 내림 bet·장부 brent_95·qa 19",
+   "summary": "트럼프 발언 뒤 유가 반등, 22:33 브렌트 93.72(+1.03%)·WTI 87.11·금 −1.77%(daily-app)."
+  },
+  {
+   "title": "엔비디아 장전 −7%대, AMD·브로드컴은 +2% 넘게 — 「고객사 칩 구매 분산」 해석",
+   "url": "https://www.tradingkey.com/analysis/stocks/us-stocks/262302368-nvidia-amd-broadcom-huang-ceo-chip-procurement-diversification-tradingkey",
+   "press": "TradingKey",
+   "at": "2026-11-12 21:45",
+   "why": "NVDA 사람 위험이 업종 전체 할인이 아니라 2·3위로 돈 이동인지 — 반도체 칸·ideas 19:45(경쟁사 상대수익)·qa 3·9",
+   "summary": "NVDA 장전 −7% 넘게 하락, AMD·AVGO 각각 +2% 넘게 상승. 황 CEO 거취 불확실성이 고객사의 칩 구매 다변화를 부를 수 있다는 분석."
+  },
+  {
+   "title": "AMD·브로드컴, 엔비디아에서 돈이 옮겨가며 상승",
+   "url": "https://www.benzinga.com/trading-ideas/movers/26/11/63177290/amd-broadcom-stocks-gain-as-investors-rotate-away-from-nvidia-whats-going-on",
+   "press": "Benzinga",
+   "at": "2026-11-12 21:45",
+   "why": "「대장주 단독」 판정 근거 +1 — SOXX 전체 붕괴가 아니라 업종 안 갈아타기",
+   "summary": "엔비디아 이사회 해임 준비 보도 뒤 투자자들이 AMD·브로드컴으로 이동. 이사회는 외부 업체를 고용해 후임 물색(야후 헤드라인)."
+  },
+  {
    "title": "뉴스퀵 美 개장 전 — 엔비디아 이사회 오늘 회의, 일부 이사 크레스 CFO 임시 CEO 선호(세마포)",
    "url": "https://www.newsquawk.com/headlines/newsquawk-daily-us-opening-news---12th-november-2026",
    "press": "Newsquawk",
@@ -487,159 +639,7 @@
    "at": "2026-11-11 07:40",
    "why": "「AI 차입이 약한 고리」(0.92) 반례 — 수요는 강하고 경색은 조달 쪽 · CRWV·SMH·한국 반도체 아침 갭",
    "summary": "3분기 매출 36.6억$(+168%, 하나 중국 텔레그램) · 연간 가이던스 상향 · 시간외 +13%(stocktwits, 정확한 마감 뒤 수치 미확인)"
-  },
-  {
-   "title": "美 10년 금리 5%로 질주 — CPI·월러 발언에 인상 기대",
-   "url": "https://www.cnbc.com/2026/11/10/us-bonds-treasurys-yields.html",
-   "press": "CNBC",
-   "at": "2026-11-11 07:40",
-   "why": "「고금리 정점」(0.35) 판정 — 종가 4.985%로 5% 아래 마감, 깨짐 선 미달 · 장기채 나눠 사기 시점",
-   "summary": "10년 4.9854%(+10.3bp)·2년 4.7335%(+17.2bp)·10Y-2Y 25bp로 축소(globalmktinsight 07:20) · FedWatch 12월 인상 확률 100%"
-  },
-  {
-   "title": "마이크로소프트, 엔스케일 영국 데이터센터 계약서 빠져 — 350억 달러 상장 흔들",
-   "url": "https://computing.co.uk/news/2026/ai/microsoft-exits-nscale-deal-ipo-at-risk",
-   "press": "Computing",
-   "at": "2026-11-11 05:45",
-   "why": "「다음 약한 고리는 AI 차입」·「AI 안에서도 갈린다」 — 빚으로 짓는 네오클라우드 쪽 자금 조달 경색(🫧 신용 칸)",
-   "summary": "MS가 엔스케일 영국(러프턴) 사이트에서 철수 보도 · 텔레그래프 「350억$ 상장 연기 검토」(로이터 인용, 피드 11/11) · 투자자 역제시 160억~190억$ 보도도(aiweekly)"
-  },
-  {
-   "title": "엔스케일 350억 달러 상장, 노르웨이 건설 지연·바이트댄스 누락으로 흔들",
-   "url": "https://aiweekly.co/alerts/nscales-35b-ipo-shaken-by-norway-build-lag-bytedance-omission",
-   "press": "AI Weekly",
-   "at": "2026-11-11 05:45",
-   "why": "AI 인프라 상장 가격 결정 주간(앤스로픽 11/18)과 같은 시기 — 비상장 AI 인프라 밸류에이션 압박, QQQ·SMH 수급 관찰",
-   "summary": "건설 지연·고객 공시 누락 문제 제기 · 상장 일정 미확인(날짜 미확인)"
-  },
-  {
-   "title": "반도체주 하락 5조 달러 육박 — 엔비디아 2019년 이후 가장 극단적 매도 수준",
-   "url": "https://finance.yahoo.com/markets/article/chip-stocks-slide-nears-5-trillion-as-nvidia-hits-most-extreme-selling-level-since-2019-191532559.html",
-   "press": "Yahoo Finance",
-   "at": "2026-11-11 04:15",
-   "why": "반도체 칸·SMH 대결(11/13 판정)·🎯 AI 분할 매수 시점 — 과매도 극단은 반등 후보지만 대장주 고유 악재(중국 유출 의혹)가 겹침",
-   "summary": "엔비디아·메모리주가 뜨거운 CPI 뒤 반도체를 다시 끌어내림, S&P 대부분 종목은 버팀. 같은 날 브로드컴 +3.6%·TSMC +1.3%(daily-app live_us 04:33) — 업종 안 자금 이동."
-  },
-  {
-   "title": "BofA, 메모리 칩 슈퍼사이클 2028년까지 이어진다",
-   "url": "https://seekingalpha.com/news/4670043-bofa-sees-memory-chip-supercycle-extending-through-2028",
-   "press": "Seeking Alpha",
-   "at": "2026-11-11 04:14",
-   "why": "한국 반도체(삼성전자·SK하이닉스·091160)·마이크론 — 외국인 20일 반도체 매도와 반대되는 IB 판단, 골드만 「마이크론 너무 싸다」·모건스탠리 「北美 반도체 구간 하단」과 같은 방향",
-   "summary": "BofA 메모리 업황 상승 주기 2028년까지 연장 전망(제목 기준, 세부 숫자 미확인). 같은 시간 골드만 「마이크론 무시하기엔 너무 싼 수준」(이데일리)·모건스탠리 「北美 반도체 조정 뒤 구간 하단 — 매수 기회」(야후 홍콩)."
-  },
-  {
-   "title": "TheStreet: 10월 CPI 뒤 나스닥 하락 — 엔비디아 −6%·GE버노바 −7%·퍼스트솔라 −6%",
-   "url": "https://www.thestreet.com/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-updates-nov-10-2026",
-   "press": "TheStreet",
-   "at": "2026-11-11 03:45",
-   "why": "금리 5% 위에서 AI·전력 장비 고평가주부터 매도 — ⚡ 공격 칸 「전력」 동점 후보 순서 재점검",
-   "summary": "12:37 ET S&P −0.83%. 하락 상위 스카이댄스 −7.8%·GE버노바 −7.1%·퍼스트솔라 −6.3%·엔비디아 −6.0%. 개장 때 러셀2000은 +3.15%."
-  },
-  {
-   "title": "CNBC: 마이크로소프트, 앤스로픽의 오피스 위협에 장중 급락",
-   "url": "https://cnbc.com/2026/11/10/stock-market-movers-live-updates.html",
-   "press": "CNBC",
-   "at": "2026-11-11 03:45",
-   "why": "「현금 도는 AI(MS)」 가설 반례 — AI 소프트웨어 칸·MS 시총 추월 하루 만의 반전",
-   "summary": "앤스로픽이 상장 앞두고 오피스용 AI 도구 공개 → MS 장중 급락(정확한 % 미확인). 같은 날 구글 100억·AMD 25억·TSMC 최대 10억 달러 앤스로픽 지분 투자 보도."
-  },
-  {
-   "title": "앤스로픽 완전희석 1.4조 달러 상장 추진 — 11/18 가격 결정, 최대 904억 달러 조달",
-   "url": "https://www.business-standard.com/world-news/anthropic-targets-1-4-tn-valuation-in-ipo-eyes-90-4-billion-fundraise-126111000700_1.html",
-   "press": "Business Standard(블룸버그)",
-   "at": "2026-11-11 02:45",
-   "why": "「AI 안에서도 갈린다」·AI 차입 가설 — 엔비디아 실적(11/17) 다음 날 나스닥에 1천억 달러 안팎 공급, QQQ·AI 대형주 수급 부담",
-   "summary": "공모가 70~78달러·8.01억 주(+구주 0.24억), 기본 644억 + AMD·브로드컴·구글·마이크론·MS·엔비디아·TSMC 사모 260억 = 최대 904억 달러, 티커 ANT. 3분기 매출 약 170억 달러(전년 14억)·영업손실 5.67억(2분기 흑자 9.74억)."
-  },
-  {
-   "title": "앤스로픽, 1조 달러 넘는 가치로 상장 조건 제시",
-   "url": "https://axios.com/2026/11/10/anthropic-ipo-terms",
-   "press": "Axios",
-   "at": "2026-11-11 02:45",
-   "why": "AI 자금 흡수 — 오픈AI도 1.25조 달러로 자금 조달 중, 대형 AI 상장 물량이 연말 나스닥 수급 변수",
-   "summary": "공모가 상단 기준 시가총액 약 1조 달러, 완전희석 1.4조 달러. 가격 결정 11/18(수)."
-  },
-  {
-   "title": "월러 「12월 인상 지지 — 50bp도 테이블 위에」",
-   "url": "https://seekingalpha.com/news/4669588-waller-backs-december-rate-hike-says-50-basis-point-move-may-be-on-the-table",
-   "press": "Seeking Alpha",
-   "at": "2026-11-11 01:45",
-   "why": "12/9 FOMC 분수령 가설(0.55)·미국채 나눠 사기 시점·현금/단기채 칸 — 비둘기로 꼽히던 월러가 빅스텝 언급",
-   "summary": "10월 CPI 근원이 월러의 50bp 조건(근원 예상 상회)에 걸림. 같은 날 로건 댈러스 연은 「최소 두 번 더·속도 높일 수도」(블룸버그), 나겔 「ECB 12월 인상 꽤 분명」 — 글로벌 동시 매파."
-  },
-  {
-   "title": "뜨거운 물가 보고서로 연준 12월 인상 궤도",
-   "url": "https://www.americanbanker.com/news/hot-inflation-report-puts-fed-on-track-for-december-rate-hike",
-   "press": "American Banker",
-   "at": "2026-11-11 01:45",
-   "why": "금융 칸(8%)·AI 차입 가설 — 인상이 조달 비용·신용(NY연은 3분기 연체율 소폭↑)으로 번지는지",
-   "summary": "CPI 전월 +0.4%·근원 +0.3%로 12월 인상이 기본 시나리오로. 미 2년 4.75%(+0.21%p)·10년 4.996%(CNBC 11:30 EST)."
-  },
-  {
-   "title": "미국 데이터센터 속 중국산 부품 — 트럼프가 왜 금지하려 하나",
-   "url": "https://www.newsweek.com/the-chinese-parts-in-us-data-centers-and-why-trump-wants-to-ban-them-12288018",
-   "press": "Newsweek",
-   "at": "2026-11-11 00:45",
-   "why": "MS가 「중국산 광트랜시버 금지가 미국 AI를 늦춘다」며 로비(로이터 11/10) — 데이터센터 원가↑ = AI 차입 부담 가설·전력/인프라 칸과 연결",
-   "summary": "미국 데이터센터 광트랜시버의 상당 부분이 중국산 — 금지되면 대체 공급 부족·원가 상승 우려. 수치는 원문 확인 필요(미확인)."
-  },
-  {
-   "title": "중국 광트랜시버 업체들, FCC 규칙 개정으로 미국 금지 일단 피해",
-   "url": "https://www.scmp.com/tech/big-tech/article/3367219/chinese-optical-transceiver-makers-dodge-us-ban-now-fcc-updates-rules",
-   "press": "SCMP",
-   "at": "2026-11-11 00:45",
-   "why": "트랜시버 금지 논쟁의 앞선 경과 — 금지 확정 여부가 미국 광통신주(COHR·LITE)와 하이퍼스케일러 원가 갈림길",
-   "summary": "FCC 규칙 개정에서 중국 광트랜시버 업체는 당장 금지 대상에서 빠짐(당시 기준). 이후 행정부 별도 금지안 초안 보도로 재점화."
-  },
-  {
-   "title": "CPI 뒤 선물 하락·금리 급등",
-   "url": "https://www.streetinsider.com/Market+Check/Futures+Decline%2C+Yields+Spike+Following+Hot+CPI+Data/18670080.html",
-   "press": "StreetInsider",
-   "at": "2026-11-10 23:45",
-   "why": "12/9 FOMC 분수령·고금리 정점 가설 — 2년물이 10년물보다 더 뛰는 매파형 반응",
-   "summary": "10월 CPI 예상 상회 뒤 미 선물 하락·국채 금리 급등(제목 기준). 같은 시각 우리 수집: 2년 4.689%(+14bp)·10년 4.954%(+9bp)·나스닥100 선물 −1.0%(23:23)."
-  },
-  {
-   "title": "월러 연준 이사 「10월 CPI가 뜨거우면 12월 0.5%p 인상 고려해야」",
-   "url": "https://uk.investing.com/news/economy-news/feds-waller-says-larger-hike-should-be-considered-if-october-cpi-runs-hot-4971098",
-   "press": "Investing.com",
-   "at": "2026-11-10 22:45",
-   "why": "오늘 밤 근원 CPI +0.3%(예상 0.2%)로 조건이 걸림 — 12/9 FOMC 분수령 가설·미국채 단기물·🫧 신용 칸",
-   "summary": "월러: 12월 인상 지지, 근원 물가가 높게 나오면 50bp 고려. 발표 결과 헤드라인 +0.4%·근원 +0.3%로 둘 다 예상 +0.1%p 상회(김현석 텔레그램 22:30)."
-  },
-  {
-   "title": "2022년 이후 최대 인상이 이례적인 10월 CPI에 달렸다",
-   "url": "https://www.tipranks.com/news/feds-largest-rate-hike-since-2022-hinges-on-todays-unusual-october-inflation-report",
-   "press": "TipRanks",
-   "at": "2026-11-10 22:45",
-   "why": "1년 전 대비 숫자 없이 전월비만 나오는 CPI — 반응이 전월비에 몰림, 금리 민감주·장기채 칸",
-   "summary": "셧다운 여파로 10월 전년비 CPI 미발표. 전월비 근원이 50bp 인상 여부의 핵심 변수로 지목."
-  },
-  {
-   "title": "평화 협상 속 유가 4주 만의 최저 부근",
-   "url": "https://www.khaleejtimes.com/business/oil-prices-ease-to-nearly-four-week-low-amid-peace-talks",
-   "press": "Khaleej Times",
-   "at": "2026-11-10 22:45",
-   "why": "장부 brent_95(선 90) — 오늘 종가 90↓면 에너지 13→10, XLE 대기 bet",
-   "summary": "미·이란 협상 진전 기대로 브렌트 약세. 알아라비아는 우라늄 3.67% 제한·동결자금 해제 예비 합의 근접 보도."
-  },
-  {
-   "title": "중국 10월 생산자물가 4년여 만 최고로 가속",
-   "url": "https://tradingeconomics.com/china/producer-prices-change/news/591666",
-   "press": "Trading Economics",
-   "at": "2026-11-10 20:40",
-   "why": "CPI 앞 물가 압력 재료 — 美 금리 위쪽·「12/9 FOMC 분수령」 가설, 채권 답(9번)",
-   "summary": "중국 PPI 상승률이 4년여 만 최고로 가속(WSJ도 같은 보도). 9월 PPI는 +5.0%였음(technews). 원자재·수입 물가를 통해 美·韓 물가 압력 쪽."
-  },
-  {
-   "title": "미 10월 CPI, 두 달 급등 뒤 둔화 예상 — 예상 전월비 +0.3%·근원 +0.2%, 12개월 수치는 미발표",
-   "url": "https://www.business-standard.com/world-news/us-inflation-set-to-cool-in-october-after-two-months-of-sharp-increases-126110800246_1.html",
-   "press": "Business Standard(로이터)",
-   "at": "2026-11-10 19:45",
-   "why": "오늘 밤 22:30 CPI 기준선 — 12/9 FOMC 분수령 가설·고금리 정점 가설·현금 해제 판단",
-   "summary": "헤드라인 전월비 예상 +0.3%(9월 +0.6%, 4월 이후 최대) · 근원 +0.2%(3개월 최저 예상) · BLS 2025년 10월 미발표 탓에 10월 전년비 수치 없음"
   }
  ],
- "at": "2026-11-12 20:45"
+ "at": "2026-11-13 01:45"
 }

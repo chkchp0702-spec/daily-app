@@ -1,5 +1,5 @@
 {
- "at": "2026-11-12 19:45",
+ "at": "2026-11-13 04:45",
  "rule": "🔴 핵심 = 정말 큰 것만(하루 0~3개, 대부분 시간은 0개): 연준·한은 깜짝·지수 −3%↓ 급변·보유 칸/킥 종목 직격·핵심 가설을 뒤집는 숫자 / 🟡 주목 = 그다음 중요한 것만(시간당 0~3개) · 나머지는 표시 안 함",
  "items": {
   "kwusa/61751": {
@@ -27,25 +27,10 @@
    "why": "KB 이은택 2027 전략 — 「남은 카드는 인플레」·장기 국채·우량 중단기 크레딧 선호 · 「고금리 정점」·「12/9 FOMC」 가설",
    "at": "2026-11-12 09:00"
   },
-  "HANAchina/71991": {
-   "lv": 1,
-   "why": "엔비디아 이사회 차기 CEO 선임 절차·「오늘 회의서 거취 결정」(중국언론) — 오늘 밤 NVDA 정규장·반도체 칸·qa 3 · 블룸버그 「외부 업체와 CEO 후보 물색」과 같은 사건",
-   "at": "2026-11-12 09:45"
-  },
-  "n/UdQQ3diLVFnRGNFWFBoWUVEOXU0cnFDYnFZQ005SWtmaWRfUEFLa3k1Ywoc5": {
-   "lv": 1,
-   "why": "11/1~10 반도체 수출 +331% 역대 최대 — 「AI 수요는 멀쩡, 사람 위험」 해석 근거 · 091160·외국인 반도체 되사기 판단",
-   "at": "2026-11-12 09:45"
-  },
   "n/5kQXlOQlRRWHRhdGk5ZEtPZjVjMjE1Q1BJaTZ1NmplRWJVSDlvRFBUQncoc5": {
    "lv": 1,
    "why": "유가 협상 기대로 또 1달러↓ — 브렌트 90 선(brent_95)·XLE 내림 bet 쪽 근거",
    "at": "2026-11-12 12:45"
-  },
-  "n/0dXpna196WEc4RGdjSTdlRTRfZDNHVzVGWjRjZnVuQkw3S1FlYTVrbjBnoc5": {
-   "lv": 1,
-   "why": "美 장기채 휴장 뒤 오름세 재개·위험 심리 냉각 — 10년 5% watch·「고금리 정점」 가설·qa 연준/채권",
-   "at": "2026-11-12 14:45"
   },
   "HANAchina/72009": {
    "lv": 1,
@@ -62,10 +47,50 @@
    "why": "美 AI 칩 수출 통제 싱가포르·동남아로 확대 — NVDA 사람 위험에 규제 겹침, 🫧 버블 경보판·091160·「AI 안에서 갈린다」",
    "at": "2026-11-12 18:45"
   },
-  "n/remountsonnvidiasjensenhuangamidreportsofsecondaffairtsrcrss": {
+  "n/0261112nvidiadefaultrisknearsrecordhighasboardweighsceosfate": {
    "lv": 1,
-   "why": "황 CEO 「두 번째 관계」 보도로 해임 압박 확대 — NVDA 프리마켓 −6~8.6%(CNBC·벤징가), 오늘 밤 정규장·반도체 칸·qa 3·9",
-   "at": "2026-11-12 19:45"
+   "why": "엔비디아 부도위험(CDS) 사상 최고 근접 — 「AI 차입이 다음 약한 고리」 가설·🫧 신용 경보 직결",
+   "at": "2026-11-12 22:45"
+  },
+  "n/httpswwwcnbccom20261112nvidiajensenhuangceoliveupdateshtml": {
+   "lv": 2,
+   "why": "젠슨 황 엔비디아 CEO 즉시 사임 확정·크레스 CFO 임시 CEO — 정규장 NVDA −10.3%(23:34)·qa 3 flip 조건 절반 충족(SOXX −2.2%로 아직 「대장주 단독」) · 반도체 칸·「AI 안에서 갈린다」·「AI 차입」 가설",
+   "at": "2026-11-12 23:45"
+  },
+  "n/261112nebiussharesdroponneocloudsdisappointingrevenueoutlook": {
+   "lv": 1,
+   "why": "네비우스 매출 +571%에도 전망 실망 −13% · 코어위브 동반 하락 — 「빚으로 짓는 네오클라우드가 약하다」(AI 안에서 갈린다) 가설 직결",
+   "at": "2026-11-12 23:45"
+  },
+  "n/EpmSS00SHdrWWRQUFVGNHlEZFRfSFFyMWl5eE1mS1ZzN3VibVQzWFo0MAoc5": {
+   "lv": 1,
+   "why": "美 10년 5% 재돌파 — 「고금리 정점」 가설 깨짐 선(5.05% 이틀)·채권 나눠 사기 자리와 직결",
+   "at": "2026-11-13 00:45"
+  },
+  "n/micronandskhynixslide3asnvidiashakeuphitsmemorystockstsrcrss": {
+   "lv": 1,
+   "why": "SK하이닉스·마이크론·샌디스크 −3% — 엔비디아 쇼크가 메모리로 번짐, 오늘 한국 반도체 개장·「오르는 날 나눠 덜기」 규칙과 직결",
+   "at": "2026-11-13 02:45"
+  },
+  "n/0261112yenfallstokey160levelperdollarraisinginterventionrisk": {
+   "lv": 1,
+   "why": "엔 160 돌파 직후 급반등(개입 경계) — 엔 캐리 되감기면 원/달러·아시아 위험자산 흔들림, 10년 5% 압력과 겹침",
+   "at": "2026-11-13 02:45"
+  },
+  "globalmktinsight/7898": {
+   "lv": 1,
+   "why": "美 10년 5.1% 재상승 — 「고금리 정점」 가설·12/9 분수령·채권 질문(15번)과 직결",
+   "at": "2026-11-13 03:36"
+  },
+  "n/20261112fedsdalysaysmoreratehikeslikelyneededtocoolinflation": {
+   "lv": 1,
+   "why": "데일리(2027 투표권) 「추가 인상 더 필요할 듯」 + JP모건 「12월 인상 이미 반영」 — 12/9 FOMC 분수령 가설·10년 5% 칸",
+   "at": "2026-11-13 04:45"
+  },
+  "n/swwwftcomcontent1e08661e1db04ff7823677254bb05790syn25a6b1a61": {
+   "lv": 1,
+   "why": "美 기존주택 판매 2010년 이후 최저 — 10년 5%대 금리가 실물(주택)을 누르기 시작, 「고금리 정점」 가설·금리 민감주 칸",
+   "at": "2026-11-13 04:45"
   }
  }
 }
