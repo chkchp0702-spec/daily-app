@@ -304,12 +304,14 @@
       '<div class="dv-mk"><button type="button" data-dvmk="png" class="main">📱 고객에게 한 장<small>카톡 전송용 그림 1장</small></button>' +
       '<button type="button" data-dvmk="pdf">📄 PDF 풀버전<small>A4 4쪽 · 차트·표·종목별</small></button>' +
       '<button type="button" data-dvmk="ppt">📊 PPT<small>4쪽 · 안 깨지는 그림판</small></button></div>' +
+      simUI() +
       '<p class="dv-st" id="dvst">이름을 넣으면 맨 위에 「○○ 고객님께」로 들어가요 · 받는 분 이름은 이 휴대폰에만 남아요</p></section>';
   }
   function bindSend(){
     var box = document.getElementById("dvsend"); if (!box) return;
     var I = box.querySelector("#dvcl"), P = box.querySelector("#dvpb");
     if (P) P.oninput = function(){ lss("pbname", P.value.trim().slice(0, 30)); };
+    [["dvsno", "no"], ["dvsfr", "from"], ["dvsto", "to"]].forEach(function(q){ var el = box.querySelector("#" + q[0]); if (el) el.oninput = el.onchange = function(){ simSet(q[1], el.value.trim()); simRefresh(); }; });
     box.onclick = function(ev){
       var t = ev.target, c = t.closest && t.closest("[data-dvcl]"), am = t.closest && t.closest("[data-dvam]"), mk = t.closest && t.closest("[data-dvmk]");
       if (c){ var on = I.value.trim() !== c.dataset.dvcl; I.value = on ? c.dataset.dvcl : ""; [].forEach.call(box.querySelectorAll("[data-dvcl]"), function(b){ b.classList.toggle("on", on && b === c); }); return; }
@@ -343,13 +345,14 @@
   }
   function make(kind, btn){
     if (BUSY || !LAST) return; BUSY = true;
-    var o = opts(), st = document.getElementById("dvst"), old = btn.innerHTML;
+    var o = opts(), st = document.getElementById("dvst"), old = btn.innerHTML; if (kind === "rev") o.cl = "";
     btn.disabled = true; btn.innerHTML = "⏳ 만드는 중…<small>몇 초 걸려요</small>";
+    var pl = kind === "rev" ? [reqPage(o)].concat(pages(LAST, o)) : null;
     var p = lib("lib/html2pdf.bundle.min.js", "html2pdf").then(function(){
       if (kind === "png") return snap(onePage(LAST, o), 1080, IOS ? 1 : 1.3).then(function(c){ return new Promise(function(r){ c.toBlob(function(b){ c.width = c.height = 0; r(b); }, "image/png"); }); });
       var imgs = [];
-      return pages(LAST, o).reduce(function(pr, html){ return pr.then(function(){ return snap(html, PW, IOS ? 1.6 : 2).then(function(c){ imgs.push(c.toDataURL("image/jpeg", 0.9)); c.width = c.height = 0; }); }); }, Promise.resolve()).then(function(){
-        if (kind === "pdf") return html2pdf().set({margin: 0, jsPDF: {unit: "px", format: [PW, PH], orientation: "portrait", hotfixes: ["px_scaling"]}}).from(document.createElement("div")).toPdf().get("pdf").then(function(pdf){
+      return (pl || pages(LAST, o)).reduce(function(pr, html){ return pr.then(function(){ return snap(html, PW, IOS ? 1.6 : 2).then(function(c){ imgs.push(c.toDataURL("image/jpeg", 0.9)); c.width = c.height = 0; }); }); }, Promise.resolve()).then(function(){
+        if (kind === "pdf" || kind === "rev") return html2pdf().set({margin: 0, jsPDF: {unit: "px", format: [PW, PH], orientation: "portrait", hotfixes: ["px_scaling"]}}).from(document.createElement("div")).toPdf().get("pdf").then(function(pdf){
           imgs.forEach(function(u, i){ if (i) pdf.addPage([PW, PH], "portrait"); pdf.addImage(u, "JPEG", 0, 0, PW, PH); }); return pdf.output("blob"); });
         return lib("lib/pptxgen.bundle.js?v=1", "PptxGenJS").then(function(){
           var P = new PptxGenJS(); P.defineLayout({name: "A4P", width: 8.27, height: 11.69}); P.layout = "A4P"; P.title = (o.cl ? cliLab(o.cl) + " " : "") + "배당 비교";
@@ -357,11 +360,11 @@
           return P.write({outputType: "blob"}); });
       });
     });
-    var mime = kind === "png" ? "image/png" : kind === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    var mime = kind === "png" ? "image/png" : kind === "pdf" || kind === "rev" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.presentationml.presentation";
     p.then(function(blob){
-      var name = fname(o, kind === "png" ? "png" : kind === "pdf" ? "pdf" : "pptx");
-      saveCli(o.cl); deliver(blob, name, mime, kind === "png" ? "배당 비교 한 장" : kind === "pdf" ? "배당 비교 PDF" : "배당 비교 PPT");
-      if (st) st.textContent = "✓ 다 만들었어요 · " + name + " · " + Math.max(1, Math.round(blob.size / 1024)) + "KB";
+      var name = kind === "rev" ? ("심의요청_배당비교_" + DV_VER + (o.pb ? "_" + o.pb : "")).replace(/[\\/:*?"<>|\s·]+/g, "_") + ".pdf" : fname(o, kind === "png" ? "png" : kind === "pdf" ? "pdf" : "pptx");
+      if (kind !== "rev") saveCli(o.cl); deliver(blob, name, mime, kind === "png" ? "배당 비교 한 장" : kind === "pdf" ? "배당 비교 PDF" : kind === "rev" ? "배당 비교 심의 요청서" : "배당 비교 PPT");
+      if (st) st.textContent = "✓ 다 만들었어요 · " + name + " · " + Math.max(1, Math.round(blob.size / 1024)) + "KB" + (kind !== "rev" && !simState().ok ? " · ⚠️ 심의필 없이 만들었어요 — 고객에게 보내기 전에 심의필을 넣어 주세요" : "");
       try { if (window.ntfyUse) ntfyUse("divc_" + kind); } catch(x) {}
     }).catch(function(err){ if (st) st.textContent = "만들지 못했어요 · " + String((err && (err.message || err)) || "").slice(0, 80); try { console.error(err); } catch(x) {} })
       .then(function(){ BUSY = false; btn.disabled = false; btn.innerHTML = old; });
@@ -433,8 +436,49 @@
     "배당 입금 달·금액은 지난 일정으로 본 예상이며 실제와 다를 수 있음. 해외 상품은 환율에 따라 원화 금액이 달라짐.",
     "세후 금액은 국내 15.4%·미국 15% 원천징수 기준 대략값이며, 금융소득 연 2,000만원 초과 시 종합과세 등 개인 상황에 따라 달라짐.",
     "주식·ETF는 원금 손실이 날 수 있으며 예금자보호법에 따라 보호되지 않음. 투자 전 상품설명서·약관을 꼭 확인할 것."];
-  function riskBox(fs, n){ return '<div style="border-top:2px solid ' + INK + ';padding-top:10px;font-size:' + fs + 'px;line-height:1.6;color:' + SUB + '"><b style="color:' + INK + '">⚠️ 꼭 알아 두실 점</b>' + RISK.slice(0, n || RISK.length).map(function(t){ return '<div>· ' + t + '</div>'; }).join("") + '</div>'; }
+  function riskBox(fs, n){ return '<div style="border-top:2px solid ' + INK + ';padding-top:10px;font-size:' + fs + 'px;line-height:1.6;color:' + SUB + '"><b style="color:' + INK + '">⚠️ 꼭 알아 두실 점</b>' + RISK.slice(0, n || RISK.length).map(function(t){ return '<div>· ' + t + '</div>'; }).join("") + (simLine() ? '<div style="margin-top:6px;font-weight:800;color:' + INK + '">' + e(simLine()) + '</div>' : '') + '</div>'; }
 
+
+  /* ⚖️ 심의필 (11/12 사용자 「필요해 만들어」) — 제안서 심의필과 따로 · 위험고지 문구(RISK)가 바뀌면 DV_VER 를 올림 → 예전 번호는 「다시 심의」 */
+  var DV_VER = "2026.11.12-1";
+  function SIM(){ try { return JSON.parse(lsg("divc_sim") || "{}") || {}; } catch(x){ return {}; } }
+  function simSet(k, v){ var m = SIM(); m[k] = v; m.ver = DV_VER; lss("divc_sim", JSON.stringify(m)); }
+  function tdy(){ return ymd(new Date(Date.now() + 9 * 3600e3 + new Date().getTimezoneOffset() * 6e4)); }
+  function dt(v){ return String(v || "").replace(/-/g, "."); }
+  function simState(){ var m = SIM(), no = (m.no || "").trim();
+    if (!no) return {ok: false, t: "⚠️ 심의필 없음", why: "아직 번호가 없음 — 「📝 심의 요청서」를 만들어 준법감시에 내고, 받은 번호를 넣어 주세요"};
+    if (m.ver && m.ver !== DV_VER) return {ok: false, t: "🔄 문구 바뀜 · 다시 심의", why: "위험고지 문구가 바뀌었음(" + DV_VER + ") — 새 요청서로 다시 심의받아 주세요"};
+    if (m.to && m.to < tdy()) return {ok: false, t: "⏰ 유효기간 지남", why: "유효기간(" + dt(m.to) + ")이 지났음 — 다시 심의받아 주세요"};
+    var left = m.to ? Math.round((pd(m.to) - pd(tdy())) / DAY) : null;
+    return {ok: true, warn: left != null && left <= 30, t: left != null && left <= 30 ? "⏳ 심의필 " + left + "일 남음" : "✅ 심의필 등록됨", why: ""}; }
+  function simText(){ var m = SIM(), no = (m.no || "").trim(); return no ? (/^제/.test(no) ? no : "제 " + no) + (/호$/.test(no) ? "" : "호") + (m.from || m.to ? " (" + dt(m.from) + "~" + dt(m.to) + ")" : "") : ""; }
+  function simLine(){ return simState().ok ? "미래에셋증권 준법감시인 심사필 " + simText() : ""; }
+  function simUI(){ var m = SIM(), st = simState();
+    return '<details class="dv-sim"' + (st.ok ? '' : ' open') + '><summary>⚖️ 심의필 <span class="dv-sb ' + (st.ok ? (st.warn ? 'w' : 'g') : 'r') + '" id="dvsb">' + st.t + '</span></summary>' +
+      '<p class="dv-st" id="dvsw" style="margin-top:4px">' + (st.why || "한 장·PDF·PPT 맨 아래에 심사필 번호가 찍혀요") + '</p>' +
+      '<label class="dv-f">번호<input id="dvsno" maxlength="40" placeholder="예: 제2026-0000호" value="' + e(m.no || "") + '"></label>' +
+      '<div class="dv-sd"><label>시작<input id="dvsfr" type="date" value="' + e(m.from || "") + '"></label><label>끝<input id="dvsto" type="date" value="' + e(m.to || "") + '"></label></div>' +
+      '<button type="button" data-dvmk="rev" class="dv-rv">📝 심의 요청서 PDF<small>요청서 1쪽 + 위험고지 문구 전문 + 지금 비교 견본 4쪽 별첨</small></button>' +
+      '<p class="dv-st">심의 순서: ① 요청서 PDF 만들기 → ② 준법감시에 제출 → ③ 받은 번호·기간을 위에 넣기 · 위험고지 문구 버전 ' + DV_VER + '</p></details>'; }
+  function simRefresh(){ var st = simState(), b = document.getElementById("dvsb"), w = document.getElementById("dvsw");
+    if (b){ b.textContent = st.t; b.className = "dv-sb " + (st.ok ? (st.warn ? "w" : "g") : "r"); } if (w) w.textContent = st.why || "한 장·PDF·PPT 맨 아래에 심사필 번호가 찍혀요"; }
+  function reqPage(o){
+    var names = LAST.map(function(x){ return e(x.name) + (tkName(x) !== main1(x) ? " (" + e(V.cd(x.sym)) + ")" : ""); });
+    var row = function(k, v){ return '<tr><td style="width:150px;padding:9px 12px;background:#f5f7fb;border:1px solid ' + LN + ';font-weight:800;font-size:13px">' + k + '</td><td style="padding:9px 12px;border:1px solid ' + LN + ';font-size:13px;line-height:1.55">' + v + '</td></tr>'; };
+    var body = '<div style="font-size:26px;font-weight:900;margin:8px 0 4px">광고·홍보물 심의 요청서</div><div style="font-size:13px;color:' + SUB + ';margin-bottom:16px">고객 배포용 배당 비교 자료 (한 장 그림 · PDF · PPT)</div>' +
+      '<table style="border-collapse:collapse;width:100%">' +
+      row("요청일", todayK()) + row("요청자", (o.org ? e(o.org) + " · " : "") + (e(o.pb) || "(이름)")) +
+      row("자료명", "종목·ETF 배당 비교 (고객 맞춤 · 고객 이름 자동 기재)") +
+      row("배포 방식", "카카오톡·문자 1:1 전송 (그림 1장 / PDF 4쪽 / PPT 4쪽) · 불특정 다수 게시 없음") +
+      row("내용", "비교 종목의 배당률(최근 1년 실제 배당 ÷ 현재가), 기준 금액당 1년 배당(세전·세후 대략), 배당 주기·입금 예상 달, 1년 전 대비 배당 증감, 주가 1년·주가+배당 1년 수익률 — 매 작성 시점 시세로 자동 계산") +
+      row("바뀌는 부분", "종목·ETF 종류와 개수(2~8개), 기준 금액(100만~1억원), 고객 이름, 작성일 시세 · 문구 틀과 위험고지는 고정") +
+      row("견본 종목", names.join(", ")) + row("위험고지 버전", DV_VER) + row("희망 사용 기간", "심의일로부터 1년") + '</table>' +
+      '<div style="font-size:17px;font-weight:900;margin:22px 0 8px">위험고지 문구 (자료 하단에 그대로 표기)</div>' +
+      '<div style="border:1.5px solid ' + LN + ';border-radius:12px;padding:12px 16px;font-size:12.5px;line-height:1.7">' + RISK.map(function(t, i){ return '<div>' + (i + 1) + '. ' + t + '</div>'; }).join("") + '</div>' +
+      '<div style="font-size:12px;color:' + SUB + ';margin-top:14px;line-height:1.6">· 별첨: 위 견본 종목으로 만든 PDF 4쪽 (한 장 그림은 PDF 1·2·3쪽 내용을 줄인 것)<br>· 심사필 번호는 받은 뒤 자료 하단에 「미래에셋증권 준법감시인 심사필 제 ○○호 (유효기간)」로 표기함</div>' +
+      '<div style="margin-top:28px;display:flex;justify-content:flex-end;gap:12px">' + ["요청자", "부점장", "준법감시인"].map(function(t){ return '<div style="width:110px;border:1px solid ' + LN + ';text-align:center"><div style="background:#f5f7fb;font-size:12px;font-weight:800;padding:5px">' + t + '</div><div style="height:58px"></div></div>'; }).join("") + '</div>';
+    return '<div style="width:' + PW + 'px;height:' + PH + 'px;background:#fff;font-family:' + FONT + ';position:relative;overflow:hidden">' + fixC('<div style="padding:40px 48px">' + body + '</div>') + '</div>';
+  }
   // 📱 한 장 (1080 폭 · 카톡)
   function onePage(R, o){
     var S = sc(R, o.A), W = 1080, M = 48;
@@ -457,7 +501,7 @@
   function page(o, k, title, sub, body){
     return '<div style="width:' + PW + 'px;height:' + PH + 'px;background:#fff;font-family:' + FONT + ';color:' + INK + ';position:relative;overflow:hidden">' + band(o, PW, title, sub, k) +
       fixC('<div style="padding:4px 48px 0">' + body + '</div>') +
-      '<div style="position:absolute;left:48px;right:48px;bottom:22px;display:flex;justify-content:space-between;font-size:10.5px;color:' + SUB + ';border-top:1px solid ' + LN + ';padding-top:8px"><span>' + todayK() + ' 기준' + (o.org ? ' · ' + e(o.org) : '') + (o.pb ? ' · ' + e(o.pb) : '') + '</span><span>' + k + ' / 4</span></div></div>';
+      '<div style="position:absolute;left:48px;right:48px;bottom:22px;display:flex;justify-content:space-between;font-size:10.5px;color:' + SUB + ';border-top:1px solid ' + LN + ';padding-top:8px"><span>' + todayK() + ' 기준' + (o.org ? ' · ' + e(o.org) : '') + (o.pb ? ' · ' + e(o.pb) : '') + (simLine() ? ' · ' + e(simLine()) : '') + '</span><span>' + k + ' / 4</span></div></div>';
   }
   function pages(R, o){
     var S = sc(R, o.A), A = o.A, names = S.map(function(s){ return e(main1(s.o)); }).join(" · ");
@@ -562,6 +606,10 @@
     ".dv-f2{font-size:13px;color:var(--sub);margin:2px 0 12px}.dv-am{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}.dv-am button{padding:8px 0}" +
     ".dv-mk{display:grid;gap:8px}.dv-mk button{text-align:left;font:inherit;font-size:16px;font-weight:800;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel2,transparent);color:var(--text);cursor:pointer}.dv-mk button small{display:block;font-size:12.5px;font-weight:500;color:var(--sub);margin-top:2px}.dv-mk button.main{background:#fee500;color:#191919;border-color:#fee500}.dv-mk button.main small{color:#5a4f00}.dv-mk button[disabled]{opacity:.6}" +
     ".dv-st{font-size:12px;color:var(--sub);line-height:1.5;margin:10px 2px 0;word-break:keep-all}" +
+    ".dv-sim{margin:12px 0 0;border:1px solid var(--line);border-radius:14px;padding:10px 12px}.dv-sim summary{cursor:pointer;font-size:14.5px;font-weight:800;list-style:none;display:flex;align-items:center;gap:8px}.dv-sim summary::-webkit-details-marker{display:none}.dv-sim[open] summary{margin-bottom:6px}" +
+    ".dv-sb{font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;margin-left:auto}.dv-sb.g{background:rgba(25,158,112,.18);color:#3fcf9a}.dv-sb.w{background:rgba(201,133,0,.2);color:#f2c14e}.dv-sb.r{background:rgba(217,89,38,.2);color:#ff8a65}" +
+    ".dv-sd{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}.dv-sd label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--sub)}.dv-sd input{font:inherit;font-size:14px;padding:8px 9px;border-radius:10px;border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text);min-width:0}" +
+    ".dv-rv{display:block;width:100%;text-align:left;font:inherit;font-size:15px;font-weight:800;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--panel2,transparent);color:var(--text);cursor:pointer}.dv-rv small{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-top:2px}" +
     "@media(max-width:360px){.dv-ns{grid-template-columns:repeat(3,1fr)}}";
     document.head.appendChild(st); })();
 })();
