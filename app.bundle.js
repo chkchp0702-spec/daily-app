@@ -2181,7 +2181,7 @@
       '<p class="mn-ft">⭐ 내 종목 · 💼 대형주·포트 실적 · 미국 장 뒤 실적은 한국 다음 날 아침에 반영 · 일정은 바뀔 수 있어요</p></section>';
   }
 
-  /* ── #10 💬 고객 질문 (11/10 10개 → 11/11 20개) ── */
+  /* ── #10 💬 고객 질문 (11/10 10개 → 11/11 20개 → 11/12 25개 = 기본 20 + 🔥 이슈 5) ── */
   var QD = null;
   function qload(){
     if (QD) return Promise.resolve(QD);
@@ -2238,10 +2238,11 @@
   /* 🙌 11/11 사용자 「질문 20개까지 · 각 답변 닫기 버튼 · 뒤로 버튼 — 편의성」
      → 답마다 「✕ 답 닫기」 · 하나 열면 다른 답은 접힘 · 시트 머리(늘 위에 붙어 있음)에 「← 뒤로」(답이 열려 있으면 「← 질문 목록」) · 휴대폰 뒤로 키도 같은 순서(답 → 시트)
        · 20개라 갈래 칩(전체·주식·금리·환율·상품·연금 — qa.json 의 g)과 질문 번호(Q1~) */
-  var QG = [["all", "전체"], ["주식", "📈 주식"], ["금리", "💱 금리·환율"], ["상품", "🧺 상품·연금"]];
+  // 🔥 11/12 사용자 「이슈 질문을 5개로 하고 총 25개」 — qa.json 의 "hot": true = 그날 이슈(매시간 갈아 끼움) · 칩 「🔥 오늘 이슈」로 따로 보기
+  var QG = [["all", "전체"], ["hot", "🔥 오늘 이슈"], ["주식", "📈 주식"], ["금리", "💱 금리·환율"], ["상품", "🧺 상품·연금"]];
   var CLS = '<button type="button" class="mn-qc qa-cl" data-qclose="1">✕ 답 닫기</button>';
   function richItem(x, i, open){
-    return '<details class="mn-q qa-r" data-g="' + e(x.g || "") + '"' + (open ? " open" : "") + '><summary data-n="' + (i + 1) + '">' + e(x.q) + '<em>' + e(x.a) + '</em></summary><div class="qa-body">' +
+    return '<details class="mn-q qa-r" data-g="' + e(x.g || "") + '"' + (x.hot ? ' data-hot="1"' : '') + (open ? " open" : "") + '><summary data-n="' + (i + 1) + '">' + (x.hot ? '<span class="qa-hot">🔥 이슈</span>' : '') + e(x.q) + '<em>' + e(x.a) + '</em></summary><div class="qa-body">' +
       '<p class="qa-a">' + e(x.a) + '</p>' +
       '<ol class="qa-pts">' + (x.pts || []).map(function(p){ return '<li><b>' + e(p.k) + '</b>' + e(p.t) + '</li>'; }).join("") + '</ol>' +
       ((x.act || []).length ? '<div class="qa-act"><small>그래서 이렇게</small>' + x.act.map(function(a){ return '<div><b>' + e(a[0]) + '</b><span>' + e(a[1]) + '</span></div>'; }).join("") + '</div>' : '') +
@@ -2252,7 +2253,7 @@
   }
   function qaChips(Q){
     var A = rich(Q); if (!A) return "";
-    var n = {}; A.items.forEach(function(x){ if (x.g) n[x.g] = (n[x.g] || 0) + 1; });
+    var n = {}; A.items.forEach(function(x){ if (x.g) n[x.g] = (n[x.g] || 0) + 1; if (x.hot) n.hot = (n.hot || 0) + 1; });
     if (Object.keys(n).length < 2) return "";
     return '<div class="qa-chips">' + QG.filter(function(g){ return g[0] === "all" || n[g[0]]; }).map(function(g){ return '<button type="button" data-qg="' + g[0] + '"' + (g[0] === "all" ? ' class="on"' : '') + '>' + g[1] + ' ' + (g[0] === "all" ? A.items.length : n[g[0]]) + '</button>'; }).join("") + '</div>';
   }
@@ -2312,7 +2313,7 @@
       if (ev.target.closest(".qa-bk")){ qaBack(); return; }
       var c = ev.target.closest("[data-qg]"); if (!c) return;
       var g = c.dataset.qg; [].forEach.call(d.querySelectorAll("[data-qg]"), function(b){ b.classList.toggle("on", b === c); });
-      [].forEach.call(d.querySelectorAll(".qa-b details.mn-q"), function(x){ var hide = g !== "all" && x.dataset.g !== g; x.hidden = hide; if (hide) x.open = false; });
+      [].forEach.call(d.querySelectorAll(".qa-b details.mn-q"), function(x){ var hide = g === "hot" ? !x.dataset.hot : g !== "all" && x.dataset.g !== g; x.hidden = hide; if (hide) x.open = false; });
       qaBk(); d.querySelector(".qa-in").scrollTop = 0;
     };
     qload().then(function(Q){ var c = d.querySelector(".qa-cb"); if (c) c.innerHTML = qaChips(Q); var b = d.querySelector(".qa-b"); if (b) b.innerHTML = qaList(Q); var n = d.querySelector(".qa-in"); if (n) n.scrollTop = 0; });
@@ -2397,6 +2398,7 @@
     ".qa-ht b{flex:1;min-width:0;font-size:16.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.qa-h small{display:block;color:var(--sub);font-size:12.5px}" +
     ".qa-bk{flex:0 0 auto;border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text);height:36px;padding:0 12px;border-radius:999px;font:inherit;font-size:13.5px;font-weight:800;white-space:nowrap;cursor:pointer}" +
     ".qa-x{flex:0 0 auto;border:0;background:var(--panel2,rgba(127,127,127,.14));color:var(--text);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer}" +
+    ".qa-hot{display:inline-block;margin-right:6px;font-size:12px;font-weight:800;color:#fff;background:#f04452;border-radius:6px;padding:1px 6px;vertical-align:1px}" +
     ".qa-chips{display:flex;gap:6px;overflow-x:auto;padding-top:8px;scrollbar-width:none}.qa-chips::-webkit-scrollbar{display:none}.qa-chips button{flex:0 0 auto;border:1px solid var(--line);background:transparent;color:var(--sub);border-radius:999px;height:32px;padding:0 12px;font:inherit;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}" +
     ".qa-chips button.on{background:var(--text);color:var(--bg,var(--panel,#fff));border-color:var(--text)}#qasheet .mn-q{scroll-margin-top:148px}#mnqab .mn-q{scroll-margin-top:70px}";
     document.head.appendChild(st); })();
@@ -8369,7 +8371,7 @@
     ["sector", "", "🧭 시장 흐름 · 나라별 섹터", "나침반 나라별 섹터 업종 섹터 등락 로테이션 한국 미국 일본 중국 홍콩 5개 시장 국면 장 분위기 대장주 히트맵 모닝 섹터 브리핑"],
     ["feed", "", "📰 피드", "뉴스 블로그 텔레그램 네이버 블룸버그 기사"],
     ["send", "", "📨 고객에게 한 장", "보내기 한장 카톡 문자 고객 그림 오늘 한 장 하락장 안내 이름 넣기"],
-    ["@qa", "", "💬 고객이 이렇게 물으면", "고객 질문 답 20개 팔아야 사도 돼 상담"],
+    ["@qa", "", "💬 고객이 이렇게 물으면", "고객 질문 답 25개 이슈 팔아야 사도 돼 상담"],
     ["prop", "", "📝 제안서", "제안서 투자제안 pdf ppt 심의 위험고지 성향 연금 irp dc 국고채 미국채 브라질 els 폼 회차 고르기 모의투자"],
     ["bond", "", "🏦 채권", "채권 국고채 미국채 브라질 국채 ntn 금리 만기 채권 전망 보고서 회사채"],
     ["fund", "", "📦 펀드", "펀드 사모 라인업 운용사 공모"],
@@ -20312,7 +20314,7 @@ window.VIDC = {
     ["port", "💼", "지금 뭘 얼마나 사요?", "포트 비중 그대로"],
     ["prop", "📝", "고객 제안서 만들기", "성향 → 상품 → 금액 → 끝"],
     ["@send", "📨", "고객에게 한 장 보내기", "카톡용 그림 한 장"],
-    ["@qa", "💬", "고객이 이렇게 물으면?", "오늘 시황으로 쓴 답 20개"],
+    ["@qa", "💬", "고객이 이렇게 물으면?", "오늘 시황으로 쓴 답 25개 · 🔥 이슈 5개"],
     ["bond", "🏦", "채권·ELS 금리 보기", "상품 한곳에서"],
     ["flow", "🧲", "외국인·기관은 뭘 사요?", "국내 수급 한눈에"],
     ["prob", "🎲", "오늘 오를 확률은?", "한국장 기준"],
