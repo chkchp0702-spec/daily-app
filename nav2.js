@@ -9,7 +9,7 @@
        아래 탭 = PB 가 하는 일 5가지. 나머지(포트·성적표·확률·신호·운세)는 지우지 않고 🔬 연구실(#lab) 한곳으로 — 숨은 묶음이라 아래 탭엔 없지만 들어가면 위 작은 탭은 그대로.
        되돌리기: 브랜치 backup-before-job5-1112 */
     {k: "home",  ic: "🏠", t: "오늘",   tabs: ["home", "market", "sector", "feed"]},
-    {k: "send",  ic: "📨", t: "보내기", tabs: ["send"]},
+    {k: "send",  ic: "📨", t: "한 장", tabs: ["send"]},
     {k: "prop",  ic: "📝", t: "제안서", tabs: ["prop"]},
     {k: "prod",  ic: "🛍️", t: "상품",   tabs: ["bond", "fund", "els", "divc"]},
     {k: "stock", ic: "🔍", t: "종목",   tabs: ["onepager", "flow"]},
@@ -18,7 +18,7 @@
     {k: "sig",   ic: "🎯", t: "신호",   tabs: ["whale", "cup", "gap", "screen", "sigmore"], hide: true, lab: 1},
     {k: "luck",  ic: "🔮", t: "운세",   tabs: ["luck", "saju", "tarot", "lotto"], hide: true, lab: 1}
   ];
-  var LAB = {send: "📨 보내기", lab: "🔬 연구실", onepager: "🔍 종목 찾기", home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", divc: "💰 배당비교", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
+  var LAB = {send: "📨 고객에게 한 장", lab: "🔬 연구실", onepager: "🔍 종목 찾기", home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", divc: "💰 배당비교", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
   function grpOf(k){ for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].tabs.indexOf(k) >= 0) return GROUPS[i]; return null; }
   function last(g){ var m = (window.store && store.gl) || {}; return m[g.k] && g.tabs.indexOf(m[g.k]) >= 0 ? m[g.k] : g.tabs[0]; }
 

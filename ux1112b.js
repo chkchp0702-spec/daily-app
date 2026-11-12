@@ -28,7 +28,7 @@
   /* ───────── D. 첫 화면 「할 수 있는 일」 지도 ───────── */
   var JOBS = [
     ["market",   "market", "시황 리포트",     "오늘 어디로 돈이 몰리는지"],
-    ["send",     "send",   "고객에게 보내기", "시장 한 장 · 고객 질문 답"],
+    ["send",     "send",   "고객에게 한 장", "오늘 시장 그림 · 고객 질문 답"],
     ["prop",     "prop",   "제안서 만들기",   "이름·금액만 넣으면 PDF·PPT"],
     ["bond",     "prod",   "상품 찾기",       "채권 · 펀드 · ELS · 배당"],
     ["onepager", "stock",  "종목 보기",       "검색 · 리포트 · 수급"],
@@ -83,12 +83,12 @@
         return '<button type="button" data-hub="' + x[0] + '"><span>' + x[1] + '</span><b>' + x[2] + '</b><small>' + x[3] + '</small><i>›</i></button>'; }).join("") + '</div></section>'; }).join("") +
       '<p class="hub-n">깊이 보는 화면을 한곳에 모았어요 · 지운 것은 없어요</p></div>';
     return '<div id="hub" class="hub hub-send" data-noemo="1">' +
-      '<section class="card hub-c" data-cz="done"><p class="hub-h">오늘 한 장</p><p class="hub-p" id="hubone">오늘 시장을 그림 한 장으로 — 받는 분 이름을 넣으면 그 고객만을 위한 한 장이 돼요.</p>' +
-        '<button type="button" class="hub-cta" data-hub="@one">📨 오늘 한 장 만들어 보내기</button></section>' +
+      '<section class="card hub-c" data-cz="done"><p class="hub-h">고객에게 한 장</p><p class="hub-p" id="hubone">오늘 시장을 그림 한 장으로 — 받는 분 이름을 넣으면 그 고객만을 위한 한 장이 돼요.</p>' +
+        '<button type="button" class="hub-cta" data-hub="@one">📨 고객에게 한 장 보내기</button></section>' +
       '<section class="card hub-c" data-cz="done"><p class="hub-h">고객이 이렇게 물으면 <small id="hubqn"></small></p><div class="hub-q" id="hubq"><p class="hub-p">불러오는 중…</p></div>' +
         '<button type="button" class="hub-sub" data-hub="@qa">질문 전부 보기 ›</button></section>' +
       '<section class="card hub-c" data-cz="done"><p class="hub-h">다른 것도 한 장으로</p><div class="hub-l">' +
-        [["bond", "🏦", "채권 전망 한 장", "국고채 · 미국채 · 브라질국채"], ["prop", "📝", "제안서", "성향 → 상품 → 금액 → PDF·PPT"], ["onepager", "🔍", "종목 한 장", "종목을 찾아 위 📨 누르기"]].map(function(x){
+        [["bond", "🏦", "채권 전망도 한 장", "국고채 · 미국채 · 브라질국채"], ["prop", "📝", "제안서", "성향 → 상품 → 금액 → PDF·PPT"], ["onepager", "🔍", "종목 한 장", "종목을 찾아 위 📨 누르기"]].map(function(x){
           return '<button type="button" data-hub="' + x[0] + '"><span>' + x[1] + '</span><b>' + x[2] + '</b><small>' + x[3] + '</small><i>›</i></button>'; }).join("") + '</div>' +
         '<p class="hub-n">어느 화면에서든 맨 위 📨 를 누르면 그 화면이 한 장이 돼요</p></section></div>';
   };

@@ -17,7 +17,7 @@
       '<div data-vd></div>' + (j.regime ? '<div class="pb-reg">📉 요즘 흐름(추세) ' + e(j.regime) + (j.one ? ' — ' + e(j.one) : '') + '</div>' : '') +   /* 🧭 11/10 결론(종가 판정)과 흐름(추세)을 나눠 이름 붙임 */
       '<div class="pb-talk"><small>' + (j.mode === "주말" || j.mode === "휴장" ? "🗓 지난 장 마감 정리" : "💬 고객에게 할 말") + '</small>' + (j.talk || []).map(function(t){ return '<p>· ' + e(t) + '</p>'; }).join("") + '</div>' + '<div data-flow></div>' +
       (j.events && j.events.length ? '<div class="pb-ev">📅 ' + e(j.events.join(" · ")) + '</div>' : '') +
-      '<div class="pb-ft"><button type="button" data-pbsend="1">📨 이 내용 보내기</button><span class="mut">' + (j.mode === "주말" || j.mode === "휴장" ? "장이 쉬는 날엔 마지막 마감으로 정리해요" : "장중 매시간 새로 써요 · 알림은 아침 한 번") + '</span></div></section>';
+      '<div class="pb-ft"><button type="button" data-pbsend="1">📨 고객에게 한 장 보내기</button><span class="mut">' + (j.mode === "주말" || j.mode === "휴장" ? "장이 쉬는 날엔 마지막 마감으로 정리해요" : "장중 매시간 새로 써요 · 알림은 아침 한 번") + '</span></div></section>';
   }
   function mount(){
     var b = document.getElementById("hmbody"); if (!b) return;

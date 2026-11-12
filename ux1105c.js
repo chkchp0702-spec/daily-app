@@ -39,7 +39,8 @@
     var r = ROLE();
     if (r === "inv") return '<button type="button" class="ez-cta' + (o.red ? ' red' : '') + '" data-ezgo="port">' + (o.red ? '💼 하락장 규칙대로 비중 확인하기' : '💼 지금 뭘 얼마나 사나 보기') + '</button>';
     if (r === "look") return '<button type="button" class="ez-cta" data-ezask="1">🙋 궁금한 것 골라 보기</button>';
-    return '<button type="button" class="ez-cta' + (o.red ? ' red' : '') + '" data-pbsend="1">' + (o.red ? '📨 하락장 안내 한 장 고객에게 보내기' : '📨 고객에게 오늘 한 장 보내기') + '</button>';
+    // 🧩 11/12 사용자 「통일성이 없지? 고객에게 한 장으로 통일하자」 — 이름·색 하나로 (하락장이면 한 장 안에 하락장 안내가 저절로 들어감)
+    return '<button type="button" class="ez-cta" data-pbsend="1">📨 고객에게 한 장 보내기</button>';
   }
   document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-ezask]"); if (!b) return; ev.stopPropagation(); help(); });
   var EASY_TABS = {home: 1, port: 1, score: 1, prop: 1, luck: 1, saju: 1, tarot: 1, lotto: 1};

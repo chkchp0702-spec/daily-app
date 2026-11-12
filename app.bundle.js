@@ -6026,7 +6026,7 @@
       '<div data-vd></div>' + (j.regime ? '<div class="pb-reg">📉 요즘 흐름(추세) ' + e(j.regime) + (j.one ? ' — ' + e(j.one) : '') + '</div>' : '') +   /* 🧭 11/10 결론(종가 판정)과 흐름(추세)을 나눠 이름 붙임 */
       '<div class="pb-talk"><small>' + (j.mode === "주말" || j.mode === "휴장" ? "🗓 지난 장 마감 정리" : "💬 고객에게 할 말") + '</small>' + (j.talk || []).map(function(t){ return '<p>· ' + e(t) + '</p>'; }).join("") + '</div>' + '<div data-flow></div>' +
       (j.events && j.events.length ? '<div class="pb-ev">📅 ' + e(j.events.join(" · ")) + '</div>' : '') +
-      '<div class="pb-ft"><button type="button" data-pbsend="1">📨 이 내용 보내기</button><span class="mut">' + (j.mode === "주말" || j.mode === "휴장" ? "장이 쉬는 날엔 마지막 마감으로 정리해요" : "장중 매시간 새로 써요 · 알림은 아침 한 번") + '</span></div></section>';
+      '<div class="pb-ft"><button type="button" data-pbsend="1">📨 고객에게 한 장 보내기</button><span class="mut">' + (j.mode === "주말" || j.mode === "휴장" ? "장이 쉬는 날엔 마지막 마감으로 정리해요" : "장중 매시간 새로 써요 · 알림은 아침 한 번") + '</span></div></section>';
   }
   function mount(){
     var b = document.getElementById("hmbody"); if (!b) return;
@@ -8334,7 +8334,7 @@
     [/섹터|업종|테마|요즘|세요|센 ?거/, ASK[4][1]], [/환율|달러|원화/, ASK[5][1]], [/연금|irp|IRP|DC|퇴직/i, ASK[6][1]], [/목표|모으|노후/, ASK[7][1]],
     [/포트|비중|배분|뭐 ?사/, [["💼 지금 이렇게 담으면 돼요 · 비중", "port", "#porec"]].concat(ASK[9][1].slice(0, 2))], [/큰손|고래|기관|연기금/, ASK[10][1]], [/일정|cpi|CPI|실적|fomc|FOMC|고용/, ASK[11][1]],
     [/고객.*(물|질문)|뭐라고 (답|말)|팔아야|사도 돼/, [["💬 고객이 이렇게 물으면 · 오늘 숫자로 채운 답", "@qa", ""]]], [/달력|일정|실적 ?발표|이번 ?주/, [["📅 이번 주 경제 지표·실적 일정", "home", "#mncal"]]], [/배당|분배금|월배당|고배당/, [["💰 배당비교 · 종목·ETF 배당 나란히 (100만원 기준 · 언제 들어오나)", "divc", "#dvbody"]]], [/수급|외국인|외인|기관|순매수|쌍끌이/, [["🧲 국내 수급 · 외국인·기관 집중 매수", "flow", "#flrank"]]], [/확률|오를까|오르나|내릴까/, [["🎲 다음 장 오를 확률 · 한국장 기준", "prob", "#prbody"]]], [/제안서|제안|성향/, [["📝 고객 제안서 만들기 · 4단계", "prop", ".pp-pf"]]],
-    [/한 ?장|보내|카톡/, [["📨 고객에게 오늘 한 장 · 홈", "home", "#ezhero"]]], [/운세|사주|타로|로또/, [["🔮 오늘의 운세 · 사주 · 타로", "luck", "#main"]]],
+    [/한 ?장|보내|카톡/, [["📨 고객에게 한 장 보내기", "send", "#hub"]]], [/운세|사주|타로|로또/, [["🔮 오늘의 운세 · 사주 · 타로", "luck", "#main"]]],
     [/펀드|사모/, [["🧺 펀드 · 사모 라인업", "fund", "#pdbody"]]], [/컵|cup/i, [["☕ 컵 차트 · 돌파 임박", "cup", "#main"]]], [/갭/, [["📈 갭 상승 · 오늘 갭 지도", "gap", "#main"]]]
   ];
   var QSTOP = /(지금|요즘|오늘|어때요?|어떤가요?|어떻게|괜찮아요?|이야|인가요?|일까|이에요|예요|봐|보여|줘|좀|\?|？|컵(이야|인가|이에요)?|사도 ?돼|살까|팔까)/g;
@@ -11223,7 +11223,7 @@
        아래 탭 = PB 가 하는 일 5가지. 나머지(포트·성적표·확률·신호·운세)는 지우지 않고 🔬 연구실(#lab) 한곳으로 — 숨은 묶음이라 아래 탭엔 없지만 들어가면 위 작은 탭은 그대로.
        되돌리기: 브랜치 backup-before-job5-1112 */
     {k: "home",  ic: "🏠", t: "오늘",   tabs: ["home", "market", "sector", "feed"]},
-    {k: "send",  ic: "📨", t: "보내기", tabs: ["send"]},
+    {k: "send",  ic: "📨", t: "한 장", tabs: ["send"]},
     {k: "prop",  ic: "📝", t: "제안서", tabs: ["prop"]},
     {k: "prod",  ic: "🛍️", t: "상품",   tabs: ["bond", "fund", "els", "divc"]},
     {k: "stock", ic: "🔍", t: "종목",   tabs: ["onepager", "flow"]},
@@ -11232,7 +11232,7 @@
     {k: "sig",   ic: "🎯", t: "신호",   tabs: ["whale", "cup", "gap", "screen", "sigmore"], hide: true, lab: 1},
     {k: "luck",  ic: "🔮", t: "운세",   tabs: ["luck", "saju", "tarot", "lotto"], hide: true, lab: 1}
   ];
-  var LAB = {send: "📨 보내기", lab: "🔬 연구실", onepager: "🔍 종목 찾기", home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", divc: "💰 배당비교", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
+  var LAB = {send: "📨 고객에게 한 장", lab: "🔬 연구실", onepager: "🔍 종목 찾기", home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", divc: "💰 배당비교", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
   function grpOf(k){ for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].tabs.indexOf(k) >= 0) return GROUPS[i]; return null; }
   function last(g){ var m = (window.store && store.gl) || {}; return m[g.k] && g.tabs.indexOf(m[g.k]) >= 0 ? m[g.k] : g.tabs[0]; }
 
@@ -19982,7 +19982,8 @@ window.VIDC = {
     var r = ROLE();
     if (r === "inv") return '<button type="button" class="ez-cta' + (o.red ? ' red' : '') + '" data-ezgo="port">' + (o.red ? '💼 하락장 규칙대로 비중 확인하기' : '💼 지금 뭘 얼마나 사나 보기') + '</button>';
     if (r === "look") return '<button type="button" class="ez-cta" data-ezask="1">🙋 궁금한 것 골라 보기</button>';
-    return '<button type="button" class="ez-cta' + (o.red ? ' red' : '') + '" data-pbsend="1">' + (o.red ? '📨 하락장 안내 한 장 고객에게 보내기' : '📨 고객에게 오늘 한 장 보내기') + '</button>';
+    // 🧩 11/12 사용자 「통일성이 없지? 고객에게 한 장으로 통일하자」 — 이름·색 하나로 (하락장이면 한 장 안에 하락장 안내가 저절로 들어감)
+    return '<button type="button" class="ez-cta" data-pbsend="1">📨 고객에게 한 장 보내기</button>';
   }
   document.addEventListener("click", function(ev){ var b = ev.target.closest && ev.target.closest("[data-ezask]"); if (!b) return; ev.stopPropagation(); help(); });
   var EASY_TABS = {home: 1, port: 1, score: 1, prop: 1, luck: 1, saju: 1, tarot: 1, lotto: 1};
@@ -21220,7 +21221,7 @@ window.VIDC = {
   /* ───────── D. 첫 화면 「할 수 있는 일」 지도 ───────── */
   var JOBS = [
     ["market",   "market", "시황 리포트",     "오늘 어디로 돈이 몰리는지"],
-    ["send",     "send",   "고객에게 보내기", "시장 한 장 · 고객 질문 답"],
+    ["send",     "send",   "고객에게 한 장", "오늘 시장 그림 · 고객 질문 답"],
     ["prop",     "prop",   "제안서 만들기",   "이름·금액만 넣으면 PDF·PPT"],
     ["bond",     "prod",   "상품 찾기",       "채권 · 펀드 · ELS · 배당"],
     ["onepager", "stock",  "종목 보기",       "검색 · 리포트 · 수급"],
@@ -21275,12 +21276,12 @@ window.VIDC = {
         return '<button type="button" data-hub="' + x[0] + '"><span>' + x[1] + '</span><b>' + x[2] + '</b><small>' + x[3] + '</small><i>›</i></button>'; }).join("") + '</div></section>'; }).join("") +
       '<p class="hub-n">깊이 보는 화면을 한곳에 모았어요 · 지운 것은 없어요</p></div>';
     return '<div id="hub" class="hub hub-send" data-noemo="1">' +
-      '<section class="card hub-c" data-cz="done"><p class="hub-h">오늘 한 장</p><p class="hub-p" id="hubone">오늘 시장을 그림 한 장으로 — 받는 분 이름을 넣으면 그 고객만을 위한 한 장이 돼요.</p>' +
-        '<button type="button" class="hub-cta" data-hub="@one">📨 오늘 한 장 만들어 보내기</button></section>' +
+      '<section class="card hub-c" data-cz="done"><p class="hub-h">고객에게 한 장</p><p class="hub-p" id="hubone">오늘 시장을 그림 한 장으로 — 받는 분 이름을 넣으면 그 고객만을 위한 한 장이 돼요.</p>' +
+        '<button type="button" class="hub-cta" data-hub="@one">📨 고객에게 한 장 보내기</button></section>' +
       '<section class="card hub-c" data-cz="done"><p class="hub-h">고객이 이렇게 물으면 <small id="hubqn"></small></p><div class="hub-q" id="hubq"><p class="hub-p">불러오는 중…</p></div>' +
         '<button type="button" class="hub-sub" data-hub="@qa">질문 전부 보기 ›</button></section>' +
       '<section class="card hub-c" data-cz="done"><p class="hub-h">다른 것도 한 장으로</p><div class="hub-l">' +
-        [["bond", "🏦", "채권 전망 한 장", "국고채 · 미국채 · 브라질국채"], ["prop", "📝", "제안서", "성향 → 상품 → 금액 → PDF·PPT"], ["onepager", "🔍", "종목 한 장", "종목을 찾아 위 📨 누르기"]].map(function(x){
+        [["bond", "🏦", "채권 전망도 한 장", "국고채 · 미국채 · 브라질국채"], ["prop", "📝", "제안서", "성향 → 상품 → 금액 → PDF·PPT"], ["onepager", "🔍", "종목 한 장", "종목을 찾아 위 📨 누르기"]].map(function(x){
           return '<button type="button" data-hub="' + x[0] + '"><span>' + x[1] + '</span><b>' + x[2] + '</b><small>' + x[3] + '</small><i>›</i></button>'; }).join("") + '</div>' +
         '<p class="hub-n">어느 화면에서든 맨 위 📨 를 누르면 그 화면이 한 장이 돼요</p></section></div>';
   };
