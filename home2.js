@@ -381,7 +381,7 @@
         (b.since && b.on ? '<p class="bm-note">' + e(b.ent === "credit200" ? "신용 경보+200일선" : b.ent === "clock6" ? "시계 6시" : b.ent === "clock4.5" ? "시계 4시 반" : "신호") + ' 켜진 날 ' + e(md(b.since)) + ' · 대리 버블 시계 지금 ' + (b.h_free != null ? b.h_free + "시" : "–") + '</p>' : '') +
         '</div>' + backNow + '</details>';
     }).join("");
-    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🔁 지금 장과 닮았던 때에서 가장 나았던 방식 · 누르면 설명</small></div>' + rows + '</div>';
+    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🔁 지금 장과 닮았던 때에서 가장 나았던 방식 · 누르면 설명</small></div>' + rows + '<p class="bm-note">💼 기본 포트는 S&P500 200일선 규칙이 먼저예요 · 🔁 닮은 장 규칙은 국내 주식과 시장별 참고용 — 🇺🇸 200일선 아래로 내려가 두 규칙이 엇갈리기 시작하면 알림</p></div>';
   }
   function moreHtml(B){   // 🌏 11/12 일본·중국·홍콩 — 판정 + 닮은 장 규칙 (bear.json more)
     var A = B.more || []; if (!A.length) return "";

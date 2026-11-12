@@ -9325,6 +9325,7 @@
       '<div class="po-rcp"><div class="po-rch">🧾 주문서 <small>' + won(S.amt) + '원 · ' + (S.mode === "kr" ? "₩ 원화" : "💵 외화") + '</small></div>' +
       // 10/14 A11-4: 「갖고 있는 주 수」를 넣으면 주문서가 「처음부터 다 사기」 대신 「바꿀 것만」(+n주 사기 · −n주 팔기 · 그대로)
       '<div class="po-hv"><button type="button" id="pohvt" class="' + (S.hv ? "on" : "") + '">' + (S.hv ? "✍️ 갖고 있는 주 수 넣는 중" : "✍️ 갖고 있는 주 수 넣기") + '</button><small>' + (S.hv ? "주문서가 「바꿀 것만」 보여 줘요 · 휴대폰에만 저장" : "넣으면 「바꿀 것만」 보여 줘요") + '</small></div>' +
+      '<p class="po-rl" style="margin:6px 0 2px;font-size:12px;line-height:1.45;color:var(--sub);word-break:keep-all">💼 기본 포트는 S&P500 200일선 규칙이 먼저예요 · 🔁 닮은 장 규칙은 국내 주식과 시장별 참고용 (11/12)</p>' +   // 🔁 11/12 사용자 「그 한 줄 넣고」
       bearBtn() +
       '<div id="porows"></div><div id="pobrx"></div><div id="pohvx"></div>' +
       '<div class="po-cp"><button class="btn" id="pocopy">📋 주문 목록 복사</button><span id="pocpst"></span></div></div>' +
@@ -9889,8 +9890,8 @@
     bx.innerHTML = '<div class="po-brs"><div class="po-brh">🐻 하락장 규칙 겹쳐 봄 <small>' + e(md((BR.markets[0] || {}).asof)) + ' 종가 판정</small></div>' +
       '<div class="po-brn">현금·단기 <b>' + (cr ? cr.x.pct0 : 0) + '%</b> → <b class="po-bcv">' + (cr ? cr.x.pct : 0) + '%</b> <small>(' + (cut ? '+' + won(cut) + '원' : '바뀌는 줄 없음') + ')</small></div>' +
       '<ul>' + lines + '</ul>' +
-      '<p>시장마다 그 시장 칸에만 적용 — 🇰🇷 코스피 하락장이면 한국 주식 칸 전부 현금 · 🇺🇸 S&P·나스닥은 현금 규칙을 꺼 둬서 그대로 · 금·자산 추세·현금·상품도 그대로 · 켜 둔 동안 「주문 목록 복사」도 이대로</p>' +
-      '<p class="po-brt2">참고 · 보기 전용 — 배분표 규칙과 연결할지는 아직 정하지 않음 · 매수·매도 권유 아님</p></div>';
+      '<p>시장마다 그 시장 칸에만 🔁 닮은 장 규칙의 현금 몫을 적용 — 금·자산 추세·현금·상품은 그대로 · 켜 둔 동안 「주문 목록 복사」도 이대로</p>' +
+      '<p class="po-brt2">💼 기본 포트는 S&P500 200일선 규칙이 먼저예요 · 🔁 닮은 장 규칙은 국내 주식과 시장별 참고용 · 보기 전용 · 매수·매도 권유 아님</p></div>';
   }
   function rows(){
     var box = document.getElementById("porows"); if (!box) return;
@@ -18752,7 +18753,7 @@ window.VIDC = {
         (b.since && b.on ? '<p class="bm-note">' + e(b.ent === "credit200" ? "신용 경보+200일선" : b.ent === "clock6" ? "시계 6시" : b.ent === "clock4.5" ? "시계 4시 반" : "신호") + ' 켜진 날 ' + e(md(b.since)) + ' · 대리 버블 시계 지금 ' + (b.h_free != null ? b.h_free + "시" : "–") + '</p>' : '') +
         '</div>' + backNow + '</details>';
     }).join("");
-    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🔁 지금 장과 닮았던 때에서 가장 나았던 방식 · 누르면 설명</small></div>' + rows + '</div>';
+    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🔁 지금 장과 닮았던 때에서 가장 나았던 방식 · 누르면 설명</small></div>' + rows + '<p class="bm-note">💼 기본 포트는 S&P500 200일선 규칙이 먼저예요 · 🔁 닮은 장 규칙은 국내 주식과 시장별 참고용 — 🇺🇸 200일선 아래로 내려가 두 규칙이 엇갈리기 시작하면 알림</p></div>';
   }
   function moreHtml(B){   // 🌏 11/12 일본·중국·홍콩 — 판정 + 닮은 장 규칙 (bear.json more)
     var A = B.more || []; if (!A.length) return "";
@@ -21742,7 +21743,7 @@ window.VIDC = {
         (p.ok ? '<em>주식 ' + p.stock + '%</em><small><b>' + e(SHORT[p.k] || p.rule) + '</b> · 다음: ' + e(p.next) + '</small>'
               : '<em class="no">정하지 않음</em><small>통하는 방식이 없었어요 — 한 번에 사지 말고 나눠 사기만 참고</small>') + '</li>'; }).join("");
     return '<div class="an-pk"><div class="an-pkh">📌 지금 규칙 <small>닮은 장에서 2년 뒤 가운데값이 가장 좋았던 방식</small></div><ul>' + rows + '</ul>' +
-      '<p>고른 방식이 우연인지 보려고 닮은 때 하나를 빼고 고른 뒤 그 하나에 적용해 봤어요(12번 반복). 그 결과가 계속 현금(2년 약 ' + (A.cash2 || 4) + '%)보다 못한 곳은 정하지 않았어요. 🇰🇷🇺🇸 네 시장은 하락장 계기판의 현금 몫에 그대로 반영돼요.</p></div>';
+      '<p>고른 방식이 우연인지 보려고 닮은 때 하나를 빼고 고른 뒤 그 하나에 적용해 봤어요(12번 반복). 그 결과가 계속 현금(2년 약 ' + (A.cash2 || 4) + '%)보다 못한 곳은 정하지 않았어요. 🇰🇷🇺🇸 네 시장은 하락장 계기판의 현금 몫에 그대로 반영돼요. 💼 기본 포트는 S&P500 200일선 규칙이 먼저예요 · 🔁 닮은 장 규칙은 국내 주식과 시장별 참고용 · 고르는 방식이 바뀌면 알림이 가요.</p></div>';
   }
   window.__analogCard = function(A){
     if (!A || !A.markets || !A.markets.length) return "";
