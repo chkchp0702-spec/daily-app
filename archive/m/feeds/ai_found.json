@@ -1,6 +1,70 @@
 {
  "items": [
   {
+   "title": "엔비디아 이사회, 황 CEO 거취 결정 회의 — 리더십 위기 심화",
+   "url": "https://www.koreatimes.co.kr/world/20261112/nvidia-board-meets-to-decide-ceo-huangs-future-as-leadership-crisis-deepens",
+   "press": "Korea Times",
+   "at": "2026-11-12 11:45",
+   "why": "🫧 경보판 「대장주 단독 vs 현금 도피」 판정 · 💬 Q3 반도체 답",
+   "summary": "이사회가 11/12(미국시간) 황 CEO 거취 논의 · 차기 CEO 절차 착수 보도 · 결과에 따라 오늘 밤 NVDA·SOXX 방향"
+  },
+  {
+   "title": "미 주가지수 선물, 엔비디아 혼란 심화에 하락 — Markets Wrap",
+   "url": "https://www.swissinfo.ch/eng/us-stock-futures-fall-as-nvidia-turmoil-deepens:-markets-wrap/92367440",
+   "press": "Bloomberg(swissinfo)",
+   "at": "2026-11-12 11:45",
+   "why": "오늘 밤 미국장 출발 톤 — S&P 정상 판정·나스닥 조정 칸",
+   "summary": "엔비디아 경영 혼란에 미 지수 선물 약세 · 코어위브 강세와 엇갈림"
+  },
+  {
+   "title": "삼성전자, 온양사업장에 56조원 — HBM 팹 5개 라인 구축",
+   "url": "https://biz.heraldcorp.com/article/10796110",
+   "press": "헤럴드경제",
+   "at": "2026-11-12 10:45",
+   "why": "오늘 온양 HBM 공장 착공·대통령 「40조 장비 투자」 발언의 바탕 — 한국 반도체·장비 ETF(091160) 수요 쪽 근거",
+   "summary": "삼성 충청권 140조 투자 계획 중 온양 56조·HBM 팹 5개 라인(7월 국민보고회) · 11/12 착공식에서 대통령이 HBM 6조 + 첨단 장비 약 40조 언급(텔레그램 kimu_nim, 금액 원문 미확인)"
+  },
+  {
+   "title": "엔비디아, 이사회 조사 착수 뒤 8% 급락 — 실적 9일 앞",
+   "url": "https://www.tikr.com/blog/nvidia-sinks-8-as-board-probes-reports-huang-was-target-of-a-foreign-intelligence-effort",
+   "press": "TIKR",
+   "at": "2026-11-12 09:45",
+   "why": "반도체 칸·091160 · 11/17 실적 앞 경영 공백 — 「사람 위험」이 실적 이벤트와 겹침 · qa 3·11",
+   "summary": "11/9 이사회 독립 조사 착수 → 11/11 장 뒤 WSJ 해임 준비 보도로 시간외 −8~9% · 실적 발표 약 9일 전"
+  },
+  {
+   "title": "엔비디아 이사회 성명 — 독립 조사",
+   "url": "https://investor.nvidia.com/news/press-release-details/2026/Statement-from-NVIDIA-Board-of-Directors/",
+   "press": "NVIDIA IR",
+   "at": "2026-11-12 09:45",
+   "why": "1차 자료 — 해임 보도와 회사 공식 입장 구분용 · 오늘 이사회 발표 대조",
+   "summary": "이사회 명의 공식 성명(11/9 무렵) · 해임 여부는 아직 회사 발표 없음(미확인)"
+  },
+  {
+   "title": "엔비디아 이사회, 젠슨 황 CEO 해임 준비 — 시간외 9% 넘게 급락",
+   "url": "https://en.bloomingbit.io/feed/news/124238",
+   "press": "Bloomingbit(WSJ 인용)",
+   "at": "2026-11-12 08:45",
+   "why": "반도체 칸·오늘 한국 개장(하닉·삼성·091160) 갭다운 위험 · 11/17 실적 앞 경영 공백 · qa 3·5·11",
+   "summary": "WSJ 「이사회가 황 CEO 축출 준비」 보도 뒤 시간외 −9%↑ · 11/11 정규장은 173.7달러(+2.9%) 마감 · 후속 NYT 「사내 임원과 관계」 보도"
+  },
+  {
+   "title": "NYT 「젠슨 황, 보고 라인 임원과 관계」 — 엔비디아 시간외 하락 확대",
+   "url": "https://www.cnbc.com/2026/11/11/nvidia-jensen-huang-affair-employee.html",
+   "press": "CNBC",
+   "at": "2026-11-12 08:45",
+   "why": "11/9 이사회 조사(스파이 의혹)에 두 번째 의혹 — 경영 공백 장기화 위험 · qa 3",
+   "summary": "11/9 이사회 독립 조사 착수 → 11/11 NYT 두 번째 관계 보도 → WSJ 해임 준비 보도 순 · 실적 11/17·하원 브리핑 요구 11/18"
+  },
+  {
+   "title": "엔비디아 주가, 이사회 해임 준비 보도에 급락",
+   "url": "https://www.cbsnews.com/news/nvidia-stock-dives-report-board-prepares-oust-jensen-huang/",
+   "press": "CBS News",
+   "at": "2026-11-12 08:45",
+   "why": "미국 대표 매체 확인 — 반도체 칸·🎯 상류 가설의 대장주 단독 위험",
+   "summary": "WSJ 보도 인용 · 이르면 이사회 회의 임박 보도(kimu_nim 텔레그램) · 정규장 상승분 반납"
+  },
+  {
    "title": "앤스로픽, 추수감사절 전 1.5조 달러 상장 강행 보도",
    "url": "https://fourweekmba.com/ai-anthropic-said-to-press-on-with-1-5t-pre-thanksgiving-ipo/",
    "press": "FourWeekMBA",
@@ -575,70 +639,6 @@
    "at": "2026-11-10 13:40",
    "why": "NVDA 키맨 리스크 — 반도체 칸·AI 차입 가설, 분리 반등 그림자(10:40 아이디어) 관찰 대상",
    "summary": "NYT 보도(미 정보당국, 중국 측 인물-황 CEO 연결) 뒤 트럼프가 직접 조사 언급 · 일부 매체는 트럼프가 황을 옹호했다고도 보도(엇갈림)"
-  },
-  {
-   "title": "모건스탠리, 삼성·SK하이닉스 메모리 「밸류에이션 함정」 경고",
-   "url": "https://www.kucoin.com/blog/samsung-sk-hynix-valuation-trap",
-   "press": "KuCoin 블로그(MS 리포트 요약)",
-   "at": "2026-11-10 12:40",
-   "why": "🐻 코스피 다시 사기·091160 — 장기 마진 가정 하향이면 반도체 반등은 숏커버 성격일 수 있음",
-   "summary": "MS 숀킴 메모: 29~35년 D램 OPM 가정 하이닉스 60→32%, 삼성 60→39%(텔레그램 kimu_nim 11/10). 블로그 게시일·세부 목표가는 미확인"
-  },
-  {
-   "title": "美 CPI: 에너지가 헤드라인을 끌어올릴 전망 — 근원은 억제될까",
-   "url": "https://investinglive.com/news/us-cpi-energy-prices-expected-to-lift-headline-inflation-will-core-stay-contained/",
-   "press": "investingLive",
-   "at": "2026-11-10 11:40",
-   "why": "오늘 밤 10월 CPI(월간만) — 🐻 현금 해제 조건 「CPI 월간 근원」·고금리 정점 가설 판정",
-   "summary": "에너지 가격이 헤드라인을 올리고 근원이 억제되는지가 관건이라는 미리보기. 세부 예상치 숫자는 미확인"
-  },
-  {
-   "title": "앤트로픽, 11/9 주간 로드쇼 시작 가능 — 추수감사절 전 상장",
-   "url": "https://www.implicator.ai/anthropic-could-start-ipo-roadshow-week-of-nov-9-putting-debut-before-thanksgiving/",
-   "press": "Implicator",
-   "at": "2026-11-10 11:40",
-   "why": "AI 차입·공급 가설 — 최대 693억$(로이터) 초대형 IPO가 상장 전후 AI 대형주 수급을 흡수할 수 있음",
-   "summary": "로드쇼 11/9 주간 시작 가능, 추수감사절 전 데뷔. 로이터는 조달 규모 최대 693억 달러 보도(피드)"
-  },
-  {
-   "title": "연준 데일리: 추가 긴축은 AI·관세·에너지 충격이 지속되는지에 달려",
-   "url": "https://investinglive.com/central-banks/fed-s-daly-more-tightening-depends-on-whether-ai-tariff-and-energy-shocks-persist/",
-   "press": "investingLive",
-   "at": "2026-11-10 10:45",
-   "why": "오늘 밤 10월 CPI 앞 연준 매파 톤 — 10년 5% 가설·현금 해제(CPI 월간 근원) 조건과 직결",
-   "summary": "데일리 총재, 인상 필요 여부는 AI 투자·관세·에너지발 물가 충격의 지속성에 달렸다고 언급. 피드(gn_us_fed)에는 「추가 인상 가능성 높다」 제목. 발언 정확한 날짜·문구 미확인."
-  },
-  {
-   "title": "엔비디아 주가 하락 이유 — 황 CEO 스캔들·메가스피드 조사",
-   "url": "https://www.barchart.com/story/news/35991549/why-nvidia-nvda-stock-is-falling-today",
-   "press": "Barchart",
-   "at": "2026-11-10 10:45",
-   "why": "NVDA 홀로 급락·S&P 급등 「역사적 분리」(bbg) — 반도체 반등이 대장주 없이 가능한지, 코스피 삼전·닉스 반등 지속성 점검",
-   "summary": "황 CEO 사생활·中 연계 의혹, 메가스피드 칩 우회 조사 보도로 NVDA 장중 −9%(gn_kr_global). The Information: 대중 수출 통제 강화 직면. 엔비디아는 우회 의혹 「조사·반박됨」 입장."
-  },
-  {
-   "title": "모건스탠리 「美 증시 조정 막바지」",
-   "url": "https://www.kitco.com/news/off-the-wire/2026-11-02/us-market-correction-nearing-end-morgan-stanley-strategists-say",
-   "press": "Kitco/Reuters",
-   "at": "2026-11-10 09:40",
-   "why": "S&P·나스닥 칸 — 11/10 「경기민감주 비중 확대」 보도의 원 발언, 다시 사기 판단 참고",
-   "summary": "윌슨팀 11/2: 대형주 다수 약 10% 조정, 조정이 끝나가는 국면. 금리가 마지막 변수(세부 숫자 미확인)."
-  },
-  {
-   "title": "사우디 동서 송유관 메디나 인근 피격 — OPEC 산유량은 전쟁 전 90%까지 회복",
-   "url": "https://mlq.ai/news/saudi-arabias-east-west-oil-pipeline-is-attacked-near-medina-as-opec-output-recovers-to-90-of-pre-war-levels/",
-   "press": "mlq.ai",
-   "at": "2026-11-10 08:40",
-   "why": "🛢️ 에너지 칸·brent_95 조건 — 평화 기대에 눌린 유가의 공급 쪽 꼬리 위험",
-   "summary": "11/9 사우디 국영매체: 동서 송유관 메디나 구간 피격. 같은 날 브렌트는 이란 협상 기대에 92.3$(−6.1%)로 마감 — 공격보다 평화 기대가 가격을 이김. 9월 같은 송유관 가동 중단 때는 유가 급등."
-  },
-  {
-   "title": "美-이란 평화 협상 기대에 유가 7% 급락",
-   "url": "https://propakistani.pk/2026/11/10/oil-prices-crash-7-percent-us-iran-peace-hopes/",
-   "press": "ProPakistani",
-   "at": "2026-11-10 08:40",
-   "why": "오늘 밤 10월 CPI 뒤 다음 달 에너지 물가 하향 근거 — 인플레 정점·금리 가설과 연결",
-   "summary": "트럼프 「이란 분쟁 종식 쪽 모멘텀」 발언 뒤 유가 최대 7% 하락. 브렌트 92$대·WTI 86~87$(latest)."
   }
  ],
  "at": "2026-11-12 05:45"
