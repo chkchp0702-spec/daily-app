@@ -13,4 +13,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q yfinance pandas numpy holidays
-      - run: python probe/inst103_bt.py
+      - run: python probe/inst103b_bt.py
