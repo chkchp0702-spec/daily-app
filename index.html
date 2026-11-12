@@ -500,6 +500,9 @@ var CATS = [
   {key:"danta",  name:"단타", short:"단타",     icon:"⚡", color:"#ff6b6b", desc:"장중 단타 알람 · 이후 수익률 추적 · 시험 중"},
   {key:"alarm",  name:"알림", short:"알림",     icon:"🔔", color:"#ffd166", desc:"이 휴대폰으로 알림 받을지 켜고 끄기"},
   {key:"idea",   name:"의견함", short:"의견",   icon:"💬", color:"#9ad0ff", desc:"앱에 바라는 점을 남겨 주세요 · 사진·파일 첨부 가능"},
+  // 🧊 11/12 할 일 5칸: 📨 보내기(한 장·고객 질문 한곳) · 🔬 연구실(포트·신호·성적표·운세 모음) — ux1112.js
+  {key:"send",   name:"고객에게 보내기", short:"보내기", icon:"📨", color:"#3182f6", desc:"오늘 시장 한 장 · 고객 질문 답 — 카톡으로 바로"},
+  {key:"lab",    name:"연구실", short:"연구실", icon:"🔬", color:"#a0a8b8", desc:"포트 · 성적표 · 신호 · 확률 · 운세 — 깊이 보는 것 모음"},
   {key:"feed",   name:"내 피드", short:"피드",  icon:"📰", color:"#f4a261", desc:"매일 보는 블로그·텔레그램 한곳에 · 시황리포트 재료"},
   // 🛍️ 상품 (10/16): 미래에셋증권이 지금 파는 것 — 채권 · 펀드 · ELS (products.js · archive/x/products.json)
   {key:"bond",   name:"채권", short:"채권",     icon:"🏦", color:"#5ac8fa", desc:"미래에셋이 지금 파는 국고채 · 미국채 · 브라질국채 · 공사채·회사채 — 세후 수익률 순"},
@@ -656,6 +659,7 @@ function go(key, id){
   var h = '<section class="hero"><h1>' + c.icon + " " + c.name + '</h1><p>' + c.desc + '</p><div class="meta">' +
           (key === "onepager" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰</span>' : key === "alarm" ? '<span class="chip">켜기 · 끄기만</span>' : key === "idea" ? '<span class="chip">매시간 모아서 반영</span>' : key === "port" ? '<span class="chip">10/2부터 · 매일 갱신</span>' : key === "home" ? '<span class="chip">매시간 갱신</span><span class="chip">누르면 그 탭으로</span>' : key === "score" ? '<span class="chip">매시간 자동 채점</span>' : key === "sigmore" ? '<span class="chip">한 단계 아래 · 참고</span>' : key === "prob" ? '<span class="chip">매시간 계산</span><span class="chip">마감 뒤 채점</span>' : key === "flow" ? '<span class="chip">매일 마감 뒤</span><span class="chip">사는 신호 아님</span>' : key === "divc" ? '<span class="chip">🇺🇸 🇰🇷 🇯🇵 🇨🇳 🇭🇰 종목·ETF</span><span class="chip">100만원 기준</span>' : (key === "bond" || key === "fund" || key === "els") ? '<span class="chip">미래에셋증권</span><span class="chip">하루 3번 갱신</span>' : key === "prop" ? '<span class="chip">매일 아침 + 장중 갱신</span><span class="chip">AI 안 씀 · 0원</span>' : key === "feed" ? '<span class="chip">블로그 5 · 텔레그램 8 · 뉴스 47</span><span class="chip">15분마다</span>' : key === "luck" ? '<span class="chip">매일 0시 새로</span><span class="chip">🔒 생일은 이 휴대폰에만</span>' : key === "saju" ? '<span class="chip">휴대폰 안에서 계산</span><span class="chip">📄 PDF 저장</span>' : key === "tarot" ? '<span class="chip">질문 맞춤 해석</span><span class="chip">78장 · 10가지 주제</span>' : key === "lotto" ? '<span class="chip">전 회차 분석</span><span class="chip">토요일 밤 자동 갱신</span>' : '<span class="chip">누적 ' + items.length + '일</span>') +
           (items[0] && key !== "onepager" && key !== "alarm" && key !== "idea" && key !== "feed" && key !== "port" && key !== "home" && key !== "score" && key !== "sigmore" && key !== "prob" && key !== "flow" && key !== "divc" && key !== "bond" && key !== "fund" && key !== "els" && key !== "prop" && key !== "luck" && key !== "saju" && key !== "tarot" && key !== "lotto" ? '<span class="chip">최신 ' + items[0].id.slice(0, 10) + '</span>' : '') + '</div></section>';
+  if (key === "send" || key === "lab") { $("main").innerHTML = h + (window.hubView ? hubView(key) : ""); if (window.hubInit) hubInit(key); window.scrollTo(0, 0); return; }   // 🧊 11/12
   if (key === "onepager") { $("main").innerHTML = h + opView(); opInit(id); window.scrollTo(0, 0); return; }
   if (key === "alarm") { $("main").innerHTML = h + alarmView(); alarmInit(); window.scrollTo(0, 0); return; }
   if (key === "idea") { $("main").innerHTML = h + ideaView(); ideaInit(); window.scrollTo(0, 0); return; }
@@ -1560,7 +1564,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261112c";
+var APPV = "20261112b";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1612,7 +1616,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합친 한 파일. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.bundle.js?v=002c8ea935"></script>
+<script defer src="app.bundle.js?v=21117fb733"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1649,7 +1653,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="pdfx.js?v=9"></script>
 <script defer src="honest.js?v=1"></script>
 <script defer src="up10.js?v=30"></script>
-<script defer src="nav2.js?v=34"></script>
+<script defer src="nav2.js?v=35"></script>
 <script defer src="vvfix.js?v=2"></script>   <!· 📱 11/02 iOS 26 키보드 뒤 아래 탭 바·위 띠 떠 보임 바로잡기 ·>
 <script defer src="clamp.js?v=5"></script>
 <script defer src="ticker.js?v=3"></script>
@@ -1681,19 +1685,19 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="guide.js?v=36"></script>   <!· 🧒 10/22 꼬마 안내원 ·>
 <script defer src="easy.js?v=5"></script>   <!· 🗣 10/28 쉬운 말 (끄기: localStorage easy=off) ·>
 <script defer src="habit.js?v=2"></script>   <!· 🏠 10/31 다시 오게: 홈 접기·1탭 예측·배지·운세 다리·장중 바뀐 것·이번 주 한 장·본 뒤 바뀐 것 ·>
-<script defer src="home2.js?v=13"></script>   <!· 🏠 10/31 오늘 v2 — 기본으로 켬 (예전 홈 ?home2=0) ·>
+<script defer src="home2.js?v=12"></script>   <!· 🏠 10/31 오늘 v2 — 기본으로 켬 (예전 홈 ?home2=0) ·>
 <script defer src="design.js?v=3"></script>   <!· 🎨 10/22 디자인 한 벌 ·>
 <script defer src="wow.js?v=2"></script>   <!· 🎨 11/04 「우와」 한 벌 2 (냉정 점검 31) ·>
 <script defer src="ux1105.js?v=1"></script>   <!· 🔍 11/05 냉정 분석 다 진행 — 13px·빈 카드 띠·운세 줄·첫 안내 ·>
 <script defer src="ux1105b.js?v=1"></script>   <!· 📐📋 11/05 A11/5-1 수익률 지도 · A11/5-3 받은 글 → 답장 한 장 ·>
 <script defer src="bond_outlook.js?v=1"></script>   <!· 📄 11/05 채권 전망 보고서 (국채·미국채·브라질 · 한 장 + PDF) ·>
-<script defer src="ux1105c.js?v=10"></script>   <!· 🔰 11/05 쉬운 화면 13가지 (끄기: localStorage ezmode=pro · 주소 ?ez=0) ·>
+<script defer src="ux1105c.js?v=11"></script>   <!· 🔰 11/05 쉬운 화면 13가지 (끄기: localStorage ezmode=pro · 주소 ?ez=0) ·>
 <script defer src="ux1109.js?v=1"></script>   <!· 🧊 11/09 냉정 재점검 17 — 뭐 살까 순서·정직 한 줄·카드 5개·머리 아이콘·전문어 밑줄 ·>
 <script defer src="ux1109b.js?v=3"></script>   <!· 🌱 11/09 A11/9-1 바닥 신호 4개의 과거 성적표 (계기판 체크리스트) ·>
 <script defer src="ux1110.js?v=1"></script>   <!· 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (반등 날에만) ·>
 <script defer src="ux1110b.js?v=6"></script>   <!· 🫧 11/10 버블 경보판 (전병서 11/11 경보표 · 계기판 아래) · 🕰 11/11 버블 시계 ·>
-<script defer src="ux1112.js?v=2"></script>   <!· 🧭 11/12 계절 시계 (5개국 지수 달력·추세 · 버블 경보판 아래) ·>
 <script defer src="ux1111.js?v=1"></script>   <!· 🔭 11/11 신호 탭 「지켜보는 중」 모드 (코스피 🐻 동안 · bear_watch.json) ·>
+<script defer src="ux1112.js?v=1"></script>   <!· 🧊 11/12 한 화면 · 할 일 5칸 · 🔬 연구실 · 첫 화면 기능 지도 · 디자인 통일 (되돌리기: 브랜치 backup-before-job5-1112) ·>
 📦list-->
 <!-- 📦/JS -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>

@@ -5,16 +5,20 @@
    ④ 뒤로 버튼은 돌아갈 곳이 있을 때만 */
 (function(){
   var GROUPS = [
-    // 🔍 11/05 A4 아래 탭 8 → 6: 🔮 운세 묶음은 「오늘」 안으로(홈 맨 아래 줄 · 위 작은 탭), 📰 피드는 「시장」 안으로(시황 재료)
-    {k: "home", ic: "🏠", t: "오늘", tabs: ["home"]},   // 🔮 11/10 #12 운세 4탭은 아래 「luck」 숨은 묶음으로 (지우지 않음 · 홈 맨 아래 줄·🙋·더보기에서 들어감)
-    {k: "mkt",  ic: "🌐", t: "시장", tabs: ["market", "sector", "flow", "prob", "feed"]},
-    {k: "inv",  ic: "💼", t: "포트", tabs: ["port", "divc", "score"]},
-    {k: "sig",  ic: "🎯", t: "신호", tabs: ["whale", "cup", "gap", "screen", "sigmore"]},   // 10/12: 🤫 매집·⚡ 단타는 메뉴에서 뺌 — 알림(앱·텔레그램)으로만. 알림을 누르면 그 화면은 그대로 열림
-    {k: "prod", ic: "🛍️", t: "상품", tabs: ["bond", "fund", "els"]},   // 10/16 사용자: 상품 카테고리 — 채권·펀드·ELS
-    {k: "prop", ic: "📝", t: "제안서", tabs: ["prop"]},
-    {k: "luck", ic: "🔮", t: "운세", tabs: ["luck", "saju", "tarot", "lotto"], hide: true},   // 🔮 11/10 #12 아래 탭 바엔 안 보임 · 들어가면 위 작은 탭 4개                 // 10/28 사용자: 제안서 카테고리 — 기본폼 9종 → 한 장·PDF·PPT
+    /* 🧊 11/12 냉정 분석 4차 「한 화면 · 할 일 5칸 · 연구실」 — 사용자 「네 의견대로 다 진행해」
+       아래 탭 = PB 가 하는 일 5가지. 나머지(포트·성적표·확률·신호·운세)는 지우지 않고 🔬 연구실(#lab) 한곳으로 — 숨은 묶음이라 아래 탭엔 없지만 들어가면 위 작은 탭은 그대로.
+       되돌리기: 브랜치 backup-before-job5-1112 */
+    {k: "home",  ic: "🏠", t: "오늘",   tabs: ["home", "market", "sector", "feed"]},
+    {k: "send",  ic: "📨", t: "보내기", tabs: ["send"]},
+    {k: "prop",  ic: "📝", t: "제안서", tabs: ["prop"]},
+    {k: "prod",  ic: "🛍️", t: "상품",   tabs: ["bond", "fund", "els", "divc"]},
+    {k: "stock", ic: "🔍", t: "종목",   tabs: ["onepager", "flow"]},
+    {k: "lab",   ic: "🔬", t: "연구실", tabs: ["lab"], hide: true},
+    {k: "inv",   ic: "💼", t: "포트",   tabs: ["port", "score", "prob"], hide: true, lab: 1},
+    {k: "sig",   ic: "🎯", t: "신호",   tabs: ["whale", "cup", "gap", "screen", "sigmore"], hide: true, lab: 1},
+    {k: "luck",  ic: "🔮", t: "운세",   tabs: ["luck", "saju", "tarot", "lotto"], hide: true, lab: 1}
   ];
-  var LAB = {home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", divc: "💰 배당비교", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
+  var LAB = {send: "📨 보내기", lab: "🔬 연구실", onepager: "🔍 종목 찾기", home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", divc: "💰 배당비교", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
   function grpOf(k){ for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].tabs.indexOf(k) >= 0) return GROUPS[i]; return null; }
   function last(g){ var m = (window.store && store.gl) || {}; return m[g.k] && g.tabs.indexOf(m[g.k]) >= 0 ? m[g.k] : g.tabs[0]; }
 
@@ -38,11 +42,11 @@
     if (cur && cur !== "onepager"){ store.lastTab = cur; }
     try { updBack(); } catch(x) {}
     if (g){ store.gl = store.gl || {}; store.gl[g.k] = cur; try { save(); } catch(x) {} }
-    if (g && g.tabs.length > 1 && cur !== "home"){   // 홈에선 위 작은 탭을 안 보임(첫 화면 깔끔하게)
+    if (g && g.tabs.length > 1){   // 🧊 11/12: 홈에서도 위 작은 탭을 보임(오늘·시황·시장 흐름·피드 — 「뭐가 있는지 모르겠다」)
       nav.className = "tabs sub";
-      nav.innerHTML = g.tabs.map(function(k){ var c = CATS.filter(function(x){ return x.key === k; })[0] || {};
-        return '<button class="tab' + (k === cur ? " on" : "") + '" style="--c:' + c.color + '" data-k="' + k + '">' + (LAB[k] || c.name) + '</button>'; }).join("");
-      [].forEach.call(nav.children, function(b){ b.onclick = function(){ if (b.dataset.k !== cur) go(b.dataset.k); }; });
+      nav.innerHTML = (g.lab ? '<button class="tab tab-lab" data-k="lab">‹ 연구실</button>' : '') + g.tabs.map(function(k){ var c = CATS.filter(function(x){ return x.key === k; })[0] || {};
+        return '<button class="tab' + (k === cur ? " on" : "") + '" style="--c:' + c.color + '" data-k="' + k + '">' + String(LAB[k] || c.name).replace(/^[^\s가-힣A-Za-z]+\s+/, "") + '</button>'; }).join("");   // 🧊 11/12 위 작은 탭은 글자만(이모지 뺌)
+      [].forEach.call(nav.children, function(b){ b.onclick = function(){ if (b.dataset.k !== cur || cur === "onepager") go(b.dataset.k); }; });   // 🧊 11/12 종목리포트를 보다가 「종목 찾기」를 누르면 검색으로
       var on = nav.querySelector(".on"); if (on && on.scrollIntoView) try { on.scrollIntoView({inline: "center", block: "nearest"}); } catch(x) {}
       if (window.subBadges) try { subBadges(nav); } catch(x) {}   // 📱 A12-5 신호 탭 숫자 배지
     } else { nav.className = "tabs sub none"; nav.innerHTML = ""; }
@@ -53,7 +57,7 @@
   // ⑦ 뒤로: 홈이 아니면 늘 보이게 (알림 링크로 종목 화면을 바로 열었을 때도) — 더 돌아갈 기록이 없으면 보던 탭 → 오늘로
   window.updBack = function(){ var b = document.getElementById("backbtn"); if (!b) return; b.classList.add("on");
     // 🎨 11/04: 아래 탭으로 가는 첫 화면(돌아갈 기록 없음)에선 숨김 — 종목리포트처럼 탭에 없는 화면은 보임
-    var tabbed = !!(window.cur && document.querySelector("#bnav") && ["home","market","sector","flow","prob","port","divc","score","whale","cup","gap","screen","sigmore","bond","fund","els","prop","luck","saju","tarot","lotto","feed"].indexOf(cur) >= 0);
+    var tabbed = !!(window.cur && document.querySelector("#bnav") && ["home","market","sector","flow","divc","bond","fund","els","prop","feed","send","lab"].indexOf(cur) >= 0);
     b.classList.toggle("root", tabbed ? !document.getElementById("sheet") : !(navD() > 0 || !!document.getElementById("sheet") || (window.cur && cur !== "home"))); };
   var _goBack = window.goBack;
   window.goBack = function(){

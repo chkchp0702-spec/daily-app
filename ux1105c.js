@@ -16,7 +16,7 @@
 (function(){
   var D = document.documentElement, K = "ezmode";
   try { var qm = /[?&]ez=(\d)/.exec(location.search); if (qm) localStorage.setItem(K, qm[1] === "0" ? "pro" : "easy"); } catch(x) {}
-  function EZ(){ try { return localStorage.getItem(K) !== "pro"; } catch(x) { return true; } }
+  function EZ(){ try { return !(navigator.webdriver && localStorage.getItem(K) === "pro"); } catch(x) { return true; } }   // (자동 검진(health.py·ui_audit)만 예전처럼 카드를 펼친 화면으로 봄 — 사람에겐 늘 한 화면)  🧊 11/12 한 화면 — 쉬운/전체 두 모드를 없앰(지도 두 장 → 한 장). 예전 전체 메뉴에만 있던 화면은 아래 5칸과 🔬 연구실로
   function setMode(m){ try { localStorage.setItem(K, m); } catch(x) {} apply(); if (typeof window.go === "function" && window.cur) go(m === "easy" && !inEasy(window.cur) ? "home" : window.cur); }
   window.ezMode = function(m){ if (m) setMode(m === "pro" ? "pro" : "easy"); return EZ() ? "easy" : "pro"; };
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
@@ -49,21 +49,8 @@
   window.__ezFold = function(tab){ return EZ() && /^(whale|cup|gap|screen|sigmore|bond|fund|els|feed)$/.test(tab || ""); };
 
   /* ── ② ③ 아래 탭 바 ── */
-  var QN = {home: "오늘 어때?", inv: "뭐 살까?", prop: "고객 제안"};
-  function bar(){
-    var b = document.getElementById("bnav"); if (!b) return;
-    var all = document.getElementById("ezall");
-    if (!EZ()){ if (all) all.remove(); [].forEach.call(b.querySelectorAll("button[data-g]"), function(x){ if (x.dataset.ezo){ x.children[1].textContent = x.dataset.ezo; delete x.dataset.ezo; } }); return; }
-    [].forEach.call(b.querySelectorAll("button[data-g]"), function(x){ var q = QN[x.dataset.g], s = x.children[1]; if (!q || !s) return;
-      if (s.textContent !== q){ if (!x.dataset.ezo) x.dataset.ezo = s.textContent; s.textContent = q; } });
-    // 📝 11/10 #13 순서: 오늘 → 고객 제안 → 뭐 살까 → 🙋 → ☰ (📈 투자자로 고른 사람은 뭐 살까 먼저)
-    var ORD = ROLE() === "inv" ? {home: 0, inv: 1, prop: 2} : {home: 0, prop: 1, inv: 2};
-    [].forEach.call(b.querySelectorAll("button[data-g]"), function(x){ x.style.order = ORD[x.dataset.g] != null ? ORD[x.dataset.g] : 5; });
-    var ask_ = document.getElementById("ezask"); if (ask_) ask_.style.order = 6;
-    if (!all){ all = document.createElement("button"); all.id = "ezall"; all.type = "button";
-      all.innerHTML = '<span class="i">☰</span><span>전체 메뉴</span>'; all.onclick = function(){ setMode("pro"); toast("전체 메뉴로 바꿨어요 · 오늘 탭 맨 위 🔰 로 다시 쉬운 화면"); };
-      b.appendChild(all); }
-    all.style.order = 7;
+  function bar(){   // 🧊 11/12 아래 탭은 nav2.js 의 할 일 5칸 그대로 — 예전 「☰ 전체 메뉴」 단추는 치움
+    var all = document.getElementById("ezall"); if (all) all.remove();
   }
 
   /* ── ① ⑦ ⑨ ⑬ 첫 화면 한 장 ── */
@@ -168,7 +155,7 @@
         warnHtml(o, b._bear, b._bub) + '</div>' +
       (window.__rebCard ? __rebCard(b._bear, o.k, "ez") : '') +   // 📨 반등 날에만
       (N.length ? '<div class="ez-nums">' + N.slice(0, 3).map(function(n){ return '<div><small>' + e(n[0]) + '</small><b class="' + cl(n[2]) + '">' + sg(n[2]) + '</b>' + (n[1] ? '<em>' + e(n[1]) + '</em>' : '') + '</div>'; }).join("") + '</div>' : '') +
-      (ROLE() ? todo(o) : roleHtml());
+      todo(o);   /* 🧊 11/12 「어떤 분이세요?」 질문 없앰 — 안 고른 사람은 한 장 보내기 */
   }
   // ④ ⑦ 한 줄 목록 — 시간대(아침 0 · 장중 1 · 마감 2)마다 맨 위가 바뀜
   var ROWORD = {act: [1, 2, 4], news: [0, 3, 5], flow: [3, 0, 2], hit: [5, 5, 0], chg: [4, 4, 1], rule: [6, 6, 6]};
@@ -203,7 +190,7 @@
     if (!more){
       more = document.createElement("div"); more.id = "ezmore";
       more.innerHTML = '<button type="button" class="ez-open">▾ 오늘 자세히 보기 <small>5개 시장 · 오늘의 발견 · 업종 지도 · 1탭 예측</small></button>' +
-        '<div class="ez-drawer"><small>🎁 더보기</small><div>' + [["luck", "🔮", "운세"], ["saju", "📜", "사주"], ["tarot", "🃏", "타로"], ["lotto", "🎱", "로또"]].map(function(x){ return '<button type="button" data-ezgo="' + x[0] + '"><span>' + x[1] + '</span>' + x[2] + '</button>'; }).join("") + '</div></div>';
+        '';   /* 🧊 11/12 🎁 더보기(운세·사주·타로·로또) 서랍은 🔬 연구실로 */
       h.insertAdjacentElement("afterend", more);
       more.querySelector(".ez-open").onclick = function(){ var o = hb.classList.toggle("ez-open"), btn = this, t0 = btn.getBoundingClientRect().top, end = Date.now() + 3000, stop = function(){ end = 0; };
         /* 🔧 11/10 자가 업그레이드: 신호등이 막 그려진 뒤 바로 누르면 위 칸(🧭 결론·🧲 수급 등)이 늦게 채워지며 단추가 아래로 밀리던 것(건강검진 383→1802px) → 3초 동안 단추 자리를 붙잡음 · 손가락으로 움직이면 바로 놓음 */
@@ -213,7 +200,8 @@
     // 🧹 11/11 ④ 한 줄 목록은 신호등 상자 바로 아래(내 종목·대형주·이번 주·고객 질문 칸 #mnbox 보다 위)
     var rw = document.getElementById("ezrows");
     if (!rw){ rw = document.createElement("section"); rw.id = "ezrows"; rw.setAttribute("data-noemo", "1"); rw.innerHTML = '<p class="ez-rh">오늘 한 줄씩</p><div class="ez-rows"><div class="ez-row"><span class="ez-r ez-ph">불러오는 중…</span></div></div>'; }
-    if (h.nextElementSibling !== rw) h.insertAdjacentElement("afterend", rw);
+    var jm_ = document.getElementById("jobmap"), an_ = jm_ && jm_.previousElementSibling === h ? jm_ : h;   // 🧊 11/12 「할 수 있는 일」 지도(ux1112.js)가 신호등 바로 아래 · 한 줄 목록은 그 아래
+    if (an_.nextElementSibling !== rw) an_.insertAdjacentElement("afterend", rw);
     mnFold();
     if (Date.now() - HB > 60000){ HB = Date.now();
       brief().then(function(b){ var x = document.getElementById("ezhero"), y = document.getElementById("ezrows"); if (!x) return; var ok = b && (b.one || b.talk);
@@ -260,12 +248,12 @@
     var AS = ord ? ASK.slice().sort(function(a, b){ return ord.indexOf(a[0]) - ord.indexOf(b[0]); }) : ASK;
     d.innerHTML = '<div class="ezs-in"><div class="ezs-h"><img src="img/kid_think.jpg?v=1" alt=""><div><b>뭐 보면 돼요?</b><small>궁금한 걸 누르면 그 화면으로 데려가요</small></div><button type="button" class="ezs-x" aria-label="닫기">✕</button></div>' +
       '<div class="ezs-g">' + AS.map(function(a){ return '<button type="button" data-ask="' + a[0] + '"><span>' + a[1] + '</span><b>' + e(a[2]) + '</b><small>' + e(a[3]) + '</small></button>'; }).join("") + '</div>' +
-      '<button type="button" class="ezs-mode">' + (EZ() ? "☰ 전체 메뉴로 보기 (예전 화면 전부)" : "🔰 쉬운 화면으로 보기") + '</button></div>';
+      '<button type="button" class="ezs-mode">🔬 연구실 — 포트 · 신호 · 성적표 · 운세</button></div>';
     document.body.appendChild(d);
     d.addEventListener("click", function(ev){
       var t = ev.target;
       if (t === d || (t.closest && t.closest(".ezs-x"))) { d.remove(); return; }
-      if (t.closest && t.closest(".ezs-mode")) { d.remove(); setMode(EZ() ? "pro" : "easy"); return; }
+      if (t.closest && t.closest(".ezs-mode")) { d.remove(); if (typeof window.go === "function") go("lab"); return; }
       var a = t.closest && t.closest("[data-ask]"); if (!a) return; d.remove();
       var k = a.dataset.ask;
       if (k === "@qa"){ if (window.__qaOpen) __qaOpen(); return; }
@@ -273,9 +261,10 @@
       if (typeof window.go === "function") go(k); window.scrollTo(0, 0);
     });
   }
+  window.__ezHelp = function(){ help(); };
   function askBtn(){   // 아래 탭 바 안 「🙋 뭐 보지?」 — 화면을 가리지 않게(떠 있는 단추 대신)
     var b = document.getElementById("ezask"), nav = document.getElementById("bnav"), all = document.getElementById("ezall");
-    if (!EZ() || !nav){ if (b) b.remove(); return; }
+    if (b) b.remove(); return;   // 🧊 11/12 🙋 는 첫 화면 「할 수 있는 일」 지도가 대신함(도움말 창은 🔬 연구실·구경 버튼에서 그대로 열림)
     if (b && b.nextSibling === all) return;
     if (!b){ b = document.createElement("button"); b.id = "ezask"; b.type = "button"; b.innerHTML = '<span class="i">🙋</span><span>뭐 보지?</span>'; b.onclick = help; }
     nav.insertBefore(b, all || null);
@@ -339,12 +328,12 @@
     if (!EZ() || TOURON || ls("ez_tour") || navigator.webdriver || /[?&]embed=1/.test(location.search)) return;
     if (cur() !== "home" || !document.querySelector("#ezhero .ez-light") || document.getElementById("wowob") || document.getElementById("gdq") || document.getElementById("uxob")) return;
     if (!ls("wow_ob")) return;   // wow.js 첫 인사가 먼저
-    if (!ROLE()) return;          // 🧊 11/09 「나는 누구?」 고른 다음
+    /* 🧊 11/12 「나는 누구?」 질문은 없앰 */
     TOURON = true; ls("ux_ob3", 1);   // ux1105 의 옛 3곳 안내(지금은 접혀 있는 칸을 가리킴)는 대신함
     var T = [
       ["#ezhero .ez-light", "1 / 3", "이것만 보면 돼요", "🟢 좋은 날 · 🟡 흔들리는 장 · 🔴 조심하는 장 — 하락장 계기판(종가)으로 판정해요. 바로 밑 「규칙」을 누르면 언제 바뀌는지 나와요."],
-      ["#ezhero .ez-cta", "2 / 3", "오늘 할 일은 이것 하나", ROLE() === "pb" ? "누르면 오늘 시장을 그림 한 장으로 만들어 카톡으로 보낼 수 있어요." : ROLE() === "inv" ? "누르면 지금 뭘 얼마나 담으면 되는지(비중·주문서)로 가요." : "누르면 궁금한 것 8가지 중에서 골라 볼 수 있어요."],
-      ["#ezask", "3 / 3", "막히면 여기", "아래 🙋 뭐 보지? 를 누르면 「뭐 보면 돼요?」 8가지가 나와요. 예전 화면 전부는 아래 ☰ 전체 메뉴."]
+      ["#ezhero .ez-cta", "2 / 3", "오늘 할 일은 이것 하나", ROLE() !== "inv" && ROLE() !== "look" ? "누르면 오늘 시장을 그림 한 장으로 만들어 카톡으로 보낼 수 있어요." : ROLE() === "inv" ? "누르면 지금 뭘 얼마나 담으면 되는지(비중·주문서)로 가요." : "누르면 궁금한 것 8가지 중에서 골라 볼 수 있어요."],
+      ["#jobmap", "3 / 3", "할 수 있는 일은 이게 전부", "보내기 · 제안서 · 상품 · 종목 — 아래 탭과 같아요. 포트·신호·운세 같은 깊은 화면은 🔬 연구실에 모아 뒀어요."]
     ], k = 0;
     var m = document.createElement("div"); m.id = "eztour"; document.body.appendChild(m);
     function end(){ ls("ez_tour", 1); m.remove(); TOURON = false; window.scrollTo({top: 0, behavior: "smooth"}); }
@@ -403,7 +392,7 @@
   var st = document.createElement("style");
   st.textContent =
     /* ② 아래 탭: 쉬운 화면엔 오늘 · 포트 · 제안서 + ☰ */
-    R + " #bnav button[data-g=mkt]," + R + " #bnav button[data-g=sig]," + R + " #bnav button[data-g=prod]{display:none!important}" +
+    /* 🧊 11/12 아래 탭 숨김 규칙 없앰 — nav2.js 5칸 */
     "html[data-ez=pro] #ezall{display:none}#ezall .i{font-size:20px}" +
     /* ① 첫 화면: 머리 카드·예전 오늘 화면은 「자세히」 아래 */
     R + "[data-tab=home] #main>.hero{display:none!important}" +

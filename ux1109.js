@@ -159,7 +159,7 @@
   function sheetRow(){
     var s = document.querySelector("#ezsheet .ezs-in"); if (!s || s.querySelector(".ezs-tools") || !EZ()) return;
     var r = document.createElement("div"); r.className = "ezs-tools";
-    r.innerHTML = [["wlbtn", "★", "관심종목"], ["opbtn", "📨", "화면 한 장"], ["uibtn", "⚙", "보기 설정"], ["@role", "👤", "나는 누구?"]].map(function(x){ return '<button type="button" data-tool="' + x[0] + '"><span>' + x[1] + '</span>' + x[2] + '</button>'; }).join("");
+    r.innerHTML = [["wlbtn", "★", "관심종목"], ["opbtn", "📨", "화면 한 장"], ["uibtn", "⚙", "보기 설정"]].map(function(x){ return '<button type="button" data-tool="' + x[0] + '"><span>' + x[1] + '</span>' + x[2] + '</button>'; }).join("");
     var mode = s.querySelector(".ezs-mode"); s.insertBefore(r, mode || null);
     r.onclick = function(ev){ var b = ev.target.closest("[data-tool]"); if (!b) return; var k = b.dataset.tool, sh = document.getElementById("ezsheet"); if (sh) sh.remove();
       if (k === "@role"){ if (window.__ezRole) __ezRole(true); return; }

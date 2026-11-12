@@ -206,7 +206,7 @@ def app_checks():
         # 10/21: 홈 첫 화면 정리(673f9cd 「🧹 홈 더 줄임」)로 킥·성적표·종목 칸 모양이 바뀜 → 새 칸으로
         for start, sel, want in [("home", '#hmbody [data-goto="port~pokick"]', ("port", "pokick")), ("home", '#hmbody a[data-goto="score"]', ("score", None)),
                                  ("home", '#hmbody [data-op]', ("onepager", None)), ("score", '.sc-c[data-goto="market~mkfo"] .sc-h b', ("market", "mkfo")),
-                                 ("home", '#bnav button[data-g="sig"]', (("whale", "cup", "gap", "screen", "sigmore", "accum", "danta"), None)), ("market", '#tabs .tab[data-k="sector"]', ("sector", None)), ("home", '.hm-big [data-goto="port~poconc"]', ("port", "poconc"))]:
+                                 ("home", '#bnav button[data-g="prod"]', (("bond", "fund", "els", "divc"), None)), ("market", '#tabs .tab[data-k="sector"]', ("sector", None)), ("home", '.hm-big [data-goto="port~poconc"]', ("port", "poconc"))]:
             pg = ctx.new_page(); pg.on("dialog", lambda d: d.dismiss())
             try:
                 pg.goto(APP + "?h=" + str(int(time.time())) + "#" + start, wait_until="domcontentloaded", timeout=45000)
