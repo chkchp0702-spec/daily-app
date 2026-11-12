@@ -162,7 +162,9 @@
     out.innerHTML = '<div class="loading">배당 자료 모으는 중…</div>';
     opLoadIdx().then(function(){ return Promise.all(L.map(load)); }).then(function(R){
       R.forEach(function(o, i){ o.c = COL[ST.pick.indexOf(o.sym) >= 0 ? ST.pick.indexOf(o.sym) : i]; });
-      out.innerHTML = head(R) + bars(R) + cal(R) + table(R) + details(R) + note(R);
+      LAST = R;
+      out.innerHTML = head(R) + bars(R) + cal(R) + table(R) + details(R) + sendCard() + note(R);
+      bindSend();
       [].forEach.call(out.querySelectorAll("[data-dvop]"), function(x){ x.onclick = function(){ if (window.openOP) openOP(x.dataset.dvop); }; });
       setTimeout(function(){ var h = document.getElementById("dvhead"); if (h) h.scrollIntoView({behavior: "smooth", block: "start"}); }, 60);
     }).catch(function(){ out.innerHTML = '<div class="empty">자료를 못 불러왔어요. 잠시 뒤 다시 눌러 주세요.</div>'; });
@@ -266,7 +268,262 @@
       '<div class="dv-again"><button type="button" id="dvre">🔄 다른 종목으로 다시</button></div>';
   }
 
+
+  /* ───────── 📨 고객에게 보내기 — 한 장(카톡 그림) · PDF 풀버전(A4 4쪽) · PPT(그림판 4쪽) ─────────
+     11/12 사용자 「배당비교 결과 나오면 제안서처럼 한 장·전체 PDF 등등 카톡으로 보낼 수 있게」
+     휴대폰 안에서 그림을 새로 그림(lib/html2pdf · lib/pptxgen) · 서버·돈 안 씀 · 앱 이름 안 넣음 · 받는 분 이름은 휴대폰에만 */
+  var LAST = null, BUSY = false;
+  var AMTS = [[1000000, "100만원"], [10000000, "1,000만원"], [50000000, "5,000만원"], [100000000, "1억원"]];
+  var FONT = '"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR",sans-serif';
+  var INK = "#141a26", SUB = "#5b6576", LN = "#e3e7ee", NAVY = "#13284b", GOLD = "#e0a82e", WIN = "#14895f";
+  var PW = 794, PH = 1123;
+  function lsg(k){ try { return localStorage.getItem(k); } catch(x){ return null; } }
+  function lss(k, v){ try { localStorage.setItem(k, v); } catch(x) {} }
+  function ME(){ try { return JSON.parse(lsg("propme") || "{}") || {}; } catch(x){ return {}; } }
+  function amt(){ var a = +lsg("divc_amt"); return AMTS.some(function(x){ return x[0] === a; }) ? a : 10000000; }
+  function amtLab(a){ var f = AMTS.filter(function(x){ return x[0] === a; })[0]; return f ? f[1] : won(a); }
+  function recent(){ try { var a = JSON.parse(lsg("op_clients") || "[]"); return Array.isArray(a) ? a.filter(function(x){ return typeof x === "string" && x; }).slice(0, 8) : []; } catch(x){ return []; } }
+  function saveCli(c){ c = String(c || "").trim(); if (!c) return; var a = recent().filter(function(x){ return x !== c; }); a.unshift(c); lss("op_clients", JSON.stringify(a.slice(0, 8))); }
+  function cliLab(c){ c = String(c || "").replace(/\s+/g, " ").trim(); return !c ? "" : /님$/.test(c) ? c : c + " 고객님"; }
+  // 짧은 원: 1만 미만 그대로 · 1만 넘으면 「3.1만」 · 100만 넘으면 「123만」
+  function wk(v){ if (!v) return ""; if (v < 1e4) return (Math.round(v / 10) * 10).toLocaleString("ko-KR"); if (v < 1e6) return (Math.round(v / 1e3) / 10).toFixed(1).replace(/\.0$/, "") + "만"; return Math.round(v / 1e4).toLocaleString("ko-KR") + "만"; }
+  function todayK(){ var d = new Date(Date.now() + 9 * 3600e3); return d.getUTCFullYear() + "년 " + (d.getUTCMonth() + 1) + "월 " + d.getUTCDate() + "일"; }
+  function tkName(o){ return /[가-힣]/.test(o.name) ? V.cd(o.sym) : o.name; }   // 이름 밑 둘째 줄 (미국 종목 = 티커 / 영어 이름)
+  function main1(o){ return lab(o); }
+  // 기준 금액에 맞춰 늘린 숫자
+  function sc(R, A){ var f = A / BASE; return R.map(function(o){ return {o: o, ann: o.ann != null ? o.ann * f : null, net: o.net != null ? o.net * f : null, per: o.per != null ? o.per * f : null, mo: o.mo ? o.mo.map(function(v){ return v * f; }) : null}; }); }
+  function monthsAhead(){ var now = new Date(), ms = []; for (var i = 0; i < 12; i++){ var d = new Date(now.getFullYear(), now.getMonth() + i, 1); ms.push({m: d.getMonth() + 1, y: d.getFullYear()}); } return ms; }
+
+  function sendCard(){
+    var R = recent(), me = ME(), pb = lsg("pbname") || me.pb || "", a = amt();
+    return '<section class="card dv-send" id="dvsend"><h3>📨 고객에게 보내기 <span class="mut">카톡 · PDF · PPT</span></h3>' +
+      '<label class="dv-f">💌 받는 분<input id="dvcl" maxlength="20" placeholder="고객 이름 (예: 홍길동 · 비워도 돼요)" autocomplete="off"></label>' +
+      (R.length ? '<div class="dv-rc">' + R.map(function(n){ return '<button type="button" data-dvcl="' + e(n) + '">' + e(n) + '</button>'; }).join("") + '</div>' : '') +
+      '<label class="dv-f">✍️ 보내는 사람<input id="dvpb" maxlength="30" placeholder="내 이름 (예: 김OO PB · 비워도 돼요)" value="' + e(pb) + '"></label>' +
+      '<div class="dv-f2">💵 얼마 기준으로<div class="dv-am">' + AMTS.map(function(x){ return '<button type="button" data-dvam="' + x[0] + '"' + (x[0] === a ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join("") + '</div></div>' +
+      '<div class="dv-mk"><button type="button" data-dvmk="png" class="main">📱 고객에게 한 장<small>카톡 전송용 그림 1장</small></button>' +
+      '<button type="button" data-dvmk="pdf">📄 PDF 풀버전<small>A4 4쪽 · 차트·표·종목별</small></button>' +
+      '<button type="button" data-dvmk="ppt">📊 PPT<small>4쪽 · 안 깨지는 그림판</small></button></div>' +
+      '<p class="dv-st" id="dvst">이름을 넣으면 맨 위에 「○○ 고객님께」로 들어가요 · 받는 분 이름은 이 휴대폰에만 남아요</p></section>';
+  }
+  function bindSend(){
+    var box = document.getElementById("dvsend"); if (!box) return;
+    var I = box.querySelector("#dvcl"), P = box.querySelector("#dvpb");
+    if (P) P.oninput = function(){ lss("pbname", P.value.trim().slice(0, 30)); };
+    box.onclick = function(ev){
+      var t = ev.target, c = t.closest && t.closest("[data-dvcl]"), am = t.closest && t.closest("[data-dvam]"), mk = t.closest && t.closest("[data-dvmk]");
+      if (c){ var on = I.value.trim() !== c.dataset.dvcl; I.value = on ? c.dataset.dvcl : ""; [].forEach.call(box.querySelectorAll("[data-dvcl]"), function(b){ b.classList.toggle("on", on && b === c); }); return; }
+      if (am){ lss("divc_amt", am.dataset.dvam); [].forEach.call(box.querySelectorAll("[data-dvam]"), function(b){ b.classList.toggle("on", b === am); }); return; }
+      if (mk) make(mk.dataset.dvmk, mk);
+    };
+    if (I) I.oninput = function(){ [].forEach.call(box.querySelectorAll("[data-dvcl]"), function(b){ b.classList.toggle("on", b.dataset.dvcl === I.value.trim()); }); };
+  }
+  function opts(){ var I = document.getElementById("dvcl"), P = document.getElementById("dvpb"), me = ME();
+    return {cl: I ? I.value.trim().slice(0, 20) : "", pb: P ? P.value.trim().slice(0, 30) : (lsg("pbname") || ""), org: me.org || "", A: amt()}; }
+
+  /* ── 그림 찍기 (제안서와 같은 방식) ── */
+  var HOST = null, IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  function host(){ if (!HOST || !document.body.contains(HOST)){ HOST = document.createElement("div"); HOST.setAttribute("aria-hidden", "true");
+    HOST.style.cssText = "position:fixed;left:-20000px;top:0;z-index:-1;pointer-events:none;background:#fff;color:" + INK + ";color-scheme:light"; document.body.appendChild(HOST); } return HOST; }
+  function lib(src, key){ return new Promise(function(ok, no){ if (window[key]) return ok(); var s = document.createElement("script"); s.src = src; s.onload = function(){ ok(); }; s.onerror = function(){ no(new Error("도구를 못 받음")); }; document.head.appendChild(s); }); }
+  function snap(html, w, scale){
+    var H = host(); H.innerHTML = html; var el = H.firstChild;
+    var h = Math.ceil(el.getBoundingClientRect().height);
+    return html2pdf().set({margin: 0, jsPDF: {unit: "px", format: [w, h], orientation: "portrait", hotfixes: ["px_scaling"]},
+      html2canvas: {scale: scale, backgroundColor: "#ffffff", useCORS: true, logging: false, scrollX: 0, scrollY: 0, windowWidth: w, width: w, height: h,
+        onclone: function(d){ try { d.documentElement.removeAttribute("data-ui"); d.documentElement.style.colorScheme = "light"; } catch(x) {} }}}).from(el).toCanvas().get("canvas")
+      .then(function(c){ H.innerHTML = ""; return c; });
+  }
+  function fname(o, ext){ return ((o.cl ? o.cl + "님_" : "") + "배당비교_" + LAST.map(main1).slice(0, 3).join("_") + "_" + ymd(new Date()).slice(5).replace("-", "")).replace(/[\\/:*?"<>|\s·&]+/g, "_").slice(0, 60) + "." + ext; }
+  function deliver(blob, name, mime, title){
+    var f = new File([blob], name, {type: mime});
+    if (window.__onepage && __onepage.ready){ __onepage.ready([f], title); return; }
+    try { if (navigator.canShare && navigator.canShare({files: [f]})){ navigator.share({files: [f]}).catch(function(){}); return; } } catch(x) {}
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 30000);
+  }
+  function make(kind, btn){
+    if (BUSY || !LAST) return; BUSY = true;
+    var o = opts(), st = document.getElementById("dvst"), old = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = "⏳ 만드는 중…<small>몇 초 걸려요</small>";
+    var p = lib("lib/html2pdf.bundle.min.js", "html2pdf").then(function(){
+      if (kind === "png") return snap(onePage(LAST, o), 1080, IOS ? 1 : 1.3).then(function(c){ return new Promise(function(r){ c.toBlob(function(b){ c.width = c.height = 0; r(b); }, "image/png"); }); });
+      var imgs = [];
+      return pages(LAST, o).reduce(function(pr, html){ return pr.then(function(){ return snap(html, PW, IOS ? 1.6 : 2).then(function(c){ imgs.push(c.toDataURL("image/jpeg", 0.9)); c.width = c.height = 0; }); }); }, Promise.resolve()).then(function(){
+        if (kind === "pdf") return html2pdf().set({margin: 0, jsPDF: {unit: "px", format: [PW, PH], orientation: "portrait", hotfixes: ["px_scaling"]}}).from(document.createElement("div")).toPdf().get("pdf").then(function(pdf){
+          imgs.forEach(function(u, i){ if (i) pdf.addPage([PW, PH], "portrait"); pdf.addImage(u, "JPEG", 0, 0, PW, PH); }); return pdf.output("blob"); });
+        return lib("lib/pptxgen.bundle.js?v=1", "PptxGenJS").then(function(){
+          var P = new PptxGenJS(); P.defineLayout({name: "A4P", width: 8.27, height: 11.69}); P.layout = "A4P"; P.title = (o.cl ? cliLab(o.cl) + " " : "") + "배당 비교";
+          imgs.forEach(function(u){ P.addSlide().addImage({data: u, x: 0, y: 0, w: 8.27, h: 11.69}); });
+          return P.write({outputType: "blob"}); });
+      });
+    });
+    var mime = kind === "png" ? "image/png" : kind === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    p.then(function(blob){
+      var name = fname(o, kind === "png" ? "png" : kind === "pdf" ? "pdf" : "pptx");
+      saveCli(o.cl); deliver(blob, name, mime, kind === "png" ? "배당 비교 한 장" : kind === "pdf" ? "배당 비교 PDF" : "배당 비교 PPT");
+      if (st) st.textContent = "✓ 다 만들었어요 · " + name + " · " + Math.max(1, Math.round(blob.size / 1024)) + "KB";
+      try { if (window.ntfyUse) ntfyUse("divc_" + kind); } catch(x) {}
+    }).catch(function(err){ if (st) st.textContent = "만들지 못했어요 · " + String((err && (err.message || err)) || "").slice(0, 80); try { console.error(err); } catch(x) {} })
+      .then(function(){ BUSY = false; btn.disabled = false; btn.innerHTML = old; });
+  }
+
+  /* ── 그림 조각 (흰 바탕) ── */
+  function dot(c, s){ s = s || 12; return '<i style="display:inline-block;width:' + s + 'px;height:' + s + 'px;border-radius:50%;background:' + c + ';flex:0 0 ' + s + 'px"></i>'; }
+  function nm2(o, fs, fs2){ return '<div style="min-width:0"><div style="font-size:' + fs + 'px;font-weight:800;color:' + INK + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(main1(o)) + '</div><div style="font-size:' + fs2 + 'px;color:' + SUB + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(tkName(o)) + (o.etf ? ' · ETF' : '') + '</div></div>'; }
+  function band(o, W, title, sub, k){
+    var cl = cliLab(o.cl), big = W > 900;
+    return '<div style="background:linear-gradient(135deg,' + NAVY + ' 0%,#1f4a86 100%);color:#fff;padding:' + (big ? '48px 48px 40px' : '34px 48px 28px') + ';position:relative">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;font-size:' + (big ? 24 : 15) + 'px;color:rgba(255,255,255,.78)">' +
+        '<div style="font-weight:800;color:' + (cl ? '#fff' : 'rgba(255,255,255,.78)') + ';font-size:' + (cl ? (big ? 32 : 19) : (big ? 24 : 15)) + 'px">' + (cl ? '💌 ' + e(cl) + '께' : todayK()) + '</div>' +
+        '<div style="text-align:right;line-height:1.45">' + (cl ? todayK() + '<br>' : '') + (o.org ? e(o.org) + ' · ' : '') + (o.pb ? e(o.pb) + (cl ? ' 드림' : '') : '') + '</div></div>' +
+      '<div style="margin-top:' + (big ? 26 : 18) + 'px;font-size:' + (big ? 21 : 13) + 'px;font-weight:800;color:' + GOLD + ';letter-spacing:.06em">DIVIDEND COMPARISON' + (k ? ' · ' + k : '') + '</div>' +
+      '<div style="font-size:' + (big ? 54 : 32) + 'px;font-weight:900;line-height:1.2;margin-top:6px">' + title + '</div>' +
+      (sub ? '<div style="font-size:' + (big ? 24 : 15) + 'px;color:rgba(255,255,255,.82);margin-top:8px;line-height:1.5">' + sub + '</div>' : '') + '</div>';
+  }
+  function hTitle(t, s, big){ return '<div style="display:flex;align-items:baseline;gap:10px;margin:' + (big ? '40px 0 16px' : '26px 0 12px') + '"><div style="font-size:' + (big ? 32 : 20) + 'px;font-weight:900;color:' + INK + '">' + t + '</div>' + (s ? '<div style="font-size:' + (big ? 20 : 12.5) + 'px;color:' + SUB + '">' + s + '</div>' : '') + '</div>'; }
+  function ranked(S){ return S.slice().sort(function(a, b){ return (b.o.y || 0) - (a.o.y || 0); }); }
+  function heroBox(S, A, big){
+    var ok = ranked(S).filter(function(s){ return s.o.y > 0; }), b = ok[0], lo = ok[ok.length - 1];
+    if (!b) return '<div style="padding:24px;border-radius:18px;background:#f5f7fb;font-size:' + (big ? 26 : 16) + 'px">배당 자료가 없음</div>';
+    var nx = S.filter(function(s){ return s.o.nextPay; }).sort(function(x, y){ return x.o.nextPay - y.o.nextPay; })[0];
+    return '<div style="border-radius:' + (big ? 26 : 16) + 'px;background:linear-gradient(135deg,#fff8e6,#fff3d1);border:2px solid #f3d58a;padding:' + (big ? '30px 34px' : '20px 24px') + ';display:flex;gap:' + (big ? 26 : 18) + 'px;align-items:center">' +
+      '<div style="font-size:' + (big ? 84 : 52) + 'px;line-height:1">🥇</div><div style="flex:1;min-width:0">' +
+        '<div style="font-size:' + (big ? 22 : 13.5) + 'px;color:#8a6410;font-weight:800">배당 가장 많이 주는 것</div>' +
+        '<div style="font-size:' + (big ? 44 : 27) + 'px;font-weight:900;color:' + INK + ';line-height:1.25;margin-top:2px;word-break:keep-all">' + e(main1(b.o)) + (main1(b.o) !== b.o.name ? '<span style="display:block;font-size:' + (big ? 20 : 12.5) + 'px;font-weight:600;color:' + SUB + ';margin-top:2px">' + e(b.o.name) + '</span>' : '') + '</div>' +
+        '<div style="font-size:' + (big ? 26 : 16) + 'px;color:' + INK + ';margin-top:6px;line-height:1.5">' + amtLab(A) + ' 넣으면 1년에 <b style="color:#b7790b;font-size:' + (big ? 36 : 22) + 'px">' + won(b.ann) + '</b> (배당률 ' + pc(b.o.y) + ')</div>' +
+        (lo && lo !== b ? '<div style="font-size:' + (big ? 21 : 13) + 'px;color:' + SUB + ';margin-top:4px">' + e(main1(lo.o)) + '보다 1년에 ' + won(b.ann - lo.ann) + ' 더 받음' + (nx ? ' · 다음 입금은 ' + e(main1(nx.o)) + ' ' + md(nx.o.nextPay) + '쯤' : '') + '</div>' : '') +
+      '</div></div>';
+  }
+  function barsH(S, A, big){
+    var L = ranked(S), mx = Math.max.apply(null, L.map(function(s){ return s.ann || 0; })) || 1, fs = big ? 24 : 14.5;
+    return L.map(function(s, i){ var w = s.ann ? Math.max(2, s.ann / mx * 100) : 0;
+      return '<div style="display:flex;align-items:center;gap:' + (big ? 16 : 12) + 'px;padding:' + (big ? '14px 0' : '9px 0') + ';border-bottom:1px solid ' + LN + '">' +
+        '<div style="width:' + (big ? 34 : 22) + 'px;font-size:' + fs + 'px;font-weight:900;color:' + (i === 0 ? '#b7790b' : SUB) + ';text-align:center">' + (i + 1) + '</div>' + dot(s.o.c, big ? 16 : 11) +
+        '<div style="width:' + (big ? 250 : 170) + 'px">' + nm2(s.o, fs, big ? 17 : 11) + '</div>' +
+        '<div style="flex:1;height:' + (big ? 30 : 18) + 'px;background:#eef1f6;border-radius:99px;overflow:hidden"><div style="height:100%;width:' + w + '%;background:' + s.o.c + ';border-radius:99px"></div></div>' +
+        '<div style="width:' + (big ? 210 : 140) + 'px;text-align:right"><div style="font-size:' + (big ? 30 : 17) + 'px;font-weight:900;color:' + INK + '">' + (s.ann ? won(s.ann) : (s.o.stale ? '중단' : '없음')) + '</div>' +
+          '<div style="font-size:' + (big ? 18 : 11.5) + 'px;color:' + SUB + '">' + (s.o.y ? pc(s.o.y) : '–') + (s.net ? ' · 세후 ' + wonS(s.net) : '') + '</div></div></div>'; }).join("");
+  }
+  function heat(S, big){   // 앞으로 12달 × 종목 — 칸 색 진하기 = 그 달 들어오는 돈
+    var L = S.filter(function(s){ return s.mo; }); if (!L.length) return '';
+    var ms = monthsAhead(), mx = Math.max.apply(null, L.map(function(s){ return Math.max.apply(null, s.mo); })) || 1, lw = big ? 230 : 150, fs = big ? 15.5 : 9.5, ch = big ? 50 : 30;
+    var head = '<div style="display:flex;gap:' + (big ? 4 : 3) + 'px;margin-left:' + lw + 'px;margin-bottom:4px">' + ms.map(function(m, k){ return '<div style="flex:1;text-align:center;font-size:' + (big ? 18 : 11) + 'px;font-weight:' + (k === 0 ? 900 : 600) + ';color:' + (k === 0 ? INK : SUB) + '">' + (m.m === 1 && k ? "'" + String(m.y).slice(2) + ' ' : '') + m.m + '월</div>'; }).join("") + '</div>';
+    var rows = L.map(function(s){
+      return '<div style="display:flex;align-items:center;gap:' + (big ? 4 : 3) + 'px;margin-bottom:' + (big ? 4 : 3) + 'px"><div style="width:' + (lw - 8) + 'px;margin-right:8px;display:flex;align-items:center;gap:7px;min-width:0">' + dot(s.o.c, big ? 13 : 9) + '<div style="font-size:' + (big ? 19 : 12) + 'px;font-weight:800;color:' + INK + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(main1(s.o)) + '</div></div>' +
+        s.mo.map(function(v){ var a = v ? 0.18 + 0.82 * v / mx : 0;
+          return '<div style="flex:1;height:' + ch + 'px;border-radius:' + (big ? 9 : 6) + 'px;background:' + (v ? hexA(s.o.c, a) : '#f2f4f8') + ';display:flex;align-items:center;justify-content:center;font-size:' + fs + 'px;font-weight:800;color:' + (a > 0.55 ? '#fff' : INK) + '">' + (v ? wk(v) : '') + '</div>'; }).join("") + '</div>'; }).join("");
+    return head + rows;
+  }
+  // 캡처 때 앱의 밝은 글자색이 새어 들지 않게 — 본문 칸마다 글자색을 직접 박음 (색을 이미 정한 칸은 그대로)
+  function fixC(h){ return h.replace(/style="([^"]*)"/g, function(m, st){ return /(^|;)\s*color:/.test(st) ? m : 'style="color:' + INK + ';' + st + '"'; }); }
+  function hexA(h, a){ var n = parseInt(h.slice(1), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a.toFixed(2) + ")"; }
+  function stack(S, big){   // 모두 같은 금액씩 담으면 매달 들어오는 돈 (쌓은 막대)
+    var L = S.filter(function(s){ return s.mo; }); if (!L.length) return '';
+    var ms = monthsAhead(), tot = ms.map(function(_, k){ return L.reduce(function(a, s){ return a + s.mo[k]; }, 0); }), mx = Math.max.apply(null, tot) || 1, H = big ? 260 : 210;
+    return '<div style="display:flex;align-items:flex-end;gap:8px;height:' + (H + 44) + 'px;padding-top:6px">' + ms.map(function(m, k){
+      var segs = L.map(function(s){ var v = s.mo[k]; return v ? '<div style="height:' + (v / mx * H).toFixed(1) + 'px;background:' + s.o.c + '"></div>' : ''; }).join("");
+      return '<div style="flex:1;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end;height:100%">' +
+        '<div style="font-size:11px;font-weight:800;text-align:center;color:' + INK + ';margin-bottom:3px">' + (tot[k] ? wk(tot[k]) : '') + '</div>' +
+        '<div style="display:flex;flex-direction:column-reverse;border-radius:6px 6px 0 0;overflow:hidden;min-height:2px;background:' + (tot[k] ? 'transparent' : '#eef1f6') + '">' + segs + '</div>' +
+        '<div style="font-size:12px;text-align:center;color:' + (k === 0 ? INK : SUB) + ';font-weight:' + (k === 0 ? 900 : 600) + ';margin-top:5px;border-top:1.5px solid ' + INK + ';padding-top:4px">' + m.m + '월</div></div>'; }).join("") + '</div>';
+  }
+  function legend(S, fs){ return '<div style="display:flex;flex-wrap:wrap;gap:6px 16px;font-size:' + fs + 'px;color:' + INK + '">' + S.map(function(s){ return '<span style="display:inline-flex;align-items:center;gap:6px">' + dot(s.o.c, fs * 0.75) + e(main1(s.o)) + '</span>'; }).join("") + '</div>'; }
+  var RISK = ["이 자료는 투자 판단을 돕기 위한 참고 자료이며, 투자 권유나 수익 보장이 아님.",
+    "배당률은 최근 1년 실제 배당 ÷ 현재 가격으로 계산한 값이며, 과거 배당이 미래 배당을 보장하지 않음. 배당은 회사·운용사 결정에 따라 줄거나 멈출 수 있음.",
+    "배당 입금 달·금액은 지난 일정으로 본 예상이며 실제와 다를 수 있음. 해외 상품은 환율에 따라 원화 금액이 달라짐.",
+    "세후 금액은 국내 15.4%·미국 15% 원천징수 기준 대략값이며, 금융소득 연 2,000만원 초과 시 종합과세 등 개인 상황에 따라 달라짐.",
+    "주식·ETF는 원금 손실이 날 수 있으며 예금자보호법에 따라 보호되지 않음. 투자 전 상품설명서·약관을 꼭 확인할 것."];
+  function riskBox(fs, n){ return '<div style="border-top:2px solid ' + INK + ';padding-top:10px;font-size:' + fs + 'px;line-height:1.6;color:' + SUB + '"><b style="color:' + INK + '">⚠️ 꼭 알아 두실 점</b>' + RISK.slice(0, n || RISK.length).map(function(t){ return '<div>· ' + t + '</div>'; }).join("") + '</div>'; }
+
+  // 📱 한 장 (1080 폭 · 카톡)
+  function onePage(R, o){
+    var S = sc(R, o.A), W = 1080, M = 48;
+    var info = [["주는 횟수", function(s){ return s.o.fq ? (s.o.stale ? "중단?" : s.o.fq.k) : "–"; }], ["입금 달(대략)", function(s){ return s.o.payM && !s.o.stale ? (s.o.payM.length >= 12 ? "매달" : s.o.payM.length >= 9 ? "거의 매달 (" + s.o.payM.length + "번)" : s.o.payM.join("·") + "월") : "–"; }],
+      ["다음 입금", function(s){ return s.o.nextPay ? md(s.o.nextPay) + "쯤" : "–"; }], ["주가+배당 1년", function(s){ return sg(s.o.tot); }]];
+    var cols = S.length, lw = 190, cw = (W - 2 * M - lw) / cols;
+    var tbl = '<div style="border:1.5px solid ' + LN + ';border-radius:20px;overflow:hidden"><div style="display:flex;background:#f5f7fb">' + '<div style="width:' + lw + 'px"></div>' +
+      S.map(function(s){ return '<div style="width:' + cw + 'px;padding:12px 6px;text-align:center;font-size:' + (cols > 5 ? 16 : 19) + 'px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-bottom:3px solid ' + s.o.c + '">' + e(main1(s.o)) + '</div>'; }).join("") + '</div>' +
+      info.map(function(r){ return '<div style="display:flex;border-top:1px solid ' + LN + '"><div style="width:' + lw + 'px;padding:13px 16px;font-size:19px;color:' + SUB + ';font-weight:700">' + r[0] + '</div>' +
+        S.map(function(s){ var t = r[1](s); return '<div style="width:' + cw + 'px;padding:13px 4px;text-align:center;font-size:' + (cols > 5 ? 16 : 20) + 'px;font-weight:800;color:' + (/^\+/.test(t) ? "#d33a2c" : /^−/.test(t) ? "#2563c9" : INK) + '">' + e(t) + '</div>'; }).join("") + '</div>'; }).join("") + '</div>';
+    var sub = S.length + '개 비교 · ' + amtLab(o.A) + '씩 넣었다고 보면 · 세전';
+    return '<div style="width:' + W + 'px;background:#fff;font-family:' + FONT + ';color:' + INK + '">' + band(o, W, "1년 배당, 누가 더 줄까", sub) +
+      fixC('<div style="padding:34px ' + M + 'px 40px">' + heroBox(S, o.A, true) +
+        hTitle("📊 1년에 받는 배당", amtLab(o.A) + " 기준 · 많은 순", true) + barsH(S, o.A, true) +
+        hTitle("📅 언제 들어오나", "앞으로 12달 · 입금 예상 · 진할수록 많이", true) + heat(S, true) +
+        hTitle("🧾 한눈에 비교", "", true) + tbl +
+        '<div style="margin-top:28px">' + riskBox(15.5, 5) + '</div></div>') + '</div>';
+  }
+  // 📄 A4 4쪽
+  function page(o, k, title, sub, body){
+    return '<div style="width:' + PW + 'px;height:' + PH + 'px;background:#fff;font-family:' + FONT + ';color:' + INK + ';position:relative;overflow:hidden">' + band(o, PW, title, sub, k) +
+      fixC('<div style="padding:4px 48px 0">' + body + '</div>') +
+      '<div style="position:absolute;left:48px;right:48px;bottom:22px;display:flex;justify-content:space-between;font-size:10.5px;color:' + SUB + ';border-top:1px solid ' + LN + ';padding-top:8px"><span>' + todayK() + ' 기준' + (o.org ? ' · ' + e(o.org) : '') + (o.pb ? ' · ' + e(o.pb) : '') + '</span><span>' + k + ' / 4</span></div></div>';
+  }
+  function pages(R, o){
+    var S = sc(R, o.A), A = o.A, names = S.map(function(s){ return e(main1(s.o)); }).join(" · ");
+    var ok = ranked(S).filter(function(s){ return s.o.y > 0; }), b = ok[0];
+    var live = R.filter(function(x){ return x.fq && !x.stale; }), mxn = Math.max.apply(null, live.map(function(x){ return x.fq.n; }).concat([0])), often = live.filter(function(x){ return x.fq.n === mxn; });
+    var gro = R.filter(function(x){ return x.gr != null && !x.spec; }).sort(function(x, y){ return y.gr - x.gr; })[0];
+    var tr = R.filter(function(x){ return x.tot != null; }).sort(function(x, y){ return y.tot - x.tot; })[0];
+    var pts = [];
+    if (b) pts.push(["💰", "배당 가장 많음", e(main1(b.o)) + " — " + amtLab(A) + "이면 1년 " + won(b.ann) + " (" + pc(b.o.y) + ")"]);
+    if (often.length) pts.push(["📅", "가장 자주 줌", often.length < R.length ? often.map(function(x){ return e(main1(x)); }).join(" · ") + " (" + often[0].fq.k + ")" : "모두 " + often[0].fq.k]);
+    if (gro && gro.gr > 0) pts.push(["🌱", "배당 가장 많이 늘림", e(main1(gro)) + " — 1년 전보다 1주당 배당 " + sg(gro.gr)]);
+    if (tr) pts.push(["📈", "주가+배당 1년 1등", e(main1(tr)) + " " + sg(tr.tot) + " — 배당만 보지 말고 같이 봐야 함"]);
+    var p1 = heroBox(S, A, false) +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">' + pts.map(function(p){ return '<div style="border:1.5px solid ' + LN + ';border-radius:14px;padding:12px 14px"><div style="font-size:12.5px;color:' + SUB + ';font-weight:800">' + p[0] + ' ' + p[1] + '</div><div style="font-size:14px;font-weight:700;line-height:1.45;margin-top:3px">' + p[2] + '</div></div>'; }).join("") + '</div>' +
+      hTitle("📊 1년에 받는 배당", amtLab(A) + " 기준 · 많은 순 · 세전 (세후 함께)") + barsH(S, A, false) +
+      '<div style="margin-top:14px;font-size:11.5px;color:' + SUB + ';line-height:1.6">배당률 = 최근 1년 실제 받은 배당 ÷ 지금 가격 (기록이 없으면 증권사 자료 배당률) · 세후 = 국내 15.4% · 미국 15% 원천징수 기준</div>';
+    var totY = S.reduce(function(a, s){ return a + (s.ann || 0); }, 0), totN = S.reduce(function(a, s){ return a + (s.net || 0); }, 0);
+    var nxL = S.filter(function(s){ return s.o.nextPay; }).sort(function(x, y){ return x.o.nextPay - y.o.nextPay; });
+    var p2 = hTitle("📅 모두 " + amtLab(A) + "씩 담으면 매달 들어오는 돈", "앞으로 12달 · 입금 예상") + legend(S, 13) + stack(S, false) +
+      '<div style="display:flex;gap:10px;margin-top:14px">' + [["총 투자", won(A * S.length)], ["1년 배당 (세전)", won(totY)], ["1년 배당 (세후·대략)", totN ? won(totN) : "–"], ["한 달 평균", won(totY / 12)]].map(function(x, i){
+        return '<div style="flex:1;border-radius:12px;padding:10px 12px;background:' + (i === 1 ? '#fff6dd' : '#f5f7fb') + '"><div style="font-size:11.5px;color:' + SUB + ';font-weight:700">' + x[0] + '</div><div style="font-size:17px;font-weight:900;margin-top:2px">' + x[1] + '</div></div>'; }).join("") + '</div>' +
+      hTitle("🗓 종목별 입금 달력", amtLab(A) + " 기준 · 진할수록 많이") + heat(S, false) +
+      (nxL.length ? hTitle("⏭ 다음 배당 순서", "배당락 → 입금 (대략)") + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 14px">' + nxL.map(function(s){ return '<div style="display:flex;align-items:center;gap:8px;font-size:13px;padding:6px 0;border-bottom:1px solid ' + LN + '">' + dot(s.o.c, 9) + '<b style="color:' + INK + ';flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(main1(s.o)) + '</b><span style="color:' + SUB + '">' + md(s.o.next) + ' → </span><b>' + md(s.o.nextPay) + '쯤</b><span style="color:' + SUB + ';width:70px;text-align:right">' + (s.per ? wonS(s.per) : '') + '</span></div>'; }).join("") + '</div>' : '');
+    var rows = [
+      ["배당률", function(x){ return x.o.y; }, function(v){ return pc(v); }, 1], [amtLab(A) + " → 1년", function(x){ return x.ann; }, function(v){ return wonS(v); }, 1],
+      ["1번 받을 때", function(x){ return x.per; }, function(v){ return wonS(v); }], ["세후 1년(대략)", function(x){ return x.net; }, function(v){ return wonS(v); }, 1],
+      ["주는 횟수", function(x){ return x.o.fq && !x.o.stale ? x.o.fq.n : null; }, function(v, x){ return x.o.fq ? (x.o.stale ? "중단?" : x.o.fq.k) : "–"; }, 1],
+      ["배당락 달", null, function(v, x){ return x.o.exM && !x.o.stale ? (x.o.exM.length >= 12 ? "매달" : x.o.exM.length >= 9 ? "거의 매달" : x.o.exM.join("·") + "월") : "–"; }],
+      ["입금 달(대략)", null, function(v, x){ return x.o.payM && !x.o.stale ? (x.o.payM.length >= 12 ? "매달" : x.o.payM.length >= 9 ? "거의 매달" : x.o.payM.join("·") + "월") : "–"; }],
+      ["다음 배당락", null, function(v, x){ return x.o.next ? md(x.o.next) + "쯤" : "–"; }],
+      ["1년 전보다 배당", function(x){ return x.o.spec ? null : x.o.gr; }, function(v){ return sg(v); }, 1],
+      ["1주 가격", null, function(v, x){ return fmtPx(x.o.price, x.o.cur); }], ["1주당 1년 배당", null, function(v, x){ return x.o.ps ? fmtPx(x.o.ps, x.o.cur) : "–"; }],
+      ["주가 1년", function(x){ return x.o.r1y; }, function(v){ return sg(v); }, 1], ["주가+배당 1년", function(x){ return x.o.tot; }, function(v){ return sg(v); }, 1]];
+    var n = S.length, lw = 128, cw = (PW - 96 - lw) / n, tf = n > 5 ? 11.5 : 13;
+    function bst(f, hi){ var v = S.map(f).filter(function(x){ return x != null && isFinite(x); }); return v.length < 2 ? null : hi ? Math.max.apply(null, v) : Math.min.apply(null, v); }
+    var p3 = hTitle("🧾 나란히 비교", "초록 = 가장 좋은 쪽") + '<div style="border:1.5px solid ' + LN + ';border-radius:14px;overflow:hidden">' +
+      '<div style="display:flex;background:#f5f7fb"><div style="width:' + lw + 'px"></div>' + S.map(function(s){ return '<div style="width:' + cw + 'px;padding:10px 4px 8px;text-align:center;border-bottom:3px solid ' + s.o.c + '"><div style="font-size:' + tf + 'px;font-weight:900;color:' + INK + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(main1(s.o)) + '</div><div style="font-size:' + (tf - 2.5) + 'px;color:' + SUB + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(tkName(s.o)) + '</div></div>'; }).join("") + '</div>' +
+      rows.map(function(rw, ri){ var bv = rw[1] && rw[3] != null ? bst(rw[1], rw[3]) : null;
+        return '<div style="display:flex;border-top:1px solid ' + LN + ';background:' + (ri % 2 ? '#fbfcfe' : '#fff') + '"><div style="width:' + lw + 'px;padding:10px 12px;font-size:12px;color:' + SUB + ';font-weight:700">' + rw[0] + '</div>' +
+          S.map(function(s){ var v = rw[1] ? rw[1](s) : null, w = bv != null && v === bv, t = rw[2](v, s); return '<div style="width:' + cw + 'px;padding:10px 3px;text-align:center;font-size:' + tf + 'px;font-weight:' + (w ? 900 : 700) + ';color:' + (w ? WIN : INK) + ';background:' + (w ? 'rgba(20,137,95,.08)' : 'transparent') + '">' + e(t) + '</div>'; }).join("") + '</div>'; }).join("") + '</div>' +
+      hTitle("💡 이렇게 읽으면 됨") + '<div style="display:grid;gap:8px">' + [
+        ["배당률이 높다 ≠ 수익이 크다", "주가가 빠지면 배당을 받아도 손해일 수 있음 — 「주가+배당 1년」 줄을 같이 봐야 함"],
+        ["자주 주는 것 = 생활비용", "월배당은 매달 현금이 필요할 때 편리함 · 분기·연 배당은 한 번에 크게 들어옴"],
+        ["배당이 늘어나는 곳", "「1년 전보다 배당」이 플러스면 회사가 배당을 키우는 중이라는 뜻 — 오래 들고 갈수록 유리"]].map(function(x){
+          return '<div style="border-left:4px solid ' + GOLD + ';background:#fffbf0;border-radius:0 12px 12px 0;padding:10px 14px"><div style="font-size:14px;font-weight:900">' + x[0] + '</div><div style="font-size:12.5px;color:' + SUB + ';line-height:1.5;margin-top:2px">' + x[1] + '</div></div>'; }).join("") + '</div>';
+    var cards = S.map(function(s){ var x = s.o, sp = x.spark || [], mx = Math.max.apply(null, sp.map(function(z){ return z[1]; }).concat([0])) || 1;
+      var bars = sp.length ? '<div style="display:flex;align-items:flex-end;gap:3px;height:54px;margin:8px 0 2px">' + sp.map(function(z, k){ return '<div style="flex:1;height:' + Math.max(3, z[1] / mx * 54).toFixed(1) + 'px;background:' + x.c + ';opacity:' + (k === sp.length - 1 ? 1 : .5) + ';border-radius:3px 3px 0 0"></div>'; }).join("") + '</div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:9.5px;color:' + SUB + '"><span>' + sp[0][0].slice(2, 7).replace("-", ".") + '</span><span>최근 ' + sp.length + '번</span><span>' + sp[sp.length - 1][0].slice(2, 7).replace("-", ".") + '</span></div>' : '<div style="font-size:11.5px;color:' + SUB + ';padding:16px 0">배당 기록 모으는 중</div>';
+      var kv = [];
+      if (x.lastEx) kv.push(["지난 배당", ymd(x.lastEx).slice(2).replace(/-/g, ".") + " · 1주 " + fmtPx(x.lastAmt, x.cur)]);
+      if (x.next) kv.push(["다음 예상", md(x.next) + " → 입금 " + md(x.nextPay) + "쯤"]);
+      if (s.per) kv.push(["한 번에", "약 " + won(s.per) + " (" + amtLab(A) + ")"]);
+      if (x.gr != null) kv.push(["1년 전보다", x.spec ? "특별배당 섞임" : sg(x.gr)]);
+      return '<div style="border:1.5px solid ' + LN + ';border-top:4px solid ' + x.c + ';border-radius:12px;padding:10px 12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' + nm2(x, 14, 10.5) + '<div style="text-align:right;flex:0 0 auto"><div style="font-size:16px;font-weight:900">' + (x.y ? pc(x.y) : '–') + '</div><div style="font-size:10.5px;color:' + SUB + '">' + (x.fq ? (x.stale ? '중단?' : x.fq.k) : '') + '</div></div></div>' + bars +
+        kv.map(function(k){ return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-top:1px dashed ' + LN + '"><span style="color:' + SUB + '">' + k[0] + '</span><b>' + e(k[1]) + '</b></div>'; }).join("") + '</div>'; }).join("");
+    var p4 = hTitle("📈 종목별 배당 흐름", "최근 배당 막대 · 진한 막대 = 가장 최근") + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + cards + '</div>' +
+      '<div style="position:absolute;left:48px;right:48px;bottom:56px">' + riskBox(10.5) + '</div>';
+    return [page(o, 1, "1년 배당, 누가 더 줄까", names + " · " + amtLab(A) + " 기준", p1),
+            page(o, 2, "언제, 얼마나 들어오나", "앞으로 12달 입금 예상 · " + amtLab(A) + " 기준", p2),
+            page(o, 3, "숫자로 나란히", "배당률 · 주기 · 세후 · 주가까지 한 표에", p3),
+            page(o, 4, "종목별 배당 흐름", "지난 배당과 다음 배당 · 알아 둘 점", p4)];
+  }
+
   window.divcView = view;
+  window.__divc = {onePage: function(o){ return onePage(LAST, o); }, pages: function(o){ return pages(LAST, o); }, last: function(){ return LAST; }};
   window.divcInit = function(){
     draw();
     document.getElementById("dvbody").addEventListener("click", function(ev){ if (ev.target && ev.target.id === "dvre"){ ST = {n: 0, pick: [], done: false}; keep(); draw(); window.scrollTo({top: 0, behavior: "smooth"}); } });
@@ -300,6 +557,11 @@
     ".dv-kv div{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:13px;border-top:1px dashed var(--line)}.dv-kv small{color:var(--sub);flex:0 0 auto;font-size:12.5px}.dv-kv b{text-align:right;font-weight:600;word-break:keep-all}" +
     ".dv-op{display:block;width:100%;margin:8px 0 6px;border:1px solid var(--line);background:none;color:var(--text);border-radius:10px;padding:9px;font:inherit;font-size:13px;cursor:pointer}" +
     ".dv-note{font-size:12px;color:var(--sub);line-height:1.6;margin:4px 8px 10px;word-break:keep-all}.dv-again{text-align:center;margin:0 0 18px}.dv-again button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:10px 18px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}" +
+    ".dv-send h3{margin-bottom:12px}.dv-f{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);margin:0 0 10px;white-space:nowrap}.dv-f input{flex:1;min-width:0;font:inherit;font-size:15px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text)}" +
+    ".dv-rc{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 10px}.dv-rc button,.dv-am button{font:inherit;font-size:13px;font-weight:700;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel2,transparent);color:var(--text);cursor:pointer}.dv-rc button.on,.dv-am button.on{border-color:var(--acc,#7c9cff);background:rgba(124,156,255,.18)}" +
+    ".dv-f2{font-size:13px;color:var(--sub);margin:2px 0 12px}.dv-am{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}.dv-am button{padding:8px 0}" +
+    ".dv-mk{display:grid;gap:8px}.dv-mk button{text-align:left;font:inherit;font-size:16px;font-weight:800;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel2,transparent);color:var(--text);cursor:pointer}.dv-mk button small{display:block;font-size:12.5px;font-weight:500;color:var(--sub);margin-top:2px}.dv-mk button.main{background:#fee500;color:#191919;border-color:#fee500}.dv-mk button.main small{color:#5a4f00}.dv-mk button[disabled]{opacity:.6}" +
+    ".dv-st{font-size:12px;color:var(--sub);line-height:1.5;margin:10px 2px 0;word-break:keep-all}" +
     "@media(max-width:360px){.dv-ns{grid-template-columns:repeat(3,1fr)}}";
     document.head.appendChild(st); })();
 })();
