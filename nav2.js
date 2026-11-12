@@ -19,6 +19,7 @@
     {k: "luck",  ic: "🔮", t: "운세",   tabs: ["luck", "saju", "tarot", "lotto"], hide: true, lab: 1}
   ];
   var LAB = {send: "📨 고객에게 한 장", lab: "🔬 연구실", onepager: "🔍 종목 찾기", home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", divc: "💰 배당비교", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
+  window.__navMap = {groups: GROUPS, lab: LAB};   // 🔎 11/12 메뉴 찾기 — 화면이 바뀌어도 지금 이름·자리로 길 안내
   function grpOf(k){ for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].tabs.indexOf(k) >= 0) return GROUPS[i]; return null; }
   function last(g){ var m = (window.store && store.gl) || {}; return m[g.k] && g.tabs.indexOf(m[g.k]) >= 0 ? m[g.k] : g.tabs[0]; }
 

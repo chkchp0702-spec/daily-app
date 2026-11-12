@@ -108,7 +108,10 @@
   };
   document.addEventListener("click", function(ev){
     var t = ev.target.closest && ev.target.closest("#hub [data-hub]"); if (!t) return; ev.stopPropagation();
-    var k = t.dataset.hub;
+    hubGo(t.dataset.hub);
+  });
+  window.__hubGo = hubGo;   // 🔎 11/12 메뉴 찾기(gsearch.js)도 같은 길로
+  function hubGo(k){
     if (k === "@one"){ if (window.__onepage) (__onepage.chooser || __onepage.go)(null); return; }
     if (k === "@qa"){ if (window.__qaOpen) __qaOpen(); return; }
     if (k === "@wlbtn" || k === "@uibtn"){ var o = document.getElementById(k.slice(1)); if (o) o.click(); return; }
@@ -119,7 +122,7 @@
         if (hb && !hb.classList.contains("ez-open") && op) op.click();
         var x = document.getElementById(tid); if (x){ x.scrollIntoView({behavior: "smooth", block: "start"}); return; } if (++n < 30) setTimeout(seek, 300); })(); return; }
     if (typeof window.go === "function"){ go(k); window.scrollTo(0, 0); }
-  });
+  }
 
   /* ───────── 아래 탭 아이콘(보내기·종목) — design.js 는 이름으로 찾는데 새 이름이 없어서 ───────── */
   function icons(){

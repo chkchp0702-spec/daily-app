@@ -8357,17 +8357,108 @@
       (on != null && ASK[on] ? '<div class="gs-ag">' + ASK[on][1].map(function(d, j){ return '<button type="button" data-aj="' + on + '_' + j + '">' + e(d[0]) + '<small>' + e({home: "오늘", market: "시장", sector: "시장 · 분위기", prob: "시장 · 확률", port: "포트", bond: "상품 · 채권", fund: "상품 · 펀드", els: "상품 · ELS", prop: "제안서", whale: "신호 · 큰손"}[d[1]] || d[1]) + ' ›</small></button>'; }).join("") +
         '<p class="gs-an">카드로 간 뒤 아래 「📨 보내기」를 누르면 그 화면을 한 장으로 보낼 수 있어요 · 참고용 · 사라·팔라는 뜻 아님</p></div>' : '') + '</div>';
   }
-  function open(){
+  /* 🔎 11/12 사용자 「어플 디자인을 자주 바꿔서 원하는 메뉴 찾기 힘드니, 메뉴 검색창도 하나 만들자」
+     메뉴 이름·옛 이름(나침반·보내기·고래 …)·하는 일(배당, 풀버전, 나라별 섹터 …)·초성(ㅂㄷ)으로 찾음 → 누르면 그 화면·그 칸으로 바로
+     길 안내(「🏠 오늘 › 시장 흐름」)는 nav2.js 의 지금 탭 묶음에서 그때그때 읽어서 — 화면 배치가 또 바뀌어도 맞게 나옴 */
+  var MENU = [
+    ["home", "", "🏠 오늘", "홈 첫화면 신호등 오늘한장 pb요약 아침 요약 5개 시장 업종 지도 오늘의 숫자"],
+    ["market", "", "🌐 시황 리포트", "시황 리포트 아침 시황 주도 섹터 테마 돈 몰리는 곳 일정 카톡 요약 전략 대시보드"],
+    ["market", "@pdf", "📄 시황 풀버전 PDF", "풀버전 전체 리포트 pdf 요약본 시황 리포트 원문 보고서"],
+    ["sector", "", "🧭 시장 흐름 · 나라별 섹터", "나침반 나라별 섹터 업종 섹터 등락 로테이션 한국 미국 일본 중국 홍콩 5개 시장 국면 장 분위기 대장주 히트맵 모닝 섹터 브리핑"],
+    ["feed", "", "📰 피드", "뉴스 블로그 텔레그램 네이버 블룸버그 기사"],
+    ["send", "", "📨 고객에게 한 장", "보내기 한장 카톡 문자 고객 그림 오늘 한 장 하락장 안내 이름 넣기"],
+    ["@qa", "", "💬 고객이 이렇게 물으면", "고객 질문 답 20개 팔아야 사도 돼 상담"],
+    ["prop", "", "📝 제안서", "제안서 투자제안 pdf ppt 심의 위험고지 성향 연금 irp dc 국고채 미국채 브라질 els 폼 회차 고르기 모의투자"],
+    ["bond", "", "🏦 채권", "채권 국고채 미국채 브라질 국채 ntn 금리 만기 채권 전망 보고서 회사채"],
+    ["fund", "", "📦 펀드", "펀드 사모 라인업 운용사 공모"],
+    ["els", "", "🎯 ELS", "els elb 청약 낙인 ki 조기상환 관제탑"],
+    ["divc", "", "💰 배당비교", "배당 배당률 배당금 백만원 언제 배당 고배당 etf 비교"],
+    ["onepager", "", "🔍 종목 찾기 · 종목리포트", "종목 검색 종목리포트 원페이저 티커 차트"],
+    ["flow", "", "🧲 수급", "수급 외국인 기관 순매수 집중 매수 연기금"],
+    ["lab", "", "🔬 연구실", "연구실 연구 신호 더보기 숨은 메뉴"],
+    ["port", "", "💼 포트", "포트 자산배분 배분표 비중 공격 킥 집중 기본 포트 설계기 세금 뭘 얼마나 사"],
+    ["score", "", "📊 성적표", "성적표 채점 수익률 예고 맞음 틀림"],
+    ["prob", "", "🎲 오를 확률", "시장확률 확률 내일 오를 확률 닮은 날"],
+    ["whale", "", "🐋 큰손", "고래 큰손 whale 기관 유명 투자자 13f 보유"],
+    ["cup", "", "☕ 컵 차트", "컵 컵앤핸들 돌파"],
+    ["gap", "", "📈 갭 상승", "갭 상승 돌파"],
+    ["screen", "", "🔎 종목 거르기", "거르기 스크리너 거름망"],
+    ["sigmore", "", "🗂 신호 더 보기", "더 보기 예측 채점 상세 매집"],
+    ["@bubble", "", "🕰 버블 시계 · 🐻 하락장 계기판", "버블 시계 하락장 계기판 현금 비중 곰 신용 경보 언제 다시 사나 바닥 신호 채권형"],
+    ["@season", "", "🧭 계절 시계", "계절 시계 5개국 지수 흐름 3개월 뒤"],
+    ["@sigprob", "", "🎯 신호 확률판", "신호 확률판 경고 신호 바닥 신호 확률"],
+    ["@analog", "", "🔁 닮은 장", "닮은 장 비슷한 과거 백테스트"],
+    ["@bt40", "", "📏 40주선 백테스트", "40주 이동평균 백테스트"],
+    ["luck", "", "🔮 오늘의 운세", "운세 오늘의 운세 투자운"],
+    ["saju", "", "📜 사주 리포트", "사주 별자리"],
+    ["tarot", "", "🃏 타로", "타로 카드"],
+    ["lotto", "", "🎱 로또", "로또 번호"],
+    ["@wlbtn", "", "★ 관심종목", "관심종목 즐겨찾기 내 종목 별"],
+    ["@uibtn", "", "⚙️ 보기 설정", "설정 글자 크기 글씨 화면 색 다크 밝게"],
+    ["alarm", "", "🔔 알림", "알림 푸시 켜기 끄기"],
+    ["idea", "", "💬 의견함", "의견 바라는 점 건의"],
+    ["@help", "", "🙋 뭐 보면 돼요?", "도움말 사용법 처음 궁금"]
+  ];
+  var CHO = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
+  function cho(t){ return String(t).replace(/[가-힣]/g, function(c){ return CHO.charAt(Math.floor((c.charCodeAt(0) - 0xAC00) / 588)); }); }
+  function nz(t){ return String(t || "").toLowerCase().replace(/[\s·›\-_]/g, "").replace(/[^\w가-힣ㄱ-ㅎ]/g, ""); }
+  function navName(k){ var N = window.__navMap; return (N && N.lab && N.lab[k]) || null; }
+  function menuPath(k){
+    if (k === "@qa") return "📨 고객에게 한 장 › 질문 답";
+    if (/^@(bubble|season|sigprob|analog)$/.test(k)) return "🏠 오늘 › 자세히 보기 안";
+    if (k === "@bt40") return "🔬 연구실 › 연구";
+    if (/^@(wlbtn|uibtn)$/.test(k)) return "맨 위 오른쪽";
+    if (k === "@help") return "꼬마 얼굴 누르기";
+    var N = window.__navMap, G = (N && N.groups) || [];
+    for (var i = 0; i < G.length; i++) if (G[i].tabs.indexOf(k) >= 0){ var g = G[i], nm = navName(k);
+      if (g.tabs.length < 2) return "아래 탭 " + g.ic + " " + g.t;
+      return (g.hide ? "🔬 연구실" : "아래 탭 " + g.ic + " " + g.t) + " › 위쪽 칸 「" + String(nm || k).replace(/^\S+\s/, "") + "」"; }
+    return "🔬 연구실 안";
+  }
+  function msearch(q){
+    var a = nz(q); if (!a) return [];
+    var isCho = /^[ㄱ-ㅎ]+$/.test(a), out = [];
+    MENU.forEach(function(m, i){
+      var nm = navName(m[0]), t = nz(m[2] + " " + (m[1] ? "" : nm || "")), kw = nz(m[3]), sc = 0;
+      if (isCho){ var ct = cho(t), ck = cho(kw); sc = ct.indexOf(a) === 0 ? 6 : ct.indexOf(a) >= 0 ? 4 : ck.indexOf(a) >= 0 ? 2 : 0; }
+      else sc = t.indexOf(a) === 0 ? 10 : t.indexOf(a) >= 0 ? 8 : kw.indexOf(a) >= 0 ? 5 : (a.length >= 2 && a.split("").every(function(c){ return kw.indexOf(c) >= 0; }) && kw.indexOf(a.slice(0, 2)) >= 0 ? 1 : 0);
+      if (sc) out.push({i: i, sc: sc}); });
+    return out.sort(function(x, y){ return y.sc - x.sc || x.i - y.i; }).slice(0, 6).map(function(o){ var m = MENU[o.i]; return {k: m[0], sel: m[1], t: m[1] ? m[2] : (navName(m[0]) && !/^@/.test(m[0]) && m[2].indexOf("·") < 0 ? navName(m[0]) : m[2]), sc: o.sc}; });
+  }
+  function menuGo(k, sel){
+    close();
+    try { if (window.ntfyUse) ntfyUse("menu_find"); } catch(z) {}
+    if (k === "@qa"){ if (window.__qaOpen) __qaOpen(); return; }
+    if (k.charAt(0) === "@" && window.__hubGo){ __hubGo(k);
+      var tid = {"@bubble": "bubble", "@season": "season", "@sigprob": "sigprob", "@analog": "analog"}[k];   // 위 카드가 늦게 그려지며 밀리면 다시 맞춤
+      if (tid) [1500, 3000, 4500].forEach(function(t){ setTimeout(function(){ var x = document.getElementById(tid); if (x){ var r = x.getBoundingClientRect(); if (Math.abs(r.top - 70) > 120) window.scrollTo({top: Math.max(0, r.top + window.scrollY - 70), behavior: "smooth"}); } }, t); });
+      return; }
+    if (typeof window.go === "function"){ window.go(k); window.scrollTo(0, 0); }   // ⚠ 이 파일 안의 go() 는 종목 열기라 window.go 로
+    if (sel === "@pdf"){ var t0 = Date.now(); (function f(){ var b = [].filter.call(document.querySelectorAll("#main .fold, #main button, #main summary"), function(x){ return /전체 리포트/.test(x.textContent); })[0];
+      if (b){ var hid = b.closest(".ez-cap-hid") || (b.classList.contains("ez-cap-hid") ? b : null); if (hid) hid.classList.remove("ez-cap-hid");   // 「더 보기」 밑에 숨어 있어도 꺼내서
+        b.scrollIntoView({behavior: "smooth", block: "center"}); b.classList.add("ms-hi"); setTimeout(function(){ b.classList.remove("ms-hi"); }, 2600); return; }
+      if (Date.now() - t0 < 8000) setTimeout(f, 250); })(); }
+  }
+  function menuHTML(list){
+    return list.length ? '<div class="gs-mn"><div class="gs-ah">📍 메뉴 <small>누르면 바로 그 화면으로</small></div>' + list.map(function(m, j){
+      return '<button type="button" data-mn="' + j + '"><b>' + e(m.t) + '</b><small>' + e(menuPath(m.k)) + '</small></button>'; }).join("") + '</div>' : '';
+  }
+  var MCHIP = [["시황 풀버전", "market", "@pdf"], ["나라별 섹터", "sector", ""], ["고객에게 한 장", "send", ""], ["제안서", "prop", ""], ["배당비교", "divc", ""], ["채권", "bond", ""], ["포트", "port", ""], ["버블 시계", "@bubble", ""]];
+  function mchipHTML(){ return '<div class="gs-ask gs-mc"><div class="gs-ah">📍 자주 찾는 메뉴 <small>위 칸에 메뉴 이름·하는 일을 쳐도 돼요 (예: 배당, 풀버전, ㅅㅎ)</small></div><div class="gs-ac">' +
+    MCHIP.map(function(c, i){ return '<button type="button" data-mc="' + i + '">' + e(c[0]) + '</button>'; }).join("") + '</div></div>'; }
+  function open(mode){
     if (document.getElementById("gsq")) return;
     var o = document.createElement("div"); o.id = "gsq";
-    o.innerHTML = '<div class="gs-box"><div class="gs-row"><input aria-label="종목명·코드" id="gsin" type="search" placeholder="종목·질문 (예: 삼성전자, 브라질 국채 어때)" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="gs-x" aria-label="닫기">✕</button></div>' +
-      '<div id="gsask"></div><div id="gsres" class="gs-res"><div class="gs-hint">종목 목록 불러오는 중…</div></div></div>';
+    o.innerHTML = '<div class="gs-box"><div class="gs-row"><input aria-label="종목명·코드" id="gsin" type="search" placeholder="메뉴·종목·질문 (예: 배당, 섹터, 삼성전자)" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="gs-x" aria-label="닫기">✕</button></div>' +
+      '<div id="gsmc">' + mchipHTML() + '</div><div id="gsask"></div><div id="gsres" class="gs-res"><div class="gs-hint">종목 목록 불러오는 중…</div></div></div>';
     document.body.appendChild(o); document.body.classList.add("gs-open");
     o.addEventListener("click", function(ev){ if (ev.target === o) close(); });
     o.querySelector(".gs-x").onclick = close;
     var inp = document.getElementById("gsin"), res = document.getElementById("gsres");
-    var ask = document.getElementById("gsask"), aOn = null;
-    function drawAsk(){ ask.innerHTML = askHTML(aOn); ask.style.display = inp.value.trim() ? "none" : ""; }
+    var ask = document.getElementById("gsask"), aOn = null, mc = document.getElementById("gsmc"), ML = [];
+    function drawAsk(){ ask.innerHTML = askHTML(aOn); ask.style.display = inp.value.trim() ? "none" : ""; mc.style.display = inp.value.trim() ? "none" : ""; }
+    mc.onclick = function(ev){ var t = ev.target.closest && ev.target.closest("[data-mc]"); if (!t) return; var c = MCHIP[+t.dataset.mc]; menuGo(c[1], c[2]); };
+    res.addEventListener("click", function(ev){ var t = ev.target.closest && ev.target.closest("[data-mn]"); if (!t) return; var m = ML[+t.dataset.mn]; if (m) menuGo(m.k, m.sel); });
     ask.onclick = function(ev){ var t = ev.target.closest && ev.target.closest("button"); if (!t) return;
       if (t.dataset.ask != null){ aOn = aOn === +t.dataset.ask ? null : +t.dataset.ask; drawAsk(); try { if (window.ntfyUse) ntfyUse("ask_chip"); } catch(z) {} return; }
       if (t.dataset.aj){ var q = t.dataset.aj.split("_"), d = ASK[+q[0]][1][+q[1]]; jump(d[1], d[2]); } };
@@ -8378,29 +8469,41 @@
       .catch(function(){ res.innerHTML = '<div class="gs-hint">목록을 못 불러왔어요. 잠시 뒤 다시.</div>'; });
     function draw(){
       var q0 = inp.value.trim(); if (!q0){ res.innerHTML = ""; return; }
-      var qa = qAnswers(q0), qh = qa.length ? '<div class="gs-qa"><div class="gs-ah">💬 이 질문의 답 <small>누르면 그 카드로</small></div>' + qa.map(function(d, j){ return '<button type="button" data-qa="' + j + '">' + e(d[0]) + '</button>'; }).join("") + '</div>' : '';
+      ML = msearch(q0); var mh = menuHTML(ML);
+      var qa = qAnswers(q0), qh = mh + (qa.length ? '<div class="gs-qa"><div class="gs-ah">💬 이 질문의 답 <small>누르면 그 카드로</small></div>' + qa.map(function(d, j){ return '<button type="button" data-qa="' + j + '">' + e(d[0]) + '</button>'; }).join("") + '</div>' : '');
       if (!ready){ res.innerHTML = qh || '<div class="gs-hint">종목 목록 불러오는 중…</div>'; bindQa(qa); return; }
       var q = stripQ(q0) || q0;
       var r = opSearch(q).slice(0, qa.length ? 6 : 12), FL = window.FLAG || {};
       res.innerHTML = qh + (r.length ? r.map(function(x){
         return '<button data-s="' + e(x.sym) + '">' + (FL[x.mkt] || "") + ' <b>' + e(x.name) + '</b>' + (x.etf ? ' <span class="gs-etf">ETF</span>' : '') +
           '<small>' + e(window.V && V.cd ? V.cd(x.sym) : x.sym) + (x.built ? '' : ' · 준비 중') + '</small></button>'; }).join("")
-        : (qa.length ? '' : '<div class="gs-hint">「' + e(q0) + '」 — 찾는 종목·질문이 없어요 · 예: 「브라질 국채 지금 어때」「하락장이면?」</div>'));
+        : (qa.length || ML.length ? '' : '<div class="gs-hint">「' + e(q0) + '」 — 찾는 메뉴·종목·질문이 없어요 · 예: 「브라질 국채 지금 어때」「하락장이면?」</div>'));
       [].forEach.call(res.querySelectorAll("button[data-s]"), function(b){ b.onclick = function(){ go(b.dataset.s); }; });
       bindQa(qa);
     }
     function bindQa(qa){ [].forEach.call(res.querySelectorAll("button[data-qa]"), function(b){ b.onclick = function(){ var d = qa[+b.dataset.qa]; try { if (window.ntfyUse) ntfyUse("ask_free"); } catch(z) {} if (d[1] === "@op") go(d[2]); else jump(d[1], d[2]); }; }); }
-    inp.oninput = function(){ draw(); ask.style.display = inp.value.trim() ? "none" : ""; };
+    inp.oninput = function(){ draw(); ask.style.display = mc.style.display = inp.value.trim() ? "none" : ""; };
     inp.onkeydown = function(ev){
       if (ev.key === "Escape") close();
-      if (ev.key === "Enter"){ var qa = qAnswers(inp.value.trim()); if (qa.length && qa[0][1] !== "@op"){ jump(qa[0][1], qa[0][2]); return; } if (ready){ var r = opSearch(stripQ(inp.value.trim()) || inp.value.trim())[0]; if (r) go(r.sym); } }
+      if (ev.key === "Enter"){ var mm = msearch(inp.value.trim()); if (mm.length && mm[0].sc >= 8){ menuGo(mm[0].k, mm[0].sel); return; } var qa = qAnswers(inp.value.trim()); if (qa.length && qa[0][1] !== "@op"){ jump(qa[0][1], qa[0][2]); return; } if (ready){ var r = opSearch(stripQ(inp.value.trim()) || inp.value.trim())[0]; if (r) go(r.sym); } }
     };
   }
   window.gsOpen = open;
+  window.__menuFind = msearch;
+  function bar(){
+    var k = typeof cur !== "undefined" ? cur : null, m = document.getElementById("main");
+    if (!m || ["home", "lab", "send"].indexOf(k) < 0 || document.getElementById("msbar")) return;
+    var b = document.createElement("button"); b.type = "button"; b.id = "msbar";
+    b.innerHTML = '<span>🔎</span><b>메뉴 찾기</b><small>배당 · 나라별 섹터 · 시황 풀버전 · 종목 …</small>';
+    b.onclick = function(){ open(); };
+    m.insertBefore(b, m.firstChild);
+  }
+  function watch(){ var m = document.getElementById("main"); if (!m){ setTimeout(watch, 500); return; } new MutationObserver(function(){ if (!document.getElementById("msbar")) bar(); }).observe(m, {childList: true}); bar(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", watch); else watch();
   window.__gsAsk = {list: ASK, jump: jump};   // 11/05 📋 받은 글 → 답장 한 장(ux1105b)이 답 카드 칩을 같이 씀
   function addBtn(){
     var top = document.querySelector("header .top"); if (!top || document.getElementById("gsbtn")) return;
-    var b = document.createElement("button"); b.id = "gsbtn"; b.setAttribute("aria-label", "종목 검색"); b.innerHTML = "🔍";
+    var b = document.createElement("button"); b.id = "gsbtn"; b.setAttribute("aria-label", "메뉴·종목 찾기"); b.innerHTML = "🔍";
     b.onclick = open;
     var ref = document.getElementById("wlbtn") || document.getElementById("stamp");
     top.insertBefore(b, ref);
@@ -8424,6 +8527,10 @@
     ".gs-ac{display:flex;flex-wrap:wrap;gap:6px}.gs-ac button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:99px;padding:7px 11px;font:inherit;font-size:13.5px;cursor:pointer}" +
     ".gs-ac button.on{background:var(--c,#7c9cff);color:#111;border-color:transparent;font-weight:800}" +
     ".gs-ag{margin:8px 0 4px;border:1px solid var(--line);border-radius:12px;overflow:hidden}.gs-ag button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);padding:10px 12px;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer}" +
+    ".gs-mn{padding:10px 10px 6px;border-bottom:1px solid var(--line)}.gs-mn button{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:10px 12px;margin-top:6px;font:inherit;font-size:15px;cursor:pointer}.gs-mn button b{font-weight:800}.gs-mn button small{display:block;color:var(--sub);font-size:12.5px;margin-top:2px}" +
+    ".gs-mc{border-bottom:1px solid var(--line)}" +
+    "#msbar{display:flex;align-items:center;gap:8px;width:100%;margin:0 0 12px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:14px;padding:12px 14px;font:inherit;text-align:left;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05)}#msbar span{font-size:17px}#msbar b{font-size:15px;font-weight:800;flex:none}#msbar small{color:var(--sub);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}" +
+    ".ms-hi{outline:3px solid #3182f6;outline-offset:3px;border-radius:12px;transition:outline-color .4s}" +
     ".gs-ag button small{display:block;font-weight:500;color:var(--sub);font-size:12px;margin-top:1px}.gs-ag button:active{background:var(--panel2)}.gs-an{font-size:11.5px;color:var(--sub);margin:0;padding:8px 12px;line-height:1.45}";
   document.head.appendChild(css);
 })();
@@ -11238,6 +11345,7 @@
     {k: "luck",  ic: "🔮", t: "운세",   tabs: ["luck", "saju", "tarot", "lotto"], hide: true, lab: 1}
   ];
   var LAB = {send: "📨 고객에게 한 장", lab: "🔬 연구실", onepager: "🔍 종목 찾기", home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", divc: "💰 배당비교", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
+  window.__navMap = {groups: GROUPS, lab: LAB};   // 🔎 11/12 메뉴 찾기 — 화면이 바뀌어도 지금 이름·자리로 길 안내
   function grpOf(k){ for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].tabs.indexOf(k) >= 0) return GROUPS[i]; return null; }
   function last(g){ var m = (window.store && store.gl) || {}; return m[g.k] && g.tabs.indexOf(m[g.k]) >= 0 ? m[g.k] : g.tabs[0]; }
 
@@ -21323,7 +21431,10 @@ window.VIDC = {
   };
   document.addEventListener("click", function(ev){
     var t = ev.target.closest && ev.target.closest("#hub [data-hub]"); if (!t) return; ev.stopPropagation();
-    var k = t.dataset.hub;
+    hubGo(t.dataset.hub);
+  });
+  window.__hubGo = hubGo;   // 🔎 11/12 메뉴 찾기(gsearch.js)도 같은 길로
+  function hubGo(k){
     if (k === "@one"){ if (window.__onepage) (__onepage.chooser || __onepage.go)(null); return; }
     if (k === "@qa"){ if (window.__qaOpen) __qaOpen(); return; }
     if (k === "@wlbtn" || k === "@uibtn"){ var o = document.getElementById(k.slice(1)); if (o) o.click(); return; }
@@ -21334,7 +21445,7 @@ window.VIDC = {
         if (hb && !hb.classList.contains("ez-open") && op) op.click();
         var x = document.getElementById(tid); if (x){ x.scrollIntoView({behavior: "smooth", block: "start"}); return; } if (++n < 30) setTimeout(seek, 300); })(); return; }
     if (typeof window.go === "function"){ go(k); window.scrollTo(0, 0); }
-  });
+  }
 
   /* ───────── 아래 탭 아이콘(보내기·종목) — design.js 는 이름으로 찾는데 새 이름이 없어서 ───────── */
   function icons(){
