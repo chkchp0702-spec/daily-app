@@ -383,6 +383,15 @@
     }).join("");
     return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🔁 지금 장과 닮았던 때에서 가장 나았던 방식 · 누르면 설명</small></div>' + rows + '</div>';
   }
+  function moreHtml(B){   // 🌏 11/12 일본·중국·홍콩 — 판정 + 닮은 장 규칙 (bear.json more)
+    var A = B.more || []; if (!A.length) return "";
+    var FL = {jp: "🇯🇵", cn: "🇨🇳", hk: "🇭🇰"}, NM = {"🟢": "정상", "🟡": "조정", "🐻": "하락장"};
+    return '<details class="bm bm-more"><summary class="bm-h">🌏 일본·중국·홍콩 <small>' + A.map(function(m){ return m.state + e(m.name.replace("225", "").replace("종합", "").replace("성분", "")); }).join(" ") + '</small></summary>' +
+      A.map(function(m){ var ap = m.analog;
+        return '<div class="bmm"><span>' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' <small>고점보다 ' + sg(m.dd) + '</small></span><em>' + (ap ? "주식 " + ap.stock + "%" : "정하지 않음") + '</em>' +
+          '<small>' + (ap ? '🔁 ' + e(ap.rule) + ' · 다음: ' + e(ap.next) : '닮은 장에서 통하는 방식이 없었어요 — 한 번에 사지 말고 나눠 사기만 참고') + '</small></div>'; }).join("") +
+      '<p class="bm-note">상태나 주식 몫이 바뀌면 알림이 가요 · 매수·매도 추천 아님</p></details>';
+  }
   function bearHtml(d){
     var B = d.bear; if (!B || !B.markets || !B.markets.length) return "";
     var M_ = B.markets, bad = M_.filter(function(m){ return m.state !== "🟢"; });
@@ -402,7 +411,7 @@
         '<p class="bg-ad">' + e(m.advice) + '</p></div>';
     }).join("");
     return '<section class="card h2-bear" id="bear" data-cz="done"><div class="bg-h">🐻 하락장 계기판 <small>' + e(md(B.at)) + ' ' + e(String(B.at || "").slice(11, 16)) + ' · 종가 판정</small></div>' +
-      '<div class="bg-cs">' + chips + '</div><p class="bg-lead' + (bad.length ? " warn" : "") + '">' + e(lead) + '</p>' + methHtml(B) +
+      '<div class="bg-cs">' + chips + '</div><p class="bg-lead' + (bad.length ? " warn" : "") + '">' + e(lead) + '</p>' + methHtml(B) + moreHtml(B) +
       (bad.length ? '<details class="bg-d"><summary>무엇을 보면 다시 사나 · 체크리스트 펼치기</summary>' + det +
         '<p class="note bg-ru">판정: 고점보다 −10% 조정 · −20% 하락장 (종가) · 현금 권고(11/11부터): 위 🏁 시장별 방식 — 1999년부터 200여 가지를 돌려 2012년까지·2013년 뒤 둘 다 그냥 들고 있기를 이긴 것 중 수익 1등(best_bt). 판정 규칙은 결과 보기 전 등록 · 매수·매도 추천 아님 — 고객 성향·기간에 맞춰 판단.</p></details>' : '') +
       '</section>';
@@ -477,6 +486,7 @@
     ".bg-m{background:var(--panel2);border-radius:14px;padding:12px;margin-top:10px}.bg-mh{font-size:14.5px;line-height:1.5;word-break:keep-all}.bg-n{font-size:14px;font-weight:700;margin:6px 0 4px}" +
     ".bg-ck{list-style:none;margin:0;padding:0}.bg-ck li{display:grid;grid-template-columns:22px 1fr;column-gap:4px;padding:5px 0;border-top:1px solid var(--line,rgba(0,0,0,.06));font-size:14px}.bg-ck li i{font-style:normal;grid-row:span 2}.bg-ck li b{font-weight:700}.bg-ck li small{color:var(--sub);font-size:12.5px;word-break:keep-all}.bg-ck li.on b{color:var(--up,#f04452)}" +
     ".bg-lad{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:8px 0 6px}.bg-lad span{text-align:center;border-radius:10px;padding:6px 2px;background:var(--panel,#fff);opacity:.6}.bg-lad span.now{opacity:1;box-shadow:inset 0 0 0 2px var(--accent,#3182f6)}.bg-lad small{display:block;font-size:11.5px;color:var(--sub);font-weight:700}.bg-lad b{font-size:14px;font-weight:900}" +
+    ".bm-more summary{cursor:pointer;list-style:none;min-height:44px}.bm-more summary::-webkit-details-marker{display:none}.bm-more summary:after{content:\" ▾\";color:var(--sub)}.bmm{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:8px 0;border-top:1px solid var(--line,rgba(127,127,127,.18));font-size:14px}.bmm em{font-style:normal;font-weight:900}.bmm>small{grid-column:1/-1;font-size:12.5px;line-height:1.45;color:var(--sub);word-break:keep-all}.bmm span small{color:var(--sub)}" +
     ".bm{margin:12px 0 4px}.bm-h{font-size:14px;font-weight:900;margin-bottom:6px}.bm-h small{display:block;font-size:11.5px;font-weight:600;color:var(--sub);margin-top:1px}" +
     ".bm-r{border-radius:12px;background:var(--panel,rgba(127,127,127,.07));padding:10px 12px;margin-top:6px}.bm-r.on{box-shadow:inset 3px 0 0 #e5484d}.bm-r>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.bm-r>summary::-webkit-details-marker{display:none}" +
     ".bm-n{min-width:0}.bm-n b{font-size:14px;font-weight:900}.bm-n small{display:block;font-size:12px;color:var(--sub);font-weight:700;margin-top:1px}.bm-now{text-align:right;flex:0 0 auto;max-width:58%}.bm-now>b{font-size:13.5px;font-weight:900;white-space:nowrap}" +
