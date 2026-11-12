@@ -1320,7 +1320,7 @@ function opShard(sym){ var x = (fnv(sym) % 256).toString(16); return x.length < 
 function opFile(sym){ return sym.replace(/[^A-Za-z0-9.-]/g, "_"); }
 
 function opView(){
-  return '<div class="card"><h3>종목 찾기</h3><div class="reqrow"><input aria-label="종목 찾기" id="opq" placeholder="예: 삼성전자, 엔비디아, AAPL, KODEX 200 · 발음이 대충 맞아도 OK" autocomplete="off" enterkeyhint="search"></div>' +
+  return '<div class="card"><h3>종목 찾기</h3><div class="reqrow"><input aria-label="종목 찾기" id="opq" placeholder="예: 삼전, ㅅㅅㅈㅈ, 엔디비아, nvidai, AAPL · 대충 쳐도 OK" autocomplete="off" enterkeyhint="search"></div>' +
          '<div id="opsug" class="sug"></div><div class="tm" id="opmsg" style="margin-top:8px">미국·한국·일본·중국·홍콩 약 2만 종목 + ETF · 최근 종가 기준</div></div>' +
          '<div id="oppick"></div><div id="opbox"></div>';
 }
@@ -1402,7 +1402,7 @@ function chunkIn(q, s){
   }
   return true;
 }
-function opSearch(q, lim){
+function opSearch0(q, lim){
   var raw = q; lim = lim || 8;
   q = norm(q); if (!q) return [];
   var out = [];
@@ -1422,10 +1422,90 @@ function opSearch(q, lim){
   if (res.length < 8){                                            // 발음이 비슷한 이름으로 더 찾기
     var have = {}; res.forEach(function(r){ have[r.sym] = 1; });
     res.fz = {};
-    fuzzy(raw).forEach(function(f){ if (res.length < 8 && !have[f[1].sym]){ res.fz[f[1].sym] = 1; res.push(f[1]); have[f[1].sym] = 1; } });
+    fuzzy(raw).forEach(function(f){ if (res.length < 8 && !have[f[1].sym]){ res.fz[f[1].sym] = "비슷한 발음"; res.push(f[1]); have[f[1].sym] = 1; } });
   }
   return res;
 }
+/* 🔎 11/12 사용자 「종목 찾기도 저렇게 비슷하게만 쳐도 나오게 하자」 — 원래 찾기(이름·티커·발음 비슷) 위에 네 가지를 더 얹음
+   ① 줄임말: 삼전·하닉·삼바·엘엔솔·현차 …  ② 초성: ㅅㅅㅈㅈ → 삼성전자  ③ 한/영 바뀜: tkatjdwjswk → 삼성전자 · ㅜㅍㅇㅁ → nvda
+   ④ 영어 철자 틀림: nvidai → 엔비디아(NVDA) · aple → 애플 · tesal → 테슬라  · AI 안 씀(0원) · 휴대폰 안에서만 계산 */
+var OP_NICK = {"삼전": "삼성전자", "삼전우": "삼성전자우", "하닉": "SK하이닉스", "하이닉": "SK하이닉스", "삼바": "삼성바이오로직스", "엘엔솔": "LG에너지솔루션", "엔솔": "LG에너지솔루션", "엘지엔솔": "LG에너지솔루션",
+  "현차": "현대차", "기아차": "기아", "삼전기": "삼성전기", "삼중": "삼성중공업", "한화에어로": "한화에어로스페이스", "한에": "한화에어로스페이스", "포홀": "POSCO홀딩스", "포스코": "POSCO홀딩스", "네이버": "NAVER",
+  "셀트": "셀트리온", "에코비": "에코프로비엠", "두에빌": "두산에너빌리티", "두산에너": "두산에너빌리티", "현중": "HD현대중공업", "한조": "한화오션", "카뱅": "카카오뱅크", "카페": "카카오페이", "엘전": "LG전자", "삼물": "삼성물산", "삼생": "삼성생명", "삼화": "삼성화재", "케이비": "KB금융",
+  "엔비": "엔비디아", "테슬": "테슬라", "팔란": "팔란티어", "마소": "마이크로소프트", "마이크로": "마이크로소프트", "구글": "알파벳", "페북": "메타", "아마존": "아마존닷컴", "브로드": "브로드컴", "마이크론": "마이크론 테크놀로지", "티에스엠씨": "TSMC", "에이엠디": "AMD", "넷플": "넷플릭스", "코카": "코카콜라"};
+var KB_EN = "rRseEfaqQtTdwWczxvgkoiOjpuPhynbml", KB_HG = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎㅏㅐㅑㅒㅓㅔㅕㅖㅗㅛㅜㅠㅡㅣ";
+var KB_JA = {r:"ㄱ",R:"ㄲ",s:"ㄴ",e:"ㄷ",E:"ㄸ",f:"ㄹ",a:"ㅁ",q:"ㅂ",Q:"ㅃ",t:"ㅅ",T:"ㅆ",d:"ㅇ",w:"ㅈ",W:"ㅉ",c:"ㅊ",z:"ㅋ",x:"ㅌ",v:"ㅍ",g:"ㅎ",k:"ㅏ",o:"ㅐ",i:"ㅑ",O:"ㅒ",j:"ㅓ",p:"ㅔ",u:"ㅕ",P:"ㅖ",h:"ㅗ",y:"ㅛ",n:"ㅜ",b:"ㅠ",m:"ㅡ",l:"ㅣ"};
+function enToHangul(t){   // 두벌식 자판으로 친 영문 → 한글 (tkatjd → 삼성)
+  var CH = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ", JU = "ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ", JO = " ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ";
+  var VV = {"ㅗㅏ":"ㅘ","ㅗㅐ":"ㅙ","ㅗㅣ":"ㅚ","ㅜㅓ":"ㅝ","ㅜㅔ":"ㅞ","ㅜㅣ":"ㅟ","ㅡㅣ":"ㅢ"}, CC = {"ㄱㅅ":"ㄳ","ㄴㅈ":"ㄵ","ㄴㅎ":"ㄶ","ㄹㄱ":"ㄺ","ㄹㅁ":"ㄻ","ㄹㅂ":"ㄼ","ㄹㅅ":"ㄽ","ㄹㅌ":"ㄾ","ㄹㅍ":"ㄿ","ㄹㅎ":"ㅀ","ㅂㅅ":"ㅄ"};
+  var j = [], i; for (i = 0; i < t.length; i++){ var c = KB_JA[t[i]] || KB_JA[t[i].toLowerCase()]; if (!c) return ""; j.push(c); }
+  var out = "", isV = function(c){ return JU.indexOf(c) >= 0; };
+  i = 0;
+  while (i < j.length){
+    var c = j[i];
+    if (isV(c)){ var v0 = c; if (i + 1 < j.length && VV[v0 + j[i + 1]]){ v0 = VV[v0 + j[i + 1]]; i++; } out += v0; i++; continue; }
+    if (i + 1 >= j.length || !isV(j[i + 1])){ out += c; i++; continue; }
+    var cho = c, v = j[i + 1]; i += 2;
+    if (i < j.length && VV[v + j[i]]){ v = VV[v + j[i]]; i++; }
+    var jong = "";
+    if (i < j.length && !isV(j[i]) && JO.indexOf(j[i]) > 0){
+      if (i + 1 < j.length && isV(j[i + 1])){ }                      // 다음 글자의 첫소리
+      else if (i + 1 < j.length && CC[j[i] + j[i + 1]] && !(i + 2 < j.length && isV(j[i + 2]))){ jong = CC[j[i] + j[i + 1]]; i += 2; }
+      else { jong = j[i]; i++; }
+    }
+    out += String.fromCharCode(0xAC00 + CH.indexOf(cho) * 588 + JU.indexOf(v) * 28 + (jong ? JO.indexOf(jong) : 0));
+  }
+  return out;
+}
+function hangulToEn(t){   // 한글 자판인 채로 친 영문 (ㅜㅍㅇㅁ → nvda)
+  var o = "", rev = {}; for (var k in KB_JA) if (k === k.toLowerCase()) rev[KB_JA[k]] = k;
+  for (var i = 0; i < t.length; i++){ var c = t[i]; if (rev[c]) o += rev[c]; else if (/[\s0-9]/.test(c)) o += c; else return ""; }
+  return o;
+}
+var OP_CHO = null;
+function opCho(t){ var C = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ"; return String(t).replace(/[가-힣]/g, function(c){ return C.charAt(Math.floor((c.charCodeAt(0) - 0xAC00) / 588)); }).replace(/[^ㄱ-ㅎa-z0-9]/gi, "").toLowerCase(); }
+function choIndex(){ if (OP_CHO) return OP_CHO; OP_CHO = OPIDX.map(function(r){ var a = [opCho(r.name)].concat((r.altRaw || []).map(opCho)).filter(function(x){ return /[ㄱ-ㅎ]/.test(x); }); return a; }); return OP_CHO; }
+function latFuzzy(q){   // 영어 철자 틀림 — 티커·영문 이름 앞부분과 글자 거리
+  if (!/^[a-z][a-z0-9]{2,}$/.test(q)) return [];
+  var out = [], L = q.length, maxD = L <= 4 ? 1 : 2;
+  OPIDX.forEach(function(r){
+    var best = 9;
+    [r.s1].concat(r.alts).forEach(function(w){ if (!w || !/^[a-z]/.test(w) || Math.abs(w.length - L) > 3 && w.length < L) return;
+      var d = Math.min(lev(q, w.slice(0, L)), lev(q, w.slice(0, L + 1)), lev(q, w.slice(0, Math.max(1, L - 1)))); if (d < best) best = d; });
+    if (best <= maxD) out.push([best - (r.tier || 0) * 0.3 - (r.built ? 0.2 : 0) + r.name.length / 300, r]);
+  });
+  return out.sort(function(a, b){ return a[0] - b[0]; }).slice(0, 8).map(function(x){ return x[1]; });
+}
+function opSearch(q, lim){
+  var raw = String(q || "").trim(), nq = norm(raw); if (!nq) return [];
+  if (!OPIDX) return [];
+  var pre = [], lab = {};
+  var put = function(r, l){ if (!r || pre.some(function(x){ return x.sym === r.sym; })) return; pre.push(r); if (l) lab[r.sym] = l; };
+  // ① 줄임말
+  var nk = OP_NICK[nq] || OP_NICK[raw]; if (nk) opSearch0(nk, 3).slice(0, 2).forEach(function(r){ put(r, "줄임말"); });
+  // ② 초성
+  var rq = raw.replace(/\s+/g, "");   // ⚠ norm(NFKC)은 ㄱ 같은 자모를 다른 글자로 바꿔서, 초성은 친 그대로 비교
+  if (/^[ㄱ-ㅎ]{2,}$/.test(rq)){ var CI = choIndex(), hits = []; nq = rq;
+    OPIDX.forEach(function(r, i){ var a = CI[i]; for (var k = 0; k < a.length; k++){ var at = a[k].indexOf(nq); if (at >= 0){ hits.push([(at === 0 ? 0 : 1) + (a[k].length - nq.length) / 20 - (r.tier || 0) * 0.2 - (r.built ? 0.1 : 0) - (r.mkt === "KR" ? 0.15 : 0), r]); break; } } });
+    hits.sort(function(a, b){ return a[0] - b[0]; }).slice(0, 8).forEach(function(h){ put(h[1], "초성"); });
+    return withLab(pre.slice(0, Math.max(lim || 8, 8)), lab);
+  }
+  var base = opSearch0(raw, lim);
+  var strong = base.filter(function(r){ return !(base.fz && base.fz[r.sym]) && (r.n1.indexOf(nq) === 0 || r.s1.indexOf(nq) === 0 || r.alts.some(function(w){ return w.indexOf(nq) === 0; })); }).length;   // 이름·티커 앞이 맞는 것만 「제대로 찾음」
+  // ③ 한/영 바뀜
+  if (strong < 2){
+    var alt = /^[a-z]+$/i.test(raw.replace(/\s/g, "")) ? enToHangul(raw.replace(/\s/g, "")) : /^[ㄱ-ㅣ\s0-9]+$/.test(raw) ? hangulToEn(raw.replace(/\s/g, "")) : "";
+    if (alt && (/[가-힣]/.test(alt) || /^[a-z]/.test(alt))){ var ar = opSearch0(alt, 4); ar.filter(function(r){ return !(ar.fz && ar.fz[r.sym]); }).slice(0, 3).forEach(function(r){ put(r, "한/영 바뀜"); }); }
+  }
+  // ④ 영어 철자 틀림
+  var LF = strong < 8 && /^[a-z][a-z0-9]{2,}$/.test(nq) ? latFuzzy(nq) : [];
+  if (strong < 3) LF.slice(0, 5).forEach(function(r){ put(r, r.s1 === nq || r.alts.indexOf(nq) >= 0 ? "" : "비슷한 철자"); });
+  var res = pre.concat(base.filter(function(r){ return !pre.some(function(x){ return x.sym === r.sym; }); }));
+  if (strong >= 3) LF.forEach(function(r){ if (res.length < 8 && !res.some(function(x){ return x.sym === r.sym; })){ res.push(r); lab[r.sym] = "비슷한 철자"; } });
+  if (base.fz) for (var s2 in base.fz) if (!lab[s2]) lab[s2] = base.fz[s2];
+  return withLab(res.slice(0, Math.max(lim || 8, 8)), lab);
+}
+function withLab(arr, lab){ arr.fz = {}; arr.forEach(function(r){ if (lab[r.sym]) arr.fz[r.sym] = lab[r.sym]; }); return arr; }
 function opInit(first){
   $("opmsg").textContent = "종목 목록 불러오는 중…";
   opLoadIdx().then(function(){
@@ -1436,7 +1516,7 @@ function opInit(first){
     q.oninput = function(){
       var res = opSearch(q.value), fz = res.fz || {};
       $("opsug").innerHTML = res.map(function(r){
-        return '<button data-s="' + esc(r.sym) + '">' + (FLAG[r.mkt] || "") + " <b>" + esc(r.name) + '</b>' + (r.etf ? '<span class="etfb">ETF</span>' : "") + (fz[r.sym] ? '<span class="fzb">비슷한 발음</span>' : "") + '<small>' + esc(V.cd(r.sym)) + (r.built ? "" : " · 준비 중") + '</small></button>';
+        return '<button data-s="' + esc(r.sym) + '">' + (FLAG[r.mkt] || "") + " <b>" + esc(r.name) + '</b>' + (r.etf ? '<span class="etfb">ETF</span>' : "") + (fz[r.sym] ? '<span class="fzb">' + esc(typeof fz[r.sym] === "string" ? fz[r.sym] : "비슷한 발음") + '</span>' : "") + '<small>' + esc(V.cd(r.sym)) + (r.built ? "" : " · 준비 중") + '</small></button>';
       }).join("");
       [].forEach.call($("opsug").children, function(b){ b.onclick = function(){ q.value = ""; $("opsug").innerHTML = ""; q.blur(); opShow(b.dataset.s); }; });
     };
@@ -1616,7 +1696,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합친 한 파일. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.bundle.js?v=65bcccb5f4"></script>
+<script defer src="app.bundle.js?v=4eae911a8a"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>

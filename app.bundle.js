@@ -8449,7 +8449,7 @@
   function open(mode){
     if (document.getElementById("gsq")) return;
     var o = document.createElement("div"); o.id = "gsq";
-    o.innerHTML = '<div class="gs-box"><div class="gs-row"><input aria-label="종목명·코드" id="gsin" type="search" placeholder="메뉴·종목·질문 (예: 배당, 섹터, 삼성전자)" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="gs-x" aria-label="닫기">✕</button></div>' +
+    o.innerHTML = '<div class="gs-box"><div class="gs-row"><input aria-label="종목명·코드" id="gsin" type="search" placeholder="메뉴·종목·질문 (예: 배당, 섹터, 삼전, ㅅㅅㅈㅈ)" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="gs-x" aria-label="닫기">✕</button></div>' +
       '<div id="gsmc">' + mchipHTML() + '</div><div id="gsask"></div><div id="gsres" class="gs-res"><div class="gs-hint">종목 목록 불러오는 중…</div></div></div>';
     document.body.appendChild(o); document.body.classList.add("gs-open");
     o.addEventListener("click", function(ev){ if (ev.target === o) close(); });
@@ -8473,9 +8473,9 @@
       var qa = qAnswers(q0), qh = mh + (qa.length ? '<div class="gs-qa"><div class="gs-ah">💬 이 질문의 답 <small>누르면 그 카드로</small></div>' + qa.map(function(d, j){ return '<button type="button" data-qa="' + j + '">' + e(d[0]) + '</button>'; }).join("") + '</div>' : '');
       if (!ready){ res.innerHTML = qh || '<div class="gs-hint">종목 목록 불러오는 중…</div>'; bindQa(qa); return; }
       var q = stripQ(q0) || q0;
-      var r = opSearch(q).slice(0, qa.length ? 6 : 12), FL = window.FLAG || {};
+      var r0 = opSearch(q), fz = r0.fz || {}, r = r0.slice(0, qa.length ? 6 : 12), FL = window.FLAG || {};   // 🔎 11/12 줄임말·초성·한/영·철자 표시
       res.innerHTML = qh + (r.length ? r.map(function(x){
-        return '<button data-s="' + e(x.sym) + '">' + (FL[x.mkt] || "") + ' <b>' + e(x.name) + '</b>' + (x.etf ? ' <span class="gs-etf">ETF</span>' : '') +
+        return '<button data-s="' + e(x.sym) + '">' + (FL[x.mkt] || "") + ' <b>' + e(x.name) + '</b>' + (x.etf ? ' <span class="gs-etf">ETF</span>' : '') + (fz[x.sym] ? ' <span class="fzb">' + e(typeof fz[x.sym] === "string" ? fz[x.sym] : "비슷한 발음") + '</span>' : '') +
           '<small>' + e(window.V && V.cd ? V.cd(x.sym) : x.sym) + (x.built ? '' : ' · 준비 중') + '</small></button>'; }).join("")
         : (qa.length || ML.length ? '' : '<div class="gs-hint">「' + e(q0) + '」 — 찾는 메뉴·종목·질문이 없어요 · 예: 「브라질 국채 지금 어때」「하락장이면?」</div>'));
       [].forEach.call(res.querySelectorAll("button[data-s]"), function(b){ b.onclick = function(){ go(b.dataset.s); }; });
