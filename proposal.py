@@ -490,6 +490,58 @@ def bond_mix():
     return 35, 35, 30, "금리 방향이 반반이라 단기·중기·장기를 고르게 나눔"
 
 
+# ───────── 11/12 사용자 「제안서에서 상품 고르면 왜 회차나 다른 채권들 선택이 안 되니?」 ─────────
+# 채권·ELS 폼은 그동안 기간별 1등만 자동으로 골라 PB가 바꿀 수 없었음 → 고를 수 있는 후보 전체(cands)를 같이 실어 보냄
+# 앱(propose.js)에서 PB가 회차·종목을 골라 비중을 적으면 그걸로 제안서·계산서를 다시 짬 (계산 재료 s 는 proposal_mkt 가 붙임)
+def yrs_of(b):
+    return (b.get("yrs") or 0) + (b.get("days") or 0) / 365
+
+
+def krw_entry(b, k="c", lab=None):
+    yrs = yrs_of(b)
+    bk = b.get("kind") or "채권"
+    return {"k": k, "pct": 0, "name": lab or f"{bk} · {yrs:.1f}년", "code": b.get("code"), "inst": b.get("name"), "us": None,
+            "why": f"세후 {b['after']:.2f}% (은행 예금으로 치면 {b['bank']:.2f}%) · 만기 {b['mat']}" + ("" if bk == "국채" else f" · {b.get('risk') or ''}"),
+            "kind": "안전", "color": C.get(k, "#1f9fb5"),
+            "y": b.get("after"), "bank": b.get("bank"), "buy": b.get("buy"), "px": b.get("px"), "mat": b.get("mat"), "yrs": round(yrs, 1), "cpn": b.get("cpn"),
+            "id": b.get("code") or b.get("name"), "bk": bk, "risk": b.get("risk")}
+
+
+def ust_entry(b, k="c", lab=None, sold=True):
+    try:
+        yrs = (dt.date.fromisoformat(b["mat"]) - NOW.date()).days / 365.25
+    except Exception:
+        yrs = 0
+    ytm = b.get("ytm") if b.get("ytm") is not None else b.get("y")
+    nm = b.get("name") or b.get("nm")
+    return {"k": k, "pct": 0, "name": lab or f"미국채 · {yrs:.1f}년", "code": b.get("cu"), "inst": nm, "us": None,
+            "why": f"달러 기준 연 {ytm:.2f}% · 표면금리 {b.get('cpn')}% · 만기 {b.get('mat')}" + ("" if sold else " · 판매 목록 밖(창구 확인)"), "kind": "안전", "color": C.get(k, "#2f6fdf"),
+            "y": ytm, "mat": b.get("mat"), "cpn": b.get("cpn"), "yrs": round(yrs, 1),
+            "id": nm, "bk": "판매 중" if sold else "전체 미국채", "sold": sold}
+
+
+def brl_entry(a=None, u=None, k="c", lab=None):
+    if a is not None:      # 헤알 국채 NTN-F(연 10% 이표) · LTN(이자 없이 싸게 사서 만기에 액면)
+        code = a["code"]
+        nm = f"{code} {a['mat'][:4]}년 {int(a['mat'][5:7])}월 만기" + (" (연 10% 이표)" if code == "NTN-F" else " (무이표 · 할인채)")
+        return {"k": k, "pct": 0, "name": lab or ("헤알 국채 " + code), "code": None, "inst": nm, "us": None,
+                "why": f"헤알 기준 연 {a['r']:.2f}% · 개인 이자·차익·환차익 비과세(한-브라질 조세협약)", "kind": "위험", "color": "#22a06b",
+                "y": r1(a["r"], 2), "mat": a["mat"], "cur": "BRL", "bt": code, "id": f"{code}-{a['mat']}", "bk": "헤알 " + code}
+    return {"k": k, "pct": 0, "name": lab or "달러표시 브라질 국채", "code": u.get("isin"), "inst": u.get("name"), "us": None,
+            "why": f"달러 기준 연 {u['ytm']:.2f}% · 헤알 환율 걱정 없이 달러로 받음 (세금은 창구 확인)", "kind": "위험", "color": "#e6a817",
+            "y": r1(u["ytm"], 2), "mat": u.get("mat"), "cur": "USD", "bt": "USD", "id": u.get("isin") or u.get("name"), "bk": "달러표시"}
+
+
+def els_entry(e, k="c", lab=None, color="#2f6fdf", why=None):
+    ki = e.get("ki")
+    pp = e.get("t") == "ELB" or (e.get("pp") or 0) >= 100
+    idx = (not pp) and all(u.strip() in INDEX_UA for u in (e.get("ua") or "").split(","))
+    return {"k": k, "pct": 0, "name": lab or ("원금지급형 ELB" if pp else "지수형 ELS" if idx else "종목형 ELS"), "code": e.get("isin"), "inst": e.get("n"), "us": None,
+            "why": f"연 {e['cpn']:g}% · 기초자산 {e.get('ua')} · " + (f"손실 기준선(KI) {ki:g}%" if ki else "원금 지급형") + f" · 청약 마감 {md(e.get('e'))}",
+            "kind": "안전" if pp else "위험", "color": color, "y": e.get("cpn"), "ua": e.get("ua"), "ki": ki, "desc": strip(e.get("desc")), "mat": e.get("mat"), "cyc": e.get("cyc"), "end": e.get("e"),
+            "id": e.get("isin") or e.get("n"), "bk": "ELB" if pp else "지수형" if idx else "종목형", "pp": pp}
+
+
 def f_ktb():
     ks = [b for b in (PR.get("krw") or []) if b.get("kind") == "국채" and b.get("after") is not None]
     def best(lo, hi):
@@ -503,10 +555,7 @@ def f_ktb():
     for k, lab, b in picks:
         if not b:
             continue
-        yrs = (b.get("yrs") or 0) + (b.get("days") or 0) / 365
-        al.append({"k": k, "pct": pcts[k], "name": lab, "code": b.get("code"), "inst": b.get("name"), "us": None,
-                   "why": f"세후 {b['after']:.2f}% (은행 예금으로 치면 {b['bank']:.2f}%) · 만기 {b['mat']}", "kind": "안전", "color": C[k],
-                   "y": b.get("after"), "bank": b.get("bank"), "buy": b.get("buy"), "px": b.get("px"), "mat": b.get("mat"), "yrs": round(yrs, 1), "cpn": b.get("cpn")})
+        al.append(dict(krw_entry(b, k, lab), pct=pcts[k]))
         rows.append([lab, b.get("name"), f"{b['buy']:.3f}%", f"{b['after']:.2f}%", f"{b['bank']:.2f}%", b.get("mat"), f"{comma(b.get('px'))}원"])
     tot = sum(a["pct"] for a in al) or 1
     for a in al:
@@ -536,6 +585,8 @@ def f_ktb():
                   "장기채일수록 금리 변화에 값이 크게 움직임",
                   "예금자보호 대상은 아니지만 정부가 원리금을 갚음"],
         "tags": ["정부 보증", "분리과세 X · 차익 비과세", "기간 분산"],
+        "cands": [krw_entry(b) for b in sorted([b for b in (PR.get("krw") or []) if b.get("after") is not None and b.get("px")],
+                                               key=lambda b: ({"국채": 0, "공사채·지방채": 1, "회사채": 2}.get(b.get("kind"), 3), yrs_of(b)))],
     }
 
 
@@ -557,9 +608,7 @@ def f_ust():
     for k, lab, b, p in picks:
         if not b:
             continue
-        al.append({"k": k, "pct": p, "name": lab, "code": None, "inst": b.get("name"), "us": None,
-                   "why": f"달러 기준 연 {b['ytm']:.2f}% · 표면금리 {b['cpn']}% · 만기 {b['mat']}", "kind": "안전", "color": C[k],
-                   "y": b.get("ytm"), "mat": b.get("mat"), "cpn": b.get("cpn"), "yrs": round(yrs(b), 1)})
+        al.append(dict(ust_entry(b, k, lab), pct=p, code=None))
         rows.append([lab, b.get("name"), f"{b['cpn']}%", f"{b['ytm']:.2f}%", b.get("mat"), f"{yrs(b):.1f}년"])
     tot = sum(a["pct"] for a in al) or 1
     for a in al:
@@ -589,7 +638,36 @@ def f_ust():
                   "만기 전에 팔면 금리에 따라 값이 오르내림",
                   "장외 거래라 최소 금액·매매 시간이 정해져 있음"],
         "tags": ["달러 자산", "AA+ 국가", "환차익 비과세"],
+        "cands": ust_cands(it),
     }
+
+
+def ust_cands(it):
+    out, seen = [], set()
+    for b in it:
+        if b.get("ytm") is None:
+            continue
+        out.append(ust_entry(b))
+        seen.add(b.get("name"))
+    # 판매 목록 밖 미국채(재무부 전체) — 이표채(N·B)만 · 3개월 넘게 남은 것 · 같은 만기 달엔 표면금리 낮은 것 하나(차익 비과세가 커서 세후 유리)
+    best = {}
+    for b in ((PR.get("ust_all") or {}).get("items") or []):
+        if b.get("k") not in ("N", "B") or b.get("y") is None or b.get("nm") in seen:
+            continue
+        try:
+            if (dt.date.fromisoformat(b["mat"]) - NOW.date()).days < 92:
+                continue
+        except Exception:
+            continue
+        m = b["mat"][:7]
+        if m not in best or (b.get("cpn") or 0) < (best[m].get("cpn") or 0):
+            best[m] = b
+    for m in sorted(best):
+        out.append(ust_entry(best[m], sold=False))
+    for c in out:          # 무게 줄이기 — 앱에서 안 쓰는 칸
+        for q in ("us", "code", "color"):
+            c.pop(q, None)
+    return out
 
 
 # ───────── 8. 브라질 국채 ─────────
@@ -611,11 +689,9 @@ def f_brl():
     upk = upk or (usd[0] if usd else None)
     al = []
     if pick:
-        al.append({"k": "brlf", "pct": 70, "name": "헤알 국채 NTN-F", "code": None, "inst": f"NTN-F {pick['mat'][:4]}년 1월 만기 (연 10% 이표)", "us": None,
-                   "why": f"헤알 기준 연 {pick['r']:.2f}% · 개인 이자·차익·환차익 비과세(한-브라질 조세협약)", "kind": "위험", "color": "#22a06b", "y": r1(pick["r"], 2), "mat": pick["mat"]})
+        al.append(dict(brl_entry(a=pick, k="brlf"), pct=70))
     if upk:
-        al.append({"k": "brlu", "pct": 30, "name": "달러표시 브라질 국채", "code": upk.get("isin"), "inst": upk.get("name"), "us": None,
-                   "why": f"달러 기준 연 {upk['ytm']:.2f}% · 헤알 환율 걱정 없이 달러로 받음 (세금은 창구 확인)", "kind": "위험", "color": "#e6a817", "y": r1(upk["ytm"], 2), "mat": upk.get("mat")})
+        al.append(dict(brl_entry(u=upk, k="brlu"), pct=30))
     tot = sum(a["pct"] for a in al) or 1
     for a in al:
         a["pct"] = a["pct"] * 100 / tot
@@ -644,6 +720,8 @@ def f_brl():
                   "헤알 환율이 20~30% 빠진 해도 있음 → 원화 기준 원금 손실 가능",
                   "조세협약·세법이 바뀌면 비과세가 달라질 수 있음 · 달러표시채 세금은 창구 확인"],
         "tags": ["비과세(개인)", "고금리", "환율 위험 큼"],
+        "cands": [brl_entry(a=a) for a in sorted([a for a in anb if a.get("code") in ("NTN-F", "LTN") and a.get("pu")], key=lambda a: (a["code"] != "NTN-F", a["mat"]))]
+                 + [brl_entry(u=b) for b in sorted([b for b in (BL.get("usd") or []) if b.get("ytm") is not None], key=lambda b: b.get("mat") or "")],
     }
 
 
@@ -674,10 +752,7 @@ def f_els():
     picks = [(a, b, c, (left / ni if a.startswith("idx") else d), e, f) for a, b, c, d, e, f in picks]
     al = []
     for k, lab, e, p, col, why in picks:
-        ki = e.get("ki")
-        al.append({"k": k, "pct": round(p, 1), "name": lab, "code": e.get("isin"), "inst": e.get("n"), "us": None,
-                   "why": f"연 {e['cpn']:g}% · 기초자산 {e.get('ua')} · " + (f"손실 기준선(KI) {ki:g}%" if ki else "원금 지급형") + f" · 청약 마감 {md(e.get('e'))}",
-                   "kind": "안전" if k == "elb" else "위험", "color": col, "y": e.get("cpn"), "ua": e.get("ua"), "ki": ki, "desc": strip(e.get("desc")), "mat": e.get("mat"), "cyc": e.get("cyc"), "end": e.get("e")})
+        al.append(dict(els_entry(e, k, lab, col), pct=round(p, 1)))
     norm(al)
     rows = [[e.get("n"), e.get("ua"), f"{e['cpn']:g}%", (f"{e['ki']:g}%" if e.get("ki") else "원금지급"), strip(e.get("desc"))[:30], md(e.get("e"))] for e in sorted(E, key=lambda e: -(e.get("cpn") or 0))]
     avg = sum(a["pct"] * (a.get("y") or 0) for a in al) / 100 if al else None
@@ -702,6 +777,7 @@ def f_els():
                   "6개월마다 조건이 안 맞으면 다음으로 미뤄지고, 최대 3년 묶일 수 있음",
                   "예금자보호 대상 아님 · 발행사(증권사) 신용 위험이 있음"],
         "tags": ["청약 마감 " + md(al[0]["end"]) if al else "청약 중", "원금지급형 섞음", "지수형"],
+        "cands": [els_entry(e) for e in sorted(E, key=lambda e: ({"ELB": 0, "지수형": 1}.get(els_entry(e)["bk"], 2), -(e.get("cpn") or 0)))],
     }
 
 

@@ -305,7 +305,61 @@ def enrich(forms, P, old_macro):
             import traceback
             traceback.print_exc()
             print("시장·계산서 실패", k, repr(e))
+        try:
+            cand_sims(f, k, P, today)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print("후보 계산 재료 실패", k, repr(e))
     return M
+
+
+# 11/12 사용자 「회차나 다른 채권들 선택이 안 되니?」 — 후보마다 계산서 재료(s)를 미리 붙여 둠 → 앱에서 PB가 고르면 그대로 씀
+def cand_sims(f, k, P, today):
+    C = f.get("cands") or []
+    if not C:
+        return
+    fn = {"ktb": lambda g: sim_ktb(g, today), "ust": lambda g: sim_ust(g, P, today), "brl": lambda g: sim_brl(g, P, today), "els": lambda g: sim_els(g, P)}.get(k)
+    keep = []
+    for c in C:
+        try:
+            ps = fn({"alloc": [dict(c, pct=100)]})["picks"]
+        except Exception:
+            ps = []
+        if not ps:
+            continue
+        sp = ps[0]
+        for q in ("name", "slot", "pct"):
+            sp.pop(q, None)
+        c["s"] = sp
+        keep.append(c)
+    f["cands"] = keep
+    if k == "els":      # 고른 ELS 의 기초자산 흐름을 앱에서 다시 그릴 수 있게 — 기초자산별 재료
+        f["mkt_ua"] = els_ua_block(keep)
+
+
+def els_ua_block(C):
+    out = {}
+    colors = ["#2f6fdf", "#e0533d", "#22a06b", "#7b5cff", "#e6a817"]
+    for c in C:
+        for u in (c.get("ua") or "").split(","):
+            u = u.strip()
+            if not u or u in out:
+                continue
+            s = series(os.path.join(EPX, EMAP.get(u, u) + ".json"))
+            if len(s) < 260:
+                continue
+            v = [x for _, x in s]
+            hi = max(v[-252:])
+            mdd3, pk = 0, v[-min(756, len(v))]
+            for x in v[-756:]:
+                pk = max(pk, x)
+                mdd3 = min(mdd3, x / pk - 1)
+            s1 = last_n(s, 253)
+            out[u] = {"kp": {"label": u, "value": "1년 " + sg(chg(s, 252)), "sub": f"1달 {sg(chg(s, 21))} · 52주 고점 대비 {sg((v[-1] / hi - 1) * 100)}", "tone": 1 if (chg(s, 21) or 0) > 0 else -1},
+                      "row": [u, sg(chg(s, 21)), sg(chg(s, 252)), sg((v[-1] / hi - 1) * 100), sg(mdd3 * 100, 0)],
+                      "vals": [r(x / s1[0][1] * 100, 1) for _, x in s1][::-5][::-1], "labels": [d.isoformat() for d, _ in s1][::-5][::-1], "color": colors[len(out) % 5]}   # 주 1번 점(무게 줄이기)
+    return out
 
 
 # ── 주식·연금 (미국 중심) ──
@@ -738,11 +792,13 @@ def sim_brl(f, P, today):
         yrs = years_to(a.get("mat"), today)
         if not yrs:
             continue
-        if a["k"] == "brlf":
-            b = [x for x in anb if x.get("code") == "NTN-F" and x["mat"] == a.get("mat")]
+        if a["k"] == "brlf" or a.get("cur") == "BRL":
+            code = a.get("bt") or "NTN-F"
+            b = [x for x in anb if x.get("code") == code and x["mat"] == a.get("mat")]
             pu = b[0]["pu"] if b else None
-            picks.append({"name": a["inst"], "slot": a["name"], "pct": a["pct"], "cur": "BRL", "p": round(pu / 1000, 5) if pu else None, "cpn": 10.0, "cpn_eff": 4.8809 * 2, "freq": 2,
-                          "yrs": round(yrs, 2), "y": a.get("y"), "dur": mod_dur(10, 2, yrs, a.get("y") or 14), "tax_int": 0, "mat": a.get("mat"), "fx": fxb})
+            cp = 10.0 if code == "NTN-F" else 0.0      # LTN = 이자 없이 싸게 사서 만기에 액면 1,000헤알
+            picks.append({"name": a["inst"], "slot": a["name"], "pct": a["pct"], "cur": "BRL", "p": round(pu / 1000, 5) if pu else None, "cpn": cp, "cpn_eff": 4.8809 * 2 if cp else 0, "freq": 2,
+                          "yrs": round(yrs, 2), "y": a.get("y"), "dur": mod_dur(cp, 2, yrs, a.get("y") or 14), "tax_int": 0, "mat": a.get("mat"), "fx": fxb})
         else:
             u = [x for x in (BL.get("usd") or []) if x.get("name") == a["inst"]]
             u = u[0] if u else {}
@@ -754,7 +810,8 @@ def sim_brl(f, P, today):
 
 # ── ELS ──
 EMAP = {"KOSPI200": "KS200", "S&P500": "GSPC", "Nikkei225": "N225", "NIKKEI225": "N225", "HSCEI": "HSCE", "EuroStoxx50": "STOXX50E", "EUROSTOXX50": "STOXX50E",
-        "삼성전자": "005930_KS", "SK하이닉스": "000660_KS"}
+        "삼성전자": "005930_KS", "SK하이닉스": "000660_KS", "현대차": "005380_KS", "한국전력": "015760_KS",
+        "마이크론 테크놀로지": "MU", "팔란티어 테크": "PLTR", "테슬라": "TSLA", "AMD": "AMD", "엔비디아": "NVDA", "애플": "AAPL", "브로드컴": "AVGO", "인텔": "INTC", "나스닥100": "NDX", "NASDAQ100": "NDX"}
 
 
 def mkt_els(f, P):
@@ -810,7 +867,7 @@ def sim_els(f, P):
         except Exception:
             steps = []
         picks.append({"name": a["inst"], "slot": a["name"], "pct": a["pct"], "cpn": a.get("y"), "ki": a.get("ki"), "steps": steps, "cyc": 6, "ua": a.get("ua"),
-                      "pp": a["k"] == "elb", "hist": {"n": h.get("n"), "from": h.get("from"), "to": h.get("to"), "k": h.get("k"), "loss": h.get("loss"), "loss_avg": h.get("loss_avg"),
+                      "pp": a["k"] == "elb" or bool(a.get("pp")), "hist": {"n": h.get("n"), "from": h.get("from"), "to": h.get("to"), "k": h.get("k"), "loss": h.get("loss"), "loss_avg": h.get("loss_avg"),
                                                      "loss_worst": h.get("loss_worst"), "ki_touch": h.get("ki_touch"), "mat_ok": h.get("mat_ok")} if h else None})
     return {"kind": "els", "picks": picks, "note": "조기상환되면 그때까지 연 이자를 기간만큼 받음(6개월 = 연 이자의 절반) · 과거 확률은 2006년부터 매일 같은 조건으로 가입했다고 치고 돌려 본 결과 · 세금(배당소득세 15.4%)·수수료 반영 전"}
 
