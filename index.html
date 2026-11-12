@@ -1564,7 +1564,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261112g";
+var APPV = "20261112h";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1616,7 +1616,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합친 한 파일. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.bundle.js?v=d186593db5"></script>
+<script defer src="app.bundle.js?v=30823962ee"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1700,7 +1700,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1111.js?v=1"></script>   <!· 🔭 11/11 신호 탭 「지켜보는 중」 모드 (코스피 🐻 동안 · bear_watch.json) ·>
 <script defer src="ux1112b.js?v=3"></script>   <!· 🧊 11/12 한 화면 · 할 일 5칸 · 🔬 연구실 · 첫 화면 기능 지도 (되돌리기: 브랜치 backup-before-job5-1112) ·>
 <script defer src="ux1112c.js?v=1"></script>   <!· ⬆ 11/12 언제나 접기 · ← 언제나 뒤로 (사용자) ·>
-<script defer src="ux1112d.js?v=1"></script>   <!· 🎯 11/12 신호 확률판 (경고·바닥 신호별 확률 · 계절 시계 아래) ·>
+<script defer src="ux1112d.js?v=2"></script>   <!· 🎯 11/12 신호 확률판 (경고·바닥 신호별 확률 · 계절 시계 아래) ·>
 📦list-->
 <!-- 📦/JS -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>

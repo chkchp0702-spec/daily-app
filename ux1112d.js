@@ -31,6 +31,27 @@
     return (T.signals || []).filter(function(x){ return !x.thin; }).slice(0, 8).map(function(x){
       return '<tr class="' + (x.good ? "pk" : "") + '"><td>' + (x.good ? "✅ " : "") + e(x.name) + '</td><td>' + x.p_on + '%</td><td>' + x.lift + '배</td><td>' + (x.lift_a == null ? "–" : x.lift_a) + ' / ' + (x.lift_b == null ? "–" : x.lift_b) + '</td></tr>'; }).join("");
   }
+  // 📦 11/12 나라별 「다른 자료」(싼지 비싼지 · 빚 · 심리 · 자금) — market/alt.json (src/alt_bt.py)
+  var TGN = {down: "6개월 안 −10%", crash: "1년 안 −20%", up12: "1년 뒤 플러스", good: "6개월 좋은 매수 자리", up12_deep: "1년 뒤 플러스(고점 −20% 아래서)", good_deep: "6개월 좋은 매수 자리(고점 −20% 아래서)"};
+  function altHtml(A){
+    if (!A || !A.markets) return "";
+    var onW = [], onB = [];
+    var rows = A.markets.map(function(m){
+      var gs = (m.signals || []).filter(function(r){ return r.good && r.good.length; });
+      var li = gs.map(function(r){
+        var tg = r.good[0], v = r.t[tg];
+        if (r.now) (r.side === "W" ? onW : onB).push(m.name);
+        return '<li class="' + (r.now ? "on" : "") + '">' + (r.side === "W" ? "🚨" : "🌱") + ' <b>' + e(r.name) + '</b>' + (r.now ? ' <i>지금 켜짐</i>' : '') + '<em>' + e(TGN[tg] || tg) + ' ' + v.p_on + '% (평소 ' + v.base + '%) · ' + v.years + '개 해에 걸쳐 · ' + String(v.from).slice(0, 4) + '년~</em></li>'; }).join("");
+      var x = m.x5 || {};
+      return '<div class="sp-am"><div class="sp-amh">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small>5년 평균선보다 ' + (x.gap > 0 ? "+" : "") + String(x.gap).replace("-", "−") + '% · 자기 과거 중 ' + (x.pct >= 50 ? "비싼 쪽 상위 " + (100 - x.pct) : "싼 쪽 하위 " + x.pct) + '%</small></div>' +
+        (li ? '<ul class="sp-al">' + li + '</ul>' : '<p class="sp-an">통과한 신호 없음 (' + (m.signals || []).length + '개 시험)</p>') + '</div>';
+    }).join("");
+    var uq = function(a){ return a.filter(function(x, i){ return a.indexOf(x) === i; }); };
+    return '<details class="sp-t" open><summary>📦 나라별 다른 자료 — 싼지 비싼지 · 빚 · 심리 · 자금</summary>' +
+      '<p>주가 말고 다른 종류의 자료로 만든 신호 <b>' + A.n_tested + '개 중 ' + A.n_good + '개</b>가 앞·뒤 기간 둘 다 통했어요. ' +
+        (uq(onW).length ? '지금 🚨 경고가 켜진 곳: <b>' + e(uq(onW).join(" · ")) + '</b>. ' : '') + (uq(onB).length ? '지금 🌱 바닥 쪽이 켜진 곳: <b>' + e(uq(onB).join(" · ")) + '</b>.' : '지금 🌱 바닥 쪽이 켜진 곳은 없어요.') + '</p>' + rows +
+      '<small>자료: 🇺🇸 CAPE·PER·PBR·개인 심리(AAII) · 🇰🇷 예탁금·신용잔고·반대매매(금융투자협회)·외국인 매매·환율 · 🇨🇳 PER·PBR·주식−채권 금리차·시총÷GDP·융자잔고·북향 자금 · 🇭🇰 남향 자금 · 전부 5년 평균선. 「비싸다·싸다」는 그날까지 자기 과거와 비교(미래 값 안 봄). 못 받은 것: 🇰🇷 코스피 PER·PBR(KRX 로그인 필요) · 🇯🇵 닛케이 PER·PBR 과거 · 🇺🇸 신용융자·실업률(막힘)</small></details>';
+  }
   window.__sigProbCard = function(P){
     if (!P || !P.targets || !P.now) return "";
     var T = P.targets, D = T.down, C = T.crash, G = T.good, U = T.up12;
@@ -43,6 +64,7 @@
       '<p class="sp-lead">' + e(lead) + '</p>' +
       '<p class="sp-sum">신호가 켜진 날 뒤에 실제로 얼마나 자주 빠졌는지를 9개 지수 약 30년치로 센 숫자예요. <b>숫자 = 앞으로 6개월 안에 지금보다 10% 넘게 더 빠진 적이 있던 비율</b> · 세로 줄은 그 지수의 평소 값.</p>' +
       ms.map(function(m){ return row(m, P); }).join("") +
+      altHtml(window.__altData) +
       '<details class="sp-t"><summary>🚨 어떤 신호에 현금을 늘리나 — 경고 신호 성적</summary>' +
         '<p>경고 ' + (D.signals || []).length + '개 중 <b>앞·뒤 기간 둘 다 통한 건 ' + (D.good || []).length + '개</b>예요. 켜져도 평소 ' + D.base + '% → 50% 안팎으로, 조금 올라가는 정도예요.</p>' +
         '<table><tr><th>신호 (6개월 안 −10%)</th><th>켜지면</th><th>평소 대비</th><th>앞 / 뒤</th></tr>' + sigRows(D) + '</table>' +
@@ -66,8 +88,13 @@
     ".sp-own{color:var(--sub);font-size:12.5px}.sp-ul{margin:4px 0 0;padding:0;list-style:none;font-size:12.5px}.sp-ul li{padding:2px 0}.sp-ul em{font-style:normal;color:var(--sub);margin-left:4px}" +
     ".sp-t{margin-top:10px;border-radius:12px;background:var(--panel,rgba(127,127,127,.07));padding:10px 12px}.sp-t>summary{cursor:pointer;font-size:13.5px;font-weight:900;list-style:none}.sp-t>summary::-webkit-details-marker{display:none}.sp-t p{margin:8px 0 6px;font-size:13px;line-height:1.55;word-break:keep-all}" +
     ".sp-t table{width:100%;border-collapse:collapse;font-size:11.5px;margin:4px 0 8px}.sp-t th,.sp-t td{padding:4px 3px;text-align:right;border-bottom:1px solid rgba(127,127,127,.15);white-space:nowrap}.sp-t th:first-child,.sp-t td:first-child{text-align:left;white-space:normal;word-break:keep-all}.sp-t tr.pk td{font-weight:900}.sp-t small{display:block;font-size:11px;color:var(--sub);line-height:1.4}" +
+    ".sp-am{margin-top:10px;padding-top:8px;border-top:1px solid rgba(127,127,127,.18)}.sp-amh b{font-size:13.5px;font-weight:900}.sp-amh small{display:block;font-size:11.5px;color:var(--sub);font-weight:700;margin-top:1px}" +
+    ".sp-al{list-style:none;margin:6px 0 0;padding:0}.sp-al li{font-size:12.5px;line-height:1.45;padding:4px 0;word-break:keep-all}.sp-al li b{font-weight:800}.sp-al li em{display:block;font-style:normal;color:var(--sub);font-size:11.5px}.sp-al li i{font-style:normal;font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:99px;background:rgba(229,72,77,.14);color:#d13438;margin-left:3px}.sp-an{margin:4px 0 0!important;font-size:12px!important;color:var(--sub)}" +
     ".sp-note{margin:10px 0 0;font-size:11.5px;line-height:1.5;color:var(--sub);word-break:keep-all}";
   document.head.appendChild(css);
+  fetch(RAW.replace("prob.json", "alt.json") + "?t=" + Math.floor(Date.now() / 18e5)).then(function(r){ return r.ok ? r.json() : null; }).then(function(A){
+    if (!A) return; window.__altData = A; if (window.__h2apply) try { __h2apply(); } catch(x) {}
+  }).catch(function(){});
   fetch(RAW + "?t=" + Math.floor(Date.now() / 18e5)).then(function(r){ return r.ok ? r.json() : null; }).then(function(S){
     if (!S) return; window.__sigProbData = S; if (window.__h2apply) try { __h2apply(); } catch(x) {}
   }).catch(function(){});
