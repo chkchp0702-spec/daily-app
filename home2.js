@@ -377,6 +377,7 @@
       return '<details class="bm-r' + (out ? " on" : "") + '"><summary><span class="bm-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small>' + e(D.t) + '</small></span>' +
         '<span class="bm-now"><b>' + e(now) + '</b>' + (sig.length ? '<span class="bm-sg">' + sig.map(function(x){ return '<i class="' + (x[1] ? "on" : "") + '">' + (x[1] ? "🔴 " : "⚪ ") + e(x[0]) + '</i>'; }).join("") + '</span>' : '') + '</span></summary>' +
         '<div class="bm-x"><p><b>' + (ap ? "어떤 방식" : "언제 옮기나") + '</b> ' + e(D.how) + '</p>' + (ap ? '<p><b>다음에 바뀌는 때</b> ' + e(D.back) + '</p>' : m.key !== "nasdaq" ? '<p><b>언제 다시 사나</b> ' + e(D.back) + '</p>' : '') +
+        (window.__meetLine ? __meetLine(m) : '') +   // 📏 11/13 A11/13-1
         '<p><b>왜 이 방식</b> ' + e(D.why) + '</p>' + (D.note ? '<p class="bm-note">' + e(D.note) + '</p>' : '') +
         (b.since && b.on ? '<p class="bm-note">' + e(b.ent === "credit200" ? "신용 경보+200일선" : b.ent === "clock6" ? "시계 6시" : b.ent === "clock4.5" ? "시계 4시 반" : "신호") + ' 켜진 날 ' + e(md(b.since)) + ' · 대리 버블 시계 지금 ' + (b.h_free != null ? b.h_free + "시" : "–") + '</p>' : '') +
         '</div>' + backNow + '</details>';
@@ -389,7 +390,7 @@
     return '<details class="bm bm-more"><summary class="bm-h">🌏 일본·중국·홍콩 <small>' + A.map(function(m){ return m.state + e(m.name.replace("225", "").replace("종합", "").replace("성분", "")); }).join(" ") + '</small></summary>' +
       A.map(function(m){ var ap = m.analog;
         return '<div class="bmm"><span>' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' <small>고점보다 ' + sg(m.dd) + '</small></span><em>' + (ap ? "주식 " + ap.stock + "%" : "정하지 않음") + '</em>' +
-          '<small>' + (ap ? '🔁 ' + e(ap.rule) + ' · 다음: ' + e(ap.next) : '닮은 장에서 통하는 방식이 없었어요 — 한 번에 사지 말고 나눠 사기만 참고') + '</small></div>'; }).join("") +
+          '<small>' + (ap ? '🔁 ' + e(ap.rule) + ' · 다음: ' + e(ap.next) : '닮은 장에서 통하는 방식이 없었어요 — 한 번에 사지 말고 나눠 사기만 참고') + '</small>' + (window.__meetLine ? __meetLine(m) : '') + '</div>'; }).join("") +   // 📏 11/13
       '<p class="bm-note">상태나 주식 몫이 바뀌면 알림이 가요 · 매수·매도 추천 아님</p></details>';
   }
   function bearHtml(d){
@@ -405,6 +406,7 @@
           : m.rule && m.rule.id === "OFF" ? '<div class="bg-n">⏸ 이 시장은 현금 규칙을 꺼 뒀어요 — 2013년 이후엔 어떤 현금 규칙도 그냥 보유를 못 이겼어요 · 판정과 아래 신호는 참고</div>'
           : m.rule && !m.nuse ? '<div class="bg-n">🌱 ' + e(m.rule.name) + ' · 아래 신호는 참고</div>'
           : '<div class="bg-n">🌱 다시 사는 조건 <b>' + m.n + '/' + (m.nuse || 4) + '</b> — ' + e(m.rule ? m.rule.name : "켜질수록 3분의 1씩 다시 사기") + '</div>') +   // 🌱 11/09 시장별 다시 사기 규칙
+        (window.__meetLine ? __meetLine(m) : '') +   // 📏 11/13 A11/13-1 선이 닿는 날 한 토막 (ux1113.js)
         (window.__bearSigHead ? __bearSigHead(m) : '') +   // 🌱 11/09 A11/9-1 과거 성적표 (ux1109b.js)
         '<ul class="bg-ck">' + (m.checks || []).map(function(c, k){ return '<li class="' + (c.on ? "on" : "") + '"><i>' + (c.on ? "✅" : "⬜") + '</i><b>' + e(c.k) + (c.use === false ? ' <em class="bg-ref">참고</em>' : '') + '</b><small>' + e(c.d) + '</small>' + (window.__bearSigLine ? __bearSigLine(m, k) : '') + '</li>'; }).join("") + '</ul>' +
         '<div class="bg-lad">' + (m.ladder ? m.ladder.map(function(x){ return [x[0], x[1]]; }) : [[ladder[0], "신호 0~1개"], [ladder[2], "2개"], [ladder[3], "3개"], [ladder[4], "4개"]]).map(function(x, i, A){ var now = m.ladder && m.ladder.length ? x[0] === m.cash : Math.max(0, m.n - 1) === i; return '<span class="' + (now ? "now" : "") + '"><small>' + e(x[1]) + '</small><b>' + e(m.to || '현금') + ' ' + x[0] + '%</b></span>'; }).join("") + '</div>' +
