@@ -1,6 +1,78 @@
 {
  "items": [
   {
+   "title": "아시아 증시, 기술주 급락 뒤 일부 회복",
+   "url": "https://www.marketscreener.com/news/asia-stocks-recover-some-ground-after-tech-rout-update-ce785cdad98cf026",
+   "press": "MarketScreener(다우존스)",
+   "at": "2026-11-13 09:45",
+   "why": "🐻 코스피·🇯🇵 닛케이 — 엔비디아 CEO 퇴진 충격 뒤 아시아 반등 흐름, 한국 +2% 출발과 같은 방향",
+   "summary": "엔비디아발 기술주 매도 뒤 아시아 주요 지수 일부 회복 · 한국 코스피 개장 +2.05%(5,452)·09:33 +2.39%(daily-app)"
+  },
+  {
+   "title": "美 선물, 엔비디아 CEO 퇴진 충격 뒤 소폭 상승 — 실시간",
+   "url": "https://www.cnbc.com/2026/11/12/stock-market-today-live-updates.html",
+   "press": "CNBC",
+   "at": "2026-11-13 09:45",
+   "why": "🟢 S&P·🟡 나스닥 칸 — 오늘 밤 PPI 앞 선물 보합, 「현금 도피」 아님 근거",
+   "summary": "S&P500 선물 7,642(+0.02%)·나스닥100 선물 +0.24%(daily-app 09:34) · 11/12 마감 S&P −0.35%·나스닥 −0.39%"
+  },
+  {
+   "title": "엔비디아 스파이 의혹, 대중 AI 칩 수출 규제 입법에 불 붙일 듯",
+   "url": "https://www.thestar.com.my/news/world/2026/11/10/nvidia-spy-allegations-likely-to-spur-laws-totighten-china039s-access-to-ai-chips",
+   "press": "로이터(더스타 전재)",
+   "at": "2026-11-13 08:45",
+   "why": "황 사임 뒤 규제 리스크가 남는다 — 반도체 칸·091160·「AI 안에서 갈린다」(NVDA 중국 매출)",
+   "summary": "황 관련 의혹이 의회의 대중 칩 접근 제한 입법(국방수권법 등)을 밀어줄 것이라는 보도. 11/13 인베스팅 「의회 합의 형성」으로 이어짐."
+  },
+  {
+   "title": "엔비디아 스파이 스캔들, 대중 칩 수출 논쟁 키워",
+   "url": "https://www.aljazeera.com/economy/2026/11/10/nvidia-spy-scandal-fuels-debate-over-chip-exports-to-china",
+   "press": "알자지라",
+   "at": "2026-11-13 08:45",
+   "why": "규제 강화면 AMD·브로드컴 「대체 수혜」도 중국 매출에선 같이 막힘 — 갈아타기 bet 근거 점검용",
+   "summary": "스캔들이 H200 등 대중 판매 허가 논쟁을 다시 키움. 상원 초당파 서한 「수출 허가 중단」 요구 흐름과 연결."
+  },
+  {
+   "title": "채권 금리, 2022년 이후 최대 급등 — 연준 추가 인상 기대 확산",
+   "url": "https://www.marketwatch.com/story/bond-yields-just-saw-their-biggest-surge-since-2022-as-expectations-grow-for-more-fed-rate-hikes-d0a4f195",
+   "press": "MarketWatch",
+   "at": "2026-11-13 07:45",
+   "why": "고금리 정점 가설 역풍 · 12/9 FOMC 분수령 · 해외 포트 채권형 칸",
+   "summary": "워시 의장의 조용한 소통 방식이 금리 변동성을 키웠다는 지적. 10년 5.1%대 마감(재무부 11/12 5.10%)."
+  },
+  {
+   "title": "앤스로픽 IPO, 약 6배 초과 청약",
+   "url": "https://www.iposcoop.com/?p=39729",
+   "press": "Bloomberg(보도)·IPO Scoop(공모 조건)",
+   "at": "2026-11-13 07:45",
+   "why": "AI 심리 시험대 — 엔비디아 CEO 사임에도 공모 수요 강함, 11/17 엔비디아 실적 뒤 상장",
+   "summary": "블룸버그 「공모 약 6배 초과 청약」(11/12). 공모 조건은 IPO Scoop 기준 약 610억 달러 규모."
+  },
+  {
+   "title": "美 증시 엔비디아 하락에 약세 마감 — S&P −0.35%·10년 5.125%·브렌트 96.10",
+   "url": "https://www.tipranks.com/news/u-s-market-ends-lower-as-nvidias-stock-falls",
+   "press": "TipRanks",
+   "at": "2026-11-13 06:45",
+   "why": "지수는 대장주 단독 충격(−0.4%)에 그침 vs 10년·유가 동반 상승 — 12/9 분수령·고금리 가설 직결",
+   "summary": "S&P500 −0.35%·다우 −0.36%·나스닥 −0.39%, 엔비디아 −4%. 브렌트 +4% 96.10달러·WTI 89달러 안팎. 10년 5.125% 마감(수 주 만 최고)."
+  },
+  {
+   "title": "S&P500·나스닥, 엔비디아 CEO 퇴진에 AI주 흔들리며 하락 출발",
+   "url": "https://www.kitco.com/news/off-the-wire/2026-11-12/sp-500-nasdaq-fall-nvidia-ceos-exit-rattles-ai-stocks",
+   "press": "로이터(키트코)",
+   "at": "2026-11-13 05:45",
+   "why": "「AI 안에서 갈린다」 가설 실증 — 네오클라우드·메모리 약세 vs 브로드컴·AMD 강세",
+   "summary": "11/12 개장 15분 S&P500 −0.29%(7,597)·나스닥 −0.56%·SOX −1.3%. 엔비디아 −7.6%, 네비우스 −17%·코어위브 −7%·마이크론 등 −2.8~4.2%, 브로드컴 +5.5%·AMD +4.3%. 스트래티지 −6.6%(MSCI 지수 제외)."
+  },
+  {
+   "title": "월가 소폭 상승 전환, 엔비디아 CEO 사임에도 — 달러지수 19개월 최고",
+   "url": "https://live.euronext.com/en/financial-news/wall-street-edges-nvidia-drops-after-ceo-resigns",
+   "press": "유로넥스트(로이터)",
+   "at": "2026-11-13 05:45",
+   "why": "달러 19개월 최고·10년 5.07% — 원/달러·채권 질문, 12/9 분수령 가설",
+   "summary": "장중 S&P500 7,641(+0.29%)·나스닥 +0.31%, 엔비디아 −4%. 10년 5.066%(+7.7bp)·달러지수 103.14(19개월 최고)·브렌트 93.82(+1.14%). AMD +7%·브로드컴 +5.4%, 알리바바 −7.1%."
+  },
+  {
    "title": "데일리 샌프란시스코 연은 총재 「인플레 너무 오래 — 추가 인상 필요할 가능성이 더 크다」",
    "url": "https://www.mpamag.com/us/mortgage-industry/industry-trends/feds-daly-signals-more-rate-hikes/596733",
    "press": "MPA",
@@ -567,78 +639,6 @@
    "at": "2026-11-11 12:45",
    "why": "12/9 FOMC 분수령 thesis의 반대 갈래 점검 — PPI(11/13)·고용 약세가 브레이크 조건",
    "summary": "인상 경로를 바꿀 변수 정리(물가 둔화·고용 급랭·신용 사고) · 게시 날짜 미확인"
-  },
-  {
-   "title": "모건스탠리: 전 세계 주식 헤지펀드 위험 축소, 10여 년 만에 최대",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-11/hedge-fund-risk-retreat-largest-in-a-decade-says-morgan-stanley",
-   "press": "블룸버그",
-   "at": "2026-11-11 11:17",
-   "why": "🧠 「12/9 FOMC 2018 분수령」·🫧 신용 경보 — 외국인 한국 반도체 매도가 글로벌 디레버리징의 일부인지",
-   "summary": "MS 프라임 브로커 노트(11/10): 11월 첫 주까지 글로벌 주식 헤지펀드가 10여 년 만에 가장 가파르게 위험 축소 · 광범위한 포지션 청산(언와인드) 확산"
-  },
-  {
-   "title": "룰라 경제팀, 시장 달랠 재정 목표 이행안 다음 주까지 의회 제출 준비",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-11/lula-team-readies-brazil-fiscal-plan-in-bid-to-calm-market-jitters",
-   "press": "블룸버그",
-   "at": "2026-11-11 11:05",
-   "why": "💬 9번 🇧🇷 브라질 국채 — 재정 걱정 진정 여부(헤알/원 250원·10년 14%대 조건)",
-   "summary": "재정 목표 이행 방안을 다음 주까지 의회에 · 브라질 10년 15.23%(11/10, brl_live)·Trading Economics 15.19% 부근 · 세부 내용 미확인"
-  },
-  {
-   "title": "코어위브, 26억 달러 AI 대출 — 가산금리 넓어져(SOFR+5.5%대, 네비우스의 약 3배)",
-   "url": "https://theenergymag.com/news/2026-08-11/coreweave-ai-2-6-billion-wider-spread/",
-   "press": "The Energy Mag",
-   "at": "2026-11-11 10:45",
-   "why": "🧠 「AI 차입」 가설·🫧 신용 칸 — 코어위브가 이번엔 칩 담보 빚+고객 선급금으로 조달(FT 11/11), 앞선 대출 금리가 이미 넓어졌던 배경",
-   "summary": "8월 26억 달러 대출 가산금리가 이전보다 넓어짐(dealroom: SOFR+5.5, 네비우스의 3배) · 11/11 FT 「칩 담보 수십억 달러 빚」 = 무담보 회사채 대신 담보·선급금으로 방식 전환"
-  },
-  {
-   "title": "코어위브, 메타 계약 담보 GPU 대출 85억 달러 — 투자등급",
-   "url": "https://www.bloomberg.com/news/articles/2026-03-31/coreweave-crwv-raises-8-5-billion-gpu-loan-backed-by-meta-deal",
-   "press": "Bloomberg",
-   "at": "2026-11-11 10:45",
-   "why": "AI 안에서도 갈린다 — 「계약(현금흐름)이 붙은 빚」은 투자등급, 붙지 않은 빚은 비싸짐 → 네오클라우드 중 수요 확인된 쪽만 남는 근거",
-   "summary": "3/31 메타 계약을 담보로 85억 달러 GPU 대출, 투자등급 · 같은 회사도 담보 유무로 금리가 크게 갈림"
-  },
-  {
-   "title": "한국 10월 수출 1,153억 달러 — 반도체 사상 최대 판매",
-   "url": "https://www.koreatimes.co.kr/economy/20261101/koreas-monthly-exports-hit-1153-bil-in-oct-on-record-chip-sales",
-   "press": "Korea Times",
-   "at": "2026-11-11 09:45",
-   "why": "코스피 하락장 판정·외국인 반도체 매도와 정반대 숫자 — 11/1~10 수출 +111.9%(연합) 와 이어서 보는 바닥 근거",
-   "summary": "10월 수출 1,153억 달러로 역대 2위, 반도체가 사상 최대 판매 견인. 11월 1~10일 수출 335억 달러(+111.9%, 일평균 +97.7%) — 반도체 단가 상승이 실적으로 확인되는 중."
-  },
-  {
-   "title": "앤스로픽, 나스닥 상장 신청 — 종목 코드 ANT",
-   "url": "https://investinglive.com/news/anthropic-files-for-ipo-on-nasdaq-will-use-the-symbol-ant/",
-   "press": "investingLive",
-   "at": "2026-11-11 09:45",
-   "why": "🫧 버블 경보판 「상장 창」·AI 차입 가설 — 11/19 상장(공모가 70~78달러), 조달 규모가 10월 기대보다 30~40% 줄어든 게 시장 체온",
-   "summary": "나스닥 상장·코드 ANT. 국내 보도(11/11)로는 11/19 상장·공모가 70~78달러·약 86조원 조달 추진, 대표주관 골드만은 2026~30 매출 연평균 +90% 추정."
-  },
-  {
-   "title": "마이크로소프트, 엔비디아 −6% 속 시가총액 추월 — 2025년 6월 이후 처음",
-   "url": "https://finance.yahoo.com/markets/stocks/articles/microsoft-tops-nvidia-market-cap-193114512.html",
-   "press": "Yahoo Finance",
-   "at": "2026-11-11 08:45",
-   "why": "「AI 안에서도 갈린다」(0.6) — 현금 도는 MS vs 대장주 단독 위험 엔비디아 · 💬 3·5번",
-   "summary": "엔비디아 이틀 −10%대 하락으로 MS가 시총 2위 탈환 · CEO 의혹 조사로 엔비디아 시총 약 4,700억 달러 감소 위험 거론(ibtimes)"
-  },
-  {
-   "title": "Microsoft Overtakes Nvidia as Jensen Huang Affair Probe Threatens $470 Billion Market Value Loss",
-   "url": "https://www.ibtimes.co.uk/microsoft-overtakes-nvidia-amid-jensen-huang-reports-1831499",
-   "press": "IBTimes UK",
-   "at": "2026-11-11 08:45",
-   "why": "엔비디아 단일 위험(CEO 조사)이 AI 수요와 분리돼 값을 깎는 중 — 11/17 실적·11/18 하원 브리핑 전 SMH·한국 반도체 상대강도",
-   "summary": "CEO 조사로 엔비디아 시총 약 4,700억 달러 손실 위험 · MS 시총 약 4.03조 달러로 2위(미확인 수치 — 매체별 상이)"
-  },
-  {
-   "title": "코어위브 시간외 +13% — AI 연산 수요로 매출 두 배 넘게, 연간 전망 상향",
-   "url": "https://stocktwits.com/news-articles/markets/equity/ai-compute-demand-has-pushed-core-weave-revenue-to-more-than-double/cZoNQHURJXn",
-   "press": "Stocktwits",
-   "at": "2026-11-11 07:40",
-   "why": "「AI 차입이 약한 고리」(0.92) 반례 — 수요는 강하고 경색은 조달 쪽 · CRWV·SMH·한국 반도체 아침 갭",
-   "summary": "3분기 매출 36.6억$(+168%, 하나 중국 텔레그램) · 연간 가이던스 상향 · 시간외 +13%(stocktwits, 정확한 마감 뒤 수치 미확인)"
   }
  ],
  "at": "2026-11-13 01:45"
