@@ -1,4 +1,4 @@
-"""#108 간밤 S&P 큰 움직임(±1.5%↑) 뒤 아시아 과잉/과소 반응 — 확률 보강 일지 11/13 12시 (Actions)
+"""#108(v2: 포화·반반) 간밤 S&P 큰 움직임(±1.5%↑) 뒤 아시아 과잉/과소 반응 — 확률 보강 일지 11/13 12시 (Actions)
 https://ideas.repec.org/a/eee/empfin/v17y2010i3p428-440.html
 지금 닻 = 간밤 S&P 9칸(LEAD_E9, 사전 20) + 국가 ETF 초과(선형). 꼬리 날(|S&P|≥1.5%)에서 칸 확률이 실제와 어긋나는지,
 칸 안 크기(꼬리 초과분) · 포화(tanh) 항을 더하면 두 기간·걸어가기 브라이어가 좋아지는지."""
@@ -39,16 +39,20 @@ for mk, ix, etf in (("KR", "^KS11", "EWY"), ("JP", "^N225", "EWJ"), ("HK", "^HSI
     R = pd.DataFrame(rows, columns=["D", "us", "etfx", "y"]).set_index("D")
     R["us"] = R["us"].clip(-0.1, 0.1) * 100; R["etfx"] = R["etfx"].clip(-0.08, 0.08) * 100
     R["tail"] = np.sign(R["us"]) * np.maximum(R["us"].abs() - 1.5, 0)   # 칸 밖 크기
-    R["sat"] = np.tanh(R["us"] / 1.5)
+    R["sat"] = np.tanh(R["us"] / 1.5); R["sat1"] = np.tanh(R["us"] / 1.0); R["sat2"] = np.tanh(R["us"] / 2.0)
     R["big"] = (R["us"].abs() >= 1.5).astype(float) * np.sign(R["us"])
     mid = R.index[len(R) // 2]; A, B = R[R.index < mid], R[R.index >= mid]
-    SETS = {"칸": [], "칸+etf": ["etfx"], "칸+etf+tail": ["etfx", "tail"], "칸+etf+big": ["etfx", "big"], "선형us+etf": None, "포화sat+etf": None}
+    SETS = {"칸": [], "칸+etf": ["etfx"], "칸+etf+tail": ["etfx", "tail"], "칸+etf+big": ["etfx", "big"], "칸+etf+sat": ["etfx", "sat"], "선형us+etf": None, "포화sat+etf": None, "포화sat1+etf": None, "포화sat2+etf": None, "반반": "mix"}
     def run(tr, te):
         r = {"평소": brier(np.full(len(te), tr["y"].mean()), te["y"])}
         otr, ote = lg(bucket_p(tr, tr)), lg(bucket_p(tr, te))
         for lab, cols in SETS.items():
-            if cols is None:
-                cc = ["us", "etfx"] if lab.startswith("선형") else ["sat", "etfx"]
+            if cols == "mix":
+                ws = fit(tr[["sat", "etfx"]].values, tr["y"].values, np.zeros(len(tr))); ps = pr(ws, te[["sat", "etfx"]].values, np.zeros(len(te)))
+                wb = fit(tr[["etfx"]].values, tr["y"].values, otr); pb = pr(wb, te[["etfx"]].values, ote)
+                p = 1 / (1 + np.exp(-(lg(ps) + lg(pb)) / 2)); w = []
+            elif cols is None:
+                cc = ["us", "etfx"] if lab.startswith("선형") else [{"포화sat+etf": "sat", "포화sat1+etf": "sat1", "포화sat2+etf": "sat2"}[lab], "etfx"]
                 w = fit(tr[cc].values, tr["y"].values, np.zeros(len(tr))); p = pr(w, te[cc].values, np.zeros(len(te)))
             elif not cols:
                 p = bucket_p(tr, te); w = []
@@ -70,6 +74,7 @@ for mk, ix, etf in (("KR", "^KS11", "EWY"), ("JP", "^N225", "EWJ"), ("HK", "^HSI
     res["걸어가기"] = wk
     rec = R[R.index >= R.index[-1] - pd.Timedelta(days=365 * 5)]; old = R[R.index < rec.index[0]]
     rr = run(old, rec); res["최근5년"] = {kk: v for kk, v in rr.items() if not kk.endswith("_w")}
+    ws = fit(R[["sat", "etfx"]].values, R["y"].values, np.zeros(len(R))); res["전체_sat_w"] = [round(float(v), 3) for v in ws]
     res["지금"] = {"D": str(R.index[-1].date()), "us": round(float(R["us"].iloc[-1]), 3)}
     print(mk, json.dumps(res, ensure_ascii=False)); OUT[mk] = res
 json.dump(OUT, open("probe/os108_bt.json", "w"), ensure_ascii=False, indent=1)
