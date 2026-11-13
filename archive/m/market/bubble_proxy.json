@@ -1,7 +1,7 @@
 {
- "at": "2026-11-13 09:06",
+ "at": "2026-11-13 16:21",
  "asof_us": "2026-11-12",
- "asof_kr": "2026-11-11",
+ "asof_kr": "2026-11-13",
  "h": 0.0,
  "h_kr": 0.0,
  "h_free": 2.0,
@@ -32,22 +32,22 @@
    "since": "2026-10-01",
    "ent": "clock4.5",
    "exit": "floor14",
-   "h_free": 3.0,
+   "h_free": 2.0,
    "cred": 0.0,
    "nb": 1,
    "low60_seen": null,
-   "asof": "2026-11-11"
+   "asof": "2026-11-13"
   },
   "kosdaq": {
    "on": true,
    "since": "2026-10-16",
    "ent": "clock6",
    "exit": "floor3",
-   "h_free": 3.0,
+   "h_free": 2.0,
    "cred": 0.0,
    "nb": 1,
    "low60_seen": null,
-   "asof": "2026-11-11"
+   "asof": "2026-11-13"
   },
   "sp500": {
    "on": false,
