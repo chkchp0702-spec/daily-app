@@ -1,6 +1,70 @@
 {
  "items": [
   {
+   "title": "美 FAA, 「이례적 상황·안전」 이유로 전국 항공기 이륙 중단",
+   "url": "https://www.axios.com/2026/11/13/faa-nationwide-ground-stop",
+   "press": "Axios",
+   "at": "2026-11-14 06:45",
+   "why": "장 마감 뒤 돌발 — 원인 미확인, 월요일 항공·여행주와 위험 심리 확인용",
+   "summary": "11/13 저녁 FAA 전국 지상 대기(ground stop) 명령 · 원인 미확인 · 우리 칸에 항공 노출 없음"
+  },
+  {
+   "title": "골드만 「2027 S&P500 EPS 415달러 — 다만 좁은 주도주가 위험」",
+   "url": "https://investinglive.com/stock-market-update/goldman-sachs-sees-s-p-500-earnings-at-415-in-2027-but-warns-narrow-leadership-is-a-risk/",
+   "press": "investingLive",
+   "at": "2026-11-14 04:40",
+   "why": "가설 「AI 안에서도 갈린다」·「닷컴 3막」 — 엔비디아 사태로 소수 대형주 쏠림 위험이 실제로 드러난 날",
+   "summary": "골드만 2027 S&P500 주당순이익 415달러 전망 · 주도주가 좁은 것을 위험으로 지목(제목 기준, 세부 숫자는 원문 확인 · 미확인)"
+  },
+  {
+   "title": "S&P 이익 증가율 11%로 둔화 — 방어주가 피난처로",
+   "url": "https://www.webull.com/news/15775181418015744",
+   "press": "Webull",
+   "at": "2026-11-14 04:40",
+   "why": "11/13 밤 반도체→음식료·보험 「업종 갈아타기」와 같은 흐름 — 💬 「돈 어디로」 답 근거",
+   "summary": "골드만 「꼭지 맞히려 하지 말라」·EPS 증가율 11%로 둔화 전망 · 방어주로 돈 이동(제목 기준 · 세부 미확인)"
+  },
+  {
+   "title": "AI 빚, 민주당 의회 장악 앞두고 압박 — 로이터 분석",
+   "url": "https://www.kitco.com/news/off-the-wire/2026-11-10/ai-debt-faces-pressure-democrats-prepare-take-over-congress",
+   "press": "Reuters(Kitco 전재)",
+   "at": "2026-11-14 03:40",
+   "why": "가설 「다음 약한 고리는 AI 차입(크레딧)」 0.9 · 11/13 네비우스·코어위브 동반 급락과 이어짐",
+   "summary": "11/10 로이터 분석 — 민주당 의회 전환이 AI 데이터센터 차입(회사채·사모 대출)에 규제·조사 부담을 더할 수 있다는 시각 · 세부 숫자는 원문 확인(미확인)"
+  },
+  {
+   "title": "AMD 11% 급락, 브로드컴·인텔 6% 하락 — 반도체 반등 되돌림",
+   "url": "https://247wallst.com/investing/2026/11/13/amd-tumbles-11-broadcom-and-intel-slide-6-as-chip-rally-reverses/",
+   "press": "247 Wall St.",
+   "at": "2026-11-14 02:40",
+   "why": "반도체 칸 7% · 🫧 현금 도피 첫 조건(반도체 −5%↓) — 같은 시각 방어주는 상승이라 「업종 갈아타기」 쪽",
+   "summary": "11/13 AMD −11%·브로드컴·인텔 −6% · daily-app 02:24 SOXX −5.0%·음식료 +1.1% · S&P500 −0.85%"
+  },
+  {
+   "title": "군드라크 「주식시장은 속 빈 나무 — 약세가 빅테크 밖으로 번진다」",
+   "url": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxPMmRXU1dBQlRlN2ZhNjhvUWVEVFlwa3VDcDQwRExpeUduUU9TM29yb0ZNS2tpWUJXa2RULThCNmh3eElON3JubzZwQ21KNGVhQ1dsalR0UV9vbFhTR09CdzBEb1NueDBjVzctc19aZnhLZUlMU2M2VzZ5enNtTENTYlNlYkRPbEJZT1pPQ1VjMkdmQTlrSGpKS1l3TUhjLVJ1M01lVUdoR21tMGVtMjBtVEN2djhXVjlpU3NKamlzem5WNktBUlkyLWExWUtETU5IbE91b3pxUlV3aWptdVE?oc=5",
+   "press": "구글뉴스(美 시장)",
+   "at": "2026-11-14 02:40",
+   "why": "「닷컴 3막」 가설 — 시장 폭 약화 경고, 반면 오늘 밤 498종목 중 252 상승으로 폭은 반반",
+   "summary": "더블라인 군드라크가 시장을 「속 빈 나무」로 표현 · 약세가 빅테크 밖으로 확산 중이라는 주장 · 세부 숫자는 원문 확인 필요(미확인)"
+  },
+  {
+   "title": "콜린스 보스턴 연은 총재 「추가 금리 인상 곧 적절」",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-13/fed-s-collins-says-inflation-fight-trumps-housing-woes",
+   "press": "Bloomberg",
+   "at": "2026-11-14 01:35",
+   "why": "12/9 FOMC 인상 폭·「2018 경로」 가설 — 美 10년 5.05% 이틀째 판정",
+   "summary": "물가 압력이 넓어지고 있어 추가 인상이 곧 필요(블룸버그). PPI 뒤 10년 5.15%(구글뉴스)."
+  },
+  {
+   "title": "네비우스 −13%(베어드·BofA 목표가 하향), 코어위브 −11%",
+   "url": "https://247wallst.com/investing/2026/11/13/nebius-sinks-13-as-baird-and-bofa-slash-price-targets-over-data-center-delays-coreweave-tumbles-11-nvidia-falls-4/",
+   "press": "24/7 Wall St.(야후)",
+   "at": "2026-11-14 01:35",
+   "why": "빚으로 짓는 네오클라우드 — 「AI 차입이 약한 고리」 가설·🫧 신용 경보",
+   "summary": "데이터센터 지연으로 목표가 하향, 네비우스 111.34달러(−13%)·한 달 −46%. 코어위브 −11%, 엔비디아 −4%."
+  },
+  {
    "title": "뉴욕증시, 초반 상승 반납 — 엔비디아 혼란에 기술주 하락",
    "url": "https://www.investing.com/news/stock-market-news/wall-st-gives-up-early-gains-as-tech-stocks-slide-on-nvidia-turmoil-5026063",
    "press": "Reuters(Investing.com)",
@@ -575,46 +639,6 @@
    "at": "2026-11-12 08:45",
    "why": "미국 대표 매체 확인 — 반도체 칸·🎯 상류 가설의 대장주 단독 위험",
    "summary": "WSJ 보도 인용 · 이르면 이사회 회의 임박 보도(kimu_nim 텔레그램) · 정규장 상승분 반납"
-  },
-  {
-   "title": "앤스로픽, 추수감사절 전 1.5조 달러 상장 강행 보도",
-   "url": "https://fourweekmba.com/ai-anthropic-said-to-press-on-with-1-5t-pre-thanksgiving-ipo/",
-   "press": "FourWeekMBA",
-   "at": "2026-11-12 06:45",
-   "why": "11/18~20 대형 상장 — AI 수급 흡수·상류(TSMC 지분) 재평가 · qa 11",
-   "summary": "주관사들이 공모 기업가치 최소 1.5조 달러 검토(FT 인용) · 앞서 2조 논의에서 낮춘 숫자 · 추수감사절 전 상장 일정 유지"
-  },
-  {
-   "title": "앤스로픽 투자자들, 상장 가치 2조→1.5조 달러 저울질",
-   "url": "https://fourweekmba.com/ai-anthropic-investors-weigh-1-5t-ipo-value-down-from-2t/",
-   "press": "FourWeekMBA",
-   "at": "2026-11-12 06:45",
-   "why": "AI 비상장 가치 눈높이 조정 — 🫧 버블 경보판 참고",
-   "summary": "기업가치 기대치 2조→1.5조 달러로 낮춰 논의 · 공모 규모·수요가 AI 위험선호 온도계"
-  },
-  {
-   "title": "엔비디아, 모건스탠리 최선호주에서 교체 — AI 애널리스트 의견 5건",
-   "url": "https://ng.investing.com/news/stock-market-news/5-big-analyst-ai-moves-nvidia-replaced-as-top-pick-pinterest-downgraded-2195960",
-   "press": "Investing.com",
-   "at": "2026-11-12 05:45",
-   "why": "엔비디아 하향 몰린 날 SOXX +6%대 — 「악재 소진」 판단·11/17 실적 앞 TSM bet·「AI 안에서 갈린다」",
-   "summary": "모건스탠리가 엔비디아를 최선호 목록에서 교체(피드 gn_kr_global: 베어드 「중립」 하향과 같은 날). 세부 목표가는 미확인."
-  },
-  {
-   "title": "공매도사 컬퍼, 6개월 전 이미 젠슨 황-앨리스 황 관계를 지목",
-   "url": "https://officechai.com/ai/how-short-seller-culper-research-had-highlighted-jensen-huangs-uncomfortably-close-relationship-with-alice-huang-6-months-before-their-affair-was-revealed/",
-   "press": "OfficeChai",
-   "at": "2026-11-12 04:45",
-   "why": "엔비디아 CEO 위험이 「새 악재」가 아니라 5월부터 알려진 이야기 — 반등이 악재 소진인지 판단 · TSM bet·「AI 안에서 갈린다」",
-   "summary": "컬퍼 리서치 5월 공매도 보고서가 황 CEO와 중국 사업가 관계·중국 우회 매출 20%를 지적. 11/9 보도 뒤 시총 약 2,700억$ 증발(ynet)."
-  },
-  {
-   "title": "美·세계 경제, AI 붕괴 위험에 노출",
-   "url": "https://www.globalcapital.com/globalmarkets/article/2fh1r82dhf7r0tafmj7r4/people-and-markets/market-news/us-and-world-economy-at-risk-from-ai-bust",
-   "press": "GlobalCapital",
-   "at": "2026-11-12 04:45",
-   "why": "WSJ 「세계 경제 AI 붕괴에 취약」과 같은 결 — AI 투자가 성장의 큰 몫이라 꺾이면 경기까지 · 🫧 버블 경보판·닷컴 3막 가설",
-   "summary": "AI 설비 투자가 미국 성장 기여의 큰 몫 — 투자 둔화 시 침체 위험(BIS 6월 경고와 같은 논지)."
   }
  ],
  "at": "2026-11-14 00:45"
