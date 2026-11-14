@@ -8,6 +8,15 @@ import prob, prob_x
 from night_bt_lib import wf, score, lab, one, logit_fit
 
 H = prob.load_hist(["^KS11", "^KQ11", "^GSPC"])
+import time, yfinance as yf
+for s_ in ("^KQ11", "^GSPC", "^KS11"):          # 11/14: yfinance 캐시 「database is locked」로 한 종목 빠짐 → 하나씩 다시
+    for _ in range(3):
+        if s_ in H and len(H[s_]) > 3000: break
+        time.sleep(3); one_ = yf.download(s_, start="2000-01-01", interval="1d", auto_adjust=False, progress=False, threads=False)
+        if isinstance(one_.columns, pd.MultiIndex): one_.columns = one_.columns.get_level_values(0)
+        if len(one_):
+            one_ = one_[["Open", "Close"]].dropna(subset=["Close"]); one_.index = pd.to_datetime(one_.index).tz_localize(None); H[s_] = one_
+    print(s_, len(H.get(s_, [])))
 def cs(s):
     x = H[s]["Close"].dropna(); return x[x > 0]
 ks, kq, sp = cs("^KS11"), cs("^KQ11"), cs("^GSPC")
