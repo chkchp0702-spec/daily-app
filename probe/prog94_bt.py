@@ -1,6 +1,5 @@
 """#94 한국 프로그램 비차익 순매수 5·20일 합 꼬리(1년 백분위 ≥90·≤10) → 코스피 다음 날·5일 — 확률 보강 일지 11/14 12시 (Actions)
-자료 길: 네이버 PC finance.naver.com/sise/programDealTrendDay.naver (코스피 일별 차익·비차익·전체 매수/매도/순매수, 억원) — 쪽 넘기며 끝까지.
-막히면 다른 주소 상태만 찍는다."""
+자료 길: 옛 finance.naver.com/sise/programDealTrendDay.naver 는 410 → 새 화면 JS 에서 찾은 stock.naver.com/api/domestic/market/trendProgram (코스피 일별 차익·비차익 순매수, 원) · startIdx = 쪽 번호."""
 import json, sys, os, time, io, re
 import numpy as np, pandas as pd, requests
 sys.path.insert(0, os.getcwd()); sys.path.insert(0, os.path.join(os.getcwd(), "probe"))
@@ -17,9 +16,9 @@ def lst(j):
             if isinstance(v, list) and v and isinstance(v[0], dict): return v
     return []
 allr = []; ps = 100; bd = "20261113"; seen = set()
-for i in range(120):          # startIdx 는 100 뒤 빈 쪽 → bizdate 를 거꾸로 옮기며 받기
+for i in range(70):          # startIdx = 쪽 번호(0,1,2…) · 전체 5,393일 54쪽(11/14 확인)
     try:
-        r = requests.get(U, params={"tradeType": "KRX", "krxMarketType": "KOSPI", "bizdate": bd, "startIdx": 0, "pageSize": ps, "periodType": "DAY"}, headers=H2, timeout=20)
+        r = requests.get(U, params={"tradeType": "KRX", "krxMarketType": "KOSPI", "bizdate": "20261113", "startIdx": i, "pageSize": ps, "periodType": "DAY"}, headers=H2, timeout=20)
         j = r.json()
     except Exception as e:
         print("err", i, str(e)[:100]); break
@@ -28,7 +27,6 @@ for i in range(120):          # startIdx 는 100 뒤 빈 쪽 → bizdate 를 거
     if not L: print("끝", i, bd); break
     for x in L: seen.add(x["bizdate"])
     allr += L
-    bd = (pd.to_datetime(min(x["bizdate"] for x in L)) - pd.Timedelta(days=1)).strftime("%Y%m%d")
     if i % 10 == 0: print(i, len(allr), bd, flush=True)
     time.sleep(0.15)
 print("rows", len(allr), flush=True)
