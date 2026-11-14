@@ -129,7 +129,7 @@
 | 107 | 미국 장 마지막 30분·90분 등락 → 아시아 다음 날(닻 위) | Gao·Han·Li·Zhou 2018 마지막 30분 · probe/lh107_bt.py — 야후 60분봉 ^GSPC 2023-12~·ES=F 2024-06~ 약 540일 · 닻(간밤 S&P+국가 ETF 초과+SOX(한국)+미국 마감 뒤 ES 선물) 위 교차·세 토막 걸어가기 브라이어 + 잔차 칸 | 한·일·중·홍·미 | ❌ 11/13 10시 기각 — 한국 90분 앞→뒤 0.20122→0.19989 좋아짐·뒤→앞 0.20622→0.20936 나빠짐 · 일본 30분 교차 두 방향 0.0001~0.0002 좋아짐이나 걸어가기 토막1·3 나빠짐·잔차 칸 앞 0.0·뒤 −13.1%p 엇갈림 ➖ · 홍콩·중국·미국(다음 날) 나빠짐 · 마감 뒤 ES 선물 닻이 이미 덮음 |
 | 108 | 간밤 S&P 큰 움직임(±1.5%↑) 뒤 아시아 「과잉/과소 반응」 — 닻 기울기를 꼬리에서 줄이기(비선형) | Do the prices of stock index futures in Asia overreact to U.S. market returns? https://ideas.repec.org/a/eee/empfin/v17y2010i3p428-440.html · #79(국가 ETF 꼬리)와 다른 S&P 자체 · 야후 일봉 2000~ 교차·걸어가기 | 한·일·중·홍 | ❌ 11/13 12시 기각 — 꼬리 날(|S&P|≥1.5%) 칸 예측 vs 실제가 앞/뒤에서 뒤집힘(한국 +쪽 앞 80.9 vs 74.2 · 뒤 78.9 vs 83.6) · 칸 밖 크기·꼬리 표시 항 브라이어 개선 없음 · probe/os108_bt.py → 곁가지 #108b |
 | 108b | 🧭 닻 「9칸」 대신 「매끈한 곡선」(로짓 = a + b·tanh(S&P%/1.5), 그 위 ETF 초과 그대로) | #108 곁가지 · probe/sm108b_bt.py — 실제 닻과 같게: 야후 2000~ 이력·2012~ 걸어가며(칸 사전 20 · 곡선 21일마다 다시 맞춤) · ETF 0.16 ±0.3·홍콩 KWEB 0.15 ±0.25 같이 얹음 | 한·일·중·홍 | ✅ 11/13 14시 한국·일본 붙임(prob.py SMOOTH_OK) · 중국 ➖(작음·적중↓) · 홍콩 ❌(둘째 토막·뒤 절반 나빠짐 — 12시 결과와 반대) |
-| 109 | 외국인·기관 코스피200 선물 순매수 — 네이버 m.stock.naver.com/api/index/FUT/trend(11/14 찾음: bizdate·외국인·기관·개인 하루치) 날짜 파라미터로 이력 받기 → #73 다시 | #97 찾다가 나온 길 · #73 은 주소 막혀 멈춤 | 한국 | ⏳ |
+| 109 | 외국인·기관 코스피200 선물 순매수 — 네이버 m.stock.naver.com/api/index/FUT/trend(11/14 찾음: bizdate·외국인·기관·개인 하루치) 날짜 파라미터로 이력 받기 → #73 다시 | #97 찾다가 나온 길 · 11/6 에 「오늘 값만」 확인돼 prob_x._save_ffut() 가 archive/x/ffut_hist.json 에 쌓는 중 → 이번엔 bizdate·startIdx·pageSize·periodType 파라미터로 과거가 나오는지만 시험, 안 나오면 100거래일 쌓인 뒤 검증 | 한국 | ⏳ |
 | 14 | 결합 손잡이(N0·RHO·CAP) 보정 · auto_w 점검 | prob_hist.json 채점 60건 넘으면 | 5개 시장 | ⏳ 11/4 17시 실제 채점 77건이나 기준일 16일뿐(5개 시장 같은 날 겹침) · 브라이어 0.2494(평소 비율 0.2449 보다 못함, 적중 45.5%) → 날 수 40일 넘으면 손잡이 보정 |
 
 ## 실행 기록
@@ -140,7 +140,7 @@
 - 판정: ➖ 자료 없음 → 붙이지 않음 · #97 닫음(새 공개 주소 나오면 다시).
 - 곁가지 발견: m.stock.naver.com/api/index/FUT/trend → {bizdate, personalValue, foreignValue, institutionalValue} 코스피200 선물 투자자별 순매수(11/13 외국인 +5,664 · 기관 −5,137) → 새 후보 #109(#73 외국인 선물 순매수 다시).
 - 지금: 코드 변경 없음 → 확률 그대로.
-- 다음: #109 FUT/trend 날짜 파라미터로 이력 받기(bizdate·startIdx·pageSize 시험) · #85 경제지표 놀람 자료 길.
+- 다음: #109 FUT/trend 날짜 파라미터 시험(11/6 엔 오늘 값만 · 지금 ffut_hist.json 에 쌓는 중) · #85 경제지표 놀람 자료 길 · ⏳ 후보 3개뿐 → 웹 검색으로 채우기.
 
 ### 11/14 12시 — 🤖 프로그램 비차익 순매수 꼬리 (#94)
 - 자료: 옛 finance.naver.com/sise/programDealTrendDay.naver 410 · 다음 금융 program 주소 9곳 404 · 네이버 모바일 404 → 새 화면 sise_program.naver 의 JS 에서 찾은 stock.naver.com/api/domestic/market/trendProgram(startIdx=쪽 번호, pageSize≤200) → 코스피 2005-01-03~2026-11-13 5,393일 · probe/prog94_bt.py (probe_tmp run 43552120357, 끝나고 워크플로 지움).
