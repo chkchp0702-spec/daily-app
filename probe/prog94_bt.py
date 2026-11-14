@@ -16,18 +16,20 @@ def lst(j):
         for v in j.values():
             if isinstance(v, list) and v and isinstance(v[0], dict): return v
     return []
-allr = []; ps = 100
-for i in range(400):
+allr = []; ps = 100; bd = "20261113"; seen = set()
+for i in range(120):          # startIdx 는 100 뒤 빈 쪽 → bizdate 를 거꾸로 옮기며 받기
     try:
-        r = requests.get(U, params={"tradeType": "KRX", "krxMarketType": "KOSPI", "bizdate": "20261113", "startIdx": i * ps, "pageSize": ps, "periodType": "DAY"}, headers=H2, timeout=20)
+        r = requests.get(U, params={"tradeType": "KRX", "krxMarketType": "KOSPI", "bizdate": bd, "startIdx": 0, "pageSize": ps, "periodType": "DAY"}, headers=H2, timeout=20)
         j = r.json()
     except Exception as e:
-        print("err", i, str(e)[:100], r.status_code if 'r' in dir() else ""); break
-    L = lst(j)
-    if i == 0: print("top", str(j)[:1200], flush=True)
-    if not L: print("빈 쪽", i); break
+        print("err", i, str(e)[:100]); break
+    L = [x for x in lst(j) if x.get("bizdate") not in seen]
+    if i == 0: print("top", str(j)[:400], flush=True)
+    if not L: print("끝", i, bd); break
+    for x in L: seen.add(x["bizdate"])
     allr += L
-    if len(L) < ps: break
+    bd = (pd.to_datetime(min(x["bizdate"] for x in L)) - pd.Timedelta(days=1)).strftime("%Y%m%d")
+    if i % 10 == 0: print(i, len(allr), bd, flush=True)
     time.sleep(0.15)
 print("rows", len(allr), flush=True)
 if not allr:
@@ -35,7 +37,7 @@ if not allr:
 k0 = list(allr[0].keys()); print("keys", k0)
 dk = next(k for k in k0 if "date" in k.lower())
 num = lambda v: float(str(v).replace(",", "").replace("+", "")) if v not in (None, "", "-") else np.nan
-nk = [k for k in k0 if "nonarbitrage" in k.lower().replace("_", "")]
+nk = [k for k in k0 if k.startswith("biDiff")]
 print("nonarb keys", nk)
 pick = next((k for k in nk if any(w in k.lower() for w in ("net", "pure", "straight", "total"))), None)
 if pick is None:
