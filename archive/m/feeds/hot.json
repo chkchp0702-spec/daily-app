@@ -1,5 +1,5 @@
 {
- "at": "2026-11-15 00:50",
+ "at": "2026-11-15 05:40",
  "rule": "🔴 핵심 = 정말 큰 것만(하루 0~3개, 대부분 시간은 0개): 연준·한은 깜짝·지수 −3%↓ 급변·보유 칸/킥 종목 직격·핵심 가설을 뒤집는 숫자 / 🟡 주목 = 그다음 중요한 것만(시간당 0~3개) · 나머지는 표시 안 함",
  "items": {
   "kwusa/61751": {
@@ -121,6 +121,36 @@
    "lv": 1,
    "why": "마이클 버리 「나스닥100·반도체 숏 확대 — 엔비디아 영향력 새 국면」(鉅亨) — 11/6 칩 풋 25% 정리 뒤 다시 늘림이면 반도체 칸·🫧 신용 경보와 같은 방향(세부 미확인)",
    "at": "2026-11-14 23:45"
+  },
+  "n/LUXhBb19tbGV2a09Ua1VvMEpucUtfTWtnVV9wZ2Q2ODEzVnNDYzVLT09noc5": {
+   "lv": 1,
+   "why": "AI 회사채 발행 비중 31%(연준 보고서) — 가설 「다음 약한 고리는 AI 차입」·🫧 신용 칸과 직결",
+   "at": "2026-11-15 01:50"
+  },
+  "n/g20261114hsbcjustdowngradednvidiaandcutitstargetto170tsrcrss": {
+   "lv": 1,
+   "why": "11/17 엔비디아 실적 직전 HSBC 하향·목표 170달러(야후 제목) — 💬 2번·🫧 신용 경보, 월요일 SOXX",
+   "at": "2026-11-15 02:45"
+  },
+  "n/ENjJCVno4MUtLSWNSNjkwdHE2YWdHLVdYM0hfRlNVR2lGbFZ6U0NMRHBpoc5": {
+   "lv": 1,
+   "why": "금 6월 이후 최대 주간 낙폭·3,900 밑 — 포트 금 칸 5%·gold_test, 금리 5%↑·달러 19개월 고점과 같은 원인",
+   "at": "2026-11-15 02:45"
+  },
+  "n/otelEzbmUtd0dSY0FYV0swT04zRDZ2ajlCMVE4c2kxcWVrWkpYVHNtTFgoc5": {
+   "lv": 1,
+   "why": "11/16(월) 워시 의장 AI 물가·고용 토론회 — 12/9 인상 폭·美 10년 5%↑·나스닥 칸, 엔비디아 실적 하루 전",
+   "at": "2026-11-15 03:45"
+  },
+  "n/NM2VVVlQ0YnNXR0hUNHRhM1gwSWhtZXl3QlB2QXR5aUVXajZBTTlRdDhBoc5": {
+   "lv": 1,
+   "why": "워시 의장 「금리 결정 횟수 줄이고 숙의 늘리기」 구상(WSJ) — 11/16 토론회·12/9 FOMC 분수령 가설(🧠 thesis 3)과 직결",
+   "at": "2026-11-15 04:45"
+  },
+  "n/es20261114juicy6yieldsgainappealafternvidiadramacreditweekly": {
+   "lv": 1,
+   "why": "🫧 신용 가설(0.9)과 엇갈리는 숫자 — 美 회사채 몇 주째 랠리·6% 수익률로 피난처 수요(블룸버그 크레딧 위클리)",
+   "at": "2026-11-15 05:40"
   }
  }
 }
