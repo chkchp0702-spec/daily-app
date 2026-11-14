@@ -462,6 +462,11 @@
       '<p class="note pz-ms">휴대폰에서 ' + (r.nv.length * 3).toLocaleString() + '일 치를 ' + (ST.ms < 1000 ? ST.ms.toFixed(0) + 'ms' : (ST.ms / 1000).toFixed(1) + '초') + ' 만에 다시 셈 · 평균 주식 ' + r.expo.toFixed(0) + '%' +
         (CHKOK ? (CHKOK.ok === CHKOK.n ? ' · <b class="pz-ok">✓ 파이썬 검사 ' + CHKOK.n + '개와 같은 숫자</b>' : ' · ⚠️ 파이썬 검사 ' + CHKOK.ok + '/' + CHKOK.n + ' 맞음') : '') + '</p>';
   }
+  // 🔧 11/14 ui_audit 「🙋 내 포트 비중 405→582」: 프리셋·종목 단추가 설계기를 통째로 다시 그리면 누른 단추가 아래로 밀림 → 다시 그린 뒤 손가락 밑 제자리로
+  function pin(sel, y0){ var fix = function(){ var n = document.querySelector("#main " + sel) || document.querySelector(sel); if (!n) return; var d = n.getBoundingClientRect().top - y0; if (Math.abs(d) > 2) window.scrollBy(0, d); };
+    // 늦게 오는 계산 결과(세금·위기 칸 등)가 위 칸 높이를 바꿔도 1.5초 동안 매 프레임 붙잡음 — 손가락·휠이 움직이면 바로 놓음
+    var t0 = Date.now(), stop = false, off = function(){ stop = true; }; ["touchstart", "wheel", "keydown"].forEach(function(k){ window.addEventListener(k, off, {once: true, passive: true}); });
+    (function loop(){ if (stop) return; fix(); if (Date.now() - t0 < 1500) (window.requestAnimationFrame || setTimeout)(loop, 16); })(); }
   function paint(){ var r = document.getElementById("pzres"); if (r) r.innerHTML = result(); bindRes(); var b = document.getElementById("pzbar"); if (b) b.innerHTML = barH(); }
   var RUN = 0;
   function calc(){
@@ -515,10 +520,10 @@
     [].forEach.call(box.querySelectorAll("[data-pre]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); var p = b.getAttribute("data-pre");
       ST.w = p === "base" ? {SPY: 47.5, QQQ: 47.5, GLD: 5} : p === "spy" ? {SPY: 100, QQQ: 0, GLD: 0} : p === "6040" ? {SPY: 60, QQQ: 0, GLD: 20} : {SPY: MY.spx, QQQ: MY.ndx, GLD: MY.gold};
       if (p === "base"){ ST.reg = 1; ST.vol = 1; }
-      keep(); draw(box); calc(); }; });
+      var y0 = b.getBoundingClientRect().top; keep(); draw(box); calc(); pin("[data-pre=\"" + p + "\"]", y0); }; });
     [].forEach.call(box.querySelectorAll("[data-tg]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); var k = b.getAttribute("data-tg"); ST[k] = ST[k] ? 0 : 1;
       b.classList.toggle("on", !!ST[k]); b.querySelector("b").textContent = ST[k] ? "켬" : "끔"; keep(); calc(); }; });
-    [].forEach.call(box.querySelectorAll("[data-stk]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); var n = b.getAttribute("data-stk"); ST.st = ST.st === n ? "" : n; keep(); draw(box); calc(); }; });
+    [].forEach.call(box.querySelectorAll("[data-stk]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); var n = b.getAttribute("data-stk"); ST.st = ST.st === n ? "" : n; var y0 = b.getBoundingClientRect().top; keep(); draw(box); calc(); pin("[data-stk=\"" + n + "\"]", y0); }; });
     var sw = document.getElementById("pzstw");
     if (sw){ sw.oninput = function(){ ST.stw = +sw.value; document.getElementById("pzstv").textContent = ST.stw + "%"; var b = document.getElementById("pzbar"); if (b) b.innerHTML = barH(); };
       sw.onchange = function(){ sw.oninput(); keep(); if (ST.st) calc(); }; sw.addEventListener("click", function(ev){ ev.stopPropagation(); }); }

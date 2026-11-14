@@ -210,7 +210,15 @@ def app_checks():
             pg = ctx.new_page(); pg.on("dialog", lambda d: d.dismiss())
             try:
                 pg.goto(APP + "?h=" + str(int(time.time())) + "#" + start, wait_until="domcontentloaded", timeout=45000)
-                pg.wait_for_selector(sel, state="attached", timeout=20000); pg.wait_for_timeout(800)
+                try:
+                    pg.wait_for_selector(sel, state="attached", timeout=20000)
+                except Exception:
+                    # 🔧 11/14: 홈 종목 링크([data-op])는 킥 사고팔기·집중 ★·돈 몰린 종목이 있는 날만 생김 — 주말·조용한 날엔 0개라
+                    #   20초 시간초과를 「클릭 연동 실패」로 잡던 거짓 경보. 홈이 다 그려졌는데 링크가 0개면 「오늘 없음」으로 건너뜀
+                    if "[data-op]" in sel and pg.evaluate("()=>!!document.querySelector('#hmbody .card')&&!document.querySelector('#hmbody [data-op]')"):
+                        res.append({"tab": "클릭 " + start + " → onepager", "ok": True, "got": ["오늘 종목 링크 0개 — 건너뜀"]}); pg.close(); continue
+                    raise
+                pg.wait_for_timeout(800)
                 # 🔧 11/05: 단추가 접힌 카드(.cz.cz-on) 속이면 사람처럼 카드 제목을 눌러 먼저 펼침
                 #   접기는 카드가 다 그려진 뒤(높이 140px↑) 늦게 붙으므로 펼치기·누르기를 3번까지 다시
                 for k in range(3):
