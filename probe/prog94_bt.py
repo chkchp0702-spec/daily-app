@@ -5,47 +5,50 @@ import json, sys, os, time, io, re
 import numpy as np, pandas as pd, requests
 sys.path.insert(0, os.getcwd()); sys.path.insert(0, os.path.join(os.getcwd(), "probe"))
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124 Safari/537.36", "Referer": "https://finance.naver.com/sise/sise_program.naver"}
-res = {"주소": {}}
-for nm, u in (("naver_pc", "https://finance.naver.com/sise/programDealTrendDay.naver?bizdate=20261113&sosok=&page=1"),
-              ("naver_pc_time", "https://finance.naver.com/sise/programDealTrendTime.naver?bizdate=20261113&sosok=&page=1"),
-              ("daum_program", "https://finance.daum.net/api/market_index/program_trading?market=KOSPI&page=1&perPage=10"),
-              ("naver_m", "https://m.stock.naver.com/api/index/KOSPI/program")):
+res = {"주소": "https://stock.naver.com/api/domestic/market/trendProgram?tradeType=KRX&krxMarketType=KOSPI&bizdate=YYYYMMDD&startIdx=&pageSize=&periodType=DAY (네이버 새 화면 sise_program.naver → JS 에서 찾음 · 옛 programDealTrendDay 는 410)"}
+U = "https://stock.naver.com/api/domestic/market/trendProgram"
+H2 = {"User-Agent": UA["User-Agent"], "Referer": "https://stock.naver.com/market/stock/kr/trend/program"}
+def lst(j):
+    if isinstance(j, list): return j
+    for k in ("data", "list", "items", "result", "contents", "trendProgramList"):
+        if isinstance(j, dict) and isinstance(j.get(k), list): return j[k]
+    if isinstance(j, dict):
+        for v in j.values():
+            if isinstance(v, list) and v and isinstance(v[0], dict): return v
+    return []
+allr = []; ps = 100
+for i in range(400):
     try:
-        r = requests.get(u, headers=UA, timeout=15); res["주소"][nm] = [r.status_code, len(r.content)]
+        r = requests.get(U, params={"tradeType": "KRX", "krxMarketType": "KOSPI", "bizdate": "20261113", "startIdx": i * ps, "pageSize": ps, "periodType": "DAY"}, headers=H2, timeout=20)
+        j = r.json()
     except Exception as e:
-        res["주소"][nm] = str(e)[:80]
-print(res["주소"], flush=True)
-
-rows = {}; first = None
-for pg in range(1, 700):
-    try:
-        r = requests.get(f"https://finance.naver.com/sise/programDealTrendDay.naver?bizdate=20261114&sosok=&page={pg}", headers=UA, timeout=15)
-        html = r.content.decode("euc-kr", "replace")
-        tb = pd.read_html(io.StringIO(html))
-    except Exception as e:
-        print("page", pg, "err", str(e)[:80]); break
-    t = max(tb, key=len); new = 0
-    for _, row in t.iterrows():
-        v = [str(x) for x in row.values]
-        if not re.match(r"^\d{2}\.\d{2}\.\d{2}$", v[0]): continue
-        if first is None: first = v; print("sample", v)
-        dt = pd.to_datetime("20" + v[0], format="%Y.%m.%d")
-        if dt in rows: continue
-        nums = [float(str(x).replace(",", "")) if str(x) not in ("nan", "") else np.nan for x in v[1:]]
-        rows[dt] = nums; new += 1
-    if new == 0: print("stop at page", pg); break
-    if pg % 50 == 0: print(pg, len(rows), min(rows).date(), flush=True)
-    time.sleep(0.12)
-res["rows"] = len(rows)
-if len(rows) < 300:
-    print(json.dumps(res, ensure_ascii=False)); json.dump(res, open("probe/prog94_bt.json", "w"), ensure_ascii=False, indent=1); sys.exit(0)
-P = pd.DataFrame.from_dict(rows, orient="index").sort_index()
-res["열수"] = P.shape[1]; res["샘플"] = first; res["first"] = str(P.index[0].date()); res["last"] = str(P.index[-1].date())
-# 열: 차익(매수,매도,순매수) 비차익(매수,매도,순매수) 전체(매수,매도,순매수) — 순매수 = 매수−매도 로 확인
-na = P[5] if P.shape[1] >= 9 else P.iloc[:, 5]
-res["확인 비차익 순=매수−매도 비율"] = round(float(((P[3] - P[4] - P[5]).abs() < 2).mean()), 3)
-P.to_csv("probe/prog94_raw.csv")
-
+        print("err", i, str(e)[:100], r.status_code if 'r' in dir() else ""); break
+    L = lst(j)
+    if i == 0: print("top", str(j)[:1200], flush=True)
+    if not L: print("빈 쪽", i); break
+    allr += L
+    if len(L) < ps: break
+    time.sleep(0.15)
+print("rows", len(allr), flush=True)
+if not allr:
+    json.dump(res, open("probe/prog94_bt.json", "w"), ensure_ascii=False, indent=1); sys.exit(0)
+k0 = list(allr[0].keys()); print("keys", k0)
+dk = next(k for k in k0 if "date" in k.lower())
+num = lambda v: float(str(v).replace(",", "").replace("+", "")) if v not in (None, "", "-") else np.nan
+nk = [k for k in k0 if "nonarbitrage" in k.lower().replace("_", "")]
+print("nonarb keys", nk)
+pick = next((k for k in nk if any(w in k.lower() for w in ("net", "pure", "straight", "total"))), None)
+if pick is None:
+    bk = next(k for k in nk if "buy" in k.lower() or "bid" in k.lower()); sk = next(k for k in nk if "sell" in k.lower() or "ask" in k.lower())
+    na = pd.Series({pd.to_datetime(str(x[dk])[:10].replace(".", "-") if "-" in str(x[dk]) or "." in str(x[dk]) else str(x[dk])[:8]): num(x[bk]) - num(x[sk]) for x in allr})
+    res["열"] = f"{bk}-{sk}"
+else:
+    na = pd.Series({pd.to_datetime(str(x[dk])[:10].replace(".", "-") if "-" in str(x[dk]) or "." in str(x[dk]) else str(x[dk])[:8]): num(x[pick]) for x in allr})
+    res["열"] = pick
+na = na.sort_index(); na = na[~na.index.duplicated()]
+res["rows"] = len(na); res["first"] = str(na.index[0].date()); res["last"] = str(na.index[-1].date()); res["샘플"] = allr[0]
+na.to_csv("probe/prog94_raw.csv")
+P = pd.DataFrame({0: na})
 import prob, prob_x
 from night_bt_lib import wf, score, lab, logit_fit
 H = prob.load_hist(["^KS11", "^GSPC"])
@@ -57,7 +60,7 @@ for s_ in ("^KS11", "^GSPC"):
         if isinstance(o.columns, pd.MultiIndex): o.columns = o.columns.get_level_values(0)
         if len(o): o = o[["Open", "Close"]].dropna(subset=["Close"]); o.index = pd.to_datetime(o.index).tz_localize(None); H[s_] = o
 ks = H["^KS11"]["Close"].dropna(); sp = H["^GSPC"]["Close"].dropna()
-d = prob.feats(H["^KS11"]); d = d[d.index >= P.index[0]].copy(); idx = d.index
+d = prob.feats(H["^KS11"]); d = d[d.index >= na.index[0]].copy(); idx = d.index
 nar = na.reindex(idx)                       # 그날 장 끝난 뒤 값 → 다음 날 예측
 # 크기 맞추기: 시가총액 커짐 → 1년 백분위로
 F = {}
