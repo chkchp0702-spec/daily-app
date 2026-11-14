@@ -1,14 +1,17 @@
 name: probe_tmp
 on:
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   p:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -q pandas numpy requests
-      - run: python probe/ffut109_find.py
+      - run: pip install -q pandas numpy requests yfinance holidays
+      - run: python probe/ffut109_bt.py
+      - run: bash scripts/push.sh "🎲 probe #109 결과" probe/ffut109_bt.json probe/ffut109_raw.csv
