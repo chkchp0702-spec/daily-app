@@ -1,5 +1,5 @@
 {
- "at": "2026-11-16 00:45",
+ "at": "2026-11-16 04:45",
  "rule": "🔴 핵심 = 정말 큰 것만(하루 0~3개, 대부분 시간은 0개): 연준·한은 깜짝·지수 −3%↓ 급변·보유 칸/킥 종목 직격·핵심 가설을 뒤집는 숫자 / 🟡 주목 = 그다음 중요한 것만(시간당 0~3개) · 나머지는 표시 안 함",
  "items": {
   "kwusa/61751": {
@@ -86,6 +86,31 @@
    "lv": 1,
    "why": "바레인 공격 직후 리야드·동부주 미사일·드론 요격 — 월요일 브렌트 갭 위험, brent_95·에너지 칸",
    "at": "2026-11-16 00:45"
+  },
+  "n/yU2NQcDhPcGxEeFlEUzFWM3hYVEtzRk9LbklfQ3JLaF9lYkZhenB3R3dBoc5": {
+   "lv": 1,
+   "why": "스페이스X 텍사스·애리조나 데이터센터 740억달러↑ — 「현금이 도는 곳이 짓는다」 가설(상류·전력)과 엔비디아 실적(11/17) 앞 AI 설비 수요 근거",
+   "at": "2026-11-16 01:45"
+  },
+  "n/VdHRmeUxyRmdFSGttMDZvX2JwT2c5S3VuZEx3STFkek92Y3FWRi1sNW5noc5": {
+   "lv": 1,
+   "why": "비트코인 6.2만달러대·연저점 5.8만 접근 — 레버리지 청산이 주식(나스닥·AI)으로 번지는지 보는 🫧 버블 경보판 「현금 도피」 보조 신호",
+   "at": "2026-11-16 01:45"
+  },
+  "n/20261115housechairmansayshuangagreestotestifybutnodatesetyet": {
+   "lv": 1,
+   "why": "엔비디아 실적(11/17) 앞 정치 리스크 — 황 의회 증언 동의(날짜 미정), 반도체 칸·🐻 나스닥 조정 판정과 이어짐",
+   "at": "2026-11-16 02:45"
+  },
+  "n/hb2xPaVd6Q2t0OFd5OUpNVEZuS0c0VTFHaktFMUZEWjJqNjNWTVdXZmFkoc5": {
+   "lv": 1,
+   "why": "연준 의사록 11/18 공개 — 12/9 FOMC 분수령 가설(인상 폭) 첫 단서, 💬 6·14번 일정 정정",
+   "at": "2026-11-16 03:45"
+  },
+  "n/DenRtajR2aGVGT3RQR0NOSnY1VHQ3czdCSkJWSUgxaFFYNThEUlBBMVpnoc5": {
+   "lv": 1,
+   "why": "후티 「리야드 공항·금융 중심지 탄도미사일」 — 바레인 공격에 이은 걸프 확전 재료, 장부 brent_95(에너지 칸)·월요일 브렌트 개장",
+   "at": "2026-11-16 04:45"
   }
  }
 }

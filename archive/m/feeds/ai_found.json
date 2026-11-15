@@ -1,6 +1,38 @@
 {
  "items": [
   {
+   "title": "연준 슈미드, 매파 합창에 합류 — 「금리 방향은 인상」",
+   "url": "https://www.morningstar.com/news/dow-jones/2026111010580/feds-schmid-joins-hawkish-chorus-on-rate-direction",
+   "press": "모닝스타(다우존스)",
+   "at": "2026-11-16 04:45",
+   "why": "12/9 FOMC 분수령 가설 — 11/15 「할 일 남았다」 재확인으로 지역 연은 총재 매파 쪽 일주일째, 11/18 의사록 앞",
+   "summary": "슈미드 캔자스시티 연은 총재가 11/10 인상 쪽 목소리에 합류, 11/15 「물가를 끌어내리려면 할 일이 남았다」(블룸버그·CNBC 제목) 재확인."
+  },
+  {
+   "title": "마이클 버리, 반도체 ETF 풋 25% 차익 실현 — 「여전히 매우 약세」",
+   "url": "https://247wallst.com/investing/2026/11/06/michael-burry-sold-25-of-his-chip-puts-and-says-hes-still-very-bearish/",
+   "press": "24/7 Wall St.",
+   "at": "2026-11-16 03:45",
+   "why": "11/16 홍콩 매체 「버리 나스닥·반도체 숏 확대」 제목과 엇갈림 — 11/6 기준 풋 일부 정리, 엔비디아 실적 앞 반도체 칸 「반등 추격 금지」 판단의 참고",
+   "summary": "11/5~6 버리가 반도체 ETF 풋 포지션 25%를 정리했지만 약세 시각은 유지. 11/16 홍콩 보도의 「숏 확대」는 시점·규모 미확인."
+  },
+  {
+   "title": "엔비디아 황 조사 착수 — 한국 칩 업체들 충격 대비",
+   "url": "https://www.koreajoongangdaily.com/business/as-nvidia-begins-huang-probe-korean-chipmakers-brace-for-impact/12965338",
+   "press": "코리아중앙데일리",
+   "at": "2026-11-16 02:45",
+   "why": "삼성전자·SK하이닉스 HBM 공급 일정과 수출 규제 위험 — 월요일 한국 반도체 개장·코스피 하락장 판정과 이어짐",
+   "summary": "엔비디아 내부 조사 착수 뒤 한국 메모리 업체 영향 점검 기사. 세부 숫자는 원문 미확인."
+  },
+  {
+   "title": "WSJ: 스페이스X, 텍사스·애리조나 데이터센터에 740억달러 넘게 투자 계획",
+   "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxPRHBDbl83ZEF3NVVUcjdrMG9mczZ2UGdtRWNpbWxiOVo3aHNodU03Z0RsRU8wSFZZZlBNQV83V09DOWVlendGdjliM0xvT0twMjhqbkIyZEZva21DZDhLOEtFQ3lha1NLM2J6Q01EWTNET3ZxNFlieWRHX29CRl9HVDByY05qLWNyU2NQcDhPcGxEeFlEUzFWM3hYVEtzRk9LbklfQ3JLaF9lYkZhenB3R3dB?oc=5",
+   "press": "WSJ",
+   "at": "2026-11-16 01:45",
+   "why": "황 퇴진·네비우스 하향 속에도 현금 많은 쪽 AI 설비는 커진다 — 「상류·전력이 빚으로 짓는 곳을 이긴다」 가설, 전력·냉각 칸",
+   "summary": "WSJ 11/15 제목 「스페이스X 텍사스·애리조나 데이터센터 740억달러↑」. 애리조나 코치스 카운티 6GW 캠퍼스는 11/10 지역 보도(KJZZ·Baxtel)로 확인, 740억 세부 내역은 원문 미확인."
+  },
+  {
    "title": "스쿠프: 베선트, 상황실서 러트닉과 충돌 — 메가스피드·엔비디아 칩 중국 우회 방치 놓고",
    "url": "https://axios.com/2026/11/11/bessent-lutnick-megaspeed-nvidia-china-chips",
    "press": "Axios",
@@ -607,39 +639,7 @@
    "at": "2026-11-13 02:45",
    "why": "엔 160 = 日 개입선 · 엔 캐리 되감기면 원/달러·아시아 반도체 흔들림 — 💬 17번 환율 답과 이어짐",
    "summary": "달러/엔 160 돌파 직후 개입 경계로 엔 반등. 일본은 앞서 하루 500억 달러 사상 최대 개입(WSJ 11/8 보도) 전례."
-  },
-  {
-   "title": "굴스비 「AI 데이터센터 붐은 옛날식 수요 과열」 — 인플레 위험 경고",
-   "url": "https://247wallst.com/investing/2026/11/10/feds-goolsbee-says-ai-data-centers-look-like-old-fashioned-overheating/",
-   "press": "24/7 Wall St.",
-   "at": "2026-11-13 02:45",
-   "why": "비둘기 쪽이던 굴스비까지 과열 경고 — 12/9 FOMC 인상 폭(0.25 vs 0.5) 가설과 10년 5% 압력에 직결",
-   "summary": "시카고 연은 굴스비: 서비스 물가 상승, AI 데이터센터 투자 = 수요 과열. 11/12 밤 「뜨거운 물가는 우연 아님」 추가 발언(피드)."
-  },
-  {
-   "title": "월가 혼조 — 엔비디아 다시 낙폭 키워",
-   "url": "https://bizneworleans.com/wall-street-is-mixed-as-nvidia-gets-back-to-falling/",
-   "press": "AP(Biz New Orleans)",
-   "at": "2026-11-13 02:45",
-   "why": "오후 들어 지수 플러스 전환이 꺾임 — 「대장주 단독」 vs 「현금 도피」 판정의 마감 증거",
-   "summary": "엔비디아 장중 낙폭 회복 뒤 다시 하락, 지수 혼조. daily-app 02:14 NVDA −5.2%·SOXX −0.3%."
-  },
-  {
-   "title": "월가, 엔비디아 주가·유가 큰 출렁임 흡수하고 안정",
-   "url": "https://www.sooleader.com/michigan-news-ap/wall-street-steadies-after-absorbing-big-swings-for-nvidias-stock-and-oil-prices-13008049",
-   "press": "AP",
-   "at": "2026-11-13 01:45",
-   "why": "S&P 「정상」 판정 유지 근거 · 유가(brent_95 선) 출렁임 함께",
-   "summary": "엔비디아 급락·유가 급등락에도 미국 지수 안정 — 세부 숫자는 원문 확인(미확인)."
-  },
-  {
-   "title": "월가 하락 출발 전망 — 엔비디아 폭풍 지속, 美 국채 금리 5% 언저리",
-   "url": "https://www.kitco.com/news/off-the-wire/2026-11-12/wall-street-set-dip-nvidia-storm-continues-treasury-yields-bob-5",
-   "press": "Kitco(로이터 전재)",
-   "at": "2026-11-13 00:45",
-   "why": "🫧 신용 경보·「고금리 정점」 가설 — 10년 5% 문턱과 엔비디아 사건이 같은 날 겹침",
-   "summary": "11/12 美 개장 전 — 엔비디아 사태 지속에 지수 선물 약세, 10년 국채 금리가 5% 안팎에서 오르내림(세부 숫자 미확인)."
   }
  ],
- "at": "2026-11-15 22:45"
+ "at": "2026-11-16 03:45"
 }
