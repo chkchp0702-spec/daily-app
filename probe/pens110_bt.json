@@ -1,0 +1,40 @@
+{
+ "시험": {
+  "naver_old": [
+   410,
+   "<html lang=\"ko\">\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=euc-kr\">\n<title>Npay 증권</title>\n<link rel=\"stylesheet\" type=\"text/css\" href=\"https://ssl.pstatic.net/imgstock/static.pc/20261103215000/css/newstock.css\">\n<link rel=\"stylesheet\" type=\"text/css\" href=\"https://ssl.pstat"
+  ],
+  "sn_trendInvestor": [
+   404,
+   "{\"message\":\"Route GET:/api/domestic/market/trendInvestor?tradeType=KRX&krxMarketType=KOSPI&bizdate=20261113&startIdx=0&pageSize=5&periodType=DAY not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+  ],
+  "sn_investorTrend": [
+   404,
+   "{\"message\":\"Route GET:/api/domestic/market/investorTrend?tradeType=KRX&krxMarketType=KOSPI&bizdate=20261113&startIdx=0&pageSize=5&periodType=DAY not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+  ],
+  "sn_trendInvestorDetail": [
+   404,
+   "{\"message\":\"Route GET:/api/domestic/market/trendInvestorDetail?tradeType=KRX&krxMarketType=KOSPI&bizdate=20261113&startIdx=0&pageSize=5&periodType=DAY not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+  ],
+  "sn_investor": [
+   404,
+   "{\"message\":\"Route GET:/api/domestic/market/investor?tradeType=KRX&krxMarketType=KOSPI&bizdate=20261113&startIdx=0&pageSize=5&periodType=DAY not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+  ],
+  "sn_trendDealInvestor": [
+   404,
+   "{\"message\":\"Route GET:/api/domestic/market/trendDealInvestor?tradeType=KRX&krxMarketType=KOSPI&bizdate=20261113&startIdx=0&pageSize=5&periodType=DAY not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+  ],
+  "daum_days": [
+   200,
+   "{\"code\":200,\"message\":\"OK\",\"data\":[{\"date\":\"2026-11-13 00:00:00\",\"individualStraightPurchasePrice\":14501504101.000,\"foreignStraightPurchasePrice\":-541917420124.000,\"institutionStraightPurchasePrice\":-5908598835.000,\"details\":null},{\"date\":\"2026-11-12 00:00:00\",\"individualStraightPurchasePrice\":-2785"
+  ],
+  "daum_detail": [
+   200,
+   "{\"code\":200,\"message\":\"OK\",\"data\":[{\"date\":\"2026-11-13 00:00:00\",\"individualStraightPurchasePrice\":14501504101.000,\"foreignStraightPurchasePrice\":-541917420124.000,\"institutionStraightPurchasePrice\":-5908598835.000,\"details\":null},{\"date\":\"2026-11-12 00:00:00\",\"individualStraightPurchasePrice\":-2785"
+  ],
+  "m_kospi_trend": [
+   200,
+   "{\"bizdate\":\"20261113\",\"personalValue\":\"+145\",\"foreignValue\":\"-5,419\",\"institutionalValue\":\"-59\"}"
+  ]
+ }
+}
