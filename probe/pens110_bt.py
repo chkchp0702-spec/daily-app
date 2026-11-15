@@ -17,45 +17,27 @@ def tryget(nm, url, params=None, ref=None, enc=None):
         res["시험"][nm] = ["err", str(e)[:150]]; print("##", nm, "err", e, flush=True)
 BD = "20261113"
 num = lambda v: float(str(v).replace(",", "").replace("+", "")) if v not in (None, "", "-") else np.nan
-# --- 시험 ---
-r1 = tryget("naver_old", "https://finance.naver.com/sise/investorDealTrendDay.naver", {"bizdate": BD, "sosok": "01", "page": 1}, "https://finance.naver.com/sise/sise_trans_style.naver", "euc-kr")
-SN = "https://stock.naver.com/api/domestic/market/"
-for ep in ("trendInvestor", "investorTrend", "trendInvestorDetail", "investor", "trendDealInvestor"):
-    tryget("sn_" + ep, SN + ep, {"tradeType": "KRX", "krxMarketType": "KOSPI", "bizdate": BD, "startIdx": 0, "pageSize": 5, "periodType": "DAY"}, "https://stock.naver.com/market/stock/kr/trend/investor")
-tryget("daum_days", "https://finance.daum.net/api/investor/KOSPI/days", {"page": 1, "perPage": 3}, "https://finance.daum.net/domestic/investors")
-tryget("daum_detail", "https://finance.daum.net/api/investor/KOSPI/days", {"page": 1, "perPage": 3, "fieldName": "pension"}, "https://finance.daum.net/domestic/investors")
-tryget("m_kospi_trend", "https://m.stock.naver.com/api/index/KOSPI/trend", {"bizdate": BD}, "https://m.stock.naver.com/")
-# --- 이력 받기: 옛 네이버 표가 되면 그걸로 ---
-def old_page(bd, page):
-    r = requests.get("https://finance.naver.com/sise/investorDealTrendDay.naver", params={"bizdate": bd, "sosok": "01", "page": page},
-                     headers={"User-Agent": UA, "Referer": "https://finance.naver.com/sise/sise_trans_style.naver"}, timeout=20)
-    r.encoding = "euc-kr"
-    T = pd.read_html(io.StringIO(r.text))
-    for t in T:
-        cols = [" ".join(map(str, c)) if isinstance(c, tuple) else str(c) for c in t.columns]
-        if any("연기금" in c for c in cols):
-            t.columns = cols; return t
-    return None
-na = None
-if r1 is not None and r1.status_code == 200 and "연기금" in r1.text:
-    rows = {}; bd = BD; t0 = time.time()
-    for it in range(1500):
-        try: t = old_page(bd, 1)
-        except Exception as e: print("err", e); time.sleep(2); continue
-        if t is None: print("표 없음", bd); break
-        if it == 0: print("cols", list(t.columns)); res["열"] = list(t.columns); print(t.head(5).to_string())
-        dc = t.columns[0]; pc = next(c for c in t.columns if "연기금" in c)
-        t = t[t[dc].astype(str).str.match(r"\d\d\.\d\d\.\d\d")]
-        if not len(t): print("빈 쪽", bd); break
-        new = 0
-        for _, x in t.iterrows():
-            d_ = pd.to_datetime("20" + str(x[dc]), format="%Y.%m.%d")
-            if d_ not in rows: rows[d_] = num(x[pc]); new += 1
-        oldest = min(rows); bd = (oldest - pd.Timedelta(days=1)).strftime("%Y%m%d")
-        if it % 50 == 0: print(it, len(rows), bd, round(time.time() - t0), flush=True)
-        if new == 0 or oldest < pd.Timestamp("2004-01-01") or time.time() - t0 > 900: print("멈춤", it, bd, new); break
-        time.sleep(0.12)
-    if rows: na = pd.Series(rows).sort_index(); res["자료"] = "finance.naver.com/sise/investorDealTrendDay.naver?bizdate=&sosok=01 (연기금등, 억원)"
+# --- 이력: 다음 investor/KOSPI/days?details=true (11/16 찾음 · details 안 연기금 칸) ---
+rows = {}; allk = None
+for pg in range(1, 140):
+    try:
+        r = requests.get("https://finance.daum.net/api/investor/KOSPI/days", params={"page": pg, "perPage": 30, "details": "true"},
+                         headers={"User-Agent": UA, "Referer": "https://finance.daum.net/domestic/investors"}, timeout=20)
+        j = r.json()
+    except Exception as e:
+        print("page", pg, e); time.sleep(2); continue
+    L = j.get("data") or []
+    if pg == 1 and L: print("totalCount", j.get("totalCount"), "row0", json.dumps(L[0], ensure_ascii=False)[:1200]); res["row0"] = L[0]; res["totalCount"] = j.get("totalCount")
+    for x in L:
+        dt = x.get("details") or {}
+        if allk is None and dt: allk = list(dt.keys()); print("details keys", allk)
+        pk = next((k for k in dt if "PENSION" in k.upper()), None)
+        if pk and dt[pk] is not None: rows[x["date"][:10]] = float(dt[pk]) / 1e8
+    if len(L) < 30: break
+    time.sleep(0.25)
+na = pd.Series(rows).sort_index() if rows else None
+if na is not None: na.index = pd.to_datetime(na.index); res["자료"] = "https://finance.daum.net/api/investor/KOSPI/days?page=&perPage=30&details=true → details.PENSION* (억원)"
+print("pension rows", 0 if na is None else len(na))
 if na is None or len(na) < 500:
     print("이력 없음 → 끝"); json.dump(res, open("probe/pens110_bt.json", "w"), ensure_ascii=False, indent=1); sys.exit(0)
 na = na[~na.index.duplicated()]
