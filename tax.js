@@ -191,20 +191,31 @@
           "회사가 넣어 주는 퇴직연금(DB·DC 회사 부담분)은 해당 없음"]);
         return h; } },
 
-    { k: "ret", ic: "🧳", t: "퇴직소득세", d: "한 번에 vs 연금으로 받기",
+    { k: "ret", ic: "🧳", t: "퇴직소득세", d: "한 번에 vs 연금 · 중간정산 합산",
+      segs: [{id: "mid", label: "퇴직금 중간정산 받은 적", opts: [["n", "없음"], ["y", "있음"]]}],
       fields: [
-        {id: "pay", label: "퇴직금", sub: "세전 · 명예퇴직금·위로금 포함", req: 1, ph: "예: 30000"},
-        {id: "yrs", label: "근속연수", unit: "년", req: 1, ph: "예: 25", max: 60},
+        {id: "pay", label: "퇴직금", sub: "이번에 받는 돈 · 세전 · 명예퇴직금·위로금 포함", req: 1, ph: "예: 30000"},
+        {id: "yrs", label: "근속연수", unit: "년", req: 1, ph: "예: 25", max: 60, on: function(v){ return v.mid !== "y"; }},
+        {id: "yrs2", label: "중간정산 다음 날부터 근속", sub: "1년 안 되는 달은 1년으로", unit: "년", req: 1, ph: "예: 10", max: 60, on: function(v){ return v.mid === "y"; }},
+        {id: "mpay", label: "중간정산 때 받은 퇴직금", sub: "원천징수영수증 「퇴직급여」", req: 1, ph: "예: 16000", on: function(v){ return v.mid === "y"; }},
+        {id: "myr", label: "중간정산 때 근속연수", sub: "원천징수영수증 「근속연수」", unit: "년", req: 1, ph: "예: 23", max: 60, on: function(v){ return v.mid === "y"; }},
+        {id: "mtax", label: "중간정산 때 낸 퇴직소득세", sub: "원천징수영수증 「퇴직소득세」 · 지방소득세 빼고 · 홈택스 지급명세서에도 있음", req: 1, ph: "예: 492", on: function(v){ return v.mid === "y"; }},
+        {id: "mon", label: "입사일 ~ 퇴직일 전체 개월 수", sub: "두 기간이 겹치거나 끊긴 달이 있으면 · 겹친 달은 한 번만", unit: "개월", ph: "선택", max: 720, adv: 1, on: function(v){ return v.mid === "y"; }},
         {id: "span", label: "연금으로 나눠 받을 기간", unit: "년", ph: "기본 20", max: 50},
         {id: "ror", label: "IRP 예상 수익률", sub: "1년 · 넣으면 원금이 빨리 나오는 것까지 계산", unit: "%", ph: "선택", max: 15, adv: 1}
       ],
       run: function(v){
-        var p = v.pay || 0, n = Math.ceil(v.yrs || 0); if (!p || !n) return null;
+        var mid = v.mid === "y", p = v.pay || 0, n = Math.ceil((mid ? v.yrs2 : v.yrs) || 0); if (!p || !n) return null;
+        var mp = v.mpay || 0, my = Math.ceil(v.myr || 0), mt = v.mtax || 0; if (mid && (!mp || !my || !v.mtax)) return null;
         var Y = Math.max(1, Math.round(v.span || 20)), r = (v.ror || 0) / 100;
-        var d1 = n <= 5 ? 100 * n : n <= 10 ? 500 + 200 * (n - 5) : n <= 20 ? 1500 + 250 * (n - 10) : 4000 + 300 * (n - 20);
-        var conv = Math.max(0, p - d1) * 12 / n;
-        var d2 = conv <= 800 ? conv : conv <= 7000 ? 800 + (conv - 800) * .6 : conv <= 10000 ? 4520 + (conv - 7000) * .55 : conv <= 30000 ? 6170 + (conv - 10000) * .45 : 15170 + (conv - 30000) * .35;
-        var base = Math.max(0, conv - d2), tax = itax(base) * n / 12 * LAW.local;
+        /* 퇴직소득세(국세 · 만원) — 소득세법 §48·§55 · 국세청 「퇴직소득세 계산방법」(2020년 이후 퇴직 · 근속연수공제는 2023년 이후 표) */
+        function rt(pp, nn){ var a = nn <= 5 ? 100 * nn : nn <= 10 ? 500 + 200 * (nn - 5) : nn <= 20 ? 1500 + 250 * (nn - 10) : 4000 + 300 * (nn - 20), c = Math.max(0, pp - a) * 12 / nn,
+            b = c <= 800 ? c : c <= 7000 ? 800 + (c - 800) * .6 : c <= 10000 ? 4520 + (c - 7000) * .55 : c <= 30000 ? 6170 + (c - 10000) * .45 : 15170 + (c - 30000) * .35, q = Math.max(0, c - b);
+          return {d1: a, conv: c, d2: b, base: q, t: itax(q) * nn / 12, n: nn, p: pp}; }
+        var R = rt(p, n), M = null, N = 0, addT = 0, useM = false;
+        if (mid){ N = v.mon ? Math.ceil(v.mon / 12) : n + my;   // 정산 근속 = 두 근속 월수 합 − 중복 월수 (1년 미만 올림) — 시행령 §203 · 국세청 「퇴직소득 세액정산」
+          M = rt(p + mp, N); addT = Math.max(0, M.t - mt); useM = addT < R.t - 0.0005; }
+        var tax = (useM ? addT : R.t) * LAW.local, d1 = (useM ? M : R).d1, conv = (useM ? M : R).conv, d2 = (useM ? M : R).d2, base = (useM ? M : R).base;
         function keep(k){ for (var j = 0; j < LAW.ret.keep.length; j++) if (k <= LAW.ret.keep[j][0]) return LAW.ret.keep[j][1]; return .5; }
         /* yy년 동안 매년 같은 금액을 받는다고 보고 한 해씩 계산: 퇴직금 원금이 먼저 나옴 · 10년째까지는 연금수령한도(잔액÷(11−연차)×120%) 안만 감면 · 한도 넘는 부분은 감면 없음 */
         function sim(yy){ var bal = p, pr = p, t = 0, A = r > 0 ? p * r / (1 - Math.pow(1 + r, -yy)) : p / yy, done = 0, xs = 0;
@@ -217,7 +228,15 @@
         var rows = [["한 번에 받기", tax, null, 0]], seen = {}, S = sim(Y);
         [10, 20, Y].sort(function(a, b){ return a - b; }).forEach(function(y){ if (seen[y]) return; seen[y] = 1; rows.push([y + "년 연금", y === Y ? S.tax : sim(y).tax, null, 0]); });
         var mn = rows.reduce(function(a, x){ return x[1] < a[1] ? x : a; }, rows[0]); mn[3] = 1;
-        var h = big("한 번에 받으면 세금", won(tax), "퇴직금의 " + pct(p ? tax / p : 0) + " · 실제 받는 돈 " + won(p - tax), tax > 0 ? "bad" : "ok");
+        var h = "";
+        if (mid){ var sepT = R.t * LAW.local, mrgT = addT * LAW.local, gap = sepT - mrgT;
+          h += big(useM ? "합산 특례로 낼 세금" : "이번 퇴직금 세금", won(tax), useM ? "따로 계산하면 " + won(sepT) + " → 합산하면 " + won(mrgT) + " · " + won(gap) + " 덜 냄" : "합산 특례가 오히려 불리 — 따로 계산이 유리", tax > 0 ? "bad" : "ok") +
+            bars([["따로 계산 (중간정산 뒤 " + n + "년만)", sepT, null, !useM], ["합산 특례 (" + N + "년 · 퇴직금 " + won(p + mp) + ")", mrgT, null, useM]]) +
+            '<p class="tx-n">합산 특례: 두 퇴직금을 합쳐 ' + N + '년으로 계산한 세금 ' + won(M.t * LAW.local) + ' − 중간정산 때 낸 ' + won(mt * LAW.local) + '(지방소득세 포함) = ' + won(mrgT) + '</p>';
+          if (M.t < mt - 0.05) h += '<p class="tx-n tx-s">합쳐 계산한 세금이 그때 낸 세금보다 적어도 차액은 돌려받지 못함(추가 0원) — 중간정산금을 IRP로 옮겨 세금을 미뤄 둔 경우만 일부 환급(시행령 §203②)</p>';
+          if (useM) h += '<p class="tx-n">회사에 <b>중간정산 때 원천징수영수증을 내며 정산을 요청</b>해야 적용 — 안 내면 회사는 따로 계산으로 뗌 (소득세법 §148)</p>';
+          h += '<p class="tx-sec">이번 퇴직금 ' + won(p) + ' — 한 번에 vs 연금</p>'; }
+        h += big(mid ? "한 번에 받으면" : "한 번에 받으면 세금", won(tax), "이번 퇴직금의 " + pct(p ? tax / p : 0) + " · 실제 받는 돈 " + won(p - tax), tax > 0 ? "bad" : "ok");
         if (tax > 0.05){ h += bars(rows) + '<p class="tx-n">IRP로 옮겨 ' + Y + '년 동안 나눠 받으면 세금 ' + won(S.tax) + ' — <b class="tx-a">' + won(tax - S.tax) + '</b> 덜 냄 (' + pct(1 - S.tax / tax, 0) + ' 감면)</p>';
           h += '<p class="tx-n">세전 연 ' + won(S.A) + ' · 월 ' + won(S.A / 12) + ' 꼴' + (r > 0 ? ' (수익률 ' + pct(r) + ' 가정)' : ' (운용 수익 빼고)') + '</p>';
           if (S.xs > 0.05) h += '<p class="tx-n tx-w">⚠ ' + Y + '년은 너무 짧음 — 처음 10년은 해마다 찾을 수 있는 한도가 있어 넘는 ' + won(S.xs) + '은 감면을 못 받음. 한도 안에서만 받으려면 10년 이상으로</p>';
@@ -229,12 +248,14 @@
           tax > 0.05 ? "IRP로 옮기면 세금을 나중에 내므로 <b>세금 낼 돈까지 굴릴 수 있음</b> (과세이연) · 받은 뒤 60일 안에 넣어도 됨" : "",
           "55세 이후 · 연금수령한도 안에서 받아야 감면 — 중간에 한꺼번에 찾으면 남은 세금을 그때 다 냄",
           "퇴직금 원금으로 받는 연금은 <b>연 1,500만 한도와 상관없고</b> 금융소득·건보료에도 안 잡힘 — 운용 수익과 세액공제 받은 돈은 한도에 들어가니 계좌를 따로 두면 관리가 쉬움"]);
-        h += basis(["2023년 이후 퇴직 기준(소득세법 §48 · 국세청 퇴직소득세 계산방법) — 근속연수공제 " + won(d1) + " → 환산급여 " + won(conv) + " → 환산급여공제 " + won(d2) + " → 과세표준 " + won(base),
+        h += basis([(mid ? (useM ? "합산 특례로 계산(퇴직금 " + won(p + mp) + " · " + N + "년) — " : "따로 계산(퇴직금 " + won(p) + " · " + n + "년) — ") : "") + "2023년 이후 퇴직 기준(소득세법 §48 · 국세청 퇴직소득세 계산방법) — 근속연수공제 " + won(d1) + " → 환산급여 " + won(conv) + " → 환산급여공제 " + won(d2) + " → 과세표준 " + won(base),
+          mid ? "중간정산 뒤 퇴직하면 근속연수는 중간정산 다음 날부터 셈(국세청 원천세과-233) · 합산 특례(소득세법 §148·시행령 §203): 이미 받은 퇴직금과 합쳐 세금을 다시 계산한 뒤 그때 낸 세금을 뺌 · 정산 근속 = 두 근속 월수 합 − 겹친 월수(1년 미만 올림)" + (v.mon ? "" : " — 여기서는 두 근속연수를 더함(각각 올림한 연수라 실제보다 최대 1년 길 수 있음 → 「더 정확하게」에 전체 개월 수)") : "",
+          mid ? "중간정산 때 낸 세금은 넣은 값(당시 세법) 그대로 빼고, 합산 세금은 지금 세법(2023년 이후 근속연수공제)으로 계산 · 명예퇴직금처럼 처음 입사일부터 근속을 세는 퇴직금이 섞이면 겹친 기간 처리가 달라짐(국세청 서면1팀-510)" : "",
           "세액 = 과세표준 × 기본세율(6~45%) × 근속연수 ÷ 12 · 지방소득세 10% 포함 · 근속 1년 미만은 1년으로 올림",
           "연금 수령: 해마다 같은 금액 · 연금 계좌에서는 세액공제 안 받은 돈 → 퇴직금 → 세액공제 받은 돈·수익 순서로 나옴 · IRP에 퇴직금만 있다고 봄",
           "연금수령한도(시행령 §40의2) = 그해 1월 1일 계좌 평가액 ÷ (11 − 연금수령연차) × 120% · 11년차부터 한도 없음 · 한도 연차는 55세 이후 「받을 수 있게 된 해」부터 안 받아도 올라감(2013년 3월 전 계좌는 6년차부터) — 여기서는 받기 시작한 해를 1년차로 봄(가장 불리한 경우)",
           "감면 70·60·50%는 「실제로 받은 해」만 세는 연차 기준(국세청 연금소득 원천징수 방법 · 20년 초과 50%는 2026.1.1 이후 수령분)",
-          "IRP 운용 수익에 붙는 세금과 수수료는 뺐음 · 임원 퇴직금 한도 초과분·중간정산 합산 특례·비과세 퇴직급여는 안 넣음"]);
+          "IRP 운용 수익에 붙는 세금과 수수료는 뺐음 · 임원 퇴직금 한도 초과분·비과세 퇴직급여는 안 넣음"].filter(Boolean));
         return h; } },
 
     { k: "pay", ic: "👵", t: "연금 받을 때 세금", d: "1,500만 선 · 얼마씩 받을까",
