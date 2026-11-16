@@ -1,6 +1,118 @@
 {
  "items": [
   {
+   "title": "코스피, 190.03P 내린 5100.5 마감(3.59%↓)",
+   "url": "https://view.asiae.co.kr/article/2026111615340792268",
+   "press": "아시아경제",
+   "at": "2026-11-16 15:34",
+   "why": "코스피 마감 확정 — 하락장 계기판(주식 0%)·11/9 저점 5,019까지 1.6%",
+   "summary": "코스피 5,100.5(−190.03p, −3.59%) 마감. 장중 5,08x까지 밀린 뒤 동시호가에서 소폭 회복."
+  },
+  {
+   "title": "코스피, 1.2조 외인 ‘팔자’에 2.9%↓…삼전·닉스 동반 약세",
+   "url": "https://www.g-enews.com/article/Securities/2026/11/20261116125611794153ddfb15a_1",
+   "press": "글로벌이코노믹",
+   "at": "2026-11-16 12:56",
+   "why": "외국인 1.2조 매도 — 반도체 비중 줄이기, 💬 8번 외국인 답 근거",
+   "summary": "외국인 코스피 1.2조 순매도(장중 보도)·삼성전자·SK하이닉스 동반 약세."
+  },
+  {
+   "title": "BofA 하트넷 「위험 회피 유지 — 킹달러가 철거용 쇳덩이처럼 돌아왔다」",
+   "url": "https://news.google.com/rss/articles/CBMihAFBVV95cUxOejEzQ2lvUjJwRG55U2dGSzRzTFNrU3dsRjBaWno2TDRfZU5kN0dJT1kxcXBNaDJwTHhNRGd3c3JTVUpQSGIxcHI5V0lkM2RtemlONkRsaGJ6bXBiM0pVQ2s0MmRXNmlQWVJGbGs1c2NheFgxOHQwNnh3X3BNQjI5X3pQeEI?oc=5",
+   "press": "구글뉴스(미국 시장)",
+   "at": "2026-11-16 14:40",
+   "why": "달러지수 작년 4월 이후 최고(103.46)와 같은 날 — 모건스탠리 「최대 비중확대」와 정반대, 「업종 갈아타기 vs 현금 도피」 가설 판단 재료",
+   "summary": "하트넷은 달러 정점·금리 하락 전엔 위험 회피를 유지한다는 입장(11/15 주간 노트 연장). 세부 숫자 미확인."
+  },
+  {
+   "title": "증시 덮친 「앤트로픽 수급 공포」…삼전·닉스 2차 매물 쏟아지나",
+   "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5sMm42SEdYaEdrcVhOZjNJTzVfQ3pkT1V1WFVtVUNFRTdwdjFuZWNNMXBPUjhjVGFyOXZWc1oyUGpUWDc2blBCelA4X2l2Q002WnRNVDBIQXJmakJ1XzNCOW9wclFHc1FEVVp6cVBZNDdtd9IBdkFVX3lxTE5PRnZ5ZmVyU004alNQRlFsME9leGpKZ2dDQWZCU3Z1R29Qc3E3T0RsaDVrSjN1YUdrMWQ4LWlZY3RHWDMyYjFGaHhUS3V0MS0tLWp2bzFVZjdnS1M0c2RsVlRXQm5aSTRfZzJuOUUzQWNSVWY4VFE?oc=5",
+   "press": "구글뉴스(국내 시장)",
+   "at": "2026-11-16 14:40",
+   "why": "11/16 반도체 −7.6% 급락의 수급 해석 — 대형 공모(앤트로픽) 앞 AI 대형주 갈아타기 매도, 💬 5번·반도체 칸",
+   "summary": "14:33 하이닉스 −7.65%·삼성전자 −4.95%. 공모 청약 자금 마련 매도 규모는 미확인."
+  },
+  {
+   "title": "외국인 국내 증권자금 137억 달러 순유출…주식 유출 확대·채권은 순유입 전환",
+   "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFBkeFEtelB1UkVndG5kb3ZqYWFfV0xKNVMwM3dhdktVVEZEb0FGdE90czlqUkQ1RU9rNEdtZnRqLXZMZVJUQmx2bzhjaTVDZ0FFMXVr?oc=5",
+   "press": "구글뉴스(한은)",
+   "at": "2026-11-16 14:40",
+   "why": "외국인이 주식은 팔고 채권은 사는 중 — 「한국 이탈」이 아니라 「위험자산 줄이기」, 원화가 버티는 이유와 연결(💬 7·16번)",
+   "summary": "한은 10월 국제금융·외환시장 동향 기준 주식+채권 137억 달러 순유출, 채권은 순유입 전환(보도 제목 기준, 세부 미확인)."
+  },
+  {
+   "title": "삼성·SK하이닉스·마이크론, 세 번째 D램 가격 담합 소송 직면",
+   "url": "https://www.tomshardware.com/pc-components/dram/samsung-sk-hynix-and-micron-face-a-third-dram-price-fixing-lawsuit",
+   "press": "Tom's Hardware",
+   "at": "2026-11-16 13:40",
+   "why": "11/16 한국 반도체 −6% 급락 때 텔레그램(kimu)이 지목한 재료 — 반도체 칸·하이닉스 ELS 질문과 연결",
+   "summary": "AI 수요로 D램 값이 급등한 가운데 3사가 공급을 조절해 값을 올렸다는 집단소송이 이어짐(세 번째). 배상 규모·법원 판단은 미확인."
+  },
+  {
+   "title": "베선트 재무장관 「연준은 유가를 넘겨 봐야」 — 12월 0.25%p 인상 확률 92%",
+   "url": "https://www.ctol.digital/news/bessent-fed-ai-productivity-oil-shock-hold/",
+   "press": "CTOL (구글뉴스 제목 확인)",
+   "at": "2026-11-16 12:40",
+   "why": "「12/9 FOMC 2018식 분수령」 가설 — 인상은 거의 가격에 들어갔고 남은 변수는 폭·1월 추가",
+   "summary": "구글뉴스 제목: 12월 0.25%p 인상 확률 92% · 베선트 「에너지 충격은 근원 물가로 안 번진다 — 지나친 인상 경계」 · 세부 숫자 미확인"
+  },
+  {
+   "title": "인도 증시 반등 — AI 거래 되감기에 외국인 자금 복귀",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-15/india-stock-market-rebounds-as-ai-trade-unwinds-foreign-funds-return",
+   "press": "Bloomberg",
+   "at": "2026-11-16 12:40",
+   "why": "한국·대만·일본 AI 비중 → 인도 등 「AI 아닌 곳」으로 외국계 돈이 옮기는 그림 — 코스피 외국인 매도 해석과 직결",
+   "summary": "블룸버그: AI 거래가 풀리며 인도에 외국인 자금 복귀 · 항공우주주 「반AI 자금」 수혜(같은 날 별도 기사) · 같은 날 코스피 외국인 오전 약 −9,864억"
+  },
+  {
+   "title": "중국 10월 산업생산·소매판매·투자 모두 예상 하회 — 경기 둔화 심화",
+   "url": "https://www.cnbc.com/2026/11/16/china-retail-sales-october-industrial-output-investment.html",
+   "press": "CNBC",
+   "at": "2026-11-16 11:40",
+   "why": "상해 33%·H주 50% 칸 — 지표 쇼크인데 홍콩은 +1% 가까이(부양 기대)",
+   "summary": "산업생산 +4.8%(예상 +5.3%) · 소매판매 +0.4%(예상 +0.8%) · 1~10월 고정투자 −8.1%(예상 −7.0%) · 부동산 개발투자 −21.6% (하나중국 정리)"
+  },
+  {
+   "title": "모건스탠리, 글로벌 주식 「최대 비중확대」 — AI 설비투자 사이클 유효",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-16/morgan-stanley-max-overweight-global-stocks-on-intact-ai-cycle",
+   "press": "Bloomberg",
+   "at": "2026-11-16 11:40",
+   "why": "엔비디아 실적 전 아시아 급락과 반대되는 IB 판단 — S&P 정상 판정·해외 ETF 칸 유지 근거",
+   "summary": "AI 설비투자 사이클이 내년까지 경기·이익 성장을 받친다며 글로벌 주식 최대 비중확대 권고"
+  },
+  {
+   "title": "HSBC, 엔비디아 목표가 반토막 — 「정식 CEO 올 때까지 고전」",
+   "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1YdUdPNks5MDBUd1lBbDhzSUFKWF84Vkp1cjEtSlR5Y2ptOG5IaHpEODBNREl4c0FfS2RETW14WUprWWQyQ3NXaVY2YmtBbjlGXzBlcEc1N0x4eHdZVUlTY0pBTktyS1ptajRIc2I0NkI?oc=5",
+   "press": "연합인포맥스",
+   "at": "2026-11-16 11:40",
+   "why": "11/17 엔비디아 실적 직전 한국 반도체 −4% 배경 — 반도체 칸 2%·091160 관찰",
+   "summary": "젠슨 황 공백을 이유로 목표가 대폭 하향(세부 숫자 미확인) · 같은 날 황 복귀 검토 보도도 나옴"
+  },
+  {
+   "title": "닛케이, 일본 3분기 GDP 깜짝 역성장 뒤 하락 출발 — 엔비디아 실적·앤스로픽 상장 주간 시작",
+   "url": "https://mlq.ai/news/nikkei-opens-lower-after-japans-surprise-contraction-as-asia-starts-a-week-of-nvidia-results-and-the-anthropic-ipo/",
+   "press": "MLQ.ai",
+   "at": "2026-11-16 10:40",
+   "why": "아시아 동반 약세(닛케이 −600엔대) — 한국 급락이 한국만의 일이 아님, 일본 칸(지금 0%) 유지 근거",
+   "summary": "일본 3분기 GDP 연율 −0.1%로 예상 하회 · 닛케이 하락 출발 · 이번 주 엔비디아 실적(11/17)·앤스로픽 상장이 아시아 기술주 분수령."
+  },
+  {
+   "title": "아시아 증시, 엔비디아 리더십 충격 속 기술주 반등 힘 잃고 하락",
+   "url": "https://www.investing.com/news/stock-market-news/asia-stocks-steady-as-chipmakers-rebound-after-nvidia-leadership-shock-5024055",
+   "press": "Investing.com",
+   "at": "2026-11-16 10:40",
+   "why": "황 사임 뒤 반도체 반등이 아시아에서 꺾임 — 코스닥 칸·반도체 칸 판단 재료",
+   "summary": "칩주 반등 시도 뒤 다시 약세 — 엔비디아 CEO 공백·실적 앞 관망(제목 기준, 세부 숫자 미확인)."
+  },
+  {
+   "title": "엔비디아 11/17 실적 — EPS 2.47달러 예상·옵션 내재 변동 약 ±4.5%",
+   "url": "https://tradestie.com/news/nvda-earnings-nov-17-247-eps-expected-45-implied-move-20261117/",
+   "press": "Tradestie",
+   "at": "2026-11-16 09:40",
+   "why": "실적 뒤 반도체 칸·SMH 20일선 판단 기준 — 내재 변동보다 크게 움직이면 「업종 갈아타기」 가설 시험",
+   "summary": "주가 178.67달러 기준 EPS 2.47달러 예상, 옵션 내재 변동 약 ±4.5%(제목 기준 · 2차 출처라 미확인 취급)."
+  },
+  {
    "title": "삼성SDI, 미국서 수조원대 ESS 배터리 수주…LFP 시장 공략 본격화",
    "url": "https://n.news.naver.com/mnews/article/001/0016442965",
    "press": "연합뉴스",
@@ -543,103 +655,7 @@
    "at": "2026-11-13 11:45",
    "why": "재무통 임시 CEO = 투자·보증 축소 쪽 무게 — 엔비디아 돈에 기대던 코어위브·네비우스 등 자금 조달에 부담",
    "summary": "크레스는 2013년부터 CFO · 임시 CEO 선임(SEC 8-K) · 엔비디아 올해 두 달 1,400억$ 투자, 앤스로픽 IPO 100억$ 계획(하나중국 전언, 미확인)"
-  },
-  {
-   "title": "코스피 3% 가까이 급등 — 엔비디아 CEO 퇴진 뒤 아시아 칩주 반등",
-   "url": "https://mlq.ai/news/kospi-jumps-nearly-3-as-asian-chip-stocks-rebound-after-nvidias-ceo-exit/",
-   "press": "MLQ",
-   "at": "2026-11-13 10:45",
-   "why": "🐻 코스피 하락장 중 20일선(5,571) 시험 — 「AI 안에서 갈린다」(칩·메모리 상류 강세) 근거",
-   "summary": "코스피 장중 +3% 근접, 삼성전자·SK하이닉스 +3%대. 엔비디아 −4% 다음 날 아시아 메모리·장비주는 반등."
-  },
-  {
-   "title": "코스피 +3%·키옥시아 +5%·삼성·하이닉스 +3% — 한·일 칩주 동반 반등",
-   "url": "https://www.tradingkey.com/analysis/stocks/more/262303508-japan-korea-stocks-skhy-kospi-nikkei-samsung-skhynix-softbank-kioxia-amd-avgo-tradingkey",
-   "press": "TradingKey",
-   "at": "2026-11-13 10:45",
-   "why": "닛케이(일본 0%·바닥 신호 대기)와 한국 반도체 ETF 관찰 — 메모리 상류가 엔비디아 사람 문제와 분리되는지",
-   "summary": "키옥시아 +5% 넘게, 삼성·하이닉스 +3%대, AMD·AVGO 대체 수혜 해석. 닛케이 한때 +900엔."
-  },
-  {
-   "title": "아시아 증시, 기술주 급락 뒤 일부 회복",
-   "url": "https://www.marketscreener.com/news/asia-stocks-recover-some-ground-after-tech-rout-update-ce785cdad98cf026",
-   "press": "MarketScreener(다우존스)",
-   "at": "2026-11-13 09:45",
-   "why": "🐻 코스피·🇯🇵 닛케이 — 엔비디아 CEO 퇴진 충격 뒤 아시아 반등 흐름, 한국 +2% 출발과 같은 방향",
-   "summary": "엔비디아발 기술주 매도 뒤 아시아 주요 지수 일부 회복 · 한국 코스피 개장 +2.05%(5,452)·09:33 +2.39%(daily-app)"
-  },
-  {
-   "title": "美 선물, 엔비디아 CEO 퇴진 충격 뒤 소폭 상승 — 실시간",
-   "url": "https://www.cnbc.com/2026/11/12/stock-market-today-live-updates.html",
-   "press": "CNBC",
-   "at": "2026-11-13 09:45",
-   "why": "🟢 S&P·🟡 나스닥 칸 — 오늘 밤 PPI 앞 선물 보합, 「현금 도피」 아님 근거",
-   "summary": "S&P500 선물 7,642(+0.02%)·나스닥100 선물 +0.24%(daily-app 09:34) · 11/12 마감 S&P −0.35%·나스닥 −0.39%"
-  },
-  {
-   "title": "엔비디아 스파이 의혹, 대중 AI 칩 수출 규제 입법에 불 붙일 듯",
-   "url": "https://www.thestar.com.my/news/world/2026/11/10/nvidia-spy-allegations-likely-to-spur-laws-totighten-china039s-access-to-ai-chips",
-   "press": "로이터(더스타 전재)",
-   "at": "2026-11-13 08:45",
-   "why": "황 사임 뒤 규제 리스크가 남는다 — 반도체 칸·091160·「AI 안에서 갈린다」(NVDA 중국 매출)",
-   "summary": "황 관련 의혹이 의회의 대중 칩 접근 제한 입법(국방수권법 등)을 밀어줄 것이라는 보도. 11/13 인베스팅 「의회 합의 형성」으로 이어짐."
-  },
-  {
-   "title": "엔비디아 스파이 스캔들, 대중 칩 수출 논쟁 키워",
-   "url": "https://www.aljazeera.com/economy/2026/11/10/nvidia-spy-scandal-fuels-debate-over-chip-exports-to-china",
-   "press": "알자지라",
-   "at": "2026-11-13 08:45",
-   "why": "규제 강화면 AMD·브로드컴 「대체 수혜」도 중국 매출에선 같이 막힘 — 갈아타기 bet 근거 점검용",
-   "summary": "스캔들이 H200 등 대중 판매 허가 논쟁을 다시 키움. 상원 초당파 서한 「수출 허가 중단」 요구 흐름과 연결."
-  },
-  {
-   "title": "채권 금리, 2022년 이후 최대 급등 — 연준 추가 인상 기대 확산",
-   "url": "https://www.marketwatch.com/story/bond-yields-just-saw-their-biggest-surge-since-2022-as-expectations-grow-for-more-fed-rate-hikes-d0a4f195",
-   "press": "MarketWatch",
-   "at": "2026-11-13 07:45",
-   "why": "고금리 정점 가설 역풍 · 12/9 FOMC 분수령 · 해외 포트 채권형 칸",
-   "summary": "워시 의장의 조용한 소통 방식이 금리 변동성을 키웠다는 지적. 10년 5.1%대 마감(재무부 11/12 5.10%)."
-  },
-  {
-   "title": "앤스로픽 IPO, 약 6배 초과 청약",
-   "url": "https://www.iposcoop.com/?p=39729",
-   "press": "Bloomberg(보도)·IPO Scoop(공모 조건)",
-   "at": "2026-11-13 07:45",
-   "why": "AI 심리 시험대 — 엔비디아 CEO 사임에도 공모 수요 강함, 11/17 엔비디아 실적 뒤 상장",
-   "summary": "블룸버그 「공모 약 6배 초과 청약」(11/12). 공모 조건은 IPO Scoop 기준 약 610억 달러 규모."
-  },
-  {
-   "title": "美 증시 엔비디아 하락에 약세 마감 — S&P −0.35%·10년 5.125%·브렌트 96.10",
-   "url": "https://www.tipranks.com/news/u-s-market-ends-lower-as-nvidias-stock-falls",
-   "press": "TipRanks",
-   "at": "2026-11-13 06:45",
-   "why": "지수는 대장주 단독 충격(−0.4%)에 그침 vs 10년·유가 동반 상승 — 12/9 분수령·고금리 가설 직결",
-   "summary": "S&P500 −0.35%·다우 −0.36%·나스닥 −0.39%, 엔비디아 −4%. 브렌트 +4% 96.10달러·WTI 89달러 안팎. 10년 5.125% 마감(수 주 만 최고)."
-  },
-  {
-   "title": "S&P500·나스닥, 엔비디아 CEO 퇴진에 AI주 흔들리며 하락 출발",
-   "url": "https://www.kitco.com/news/off-the-wire/2026-11-12/sp-500-nasdaq-fall-nvidia-ceos-exit-rattles-ai-stocks",
-   "press": "로이터(키트코)",
-   "at": "2026-11-13 05:45",
-   "why": "「AI 안에서 갈린다」 가설 실증 — 네오클라우드·메모리 약세 vs 브로드컴·AMD 강세",
-   "summary": "11/12 개장 15분 S&P500 −0.29%(7,597)·나스닥 −0.56%·SOX −1.3%. 엔비디아 −7.6%, 네비우스 −17%·코어위브 −7%·마이크론 등 −2.8~4.2%, 브로드컴 +5.5%·AMD +4.3%. 스트래티지 −6.6%(MSCI 지수 제외)."
-  },
-  {
-   "title": "월가 소폭 상승 전환, 엔비디아 CEO 사임에도 — 달러지수 19개월 최고",
-   "url": "https://live.euronext.com/en/financial-news/wall-street-edges-nvidia-drops-after-ceo-resigns",
-   "press": "유로넥스트(로이터)",
-   "at": "2026-11-13 05:45",
-   "why": "달러 19개월 최고·10년 5.07% — 원/달러·채권 질문, 12/9 분수령 가설",
-   "summary": "장중 S&P500 7,641(+0.29%)·나스닥 +0.31%, 엔비디아 −4%. 10년 5.066%(+7.7bp)·달러지수 103.14(19개월 최고)·브렌트 93.82(+1.14%). AMD +7%·브로드컴 +5.4%, 알리바바 −7.1%."
-  },
-  {
-   "title": "데일리 샌프란시스코 연은 총재 「인플레 너무 오래 — 추가 인상 필요할 가능성이 더 크다」",
-   "url": "https://www.mpamag.com/us/mortgage-industry/industry-trends/feds-daly-signals-more-rate-hikes/596733",
-   "press": "MPA",
-   "at": "2026-11-13 04:45",
-   "why": "2027 투표권자까지 인상 쪽 — 12/9 FOMC 분수령 가설·채권 나눠 사기 칸",
-   "summary": "데일리 「추가 인상이 필요할 가능성이 그렇지 않을 가능성보다 크다, 다만 서두르지 않는다」(뉴스퀵). 같은 날 JP모건 버로 「12월 인상은 이미 가격에 반영」(블룸버그)."
   }
  ],
- "at": "2026-11-16 05:45"
+ "at": "2026-11-16 14:40"
 }
