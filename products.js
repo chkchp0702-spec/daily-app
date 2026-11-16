@@ -901,6 +901,9 @@
   };
 
   /* ───────── 공통 ───────── */
+  // 🔧 11/16 자가 업그레이드: 오류 줄의 영어 내부 이름(ust_all 등)·HTTP 기술 문구를 한글 이름만 남김 (health #bond·#fund·#els)
+  var ERRKO = {krw: "원화채권", ust: "미국채(미래에셋)", aud: "호주채", notice: "채권 공지", funds: "공모펀드", els: "ELS", els_done: "지난 ELS", td: "브라질 국채", td_hist: "브라질 국채 기록", anb: "브라질 채권 시세", ust_all: "미국채 전체 목록", bm: "기준 지수"};
+  function errKo(L){ var seen = {}; return (L || []).map(function(x){ var k = String(x).split(":")[0].trim(); return ERRKO[k] || k.replace(/[A-Za-z_]{3,}\S*/g, "").trim() || "일부 자료"; }).filter(function(n){ if (seen[n]) return false; seen[n] = 1; return true; }).join(" · ").slice(0, 120); }
   function boSlot(k){ return /^(gov|ust|brl|bru)$/.test(k || "gov") ? '<div class="bo-slot" data-bo="' + (k || "gov") + '"></div>' : ""; }   // 📄 11/05 채권 전망 보고서(bond_outlook.js) 자리
   var VIEW = {bond: bondView, fund: fundView, els: elsView}, BODY = {bond: function(D, k){ return boSlot(k) + bondBody(D, k); }, fund: fundBody, els: elsBody};
   window.prodView = function(key){ return '<div id="pdroot" data-k="' + key + '"><div class="loading">미래에셋 상품 자료 불러오는 중…</div></div>'; };
@@ -908,7 +911,7 @@
     P().then(function(D){
       var root = document.getElementById("pdroot"); if (!root || root.dataset.k !== key) return; DATA = D;
       var full = function(){ var r = document.getElementById("pdroot"); if (!r || r.dataset.k !== key) return;
-        r.innerHTML = (D.errors && D.errors.length ? '<p class="note" style="margin:0 0 8px">⚠️ 일부 자료를 못 받았어요: ' + e(D.errors.join(" · ").slice(0, 200)) + ' — 지난 값을 보여 줘요.</p>' : '') + (false && window.threeWay && key === "bond" ? '<div id="pd3w"></div>' : '') + VIEW[key](D);   // 🎨 11/04: 세 갈래 길은 상품 첫 화면(채권)에만 — 채권·펀드 중복 카드 분리
+        r.innerHTML = (D.errors && D.errors.length ? '<p class="note" style="margin:0 0 8px">⚠️ 일부 자료를 못 받았어요: ' + e(errKo(D.errors)) + ' — 지난 값을 보여 줘요.</p>' : '') + (false && window.threeWay && key === "bond" ? '<div id="pd3w"></div>' : '') + VIEW[key](D);   // 🎨 11/04: 세 갈래 길은 상품 첫 화면(채권)에만 — 채권·펀드 중복 카드 분리
         if (false && window.threeWay && key === "bond") try { threeWay(document.getElementById("pd3w"), D); } catch(x) {}   // ⚖️ 10/21 A10/21-3 세 갈래 길
         bindSeg("pdseg", function(k){ SEL[key] = k; keep(); redraw(); }); bindInner(); };
       window.__pdRedraw = function(){ redraw(); };

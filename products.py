@@ -566,6 +566,10 @@ def clean_px(c, y, mat, today):
     return dirty - c / 2 * (1 - f)
 
 
+KO_ERR = {"krw": "원화채권", "ust": "미국채(미래에셋)", "aud": "호주채", "notice": "채권 공지", "funds": "공모펀드", "els": "ELS", "els_done": "지난 ELS",
+          "td": "브라질 국채", "td_hist": "브라질 국채 기록", "anb": "브라질 채권 시세", "ust_all": "미국채 전체 목록", "bm": "기준 지수"}
+
+
 def ust_all(mirae):
     today = datetime.date.today()
     rd = get_url(FD + "?sort=-record_date&page[size]=1").json()["data"][0]["record_date"]
@@ -632,7 +636,7 @@ def main():
             P[key] = fn(*a)
             print("✓", key, len(P[key]) if isinstance(P[key], list) else len(P[key].get("items", [])))
         except Exception as e:
-            ERR.append(f"{key}: {str(e)[:200]}")
+            ERR.append(f"{KO_ERR.get(key, key)}: {str(e)[:200]}")   # 🔧 11/16 자가 업그레이드: 화면에 영어 내부 이름 대신 한글 (health #bond·#fund·#els)
             P[key] = old.get(key)
             print("✗", key, e)
     run("krw", krw_bonds)
