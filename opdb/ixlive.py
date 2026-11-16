@@ -211,10 +211,52 @@ def _breadth_live(m, j, mk, log=print):
     log(f"🧮 {mk} 종목 수 → live {d} {j.get('t')}: 오른 {up} · 내린 {dn} (전 {m['prev'].get('date')}: {m['prev'].get('up')} · {m['prev'].get('down')})")
 
 
+def _unpartial(m, mk, built, now_utc=None, log=print):
+    """🧭 11/16 사용자 「나라랑 섹터 로테이션 제대로 맞게 돌아가나」 — 아침 가격 작업(opprice)이 GitHub 지연으로 09:43 에 돌아
+    한국·일본 「오늘」 봉이 장 시작 43분짜리로 들어감 → m.date = 오늘이라 live 덧입히기(d > m.date)가 하루 종일 건너뛰어
+    「한국 · 11/16 마감」 + 09:43 섹터·등락이 얼어붙음(실제 09:53 오른 725 · 내린 1,667 인데 화면은 1,217 · 1,101).
+    만든 시각(built)이 그날 마감 전이면 그 봉을 걷어 내고 지난 마감 기준으로 되돌림 → 아래 _breadth_live 가 장중 값으로 덮음."""
+    if m.get("live") or not m.get("date") or not built:
+        return False
+    try:
+        from zoneinfo import ZoneInfo
+        tz, hh, mm = TZ[mk]
+        b = datetime.datetime.fromisoformat(built.replace("Z", "+00:00")).astimezone(ZoneInfo(tz))
+    except Exception:
+        return False
+    d = m["date"]
+    if b.strftime("%Y-%m-%d") != d or (b.hour, b.minute) >= (hh, mm):
+        return False                       # 마감 뒤에 만든 것 → 정상
+    lab = f"{int(d[5:7]):02d}/{int(d[8:]):02d}"
+    bh = m.get("breadth_hist") or []
+    if not bh or bh[-1][0] != lab or len(bh) < 2:
+        return False
+    prev_lab = bh[-2][0]
+    ds = [r[0] for r in ((m.get("index") or [{}])[0].get("ohlc") or [])]
+    pd_ = next((x for x in reversed(ds) if x < d and x[5:].replace("-", "/") == prev_lab), None) or _prev_wd(d)
+    m["breadth_hist"] = bh[:-1]
+    for k in ("b200_hist", "hl_hist"):
+        if (m.get(k) or [[None]])[-1][0] == lab:
+            m[k] = m[k][:-1]
+    for x in m.get("sectors") or []:
+        p = x.get("path") or []
+        if len(p) >= 2 and p[-1][0] == lab:
+            x["path"] = p[:-1]
+            x["r5"], x["r20"] = p[-2][1], p[-2][2]
+    u10 = [r[1] / max(1, r[1] + r[2]) for r in m["breadth_hist"][-10:]]
+    if u10:
+        m["breadth10"] = round(sum(u10) / len(u10) * 100)
+    m["date"] = pd_
+    m["partial_fix"] = f"{d} {b.strftime('%H:%M')} 장중 봉 걷어 냄"
+    log(f"🧹 {mk} {d} {b.strftime('%H:%M')}(장중)에 만든 봉 → 지난 마감 {pd_} 기준으로 되돌림")
+    return True
+
+
 def overlay(C, live_dir, now_utc=None, log=print):
     """compass.json(C) 의 각 시장 지수에 live 값을 덧입힘. 바꾼 지수 수를 돌려줌."""
     cache, done = {}, 0
     for mk, m in (C.get("markets") or {}).items():
+        _unpartial(m, mk, C.get("updated"), now_utc, log)
         for ix in m.get("index") or []:
             if ix.get("sym") not in LIVE or not ix.get("ohlc"):
                 continue

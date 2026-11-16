@@ -341,6 +341,11 @@ def build(daily, hl, mkt_of, dest, hlh=None):
         df = df.groupby(level=0).last().sort_index()
         cnt = df.notna().sum(axis=1)
         df = df[cnt >= max(30, 0.3 * len(syms))]          # 거래일만
+        # 🧭 11/16: 아침 작업이 늦게(09:43) 돌면 한국·일본 「오늘」 봉이 장 시작 몇십 분짜리로 들어와 하루 종일 「마감」처럼 얼어붙음
+        #   → 마지막 봉이 아직 장중이면 빼고 지난 마감까지로 만든다 (장중 값은 live.yml → ixlive 가 10분마다 덧입힘)
+        if len(df) > 3 and _live(mkt, df.index[-1]):
+            print("나침반", mkt, df.index[-1].strftime("%Y-%m-%d"), "장중 봉 뺌", flush=True)
+            df = df.iloc[:-1]
         if len(df) < 3:
             continue
         ret = df.pct_change(fill_method=None)
