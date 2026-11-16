@@ -136,7 +136,7 @@ def _f(v):
         return None
 
 
-REF = {"036930.KQ"}   # 사용자 기준선: 주성엔지니어링 = 컵 (11/12 사용자: 엔비디아 뺌 · 11/16 사용자: 메가터치도 조건 안 맞으면 뺌)
+REF = set()   # 사용자 기준선 없음 (11/12 엔비디아 뺌 · 11/16 메가터치 뺌 · 11/17 주성엔지니어링도 「저 정도 빠졌으면 이탈」로 뺌)
 
 
 def user_verdicts():
@@ -176,6 +176,16 @@ def auto_drop(mode, r, ch):
         return None
     rs, dist, dbo = _f(r.get("상대강도")), _f(r.get("기준가까지%")), _f(r.get("돌파후일수"))
     code = str(r.get("코드", ""))
+    # 11/17 사용자: 「주성엔지니어링 정도 빠졌으면 이탈이야. 저런 종목들 다 빼」 — 사용자 컵 판정도 예외 없음
+    c, li, ri = ch.get("c") or [], ch.get("li"), ch.get("ri")
+    try:
+        peak = max(c[ri:])                              # 테두리(기준가)까지 올라온 뒤 다시 기준가 −12% 아래로 무너짐 = 이탈
+        if peak >= c[li] * 0.97 and c[-1] < c[li] * 0.88:
+            return f"이탈(기준가 {(c[-1] / c[li] - 1) * 100:.0f}% · 고점 대비 {(c[-1] / peak - 1) * 100:.0f}%)"
+    except Exception:
+        pass
+    if (code in REF or code in UKEEP) and dist is not None and dist < -15:
+        return f"이탈(기준가 {dist:.0f}%)"
     if code in REF or code in UKEEP:
         return None                                    # 사용자 기준선·사용자가 컵이라 한 종목은 항상 눈으로 본다 (그리고 남긴다)
     if code in UREJ:
