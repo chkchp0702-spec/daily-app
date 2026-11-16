@@ -73,14 +73,14 @@ for mk, ix, etf in (("KR", "^KS11", "EWY"), ("JP", "^N225", "EWJ"), ("HK", "^HSI
     R = R[R.index >= "2006-01-01"]
     for c in ["us", "etfx", "sx", "gap", "react"]: R[c] = R[c].astype(float).clip(-0.15, 0.15) * 100
     R["ev1"] = (R["gap"] != 0).astype(int); R["ev2"] = (R["react"] != 0).astype(int)
-    SETS = {"닻": ["us", "etfx", "sx"], "닻+gap(T1 뒷북)": ["us", "etfx", "sx", "gap"], "닻+react(T2)": ["us", "etfx", "sx", "react"]}
+    SETS = {"닻": ["us", "etfx", "sx"], "닻+gap(T1 뒷북)": ["us", "etfx", "sx", "gap"], "닻+react(T2)": ["us", "etfx", "sx", "react"], "닻+ev1(발표 밤 표시)": ["us", "etfx", "sx", "ev1"]}
     mid = R.index[len(R) // 2]; A, B = R[R.index < mid], R[R.index >= mid]
     res = {"n": len(R), "from": str(R.index[0].date()), "mid": str(mid.date()), "ev1": int(R["ev1"].sum()), "ev2": int(R["ev2"].sum())}
     for nm, (tr, te) in {"앞→뒤": (A, B), "뒤→앞": (B, A)}.items():
         r = {}
         for lab, cols in SETS.items():
             w = fit(tr[cols].values, tr["y"].values); p = pr(w, te[cols].values)
-            evm = (te["ev1"] if "gap" in lab else te["ev2"]).values.astype(bool) if lab != "닻" else None
+            evm = (te["ev1"] if ("gap" in lab or "ev1" in lab) else te["ev2"]).values.astype(bool) if lab != "닻" else None
             r[lab] = brier(p, te["y"]); r[lab + "_w"] = [round(float(v), 3) for v in w]
             if evm is not None:
                 w0 = fit(tr[SETS["닻"]].values, tr["y"].values); p0 = pr(w0, te[SETS["닻"]].values)
@@ -95,7 +95,8 @@ for mk, ix, etf in (("KR", "^KS11", "EWY"), ("JP", "^N225", "EWJ"), ("HK", "^HSI
     yy = np.concatenate(ys); W = {k: np.concatenate(v) for k, v in wf.items()}; E1 = np.concatenate(e1).astype(bool); E2 = np.concatenate(e2).astype(bool); n = len(yy); h = n // 2
     res["걸어가기"] = {seg: {k: brier(v[sl], yy[sl]) for k, v in W.items()} for seg, sl in (("2012~앞", slice(0, h)), ("뒤", slice(h, n)), ("최근5년", slice(n - 1250, n)))}
     res["걸어가기_사건날"] = {"T1": [int(E1.sum()), brier(W["닻"][E1], yy[E1]), brier(W["닻+gap(T1 뒷북)"][E1], yy[E1])],
-                          "T2": [int(E2.sum()), brier(W["닻"][E2], yy[E2]), brier(W["닻+react(T2)"][E2], yy[E2])]}
+                          "T2": [int(E2.sum()), brier(W["닻"][E2], yy[E2]), brier(W["닻+react(T2)"][E2], yy[E2])],
+                          "ev1": [int(E1.sum()), brier(W["닻"][E1], yy[E1]), brier(W["닻+ev1(발표 밤 표시)"][E1], yy[E1]), round(float(W["닻"][E1].mean())*100,1), round(float(yy[E1].mean())*100,1)]}
     cells = {}
     for half, T in (("앞", A), ("뒤", B)):
         cells[half] = {"평소": round(float(T["y"].mean()) * 100, 1)}
