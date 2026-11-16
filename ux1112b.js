@@ -104,7 +104,9 @@
     if (key !== "send") return;
     hubPaint();
     gj(RM + "qa.json").then(function(q){ QA = q || QA || 0; hubPaint(); });
-    gj("archive/x/pbbrief.json").then(function(b){ var o = document.getElementById("hubone"); if (o && b && b.one) o.innerHTML = '<b>' + e(String(b.one).split("｜")[0].trim()) + '</b><br><small>' + e(b.label || "") + ' 기준 · 받는 분 이름을 넣으면 그 고객만을 위한 한 장이 돼요</small>'; });
+    // 🧭 11/16 사용자 「왜 두 개의 시황 한 장이 내용이 약간 다르지?」 — 여기만 아침 시황 한 줄(pbbrief.one, 「10:00 장중 기준」이라 붙었지만 실제는 11/13 종가 판정)을 따로 써서
+    //   오늘 탭 결론 두 줄(verdict.js)과 문구가 달랐음 → 같은 결론 상자(data-vd)를 그대로 씀
+    var o = document.getElementById("hubone"); if (o && !o.querySelector("[data-vd]")) o.innerHTML = '<div data-vd></div><small>받는 분 이름을 넣으면 그 고객만을 위한 한 장이 돼요</small>';
   };
   document.addEventListener("click", function(ev){
     var t = ev.target.closest && ev.target.closest("#hub [data-hub]"); if (!t) return; ev.stopPropagation();
