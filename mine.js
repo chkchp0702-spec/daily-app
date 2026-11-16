@@ -150,7 +150,7 @@
       (x.flip ? '<p class="qa-flip"><b>🔁 이 답이 바뀌는 조건</b>' + e(x.flip) + '</p>' : '') +
       (x.watch ? '<p class="qa-watch">👀 다음에 볼 것 · ' + e(x.watch) + '</p>' : '') +
       (x.src ? '<p class="qa-src">근거: ' + e(x.src) + '</p>' : '') +
-      '<div class="qa-btn"><button type="button" class="mn-qc" data-qcopy="' + i + '" data-qm="s">📋 카톡용(짧게)</button><button type="button" class="mn-qc" data-qcopy="' + i + '" data-qm="f">📋 전체 복사</button>' + CLS + '</div></div></details>';
+      '<div class="qa-btn"><button type="button" class="mn-qc" data-qcopy="' + i + '" data-qm="s">📋 카톡용(짧게)</button><button type="button" class="mn-qc" data-qcopy="' + i + '" data-qm="f">📋 전체 복사</button><button type="button" class="mn-qc qa-img" data-qimg="' + i + '">🖼 그림 한 장</button>' + CLS + '</div></div></details>';
   }
   function qaChips(Q){
     var A = rich(Q); if (!A) return "";
@@ -260,10 +260,11 @@
     b.onclick = window.__qaOpen; hero.insertAdjacentElement("afterend", b);
   }
   document.addEventListener("click", function(ev){
-    var t = ev.target.closest && ev.target.closest("[data-mnop],[data-qcopy],[data-qaall],[data-qclose]"); if (!t) return;
+    var t = ev.target.closest && ev.target.closest("[data-mnop],[data-qcopy],[data-qimg],[data-qaall],[data-qclose]"); if (!t) return;
     ev.stopPropagation();
     if (t.dataset.mnop != null){ if (window.openOP) openOP(t.dataset.mnop); return; }
     if (t.dataset.qcopy != null){ copyQ(+t.dataset.qcopy, t.dataset.qm); return; }
+    if (t.dataset.qimg != null){ var qi = +t.dataset.qimg; qload().then(function(Q){ var A = rich(Q), x = A && A.items[qi]; if (x && window.__qaImg) __qaImg(x, A); else try { toast("그림 한 장은 오늘 시황으로 쓴 답에서만 돼요"); } catch(z) {} }); return; }   // 🖼 11/16 답을 그림 한 장으로 (ux1116.js)
     if (t.dataset.qclose){ var dt = t.closest("details"); if (dt){ var y0 = t.getBoundingClientRect().top; dt.open = false;   // 🔧 11/11: 닫은 질문이 「✕ 답 닫기」를 누른 그 자리에 오게(손가락 밑) — 시트 안이면 시트를, 아니면 화면을 굴림
         try { var dy = dt.getBoundingClientRect().top - y0, sc = dt.closest(".qa-in"); if (sc) sc.scrollTop += dy; else window.scrollBy(0, dy); } catch(z) {} } return; }
     if (t.dataset.qaall) window.__qaOpen();

@@ -71,8 +71,8 @@
   /* ───────── B·C. 📨 보내기 · 🔬 연구실 화면 ───────── */
   var QA = null;
   var LABS = [
-    ["💼 내 포트", [["port", "💼", "포트", "지금 뭘 얼마나 담나"], ["score", "📊", "성적표", "맞았나 틀렸나"], ["prob", "🎲", "오를 확률", "5개 시장 · 매일 채점"]]],
-    ["🎯 신호", [["whale", "🐋", "큰손", "기관·유명 투자자 보유 변화"], ["cup", "☕", "컵 차트", "돌파 후보"], ["gap", "📈", "갭 상승", "갭 돌파 후보"], ["screen", "🔎", "종목 찾기", "매일 아침 거름망"], ["sigmore", "🗂", "더 보기", "예측 채점 · 상세"]]],
+    ["💼 내 포트", [["port", "💼", "포트", "지금 뭘 얼마나 담나"], ["score", "📊", "성적표", "맞았나 틀렸나"]]],
+    ["🎯 신호", [["sigall", "🎯", "신호 한눈에", "큰손 · 컵 · 갭 · 오를 확률 한 화면"], ["screen", "🔎", "종목 찾기", "매일 아침 거름망"], ["sigmore", "🗂", "더 보기", "예측 채점 · 상세"]]],
     ["🧪 연구", [["@bubble", "🕰", "버블 시계 · 하락장 계기판", "오늘 탭 「자세히 보기」 안"], ["@season", "🧭", "계절 시계", "5개국 지수 흐름 · 3개월 뒤 확률"], ["@analog", "🔁", "닮은 장 백테스트", "지금과 닮았던 때 12번 · 그 뒤 2년"], ["@sigprob", "🎯", "신호 확률판", "경고·바닥 신호가 켜지면 실제로 몇 %"], ["@bt40", "📏", "40주선 백테스트", "지수·대표 주식"]]],
     ["🔮 재미", [["luck", "🔮", "오늘의 운세", "생일만 넣으면"], ["saju", "📜", "사주 리포트", "PDF 저장"], ["tarot", "🃏", "타로", "질문 → 카드"], ["lotto", "🎱", "로또", "번호 분석"]]],
     ["⚙️ 앱", [["@wlbtn", "★", "관심종목", "담아 둔 종목"], ["@uibtn", "⚙️", "보기 설정", "글자 크기 · 화면 색"], ["alarm", "🔔", "알림", "켜고 끄기"], ["idea", "💬", "의견함", "바라는 점 남기기"], ["@help", "🙋", "뭐 보면 돼요?", "궁금한 것 → 그 화면으로"]]]
@@ -88,7 +88,7 @@
       '<section class="card hub-c" data-cz="done"><p class="hub-h">고객이 이렇게 물으면 <small id="hubqn"></small></p><div class="hub-q" id="hubq"><p class="hub-p">불러오는 중…</p></div>' +
         '<button type="button" class="hub-sub" data-hub="@qa">질문 전부 보기 ›</button></section>' +
       '<section class="card hub-c" data-cz="done"><p class="hub-h">다른 것도 한 장으로</p><div class="hub-l">' +
-        [["bond", "🏦", "채권 전망도 한 장", "국고채 · 미국채 · 브라질국채"], ["prop", "📝", "제안서", "성향 → 상품 → 금액 → PDF·PPT"], ["onepager", "🔍", "종목 한 장", "종목을 찾아 위 📨 누르기"]].map(function(x){
+        [["diag", "🩻", "포트 진단 한 장", "고객 보유 종목 → 쏠림 · 배당 · 고점 대비"], ["bond", "🏦", "채권 전망도 한 장", "국고채 · 미국채 · 브라질국채"], ["prop", "📝", "제안서", "성향 → 상품 → 금액 → PDF·PPT"], ["onepager", "🔍", "종목 한 장", "종목을 찾아 위 📨 누르기"]].map(function(x){
           return '<button type="button" data-hub="' + x[0] + '"><span>' + x[1] + '</span><b>' + x[2] + '</b><small>' + x[3] + '</small><i>›</i></button>'; }).join("") + '</div>' +
         '<p class="hub-n">어느 화면에서든 맨 위 📨 를 누르면 그 화면이 한 장이 돼요</p></section></div>';
   };
@@ -154,7 +154,7 @@
     ".hub-l button{display:grid;grid-template-columns:30px 1fr 14px;column-gap:8px;align-items:center;width:100%;font:inherit;text-align:left;color:var(--text);background:transparent;border:0;border-top:1px solid var(--line);padding:11px 2px;cursor:pointer}.hub-l button:first-child{border-top:0}" +
     ".hub-l span{grid-row:1/3;font-size:21px;text-align:center}.hub-l b{font-size:15.5px;font-weight:700}.hub-l small{grid-column:2;font-size:13px;color:var(--sub)}.hub-l i{grid-row:1/3;grid-column:3;font-style:normal;color:var(--sub);font-size:18px}" +
     ".hub-n{margin:10px 2px 0;font-size:12.5px;color:var(--sub);text-align:center}" +
-    "html[data-tab=send] #main>.hero,html[data-tab=lab] #main>.hero{display:none!important}" +
+    "html[data-tab=send] #main>.hero,html[data-tab=lab] #main>.hero,html[data-tab=diag] #main>.hero,html[data-tab=sigall] #main>.hero{display:none!important}" +
     /* 위 작은 탭 — 알약 하나로 통일(탭마다 다른 색 대신 글자색 하나) */
     ".tabs.sub .tab-lab{color:var(--sub)!important;font-weight:600!important}" +
     /* ⚙ 설정은 머리줄에 다시(11/09 에 🙋 안으로 넣었는데 🙋 가 없어져서) */
