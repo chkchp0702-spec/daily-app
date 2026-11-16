@@ -17,6 +17,7 @@
 import datetime as dt
 import json
 import math
+import os
 import urllib.request
 
 import numpy as np
@@ -499,6 +500,48 @@ def bucket_stats(d, x, edges, labels, cur, cond):
                           "m5": round(m["m5"], 2) if m["m5"] is not None else None, "now": lb == cb})
     m = cond(d, (cut == cb).reindex(d.index).fillna(False), str(cb))
     return m, table
+
+
+MEGA_FILE = "archive/x/mega_earn.json"
+MEGA = ["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA"]
+_MEGA = {}
+def _mega_earn():
+    """미 대형 기술주 7개 실적 발표 시각(뉴욕) 목록 — 야후 get_earnings_dates(지난 것+앞으로) · 12시간마다 새로 받고 archive/x/mega_earn.json 에 캐시 (#111b)"""
+    if "ev" in _MEGA:
+        return _MEGA["ev"]
+    old = {}
+    try:
+        old = json.load(open(MEGA_FILE))
+    except Exception:
+        pass
+    ev = old.get("ev") or []
+    fresh = old.get("at") and (pd.Timestamp.now() - pd.Timestamp(old["at"])) < pd.Timedelta(hours=12)
+    if not fresh and not os.environ.get("FAKE"):
+        try:
+            import yfinance as yf
+            got = {}
+            for sym in MEGA:
+                try:
+                    ed = yf.Ticker(sym).get_earnings_dates(limit=100)
+                except Exception:
+                    continue
+                if ed is None:
+                    continue
+                for ts in ed.index:
+                    t = pd.Timestamp(ts)
+                    if t.tzinfo is not None:
+                        t = t.tz_convert("America/New_York").tz_localize(None)
+                    got[(sym, t.strftime("%Y-%m-%d %H:%M"))] = 1
+            if len(got) > 100:
+                cut = (pd.Timestamp.now() - pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+                keep = {(a, b) for a, b in ev if b < cut}   # 앞으로 일정은 새로 받은 것만(날짜가 바뀌면 옛 예정 버림)
+                ev = sorted({*keep, *got.keys()}, key=lambda x: x[1])
+                ev = [list(x) for x in ev]
+                json.dump({"at": pd.Timestamp.now().strftime("%Y-%m-%dT%H:%M"), "ev": ev}, open(MEGA_FILE, "w"), ensure_ascii=False)
+        except Exception:
+            pass
+    _MEGA["ev"] = ev
+    return ev
 
 
 def methods(mk, d, H, G, ext, cond, sec_breadth=None):
@@ -1258,6 +1301,35 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                         M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
         except Exception as e:
             research["rs_jp_err"] = str(e)[:120]
+    # 💻 「미 대형 기술주 실적 발표 밤」 다음 날 → 한국·홍콩 「내일」만, w 0.3 작게 (11/16 12시 #111b · probe/mega111b_bt.py · #111 ➖ 다시)
+    #   NVDA·AAPL·MSFT·AMZN·GOOGL·META·TSLA 중 하나라도 장 마감 뒤 발표한 밤 다음 아시아 장 · 야후 get_earnings_dates 562건 · 2006~
+    #   칸: 한국 다음 날 44.5 vs 52.8(−8.3%p, n 211) · 49.2 vs 55.0(−5.8, n 197) · 홍콩 −5.4·−6.2(n 212·195) · 해마다 「실제 < 닻」 한국 10/15·홍콩 12/15
+    #   덧셈형 w0.3(닻 = 간밤 S&P·국가 ETF·SOX 걸어가기 위, 칸 몫 사전 100) 한국 0.23099→0.23078 · 0.21859→0.21852 · 최근5년 0.21667→0.21665 · 최근3년 0.2212→0.22111 · 사건날 최근5년 0.209→0.20872 ✅
+    #   홍콩 0.22948→0.22932 · 0.23928→0.2392 · 0.23658→0.23653 · 사건날 최근5년 0.26168→0.261 ✅ · w1.0 은 한국 최근5년 나빠짐 → 작게 · 일본 ❌ · 시간외 반응 크기·종목 반응 ❌(#111)
+    if mk in ("KR", "HK"):
+        try:
+            ev_ = _mega_earn()
+            research["mega_earn"] = {"next": [e for e in ev_ if e[1] >= str(pd.Timestamp.now() - pd.Timedelta(days=2))][:3], "n": len(ev_)}
+            if ev_:
+                Rset = set()
+                for sym_, ts_ in ev_:
+                    t_ = pd.Timestamp(ts_)
+                    R_ = t_.normalize() + pd.offsets.BDay(1) if (t_.hour >= 16 or (t_.hour == 0 and t_.minute == 0)) else t_.normalize()
+                    Rset.add(R_.date())
+                nxt = pd.Series(list(idx[1:]) + [idx[-1] + pd.offsets.BDay(1)], index=idx)
+                mk_ = pd.Series([x.date() in Rset for x in nxt], index=idx)
+                research["mega_earn"]["tonight"] = bool(mk_.iloc[-1]); research["mega_earn"]["next_day"] = str(nxt.iloc[-1].date())
+                if mk_.iloc[-1]:
+                    m = cond(d, mk_.astype(bool), "미 대형 기술주 실적 발표 밤 다음 날")
+                    who = [f"{e[0]} {pd.Timestamp(e[1]).month}/{pd.Timestamp(e[1]).day}" for e in ev_
+                           if pd.Timestamp(e[1]) >= pd.Timestamp(idx[-1].date()) and pd.Timestamp(e[1]).date() < nxt.iloc[-1].date()]
+                    add("mega_earn", "💻", "미 기술주 실적 밤", "일정", m, 0.3,
+                        f"{nxt.iloc[-1].month}/{nxt.iloc[-1].day} 장 바로 전 밤 미국 장 마감 뒤 {'·'.join(who) or '대형 기술주'} 실적 발표 — 이런 밤 다음 아시아 장은 평소보다 조금 덜 올랐음(2012~ 해마다 대체로 같은 쪽, 다음 날만 · 효과 작아 작게 반영)")
+                    if M and M[-1]["k"] == "mega_earn":
+                        M[-1]["p5"] = None; M[-1]["ev"] = M[-1]["ev"].split(" · 5일 ")[0]
+        except Exception as e:
+            research["mega_earn_err"] = str(e)[:120]
+
     # 🗾 홍콩 「NT 배율 5일 급락」 — 닛케이225 ÷ TOPIX(1306.T) 5일 변화 1년 백분위 ≤10% → 홍콩 「내일」만, w 0.5 덧셈형 (11/9 10시 #86b · probe/nt86b_bt.py · #86 ➖ 다시)
     #   NT 자료 기간 2009~ 4,266일, 2018-03 기준 앞/뒤 · 다음 날 오름 56.9 vs 평소 51.9(+5.0%p, n 188) · 57.3 vs 50.5(+6.8, n 253) · 최근5년 +6.9(n 148) · 첫날만 +8.7·+5.6(n 71·82)
     #   5일 간격 표본 시작점 5개: 뒤 5/5 · 앞 4/5 같은 쪽 · 덧셈형 w0.5(기존 자기5·S&P5 꼬리·간밤 3칸 걸어가기 위) 브라이어 0.23767→0.23761 · 0.23937→0.23918 · 최근5년 0.23828→0.23811 ✅(w0.3·1.0 도 세 기간 개선)
