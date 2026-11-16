@@ -22597,6 +22597,9 @@ window.VIDC = {
    ★ 세법 숫자는 전부 아래 LAW 한 곳에만 있음 — 해가 바뀌거나 법이 바뀌면 LAW 만 고칠 것 (기준: 2026년 귀속 · 2026-11-16 확인)
      확인한 곳: 건강보험공단 「2026년 달라지는 제도」(보험료율 7.19%·장기요양 0.9448%) · 시행규칙 별표 1의2(피부양자 2,000만·5.4억·9억)
                조특법 고배당 분리과세(14·20·25·30% · 2026~2028 지급분) · 소득세법 48조(퇴직 근속연수공제·환산급여공제) · 59조의3(연금계좌 600/900)
+   11/16 밤 사용자 「정말 이리 간단한거야? 다른 고려할 요인들 없는지 면밀히 살펴」 → 2차: 배당 Gross-up·배당세액공제 / 4대보험 반영한 과세표준 어림·직접 입력 /
+     지역 재산분(60등급)·상한·최저 / 연금공제 결정세액 한도·사업자 / 퇴직 연금수령한도·원금 먼저 인출·수익률 / RIA 50% 공제 / 부양가족 100만·세대 합산·부부 동반 탈락 안내
+     기본 화면은 그대로 필수 1~2칸 — 추가 칸은 「＋ 더 정확하게」를 눌러야 보임(adv)
    넣은 금액은 어디에도 저장·전송하지 않음(화면을 떠나면 사라짐) — 마지막에 고른 항목만 이 휴대폰에 기억.
    화면 연결: index.html go("tax") → hubView/hubInit (ux1116.js 와 같은 방식) · nav2.js GROUPS(tax · lab:1) · ux1112b.js LABS · gsearch.js MENU */
 (function(){
@@ -22607,12 +22610,19 @@ window.VIDC = {
     local: 1.1,                 // 지방소득세 10% 포함
     finLine: 2000,              // 금융소득종합과세 기준
     wh: .14,                    // 이자·배당 원천징수(소득세)
+    gross: .10,                 // 배당가산(Gross-up) — 국내 회사 배당 중 2,000만 초과분 · 같은 금액을 배당세액공제
+    ins4: {np: .0475, npMax: 363, ei: .009},   // 근로자 4대보험 본인 부담 어림(국민연금 4.75%·연 상한 약 363만 / 고용 0.9% / 건보는 hi 에서)
     div: [[2000, .14], [30000, .20], [500000, .25], [Infinity, .30]],   // 고배당기업 배당 분리과세(2026~2028 지급분)
-    hi: {rate: .0719, ltc: .9448 / 7.19, finIn: 1000, depLine: 2000, depLow: 1000, propMid: 54000, propMax: 90000, empFree: 2000, half: .5},
-    pen: {save: 600, all: 900, wageLine: 5500, hiRate: .165, loRate: .132, isaRate: .1, isaMax: 300},
+    hi: {rate: .0719, ltc: .9448 / 7.19, finIn: 1000, depLine: 2000, depLow: 1000, propMid: 54000, propMax: 90000, empFree: 2000, half: .5,
+         cap: 4591740, floor: 20160, floorM: 28, propDed: 10000, pt: 211.5,   // 월 상한·지역 최저(소득월액 28만 이하)·재산 기본공제 1억·점수당 금액
+         /* 재산보험료부과점수 60등급(시행령 별표 4 · 기본공제 뒤 금액 상한(만원), 점수) — 2022.9 이후 구간 고정, 점수당 금액만 해마다 바뀜 */
+         grade: [[450,22],[900,44],[1350,66],[1800,97],[2250,122],[2700,146],[3150,171],[3600,195],[4050,219],[4500,244],[5020,268],[5590,294],[6220,320],[6930,344],[7710,365],[8590,386],[9570,412],[10700,439],[11900,465],[13300,490],
+                 [14800,516],[16400,535],[18300,559],[20400,586],[22700,611],[25300,637],[28100,659],[31300,681],[34900,706],[38800,731],[43200,757],[48100,785],[53600,812],[59700,841],[66500,881],[74000,921],[82400,961],[91800,1001],[103000,1041],[114000,1091],
+                 [127000,1141],[142000,1191],[158000,1241],[176000,1291],[196000,1341],[218000,1391],[242000,1451],[270000,1511],[300000,1571],[330000,1641],[363000,1711],[399300,1781],[439230,1851],[483153,1921],[531468,1991],[584615,2061],[643077,2131],[707385,2201],[778124,2271],[Infinity,2341]]},
+    pen: {save: 600, all: 900, wageLine: 5500, incLine: 4500, hiRate: .165, loRate: .132, isaRate: .1, isaMax: 300},
     pay: {line: 1500, sep: .165, r: [[70, .055], [80, .044], [999, .033]], life: .033},
     ret: {keep: [[10, .7], [20, .6], [999, .5]]},                       // 연금 수령 연차별 내는 비율(20년 초과 50%는 2026~)
-    ovs: {ded: 250, rate: .22},
+    ovs: {ded: 250, rate: .22, ria: .5},   // RIA(국내시장 복귀계좌) 2026년 8~12월 결제분 공제율 50% · 2026년 한시
     isa: {free: {n: 200, s: 400}, rate: .099, normal: .154}
   };
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
@@ -22631,7 +22641,13 @@ window.VIDC = {
   function wonM(man){ return Math.round(man * 10000 / 10) * 10; }                    // 만원 → 원(10원 단위)
   function wn(v){ return v.toLocaleString() + "원"; }
   function pct(r, d){ return (r * 100).toFixed(d == null ? 1 : d).replace(/\.0$/, "") + "%"; }
-  function hiMonth(yearMan){ var p = Math.max(0, yearMan) / 12 * LAW.hi.rate; return wonM(p * (1 + LAW.hi.ltc)); }   // 연 소득(만원) → 월 건보료+장기요양(원)
+  function ins4(w){ var I = LAW.ins4; return Math.min(w * I.np, I.npMax) + w * LAW.hi.rate / 2 * (1 + LAW.hi.ltc) + w * I.ei; }   // 근로자 4대보험 본인 부담(만원 · 어림)
+  function fl10(x){ return Math.floor(x / 10) * 10; }
+  function propPts(base){ var x = (base || 0) - LAW.hi.propDed; if (x <= 0) return 0; var G = LAW.hi.grade; for (var i = 0; i < G.length; i++) if (x <= G[i][0]) return G[i][1]; return 2341; }
+  /* 지역가입자 월 보험료(원): 소득분(소득월액 28만 이하는 최저보험료) + 재산분, 상한, 장기요양 포함 → {inc, prop, tot} */
+  function hiLocal(yearMan, propBase){ var H = LAW.hi, m = Math.max(0, yearMan) / 12, inc = m <= H.floorM ? H.floor : m * 10000 * H.rate, pr = propPts(propBase) * H.pt, sum = inc + pr, k = sum > H.cap ? H.cap / sum : 1;
+    return {inc: fl10(inc * k * (1 + H.ltc)), prop: fl10(pr * k * (1 + H.ltc)), tot: fl10(Math.min(sum, H.cap) * (1 + H.ltc))}; }
+  function hiExtra(yearMan){ var H = LAW.hi; return fl10(Math.min(H.cap, Math.max(0, yearMan) / 12 * 10000 * H.rate) * (1 + H.ltc)); }   // 직장가입자 소득월액 보험료(월 · 원)
 
   /* ───────── 결과 그리기 도구 ───────── */
   function big(lab, val, sub, tone){ return '<div class="tx-big' + (tone ? " tx-" + tone : "") + '"><small>' + lab + '</small><b>' + val + '</b>' + (sub ? '<span>' + sub + '</span>' : '') + '</div>'; }
@@ -22642,26 +22658,31 @@ window.VIDC = {
   function basis(a){ return '<details class="tx-base"><summary>계산 기준 · 가정 보기</summary><ul>' + a.map(function(x){ return '<li>' + x + '</li>'; }).join("") + '</ul></details>'; }
   function head(t, s){ return '<p class="hub-h">' + t + (s ? ' <small>' + s + '</small>' : '') + '</p>'; }
 
-  /* ───────── 계산기 6개 ───────── */
+  /* ───────── 계산기 6개 ─────────
+     field: {id, label, sub, req, ph, unit, max, on(v) 보일 조건, adv: 1 → 「더 정확하게」를 눌러야 보이는 칸} */
   var CALCS = [
     { k: "alarm", ic: "🚨", t: "2,000만 경보기", d: "금융소득 세금 + 건보료 한 번에",
       segs: [{id: "ins", label: "건강보험", opts: [["emp", "직장가입자"], ["dep", "피부양자"], ["loc", "지역가입자"]]}],
       fields: [
         {id: "fin", label: "이자·배당 합계", sub: "1년 · 세전", req: 1, ph: "예: 2500"},
-        {id: "hd", label: "그중 고배당기업 배당", sub: "분리과세 대상 · 없으면 비움", ph: "선택"},
         {id: "wage", label: "연봉(총급여)", sub: "세전", ph: "예: 8000", on: function(v){ return v.ins === "emp"; }},
         {id: "pen", label: "국민연금 등 공적연금", sub: "1년", ph: "예: 1200", on: function(v){ return v.ins !== "emp"; }},
-        {id: "biz", label: "사업·임대 등 다른 소득", sub: "경비 뺀 금액", ph: "선택", on: function(v){ return v.ins !== "dep"; }},
-        {id: "prop", label: "재산세 과세표준", sub: "주택은 공시가의 약 60%", ph: "선택", on: function(v){ return v.ins === "dep"; }}
+        {id: "dv", label: "그중 국내 회사 주식 배당", sub: "ETF·펀드·해외·이자는 빼고", ph: "선택", adv: 1},
+        {id: "hd", label: "그중 고배당기업 배당", sub: "분리과세 신청할 수 있는 배당", ph: "선택", adv: 1},
+        {id: "biz", label: "사업·임대 등 다른 소득", sub: "경비 뺀 금액", ph: "선택", adv: 1, on: function(v){ return v.ins !== "dep"; }},
+        {id: "prop", label: "재산세 과세표준", sub: "주택은 공시가의 약 60%", ph: "선택", adv: 1, on: function(v){ return v.ins !== "emp"; }},
+        {id: "tb", label: "다른 소득의 과세표준", sub: "알면 직접 · 어림값 대신 씀", ph: "선택", adv: 1}
       ],
       run: function(v){
         var F = v.fin || 0; if (!F) return null;
-        var H = LAW.hi, HD = Math.min(v.hd || 0, F), ins = v.ins, wage = v.wage || 0, pen = v.pen || 0, biz = ins === "dep" ? 0 : (v.biz || 0), prop = v.prop || 0;
-        var inc = (ins === "emp" ? Math.max(0, wage - wageDed(wage)) : Math.max(0, pen - penDed(pen))) + biz, O = Math.max(0, inc - 150);
-        function ft(f){ return f > LAW.finLine ? Math.max(itax(O + f - LAW.finLine) + LAW.finLine * LAW.wh, itax(O) + f * LAW.wh) - itax(O) : f * LAW.wh; }   // 금융소득 f 에 붙는 소득세
-        var gen = ft(F) * LAW.local, wh = F * LAW.wh * LAW.local, extra = Math.max(0, gen - wh), sep = HD > 0 ? (prog(HD, LAW.div) + ft(F - HD)) * LAW.local : null;
+        var H = LAW.hi, HD = Math.min(v.hd || 0, F), DV = Math.min(F, Math.max(v.dv || 0, HD)), ins = v.ins, wage = v.wage || 0, pen = v.pen || 0, biz = ins === "dep" ? 0 : (v.biz || 0), prop = ins === "emp" ? 0 : (v.prop || 0);
+        var est = Math.max(0, (ins === "emp" ? Math.max(0, wage - wageDed(wage) - ins4(wage)) : Math.max(0, pen - penDed(pen))) + biz - 150), O = v.tb ? v.tb : est;
+        /* 금융소득 f(그중 Gross-up 대상 국내 배당 d)에 붙는 소득세 — 2,000만 초과분만 합산 · 배당가산 10% 더했다가 같은 금액을 세액공제 · 14% 원천징수세액보다 작을 수 없음 */
+        function ft(f, d){ if (f <= LAW.finLine) return f * LAW.wh;
+          var ex = f - LAW.finLine, g = Math.min(d, ex) * LAW.gross;
+          return Math.max(itax(O + ex + g) + LAW.finLine * LAW.wh - g, itax(O) + f * LAW.wh) - itax(O); }
+        var gen = ft(F, DV) * LAW.local, wh = F * LAW.wh * LAW.local, extra = Math.max(0, gen - wh), sep = HD > 0 ? (prog(HD, LAW.div) + ft(F - HD, DV - HD)) * LAW.local : null;
         var h = "", over = F > LAW.finLine;
-        /* 그림: 1,000만 · 2,000만 선 */
         var mx = Math.min(4000, Math.max(3000, F * 1.15)), pos = Math.min(100, F / mx * 100);
         h += '<div class="tx-g"><div class="tx-gt"><u style="width:' + pos.toFixed(1) + '%" class="' + (over ? "r" : F > H.finIn ? "y" : "g") + '"></u>' +
           '<i class="up" style="left:' + (H.finIn / mx * 100).toFixed(1) + '%"><em>1,000만 · 건보료 선</em></i><i style="left:' + (LAW.finLine / mx * 100).toFixed(1) + '%"><em>2,000만 · 종합과세 선</em></i></div>' +
@@ -22670,111 +22691,139 @@ window.VIDC = {
         h += '<p class="tx-sec">① 세금</p>';
         if (!over) h += big("금융소득 세금", won(wh), "15.4% 떼고 끝 · 더 낼 세금 없음", "ok");
         else if (extra < 0.05) h += big("더 낼 세금", "0원", "종합과세 대상이지만 다른 소득이 적어 이미 뗀 15.4%(" + won(wh) + ")로 끝 · 5월 신고는 해야 함", "ok");
-        else h += big("5월에 더 낼 세금", won(extra), "이미 뗀 " + won(wh) + " + 추가 " + won(extra) + " = 모두 " + won(gen) + " · 초과분 세율 약 " + pct(mrate(O + F - LAW.finLine) * LAW.local), "bad");
+        else h += big("5월에 더 낼 세금", won(extra), "이미 뗀 " + won(wh) + " + 추가 " + won(extra) + " = 모두 " + won(gen) + " · 초과분에 붙는 세율 약 " + pct(mrate(O + F - LAW.finLine) * LAW.local), "bad");
+        if (over && extra >= 0.05 && !v.dv && !v.hd) h += '<p class="tx-n tx-s">전부 이자·ETF 분배금으로 본 값 — 국내 회사 배당이 섞여 있으면 「더 정확하게」에 넣기 (배당세액공제로 세금이 줄어듦)</p>';
         if (sep != null && over){ var gain = gen - sep;
-          h += bars([["그냥 종합과세", gen, null, gain <= 0.05], ["고배당 분리과세 선택", sep, null, gain > 0.05]]) +
-            '<p class="tx-n">' + (gain > 0.05 ? '고배당 배당 ' + won(HD) + '을 분리과세로 신청하면 <b class="tx-a">' + won(gain) + '</b> 덜 냄 (5월 신고 때 신청)' : gain < -0.05 ? '다른 소득이 적어 분리과세를 고르면 오히려 <b class="tx-r">' + won(-gain) + '</b> 더 냄 — 신청하지 않는 쪽이 유리' : '이 경우는 분리과세를 골라도 세금 차이가 없음') + '</p>'; }
+          h += bars([["그냥 종합과세", gen, null, gain <= 0.05], ["고배당 분리과세 신청", sep, null, gain > 0.05]]) +
+            '<p class="tx-n">' + (gain > 0.05 ? '고배당 배당 ' + won(HD) + '을 분리과세로 신청하면 <b class="tx-a">' + won(gain) + '</b> 덜 냄 (5월 신고 때 신청서를 내야 적용)' : gain < -0.05 ? '다른 소득이 적어 분리과세를 고르면 오히려 <b class="tx-r">' + won(-gain) + '</b> 더 냄 — 신청하지 않는 쪽이 유리' : '이 경우는 분리과세를 골라도 세금 차이가 없음') + '</p>'; }
         else if (sep != null) h += '<p class="tx-n">2,000만 이하라 고배당 분리과세를 골라도 세금은 같음(14%)</p>';
         /* ② 건보료 */
-        var Fh = F > H.finIn ? F : 0, msg = "";
+        var Fh = F > H.finIn ? F : 0, msg = "", pp = propPts(prop);
         h += '<p class="tx-sec">② 건강보험료</p>';
-        if (ins === "emp"){ var ext = Fh + biz, add = ext > H.empFree ? hiMonth(ext - H.empFree) : 0;
+        if (ins === "emp"){ var ext = Fh + biz, add = ext > H.empFree ? hiExtra(ext - H.empFree) : 0;
           h += add ? big("월급 말고 더 내는 건보료", "월 " + wn(add), "연 " + wn(add * 12) + " · 월급 외 소득 " + won(ext) + " 중 2,000만 넘는 " + won(ext - H.empFree) + "에 부과 · 전액 본인 부담", "bad")
                    : big("더 내는 건보료", "없음", "월급 외 소득 " + won(ext) + " — 2,000만 이하" + (F <= H.finIn && F > 0 ? " (이자·배당 1,000만 이하는 아예 안 봄)" : ""), "ok");
         } else if (ins === "dep"){ var tot = Fh + pen, why = [];
           if (tot > H.depLine) why.push("소득 합계 " + won(tot) + " — 2,000만 초과");
           if (prop > H.propMax) why.push("재산세 과세표준 " + won(prop) + " — 9억 초과");
           else if (prop > H.propMid && tot > H.depLow) why.push("재산 과표 5.4억~9억 구간인데 소득 " + won(tot) + " — 1,000만 초과");
-          if (why.length){ var est = hiMonth(Fh + pen * H.half);
-            h += big("피부양자 탈락", "월 " + wn(est) + " +α", "지역가입자로 바뀜 · 소득분만 계산한 값(연 " + wn(est * 12) + ") · 집·땅이 있으면 재산분이 더 붙음", "bad") + '<p class="tx-n">탈락 이유: ' + why.join(" · ") + '</p>';
+          if (why.length){ var L = hiLocal(Fh + pen * H.half, prop);
+            h += big("피부양자 탈락", "월 " + wn(L.tot) + (prop ? "" : " +α"), "지역가입자로 바뀜 · 연 " + wn(L.tot * 12) + (prop ? " · 소득분 " + wn(L.inc) + " + 재산분 " + wn(L.prop) : " · 소득분만 계산 — 집·땅이 있으면 「더 정확하게」에 재산세 과세표준을 넣어야 재산분까지 나옴"), "bad") +
+              '<p class="tx-n">탈락 이유: ' + why.join(" · ") + '</p><p class="tx-n tx-s">부부는 한 사람만 소득 기준을 넘어도 둘 다 탈락 · 지역보험료는 같은 세대 가족의 소득·재산을 합쳐서 계산</p>';
           } else { var room = (prop > H.propMid ? H.depLow : H.depLine) - tot;
             h += big("피부양자 유지", "보험료 0원", "소득 합계 " + won(tot) + " · 기준선까지 " + won(room) + " 남음" + (F <= H.finIn ? " · 이자·배당 1,000만 이하는 0원으로 봄" : ""), "ok");
-            if (F <= H.finIn && pen + H.finIn > (prop > H.propMid ? H.depLow : H.depLine)) msg = "⚠ 이자·배당이 1,000만을 1원이라도 넘으면 전액이 소득에 잡혀 바로 탈락함"; }
-        } else { var now = hiMonth(Fh + pen * H.half + biz), low = hiMonth(pen * H.half + biz);
-          h += big("소득분 건보료", "월 " + wn(now), "연 " + wn(now * 12) + " · 재산분은 따로 붙음", Fh ? "bad" : "ok");
-          if (Fh) h += bars([["지금", now, "월 " + wn(now)], ["이자·배당 1,000만 이하면", low, "월 " + wn(low), 1]]) + '<p class="tx-n">이자·배당을 1,000만 이하로 맞추면 <b class="tx-a">연 ' + wn((now - low) * 12) + '</b> 줄어듦</p>';
-          else if (F > 0) msg = "⚠ 이자·배당이 1,000만을 넘는 순간 전액이 잡혀 월 약 " + wn(hiMonth(H.finIn + pen * H.half + biz) - low) + " 이상 오름"; }
+            if (F <= H.finIn && pen + H.finIn > (prop > H.propMid ? H.depLow : H.depLine)) msg = "⚠ 이자·배당이 1,000만을 1원이라도 넘으면 전액이 소득에 잡혀 바로 탈락함";
+            h += '<p class="tx-n tx-s">배우자가 소득 기준을 넘으면 함께 탈락 · 사업자등록이 있고 사업소득이 있으면 금액과 상관없이 탈락</p>'; }
+        } else { var N = hiLocal(Fh + pen * H.half + biz, prop), Lo = hiLocal(pen * H.half + biz, prop);
+          h += big("지역 건보료", "월 " + wn(N.tot) + (prop ? "" : " +α"), "연 " + wn(N.tot * 12) + (prop ? " · 소득분 " + wn(N.inc) + " + 재산분 " + wn(N.prop) : " · 소득분만 — 재산분은 「더 정확하게」에 재산세 과세표준을 넣으면 나옴"), Fh ? "bad" : "ok");
+          if (Fh) h += bars([["지금", N.tot, "월 " + wn(N.tot)], ["이자·배당 1,000만 이하면", Lo.tot, "월 " + wn(Lo.tot), 1]]) + '<p class="tx-n">이자·배당을 1,000만 이하로 맞추면 <b class="tx-a">연 ' + wn((N.tot - Lo.tot) * 12) + '</b> 줄어듦</p>';
+          else if (F > 0) msg = "⚠ 이자·배당이 1,000만을 넘는 순간 전액이 잡혀 월 약 " + wn(hiLocal(H.finIn + pen * H.half + biz, prop).tot - Lo.tot) + " 이상 오름";
+          h += '<p class="tx-n tx-s">같은 세대 가족의 소득·재산을 합쳐서 계산 — 본인 것만 넣었다면 실제는 더 많을 수 있음</p>'; }
         if (msg) h += '<p class="tx-n tx-w">' + msg + '</p>';
-        h += tips("줄이는 방법", [
+        h += tips("줄이는 방법 · 같이 볼 것", [
           F > H.finIn * .7 ? "이자·배당 나는 상품을 <b>ISA·연금저축·IRP</b> 안으로 — 그 안 수익은 2,000만·건보료 계산에서 빠짐" : "",
-          F > H.finIn * .7 ? "<b>받는 해를 나누기</b> — ELS 상환·채권 만기·예금 만기가 한 해에 몰리지 않게" : "",
+          F > H.finIn * .7 ? "<b>받는 해를 나누기</b> — ELS 상환·채권 만기·예금 만기가 한 해에 몰리지 않게 (ELS·펀드·국내 상장 해외 ETF 수익도 배당소득)" : "",
           over ? "<b>가족 명의로 나누기</b> — 배우자 6억·성인 자녀 5천만(10년)까지 증여세 없음 · 2,000만은 사람마다 따로 셈" : "",
           F > H.finIn * .7 ? "이자 대신 <b>매매차익이 큰 상품</b> — 국내 주식 차익·저쿠폰 채권의 차익은 금융소득에 안 들어감" : "",
-          HD > 0 || over ? "고배당기업 배당은 분리과세로 세금은 줄지만 <b>건보료 계산에는 그대로 잡힐 수 있음</b>" : ""]);
-        h += basis(["금융소득종합과세: 2,000만 초과분을 다른 소득과 합쳐 누진세율(6~45%), 14% 원천징수세액과 비교해 큰 쪽 · 지방소득세 10% 포함",
-          "다른 소득 과세표준은 " + (ins === "emp" ? "연봉 − 근로소득공제 − 본인 기본공제 150만" : "공적연금 − 연금소득공제 − 본인 기본공제 150만") + "으로만 어림(약 " + won(O) + ") — 실제 공제가 더 많으면 세금은 더 적음",
-          "배당 가산(Gross-up)·배당세액공제는 넣지 않은 간이 계산",
-          "고배당 분리과세: 2,000만 이하 14% · 3억 이하 20% · 50억 이하 25% · 초과 30% (2026~2028년 지급분 · 요건 맞는 상장사 현금배당만)",
-          "건보료율 7.19% + 장기요양(건보료의 약 13.14%) · 이자·배당은 1,000만 초과 시 전액 반영 · 공적연금은 자격 판정 100%, 보험료 계산 50%",
-          "피부양자는 사업소득이 있으면(사업자등록 시 1원 · 미등록 500만 초과 · 주택임대는 금액 무관) 따로 탈락 — 여기서는 안 봄",
-          "건보료는 올해 소득이 내년 11월부터 반영됨 · 상·하한과 재산분(과표 1억 공제 뒤 점수제)은 뺐음"]);
+          over ? "2,000만을 넘은 사람은 <b>가족의 연말정산 부양가족 공제에서 빠지고</b>, 3년간 ISA 새 가입이 막힘" : "",
+          HD > 0 ? "고배당 분리과세 배당의 건보료: 법령에는 부과 근거가 있고 지금 실무는 분리과세 금융소득을 빼고 있음 — <b>공단 방침이 아직 확정 안내 전</b>이라 여기서는 포함해 계산(보수적)" : ""]);
+        h += basis(["금융소득종합과세: 2,000만 초과분만 다른 소득과 합쳐 누진세율(6~45%) · 14% 원천징수세액과 비교해 큰 쪽 · 지방소득세 10% 포함",
+          "다른 소득 과세표준 약 " + won(O) + (v.tb ? " (직접 넣은 값)" : " — " + (ins === "emp" ? "연봉 − 근로소득공제 − 4대보험 본인 부담(어림) − 본인 기본공제 150만" : "공적연금 − 연금소득공제 − 본인 기본공제 150만") + "으로 어림 · 부양가족·카드 등 공제가 더 있으면 세금은 더 적음"),
+          "국내 회사 배당은 2,000만 초과분에 10%를 더해(Gross-up) 계산한 뒤 같은 금액을 세액공제 — 「국내 회사 주식 배당」 칸에 넣은 금액만 반영 · 2,000만은 이자·ETF 분배금부터 채운다고 봄",
+          "해외 주식 배당은 현지에서 뗀 세금(미국 15%)을 외국납부세액으로 빼 줌 — 여기서는 국내와 같이 15.4%를 뗐다고 봄",
+          "고배당 분리과세: 2,000만 이하 14% · 3억 이하 20% · 50억 이하 25% · 초과 30% · 신청하면 그 배당은 2,000만 판정에서도 빠짐 · 2026년 지급분부터 한시 · 고배당기업 여부는 거래소 KIND 공시",
+          "건보료율 7.19% + 장기요양(건보료의 약 13.14%) · 이자·배당은 1,000만 초과 시 전액 반영 · 공적연금은 자격 판정 100%, 보험료 계산 50% · 월 상한 4,591,740원 · 지역 최저 20,160원",
+          "재산분: (재산세 과세표준 − 1억) → 60등급 점수 × 211.5원 · 전월세는 (보증금+월세×40)×30%를 재산으로 봄(여기서는 넣은 과세표준만)",
+          "피부양자의 사업소득 요건(등록 시 1원 · 미등록 500만 초과 · 주택임대는 금액 무관)은 따로 확인",
+          "건보료는 올해 소득이 내년 11월부터 반영됨"]);
         return h; } },
 
     { k: "pen", ic: "🏦", t: "연금 세액공제", d: "연금저축·IRP 넣으면 얼마 환급",
+      segs: [{id: "who", label: "소득 종류", opts: [["emp", "근로자"], ["biz", "사업자·기타"]]}],
       fields: [
-        {id: "wage", label: "연봉(총급여)", sub: "세전", req: 1, ph: "예: 7000"},
+        {id: "wage", label: "연봉(총급여)", sub: "세전", req: 1, ph: "예: 7000", on: function(v){ return v.who !== "biz"; }},
+        {id: "inc", label: "종합소득금액", sub: "수입 − 경비", req: 1, ph: "예: 6000", on: function(v){ return v.who === "biz"; }},
         {id: "save", label: "연금저축 올해 넣은(넣을) 돈", ph: "예: 400"},
-        {id: "irp", label: "IRP 올해 넣은(넣을) 돈", sub: "본인 추가 납입분", ph: "예: 0"},
-        {id: "isa", label: "ISA 만기 → 연금으로 옮긴 돈", ph: "선택"}
+        {id: "irp", label: "IRP 올해 넣은(넣을) 돈", sub: "본인 추가 납입분 · DC 추가 납입 포함", ph: "예: 0"},
+        {id: "isa", label: "ISA 만기 → 연금으로 옮긴 돈", ph: "선택", adv: 1}
       ],
       run: function(v){
-        var P = LAW.pen, w = v.wage || 0; if (!w) return null;
-        var s = v.save || 0, ir = v.irp || 0, isa = v.isa || 0, rate = w <= P.wageLine ? P.hiRate : P.loRate;
+        var P = LAW.pen, emp = v.who !== "biz", w = emp ? (v.wage || 0) : (v.inc || 0); if (!w) return null;
+        var s = v.save || 0, ir = v.irp || 0, isa = v.isa || 0, rate = (emp ? w <= P.wageLine : w <= P.incLine) ? P.hiRate : P.loRate;
         var sOk = Math.min(s, P.save), base = Math.min(sOk + ir, P.all), isaOk = Math.min(isa * P.isaRate, P.isaMax), tot = base + isaOk, back = tot * rate, room = P.all - base, lost = s - sOk;
-        var h = big("돌려받는 세금", won(back), "공제 대상 " + won(tot) + " × " + pct(rate) + (isaOk ? " (ISA 전환분 " + won(isaOk) + " 포함)" : ""), back > 0 ? "ok" : "");
+        /* 낸 세금(결정세액)보다 많이는 못 돌려받음 — 근로자만 어림 */
+        var cap = null; if (emp){ var b0 = Math.max(0, w - wageDed(w) - ins4(w) - 150), c0 = itax(b0), wc = Math.min(c0 <= 130 ? c0 * .55 : 71.5 + (c0 - 130) * .3, w <= 3300 ? 74 : w <= 7000 ? Math.max(66, 74 - (w - 3300) * .008) : w <= 12000 ? Math.max(50, 66 - (w - 7000) * .5) : Math.max(20, 50 - (w - 12000) * .5));
+          cap = Math.max(0, c0 - wc - 13) * LAW.local; }
+        var real = cap != null ? Math.min(back, cap) : back, cut = cap != null && back > cap + 0.05;
+        var h = big("돌려받는 세금", won(real), "공제 대상 " + won(tot) + " × " + pct(rate) + (isaOk ? " (ISA 전환분 " + won(isaOk) + " 포함)" : "") + (cut ? " = " + won(back) + "이지만 낸 세금이 그보다 적음" : ""), real > 0 ? "ok" : "");
+        if (cut) h += '<p class="tx-n tx-w">⚠ 이 연봉에서 1년에 내는 세금이 약 ' + won(cap) + '(어림)뿐이라 그 이상은 못 돌려받음 — 부양가족·카드 공제가 많으면 더 적음. 공제 못 받은 납입액은 다음 해로 넘겨 공제받거나 나중에 세금 없이 찾을 수 있음</p>';
         h += '<div class="tx-lim"><div class="tx-lt"><u style="width:' + (base / P.all * 100).toFixed(1) + '%"></u><i style="left:' + (P.save / P.all * 100).toFixed(1) + '%"><em>연금저축만 600만</em></i></div><p>한도 900만 중 <b>' + won(base) + '</b> 채움' + (room > 0 ? ' · <b class="tx-a">' + won(room) + '</b> 더 넣을 수 있음' : ' · 한도 다 채움') + '</p></div>';
-        if (room > 0) h += bars([["지금", back], ["한도까지 채우면", back + room * rate, null, 1]]) + '<p class="tx-n">' + won(room) + ' 더 넣으면 <b class="tx-a">' + won(room * rate) + '</b> 더 돌려받음 (12월 31일 입금분까지)</p>';
+        if (room > 0 && !cut){ var more = cap != null ? Math.min(back + room * rate, cap) : back + room * rate;
+          h += bars([["지금", real], ["한도까지 채우면", more, null, 1]]) + '<p class="tx-n">' + won(room) + ' 더 넣으면 <b class="tx-a">' + won(more - real) + '</b> 더 돌려받음 (12월 31일 입금분까지)' + (cap != null && back + room * rate > cap + 0.05 ? ' — 낸 세금 한도(약 ' + won(cap) + ')에 걸려 다 채워도 여기까지' : '') + '</p>'; }
         h += tips("체크", [
           lost > 0 ? "연금저축 " + won(s) + " 중 <b>600만 넘는 " + won(lost) + "은 공제 안 됨</b> — 그만큼은 IRP로 넣어야 공제됨" : "",
-          w > P.wageLine && w <= P.wageLine * 1.06 ? "연봉이 5,500만을 조금 넘어 공제율이 13.2% — 5,500만 이하면 16.5%" : "",
+          emp && w > P.wageLine && w <= P.wageLine * 1.06 ? "연봉이 5,500만을 조금 넘어 공제율이 13.2% — 5,500만 이하면 16.5%" : "",
+          "맞벌이는 <b>공제율 16.5%인 쪽(연봉 5,500만 이하)</b>이 넣는 게 유리 — 단, 낸 세금이 충분한지 먼저 확인",
           !isa ? "ISA 만기 자금을 60일 안에 연금계좌로 옮기면 옮긴 돈의 10%(최대 300만)를 한도와 별도로 더 공제" : "",
-          "55세 전에 깨면 기타소득세 16.5% — 넣기 전에 묶여도 되는 돈인지 확인"]);
-        h += basis(["공제율: 총급여 5,500만 이하 16.5% · 초과 13.2% (지방소득세 포함) — 근로소득만 있다고 보고 계산 · 사업자는 종합소득금액 4,500만 기준",
+          "받을 때는 연금소득세 3.3~5.5% — 지금 13.2~16.5% 돌려받고 나중에 낮은 세율로 내는 구조 · 55세 전에 깨면 16.5%"]);
+        h += basis(["공제율: 총급여 5,500만 이하(근로소득만) · 종합소득금액 4,500만 이하 16.5% · 초과 13.2% (지방소득세 포함)",
           "한도: 연금저축 600만 · IRP 합쳐 900만 · 넣는 것 자체는 연 1,800만까지",
-          "낸 세금(결정세액)보다 많이는 못 돌려받음 — 이미 다른 공제로 세금이 0이면 환급도 0",
+          emp ? "낸 세금 한도(약 " + won(cap) + ")는 연봉 − 근로소득공제 − 4대보험 본인 부담(어림) − 본인 기본공제 150만 → 산출세액 − 근로소득세액공제 − 표준세액공제 13만으로 어림 · 실제는 연말정산 「결정세액」 확인" : "사업자는 낸 세금(결정세액) 한도를 여기서 계산하지 않음 — 종합소득세 결정세액보다 많이는 못 돌려받음",
           "회사가 넣어 주는 퇴직연금(DB·DC 회사 부담분)은 해당 없음"]);
         return h; } },
 
     { k: "ret", ic: "🧳", t: "퇴직소득세", d: "한 번에 vs 연금으로 받기",
       fields: [
-        {id: "pay", label: "퇴직금", sub: "세전", req: 1, ph: "예: 30000"},
+        {id: "pay", label: "퇴직금", sub: "세전 · 명예퇴직금·위로금 포함", req: 1, ph: "예: 30000"},
         {id: "yrs", label: "근속연수", unit: "년", req: 1, ph: "예: 25", max: 60},
-        {id: "span", label: "연금으로 나눠 받을 기간", unit: "년", ph: "기본 20", max: 50}
+        {id: "span", label: "연금으로 나눠 받을 기간", unit: "년", ph: "기본 20", max: 50},
+        {id: "ror", label: "IRP 예상 수익률", sub: "1년 · 넣으면 원금이 빨리 나오는 것까지 계산", unit: "%", ph: "선택", max: 15, adv: 1}
       ],
       run: function(v){
         var p = v.pay || 0, n = Math.ceil(v.yrs || 0); if (!p || !n) return null;
-        var Y = Math.max(1, Math.round(v.span || 20));
+        var Y = Math.max(1, Math.round(v.span || 20)), r = (v.ror || 0) / 100;
         var d1 = n <= 5 ? 100 * n : n <= 10 ? 500 + 200 * (n - 5) : n <= 20 ? 1500 + 250 * (n - 10) : 4000 + 300 * (n - 20);
         var conv = Math.max(0, p - d1) * 12 / n;
         var d2 = conv <= 800 ? conv : conv <= 7000 ? 800 + (conv - 800) * .6 : conv <= 10000 ? 4520 + (conv - 7000) * .55 : conv <= 30000 ? 6170 + (conv - 10000) * .45 : 15170 + (conv - 30000) * .35;
         var base = Math.max(0, conv - d2), tax = itax(base) * n / 12 * LAW.local;
-        function keep(yy){ var s = 0; for (var i = 1; i <= yy; i++){ for (var j = 0; j < LAW.ret.keep.length; j++) if (i <= LAW.ret.keep[j][0]){ s += LAW.ret.keep[j][1]; break; } } return s / yy; }
-        var rows = [["한 번에 받기", tax, null, 0]], seen = {};
-        [10, 20, Y].sort(function(a, b){ return a - b; }).forEach(function(y){ if (seen[y]) return; seen[y] = 1; rows.push([y + "년 연금", tax * keep(y), null, 0]); });
-        var mn = rows.reduce(function(a, r){ return r[1] < a[1] ? r : a; }, rows[0]); mn[3] = 1;
-        var mine = tax * keep(Y);
+        function keep(k){ for (var j = 0; j < LAW.ret.keep.length; j++) if (k <= LAW.ret.keep[j][0]) return LAW.ret.keep[j][1]; return .5; }
+        /* yy년 동안 매년 같은 금액을 받는다고 보고 한 해씩 계산: 퇴직금 원금이 먼저 나옴 · 10년째까지는 연금수령한도(잔액÷(11−연차)×120%) 안만 감면 · 한도 넘는 부분은 감면 없음 */
+        function sim(yy){ var bal = p, pr = p, t = 0, A = r > 0 ? p * r / (1 - Math.pow(1 + r, -yy)) : p / yy, done = 0, xs = 0;
+          for (var k = 1; k <= yy && bal > 0.001; k++){ var wd = k === yy ? bal : Math.min(A, bal), lim = k <= 10 ? bal / (11 - k) * 1.2 : Infinity, q = Math.min(wd, lim);
+            var a = Math.min(pr, q); t += tax * a / p * keep(k); pr -= a;
+            var b = Math.min(pr, wd - q); if (b > 0.001){ t += tax * b / p; pr -= b; xs += b; }
+            if (pr <= 0.001 && !done) done = k;
+            bal = (bal - wd) * (1 + r); }
+          return {tax: t, done: done || yy, A: A, xs: xs}; }
+        var rows = [["한 번에 받기", tax, null, 0]], seen = {}, S = sim(Y);
+        [10, 20, Y].sort(function(a, b){ return a - b; }).forEach(function(y){ if (seen[y]) return; seen[y] = 1; rows.push([y + "년 연금", y === Y ? S.tax : sim(y).tax, null, 0]); });
+        var mn = rows.reduce(function(a, x){ return x[1] < a[1] ? x : a; }, rows[0]); mn[3] = 1;
         var h = big("한 번에 받으면 세금", won(tax), "퇴직금의 " + pct(p ? tax / p : 0) + " · 실제 받는 돈 " + won(p - tax), tax > 0 ? "bad" : "ok");
-        if (tax > 0.05){ h += bars(rows) + '<p class="tx-n">IRP로 옮겨 ' + Y + '년 동안 나눠 받으면 세금 ' + won(mine) + ' — <b class="tx-a">' + won(tax - mine) + '</b> 덜 냄 (' + pct(1 - keep(Y), 0) + ' 감면)</p>';
-          h += '<p class="tx-n">' + Y + '년 균등이면 세전 연 ' + won(p / Y) + ' · 월 ' + won(p / Y / 12) + ' 꼴 (운용 수익 빼고)</p>'; }
+        if (tax > 0.05){ h += bars(rows) + '<p class="tx-n">IRP로 옮겨 ' + Y + '년 동안 나눠 받으면 세금 ' + won(S.tax) + ' — <b class="tx-a">' + won(tax - S.tax) + '</b> 덜 냄 (' + pct(1 - S.tax / tax, 0) + ' 감면)</p>';
+          h += '<p class="tx-n">세전 연 ' + won(S.A) + ' · 월 ' + won(S.A / 12) + ' 꼴' + (r > 0 ? ' (수익률 ' + pct(r) + ' 가정)' : ' (운용 수익 빼고)') + '</p>';
+          if (S.xs > 0.05) h += '<p class="tx-n tx-w">⚠ ' + Y + '년은 너무 짧음 — 처음 10년은 해마다 찾을 수 있는 한도가 있어 넘는 ' + won(S.xs) + '은 감면을 못 받음. 한도 안에서만 받으려면 10년 이상으로</p>';
+          if (r > 0 && S.done < Y) h += '<p class="tx-n">퇴직금 원금은 <b>' + S.done + '년째</b>에 다 나옴 — 그 뒤 ' + (Y - S.done) + '년은 운용 수익을 받는 것이라 연금소득세(3.3~5.5%)가 붙고 <b>연 1,500만 계산에 들어감</b></p>'; }
         else h += '<p class="tx-n">근속연수 공제가 커서 세금이 거의 없음 — 한 번에 받아도 부담 없음</p>';
         h += tips("체크", [
-          tax > 0.05 ? "나눠 받는 해가 길수록 유리 — 1~10년째 30% · 11~20년째 40% · <b>21년째부터 50%</b> 감면(2026년 수령분부터)" : "",
-          tax > 0.05 ? "IRP로 옮기면 세금을 나중에 내므로 <b>세금 낼 돈까지 굴릴 수 있음</b> (과세이연)" : "",
-          "55세 이후 · IRP로 받아야 감면 — 중간에 한꺼번에 찾으면 남은 세금을 그때 다 냄",
-          "퇴직금으로 받는 연금은 <b>연 1,500만 한도와 상관없음</b> · 금융소득·건보료에도 안 잡힘"]);
+          tax > 0.05 ? "받는 연차가 길수록 유리 — 1~10년째 30% · 11~20년째 40% · <b>21년째부터 50%</b> 감면(2026년 수령분부터)" : "",
+          tax > 0.05 ? "연차는 <b>실제로 받은 해</b>만 셈 — 55세에 최소 금액이라도 받기 시작하면 연차가 먼저 쌓임" : "",
+          tax > 0.05 ? "IRP로 옮기면 세금을 나중에 내므로 <b>세금 낼 돈까지 굴릴 수 있음</b> (과세이연) · 받은 뒤 60일 안에 넣어도 됨" : "",
+          "55세 이후 · 연금수령한도 안에서 받아야 감면 — 중간에 한꺼번에 찾으면 남은 세금을 그때 다 냄",
+          "퇴직금 원금으로 받는 연금은 <b>연 1,500만 한도와 상관없고</b> 금융소득·건보료에도 안 잡힘 — 운용 수익과 세액공제 받은 돈은 한도에 들어가니 계좌를 따로 두면 관리가 쉬움"]);
         h += basis(["2023년 이후 퇴직 기준 — 근속연수공제 " + won(d1) + " → 환산급여 " + won(conv) + " → 환산급여공제 " + won(d2) + " → 과세표준 " + won(base),
           "세액 = 과세표준 × 기본세율(6~45%) × 근속연수 ÷ 12 · 지방소득세 10% 포함 · 근속 1년 미만은 1년으로 올림",
-          "연금 수령은 매년 같은 금액을 받는다고 가정(연금수령한도 안) · IRP 운용 수익에 붙는 세금은 뺐음",
-          "임원 퇴직금 한도 초과분·중간정산 합산 특례·비과세 퇴직급여는 안 넣음"]);
+          "연금 수령: 해마다 같은 금액 · 연금 계좌에서는 세액공제 안 받은 돈 → 퇴직금 → 세액공제 받은 돈·수익 순서로 나옴 · IRP에 퇴직금만 있다고 봄",
+          "연금수령한도 = 계좌 잔액 ÷ (11 − 연금수령연차) × 120% (11년째부터 한도 없음) · 2013년 3월 전에 만든 계좌는 6년차부터 시작해 더 빨리 받을 수 있음",
+          "IRP 운용 수익에 붙는 세금과 수수료는 뺐음 · 임원 퇴직금 한도 초과분·중간정산 합산 특례·비과세 퇴직급여는 안 넣음"]);
         return h; } },
 
     { k: "pay", ic: "👵", t: "연금 받을 때 세금", d: "1,500만 선 · 얼마씩 받을까",
       segs: [{id: "life", label: "받는 방식", opts: [["n", "기간 정해서"], ["y", "종신형"]]}],
       fields: [
         {id: "age", label: "받는 나이", unit: "세", req: 1, ph: "예: 60", max: 110},
-        {id: "amt", label: "연금저축·IRP에서 받는 돈", sub: "1년 · 세액공제 받은 돈+수익", req: 1, ph: "예: 1800"},
-        {id: "pen", label: "국민연금 등 공적연금", sub: "1년", ph: "선택"},
-        {id: "oth", label: "그 밖의 소득", sub: "사업·임대·근로 소득금액", ph: "선택"}
+        {id: "amt", label: "연금저축·IRP에서 받는 돈", sub: "1년 · 세액공제 받은 돈+수익 · 퇴직금 원금은 빼고", req: 1, ph: "예: 1800"},
+        {id: "pen", label: "국민연금 등 공적연금", sub: "1년", ph: "선택", adv: 1},
+        {id: "oth", label: "그 밖의 소득", sub: "사업·임대·근로 소득금액", ph: "선택", adv: 1}
       ],
       run: function(v){
         var P = LAW.pay, age = v.age || 0, A = v.amt || 0; if (!age || !A) return null;
@@ -22792,47 +22841,57 @@ window.VIDC = {
           h += big("연금 세금", won(best), "1,500만을 " + won(A - P.line) + " 넘어 낮은 세율(" + pct(r) + ")을 못 씀 · " + (tot < sep ? "종합과세" : "16.5% 분리과세") + "가 유리", "bad");
           h += bars([["16.5% 분리과세", sep, null, sep <= tot], ["종합과세(다른 소득과 합산)", tot, null, tot < sep], ["1,500만까지만 받으면", low, null, 0]]);
           h += '<p class="tx-n">연 1,500만(월 125만)까지만 받으면 세금 ' + won(low) + ' — 지금보다 <b class="tx-a">' + won(best - low) + '</b> 덜 냄</p>';
+          if (!pub && !oth) h += '<p class="tx-n tx-s">다른 소득이 없다고 본 값 — 국민연금·임대소득 등이 있으면 「더 정확하게」에 넣어야 종합과세 쪽이 맞게 나옴</p>';
         }
         h += tips("체크", [
           A > P.line ? "<b>1원이라도 넘으면 전액</b>이 높은 세율 — 받는 기간을 늘려 연 1,500만 이하로 맞추기" : "",
-          v.life !== "y" && age < 80 ? "종신형으로 계약하면 나이와 상관없이 3.3% (2026년~)" : "",
+          "1,500만은 <b>연금저축·IRP 여러 계좌를 다 합쳐서</b> 셈 — 퇴직금 원금·세액공제 안 받은 원금·국민연금은 빠지고, 퇴직금을 굴려 생긴 수익은 들어감",
+          v.life !== "y" && age < 80 ? "종신형으로 계약하면 나이와 상관없이 3.3% (2026년 수령분부터)" : "",
           age < 70 ? "늦게 받을수록 세율이 내려감 — 70세부터 4.4% · 80세부터 3.3%" : "",
-          "퇴직금에서 나온 연금·세액공제 안 받은 원금은 1,500만 계산에서 빠짐",
+          "해마다 찾을 수 있는 한도(연금수령한도)를 넘겨 찾은 돈은 연금이 아니라 <b>기타소득 16.5%</b>",
           "연금저축·IRP 연금은 지금은 건보료가 안 붙음(공적연금만 반영) — 제도가 바뀔 수 있음"]);
-        h += basis(["사적연금(연금저축·IRP 중 세액공제 받은 돈과 운용 수익) 연 1,500만 이하: 나이별 5.5% · 4.4% · 3.3% 원천징수로 끝 (지방소득세 포함)",
-          "1,500만 초과: 전액을 16.5% 분리과세 또는 종합과세 중 선택 — 종합과세는 연금소득공제(최대 900만)와 본인 기본공제 150만만 반영한 어림",
-          "연금수령한도를 넘겨 찾는 돈은 연금이 아니라 기타소득(16.5%)으로 과세 — 여기서는 안 봄"]);
+        h += basis(["사적연금(연금저축·IRP 중 세액공제 받은 돈과 운용 수익) 연 1,500만 이하: 나이별 5.5% · 4.4% · 3.3% 원천징수로 끝 (지방소득세 포함) · 종신형과 겹치면 낮은 쪽",
+          "1,500만 초과: 전액을 16.5% 분리과세 또는 종합과세 중 선택 — 종합과세는 연금소득공제(공적+사적 합쳐 최대 900만)와 본인 기본공제 150만만 반영한 어림",
+          "국민연금은 2002년 이후 낸 보험료에서 나온 부분만 과세 대상 — 넣은 금액 전부를 과세 대상으로 보고 계산(보수적)",
+          "의료비 등 부득이한 사유로 찾는 돈은 한도와 상관없이 3.3~5.5%"]);
         return h; } },
 
     { k: "ovs", ic: "🌎", t: "해외주식 양도세", d: "올해 얼마 · 손실로 줄이기",
       fields: [
-        {id: "gain", label: "올해 판 종목의 이익 합계", sub: "원화 기준", req: 1, ph: "예: 3000"},
+        {id: "gain", label: "올해 판 종목의 이익 합계", sub: "원화 기준 · 수수료 뺀 뒤", req: 1, ph: "예: 3000"},
         {id: "loss", label: "올해 판 종목의 손실 합계", ph: "예: 500"},
-        {id: "un", label: "아직 안 판 종목의 평가손실", sub: "연말 전에 팔 수 있는 것", ph: "선택"}
+        {id: "un", label: "아직 안 판 종목의 평가손실", sub: "연말 전에 팔 수 있는 것", ph: "선택"},
+        {id: "ria", label: "그중 RIA 계좌에서 판(팔) 이익", sub: "국내시장 복귀계좌 · 2026년만", ph: "선택", adv: 1}
       ],
       run: function(v){
         var L = LAW.ovs, g = v.gain || 0; if (!g) return null;
-        var l = Math.abs(v.loss || 0), u = Math.abs(v.un || 0), net = g - l, tax = Math.max(0, net - L.ded) * L.rate, tax2 = Math.max(0, net - u - L.ded) * L.rate;
-        var h = big("내년 5월에 낼 세금", won(tax), tax > 0 ? "순이익 " + won(net) + " − 공제 250만 = " + won(net - L.ded) + " × 22%" : "순이익 " + won(net) + " — 250만 공제 안이라 세금 없음 (신고는 해야 함)", tax > 0 ? "bad" : "ok");
+        var l = Math.abs(v.loss || 0), u = Math.abs(v.un || 0), ria = Math.min(v.ria || 0, g), cut = ria * L.ria, net = g - l;
+        var tax0 = Math.max(0, net - L.ded) * L.rate, tax = Math.max(0, net - cut - L.ded) * L.rate, tax2 = Math.max(0, net - u - cut - L.ded) * L.rate, riaOn = Date.now() < Date.UTC(2026, 11, 31, 15);
+        var h = big("내년 5월에 낼 세금", won(tax), tax > 0 ? "순이익 " + won(net) + (cut ? " − RIA 공제 " + won(cut) : "") + " − 기본공제 250만 = " + won(net - cut - L.ded) + " × 22%" : "순이익 " + won(net) + (cut ? " − RIA 공제 " + won(cut) : "") + " — 250만 공제 안이라 세금 없음 (신고는 해야 함)", tax > 0 ? "bad" : "ok");
+        if (cut > 0 && tax0 > tax) h += bars([["RIA 없이", tax0], ["RIA 공제 반영", tax, null, 1]]) + '<p class="tx-n">RIA 계좌에서 판 이익 ' + won(ria) + '의 50%를 공제받아 <b class="tx-a">' + won(tax0 - tax) + '</b> 덜 냄 — 판 돈을 1년간 RIA 안에서 국내 주식·펀드에 둬야 유지됨</p>';
         if (u > 0 && tax > 0) h += bars([["지금대로", tax], ["손실 종목도 팔면", tax2, null, 1]]) + '<p class="tx-n">평가손실 ' + won(u) + '을 올해 안에 팔아 확정하면 <b class="tx-a">' + won(tax - tax2) + '</b> 덜 냄 — 다시 사도 됨</p>';
         else if (tax > 0) h += '<p class="tx-n">손실 난 해외 종목이 있다면 올해 안에 팔아 이익과 상계 — 손실 100만마다 세금 22만 줄어듦</p>';
-        else if (net < L.ded && net > 0) h += '<p class="tx-n">공제가 <b class="tx-a">' + won(L.ded - net) + '</b> 남음 — 이익 난 종목을 그만큼 팔았다 다시 사면 취득가를 세금 없이 높일 수 있음</p>';
+        else if (net - cut < L.ded && net > 0) h += '<p class="tx-n">공제가 <b class="tx-a">' + won(L.ded - (net - cut)) + '</b> 남음 — 이익 난 종목을 그만큼 팔았다 다시 사면 취득가를 세금 없이 높일 수 있음</p>';
         h += tips("체크", [
-          "<b>결제일 기준</b> — 12월 마지막 주에 판 건 내년으로 넘어갈 수 있음 · 증권사의 연말 매도 마감일 확인",
-          "250만 공제는 <b>1년에 한 번 · 사람마다</b> — 해외주식·국내 과세 주식 합쳐서",
-          tax > 0 ? "배우자에게 증여(10년 6억 공제) 뒤 팔기는 <b>1년 넘게 가진 뒤 팔아야</b> 효과 있음 (2025년~)" : "",
-          "양도세는 금융소득 2,000만·건보료 계산에 안 들어감 · 배당은 따로 15% 원천징수(금융소득)"]);
+          "<b>결제일 기준</b> — 12월 마지막 주에 판 건 내년으로 넘어갈 수 있음 · 나라마다 마감일이 다르니 증권사 공지 확인",
+          riaOn && !ria && tax > 0 ? "<b>RIA(국내시장 복귀계좌)</b>: 2025년 12월 23일에 갖고 있던 해외주식을 RIA로 옮겨 12월 31일(결제)까지 팔면 그 이익의 50% 공제 — 매도금액 5,000만 한도 · 판 돈은 1년간 국내 주식·펀드 · 다른 계좌에서 해외주식을 새로 사면 그만큼 깎임" : "",
+          "250만 공제는 <b>1년에 한 번 · 사람마다</b> — 해외주식·국내 과세 주식(대주주·장외) 합쳐서",
+          "배우자·자녀 계좌에서 판 이익(손실 뺀 뒤)이 <b>100만을 넘으면 연말정산 부양가족 공제에서 빠짐</b> — 250만이 아니라 100만이 기준",
+          tax > 0 ? "배우자에게 증여(10년 6억 공제) 뒤 팔기는 <b>1년 넘게 가진 뒤 팔아야</b> 효과 있음 (2025년 증여분부터)" : "",
+          "양도세는 금융소득 2,000만·건보료 계산에 안 들어감 · 배당은 따로 과세(미국 15% 현지 원천징수 · 금융소득에 포함)"]);
         h += basis(["세율 22% = 양도소득세 20% + 지방소득세 2% · 기본공제 연 250만",
           "같은 해 해외주식끼리 이익·손실 합산 · 손실은 다음 해로 못 넘김",
-          "환율은 결제일 기준으로 원화 환산 — 넣은 금액이 이미 원화라고 보고 계산 · 수수료·거래세는 이익에서 빼고 넣기",
+          "이익은 판 날·산 날 각각의 환율로 원화 환산한 차이 — 환율이 올라 생긴 이익도 과세 · 같은 종목을 나눠 샀으면 증권사 방식(선입선출·이동평균)에 따라 이익이 달라짐",
+          "RIA: 공제액 = RIA 안 양도소득 × 공제율(5월까지 100% · 7월까지 80% · 12월까지 50%) × 조정비율 — 여기서는 12월 50%·조정 없음으로 계산",
+          "신고를 안 하면 무신고 가산세 20% + 납부지연 가산세",
           "국내 상장 해외 ETF는 양도세가 아니라 배당소득세(15.4%) — 이 계산기 대상 아님"]);
         return h; } },
 
     { k: "isa", ic: "🧺", t: "ISA 절세", d: "일반 계좌보다 얼마 아끼나",
       segs: [{id: "kind", label: "가입 유형", opts: [["n", "일반형"], ["s", "서민형·농어민"]]}],
       fields: [
-        {id: "pf", label: "만기까지 예상 순이익", sub: "이자·배당·ETF 분배금·해외 ETF 차익", req: 1, ph: "예: 1000"},
-        {id: "mv", label: "만기 때 연금계좌로 옮길 돈", ph: "선택"}
+        {id: "pf", label: "만기까지 예상 순이익", sub: "이자·배당·ETF 분배금·해외 ETF 차익 (손실 뺀 뒤)", req: 1, ph: "예: 1000"},
+        {id: "mv", label: "만기 때 연금계좌로 옮길 돈", ph: "선택", adv: 1}
       ],
       run: function(v){
         var I = LAW.isa, p = v.pf || 0; if (!p) return null;
@@ -22843,11 +22902,13 @@ window.VIDC = {
         h += tips("체크", [
           "ISA 안 수익은 <b>금융소득 2,000만·건보료 계산에서 빠짐</b> — 9.9% 떼고 끝",
           "이익과 손실을 <b>합쳐서</b> 순이익에만 과세 — 일반 계좌는 이익에만 과세",
-          "국내 주식 매매차익은 원래 세금이 없어 ISA 효과가 없음 — 배당·이자·해외 ETF 쪽이 효과 큼",
-          "3년은 채워야 혜택 · 넣은 원금까지는 중간에 찾아도 됨",
+          "국내 주식·국내 주식형 ETF 매매차익은 원래 세금이 없어 ISA 효과가 없음 — 배당·이자·해외 ETF·ELS 쪽이 효과 큼",
+          "비과세 한도는 <b>계좌를 닫을 때 한 번</b> 적용 — 3년 채운 뒤 해지하고 다시 가입하면 한도를 또 쓸 수 있음",
+          "3년은 채워야 혜택(그 전에 깨면 15.4%) · 넣은 원금까지는 중간에 찾아도 됨",
           "직전 3년 안에 금융소득종합과세 대상이었으면 가입 불가"]);
         h += basis(["비과세 한도: 일반형 200만 · 서민형·농어민형 400만 · 초과분 9.9% 분리과세 (지방소득세 포함)",
           "납입 한도: 연 2,000만 · 총 1억 (안 쓴 한도는 다음 해로 넘어감)",
+          "일반 계좌 세율은 15.4%로 봄 — 해외 ETF 분배금의 현지 세금은 따로",
           "2026년 세제개편안(국회 심의 중)이 통과되면 2027년부터 한도 이월 폐지 · 총 계약 5년 · 국내 투자용 「생산적 금융 ISA」(연 2,000만·총 2억 · 이자·배당 전액 비과세)가 따로 생김 — 확정되면 이 계산기에 반영",
           "서민형: 총급여 5,000만(종합소득 3,800만) 이하"]);
         return h; } }
@@ -22861,12 +22922,14 @@ window.VIDC = {
   function formHtml(c){ var v = ST[c.k];
     return head(c.ic + " " + c.t, LAW.asof) +
       (c.segs || []).map(function(s){ return '<div class="tx-seg" role="group" aria-label="' + s.label + '"><em>' + s.label + '</em><div>' + s.opts.map(function(o){ return '<button type="button" data-txs="' + s.id + '" data-v="' + o[0] + '"' + (v[s.id] === o[0] ? ' class="on"' : '') + '>' + o[1] + '</button>'; }).join("") + '</div></div>'; }).join("") +
-      c.fields.filter(function(f){ return !f.on || f.on(v); }).map(function(f){
-        return '<label class="tx-f"><span>' + f.label + (f.req && !f.sub ? '' : '<small>' + (f.req ? '' : '<s>선택</s>') + (f.sub || '') + '</small>') + '</span><i><input data-txf="' + f.id + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="' + (f.unit ? 3 : 10) + '" placeholder="' + e(f.ph || "") + '" value="' + (v[f.id] ? (f.unit ? v[f.id] : Number(v[f.id]).toLocaleString()) : "") + '"><em>' + (f.unit || "만원") + '</em></i></label>'; }).join("") +
+      (function(){ var show = c.fields.filter(function(f){ return !f.on || f.on(v); }), adv = show.filter(function(f){ return f.adv; }), open = v._adv || adv.some(function(f){ return v[f.id]; });
+        function one(f){ return '<label class="tx-f"><span>' + f.label + (f.req && !f.sub ? '' : '<small>' + (f.req ? '' : '<s>선택</s>') + (f.sub || '') + '</small>') + '</span><i><input data-txf="' + f.id + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" maxlength="' + (f.unit ? 3 : 10) + '" placeholder="' + e(f.ph || "") + '" value="' + (v[f.id] ? (f.unit ? v[f.id] : Number(v[f.id]).toLocaleString()) : "") + '"><em>' + (f.unit || "만원") + '</em></i></label>'; }
+        return show.filter(function(f){ return !f.adv; }).map(one).join("") +
+          (adv.length ? (open ? '<p class="tx-advh">더 정확하게 <small>아는 것만 넣으면 됨</small></p>' + adv.map(one).join("") : '<button type="button" class="tx-adv" data-txadv="1">＋ 더 정확하게 <small>' + adv.map(function(f){ return f.label.replace(/^그중 /, ""); }).join(" · ") + '</small></button>') : ''); })() +
       '<button type="button" class="tx-clr" data-txclr="1">입력 지우기</button>';
   }
   function outHtml(c){ var h = null; try { h = c.run(ST[c.k]); } catch(x){ console.error("tax", x); h = '<p class="tx-n">계산하지 못했어요 — 숫자를 다시 확인해 주세요</p>'; }
-    if (h == null){ var need = c.fields.filter(function(f){ return f.req; }).map(function(f){ return f.label; });
+    if (h == null){ var vv = ST[c.k], need = c.fields.filter(function(f){ return f.req && (!f.on || f.on(vv)); }).map(function(f){ return f.label; });
       return '<p class="tx-wait"><b>' + need.join(" · ") + '</b>만 넣으면 바로 계산돼요<small>나머지는 넣을수록 정확해져요 · 단위는 만원</small></p>'; }
     return head("결과", "넣는 즉시 다시 계산") + h; }
   function view(){ var c = sel();
@@ -22881,11 +22944,12 @@ window.VIDC = {
     paintForm();
     if (scroll){ var f = D.getElementById("txform"); try { f.scrollIntoView({behavior: "smooth", block: "start"}); } catch(x) {} } }
   D.addEventListener("click", function(ev){
-    var t = ev.target.closest && ev.target.closest("#tx [data-txk], #tx [data-txs], #tx [data-txclr]"); if (!t) return;
+    var t = ev.target.closest && ev.target.closest("#tx [data-txk], #tx [data-txs], #tx [data-txclr], #tx [data-txadv]"); if (!t) return;
     var c = sel();
     if (t.dataset.txk){ choose(t.dataset.txk, true); return; }
     if (!c) return;
     if (t.dataset.txs){ ST[c.k][t.dataset.txs] = t.dataset.v; paintForm(); return; }
+    if (t.dataset.txadv){ ST[c.k]._adv = 1; paintForm(); return; }
     if (t.dataset.txclr){ var keep = {}; (c.segs || []).forEach(function(s){ keep[s.id] = ST[c.k][s.id]; }); ST[c.k] = keep; paintForm(); }
   });
   D.addEventListener("input", function(ev){
@@ -22921,6 +22985,9 @@ window.VIDC = {
     ".tx-f>i{font-style:normal;display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:12px;padding:0 10px;min-width:0}.tx-f>i:focus-within{border-color:#3182f6}" +
     ".tx-f input{flex:1;min-width:0;width:100%;font:inherit;font-size:17px;font-weight:700;text-align:right;padding:11px 0;border:0;outline:0;background:transparent;color:var(--text);font-variant-numeric:tabular-nums}.tx-f input::placeholder{font-size:13px;font-weight:500;color:var(--sub);opacity:.7}" +
     ".tx-f>i em{font-style:normal;font-size:13px;color:var(--sub);white-space:nowrap}" +
+    ".tx-adv{display:block;width:100%;font:inherit;font-size:14.5px;font-weight:700;text-align:left;color:#3182f6;background:transparent;border:0;border-top:1px solid var(--line);padding:13px 0 6px;cursor:pointer;word-break:keep-all}.tx-adv small{display:block;font-size:12.5px;font-weight:500;color:var(--sub);margin-top:2px;line-height:1.4}" +
+    ".tx-advh{margin:0;padding:13px 0 8px;border-top:1px solid var(--line);font-size:14.5px;font-weight:800;color:#3182f6}.tx-advh small{font-size:12.5px;font-weight:500;color:var(--sub);margin-left:6px}" +
+    ".tx-s{font-size:13px!important;color:var(--sub)}" +
     ".tx-clr{display:block;margin:8px 0 0 auto;font:inherit;font-size:13px;color:var(--sub);background:transparent;border:0;text-decoration:underline;cursor:pointer;padding:8px 2px}" +
     ".tx-wait{margin:6px 0;font-size:15px;line-height:1.55;text-align:center;color:var(--sub);word-break:keep-all}.tx-wait b{color:var(--text)}.tx-wait small{display:block;font-size:12.5px;margin-top:4px}" +
     ".tx-sec{margin:18px 0 8px;font-size:13.5px;font-weight:800;color:var(--sub)}" +
