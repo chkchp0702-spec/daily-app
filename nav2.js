@@ -18,9 +18,10 @@
     /* 🧊 11/16 냉정 분석 5차 — 큰손·컵·갭·오를 확률을 「신호 한눈에」(sigall · ux1116.js) 한 화면으로 합침. 네 화면은 지우지 않고 그 안 「전체 보기」로 */
     {k: "sig",   ic: "🎯", t: "신호",   tabs: ["sigall", "screen", "sigmore"], hide: true, lab: 1},
     {k: "sigd",  ic: "🎯", t: "신호 상세", tabs: ["whale", "cup", "gap", "prob"], hide: true, lab: 1, up: "sigall", upt: "신호"},
-    {k: "luck",  ic: "🔮", t: "운세",   tabs: ["luck", "saju", "tarot", "lotto"], hide: true, lab: 1}
+    {k: "luck",  ic: "🔮", t: "운세",   tabs: ["luck", "saju", "tarot", "lotto"], hide: true, lab: 1},
+    {k: "tax",   ic: "🧾", t: "세무계산기", tabs: ["tax"], hide: true, lab: 1}   // 🧾 11/16 tax.js
   ];
-  var LAB = {diag: "🩻 포트 진단", sigall: "🎯 신호 한눈에", send: "📨 고객에게 한 장", lab: "🔬 연구실", onepager: "🔍 종목 찾기", home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", divc: "💰 배당비교", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
+  var LAB = {tax: "🧾 세무계산기", diag: "🩻 포트 진단", sigall: "🎯 신호 한눈에", send: "📨 고객에게 한 장", lab: "🔬 연구실", onepager: "🔍 종목 찾기", home: "🏠 오늘", feed: "📰 피드", market: "🌐 시황", sector: "🧭 나침반", prob: "🎲 시장확률", flow: "🧲 수급", port: "💼 포트", divc: "💰 배당비교", score: "📊 성적표", whale: "🐋 큰손", cup: "☕ 컵", gap: "📈 갭", accum: "🤫 매집", danta: "⚡ 단타", screen: "🔎 거르기", sigmore: "🗂 더 보기", bond: "🏦 채권", fund: "📦 펀드", els: "🎯 ELS", luck: "🔮 오늘의 운세", saju: "📜 사주 리포트", tarot: "🃏 타로", lotto: "🎱 로또", prop: "📝 제안서"};
   window.__navMap = {groups: GROUPS, lab: LAB};   // 🔎 11/12 메뉴 찾기 — 화면이 바뀌어도 지금 이름·자리로 길 안내
   function grpOf(k){ for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i].tabs.indexOf(k) >= 0) return GROUPS[i]; return null; }
   function last(g){ var m = (window.store && store.gl) || {}; return m[g.k] && g.tabs.indexOf(m[g.k]) >= 0 ? m[g.k] : g.tabs[0]; }
@@ -45,7 +46,8 @@
     if (cur && cur !== "onepager"){ store.lastTab = cur; }
     try { updBack(); } catch(x) {}
     if (g){ store.gl = store.gl || {}; store.gl[g.k] = cur; try { save(); } catch(x) {} }
-    if (g && g.tabs.length > 1){   // 🧊 11/12: 홈에서도 위 작은 탭을 보임(오늘·시황·시장 흐름·피드 — 「뭐가 있는지 모르겠다」)
+    if (g && (g.tabs.length > 1 || g.lab)){   // 🧾 11/16 연구실 안 화면은 탭이 하나여도 「‹ 연구실」을 보임(세무계산기)
+      // 🧊 11/12: 홈에서도 위 작은 탭을 보임(오늘·시황·시장 흐름·피드 — 「뭐가 있는지 모르겠다」)
       nav.className = "tabs sub";
       nav.innerHTML = (g.up ? '<button class="tab tab-lab" data-k="' + g.up + '">‹ ' + g.upt + '</button>' : g.lab ? '<button class="tab tab-lab" data-k="lab">‹ 연구실</button>' : '') + g.tabs.map(function(k){ var c = CATS.filter(function(x){ return x.key === k; })[0] || {};
         return '<button class="tab' + (k === cur ? " on" : "") + '" style="--c:' + c.color + '" data-k="' + k + '">' + String(LAB[k] || c.name).replace(/^[^\s가-힣A-Za-z]+\s+/, "") + '</button>'; }).join("");   // 🧊 11/12 위 작은 탭은 글자만(이모지 뺌)
