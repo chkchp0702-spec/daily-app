@@ -22819,16 +22819,20 @@ window.VIDC = {
         var rows = [["한 번에 받기", tax, null, 0]], seen = {}, S = sim(Y);
         [10, 20, Y].sort(function(a, b){ return a - b; }).forEach(function(y){ if (seen[y]) return; seen[y] = 1; rows.push([y + "년 연금", y === Y ? S.tax : sim(y).tax, null, 0]); });
         var mn = rows.reduce(function(a, x){ return x[1] < a[1] ? x : a; }, rows[0]); mn[3] = 1;
+        /* 11/17 사용자 「퇴직소득세 항목에서 금액·세율 순이 아니라 반대로 — 세율을 더 강조」 → 이번 퇴직금 대비 실효세율을 크게, 금액은 작게 */
+        function er(t){ var x = p ? t / p : 0; return pct(x, x > 0 && x < .01 ? 2 : 1); }
+        function rw(t){ return er(t) + ' <small class="tx-am">' + won(t) + '</small>'; }
+        rows.forEach(function(x){ x[2] = rw(x[1]); });
         var h = "";
         if (mid){ var sepT = R.t * LAW.local, mrgT = addT * LAW.local, gap = sepT - mrgT;
-          h += big(useM ? "합산 특례로 낼 세금" : "이번 퇴직금 세금", won(tax), useM ? "따로 계산하면 " + won(sepT) + " → 합산하면 " + won(mrgT) + " · " + won(gap) + " 덜 냄" : "합산 특례가 오히려 불리 — 따로 계산이 유리", tax > 0 ? "bad" : "ok") +
-            bars([["따로 계산 (중간정산 뒤 " + n + "년만)", sepT, null, !useM], ["합산 특례 (" + N + "년 · 퇴직금 " + won(p + mp) + ")", mrgT, null, useM]]) +
+          h += big((useM ? "합산 특례 세율" : "이번 퇴직금 세율") + " · 실효", er(tax), "세금 " + won(tax) + (useM ? " · 따로 계산하면 " + er(sepT) + "(" + won(sepT) + ") → " + er(gap) + "p 낮춤 · " + won(gap) + " 덜 냄" : " · 합산 특례가 오히려 불리 — 따로 계산이 유리"), tax > 0 ? "bad" : "ok") +
+            bars([["따로 계산 (중간정산 뒤 " + n + "년만)", sepT, rw(sepT), !useM], ["합산 특례 (" + N + "년 · 퇴직금 " + won(p + mp) + ")", mrgT, rw(mrgT), useM]]) +
             '<p class="tx-n">합산 특례: 두 퇴직금을 합쳐 ' + N + '년으로 계산한 세금 ' + won(M.t * LAW.local) + ' − 중간정산 때 낸 ' + won(mt * LAW.local) + '(지방소득세 포함) = ' + won(mrgT) + '</p>';
           if (M.t < mt - 0.05) h += '<p class="tx-n tx-s">합쳐 계산한 세금이 그때 낸 세금보다 적어도 차액은 돌려받지 못함(추가 0원) — 중간정산금을 IRP로 옮겨 세금을 미뤄 둔 경우만 일부 환급(시행령 §203②)</p>';
           if (useM) h += '<p class="tx-n">회사에 <b>중간정산 때 원천징수영수증을 내며 정산을 요청</b>해야 적용 — 안 내면 회사는 따로 계산으로 뗌 (소득세법 §148)</p>';
           h += '<p class="tx-sec">이번 퇴직금 ' + won(p) + ' — 한 번에 vs 연금</p>'; }
-        h += big(mid ? "한 번에 받으면" : "한 번에 받으면 세금", won(tax), "이번 퇴직금의 " + pct(p ? tax / p : 0) + " · 실제 받는 돈 " + won(p - tax), tax > 0 ? "bad" : "ok");
-        if (tax > 0.05){ h += bars(rows) + '<p class="tx-n">IRP로 옮겨 ' + Y + '년 동안 나눠 받으면 세금 ' + won(S.tax) + ' — <b class="tx-a">' + won(tax - S.tax) + '</b> 덜 냄 (' + pct(1 - S.tax / tax, 0) + ' 감면)</p>';
+        h += big((mid ? "한 번에 받으면" : "한 번에 받으면 세율") + " · 실효", er(tax), "세금 " + won(tax) + " · 실제 받는 돈 " + won(p - tax), tax > 0 ? "bad" : "ok");
+        if (tax > 0.05){ h += bars(rows) + '<p class="tx-n">IRP로 옮겨 ' + Y + '년 동안 나눠 받으면 세율 <b class="tx-a">' + er(tax) + ' → ' + er(S.tax) + '</b> (' + pct(1 - S.tax / tax, 0) + ' 감면) — 세금 ' + won(S.tax) + ', ' + won(tax - S.tax) + ' 덜 냄</p>';
           h += '<p class="tx-n">세전 연 ' + won(S.A) + ' · 월 ' + won(S.A / 12) + ' 꼴' + (r > 0 ? ' (수익률 ' + pct(r) + ' 가정)' : ' (운용 수익 빼고)') + '</p>';
           if (S.xs > 0.05) h += '<p class="tx-n tx-w">⚠ ' + Y + '년은 너무 짧음 — 처음 10년은 해마다 찾을 수 있는 한도가 있어 넘는 ' + won(S.xs) + '은 감면을 못 받음. 한도 안에서만 받으려면 10년 이상으로</p>';
           if (r > 0 && S.done < Y) h += '<p class="tx-n">퇴직금 원금은 <b>' + S.done + '년째</b>에 다 나옴 — 그 뒤 ' + (Y - S.done) + '년은 운용 수익을 받는 것이라 연금소득세(3.3~5.5%)가 붙고 <b>연 1,500만 계산에 들어감</b></p>'; }
@@ -23029,7 +23033,7 @@ window.VIDC = {
     ".tx-big.tx-ok{background:rgba(49,130,246,.10)}.tx-big.tx-ok b{color:#3182f6}.tx-big.tx-bad{background:rgba(240,68,82,.10)}.tx-big.tx-bad b{color:#f04452}" +
     ".tx-bars{margin:12px 0 4px}.tx-b{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:baseline;margin:0 0 10px}.tx-b>span{font-size:13.5px;font-weight:600;color:var(--sub);word-break:keep-all}.tx-b>b{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}" +
     ".tx-b>i{grid-column:1/3;display:block;height:12px;border-radius:6px;background:rgba(128,128,128,.14);overflow:hidden}.tx-b>i u{display:block;height:100%;border-radius:6px;background:rgba(128,128,128,.55);text-decoration:none}" +
-    ".tx-b.tx-best>span{color:var(--text);font-weight:800}.tx-b.tx-best>b{color:#3182f6}.tx-b.tx-best>i u{background:#3182f6}" +
+    ".tx-b>b .tx-am{font-size:12.5px;font-weight:600;color:var(--sub);margin-left:4px}.tx-b.tx-best>span{color:var(--text);font-weight:800}.tx-b.tx-best>b{color:#3182f6}.tx-b.tx-best>i u{background:#3182f6}" +
     ".tx-n{margin:6px 2px 10px;font-size:14.5px;line-height:1.55;word-break:keep-all}.tx-a{color:#3182f6}.tx-r{color:#f04452}.tx-w{color:#f04452;font-weight:700}" +
     ".tx-g{margin:4px 0 6px}.tx-gt,.tx-lt{position:relative;height:14px;border-radius:7px;background:rgba(128,128,128,.14);margin:26px 0 26px}.tx-lt{margin-top:6px}.tx-gt i.up em{top:auto;bottom:22px}" +
     ".tx-gt u,.tx-lt u{display:block;height:100%;border-radius:7px;background:#3182f6;text-decoration:none;max-width:100%}.tx-gt u.y{background:#f5a623}.tx-gt u.r{background:#f04452}" +
