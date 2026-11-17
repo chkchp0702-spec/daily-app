@@ -104,7 +104,46 @@ def load_ext(fake=False):
             out["epu"] = ep
     except Exception as e:
         print("정책 불확실성(EPU) 실패", e)
+    try:
+        cy = load_cot()
+        if len(cy) > 1000:
+            out["cot_yen"] = cy
+    except Exception as e:
+        print("CFTC COT 실패", e)
     return out
+
+
+COT_FILE = "archive/x/cot_hist.json"
+
+
+def load_cot():
+    """CFTC 주간 COT(옛 형식 선물만) 엔 선물(097741) 투기(비상업) 순매수 ÷ 미결제 (11/17 12시 #115 · probe/cot115_bt.py)
+       https://www.cftc.gov/files/dea/history/deacot{연도}.zip (1986~2016 은 deacot1986_2016.zip) · 화요일 기준 → 금요일 발표
+       처음 한 번만 전체를 받고 archive/x/cot_hist.json 에 쌓은 뒤, 그다음부터는 올해 zip(약 2MB)만 — 마지막 값이 6일 넘게 묵었을 때만"""
+    import io, zipfile
+    h = json.load(open(COT_FILE, encoding="utf-8")) if os.path.exists(COT_FILE) else {}
+    last = max(h) if h else "1900-01-01"
+    if (dt.date.today() - dt.date.fromisoformat(last)).days > 6:
+        y = dt.date.today().year
+        names = [f"deacot{y}"] if len(h) > 1000 else ["deacot1986_2016"] + [f"deacot{x}" for x in range(2017, y + 1)]
+        if len(h) > 1000 and dt.date.today().month == 1 and dt.date.today().day < 10:
+            names.insert(0, f"deacot{y - 1}")
+        for nm in names:
+            req = urllib.request.Request(f"https://www.cftc.gov/files/dea/history/{nm}.zip", headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=90) as r:
+                z = zipfile.ZipFile(io.BytesIO(r.read()))
+            for f in z.namelist():
+                t = pd.read_csv(z.open(f), low_memory=False)
+                cc = [c for c in t.columns if "contract" in c.lower() and "code" in c.lower()][0]
+                t = t[t[cc].astype(str).str.strip().str.upper() == "097741"]
+                for _, row in t.iterrows():
+                    oi = float(row["Open Interest (All)"])
+                    if oi > 0:
+                        h[str(pd.Timestamp(row["As of Date in Form YYYY-MM-DD"]).date())] = round((float(row["Noncommercial Positions-Long (All)"]) - float(row["Noncommercial Positions-Short (All)"])) / oi, 5)
+        json.dump(dict(sorted(h.items())), open(COT_FILE, "w", encoding="utf-8"), separators=(",", ":"))
+    s = pd.Series(h, dtype=float); s.index = pd.to_datetime(s.index); s = s.sort_index()
+    print("CFTC 엔 투기 순매수", len(s), s.index[0].date(), "→", s.index[-1].date(), "지금", s.iloc[-1])
+    return s
 
 
 def load_epu():
@@ -677,6 +716,26 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
             add("kofia", "🏦", "투자자예탁금 급감", "자금", m, 0.5, f"투자자예탁금 20일 {dch.iloc[-1]*100:+.1f}% (1년 백분위 {cv*100:.0f}%) — 개인 대기자금이 빠르게 빠질 때 코스피 일주일이 평소보다 약했음(다음 날엔 안 씀)")
             if M and M[-1]["k"] == "kofia":
                 M[-1]["p1"] = None
+    # 💴 CFTC 엔 투기 포지션 4주 급증 (11/17 12시 #115 · probe/cot115_bt.py) — 일본 「일주일」만, w 0.3(➖ 작게), 1년 상위 10% 날만
+    #   엔 선물 비상업 순매수÷미결제의 4주 변화, 52주 백분위 ≥90%(투기 돈이 엔 사기로 급히 돌아섬 = 엔 캐리 청산 쪽) · 화요일 기준 → 금요일(미국 날짜) → 다음 일본 장
+    #   닛케이 5일 뒤 오름 −3.0·−3.0%p(n 367·446, 2016-12 기준 앞/뒤) · 기존(S&P·달러지수 5일 꼬리) 칸 위 걸어가며 사전 100 브라이어 5일
+    #   0.2486→0.24848 · 0.24565→0.24533 · 최근5년 0.24572→0.24543 ✅ · 교차 로지스틱 뒤→앞 0.25001→0.24997 좋아짐 · 앞→뒤 0.24682→0.2469 조금 나빠짐 → w 작게
+    #   주간 자료라 같은 신호가 5일씩 이어짐(실제 독립 표본은 더 적음) · 다음 날 ❌ · 수준 꼬리·S&P 선물 포지션·한·중·홍·미 ❌
+    cy = ext.get("cot_yen")
+    if mk == "JP" and cy is not None and len(cy) > 1000:
+        try:
+            r4 = cy.diff(4).rolling(52, min_periods=30).rank(pct=True)
+            r4.index = r4.index + pd.Timedelta(days=3)
+            rk = align(r4.dropna(), idx); cv = rk.iloc[-1]
+            research["cot_yen"] = {"d": str(cy.index[-1].date()), "net": round(float(cy.iloc[-1]), 3), "chg4": round(float(cy.diff(4).iloc[-1]), 3), "rk": None if pd.isna(cv) else round(float(cv), 3)}
+            if not pd.isna(cv) and cv >= 0.9:
+                m = cond(d, (rk >= 0.9).fillna(False), "엔 투기 순매수 4주 급증(1년 상위 10%)")
+                add("cot_yen", "💴", "엔 투기 포지션 급증(CFTC)", "자금", m, 0.3,
+                    f"CFTC 엔 선물 투기 순매수 {float(cy.iloc[-1])*100:+.0f}%(미결제 대비) · 4주 {float(cy.diff(4).iloc[-1])*100:+.0f}%p (1년 백분위 {cv*100:.0f}%) — 투기 돈이 엔 사기로 급히 돌아서면(엔 강세 쪽) 일본 일주일이 평소보다 덜 올랐음(다음 날엔 안 씀)")
+                if M and M[-1]["k"] == "cot_yen":
+                    M[-1]["p1"] = None
+        except Exception as e:
+            research["cot_yen_err"] = str(e)[:120]
     # 🗞️ 정책 뉴스 「아주 잠잠」 (11/11 13시 #98b · probe/epu98b_bt.py · https://ouci.dntb.gov.ua/works/42rPkVB4) — 한국·중국 「일주일」만, 하위 10% 날만
     #   미국 일별 EPU 7일 평균(하루 늦게) 로그의 1년 백분위 ≤10% · 2008~, 2018-05 기준 앞/뒤 · 걸어가며 사전 100 브라이어
     #   한국 5일 −6.1·−5.1%p(n 295·298) · VIX 수준 칸 안에서도 −5.4·−4.5 · 🌡️ VIX÷VIX3M 칸 위 0.24774→0.24763 · 0.24615→0.24608 · 최근5년 0.24677→0.24617
