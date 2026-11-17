@@ -224,13 +224,26 @@ def sgs_daily(code, start="2006-01-01"):
     return out
 
 
+def despike(P, th, name):
+    """하루만 튀었다 돌아오는 잘못 찍힌 값 버림 (앞뒤 날은 서로 가까운데 그날만 th 넘게 벌어짐)"""
+    ds = sorted(P); out = dict(P); n = 0
+    for i in range(1, len(ds) - 1):
+        a, b, c = P[ds[i - 1]], P[ds[i]], P[ds[i + 1]]
+        if abs(b / a - 1) > th and abs(c / a - 1) < th / 2:
+            out.pop(ds[i], None); n += 1
+    if n:
+        print("✗", name, "하루만 튄 값", n, "개 버림")
+    return out
+
+
 def brazil(idx):
     """🇧🇷 브라질국채 달러 값 — 위 ③ 설명"""
-    if not stale(idx, "BRBOND", DAYS):
+    if not stale(idx, "BRBOND", DAYS) and (idx["assets"].get("BRBOND") or {}).get("v") == 2:   # v2 = 튄 값·계단 거른 판
         return False
     fx = dl("BRL=X", "2006-01-01", False)   # 1달러 = ? 헤알
     if not fx:
         print("✗ BRL=X 못 받음"); return False
+    fx = despike(fx, 0.06, "BRL=X")
     F, prev = {}, None
     for d in sorted(fx):
         v = fx[d]
@@ -241,18 +254,29 @@ def brazil(idx):
     etf = dl("IRFM11.SA", "2006-01-01", True)
     if etf and len(etf) < 500:
         etf = None
+    R = {}
+    if etf:
+        etf = despike(etf, 0.06, "IRFM11")
+        # 그래도 남은 하루 ±8% 넘는 계단(주식 병합 등 수정 안 된 값 — 11/17 2026-01-08 +53%)은 그날 움직임을 0 으로 · 국채 지수 ETF 는 하루에 그만큼 못 움직임
+        ed, jumps = sorted(etf), []
+        for i in range(1, len(ed)):
+            r = etf[ed[i]] / etf[ed[i - 1]]
+            if abs(r - 1) > 0.08:
+                jumps.append(ed[i]); r = 1.0
+            R[ed[i]] = r
+        if jumps:
+            print("✗ IRFM11 계단", jumps, "→ 그날 0")
     if not sel and not etf:
         print("✗ Selic·IRF-M 둘 다 못 받음"); return False
     sd = sorted(sel); e0 = min(etf) if etf else None
-    idx_brl, P, si, rate, lastE = 100.0, {}, 0, None, None
+    idx_brl, P, si, rate, ei = 100.0, {}, 0, None, 0
+    ed = sorted(etf) if etf else []
     for d in sorted(F):
         while si < len(sd) and sd[si] <= d:
             rate = sel[sd[si]]; si += 1
         if etf and d >= e0:
-            if d in etf:
-                if lastE:
-                    idx_brl *= etf[d] / lastE
-                lastE = etf[d]
+            while ei < len(ed) and ed[ei] <= d:   # 환율 없는 날의 ETF 움직임도 다음 날에 모아 넣음
+                idx_brl *= R.get(ed[ei], 1.0); ei += 1
         elif rate is not None:
             if P:
                 idx_brl *= (1 + rate / 100) ** (1 / 252)
@@ -264,7 +288,7 @@ def brazil(idx):
     meta = write("BRBOND", P, 7)
     meta["src"] = ("IRF-M ETF(IRFM11.SA)" if etf else "") + (" + " if etf and sel else "") + ("Selic 기준금리 이자 근사(BCB SGS 432)" if sel and (not etf or e0 > min(P)) else "")
     meta["splice"] = e0 if etf and e0 > min(P) else None
-    meta["fx"] = "BRL=X"; meta["brl_last"] = round(F[max(F)], 4)
+    meta["fx"] = "BRL=X"; meta["v"] = 2; meta["brl_last"] = round(F[max(F)], 4)
     idx["assets"]["BRBOND"] = meta
     print("✓ BRBOND", len(P), meta["from"], "~", meta["to"], meta["src"], "splice", meta["splice"])
     return True
