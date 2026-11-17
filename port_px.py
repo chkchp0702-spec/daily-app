@@ -4,6 +4,11 @@
       check.json = 같은 자료·같은 규칙을 파이썬으로 돌린 값(앱 숫자 맞춤 검사용 · 실험실 market/lab/k1020_relief.json 「now」와 같은 규칙).
    ② 닮은 날: 코스피 지수(^KS11) 2000~ 종가 → archive/x/port_px/KOSPI.json (마지막 날이 바뀔 때만 새로 씀)
    파일 모양은 els_px 와 같음: {n, d0, dd:[날짜 간격(일)], c:[종가]}
+   ③ 11/17 채권 (사용자 「포트 설계기에서 종목 추가뿐 아니라 미국채 브라질국채도 추가할수 있게」)
+      · 미국채: IEF(7~10년)·TLT(20년+) 배당(이자) 포함 수정종가 — 달러
+      · 브라질국채 BRBOND: 헤알 국채 값 ÷ 달러/헤알(BRL=X) = 달러 값(설계기 엔진이 달러 기준이라)
+        헤알 국채 값 = IRF-M ETF(IRFM11.SA, 헤알 고정금리 국채 지수) 실제 값 · 그 ETF 가 없던 앞쪽은 Selic 기준금리(BCB SGS 432)로 매일 이자만 쌓은 근사(금리 변화로 값이 오르내린 것은 빠짐)
+        index.json 의 BRBOND.src·splice 에 무엇을 썼는지 남김 → 앱이 그대로 보여 줌
    원칙: 숫자를 지어내지 않음 — 못 받으면 옛 파일 그대로."""
 import datetime
 import json
@@ -15,7 +20,8 @@ X = os.path.join("archive", "x")
 D = os.path.join(X, "port_px")
 DAYS = 7
 ETF = ["SPY", "QQQ", "GLD", "BIL"]
-NAMES = {"USDKRW": "원/달러 환율", "SPY": "S&P500 (SPY)", "QQQ": "나스닥100 (QQQ)", "GLD": "금 (GLD)", "BIL": "현금·단기채 (BIL)", "KOSPI": "코스피"}
+BOND = ["IEF", "TLT"]
+NAMES = {"IEF": "미국채 7~10년 (IEF)", "TLT": "미국채 20년+ (TLT)", "BRBOND": "브라질국채 (헤알 국채 · 달러 환산)", "USDKRW": "원/달러 환율", "SPY": "S&P500 (SPY)", "QQQ": "나스닥100 (QQQ)", "GLD": "금 (GLD)", "BIL": "현금·단기채 (BIL)", "KOSPI": "코스피"}
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
 
@@ -177,9 +183,11 @@ def fx_clean(P):
 
 def div_years():
     out = {}
-    for k in ETF:
+    for k in ETF + BOND:
         tr, pr = dl(k, "2006-01-01", True), dl(k, "2006-01-01", False)
         if not tr or not pr:
+            if k in BOND:
+                continue
             return None
         ds = sorted(set(tr) & set(pr)); ys = {}
         for d in ds:
@@ -195,13 +203,85 @@ def div_years():
     return out
 
 
+def sgs_daily(code, start="2006-01-01"):
+    """브라질 중앙은행 SGS 일별 → {날짜: 값} · 한 번에 10년 넘게 못 받아 5년씩"""
+    import urllib.request
+    out, a = {}, datetime.date.fromisoformat(start)
+    today = datetime.date.today()
+    while a <= today:
+        b = min(today, a + datetime.timedelta(days=365 * 5))
+        u = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.%d/dados?formato=json&dataInicial=%s&dataFinal=%s" % (code, a.strftime("%d/%m/%Y"), b.strftime("%d/%m/%Y"))
+        for _ in range(3):
+            try:
+                req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json"})
+                for x in json.loads(urllib.request.urlopen(req, timeout=40).read().decode("utf-8")):
+                    d = datetime.datetime.strptime(x["data"], "%d/%m/%Y").date().isoformat()
+                    out[d] = float(str(x["valor"]).replace(",", "."))
+                break
+            except Exception as e:
+                print("✗ SGS", code, a, e)
+        a = b + datetime.timedelta(days=1)
+    return out
+
+
+def brazil(idx):
+    """🇧🇷 브라질국채 달러 값 — 위 ③ 설명"""
+    if not stale(idx, "BRBOND", DAYS):
+        return False
+    fx = dl("BRL=X", "2006-01-01", False)   # 1달러 = ? 헤알
+    if not fx:
+        print("✗ BRL=X 못 받음"); return False
+    F, prev = {}, None
+    for d in sorted(fx):
+        v = fx[d]
+        if prev and abs(v / prev - 1) > 0.15:
+            print("✗ BRL=X 튀는 값 버림", d, v); continue
+        F[d] = v; prev = v
+    sel = sgs_daily(432)
+    etf = dl("IRFM11.SA", "2006-01-01", True)
+    if etf and len(etf) < 500:
+        etf = None
+    if not sel and not etf:
+        print("✗ Selic·IRF-M 둘 다 못 받음"); return False
+    sd = sorted(sel); e0 = min(etf) if etf else None
+    idx_brl, P, si, rate, lastE = 100.0, {}, 0, None, None
+    for d in sorted(F):
+        while si < len(sd) and sd[si] <= d:
+            rate = sel[sd[si]]; si += 1
+        if etf and d >= e0:
+            if d in etf:
+                if lastE:
+                    idx_brl *= etf[d] / lastE
+                lastE = etf[d]
+        elif rate is not None:
+            if P:
+                idx_brl *= (1 + rate / 100) ** (1 / 252)
+        else:
+            continue   # Selic 도 아직 없음
+        P[d] = idx_brl / F[d]
+    if len(P) < 500:
+        print("✗ BRBOND 너무 짧음", len(P)); return False
+    meta = write("BRBOND", P, 7)
+    meta["src"] = ("IRF-M ETF(IRFM11.SA)" if etf else "") + (" + " if etf and sel else "") + ("Selic 기준금리 이자 근사(BCB SGS 432)" if sel and (not etf or e0 > min(P)) else "")
+    meta["splice"] = e0 if etf and e0 > min(P) else None
+    meta["fx"] = "BRL=X"; meta["brl_last"] = round(F[max(F)], 4)
+    idx["assets"]["BRBOND"] = meta
+    print("✓ BRBOND", len(P), meta["from"], "~", meta["to"], meta["src"], "splice", meta["splice"])
+    return True
+
+
 def tax_data(idx):
     ch = False
     if stale(idx, "USDKRW", 1):
         P = dl("KRW=X", "2006-01-01", False)
         if P:
             P = fx_clean(P); idx["assets"]["USDKRW"] = write("USDKRW", P, 6); idx["assets"]["USDKRW"]["last"] = round(P[max(P)], 2); ch = True; print("✓ USDKRW", len(P))
-    if stale(idx, "DIV", DAYS):
+    try:
+        have = json.load(open(os.path.join(D, "div.json"), encoding="utf-8")).get("y") or {}
+    except Exception:
+        have = {}
+    if stale(idx, "DIV", DAYS) or any(k not in have for k in BOND):   # 11/17 채권 분배금이 아직 없으면 바로 다시
+
         Y = div_years()
         if Y:
             json.dump({"at": now(), "note": "해마다 분배금 수익률 % (배당 포함 값 ÷ 가격만 − 1)", "y": Y}, open(os.path.join(D, "div.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
@@ -212,12 +292,16 @@ def tax_data(idx):
 def main():
     os.makedirs(D, exist_ok=True)
     idx = read_idx(); idx.setdefault("assets", {}); ch = False
-    for k in ETF:
+    for k in ETF + BOND:
         if not stale(idx, k, DAYS):
             continue
         P = dl(k, "2006-01-01", True)
         if P:
             idx["assets"][k] = write(k, P, 6); ch = True; print("✓", k, len(P))
+    try:
+        ch = brazil(idx) or ch
+    except Exception as x:
+        print("브라질국채 못 받음", x)
     try:
         ch = tax_data(idx) or ch
     except Exception as x:
