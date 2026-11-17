@@ -155,7 +155,8 @@
   var XR = {open: 0, q: "", sig: ""};
   function xrCalc(E, FHd){
     var C = window.__pdz && __pdz.cfg ? __pdz.cfg() : null; if (!C) return null;
-    var A = amt(), w = C.w, x = C.st ? C.stw / 100 : 0, k = 1 - x;
+    var A = amt(), w = C.w, x = C.st ? C.stw / 100 : 0, BD = C.bd || {}, bt = 0; for (var bk in BD) bt += BD[bk] / 100;   // 🏦 11/17 섞은 채권만큼 떼어 냄
+    var k = Math.max(0, 1 - x - bt);
     var parts = {SPY: A * w.SPY / 100 * k, QQQ: A * w.QQQ / 100 * k, GLD: A * w.GLD / 100 * k, BIL: A * Math.max(0, 100 - w.SPY - w.QQQ - w.GLD) / 100 * k};
     var M = {}, add = function(key, nm, v, src){ if (!(v > 0)) return; var o = M[key] || (M[key] = {nm: nm, v: 0, s: {}}); o.v += v; o.s[src] = (o.s[src] || 0) + v; };
     var et = (E && E.etf) || {}, byName = {};
@@ -164,6 +165,7 @@
       H.top.forEach(function(h){ add(h[0], KO[h[0]] || h[1], v * h[2] / 100, src); }); if (H.rest > 0) add("~" + f + "r", (f === "SPY" ? "S&P500 나머지 " : "나스닥100 나머지 ") + Math.max(0, H.n - H.top.length) + "종목", v * H.rest / 100, src); };
     expand("SPY", parts.SPY, "S"); expand("QQQ", parts.QQQ, "Q"); add("~GLD", "금", parts.GLD, "G"); add("~BIL", "현금·단기채", parts.BIL, "C");
     if (x) add("~X" + C.st, C.st, A * x, "X");
+    var BDN = {IEF: "미국채 10년", TLT: "미국채 30년", BRBOND: "브라질국채"}; for (var bk2 in BD) add("~B" + bk2, BDN[bk2] || bk2, A * BD[bk2] / 100, "B");
     var tot = A, F = myFunds(), fmiss = 0;
     F.forEach(function(f){
       var fa = +f.amt || 0; if (!(fa > 0)) return; tot += fa;
