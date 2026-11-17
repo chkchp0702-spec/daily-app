@@ -411,6 +411,9 @@ def build(daily, hl, mkt_of, dest, hlh=None):
         sectors.sort(key=lambda x: -(x["r1"] or -999))
         # 섹터 흐름 (최근 15거래일의 1주·1개월 수익률) + 섹터 하루 수익률 시계열 (민감도용)
         R5, R20 = df / df.shift(5) - 1, df / df.shift(20) - 1
+        # 🗓 11/17 사용자 「섹터 전체에 1개월·3개월·6개월 탭」 — 3개월(가로 63일·세로 20일)·6개월(가로 126일·세로 63일) 흐름도 같이
+        R63 = df / df.shift(63) - 1 if len(df) > 63 else None
+        R126 = df / df.shift(126) - 1 if len(df) > 126 else None
         sec_ret = {}
         for x in sectors:
             items = sec[x["k"]]
@@ -424,6 +427,16 @@ def build(daily, hl, mkt_of, dest, hlh=None):
                 return (D * w).sum(axis=1) / (D.notna() * w).sum(axis=1).replace(0, float("nan"))
             a5, a20 = wm(R5).iloc[-15:], wm(R20).iloc[-15:]
             x["path"] = [[d.strftime("%m/%d"), _r(v5 * 100), _r(v20 * 100)] for d, v5, v20 in zip(a5.index, a5.values, a20.values) if v5 == v5 and v20 == v20]
+            pp = {}
+            for lab_, YY, XX in (("3M", R20, R63), ("6M", R63, R126)):
+                if XX is None:
+                    continue
+                ay, ax = wm(YY).iloc[-15:], wm(XX).iloc[-15:]
+                q = [[d.strftime("%m/%d"), _r(vy * 100), _r(vx * 100)] for d, vy, vx in zip(ay.index, ay.values, ax.values) if vy == vy and vx == vx]
+                if q:
+                    pp[lab_] = q
+            if pp:
+                x["pathp"] = pp
             sec_ret[x["k"]] = wm(ret) * 100
             # 섹터 히트맵: 1주·1개월·3개월·6개월·12개월 (시가총액 가중)
             hm = {}
@@ -458,6 +471,35 @@ def build(daily, hl, mkt_of, dest, hlh=None):
         strong = sorted([x for x in pool if x["r1"] is not None], key=lambda x: -x["r1"])
         for x in strong:
             x.pop("cap", None)
+
+        # 🗓 11/17 기간별(1·3·6개월) 강한·약한 업종 + 많이 오른/내린 대형주 — 앱 섹터 기간 탭용
+        def _pcards(large_):
+            ind_p, lead_p = {}, {}
+            for lab_, n_ in (("1M", 20), ("3M", 63), ("6M", 126)):
+                if len(df) <= n_:
+                    continue
+                rr = (df.iloc[-1] / df.iloc[-1 - n_] - 1)
+                rr = rr[(rr > -0.95) & (rr < 20)].dropna()
+                R = {s_: float(v) for s_, v in rr.items()}
+                pst = lambda x: {"s": x["s"], "n": x["n"], "r": _r(R[x["s"]] * 100)}
+                L = []
+                for it in pool:
+                    items = [x for x in ind[it["name"]] if x["s"] in R]
+                    tw = sum(max(x["cap"], 0) for x in items)
+                    if len(items) < 5 or tw <= 0:
+                        continue
+                    v = sum(R[x["s"]] * max(x["cap"], 0) for x in items) / tw * 100
+                    srt = sorted(items, key=lambda x: -(x["cap"] * R[x["s"]]))
+                    L.append({"name": it["name"], "n": len(items), "r": _r(v),
+                              "up": sum(1 for x in items if R[x["s"]] > EPS), "down": sum(1 for x in items if R[x["s"]] < -EPS),
+                              "lead": [pst(x) for x in srt[:3]], "lag": [pst(x) for x in srt[-2:]]})
+                L.sort(key=lambda x: -x["r"])
+                if len(L) >= 6:
+                    ind_p[lab_] = {"strong": L[:5], "weak": list(reversed(L[-5:]))}
+                lg = sorted([x for x in large_ if x["s"] in R], key=lambda x: -R[x["s"]])
+                if lg:
+                    lead_p[lab_] = {"up": [pst(x) for x in lg[:8]], "dn": [pst(x) for x in lg[::-1][:5]]}
+            return ind_p, lead_p
 
         caps = sorted([x["cap"] for x in rows if x["cap"]], reverse=True)
         cut = caps[min(len(caps) - 1, max(30, len(caps) // 5))] if caps else 0
@@ -495,6 +537,14 @@ def build(daily, hl, mkt_of, dest, hlh=None):
             "leaders": [stock(x) for x in leaders], "laggards": [stock(x) for x in laggards],
             "top_cap": [stock(x) for x in top_cap],
         }
+        try:
+            ip_, lp_ = _pcards(large)
+            if ip_:
+                mk["ind_p"] = ip_
+            if lp_:
+                mk["lead_p"] = lp_
+        except Exception as _e:
+            print("기간 카드 실패", mkt, _e, flush=True)
         # 52주 신고가 종목 (시가총액 큰 순) + 신고가가 많이 나온 업종
         spac = lambda x: ("스팩" in (x["ind"] or "")) or ("Shell" in (x["ind"] or "")) or ("Acquisition" in (x["n"] or ""))
         hi_rows = sorted([x for x in rows if hl.get(x["s"]) == 1 and not spac(x)], key=lambda x: -x["cap"])

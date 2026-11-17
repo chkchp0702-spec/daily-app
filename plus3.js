@@ -16,8 +16,11 @@
       '<p class="note">🔔 알림 탭에서 "시장 국면 변화"를 구독하면 바뀌는 날만 푸시가 와요.</p>');
   }
   var RSEL = {};       // 되감기: 고른 섹터만 (10/11 사용자: "섹터 선택하면 그것만 돌려 볼 수 있게, 전체 누르면 다시 전체")
+  /* 🗓 11/17 섹터 기간 탭(1·3·6개월) — 3·6개월을 고르면 그 기간 흐름(pathp)으로 되감기 */
+  function rpth(m){ var SP = window.SECP, p = SP ? SP.rp(m) : "1M"; return {p: p, L: SP ? SP.lab(p) : {xl: "1개월", yl: "1주"}, f: function(x){ return SP ? SP.path(x, p) : x.path; }}; }
   function rotSvg(m, di, sel){
-    var ss = (m.sectors || []).filter(function(x){ return x.path && x.path.length; });
+    var RP = rpth(m);
+    var ss = (m.sectors || []).map(function(x){ var o = Object.create(x); o.path = RP.f(x); o._s = x; return o; }).filter(function(x){ return x.path && x.path.length; });
     if (ss.length < 4) return "";
     var W = 330, H = 250, Pd = 26, all = [];
     ss.forEach(function(x){ if (!sel || x.k === sel) x.path.forEach(function(p){ all.push(p); }); });
@@ -37,18 +40,22 @@
       if (tr.length > 1) s += '<polyline points="' + tr.map(function(q){ return Xs(q[2]).toFixed(1) + "," + Ys(q[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="' + col + '" stroke-opacity="' + (sel ? .8 : .45) + '" stroke-width="' + (sel ? 2.5 : 2) + '"/>' +
         (sel ? tr.slice(0, -1).map(function(q){ return '<circle cx="' + Xs(q[2]).toFixed(1) + '" cy="' + Ys(q[1]).toFixed(1) + '" r="2" fill="' + col + '" opacity=".6"/>'; }).join("") : '');
       var cx = Xs(p[k][2]), cy = Ys(p[k][1]);
-      s += '<g data-csec="' + e(x.k) + '" data-cm="' + MKX + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + p[k][0] + "<br>1주 " + pct(p[k][1]) + " · 1개월 " + pct(p[k][2])) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
+      s += '<g data-csec="' + e(x.k) + '" data-cm="' + MKX + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + p[k][0] + "<br>" + RP.L.yl + " " + pct(p[k][1]) + " · " + RP.L.xl + " " + pct(p[k][2])) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
         '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(V.shortSec(x.name)) + '</text></g></g>';
     });
     return s + '</svg>';
   }
+  if (window.SECP) SECP.reg("rot", function(m, k){ var r = document.querySelector('[data-rot="' + k + '"]'); if (r) r._tok = Math.random();
+    var n = rlen(m), v = r ? Math.min(+r.value, n - 1) : n - 1; if (r){ r.max = n - 1; r.value = v; } return rotSvg(m, v, RSEL[k]); });
+  function rlen(m){ var RP = rpth(m); return Math.max.apply(null, (m.sectors || []).map(function(x){ var q = RP.f(x); return q ? q.length : 0; }).concat([1])); }
   function rotSlider(m, k){
-    var ss = (m.sectors || []).filter(function(x){ return x.path && x.path.length; });
+    var RP = rpth(m);
+    var ss = (m.sectors || []).filter(function(x){ var q = RP.f(x); return q && q.length; });
     if (ss.length < 4) return "";
-    var n = Math.max.apply(null, ss.map(function(x){ return x.path.length; }));
-    var days = ss[0].path.map(function(p){ return p[0]; });
-    return card("🎞️ 섹터 흐름 되감기 <span class='mut'>최근 " + n + "거래일 · 꼬리 = 지난 4일 이동</span>",
-      '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '"><div id="rotw-' + k + '">' + rotSvg(m, n - 1, RSEL[k]) + '</div>' + V.famChips("rot") +
+    var n = Math.max.apply(null, ss.map(function(x){ return RP.f(x).length; }));
+    var days = RP.f(ss[0]).map(function(p){ return p[0]; });
+    return card("🎞️ 섹터 흐름 되감기 <span class='mut'>최근 " + n + "거래일 · 꼬리 = 지난 4일 이동</span>", (window.SECP ? SECP.tabs("p") : "") +
+      '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '"><div id="rotw-' + k + '"' + (window.SECP ? ' data-secpb="rot" data-mk="' + e(k) + '"' : '') + '>' + rotSvg(m, n - 1, RSEL[k]) + '</div>' + V.famChips("rot") +
       // 세부 섹터 칩: 고른 계열의 섹터만 보이고, 누르면 그 섹터만 재생 (10/11 사용자: "밑에 세부 섹터는 되감기 재생 안 됨")
       '<div class="rots">' + ['<button data-rsel="' + k + '|"' + (!RSEL[k] ? ' class="on"' : '') + '>전체</button>'].concat(ss.map(function(x, i){
         return '<button data-rsel="' + k + '|' + e(x.k) + '" data-fam="' + V.famOf(x) + '" style="--sc:' + V.secCol(x.k, i) + '"' + (RSEL[k] === x.k ? ' class="on"' : '') + '><i></i>' + e(x.name) + '</button>'; })).join("") + '</div></div>' +
@@ -60,7 +67,7 @@
     var t = ev.target; if (!t.getAttribute || !t.getAttribute("data-rot")) return;
     var k = t.getAttribute("data-rot"), m = CMP && CMP.markets[k]; if (!m) return;
     $("rotw-" + k).innerHTML = rotSvg(m, +t.value, RSEL[k]);
-    var ss = m.sectors.filter(function(x){ return x.path && x.path.length; }); $("rotd-" + k).textContent = (ss[0].path[+t.value] || [""])[0];
+    var RP = rpth(m), ss = m.sectors.filter(function(x){ var q = RP.f(x); return q && q.length; }); if (ss.length) $("rotd-" + k).textContent = (RP.f(ss[0])[+t.value] || [""])[0];
   });
   document.addEventListener("click", function(ev){       // 계열(큰 섹터)을 다시 고르면 세부 섹터 선택은 풀고 그 계열 전체로
     var fb = ev.target.closest && ev.target.closest(".famc [data-ffam]"); if (!fb) return;

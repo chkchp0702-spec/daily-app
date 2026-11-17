@@ -85,8 +85,12 @@
       '<div class="xr"><span>지수 vs 20일선</span>' + bar(pg) + '<b class="' + cls(pg) + '">' + sgn(pg) + '%</b></div><div class="xr"><span>20일선 vs 60일선</span>' + bar(gap) + '<b class="' + cls(gap) + '">' + sgn(gap) + '%</b></div>' +
       '<p class="note">' + txt + '. 상승장 = 지수가 20일선·60일선 위 + 20일선이 60일선 위 + 20일선이 오름. 급락(20일선 아래 + 20일 −8% 이하 또는 20일 고점 대비 −10% 이하)은 바로 하락장. 예보는 지금 속도를 그대로 이은 것이라 하루 큰 움직임에 바로 바뀌어요.</p>');
   }
-  function clock(m){
-    var ss = (m.sectors || []).filter(function(x){ return x.r5 != null && x.r20 != null; }); if (ss.length < 4) return "";
+  /* 🗓 11/17 섹터 기간 탭(1·3·6개월)을 같이 씀 — window.SECP (compass.js) */
+  function clockSvg(m){
+    var SP = window.SECP, p = SP ? SP.cur() : "1M", L = SP ? SP.lab(p) : {xl: "1개월", yl: "1주"};
+    var ss = (m.sectors || []).map(function(x){ var q = SP ? SP.xy(x, p) : {x: x.r20, y: x.r5}, pa = SP ? SP.path(x, p) : x.path;
+      return {k: x.k, icon: x.icon, name: x.name, p: x.p, n: x.n, r1: x.r1, r5: q.y, r20: q.x, path: pa, _s: x}; }).filter(function(x){ return x.r5 != null && x.r20 != null; });
+    if (ss.length < 4) return '<div class="empty">' + L.xl + ' 자료가 아직 모자라요.</div>';
     var med = function(k){ var v = ss.map(function(x){ return x[k]; }).sort(function(a, b){ return a - b; }); return v[Math.floor(v.length / 2)]; };
     var m5 = med("r5"), m20 = med("r20"), W = 300, cx = 150, cy = 150, R = 118;
     var ang = function(x, y){ return Math.atan2(x, y); };            // 12시에서 시계 방향
@@ -103,15 +107,20 @@
       if (x.path && x.path.length > 4){ var p0 = x.path[x.path.length - 5], d0x = p0[2] - m20, d0y = (p0[1] - m5) * 2, a0 = ang(d0x, d0y), r0 = 30 + Math.min(1, Math.hypot(d0x, d0y) / mxv) * (R - 40);
         tail = '<line x1="' + (cx + r0 * Math.sin(a0)).toFixed(1) + '" y1="' + (cy - r0 * Math.cos(a0)).toFixed(1) + '" x2="' + px.toFixed(1) + '" y2="' + py.toFixed(1) + '" stroke="' + col + '" stroke-opacity=".5" stroke-width="2" marker-end="url(#ah)"/>'; }
       var hour = ((a * 180 / Math.PI + 360) % 360) / 30;
-      s += '<g data-csec="' + e(x.k) + '" data-fam="' + V.famOf(x) + '"' + (TOP[x.k] ? ' data-top="1"' : '') + ' style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + (Math.floor(hour) || 12) + "시 방향<br>1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20)) + '">' + tail + '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="6" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
+      s += '<g data-csec="' + e(x.k) + '" data-fam="' + V.famOf(x._s) + '"' + (TOP[x.k] ? ' data-top="1"' : '') + ' style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + (Math.floor(hour) || 12) + "시 방향<br>" + L.yl + " " + pct(x.r5) + " · " + L.xl + " " + pct(x.r20)) + '">' + tail + '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="6" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
         '<text x="' + (px + 8).toFixed(1) + '" y="' + (py + 3).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(V.shortSec(x.name)) + '</text></g>'; });
-    s += '</svg>';
-    s = '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '">' + s + V.famChips("clock") + '</div>';
-    return card("🕐 섹터 로테이션 시계 <span class='mut'>돈은 시계 방향으로 돈다</span>", s +
+    return s + '</svg>';
+  }
+  if (window.SECP) SECP.reg("clock", function(m){ return clockSvg(m); });
+  function clock(m, k){
+    var SP = window.SECP;
+    if ((m.sectors || []).filter(function(x){ return x.r5 != null && x.r20 != null; }).length < 4) return "";
+    var s = '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '">' + (SP ? SP.body("clock", k, clockSvg(m)) : clockSvg(m)) + V.famChips("clock") + '</div>';
+    return card("🕐 섹터 로테이션 시계 <span class='mut'>돈은 시계 방향으로 돈다</span>", (SP ? SP.tabs("p") : "") + s +
       '<p class="note">교과서의 경기 순환처럼 섹터는 보통 🌱 새로 뜸(9~12시) → 🔥 강함(12~3시) → 🍂 힘 빠짐(3~6시) → 🧊 약함(6~9시) 순으로 돌아요. 화살표 = 지난 5일 이동. 9~12시 쪽에 있는 섹터가 다음 주인공 후보예요. 점을 누르면 종목.</p>');
   }
   window.CPX2 = function(m, k, C){
-    return '<section class="card sentc"><div class="sentc-k">🗣️ ' + (m.live ? (window.cpLiveDone && cpLiveDone(m) ? e(md(m.live.date)) + " 마감" : "지금") : (m.index || [])[0] && m.index[0].date > m.date ? e(m.date.slice(5).replace("-", "/")) + " 마감" : "오늘") + ' ' + e(m.name) + ' 한 문장' + (m.live ? ' <span class="mut">' + (window.cpLiveDone && cpLiveDone(m) ? '장 마감 · 마지막 ' + e(m.live.t || "") + ' 값' : e(m.live.t || "") + ' 장중') + '</span>' : '') + '</div><p>' + sentence(m) + '</p></section>' + forecast(m) + clock(m);
+    return '<section class="card sentc"><div class="sentc-k">🗣️ ' + (m.live ? (window.cpLiveDone && cpLiveDone(m) ? e(md(m.live.date)) + " 마감" : "지금") : (m.index || [])[0] && m.index[0].date > m.date ? e(m.date.slice(5).replace("-", "/")) + " 마감" : "오늘") + ' ' + e(m.name) + ' 한 문장' + (m.live ? ' <span class="mut">' + (window.cpLiveDone && cpLiveDone(m) ? '장 마감 · 마지막 ' + e(m.live.t || "") + ' 값' : e(m.live.t || "") + ' 장중') + '</span>' : '') + '</div><p>' + sentence(m) + '</p></section>' + forecast(m) + clock(m, k);
   };
 
   /* ======================= 🤫 조용한 매집 ======================= */

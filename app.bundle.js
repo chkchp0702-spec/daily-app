@@ -902,6 +902,48 @@
   window.regDisp = rd;
   var CPSEL = null;
 
+  /* 🗓 11/17 사용자 「섹터 전체에 1개월·3개월·6개월 선택 탭 — 이 줄에 있는 애들 다」
+     섹터 묶음(등락·로테이션 지도·시계·되감기·강한/약한 업종·대형주)이 기간 하나를 같이 씀. 어느 카드에서 눌러도 전부 같이 바뀜(store.secp 에 기억).
+     가로축 = 고른 기간, 세로축 = 그보다 짧은 기간(1개월→1주 · 3개월→1개월 · 6개월→3개월). 3·6개월 값은 히트맵과 같은 x.heat. */
+  var SP = {"1M": {xl: "1개월", yl: "1주", xn: "한 달", yn: "이번 주", tail: "지난 5일"},
+            "3M": {xl: "3개월", yl: "1개월", xn: "석 달", yn: "최근 한 달", tail: "지난 5일"},
+            "6M": {xl: "6개월", yl: "3개월", xn: "반년", yn: "최근 석 달", tail: "지난 5일"}};
+  var PK = ["1M", "3M", "6M"], BARK = "r1", TD = true, SREG = {};
+  var nn = function(v){ return v == null || v !== v ? null : v; };
+  var SECP = window.SECP = {
+    C: null, keys: PK,
+    cur: function(){ var p = window.store && store.secp; return SP[p] ? p : "1M"; },
+    lab: function(p){ return SP[p || SECP.cur()]; },
+    xy: function(x, p){ p = p || SECP.cur(); var h = x.heat || {};
+      return p === "3M" ? {x: nn(h["3M"]), y: nn(x.r20)} : p === "6M" ? {x: nn(h["6M"]), y: nn(h["3M"])} : {x: nn(x.r20), y: nn(x.r5)}; },
+    val: function(x, p){ return SECP.xy(x, p).x; },
+    path: function(x, p){ p = p || SECP.cur(); return p === "1M" ? x.path : (x.pathp || {})[p]; },   // [[날짜, 세로, 가로], …]
+    rp: function(m){ var p = SECP.cur(); if (p === "1M") return p;                                   // 되감기에 쓸 기간 (자료가 아직 없으면 1개월)
+      return (m.sectors || []).filter(function(x){ var q = (x.pathp || {})[p]; return q && q.length; }).length >= 4 ? p : "1M"; },
+    today: function(){ return TD; },
+    /* kind: "p" 기간만 · "b" 섹터 등락(오늘·1주 포함) · "t" 오늘 카드(오늘 포함) */
+    tabs: function(kind){ var c = SECP.cur(), on = function(v){ return kind === "b" ? (BARK ? (v === "D" ? BARK === "r1" : v === "W" && BARK === "r5") : v === c) : kind === "t" ? (TD ? v === "D" : v === c) : v === c; };
+      var bs = (kind === "b" ? [["D", "오늘"], ["W", "1주"]] : kind === "t" ? [["D", "오늘"]] : []).concat(PK.map(function(k){ return [k, SP[k].xl]; }));
+      return '<div class="seg2 secp" data-kind="' + (kind || "p") + '">' + bs.map(function(b){ return '<button type="button" data-secp="' + b[0] + '"' + (on(b[0]) ? ' class="on"' : '') + '>' + b[1] + '</button>'; }).join("") + '</div>'; },
+    reg: function(n, fn){ SREG[n] = fn; },
+    body: function(n, k, html, tag, cls){ tag = tag || "div"; return '<' + tag + (cls ? ' class="' + cls + '"' : '') + ' data-secpb="' + n + '" data-mk="' + e(k) + '">' + html + '</' + tag + '>'; },
+    refresh: function(){
+      var C = SECP.C; if (!C) return;
+      [].forEach.call(document.querySelectorAll("[data-secpb]"), function(el){ var m = C.markets[el.dataset.mk], fn = SREG[el.dataset.secpb]; if (!m || !fn) return;
+        try { var h = fn(m, el.dataset.mk, el); if (h != null) el.innerHTML = h; } catch(err) { console.error(err); } });
+      [].forEach.call(document.querySelectorAll(".seg2.secp"), function(w){ var t = document.createElement("div"); t.innerHTML = SECP.tabs(w.dataset.kind);
+        var nb = t.firstChild.children; [].forEach.call(w.children, function(b, i){ if (nb[i]) b.classList.toggle("on", nb[i].classList.contains("on")); }); });
+    }
+  };
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest && ev.target.closest("[data-secp]"); if (!b) return;
+    var v = b.dataset.secp;
+    if (v === "D"){ BARK = "r1"; TD = true; }
+    else if (v === "W"){ BARK = "r5"; }
+    else if (SP[v]){ BARK = null; TD = false; try { store.secp = v; save(); } catch(x) {} }
+    SECP.refresh();
+  });
+
   function card(title, body, extra){ return '<section class="card">' + (title ? '<h3>' + title + (extra || "") + '</h3>' : '') + body + '</section>'; }
   function sec(t){ return '<div class="sec">' + t + '</div>'; }
   function num(n){ return (n || 0).toLocaleString("ko-KR"); }
@@ -954,10 +996,12 @@
         '<span class="xbar" style="flex:1"><i style="width:' + r.sc + '%;background:' + (r.sc >= 60 ? V.UP : r.sc <= 40 ? V.DN : "#6b7385") + '"></i></span><b>' + r.sc + '</b><span class="mut">20일 ' + pct(r.c20) + '</span></div>'; }).join("") +
       '<p class="note">점수 = 오른 종목 비율·신고가 비율·지수 위치·20일 수익률(미국은 VIX까지) 평균. 높을수록 사람들이 사고 싶어 하는 시장.</p>');
   }
-  function rotation(m){
-    var ss = m.sectors.filter(function(x){ return x.r5 != null && x.r20 != null; }), TOP = V.topSet(ss, 10);
-    if (ss.length < 4) return "";
-    var W = 330, H = 250, P = 26, mx = Math.max.apply(null, ss.map(function(x){ return Math.abs(x.r20); }).concat([1])) * 1.15, my = Math.max.apply(null, ss.map(function(x){ return Math.abs(x.r5); }).concat([1])) * 1.15;
+  function rotSvgNow(m){
+    var p = SECP.cur(), L = SP[p];
+    var ss = m.sectors.map(function(x){ var q = SECP.xy(x, p); return {s: x, x: q.x, y: q.y}; }).filter(function(o){ return o.x != null && o.y != null; });
+    if (ss.length < 4) return '<div class="empty">' + L.xl + ' 자료가 아직 모자라요 (상장·자료 기간이 짧은 시장).</div>';
+    var TOP = V.topSet(ss.map(function(o){ return {k: o.s.k, r5: o.y, r20: o.x, r1: o.s.r1, n: o.s.n, name: o.s.name, p: o.s.p}; }), 10);
+    var W = 330, H = 250, P = 26, mx = Math.max.apply(null, ss.map(function(o){ return Math.abs(o.x); }).concat([1])) * 1.15, my = Math.max.apply(null, ss.map(function(o){ return Math.abs(o.y); }).concat([1])) * 1.15;
     var X = function(v){ return P + (v + mx) / (2 * mx) * (W - 2 * P); }, Y = function(v){ return P + (my - v) / (2 * my) * (H - 2 * P); };
     var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="rotsv">' +
       '<rect x="' + X(0) + '" y="' + P + '" width="' + (W - P - X(0)) + '" height="' + (Y(0) - P) + '" fill="#e66767" opacity=".08"/>' +
@@ -965,15 +1009,22 @@
       '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + Y(0) + '" y2="' + Y(0) + '" stroke="#3a4358"/><line x1="' + X(0) + '" x2="' + X(0) + '" y1="' + P + '" y2="' + (H - P) + '" stroke="#3a4358"/>' +
       '<text x="' + (W - P - 2) + '" y="' + (P + 12) + '" text-anchor="end" class="rotq u">🔥 계속 강함</text><text x="' + (P + 2) + '" y="' + (P + 12) + '" class="rotq">🌱 새로 뜨는 중</text>' +
       '<text x="' + (W - P - 2) + '" y="' + (H - P - 6) + '" text-anchor="end" class="rotq">🍂 힘 빠지는 중</text><text x="' + (P + 2) + '" y="' + (H - P - 6) + '" class="rotq d">🧊 계속 약함</text>' +
-      '<text x="' + (W - P) + '" y="' + (H - 6) + '" text-anchor="end" class="rota">1개월 수익률 →</text><text x="6" y="' + (P - 8) + '" class="rota">↑ 1주 수익률</text>';
-    ss.forEach(function(x, i){ var cx = X(x.r20), cy = Y(x.r5);
-      s += '<g data-csec="' + e(x.k) + '" data-fam="' + V.famOf(x) + '"' + (TOP[x.k] ? ' data-top="1"' : '') + ' style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b><br>1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + " · 오늘 " + pct(x.r1)) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="13" fill="transparent"/>' +
+      '<text x="' + (W - P) + '" y="' + (H - 6) + '" text-anchor="end" class="rota">' + L.xl + ' 수익률 →</text><text x="6" y="' + (P - 8) + '" class="rota">↑ ' + L.yl + ' 수익률</text>';
+    ss.forEach(function(o, i){ var x = o.s, cx = X(o.x), cy = Y(o.y), h = x.heat || {};
+      s += '<g data-csec="' + e(x.k) + '" data-fam="' + V.famOf(x) + '"' + (TOP[x.k] ? ' data-top="1"' : '') + ' style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b><br>오늘 " + pct(x.r1) + " · 1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + (h["3M"] != null ? "<br>3개월 " + pct(h["3M"]) : "") + (h["6M"] != null ? " · 6개월 " + pct(h["6M"]) : "")) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="13" fill="transparent"/>' +
         '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + V.secCol(x.k, i) + '" stroke="#121826" stroke-width="2"/>' +
         '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + V.secCol(x.k, i) + '">' + e(V.shortSec(x.name)) + '</text></g>'; });
-    s += '</svg>';
-    s = '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '">' + s + V.famChips("map") + '</div>';
-    return card("🔄 섹터 로테이션 지도 <span class='mut'>돈이 어디로 움직이나</span>", s +
-      '<p class="note">오른쪽 위 = 한 달 내내 강하고 이번 주도 강함 · 왼쪽 위 = 한 달은 약했는데 이번 주 살아남 (새로 뜨는 곳) · 오른쪽 아래 = 한 달 강했지만 이번 주 식음.</p>');
+    return s + '</svg>';
+  }
+  function rotNote(){ var L = SECP.lab();
+    return '오른쪽 위 = ' + L.xn + ' 내내 강하고 ' + L.yn + '도 강함 · 왼쪽 위 = ' + L.xn + '은 약했는데 ' + L.yn + ' 살아남 (새로 뜨는 곳) · 오른쪽 아래 = ' + L.xn + ' 강했지만 ' + L.yn + ' 식음.' +
+      ' <span class="mut">1개월 = 빠른 신호 · 3개월 = 비중 조절용 · 6개월 = 큰 흐름.</span>'; }
+  SECP.reg("map", function(m){ return rotSvgNow(m); });
+  SECP.reg("mapn", function(){ return rotNote(); });
+  function rotation(m, k){
+    if (m.sectors.filter(function(x){ return x.r5 != null && x.r20 != null; }).length < 4) return "";
+    var s = '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '">' + SECP.body("map", k, rotSvgNow(m)) + V.famChips("map") + '</div>';
+    return card("🔄 섹터 로테이션 지도 <span class='mut'>돈이 어디로 움직이나</span>", SECP.tabs("p") + s + SECP.body("mapn", k, rotNote(), "p", "note"));
   }
   function highs(m){
     if (!m.high_list || !m.high_list.length) return "";
@@ -1002,6 +1053,7 @@
   }
   function detail(k, C){
     var m = C.markets[k], ix = m.index[0], h = "";
+    BARK = "r1"; TD = true;                // 🗓 화면을 새로 그리면 섹터 등락·오늘 카드는 「오늘」부터 (기간 탭을 누르면 같이 바뀜)
     var PD = m.live ? md(m.date) : "";      // 🧭 10/15: 위 숫자는 오늘 장중(live), 아래 업종·종목 카드는 어제 마감 → 카드 제목에 날짜
     // 🧭 10/19 사용자 「진짜 쫌…」: 서버(ixlive)가 섹터·업종·대형주도 live 로 바꿨으면(m.live.cards) 그 카드들은 「HH:MM 장중」, 52주 신고가만 지난 마감
     var HPD = PD, LT = m.live && m.live.cards ? (liveDone(m) ? md(m.live.date) + " 마감" : (m.live.t || "") + " 장중") : "";
@@ -1047,30 +1099,59 @@
     // 5) 섹터
     if (m.sectors.length){
       h += card("섹터 등락 <span class='mut'>" + (LT ? e(LT) + " · 1주·1개월은 지난 마감까지 · " : PD ? PD + " 마감 · " : "") + "시가총액 가중 · 섹터를 누르면 종목</span>",
-        '<div class="seg2" id="cpsk"><button class="on" data-k="r1">' + (PD || "오늘") + '</button><button data-k="r5">1주</button><button data-k="r20">1개월</button></div><div id="cpsb">' + secBars(m, "r1") + '</div>');
+        SECP.tabs("b") + SECP.body("bars", k, secBars(m, BARK || "p" + SECP.cur())));
     }
-    h += rotation(m) + highs(m);
+    h += rotation(m, k) + highs(m);
     // 6) 강한 업종
+    var hasP = !!(m.ind_p && PK.some(function(p){ return m.ind_p[p]; }));      // 🗓 기간별 강한·약한 업종·대형주 (opdb/compass.py period_cards)
     if (m.strong.length){
       h += '<details class="card cpx-d"><summary>🔥 ' + T("오늘") + ' 강한 업종 TOP ' + Math.min(5, m.strong.length) + ' <span class="mut">' + e(m.strong[0].name) + ' ' + pct(m.strong[0].r1).replace(/<[^>]+>/g, "") + ' 외 · 누르면 종목까지</span></summary>' +
-        m.strong.slice(0, 5).map(function(x, i){
-          return '<section class="card cp-ind"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n" data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b></div>' +
-            '<b class="' + cls(x.r1) + ' cp-r">' + pct(x.r1) + '</b></div>' +
-            '<div class="cp-mini"><span class="up">▲' + x.up + '</span><span class="dn">▼' + x.down + '</span><span class="mut">' + x.n + '종목 · 1주 ' + pct(x.r5) + '</span></div>' +
-            '<div class="cp-sts">' + x.lead.map(sChip).join("") + '</div></section>';
-        }).join("") + '</details>';
+        (hasP ? SECP.tabs("t") : "") + SECP.body("strong", k, strongBody(m)) + '</details>';
     }
     // 7) 대표 종목
-    h += card("⭐ " + T("오늘") + " 많이 오른 대형주", '<div class="cp-sts">' + m.leaders.map(sChip).join("") + '</div>' +
-      (m.laggards.length ? '<div class="sub2">많이 내린 대형주</div><div class="cp-sts">' + m.laggards.map(sChip).join("") + '</div>' : '') +
-      '<div class="sub2">시가총액 TOP 10</div><div class="cp-sts">' + m.top_cap.map(sChip).join("") + '</div>');
+    h += card("⭐ " + T("오늘") + " 많이 오른 대형주", (hasP ? SECP.tabs("t") : "") + SECP.body("lead", k, leadBody(m)));
     if (m.weak && m.weak.length){
-      h += card("🧊 " + (LT ? "오늘 " + e(LT) + " " : PD ? PD + " 마감 " : "") + "약한 업종", m.weak.map(function(x){ return '<div class="cp-wk"><b data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><div class="cp-sts">' + x.lead.slice(-2).map(sChip).join("") + '</div></div>'; }).join(""));
+      h += card("🧊 " + (LT ? "오늘 " + e(LT) + " " : PD ? PD + " 마감 " : "") + "약한 업종", (hasP ? SECP.tabs("t") : "") + SECP.body("weak", k, weakBody(m)));
     }
     if (window.CPX) try { h += window.CPX(m, k, C); } catch(err) { console.error(err); }
     if (window.CPX2) try { var cut = h.indexOf("</section>") + 10; h = h.slice(0, cut) + window.CPX2(m, k, C) + h.slice(cut); } catch(err) { console.error(err); }
     return h;
   }
+
+  // 🗓 기간(1·3·6개월)을 골랐고 그 자료가 있으면 기간 기준, 아니면 오늘 기준
+  function pdat(m){ if (TD) return null; var p = SECP.cur(), d = m.ind_p && m.ind_p[p]; return d ? {p: p, d: d, l: (m.lead_p || {})[p]} : null; }
+  function pChip(x){ return sChip({s: x.s, n: x.n, r1: x.r}); }
+  function pHead(q, t){ return '<div class="sub2" style="margin-top:0">' + SP[q.p].xl + ' ' + t + ' <span class="mut">' + e(String(m_date || "").slice(5).replace("-", "/")) + ' 마감까지 · 시가총액 가중</span></div>'; }
+  var m_date = "";
+  function strongBody(m){
+    var q = pdat(m); m_date = m.date;
+    if (q && q.d.strong && q.d.strong.length) return pHead(q, "강한 업종 TOP " + q.d.strong.length) + q.d.strong.map(function(x, i){
+      return '<section class="card cp-ind"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n" data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b></div>' +
+        '<b class="' + cls(x.r) + ' cp-r">' + pct(x.r) + '</b></div>' +
+        '<div class="cp-mini"><span class="up">▲' + x.up + '</span><span class="dn">▼' + x.down + '</span><span class="mut">' + x.n + '종목 · ' + SP[q.p].xl + ' 동안</span></div>' +
+        '<div class="cp-sts">' + (x.lead || []).map(pChip).join("") + '</div></section>'; }).join("");
+    return m.strong.slice(0, 5).map(function(x, i){
+      return '<section class="card cp-ind"><div class="row"><div class="row" style="gap:10px"><span class="rk big">' + (i + 1) + '</span><b class="sect-n" data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b></div>' +
+        '<b class="' + cls(x.r1) + ' cp-r">' + pct(x.r1) + '</b></div>' +
+        '<div class="cp-mini"><span class="up">▲' + x.up + '</span><span class="dn">▼' + x.down + '</span><span class="mut">' + x.n + '종목 · 1주 ' + pct(x.r5) + '</span></div>' +
+        '<div class="cp-sts">' + x.lead.map(sChip).join("") + '</div></section>';
+    }).join("");
+  }
+  function leadBody(m){
+    var q = pdat(m); m_date = m.date;
+    if (q && q.l && q.l.up && q.l.up.length) return pHead(q, "많이 오른 대형주") + '<div class="cp-sts">' + q.l.up.map(pChip).join("") + '</div>' +
+      (q.l.dn && q.l.dn.length ? '<div class="sub2">' + SP[q.p].xl + ' 많이 내린 대형주</div><div class="cp-sts">' + q.l.dn.map(pChip).join("") + '</div>' : '');
+    return '<div class="cp-sts">' + m.leaders.map(sChip).join("") + '</div>' +
+      (m.laggards.length ? '<div class="sub2">많이 내린 대형주</div><div class="cp-sts">' + m.laggards.map(sChip).join("") + '</div>' : '') +
+      '<div class="sub2">시가총액 TOP 10</div><div class="cp-sts">' + m.top_cap.map(sChip).join("") + '</div>';
+  }
+  function weakBody(m){
+    var q = pdat(m); m_date = m.date;
+    if (q && q.d.weak && q.d.weak.length) return pHead(q, "약한 업종") + q.d.weak.map(function(x){ return '<div class="cp-wk"><b data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><span class="' + cls(x.r) + '">' + pct(x.r) + '</span><div class="cp-sts">' + (x.lag || []).map(pChip).join("") + '</div></div>'; }).join("");
+    return m.weak.map(function(x){ return '<div class="cp-wk"><b data-ind="' + e(x.name) + '" style="cursor:pointer">' + e(x.name) + ' <span class="hgo">›</span></b><span class="' + cls(x.r1) + '">' + pct(x.r1) + '</span><div class="cp-sts">' + x.lead.slice(-2).map(sChip).join("") + '</div></div>'; }).join("");
+  }
+  SECP.reg("strong", strongBody); SECP.reg("lead", leadBody); SECP.reg("weak", weakBody);
+  SECP.reg("bars", function(m){ return secBars(m, BARK || "p" + SECP.cur()); });
 
   // 🎯 오늘 이 업종·종목을 보자 — 고른 나라의 오늘(1일)·1주 힘·오른 종목 비율로 업종 3개 + 대장주
   function watchCard(m, k){
@@ -1097,10 +1178,12 @@
   }
 
   function secBars(m, k){
-    var rows = m.sectors.slice().sort(function(a, b){ return (b[k] || 0) - (a[k] || 0); });
-    return V.dbars(rows.map(function(x){
-      return {label: x.icon + " " + e(x.name) + ' <span class="hgo">›</span>', v: x[k] || 0, attr: ' data-csec="' + e(x.k) + '" style="cursor:pointer"',
-        tip: "<b>" + x.name + "</b> 오늘 " + pct(x.r1) + " · 1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + "<br>▲" + x.up + " ▼" + x.down + "<br>대표: " + x.big.map(function(s){ return s.n + " " + pct(s.r1); }).join(", ")};
+    var pk = k.charAt(0) === "p" ? k.slice(1) : null, g = function(x){ return pk ? SECP.val(x, pk) : x[k]; };
+    var rows = m.sectors.filter(function(x){ return !pk || g(x) != null; }).sort(function(a, b){ return (g(b) || 0) - (g(a) || 0); });
+    if (!rows.length) return '<div class="empty">' + SP[pk].xl + ' 자료가 아직 없어요.</div>';
+    return V.dbars(rows.map(function(x){ var h = x.heat || {};
+      return {label: x.icon + " " + e(x.name) + ' <span class="hgo">›</span>', v: g(x) || 0, attr: ' data-csec="' + e(x.k) + '" style="cursor:pointer"',
+        tip: "<b>" + x.name + "</b> 오늘 " + pct(x.r1) + " · 1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + (h["3M"] != null ? " · 3개월 " + pct(h["3M"]) : "") + (h["6M"] != null ? " · 6개월 " + pct(h["6M"]) : "") + "<br>▲" + x.up + " ▼" + x.down + "<br>대표: " + x.big.map(function(s){ return s.n + " " + pct(s.r1); }).join(", ")};
     }));
   }
 
@@ -1122,9 +1205,6 @@
   }
   function wireD(C){
     var m = C.markets[CPSEL];
-    [].forEach.call(document.querySelectorAll("#cpsk button"), function(b){ b.onclick = function(){
-      [].forEach.call(document.querySelectorAll("#cpsk button"), function(x){ x.classList.toggle("on", x === b); });
-      $("cpsb").innerHTML = secBars(m, b.dataset.k); }; });
     [].forEach.call(document.querySelectorAll("#cpix button"), function(b){ b.onclick = function(){
       [].forEach.call(document.querySelectorAll("#cpix button"), function(x){ x.classList.toggle("on", x === b); });
       $("cpixb").innerHTML = ixBody(m.index[+b.dataset.i]); }; });
@@ -1137,6 +1217,7 @@
     getJSON(file("sector", it.id, "compass.json")).then(function(C){
       var ks = ORDER.filter(function(k){ return C.markets[k]; });
       if (!ks.length){ $("cpbox").innerHTML = ""; return; }
+      SECP.C = C;
       CPSEL = ks.indexOf(store.cpm) >= 0 ? store.cpm : (ks.indexOf("KR") >= 0 ? "KR" : ks[0]);
       $("cpbox").innerHTML = '<div id="cpreg"></div><div id="cplive"></div>' + overview(C) + '<div id="cptop"></div>' + strength(C) +
         '<div class="seg2 cp-seg" id="cpseg">' + ks.map(function(k){ return '<button data-m="' + k + '"' + (k === CPSEL ? ' class="on"' : '') + '>' + C.markets[k].flag + " " + e(C.markets[k].name) + '</button>'; }).join("") + '</div>' +
@@ -6718,8 +6799,11 @@
       '<p class="note">🔔 알림 탭에서 "시장 국면 변화"를 구독하면 바뀌는 날만 푸시가 와요.</p>');
   }
   var RSEL = {};       // 되감기: 고른 섹터만 (10/11 사용자: "섹터 선택하면 그것만 돌려 볼 수 있게, 전체 누르면 다시 전체")
+  /* 🗓 11/17 섹터 기간 탭(1·3·6개월) — 3·6개월을 고르면 그 기간 흐름(pathp)으로 되감기 */
+  function rpth(m){ var SP = window.SECP, p = SP ? SP.rp(m) : "1M"; return {p: p, L: SP ? SP.lab(p) : {xl: "1개월", yl: "1주"}, f: function(x){ return SP ? SP.path(x, p) : x.path; }}; }
   function rotSvg(m, di, sel){
-    var ss = (m.sectors || []).filter(function(x){ return x.path && x.path.length; });
+    var RP = rpth(m);
+    var ss = (m.sectors || []).map(function(x){ var o = Object.create(x); o.path = RP.f(x); o._s = x; return o; }).filter(function(x){ return x.path && x.path.length; });
     if (ss.length < 4) return "";
     var W = 330, H = 250, Pd = 26, all = [];
     ss.forEach(function(x){ if (!sel || x.k === sel) x.path.forEach(function(p){ all.push(p); }); });
@@ -6739,18 +6823,22 @@
       if (tr.length > 1) s += '<polyline points="' + tr.map(function(q){ return Xs(q[2]).toFixed(1) + "," + Ys(q[1]).toFixed(1); }).join(" ") + '" fill="none" stroke="' + col + '" stroke-opacity="' + (sel ? .8 : .45) + '" stroke-width="' + (sel ? 2.5 : 2) + '"/>' +
         (sel ? tr.slice(0, -1).map(function(q){ return '<circle cx="' + Xs(q[2]).toFixed(1) + '" cy="' + Ys(q[1]).toFixed(1) + '" r="2" fill="' + col + '" opacity=".6"/>'; }).join("") : '');
       var cx = Xs(p[k][2]), cy = Ys(p[k][1]);
-      s += '<g data-csec="' + e(x.k) + '" data-cm="' + MKX + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + p[k][0] + "<br>1주 " + pct(p[k][1]) + " · 1개월 " + pct(p[k][2])) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
+      s += '<g data-csec="' + e(x.k) + '" data-cm="' + MKX + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + p[k][0] + "<br>" + RP.L.yl + " " + pct(p[k][1]) + " · " + RP.L.xl + " " + pct(p[k][2])) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
         '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(V.shortSec(x.name)) + '</text></g></g>';
     });
     return s + '</svg>';
   }
+  if (window.SECP) SECP.reg("rot", function(m, k){ var r = document.querySelector('[data-rot="' + k + '"]'); if (r) r._tok = Math.random();
+    var n = rlen(m), v = r ? Math.min(+r.value, n - 1) : n - 1; if (r){ r.max = n - 1; r.value = v; } return rotSvg(m, v, RSEL[k]); });
+  function rlen(m){ var RP = rpth(m); return Math.max.apply(null, (m.sectors || []).map(function(x){ var q = RP.f(x); return q ? q.length : 0; }).concat([1])); }
   function rotSlider(m, k){
-    var ss = (m.sectors || []).filter(function(x){ return x.path && x.path.length; });
+    var RP = rpth(m);
+    var ss = (m.sectors || []).filter(function(x){ var q = RP.f(x); return q && q.length; });
     if (ss.length < 4) return "";
-    var n = Math.max.apply(null, ss.map(function(x){ return x.path.length; }));
-    var days = ss[0].path.map(function(p){ return p[0]; });
-    return card("🎞️ 섹터 흐름 되감기 <span class='mut'>최근 " + n + "거래일 · 꼬리 = 지난 4일 이동</span>",
-      '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '"><div id="rotw-' + k + '">' + rotSvg(m, n - 1, RSEL[k]) + '</div>' + V.famChips("rot") +
+    var n = Math.max.apply(null, ss.map(function(x){ return RP.f(x).length; }));
+    var days = RP.f(ss[0]).map(function(p){ return p[0]; });
+    return card("🎞️ 섹터 흐름 되감기 <span class='mut'>최근 " + n + "거래일 · 꼬리 = 지난 4일 이동</span>", (window.SECP ? SECP.tabs("p") : "") +
+      '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '"><div id="rotw-' + k + '"' + (window.SECP ? ' data-secpb="rot" data-mk="' + e(k) + '"' : '') + '>' + rotSvg(m, n - 1, RSEL[k]) + '</div>' + V.famChips("rot") +
       // 세부 섹터 칩: 고른 계열의 섹터만 보이고, 누르면 그 섹터만 재생 (10/11 사용자: "밑에 세부 섹터는 되감기 재생 안 됨")
       '<div class="rots">' + ['<button data-rsel="' + k + '|"' + (!RSEL[k] ? ' class="on"' : '') + '>전체</button>'].concat(ss.map(function(x, i){
         return '<button data-rsel="' + k + '|' + e(x.k) + '" data-fam="' + V.famOf(x) + '" style="--sc:' + V.secCol(x.k, i) + '"' + (RSEL[k] === x.k ? ' class="on"' : '') + '><i></i>' + e(x.name) + '</button>'; })).join("") + '</div></div>' +
@@ -6762,7 +6850,7 @@
     var t = ev.target; if (!t.getAttribute || !t.getAttribute("data-rot")) return;
     var k = t.getAttribute("data-rot"), m = CMP && CMP.markets[k]; if (!m) return;
     $("rotw-" + k).innerHTML = rotSvg(m, +t.value, RSEL[k]);
-    var ss = m.sectors.filter(function(x){ return x.path && x.path.length; }); $("rotd-" + k).textContent = (ss[0].path[+t.value] || [""])[0];
+    var RP = rpth(m), ss = m.sectors.filter(function(x){ var q = RP.f(x); return q && q.length; }); if (ss.length) $("rotd-" + k).textContent = (RP.f(ss[0])[+t.value] || [""])[0];
   });
   document.addEventListener("click", function(ev){       // 계열(큰 섹터)을 다시 고르면 세부 섹터 선택은 풀고 그 계열 전체로
     var fb = ev.target.closest && ev.target.closest(".famc [data-ffam]"); if (!fb) return;
@@ -7730,8 +7818,12 @@
       '<div class="xr"><span>지수 vs 20일선</span>' + bar(pg) + '<b class="' + cls(pg) + '">' + sgn(pg) + '%</b></div><div class="xr"><span>20일선 vs 60일선</span>' + bar(gap) + '<b class="' + cls(gap) + '">' + sgn(gap) + '%</b></div>' +
       '<p class="note">' + txt + '. 상승장 = 지수가 20일선·60일선 위 + 20일선이 60일선 위 + 20일선이 오름. 급락(20일선 아래 + 20일 −8% 이하 또는 20일 고점 대비 −10% 이하)은 바로 하락장. 예보는 지금 속도를 그대로 이은 것이라 하루 큰 움직임에 바로 바뀌어요.</p>');
   }
-  function clock(m){
-    var ss = (m.sectors || []).filter(function(x){ return x.r5 != null && x.r20 != null; }); if (ss.length < 4) return "";
+  /* 🗓 11/17 섹터 기간 탭(1·3·6개월)을 같이 씀 — window.SECP (compass.js) */
+  function clockSvg(m){
+    var SP = window.SECP, p = SP ? SP.cur() : "1M", L = SP ? SP.lab(p) : {xl: "1개월", yl: "1주"};
+    var ss = (m.sectors || []).map(function(x){ var q = SP ? SP.xy(x, p) : {x: x.r20, y: x.r5}, pa = SP ? SP.path(x, p) : x.path;
+      return {k: x.k, icon: x.icon, name: x.name, p: x.p, n: x.n, r1: x.r1, r5: q.y, r20: q.x, path: pa, _s: x}; }).filter(function(x){ return x.r5 != null && x.r20 != null; });
+    if (ss.length < 4) return '<div class="empty">' + L.xl + ' 자료가 아직 모자라요.</div>';
     var med = function(k){ var v = ss.map(function(x){ return x[k]; }).sort(function(a, b){ return a - b; }); return v[Math.floor(v.length / 2)]; };
     var m5 = med("r5"), m20 = med("r20"), W = 300, cx = 150, cy = 150, R = 118;
     var ang = function(x, y){ return Math.atan2(x, y); };            // 12시에서 시계 방향
@@ -7748,15 +7840,20 @@
       if (x.path && x.path.length > 4){ var p0 = x.path[x.path.length - 5], d0x = p0[2] - m20, d0y = (p0[1] - m5) * 2, a0 = ang(d0x, d0y), r0 = 30 + Math.min(1, Math.hypot(d0x, d0y) / mxv) * (R - 40);
         tail = '<line x1="' + (cx + r0 * Math.sin(a0)).toFixed(1) + '" y1="' + (cy - r0 * Math.cos(a0)).toFixed(1) + '" x2="' + px.toFixed(1) + '" y2="' + py.toFixed(1) + '" stroke="' + col + '" stroke-opacity=".5" stroke-width="2" marker-end="url(#ah)"/>'; }
       var hour = ((a * 180 / Math.PI + 360) % 360) / 30;
-      s += '<g data-csec="' + e(x.k) + '" data-fam="' + V.famOf(x) + '"' + (TOP[x.k] ? ' data-top="1"' : '') + ' style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + (Math.floor(hour) || 12) + "시 방향<br>1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20)) + '">' + tail + '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="6" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
+      s += '<g data-csec="' + e(x.k) + '" data-fam="' + V.famOf(x._s) + '"' + (TOP[x.k] ? ' data-top="1"' : '') + ' style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + (Math.floor(hour) || 12) + "시 방향<br>" + L.yl + " " + pct(x.r5) + " · " + L.xl + " " + pct(x.r20)) + '">' + tail + '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="6" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
         '<text x="' + (px + 8).toFixed(1) + '" y="' + (py + 3).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(V.shortSec(x.name)) + '</text></g>'; });
-    s += '</svg>';
-    s = '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '">' + s + V.famChips("clock") + '</div>';
-    return card("🕐 섹터 로테이션 시계 <span class='mut'>돈은 시계 방향으로 돈다</span>", s +
+    return s + '</svg>';
+  }
+  if (window.SECP) SECP.reg("clock", function(m){ return clockSvg(m); });
+  function clock(m, k){
+    var SP = window.SECP;
+    if ((m.sectors || []).filter(function(x){ return x.r5 != null && x.r20 != null; }).length < 4) return "";
+    var s = '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '">' + (SP ? SP.body("clock", k, clockSvg(m)) : clockSvg(m)) + V.famChips("clock") + '</div>';
+    return card("🕐 섹터 로테이션 시계 <span class='mut'>돈은 시계 방향으로 돈다</span>", (SP ? SP.tabs("p") : "") + s +
       '<p class="note">교과서의 경기 순환처럼 섹터는 보통 🌱 새로 뜸(9~12시) → 🔥 강함(12~3시) → 🍂 힘 빠짐(3~6시) → 🧊 약함(6~9시) 순으로 돌아요. 화살표 = 지난 5일 이동. 9~12시 쪽에 있는 섹터가 다음 주인공 후보예요. 점을 누르면 종목.</p>');
   }
   window.CPX2 = function(m, k, C){
-    return '<section class="card sentc"><div class="sentc-k">🗣️ ' + (m.live ? (window.cpLiveDone && cpLiveDone(m) ? e(md(m.live.date)) + " 마감" : "지금") : (m.index || [])[0] && m.index[0].date > m.date ? e(m.date.slice(5).replace("-", "/")) + " 마감" : "오늘") + ' ' + e(m.name) + ' 한 문장' + (m.live ? ' <span class="mut">' + (window.cpLiveDone && cpLiveDone(m) ? '장 마감 · 마지막 ' + e(m.live.t || "") + ' 값' : e(m.live.t || "") + ' 장중') + '</span>' : '') + '</div><p>' + sentence(m) + '</p></section>' + forecast(m) + clock(m);
+    return '<section class="card sentc"><div class="sentc-k">🗣️ ' + (m.live ? (window.cpLiveDone && cpLiveDone(m) ? e(md(m.live.date)) + " 마감" : "지금") : (m.index || [])[0] && m.index[0].date > m.date ? e(m.date.slice(5).replace("-", "/")) + " 마감" : "오늘") + ' ' + e(m.name) + ' 한 문장' + (m.live ? ' <span class="mut">' + (window.cpLiveDone && cpLiveDone(m) ? '장 마감 · 마지막 ' + e(m.live.t || "") + ' 값' : e(m.live.t || "") + ' 장중') + '</span>' : '') + '</div><p>' + sentence(m) + '</p></section>' + forecast(m) + clock(m, k);
   };
 
   /* ======================= 🤫 조용한 매집 ======================= */
@@ -11824,8 +11921,8 @@
     [/누가 누구를 따라가나/, "5개 시장의 지수가 하루하루 얼마나 같이 움직였는지(상관) 보여줘요. 1이면 똑같이, 0이면 상관없이 움직여요."],
     [/제일 강할까/, "체감 온도 점수로 5개 시장을 줄 세웠어요. 높을수록 사람들이 사고 싶어 하는 시장이에요."],
     [/국면 전환 예보/, "지수와 20일선·60일선의 위치·기울기로 상승장·횡보장·하락장을 판정하고(급락 — 20일 −8%·20일 고점 대비 −10% — 은 바로 하락장), 지금 속도면 언제 바뀔지 예보해요."],
-    [/로테이션 시계/, "섹터마다 한 달 흐름과 이번 주 흐름으로 시계 위 자리를 정해요. 돈은 보통 시계 방향으로 돌아요."],
-    [/로테이션 지도/, "가로 = 한 달 강도, 세로 = 이번 주 강도. 어느 섹터로 돈이 들어오고 빠지는지 한 장으로 봐요."],
+    [/로테이션 시계/, "섹터마다 고른 기간(1·3·6개월)의 흐름과 그보다 짧은 기간 흐름으로 시계 위 자리를 정해요. 돈은 보통 시계 방향으로 돌아요."],
+    [/로테이션 지도/, "위 탭으로 기간을 골라요 — 1개월(가로 한 달·세로 1주) · 3개월(가로 석 달·세로 1개월) · 6개월(가로 반년·세로 석 달). 고른 기간은 섹터 묶음 전체(등락·시계·되감기·업종·대형주)에 같이 적용돼요. 어느 섹터로 돈이 들어오고 빠지는지 한 장으로 봐요."],
     [/이 업종·종목을 보자/, "오늘 등락·1주 흐름·업종 안 오른 종목 비율로 고른 업종 3곳과 대장주예요."],
     [/체감 온도/, "오늘 하루 오른 종목 비율·신고가·지수 위치를 섞어 시장 분위기를 0(차가움)~100(뜨거움)으로 나타내요. CNN 방식 공포·탐욕은 시장확률 탭에 있어요."],
     [/오른 종목 · 내린 종목/, "오늘 오른 종목과 내린 종목 수예요. 지수가 대형주 위주라서, 이 숫자가 보통 종목의 실제 체감이에요."],
