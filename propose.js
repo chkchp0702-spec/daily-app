@@ -775,6 +775,128 @@
       return {big: "연 " + S.bt.cagr + "%", lab: S.bt.from.slice(0, 4) + "년부터 이 비중이었다면 (연평균)", sub: "1년 뒤 보통 " + man(Q.y1[1].won) + " · 나쁜 해 " + man(Q.y1[0].won) + " · 최대 하락 " + S.bt.mdd + "%"}; }
     return null;
   }
+  /* ───────── 💸 매달 꺼내 쓰기 (11/17 사용자 「연금이랑 irp제안서에는 월 출금금액 입력칸도 넣자」) ─────────
+     개인연금·IRP 금액 칸 아래 「월 출금금액」을 넣으면 → 한 장·PDF·PPT·📲 보여 주기에 「매달 꺼내 쓰기」 칸이 붙음 (비우면 예전 그대로)
+     계산: sim.bt.growth(매달 말 값)로 과거 모든 달에 시작했다고 치고 매달 첫날 같은 금액을 꺼냄 — 세전 · 물가 반영 안 함 · 배당·수수료 빼고
+     세금 숫자는 tax.js LAW.pay·LAW.ret 과 같은 값(원문 대조된 것 — 소득세법 §14③9·§64의4 · 시행령 §40의2) → 고칠 땐 두 곳을 같이 */
+  var WD_F = {pension: 1, irp: 1};
+  var WD_LAW = {line: 1500, sep: 16.5, age: [["55~69세", 5.5], ["70~79세", 4.4], ["80세부터", 3.3]], lim: 1.2};
+  var WD_Q = [[100, "100만"], [200, "200만"], [300, "300만"], [500, "500만"]];
+  function wdOf(k){ return WD_F[k] ? Math.max(0, +((ST.opt[k] || {}).wd) || 0) * 10000 : 0; }
+  function wdRun(g, i0, H, A, W){   // 한 경로: 매달 첫날 W 를 꺼내고 그달 수익률 → 끝 잔액 · 바닥난 달 · 해마다 말 잔액
+    var bal = A, yr = [A], dep = null;
+    for (var j = 0; j < H; j++){
+      if (dep == null){ bal -= W; if (bal <= 0){ bal = 0; dep = j + 1; } else bal *= g[i0 + j]; }
+      if ((j + 1) % 12 === 0) yr.push(bal);
+    }
+    return {end: bal, dep: dep, yr: yr};
+  }
+  function wdHist(g, H, A, W){   // 과거 모든 시작 달 → 남았던 비율 · 나쁜(하위 10%)·보통·좋은(상위 10%) 경로
+    var n = g.length - H + 1; if (n < 36) return null;   // 시작 달이 3년치(36번)는 돼야 셈
+    var R = [], left = 0; for (var i = 0; i < n; i++){ var r = wdRun(g, i, H, A, W); r.i = i; R.push(r); if (r.dep == null) left++; }
+    R.sort(function(a, b){ return a.end - b.end || (a.dep || 1e9) - (b.dep || 1e9); });
+    var q = function(p){ return R[Math.min(n - 1, Math.max(0, Math.round((n - 1) * p)))]; };
+    return {H: H, y: H / 12, n: n, left: left, pct: left === n ? 100 : Math.min(99, Math.round(left / n * 100)), worst: R[0], p10: q(0.1), p50: q(0.5), p90: q(0.9)};
+  }
+  function wdSafe(g, H, A){   // 과거 가장 나빴던 경우에도 H 달 동안 안 바닥난 가장 큰 월 금액(만원 단위로 내림)
+    var n = g.length - H + 1; if (n < 36) return null;   // 시작 달이 3년치(36번)는 돼야 셈
+    var ok = function(W){ for (var i = 0; i < n; i++) if (wdRun(g, i, H, A, W).dep != null) return false; return true; };
+    var lo = 0, hi = A; for (var t = 0; t < 34; t++){ var m = (lo + hi) / 2; if (ok(m)) lo = m; else hi = m; }
+    return Math.floor(lo / 10000) * 10000;
+  }
+  function wdFix(A, W, r){ var m = Math.pow(1 + r / 100, 1 / 12), bal = A; for (var j = 1; j <= 720; j++){ bal -= W; if (bal <= 0) return j; bal *= m; } return null; }   // 해마다 r% 로 꾸준히 굴러간다고 치면 바닥나는 달(60년 넘으면 null)
+  function wdPay(A, r, Y){ var m = Math.pow(1 + r / 100, 1 / 12) - 1, N = Y * 12; return m < 1e-9 ? A / N : A * m / (1 - Math.pow(1 + m, -N)) / (1 + m); }   // Y 년 동안 딱 맞게 쓰는 월 금액(매달 첫날)
+  function wdSpan(mo){ if (mo == null) return "60년 넘게"; var y = Math.floor(mo / 12), r = mo % 12; return (y ? y + "년" : "") + (r ? (y ? " " : "") + r + "개월" : ""); }
+  var WDC = {};
+  function wdCalc(f, A){
+    var W = f ? wdOf(f.key) : 0, S = f && f.sim; if (!W || !A || !S || S.kind !== "equity" || !S.bt || !S.bt.growth) return null;
+    var v = S.bt.growth.vals; if (!v || v.length < 72) return null;
+    var ck = [f.key, A, W, v.length, v[v.length - 1], S.bt.cagr].join("|"); if (WDC.k === ck) return WDC.v;
+    var g = v.map(function(x, i){ return i ? x / v[i - 1] : x; });
+    var hs = [5, 10, 15, 20].map(function(y){ return wdHist(g, y * 12, A, W); }).filter(Boolean); if (!hs.length) return null;
+    var top = hs[hs.length - 1], yr = W * 12, lim1 = A / 10 * WD_LAW.lim, limN = 11;
+    for (var n2 = 1; n2 <= 10; n2++) if (A / (11 - n2) * WD_LAW.lim >= yr){ limN = n2; break; }
+    var cd = (f.alloc || []).filter(function(a){ return a.k === "cd"; }).reduce(function(s2, a){ return s2 + (+a.pct || 0); }, 0);
+    var C = {W: W, A: A, yr: yr, rate: yr / A * 100, hs: hs, top: top, safe: wdSafe(g, top.H, A), from: S.bt.from.slice(0, 4), cagr: S.bt.cagr,
+      fix: [0, 2, 4, 6].map(function(r){ return {r: r, mo: wdFix(A, W, r), p20: wdPay(A, r, 20), p30: wdPay(A, r, 30)}; }),
+      over: yr > WD_LAW.line * 10000, tax: WD_LAW.age.map(function(a){ return {who: a[0], rate: a[1], t: W * a[1] / 100, net: W * (1 - a[1] / 100)}; }), sepNet: W * (1 - WD_LAW.sep / 100),
+      lim1: lim1, limOk: yr <= lim1, limN: limN, cash: A * cd / 100, cashMo: cd ? A * cd / 100 / W : 0, irp: f.key === "irp"};
+    WDC = {k: ck, v: C}; return C;
+  }
+  function wdCol(p){ return p >= 90 ? "#1a8a5a" : p >= 60 ? "#b7791f" : UP; }
+  function wdEnd(r){ return r.dep == null ? man(r.end) : wdSpan(r.dep) + " 만에 바닥"; }
+  function wdSh(v){ return v >= 1e8 ? (v / 1e8).toFixed(1).replace(/\.0$/, "") + "억" : Math.round(v / 1e4).toLocaleString("ko-KR") + "만"; }   // 좁은 표용 짧은 금액
+  function wdEndS(r){ return r.dep == null ? wdSh(r.end) : (r.dep / 12).toFixed(1).replace(/\.0$/, "") + "년에 바닥"; }
+  function wdTaxLine(C){ return C.over ? "1년 수령액이 " + WD_LAW.line.toLocaleString("ko-KR") + "만원을 넘어 16.5% 분리과세 또는 종합과세 선택 대상 (16.5%면 세후 월 " + man(C.sepNet) + ")" : "세후 월 " + man(C.tax[0].net) + " (" + C.tax[0].who + " " + C.tax[0].rate + "%) · 70대 " + man(C.tax[1].net) + " · 80세부터 " + man(C.tax[2].net); }
+  function wdNote(C){ return "과거 계산은 " + C.from + "년부터 매달 시작했다고 치고 이 비중 그대로 매달 첫날 같은 금액을 꺼낸 것임 · 기간이 겹쳐 서로 비슷한 경우가 많음 · 꺼내는 금액은 세금 떼기 전 · 물가 오름과 배당·수수료는 반영하지 않음 · 세금은 작성일 현재 세법 기준이며 돈의 성격(세액공제 받은 돈·퇴직금·세액공제 안 받은 원금)에 따라 달라짐 · 과거 계산이며 미래를 보장하지 않음"; }
+  // 📝 기입 화면 한 줄 (PB 확인용)
+  function wdHint(k){
+    if (!WD_F[k]) return ""; var W = wdOf(k), A = amtOf(k);
+    if (!W) return '<span class="mut">넣으면 제안서에 「💸 매달 꺼내 쓰기 계획」(과거 계산 · 세후 금액 · 수령한도)이 붙어요 · 비우면 안 넣음</span>';
+    if (!A) return '<span class="mut">위에 금액을 먼저 넣어 주세요</span>';
+    var C = wdCalc(formX(k), A); if (!C) return '<span class="mut">1년에 ' + man(W * 12) + ' · 과거 자료가 모자라 계산은 못 붙임</span>';
+    var T = C.top;
+    return '<b>1년에 ' + man(C.yr) + '</b> · 금액의 ' + pc(C.rate) + ' · 과거 ' + T.y + '년 <b style="color:' + wdCol(T.pct) + '">' + T.n + '번 중 ' + T.left + '번 남음</b>' +
+      (C.over ? '<br>⚠️ 연 1,500만원(월 125만원) 넘음 — 16.5% 분리과세·종합과세 선택 대상' : '') +
+      (C.limOk ? '' : '<br>⚠️ 수령 1년차 한도(월 ' + man(C.lim1 / 12) + ') 넘음 — ' + (C.limN <= 10 ? C.limN + '년차부터 한도 안' : '11년차부터 한도 없음'));
+  }
+  function wdChart(C, w, h, fs){   // 좋은·보통·나쁜 경우 잔액 선 + 처음 금액 점선
+    var T = C.top, ser = [{vals: T.p90.yr, color: "#22a06b"}, {vals: T.p50.yr, color: NAVY}, {vals: T.p10.yr, color: "#e0533d"}, {vals: T.p50.yr.map(function(){ return C.A; }), color: "#9aa3b2", dash: 1}];
+    var lg = [["좋은 경우", "#22a06b", T.p90], ["보통", NAVY, T.p50], ["나쁜 경우", "#e0533d", T.p10]];
+    return '<div style="font-size:' + fs + 'px;color:' + INK + '"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px"><b style="color:' + INK + '">매달 ' + man(C.W) + '씩 꺼내 쓰면 — 남는 돈</b><span style="color:' + SUB + ';font-size:' + Math.round(fs * 0.88) + 'px;white-space:nowrap">과거 ' + T.n + '번의 ' + T.y + '년</span></div>' +
+      '<img src="' + svgUrl(lineSvg(ser, w, h)) + '" width="' + w + '" height="' + h + '" style="display:block;width:' + w + 'px;height:' + h + 'px">' +
+      '<div style="display:flex;justify-content:space-between;color:' + SUB + ';font-size:' + Math.round(fs * 0.82) + 'px;margin-top:4px"><span>지금</span><span>' + Math.round(T.y / 2) + '년 뒤쯤</span><span>' + T.y + '년 뒤</span></div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font-size:' + Math.round(fs * 0.88) + 'px;color:' + INK + '">' + lg.map(function(l){ return '<span><span style="display:inline-block;width:12px;height:4px;border-radius:2px;background:' + l[1] + ';vertical-align:middle;margin-right:5px"></span>' + l[0] + ' <b>' + wdEnd(l[2]) + '</b></span>'; }).join("") +
+      '<span><span style="display:inline-block;width:16px;border-top:2px dashed #9aa3b2;vertical-align:middle;margin-right:5px"></span>처음 금액 ' + man(C.A) + '</span></div></div>';
+  }
+  function wdChecks(C){   // 꼭 확인할 것 (세금·한도·현금성)
+    var L = [];
+    L.push(C.limOk ? "연금수령한도: 수령 1년차 한도는 1년 " + man(C.lim1) + "(월 " + man(C.lim1 / 12) + ")로, 이 금액은 한도 안임"
+      : "연금수령한도: 수령 1년차 한도는 1년 " + man(C.lim1) + "(월 " + man(C.lim1 / 12) + ")인데 이 금액은 한도를 넘음 — 넘겨 찾은 돈은 연금이 아닌 것으로 보아 세금이 무거워짐(세액공제 받은 돈·수익은 기타소득세 16.5%) · " + (C.limN <= 10 ? "계좌 금액이 그대로라면 " + C.limN + "년차부터 한도 안" : "11년차부터는 한도 없음"));
+    L.push(C.over ? "1년 수령액 " + man(C.yr) + "이 1,500만원(월 125만원)을 넘음 — 넘는 부분만이 아니라 전액이 16.5% 분리과세 또는 종합과세 선택 대상 · 퇴직금 원금과 세액공제 안 받은 원금은 1,500만원 계산에서 빠짐"
+      : "1년 수령액 " + man(C.yr) + "은 1,500만원 이하라 낮은 세율(3.3~5.5%) 원천징수로 끝남 · 1,500만원은 연금저축·IRP 여러 계좌를 합쳐서 셈");
+    if (C.irp) L.push("퇴직금으로 넣은 돈을 연금으로 받으면 퇴직소득세의 70%(수령 10년차까지) · 60%(20년차까지) · 50%(그 뒤)만 냄 — 위 표의 3.3~5.5%는 세액공제 받은 돈과 운용 수익에 해당함");
+    L.push(C.cash ? "현금성(CD금리) 칸 " + man(C.cash) + " = 출금 약 " + (C.cashMo >= 1 ? Math.floor(C.cashMo) + "개월" : "1개월 미만") + "치 — 그 뒤로는 다른 칸을 조금씩 팔아 출금함" : "이 구성에는 현금성 칸이 없어 매달 ETF를 조금씩 팔아 출금하게 됨 — 값이 빠진 달에도 팔아야 함");
+    L.push("연금으로 받는 것은 55세 이후부터 가능함 · 한도 연차는 「받을 수 있게 된 해」부터 세며 2013년 3월 1일 전에 가입한 계좌는 6년차부터 시작함");
+    return L;
+  }
+  // 📄 PDF 풀버전 덩어리
+  function wdBlocks(f, amt){
+    var C = wdCalc(f, amt); if (!C) return [];
+    var T = C.top, B = [], half = (CW - 16) / 2;
+    B.push('<!--K-->' + hTitle("💸 매달 꺼내 쓰기 계획", man(amt) + "에서 매달 " + man(C.W) + "씩 · " + f.short, f.color) +
+      stat3([["매달 꺼내는 돈 (세금 떼기 전)", man(C.W), NAVY, "1년에 " + man(C.yr) + " · 처음 금액의 " + pc(C.rate), "#eef4ff"],
+        ["과거 " + T.y + "년 동안 돈이 남았던 비율", T.pct + "%", wdCol(T.pct), T.n + "번 중 " + T.left + "번 · " + C.from + "년부터 매달 시작", T.pct >= 90 ? "#effaf4" : "#fff8ec"],
+        [T.y + "년 뒤 남은 돈 (보통)", T.p50.dep == null ? man(T.p50.end) : wdEndS(T.p50), T.p50.dep == null ? INK : UP, "나쁜 경우 " + wdEnd(T.p10) + " · 꺼낸 돈 합계 " + man(C.W * T.H), BG]]));
+    B.push('<div style="display:flex;gap:16px">' + box(wdChart(C, half - 30, 150, 12.5), "flex:1;padding:12px 13px") +
+      box(tbl({title: "① 몇 년 뒤 남는 돈 (과거 경우들)", cols: ["기간", "꺼낸 돈", "나쁜 경우", "보통", "좋은 경우", "남은 비율"], rows: C.hs.map(function(h2){ return [h2.y + "년", wdSh(C.W * h2.H), wdEndS(h2.p10), wdEndS(h2.p50), wdEndS(h2.p90), h2.pct + "%"]; })}, 11.5, {right: true, nowrap: true, pad: "6px 5px", hl: function(r, i){ return i === C.hs.length - 1; }}) +
+        (C.safe ? '<div style="font-size:12px;margin-top:8px;color:' + INK + ';line-height:1.5">👉 과거 가장 나빴던 ' + T.y + '년에도 바닥나지 않았던 금액은 <b style="color:' + NAVY + '">월 ' + man(C.safe) + '</b>까지였음' + (C.W <= C.safe ? " — 이 금액은 그 안임" : " — 이 금액은 그보다 큼") + '</div>' : ''), "flex:1;padding:12px 13px") + '</div>');
+    var mx = Math.max.apply(null, C.fix.map(function(x){ return x.mo == null ? 720 : x.mo; }));
+    B.push('<div style="display:flex;gap:16px">' +
+      box('<div style="font-size:15px;font-weight:800;margin-bottom:6px">② 수익률이 이렇다면 — 돈이 가는 기간</div>' + hbars(C.fix.map(function(x){ return ["해마다 " + x.r + "%", x.mo == null ? 720 : x.mo, x.mo == null ? "#22a06b" : f.color, x.mo == null ? "60년 넘게" : (x.mo / 12).toFixed(1).replace(/\.0$/, "") + "년"]; }), 12.5, mx, 26) +
+        '<div style="font-size:11.5px;color:' + SUB + ';margin-top:6px;line-height:1.45">해마다 같은 수익률로 꾸준히 굴러간다고 친 단순 계산 · 참고로 이 비중의 ' + C.from + '년부터 연평균은 ' + C.cagr + '%였으나 해마다 크게 달랐음</div>', "flex:1;padding:12px 13px") +
+      box(tbl({title: "③ 거꾸로 — 이 금액으로 오래 쓰려면 (월)", cols: ["수익률", "20년 동안", "30년 동안"], rows: C.fix.map(function(x){ return ["해마다 " + x.r + "%", man(Math.floor(x.p20 / 10000) * 10000), man(Math.floor(x.p30 / 10000) * 10000)]; })}, 12, {right: true}) +
+        '<div style="font-size:11.5px;color:' + SUB + ';margin-top:6px;line-height:1.45">그 기간이 끝날 때 딱 다 쓰는 금액 · 세금 떼기 전</div>', "flex:1;padding:12px 13px") + '</div>');
+    B.push('<div style="display:flex;gap:16px">' +
+      box('<div style="font-size:15px;font-weight:800;margin-bottom:6px">④ 받을 때 세금 — 실제로 손에 쥐는 돈</div>' +
+        (C.over ? '<div style="font-size:13px;line-height:1.6;color:' + INK + '">1년 수령액 <b>' + man(C.yr) + '</b>이 1,500만원을 넘음<br>· 16.5% 분리과세를 고르면 매달 세금 ' + man(C.W - C.sepNet) + ' → <b style="color:' + NAVY + '">세후 월 ' + man(C.sepNet) + '</b><br>· 종합과세를 고르면 다른 소득과 합쳐 계산함(소득이 적으면 더 낮을 수 있음)<br>· 월 125만원 이하로 받으면 3.3~5.5%로 끝남</div>'
+          : tbl({cols: ["받는 나이", "세율", "매달 세금", "세후 월 수령"], rows: C.tax.map(function(t){ return [t.who, t.rate + "%", man(t.t), man(t.net)]; })}, 12, {right: true, bold: function(j){ return j === 3; }})) +
+        '<div style="font-size:11.5px;color:' + SUB + ';margin-top:6px;line-height:1.45">세액공제 받은 돈과 운용 수익을 연금으로 받을 때 기준(지방소득세 포함) · 세액공제 안 받은 원금은 세금 없음</div>', "flex:1;padding:12px 13px;background:#effaf4") +
+      box('<div style="font-size:15px;font-weight:800;margin-bottom:4px">⑤ 꼭 확인할 것</div>' + bullets(wdChecks(C), 11.5, f.color), "flex:1.25;padding:12px 13px") + '</div>');
+    B.push('<div style="font-size:11.5px;color:' + SUB + ';line-height:1.5">※ ' + e(wdNote(C)) + '</div>');
+    return B;
+  }
+  // 📱 한 장(1080px) 칸
+  function wdOne(f, amt, multi){
+    var C = wdCalc(f, amt); if (!C) return "";
+    var T = C.top;
+    return '<div style="margin:0 26px 16px;background:#fff8ec;border-radius:16px;padding:16px 20px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700">💸 매달 ' + man(C.W) + '씩 꺼내 쓰면 <span style="font-weight:500">(세금 떼기 전 · 1년 ' + man(C.yr) + ')</span></div>' +
+      '<div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:4px 0 2px"><span style="font-size:38px;font-weight:800;color:' + wdCol(T.pct) + '">' + T.pct + '%</span><span style="font-size:23px;color:' + INK + '">과거 ' + T.y + '년 동안 돈이 남았던 비율 (' + T.n + '번 중 ' + T.left + '번)</span></div>' +
+      (multi ? '' : '<div style="margin:10px 0 6px;background:#fff;border-radius:12px;padding:14px 16px">' + wdChart(C, 858, 190, 20) + '</div>') +
+      '<div style="font-size:21px;color:' + INK + ';line-height:1.5">' + T.y + '년 뒤 남은 돈: 보통 <b>' + wdEnd(T.p50) + '</b> · 나쁜 경우 <b>' + wdEnd(T.p10) + '</b><br>수익이 전혀 없어도 <b>' + wdSpan(C.fix[0].mo) + '</b> · 해마다 4%면 <b>' + wdSpan(C.fix[2].mo) + '</b> 동안 쓸 수 있음<br>' + e(wdTaxLine(C)) +
+      (C.limOk ? '' : '<br>⚠️ 수령 1년차 한도(월 ' + man(C.lim1 / 12) + ')를 넘는 금액임') + '</div>' +
+      '<div style="font-size:17px;color:' + SUB + ';margin-top:6px;line-height:1.4">' + C.from + '년부터 매달 시작했다고 친 과거 계산 · 물가·수수료 반영 안 함 · 미래 보장 아님</div></div>';
+  }
   /* ───────── 🧪 섞으면 어땠나 (11/2 A11/2-1) ─────────
      폼을 둘 넘게 고르면 → 고른 금액 비율 그대로 섞은 포트를 과거에 굴려 봄(해마다 1월에 처음 비율로 다시 맞춤)
      주식·연금 폼 = proposal.json sim.bt.growth(매달 말 값) · 채권 폼 = 지금 금리(세후 · 환율 그대로)가 내내 그대로였다고 친 곧은 선(과거 실제 채권값 아님)
@@ -1003,7 +1125,7 @@
         '<div style="display:flex;gap:26px;align-items:center;padding:6px 26px 14px">' + donut(f.alloc, multi ? 220 : 270, multi ? 44 : 54, x.amt ? "제안 금액" : "비중", x.amt ? man(x.amt) : "100%") +
         '<div style="flex:1;min-width:0">' + legend(ls, multi ? 22 : 24, !!x.amt) + '</div></div>' +
         (sl ? '<div style="margin:0 26px 16px;background:#eef4ff;border-radius:16px;padding:16px 20px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700">🧮 모의 계산 · ' + e(sl.lab) + '</div><div style="font-size:38px;font-weight:800;color:' + NAVY + ';margin:2px 0">' + e(sl.big) + '</div><div style="font-size:21px;color:' + INK + '">' + e(sl.sub) + '</div></div>' : '') +
-        onePageExtra(f, x.amt, multi) +
+        onePageExtra(f, x.amt, multi) + wdOne(f, x.amt, multi) +
         (f.tax ? '<div style="margin:0 26px 16px;background:#effaf4;border-radius:14px;padding:12px 18px;font-size:23px;color:' + INK + '">🧾 연 ' + f.tax.limit + '만원 넣으면 세액공제 <b>' + taxLine(f).map(function(t){ return t.full + "(" + t.rate + "%)"; }).join(" / ") + '</b></div>' : '') +
         '<div style="padding:0 26px 22px">' + bullets((mk.view || f.points || []).slice(0, multi ? 2 : 3), multi ? 21 : 23, f.color) + '</div></div></div>';
     });
@@ -1493,7 +1615,7 @@
     m.items.forEach(function(x){ var f = x.f;
       var mb = f.mkt ? mktBlocks(f) : [], sb = scenBlock(f);
       if (sb){ var oi = -1; mb.forEach(function(h2, i2){ if (h2.indexOf("🔭") >= 0 && oi < 0) oi = i2; }); if (oi < 0) mb.push(sb); else mb.splice(oi, 0, sb); }
-      groups.push({color: f.color, blocks: propBlocks(f, x).concat(mustBlocks(f, x)).concat(themeBlocks(f, x)).concat(cardBlocks(f, x)).concat(mb).concat(simBlocks(f, x.amt)).concat(detailBlocks(f, x)).concat(careBlocks(f))}); });
+      groups.push({color: f.color, blocks: propBlocks(f, x).concat(mustBlocks(f, x)).concat(themeBlocks(f, x)).concat(cardBlocks(f, x)).concat(mb).concat(simBlocks(f, x.amt)).concat(wdBlocks(f, x.amt)).concat(detailBlocks(f, x)).concat(careBlocks(f))}); });
     groups.push({color: NAVY, blocks: noticeBlocks(m)});
     var pages = pack(groups), of = pages.length + 1;
     return [coverPage(m)].concat(pages.map(function(p, i){ return pageFrom(p, i + 2, of, m); })).concat([closePage()]);
@@ -1675,6 +1797,16 @@
             colChart(s, "해마다 수익률 (%)", b.years.map(function(y){ return {l: String(y[0]).slice(2), v: y[1]}; }), 7.1, 4.75, 5.7, 2.1);
           }
         }
+        var WC = wdCalc(f, A);
+        if (WC){ var WT = WC.top; s = P.addSlide(); head(s, "💸 매달 꺼내 쓰기 계획", man(A) + "에서 매달 " + man(WC.W) + "씩 (세금 떼기 전 · 1년 " + man(WC.yr) + " · 처음 금액의 " + pc(WC.rate) + ")", f.color);
+          [["과거 " + WT.y + "년 동안 돈이 남았던 비율", WT.pct + "% (" + WT.n + "번 중 " + WT.left + "번)", hx(wdCol(WT.pct))], [WT.y + "년 뒤 남은 돈 (보통)", wdEnd(WT.p50), hx(NAVY)], [WT.y + "년 뒤 남은 돈 (나쁜 경우)", wdEnd(WT.p10), hx(UP)]].forEach(function(c, i){ rbox(s, 0.6 + i * 4.1, 1.4, 3.9, 0.95); T(s, c[0], {x: 0.75 + i * 4.1, y: 1.47, w: 3.6, h: 0.26, fontSize: 10, color: "5B6576", bold: true}); T(s, c[1], {x: 0.75 + i * 4.1, y: 1.75, w: 3.7, h: 0.5, fontSize: 18, bold: true, color: c[2]}); });
+          var wy = WT.p50.yr.map(function(_, i){ return i ? i + "년" : "지금"; }), wm = function(r){ return r.yr.map(function(v2){ return Math.round(v2 / 10000); }); };
+          lineChart(s, {kind: "curve", title: "남는 돈 (만원) — 과거 " + WT.n + "번의 " + WT.y + "년", labels: wy, vals: wm(WT.p50), multi: [{name: "좋은 경우", vals: wm(WT.p90), color: "#22A06B"}, {name: "보통", vals: wm(WT.p50), color: NAVY}, {name: "나쁜 경우", vals: wm(WT.p10), color: "#E0533D"}]}, 0.6, 2.55, 6.2, 4.3, f.color);
+          s.addTable([th(["기간", "꺼낸 돈", "나쁜 경우", "보통", "좋은 경우", "남은 비율"])].concat(WC.hs.map(function(h2){ return [h2.y + "년", wdSh(WC.W * h2.H), wdEndS(h2.p10), wdEndS(h2.p50), wdEndS(h2.p90), h2.pct + "%"]; })),
+            {x: 7.1, y: 2.6, w: 5.7, colW: [0.6, 1.0, 1.1, 1.05, 1.1, 0.85], fontFace: F, fontSize: 8.5, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle", align: "right"});
+          var wy2 = 2.6 + 0.34 * (WC.hs.length + 1) + 0.15;
+          T(s, [{text: "받을 때 세금: " + wdTaxLine(WC), options: {bullet: true, breakLine: true, bold: true, color: hx(NAVY)}}].concat(wdChecks(WC).slice(0, WC.irp ? 4 : 3).map(function(t){ return {text: t, options: {bullet: true, breakLine: true}}; })).concat([{text: wdNote(WC), options: {color: "5B6576", fontSize: 7.5}}]), {x: 7.1, y: wy2, w: 5.7, h: 6.9 - wy2, fontSize: 8.5, paraSpaceAfter: 3});
+        }
         if ((f.must && f.must.length) || f.taxbox){ s = P.addSlide(); head(s, (f.must && f.must.length ? "⭐ 추천 종목 · " : "") + "💱 " + (f.mode === "usd" ? "환전해서 투자 (미국 상장)" : "원화로 투자 (국내 상장)"), "세금·거래 방식", f.color);
           var yy2 = 1.4;
           if (f.must && f.must.length){ s.addTable([th(["종목·ETF", "비중", "금액", "왜 담나"])].concat(f.must.map(function(a){ return [{text: a.inst.split(" · ")[0] + "\n" + [a.code, a.inst.split(" · ")[1]].filter(Boolean).join(" · "), options: {bold: true, color: hx(a.color)}}, pc(a.pct), A ? man(A * a.pct / 100) : "–", (a.reason || []).slice(0, 4).join("\n") || a.why]; })),
@@ -1804,6 +1936,7 @@
     core: "🧩 위 묶음(시황 그대로 · 미국 지수 · 미국+한국 · 미국+금 · S&P+금 · 직접)을 누르면 한 번에 골라져요. 아래 칩으로 하나씩 더 켜고 끌 수도 있어요.\nS&P500 · 나스닥100 · 코스피200 · 금은 처음엔 넣지 않아요. 고객 취향에 맞게 칩을 눌러 켜고 끄세요.\n끈 칸의 몫은 같은 종류의 남은 칸(켠 지수·현금성 등)에 비율대로 나눠요 · 시황 테마 칸은 그대로예요.\n켠 지수가 하나도 없으면 그 몫은 「⭐ PB 선택 칸」으로 비워 두고, ⭐ 추천 종목·ETF가 넣은 % 비율대로 채워요.\nDC·IRP는 위험자산 70% 한도를 그대로 지켜요.\n과거 계산(모의투자)은 고른 구성으로 앱에서 다시 셈해요.\n📌 「이 구성을 내 기본값으로」를 누르면 다음 제안서부터 같은 구성으로 시작해요.",
     fx: "💴 원화로 = 국내 상장 ETF(TIGER 미국S&P500 등)로 담아요. 환전이 없고, 팔아서 남은 돈은 배당소득으로 15.4% 세금(금융소득종합과세 대상)이에요.\n💵 환전해서 = 미국 상장 ETF(SPY·QQQ·GLD 등)를 달러로 담아요. 팔아서 남은 돈은 1년에 250만원까지 빼고 22% 양도세(분리과세)예요.\n고른 방식에 맞춰 담을 ETF와 세금 설명이 바뀌어요.",
     pick: "채권·ELS는 기본으로 기간별·조건별 추천을 담아 두지만, PB가 원하는 회차·종목으로 바꿀 수 있어요.\n🏛️ 국고채 = 미래에셋이 파는 원화 채권 전체(국채·공사채·지방채·회사채·신종) — 회사채 등은 위험등급이 고객 성향에 맞아야 담겨요.\n💵 미국채 = 미래에셋 판매 목록 + 재무부 전체 이표채(목록 밖은 창구 확인).\n💱 브라질 = 헤알 NTN-F(연 10% 이표)·LTN(할인채)·달러표시 국채.\n🎯 ELS = 지금 청약 중인 모든 회차(ELB·지수형·종목형).\n목록을 누르면 담기고, 다시 누르거나 ✕로 빼요. 비율을 적으면 그대로 한 장·PDF·PPT·모의 계산에 들어가요. ↺ 기본 추천으로 언제든 되돌려요.",
+    wd: "고객이 연금으로 매달 꺼내 쓸 금액(세금 떼기 전)을 만원 단위로 적어요. 개인연금·IRP에만 있어요.\n넣으면 한 장·PDF·PPT·보여 주기에 「💸 매달 꺼내 쓰기 계획」이 붙어요: 과거에 이 비중으로 매달 꺼냈다면 돈이 남았던 비율, 몇 년 뒤 남는 돈(나쁜·보통·좋은 경우), 수익률별로 돈이 가는 기간, 세후 월 수령액, 연금수령한도·1,500만원 선 확인.\n비워 두면 예전 그대로 만들어져요. 켜진 칩을 다시 누르면 지워져요.",
     must: "고객에게 꼭 넣고 싶은 종목·ETF를 검색해서 % 를 적어요(여러 개 가능).\n넣은 % 만큼 나머지 기본 포트를 원래 비율 그대로 줄여서 합계 100%를 맞춰요. 막대에서 줄어든 칸은 옛 % 가 흐리게 보여요.\n왜 추천하는지는 종목리포트·ETF 구성·실적·애널리스트·뉴스·시황 테마로 자동으로 써 줘요.\n개인연금·DC·IRP는 국내 상장 ETF만 담을 수 있고, DC·IRP에서 채권형·TDF는 「안전형」에 체크하면 안전자산 칸에서 깎아요.",
     sim: "모든 제안서 맨 끝에 들어가는 위험고지 문구를 확인하고 심의필을 관리하는 칸이에요.\n① 아래 원문을 읽어 보고 ② 「심의 요청서 PDF」를 받아 준법감시 부서에 내요.\n③ 받은 심의필 번호와 유효기간을 넣으면 한 장·PDF·PPT 모두에 저절로 찍혀요.\n유효기간이 지나거나 문구가 바뀌면 번호가 자동으로 빠지고 여기서 알려 줘요. 번호는 꼭 회사에서 받은 것만 넣어 주세요."
   };
@@ -1824,7 +1957,7 @@
     h += '<section data-xc="1" class="card"><h3>💰 상품별 금액</h3>' + notes(JOY.amt) + '' + (ST.sel.length ? ST.sel.map(function(k){ var f = form(k), v = ST.amt[k] || "";
         return '<div class="pp-amt" style="--fc:' + f.color + '"><div class="pp-an"><span>' + e(f.icon) + '</span><b>' + e(f.short) + '</b><span class="pp-aw" id="ppw_' + k + '">' + (v ? man(v * 10000) : "") + '</span></div>' + brokerTag(k) +
           '<div class="pp-ar"><input inputmode="numeric" data-ak="' + k + '" placeholder="금액 (만원)" value="' + e(v) + '"><span>만원</span></div>' +
-          '<div class="pp-q">' + AMTS.map(function(a){ return '<button type="button" data-qk="' + k + '" data-qv="' + a[0] + '"' + (+v === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div>' + optUI(k, f) + '</div>'; }).join("") +
+          '<div class="pp-q">' + AMTS.map(function(a){ return '<button type="button" data-qk="' + k + '" data-qv="' + a[0] + '"' + (+v === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div>' + wdUI(k) + optUI(k, f) + '</div>'; }).join("") +
         '<div class="pp-tot">합계 <b id="pptot">' + (total() ? man(total()) : "–") + '</b></div>'
       : '<p class="mut">2단계(📦 상품)에서 상품을 먼저 골라 주세요.</p>') + '</section>';
     h += '<section data-xc="1" class="card"><h3>📤 만들기</h3>' + notes(JOY.make) + '<p class="pp-tip" style="margin-top:-4px">휴대폰에서 바로 만듦 · 돈 안 듦' + (simState().ok ? ' · ⚖️ 심의필 ' + e(simText()) + ' 찍힘' : ' · <span style="color:#ff7a6e">⚠️ 심의필 없음 — 위 「⚖️ 위험고지 · 심의필」에서 받아 넣어 주세요</span>') + '</p><div class="pp-go">' +
@@ -1851,6 +1984,14 @@
     return '<div class="pp-pl2"><b>' + (ST.prof ? PROF_IC[ST.prof] + " " + e(profName()) : "🆕 신규 고객") + '</b> → 위험자산(주식·금) <b>' + pc(R) + '</b>' +
       (!ST.prof ? ' · 오늘 기본폼 그대로' : t === "normal" && ST.prof === 5 ? ' · 오늘 기본폼(이미 위험자산 최대)' : t === "normal" ? ' · 오늘 기본폼' : '') + '</div>';
   }
+  function wdUI(k){   // 💸 월 출금금액 (개인연금·IRP만 · 11/17)
+    if (!WD_F[k]) return ""; var v = (ST.opt[k] || {}).wd || "";
+    return '<div class="pp-wd"><div class="pp-ol"><span data-tip="' + e(JOY.wd) + '">💸 월 출금금액 ⓘ</span> <span class="mut">(연금으로 매달 꺼내 쓸 돈 · 안 쓰면 비워 둠)</span></div>' +
+      '<div class="pp-ar"><input inputmode="numeric" data-wk="' + k + '" placeholder="월 출금금액 (만원)" value="' + e(v) + '"><span>만원</span></div>' +
+      '<div class="pp-q">' + WD_Q.map(function(a){ return '<button type="button" data-wq="' + k + '" data-wv="' + a[0] + '"' + (+v === a[0] ? ' class="on"' : '') + '>' + a[1] + '</button>'; }).join("") + '</div>' +
+      '<div class="pp-wh" id="ppwh_' + k + '">' + wdHint(k) + '</div></div>';
+  }
+  function upWd(k){ var h = document.getElementById("ppwh_" + k); if (h) try { h.innerHTML = wdHint(k); } catch(x) {} }
   function optUI(k, f){
     if (!EQ[k]) return PK_F[k] ? '<div class="pp-op" id="ppko_' + k + '">' + pickUI(k) + '</div>' : "";
     var o = opt(k), h2 = profLine(k);
@@ -1939,6 +2080,10 @@
       try { navigator.clipboard.writeText(t).then(ok, fb); } catch(x) { fb(); }
       function fb(){ var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch(y) {} ta.remove(); } };
     [].forEach.call(w.querySelectorAll("[data-ak]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d]/g, ""); if (inp.value !== v) inp.value = v; ST.amt[inp.dataset.ak] = v ? +v : ""; keep(); upAmt(inp.dataset.ak); }; });
+    [].forEach.call(w.querySelectorAll("[data-wk]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d]/g, "").slice(0, 6), k = inp.dataset.wk; if (inp.value !== v) inp.value = v; if (v) opt(k).wd = +v; else delete opt(k).wd; keep();
+      [].forEach.call(w.querySelectorAll('[data-wq="' + k + '"]'), function(x){ x.classList.toggle("on", +x.dataset.wv === +v); }); upWd(k); preview(); }; });
+    [].forEach.call(w.querySelectorAll("[data-wq]"), function(b){ b.onclick = function(){ var k = b.dataset.wq, on = +opt(k).wd === +b.dataset.wv; if (on) delete opt(k).wd; else opt(k).wd = +b.dataset.wv; keep();   // 켜진 칩을 다시 누르면 지움
+      var inp = w.querySelector('[data-wk="' + k + '"]'); if (inp) inp.value = opt(k).wd || ""; [].forEach.call(b.parentNode.children, function(x){ x.classList.toggle("on", !on && x === b); }); upWd(k); resetBtns(); preview(); }; });
     [].forEach.call(w.querySelectorAll("[data-qk]"), function(b){ b.onclick = function(){ var k = b.dataset.qk; ST.amt[k] = +b.dataset.qv; keep(); var inp = w.querySelector('[data-ak="' + k + '"]'); if (inp) inp.value = ST.amt[k];
       [].forEach.call(b.parentNode.children, function(x){ x.classList.toggle("on", x === b); }); upAmt(k); }; });
     [].forEach.call(w.querySelectorAll("[data-mk]"), function(b){ b.onclick = function(){ make(b.dataset.mk, b); }; });
@@ -1964,7 +2109,7 @@
       try { navigator.clipboard.writeText(t).then(ok, function(){ fallback(); }); } catch(x) { fallback(); }
       function fallback(){ var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch(y) {} ta.remove(); } };
   }
-  function upAmt(k){ try { if (PK_F[k]) upPick(k); } catch(x) {} try { var pl = document.getElementById("pppl_" + k); if (pl) pl.innerHTML = planHTML(k); (opt(k).must || []).forEach(function(m, i){ var mw = document.getElementById("ppmw_" + k + "_" + i); if (mw) mw.textContent = amtOf(k) && +m.pct ? man(amtOf(k) * m.pct / 100) : ""; }); } catch(x) {}
+  function upAmt(k){ upWd(k); try { if (PK_F[k]) upPick(k); } catch(x) {} try { var pl = document.getElementById("pppl_" + k); if (pl) pl.innerHTML = planHTML(k); (opt(k).must || []).forEach(function(m, i){ var mw = document.getElementById("ppmw_" + k + "_" + i); if (mw) mw.textContent = amtOf(k) && +m.pct ? man(amtOf(k) * m.pct / 100) : ""; }); } catch(x) {}
     var s = document.getElementById("ppw_" + k); if (s) s.textContent = ST.amt[k] ? man(ST.amt[k] * 10000) : ""; var t = document.getElementById("pptot"); if (t) t.textContent = total() ? man(total()) : "–"; mixUpd(); preview(); }
   function mkLab(mk){ if (mk.indexOf("rev:") === 0){ var f = form(mk.slice(4)) || {}; return "📝 " + e((f.icon || "") + " " + (f.short || "")) + " 심의 요청서<small>" + e(f.short || "") + " 문구만 + 제안서 별첨</small>"; } return BTNL[mk]; }
   var BTNL = {disc: "📝 심의 요청서 PDF <small>전체 문구 · 준법감시 부서 제출용</small>", rev: "📝 이 제안서 심의 요청서 <small>고른 상품 문구만 + 제안서 별첨</small>", png: "📱 한 장 <small>카톡 전송용 그림</small>", pdf: "📄 풀버전 PDF <small>표지·시장·상품별 자세히 · 가장 안 깨짐</small>",
@@ -2105,6 +2250,15 @@
       (Q.y5 ? '<p class="px-cap" style="margin-top:18px">5년 들고 있었다면 (연평균)</p><div class="px-3">' + Q.y5.map(function(x, i){ return '<div class="' + ["dn", "", "up"][i] + '"><small>' + x.l + '</small><b>' + won(x.won) + '</b><em>연 ' + sgn(x.r, 1) + '</em></div>'; }).join("") + '</div>' +
         '<p class="px-note">5년 들고 있었을 때 이익 난 비율 ' + (b.y5.pos) + '% · 연평균 ' + b.cagr + '% (' + fromY + '~지금)</p>' : ''),
       "1년 뒤 " + man(A) + "이"));
+    var WC = wdCalc(f, A);   // ⑥ 매달 꺼내 쓰면 (11/17 · 월 출금금액을 넣었을 때만)
+    if (WC){ var WT = WC.top;
+      out.push(slide("매달 " + man(WC.W) + "씩 꺼내 쓰면", '<div class="px-pos"><b style="color:' + wdCol(WT.pct) + '">' + WT.pct + '%</b><span>' + WC.from + '년부터 아무 달에 시작해 ' + WT.y + '년 동안 매달 꺼내 썼을 때 돈이 남았던 비율 (' + WT.n + '번 중 ' + WT.left + '번)</span></div>' +
+        '<p class="px-cap">' + WT.y + '년 뒤 남은 돈</p><div class="px-3">' + [["나쁜 경우", WT.p10, "dn"], ["보통", WT.p50, ""], ["좋은 경우", WT.p90, "up"]].map(function(x){ return '<div class="' + x[2] + '"><small>' + x[0] + '</small><b>' + (x[1].dep == null ? won(x[1].end) : wdSpan(x[1].dep) + " 만에 바닥") + '</b></div>'; }).join("") + '</div>' +
+        '<p class="px-cap" style="margin-top:18px">실제로 손에 쥐는 돈 (매달)</p>' + (WC.over ? '<p class="px-note" style="margin-top:4px">1년 ' + man(WC.yr) + '으로 1,500만원을 넘어 16.5% 분리과세 또는 종합과세 선택 대상 · 16.5%면 세후 월 ' + man(WC.sepNet) + '</p>'
+          : '<div class="px-3">' + WC.tax.map(function(t){ return '<div><small>' + t.who + '</small><b>' + man(t.net) + '</b><em>세금 ' + t.rate + '%</em></div>'; }).join("") + '</div>') +
+        '<p class="px-note">' + (WC.limOk ? "" : "⚠️ 수령 1년차 한도(월 " + man(WC.lim1 / 12) + ")를 넘는 금액 · ") + '꺼내는 돈은 세금 떼기 전 · 물가·수수료 반영 안 함 · 과거 계산 · 미래 보장 아님</p>',
+        man(A) + "에서 · 1년에 " + man(WC.yr)));
+    }
     return out;
   }
   function slidesBond(f, A){
@@ -2185,6 +2339,7 @@
     var o = {v: 1, s: ST.sel.slice(), a: {}, o: {}}; if (profSet()) o.p = ST.prof;
     ST.sel.forEach(function(k){ if (+ST.amt[k]) o.a[k] = +ST.amt[k]; var q = ST.opt[k]; if (!q) return; var y = {};
       if (q.mode && q.mode !== "krw") y.m = q.mode;
+      if (WD_F[k] && +q.wd > 0) y.w = +q.wd;
       if (q.core) y.c = CORE.map(function(x){ return q.core[x[0]] ? 1 : 0; }).join("");   // spx·ndx·k200·gold
       if (q.pk && q.pk.length) y.p = q.pk.map(function(p){ return [p.id, +p.pct || 0]; });
       if (q.must && q.must.length) y.u = q.must.map(function(m){ var z = {n: m.name, p: +m.pct || 0}; if (m.code) z.c = m.code; if (m.mkt) z.k = m.mkt; if (m.sym) z.y = m.sym; if (m.etf) z.e = 1; if (m.safe) z.f = 1; return z; });
@@ -2209,6 +2364,7 @@
     ST.sel = sel; ST.amt = {}; ST.opt = {};
     sel.forEach(function(k){ var a = +((o.a || {})[k]); if (a > 0 && a < 1e7) ST.amt[k] = Math.round(a);
       var y = (o.o || {})[k] || {}, q = {mode: y.m === "usd" ? "usd" : "krw", must: []};
+      if (WD_F[k] && +y.w > 0 && +y.w < 1e6) q.wd = Math.round(+y.w);
       if (typeof y.c === "string" && /^[01]{4}$/.test(y.c)) q.core = {spx: +y.c[0], ndx: +y.c[1], k200: +y.c[2], gold: +y.c[3]};
       (Array.isArray(y.u) ? y.u : []).slice(0, 20).forEach(function(z){ if (!z || !z.n) return; var mm = {name: str(z.n), pct: Math.max(0, Math.min(100, +z.p || 0))};
         if (z.c) mm.code = str(z.c, 16); if (z.k) mm.mkt = str(z.k, 8); if (z.y) mm.sym = str(z.y, 20); if (z.e) mm.etf = true; if (z.f) mm.safe = true; q.must.push(mm); });
@@ -2256,6 +2412,7 @@
     ".pp-go{display:grid;gap:8px}.pp-go button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit;font-size:15.5px;font-weight:800}" +
     ".pp-go button small{font-size:11.5px;color:var(--sub);font-weight:500}.pp-go button.main{background:var(--c,#7c9cff);color:#111;border-color:transparent}.pp-go button.main small{color:rgba(0,0,0,.65)}" +
     ".pp-go button.ready{background:#22a06b;color:#fff;border-color:transparent}.pp-go button.ready small{color:rgba(255,255,255,.85)}.pp-go button:disabled{opacity:.7}" +
+    ".pp-wd{margin-top:10px;padding-top:6px;border-top:1px dashed var(--line)}.pp-wh{font-size:13px;line-height:1.55;margin-top:7px;color:var(--text)}.pp-wh .mut{font-size:13px}" +
     ".pp-op{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.pp-ol{font-size:12.5px;font-weight:800;margin:8px 0 5px}" +
     ".pp-pf{margin:4px 0 10px}.pp-pg{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pp-pg button{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;text-align:left;border:1.5px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:7px 10px;font:inherit;min-width:0;overflow:hidden}" +
     ".pp-pg button b{font-size:14px;white-space:nowrap;letter-spacing:-.3px;max-width:100%;overflow:hidden;text-overflow:ellipsis}.pp-pg button small{font-size:11px;color:var(--sub);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}.pp-pg button.on{border-color:#F58220;box-shadow:inset 0 0 0 1px #F58220;background:rgba(245,130,32,.12)}" +
