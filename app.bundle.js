@@ -17878,6 +17878,8 @@
     var vb = rb && rb.children[1] ? rb.children[1].textContent : null, lb = rb && rb.children[0] ? rb.children[0].textContent.replace(/^↔\s*반대로\s*/, "") : "";
     var keep = document.createElement("details"); keep.className = "tz-raw";
     keep.innerHTML = '<summary>숫자로 자세히 ▾</summary>';
+    var czh = s.querySelector(':scope > .cz-h'), czf = s.querySelector(':scope > .cz-f');   // 🔧 11/17 🩺 「#home 빈 카드 hmpanic」 — 접기(calm.js)가 먼저 붙인 제목 줄까지 「숫자로 자세히」 속에 넣어 접힌 카드가 빈 칸으로 보이던 것 → 제목 줄·접기 단추는 밖에 둠
+    if (czh) czh.remove(); if (czf) czf.remove();
     while (s.firstChild) keep.appendChild(s.firstChild);
     var pan = function(img, cap, big, cls_, small){ return '<div class="tz-pan"><div class="tz-pk" style="background-image:url(' + img + ')"></div><div class="tz-pt"><small>' + cap + '</small><b class="' + (cls_ || "") + '">' + big + '</b>' + (small ? '<em>' + small + '</em>' : '') + '</div></div>'; };
     var neg1 = /^−|^-/.test(v1.trim());
@@ -17888,7 +17890,7 @@
         (vb ? pan(/^\+/.test(vb) ? "img/kid_joy.jpg?v=1" : "img/kid_umb.jpg?v=1", "③ 반대로 " + e(lb.replace(/\s*\d+거래일 뒤$/, "")), e(vb), /^\+/.test(vb) ? "up" : "dn", "120거래일 뒤 평균") : "") +
       '</div>' +
       (rn ? '<div class="tz-now">' + e(rn.children[0] ? rn.children[0].textContent : "") + (rn.children[1] && rn.children[1].tagName === "B" ? '<br>과거엔 120거래일 뒤 평균 <b class="' + rn.children[1].className + '">' + e(rn.children[1].textContent) + '</b>' + (rn.children[2] ? '<small>' + e(rn.children[2].textContent.replace(/ · 120거래일 뒤 평균/, "")) + '</small>' : '') : '') + '</div>' : ''));
-    s.appendChild(keep);
+    s.appendChild(keep); if (czh) s.insertBefore(czh, s.firstChild); if (czf) s.appendChild(czf);
     keep.addEventListener("click", function(ev){ ev.stopPropagation(); }, true);
   }
 
@@ -23147,7 +23149,7 @@ window.VIDC = {
   var ST = {};   // 항목별로 넣은 값(메모리에만)
   CALCS.forEach(function(c){ ST[c.k] = {}; (c.segs || []).forEach(function(s){ ST[c.k][s.id] = s.opts[0][0]; }); });
   function sel(){ var k = ls("txsel"); return CALCS.filter(function(c){ return c.k === k; })[0] || null; }
-  function pickHtml(c0){ return '<div class="tx-pick">' + CALCS.map(function(c){ return '<button type="button" data-txk="' + c.k + '"' + (c0 && c0.k === c.k ? ' class="on"' : '') + '><span>' + c.ic + '</span><b>' + c.t + '</b><small>' + c.d + '</small></button>'; }).join("") + '</div>'; }
+  function pickHtml(c0){ return '<div class="tx-pick">' + CALCS.map(function(c){ return '<button type="button" data-txk="' + c.k + '" data-j="txform"' + (c0 && c0.k === c.k ? ' class="on"' : '') + '><span>' + c.ic + '</span><b>' + c.t + '</b><small>' + c.d + '</small></button>'; }).join("") + '</div>'; }
   function formHtml(c){ var v = ST[c.k];
     return head(c.ic + " " + c.t, LAW.asof) +
       (c.segs || []).map(function(s){ return '<div class="tx-seg" role="group" aria-label="' + s.label + '"><em>' + s.label + '</em><div>' + s.opts.map(function(o){ return '<button type="button" data-txs="' + s.id + '" data-v="' + o[0] + '"' + (v[s.id] === o[0] ? ' class="on"' : '') + '>' + o[1] + '</button>'; }).join("") + '</div></div>'; }).join("") +

@@ -1647,7 +1647,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261117f";
+var APPV = "20261117g";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1699,7 +1699,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합친 한 파일. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.bundle.js?v=53d6cf292f"></script>
+<script defer src="app.bundle.js?v=f2a75c11c1"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1763,7 +1763,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1104.js?v=3"></script>   <!· 🪜🔢 11/04 A11/4-1 금 가는 순서표 · A11/4-2 숫자로 찾기 ·>
 <script defer src="mc.js?v=1"></script>   <!· 🎲 11/04 1만 번 돌려보기(성적표) ·>
 <script defer src="iconz.js?v=3"></script>   <!· 🔣 10/22 아이콘 풀이 ·>
-<script defer src="today.js?v=14"></script>   <!· 🏠 10/22 오늘 탭 10가지 ·>
+<script defer src="today.js?v=15"></script>   <!· 🏠 10/22 오늘 탭 10가지 ·>
 <script defer src="vidmap.js?v=7"></script>   <!· 🎬 조이 설명 영상 목록(자동 생성) ·>
 <script defer src="guide.js?v=36"></script>   <!· 🧒 10/22 꼬마 안내원 ·>
 <script defer src="easy.js?v=5"></script>   <!· 🗣 10/28 쉬운 말 (끄기: localStorage easy=off) ·>
@@ -1787,7 +1787,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1112e.js?v=1"></script>   <!· 🔁 11/12 닮은 장 백테스트 (지금과 닮았던 때만 · 그 뒤 2년) ·>
 <script defer src="ux1113.js?v=1"></script>   <!· 📏 11/13 A11/13-1 선이 내려오는 날 (가격 그대로면 50일선·장기선이 닿는 날짜 · bear.json meet) ·>
 <script defer src="ux1116.js?v=1"></script>   <!· 🧊 11/16 냉정 분석 5차 — 🩻 포트 진단 한 장 · 💬 고객 질문 답 그림 한 장 · 🎯 신호 한눈에(큰손·컵·갭·확률 합침) ·>
-<script defer src="tax.js?v=6"></script>   <!· 🧾 11/16 세무계산기 (연구실 › 세무계산기 · 금융소득·건보료 통합 경보기 + 연금·퇴직·해외주식·ISA · 세법 숫자는 tax.js LAW 한 곳) ·>
+<script defer src="tax.js?v=7"></script>   <!· 🧾 11/16 세무계산기 (연구실 › 세무계산기 · 금융소득·건보료 통합 경보기 + 연금·퇴직·해외주식·ISA · 세법 숫자는 tax.js LAW 한 곳) ·>
 📦list-->
 <!-- 📦/JS -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>
