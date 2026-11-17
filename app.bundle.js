@@ -9603,9 +9603,11 @@
         return '<div class="po-vr" data-tip="' + e("🦴 변동성 맞춤(" + VR.role + ") — S&P½+나스닥½ 최근 20일 흔들림이 목표 " + VR.target + "%를 넘으면 주식을 그만큼 줄여 현금·단기채로. 바닥 " + VR.floor + "% · 5%p 넘게 바뀔 때만 조정 · " + (VR.from || "").slice(5) + "부터") + '">🦴 변동성 방어(' + e(VR.role) + ') · 주식 <b>' + VR.eq_scale + '%</b> 유지 <small>20일 흔들림 ' + VR.vol20 + '% / 목표 ' + VR.target + '% ⓘ</small></div>'; })() +
       // 🔄 10/28 Q10/28-2: 연기금 월말 리밸런싱 앞지르기 (💼 port.json month_flow · 🎯 conc.json month_flow — Q10/28-3)
       (function(){ var M = F.k === "conc" ? (CN && CN.month_flow) : (F.k === "kick" || F.k === "mine") ? null : P.month_flow; if (!M || !M.on) return '';
-        var tip = "🔄 월말 흐름 — 매달 마지막 " + M.k + "거래일, 60/40 펀드(S&P·중기채) 주식 비중이 ±" + M.th + "%p 넘게 쏠리면 펀드가 억지로 사고팔 쪽에 미리 섬: 넘침 → 주식 칸 60% 미국 장기채(TLT) · 모자람 → " + (F.k === "conc" ? "추세·현금" : "금·추세") + " 칸 60% 주식. 검증 2017~ 연 +" + (F.k === "conc" ? "2.3" : "2.4") + "%p · " + (M.from || "").slice(5) + "부터";
+        var tip = "🔄 월말 흐름 — 매달 마지막 " + M.k + "거래일, 60/40 펀드(S&P·중기채) 주식 비중이 ±" + M.th + "%p 넘게 쏠리면 펀드가 억지로 사고팔 쪽에 미리 섬: 넘침 → 주식 칸 " + Math.round((M.f || 0.6) * 100) + "% 미국 장기채(TLT) · 모자람 → " + (F.k === "conc" ? "추세·현금" : "금·추세") + " 칸 " + Math.round((M.f || 0.6) * 100) + "% 주식. 하루 먼저 알림 → 그날 밤 미국 종가 예약(LOC). 검증 2017~ 연 +" + (F.k === "conc" ? "2.3" : "2.4") + "%p · " + (M.from || "").slice(5) + "부터";
         var st = M.sig > 0 ? '주식 → 장기채 <b>' + M.pct + '%</b>' : M.sig < 0 ? (F.k === "conc" ? '추세·현금 → 주식 쪽' : '금·추세 → 주식 쪽') : M.window ? '쏠림 작음 · 그대로' : '쉬는 중 · 월말 ' + M.k + '거래일에만';
-        return '<div class="po-vr" data-tip="' + e(tip) + '">🔄 월말 흐름 · ' + st + ' <small>' + (M.drift != null ? '쏠림 ' + (M.drift >= 0 ? "+" : "") + M.drift + '%p · ' : '') + (M.for || "").slice(5) + ' 기준 ⓘ</small></div>'; })() +
+        // ⏰ 11/17 Q11/6-3: 하루 먼저 알림 — 오늘 밤 미국 종가 예약(LOC) 주문 (port.json·conc.json month_flow.tonight)
+        var T = M.tonight, ton = T && T.act ? '<div class="po-vr" style="border:1px solid #ffb84d;background:rgba(255,184,77,.10)" data-tip="' + e((T.note || "") + " · " + (T.for || "").slice(5) + " 비중을 오늘 밤 장 마감 가격으로 맞춰 둠") + '">⏰ <b>' + e(T.text) + '</b> <small>' + (T.order_at || "").slice(5) + ' 밤 · ' + (T.drift != null ? '쏠림 ' + (T.drift >= 0 ? "+" : "") + T.drift + '%p · ' : '') + '하루 먼저 알림 ⓘ</small></div>' : '';
+        return ton + '<div class="po-vr" data-tip="' + e(tip) + '">🔄 월말 흐름 · ' + st + ' <small>' + (M.drift != null ? '쏠림 ' + (M.drift >= 0 ? "+" : "") + M.drift + '%p · ' : '') + (M.for || "").slice(5) + ' 기준 ⓘ</small></div>'; })() +
       '<div class="po-sub">' + F.days + '거래일 · 시장 ' + BM.length + '곳 중 <b>' + beat(F) + '</b>곳보다 앞섬 · 가장 크게 빠졌을 때 <b>' + sg(F.mdd) + '</b></div>' +
       '<div class="po-cmp n' + cmp.length + '">' + cmp.map(function(n){ var x = B[n][B[n].length - 1];
         return '<div style="border-top:3px solid ' + (BCOL[n] || "#8a94a8") + '"><small>' + e(n) + '</small><b class="' + cls(x) + '">' + sg(x) + '</b><em class="' + (F.ret >= x ? "w" : "l") + '">' + (F.ret >= x ? "포트가 앞섬" : "포트가 뒤짐") + '</em></div>'; }).join("") + '</div>' +
@@ -10141,7 +10143,7 @@
       '<div><b>💼 기본 포트</b> — 뼈대. S&P500·나스닥100 반반에 금 조금. 시장이 나빠지면 현금을 늘려요. 개별 종목은 없어요.</div>' +
       (K ? '<div class="k"><b>⚡ 킥 포트</b> — <u>기본 뼈대 + 개별 종목 양념</u>. 돈의 약 ' + pc(R.sleeve) + '는 ☕ 컵·📈 갭 같은 신호가 뜬 종목을 최대 ' + (R.slots || "–") + '개, 약 ' + pc(R.whale_sleeve) + '는 🐋 고래가 새로 산 종목 묶음에 담아요. 종목마다 ' +
         (R.stop != null ? Math.round(R.stop * 100) + '% 손절 · ' : '') + (R.take != null ? '+' + Math.round(R.take * 100) + '% 익절 · ' : '') + (R.time ? R.time + '거래일 지나면 정리' : '') + '. 사고파는 일이 잦고, 스캐너가 잘 맞히느냐에 성적이 걸려 있어요.</div>' : '') +
-      (CN ? '<div class="c"><b>🎯 집중 포트</b> — <u>지수 두 개에 몰빵 + 날씨 따라 우산</u>. 개별 종목 없이 S&P500·나스닥100만. 판정: ' + e(CR.judge || "S&P500 200일선") + '. ' + e(CR.on || "") + ' / ' + e(CR.off || "") + '. 손은 주 1회 비중 맞출 때와 판정이 바뀐 날에만 가요.</div>' : '') +
+      (CN ? '<div class="c"><b>🎯 집중 포트</b> — <u>' + (CR.core ? '나스닥100에 몰빵' : '지수 두 개에 몰빵') + ' + 날씨 따라 우산</u>. 개별 종목 없이 ' + (CR.core ? '나스닥100(11/18부터)' : 'S&P500·나스닥100') + '만. 판정: ' + e(CR.judge || "S&P500 200일선") + '. ' + e(CR.on || "") + ' / ' + e(CR.off || "") + '. 손은 주 1회 비중 맞출 때와 판정이 바뀐 날에만 가요 · 🔄 월말 흐름은 하루 먼저 ⏰ 알림 → 그날 밤 미국 종가 예약(LOC).</div>' : '') +
       '<div class="m"><b>🙋 내 포트</b> — <u>내가 실제로 담는 그대로</u>. S&P·나스닥·금 비중을 직접 정하고, ⚡ 킥 종목 중 산 것만 ✓ 체크. 성적·비교·그래프는 다른 포트와 똑같이 보여 줘요.</div>' +
       '<p class="note" style="margin:6px 0 0">셋 다 「규칙대로 했다면」 계산이지 매수 추천이 아니에요.</p></div></details>';
   }
@@ -10324,8 +10326,8 @@
         return '<div class="cn-buy" data-op="' + e(it.code) + '"><b class="pct">' + c.x.pct + '%</b><span class="nm">' + e(c.x.name) + '<small>' + e(it.nm) + (it.code && it.code !== it.nm ? ' ' + e(it.code) : '') + '</small></span>' +
           '<span class="q"><b>' + (it.sh != null ? it.sh.toLocaleString("ko-KR") + '주' : '가격 확인') + '</b><small>' + won(c.amt) + '원</small></span></div>'; }).join("") +
       (CN.vol_rule && CN.vol_rule.on ? '<div class="cn-vr">🦴 변동성 방어(' + e(CN.vol_rule.role) + ') · 주식 <b>' + CN.vol_rule.eq_scale + '%</b> 유지 <small>20일 흔들림 ' + CN.vol_rule.vol20 + '% / 목표 ' + CN.vol_rule.target + '%</small></div>' : '') +
-      (CN.month_flow && CN.month_flow.on ? (function(M){ var st = M.sig > 0 ? '주식 60% → 장기채 <b>' + M.pct + '%</b>' : M.sig < 0 ? '추세·현금 60% → 주식' : M.window ? '쏠림 작음 · 그대로' : '쉬는 중 · 월말 ' + M.k + '거래일에만';
-        return '<div class="cn-vr">🔄 월말 흐름 · ' + st + ' <small>' + (M.drift != null ? '쏠림 ' + (M.drift >= 0 ? "+" : "") + M.drift + '%p · ' : '') + (M.for || "").slice(5) + ' 기준</small></div>'; })(CN.month_flow) : '') +
+      (CN.month_flow && CN.month_flow.on ? (function(M){ var fp = Math.round((M.f || 0.6) * 100), st = M.sig > 0 ? '주식 ' + fp + '% → 장기채 <b>' + M.pct + '%</b>' : M.sig < 0 ? '추세·현금 ' + fp + '% → 주식' : M.window ? '쏠림 작음 · 그대로' : '쉬는 중 · 월말 ' + M.k + '거래일에만';
+        return (M.tonight && M.tonight.act ? '<div class="cn-vr" style="border:1px solid #ffb84d">⏰ <b>' + e(M.tonight.text) + '</b></div>' : '') + '<div class="cn-vr">🔄 월말 흐름 · ' + st + ' <small>' + (M.drift != null ? '쏠림 ' + (M.drift >= 0 ? "+" : "") + M.drift + '%p · ' : '') + (M.for || "").slice(5) + ' 기준</small></div>'; })(CN.month_flow) : '') +
       '<p class="cn-n2">판정이 바뀌는 날(🟢↔🔴)과 🔄 월말 흐름 날에만 고치면 돼요. 금액·환율 바꾸기는 아래 📋 따라하기에서.</p>' +
       '<details class="cn-d"><summary>📊 성적·검증 보기</summary>' +
       '<div class="cn-h">' + md(CN.start) + '부터 <small>비용 포함 · 달러 기준</small></div>' +
