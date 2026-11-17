@@ -17,7 +17,7 @@
   }
   var RSEL = {};       // 되감기: 고른 섹터만 (10/11 사용자: "섹터 선택하면 그것만 돌려 볼 수 있게, 전체 누르면 다시 전체")
   /* 🗓 11/17 섹터 기간 탭(1·3·6개월) — 3·6개월을 고르면 그 기간 흐름(pathp)으로 되감기 */
-  function rpth(m){ var SP = window.SECP, p = SP ? SP.rp(m) : "1M"; return {p: p, L: SP ? SP.lab(p) : {xl: "1개월", yl: "1주"}, f: function(x){ return SP ? SP.path(x, p) : x.path; }}; }
+  function rpth(m){ var SP = window.SECP, p = SP ? SP.rp(m) : "1M"; return {p: p, L: SP ? SP.lab(p) : {xl: "1개월", yl: "1주"}, f: function(x){ return SP ? SP.path(x, p, m) : x.path; }}; }
   function rotSvg(m, di, sel){
     var RP = rpth(m);
     var ss = (m.sectors || []).map(function(x){ var o = Object.create(x); o.path = RP.f(x); o._s = x; return o; }).filter(function(x){ return x.path && x.path.length; });
@@ -25,13 +25,19 @@
     var W = 330, H = 250, Pd = 26, all = [];
     ss.forEach(function(x){ if (!sel || x.k === sel) x.path.forEach(function(p){ all.push(p); }); });
     var TOP = V.topSet(ss, 10);   // 한 섹터만 볼 땐 그 섹터 길이에 맞춰 크게
-    var mx = Math.max.apply(null, all.map(function(p){ return Math.abs(p[2]); }).concat([1])) * 1.12, my = Math.max.apply(null, all.map(function(p){ return Math.abs(p[1]); }).concat([1])) * 1.12;
-    var Xs = function(v){ return Pd + (v + mx) / (2 * mx) * (W - 2 * Pd); }, Ys = function(v){ return Pd + (my - v) / (2 * my) * (H - 2 * Pd); };
+    var SP = window.SECP, cur = [];
+    ss.forEach(function(x){ if (!sel || x.k === sel){ var q = x.path[Math.min(di, x.path.length - 1)]; if (q) cur.push(q); } });
+    // 📏 11/17 혼자 튄 섹터는 가장자리에 붙임 — 축은 지금 칸 기준(지난 길이 넘치면 가장자리에서 잘림)
+    var mx = SP ? SP.lim(cur.map(function(p){ return p[2]; })) : Math.max.apply(null, all.map(function(p){ return Math.abs(p[2]); }).concat([1])) * 1.12,
+        my = SP ? SP.lim(cur.map(function(p){ return p[1]; })) : Math.max.apply(null, all.map(function(p){ return Math.abs(p[1]); }).concat([1])) * 1.12;
+    var cX = function(v){ return Math.max(-mx * .94, Math.min(mx * .94, v)); }, cY = function(v){ return Math.max(-my * .94, Math.min(my * .94, v)); };
+    var Xs = function(v){ v = cX(v); return Pd + (v + mx) / (2 * mx) * (W - 2 * Pd); }, Ys = function(v){ v = cY(v); return Pd + (my - v) / (2 * my) * (H - 2 * Pd); };
     var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="rotsv">' +
       '<rect x="' + Xs(0) + '" y="' + Pd + '" width="' + (W - Pd - Xs(0)) + '" height="' + (Ys(0) - Pd) + '" fill="#e66767" opacity=".08"/><rect x="' + Pd + '" y="' + Ys(0) + '" width="' + (Xs(0) - Pd) + '" height="' + (H - Pd - Ys(0)) + '" fill="#3987e5" opacity=".08"/>' +
       '<line x1="' + Pd + '" x2="' + (W - Pd) + '" y1="' + Ys(0) + '" y2="' + Ys(0) + '" stroke="#3a4358"/><line x1="' + Xs(0) + '" x2="' + Xs(0) + '" y1="' + Pd + '" y2="' + (H - Pd) + '" stroke="#3a4358"/>' +
       '<text x="' + (W - Pd - 2) + '" y="' + (Pd + 12) + '" text-anchor="end" class="rotq u">🔥 계속 강함</text><text x="' + (Pd + 2) + '" y="' + (Pd + 12) + '" class="rotq">🌱 새로 뜨는 중</text>' +
       '<text x="' + (W - Pd - 2) + '" y="' + (H - Pd - 6) + '" text-anchor="end" class="rotq">🍂 힘 빠지는 중</text><text x="' + (Pd + 2) + '" y="' + (H - Pd - 6) + '" class="rotq d">🧊 계속 약함</text>';
+    var OUT = [];
     ss.forEach(function(x, i){
       if (sel && x.k !== sel) return;
       var p = x.path, k = Math.min(di, p.length - 1), tr = p.slice(sel ? 0 : Math.max(0, k - 4), k + 1);   // 한 섹터만 볼 땐 처음부터 지나온 길 전부
@@ -41,9 +47,11 @@
         (sel ? tr.slice(0, -1).map(function(q){ return '<circle cx="' + Xs(q[2]).toFixed(1) + '" cy="' + Ys(q[1]).toFixed(1) + '" r="2" fill="' + col + '" opacity=".6"/>'; }).join("") : '');
       var cx = Xs(p[k][2]), cy = Ys(p[k][1]);
       s += '<g data-csec="' + e(x.k) + '" data-cm="' + MKX + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + p[k][0] + "<br>" + RP.L.yl + " " + pct(p[k][1]) + " · " + RP.L.xl + " " + pct(p[k][2])) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
-        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(V.shortSec(x.name)) + '</text></g></g>';
+        (function(){ var q = p[k], dx = q[2] > mx * .94 ? 1 : q[2] < -mx * .94 ? -1 : 0, dy = q[1] > my * .94 ? 1 : q[1] < -my * .94 ? -1 : 0;
+          if ((dx || dy) && SP){ OUT.push({n: x.name, c: col, v: dx ? q[2] : q[1]}); return SP.tri(cx, cy, dx, dy, col) + '</g></g>'; }
+          return '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(V.shortSec(x.name)) + '</text></g></g>'; })();
     });
-    return s + '</svg>';
+    return s + '</svg>' + (SP ? SP.out(OUT) : '');
   }
   if (window.SECP) SECP.reg("rot", function(m, k){ var r = document.querySelector('[data-rot="' + k + '"]'); if (r) r._tok = Math.random();
     var n = rlen(m), v = r ? Math.min(+r.value, n - 1) : n - 1; if (r){ r.max = n - 1; r.value = v; } return rotSvg(m, v, RSEL[k]); });

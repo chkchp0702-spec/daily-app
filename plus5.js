@@ -88,7 +88,7 @@
   /* 🗓 11/17 섹터 기간 탭(1·3·6개월)을 같이 씀 — window.SECP (compass.js) */
   function clockSvg(m){
     var SP = window.SECP, p = SP ? SP.cur() : "1M", L = SP ? SP.lab(p) : {xl: "1개월", yl: "1주"};
-    var ss = (m.sectors || []).map(function(x){ var q = SP ? SP.xy(x, p) : {x: x.r20, y: x.r5}, pa = SP ? SP.path(x, p) : x.path;
+    var ss = (m.sectors || []).map(function(x){ var q = SP ? SP.xy(x, p, m) : {x: x.r20, y: x.r5}, pa = SP ? SP.path(x, p, m) : x.path;
       return {k: x.k, icon: x.icon, name: x.name, p: x.p, n: x.n, r1: x.r1, r5: q.y, r20: q.x, path: pa, _s: x}; }).filter(function(x){ return x.r5 != null && x.r20 != null; });
     if (ss.length < 4) return '<div class="empty">' + L.xl + ' 자료가 아직 모자라요.</div>';
     var med = function(k){ var v = ss.map(function(x){ return x[k]; }).sort(function(a, b){ return a - b; }); return v[Math.floor(v.length / 2)]; };

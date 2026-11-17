@@ -243,6 +243,9 @@ def _unpartial(m, mk, built, now_utc=None, log=print):
         if len(p) >= 2 and p[-1][0] == lab:
             x["path"] = p[:-1]
             x["r5"], x["r20"] = p[-2][1], p[-2][2]
+        for lab_, q in (x.get("pathp") or {}).items():      # 🗓 11/17 3·6개월 흐름도 같이 걷어 냄
+            if len(q) >= 2 and q[-1][0] == lab:
+                x["pathp"][lab_] = q[:-1]
     u10 = [r[1] / max(1, r[1] + r[2]) for r in m["breadth_hist"][-10:]]
     if u10:
         m["breadth10"] = round(sum(u10) / len(u10) * 100)

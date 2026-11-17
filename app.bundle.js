@@ -910,21 +910,51 @@
             "6M": {xl: "6개월", yl: "3개월", xn: "반년", yn: "최근 석 달", tail: "지난 5일"}};
   var PK = ["1M", "3M", "6M"], BARK = "r1", TD = true, SREG = {};
   var nn = function(v){ return v == null || v !== v ? null : v; };
+  /* 📏 11/17 사용자 「둘 다 진행해」 ① 지수(코스피 등) 대비 초과수익률 축 — 장 전체가 빠져도 상대적으로 돈이 들어오는 곳이 갈림.
+     지수 1년 일봉(index[0].ohlc)에서 섹터 자료와 같은 날짜로 끝나는 같은 길이 수익률을 빼 줌. 「지수 대비」 버튼으로 끄고 켬(store.secx, 기본 켬).
+     ② 혼자 멀리 튄 섹터(예: 부동산·리츠 +43%)는 가장자리에 붙이고 ↗ 표시 → 나머지 섹터가 가운데 뭉치지 않게 (SECP.lim) */
+  var NX = {"1M": [20, 5], "3M": [63, 20], "6M": [126, 63]}, IXM = {};
+  function ixMap(m){ var ix = (m && m.index || [])[0]; if (!ix || !ix.ohlc || ix.ohlc.length < 30) return null;
+    var o = ix.ohlc, key = o.length + o[o.length - 1][0] + o[o.length - 1][4], c = IXM[ix.sym || ix.name];
+    if (c && c.k === key) return c;
+    var by = {}; o.forEach(function(r, i){ by[r[0]] = i; by[r[0].slice(5).replace("-", "/")] = i; });
+    return (IXM[ix.sym || ix.name] = {k: key, o: o, by: by, name: ix.name}); }
+  function ixRet(m, d, n){ var M = ixMap(m); if (!M) return null; var j = M.by[d]; if (j == null || j - n < 0) return null; return (M.o[j][4] / M.o[j - n][4] - 1) * 100; }
   var SECP = window.SECP = {
     C: null, keys: PK,
     cur: function(){ var p = window.store && store.secp; return SP[p] ? p : "1M"; },
     lab: function(p){ return SP[p || SECP.cur()]; },
-    xy: function(x, p){ p = p || SECP.cur(); var h = x.heat || {};
-      return p === "3M" ? {x: nn(h["3M"]), y: nn(x.r20)} : p === "6M" ? {x: nn(h["6M"]), y: nn(h["3M"])} : {x: nn(x.r20), y: nn(x.r5)}; },
+    /* m 을 주면 지수 대비(켜져 있을 때) — 지도·시계·되감기만. 막대(등락)는 절대 수익률 그대로 */
+    xy: function(x, p, m){ p = p || SECP.cur(); var h = x.heat || {};
+      var o = p === "3M" ? {x: nn(h["3M"]), y: nn(x.r20)} : p === "6M" ? {x: nn(h["6M"]), y: nn(h["3M"])} : {x: nn(x.r20), y: nn(x.r5)};
+      if (m && SECP.xs(m) && o.x != null && o.y != null){ var bx = ixRet(m, m.date, NX[p][0]), by = ixRet(m, m.date, NX[p][1]);
+        if (bx != null && by != null) o = {x: o.x - bx, y: o.y - by}; }
+      return o; },
     val: function(x, p){ return SECP.xy(x, p).x; },
-    path: function(x, p){ p = p || SECP.cur(); return p === "1M" ? x.path : (x.pathp || {})[p]; },   // [[날짜, 세로, 가로], …]
+    path: function(x, p, m){ p = p || SECP.cur(); var q = p === "1M" ? x.path : (x.pathp || {})[p];   // [[날짜, 세로, 가로], …]
+      if (!q || !m || !SECP.xs(m)) return q;
+      var out = q.map(function(r){ var by = ixRet(m, r[0], NX[p][1]), bx = ixRet(m, r[0], NX[p][0]); return by == null || bx == null ? null : [r[0], +(r[1] - by).toFixed(2), +(r[2] - bx).toFixed(2)]; });
+      return out.every(function(r){ return r; }) ? out : q; },
+    xs: function(m){ return !(window.store && store.secx === false) && !!ixMap(m) && ixRet(m, m.date, 5) != null; },
+    ixn: function(m){ var M = ixMap(m); return M ? M.name : "지수"; },
+    /* 축 반쪽 길이: 혼자 튄 값은 빼고 정함. 반환값 L, 점은 ±L×0.94 안으로 붙이고 넘친 쪽을 화살표로 */
+    lim: function(vals){ var a = vals.filter(function(v){ return v != null && isFinite(v); }).map(Math.abs).sort(function(p, q){ return p - q; });
+      if (!a.length) return 1.15; var mx = a[a.length - 1], q = a[Math.floor((a.length - 1) * 0.85)], L = Math.max(q * 1.6, 1);
+      return mx <= L * 1.3 ? Math.max(mx, 1) * 1.15 : L * 1.15; },
+    clip: function(v, L){ var c = L * 0.94; return v > c ? [c, 1] : v < -c ? [-c, -1] : [v, 0]; },
+    /* 가장자리에 붙인 점: 바깥쪽을 가리키는 작은 삼각형 (이름은 그림 아래 한 줄로 — 글씨 겹침 방지) */
+    tri: function(cx, cy, dx, dy, col){ var a = Math.atan2(-dy, dx), f = function(r, t){ return (cx + r * Math.cos(t)).toFixed(1) + "," + (cy + r * Math.sin(t)).toFixed(1); };
+      return '<polygon points="' + f(11, a) + " " + f(6, a + 2.3) + " " + f(6, a - 2.3) + '" fill="' + col + '" opacity=".9"/>'; },
+    out: function(L){ return L.length ? '<div class="secp-out">↗ 너무 멀어 가장자리에 붙인 섹터 · ' + L.map(function(o){ return '<span><i style="background:' + o.c + '"></i>' + e(o.n) + ' <b class="' + (o.v >= 0 ? "up" : "dn") + '">' + sgn(o.v, 1) + '%</b></span>'; }).join(" ") + '</div>' : ""; },
+    arr: function(dx, dy){ return ({"1,0": "→", "-1,0": "←", "0,1": "↑", "0,-1": "↓", "1,1": "↗", "-1,1": "↖", "1,-1": "↘", "-1,-1": "↙"})[dx + "," + dy] || ""; },
     rp: function(m){ var p = SECP.cur(); if (p === "1M") return p;                                   // 되감기에 쓸 기간 (자료가 아직 없으면 1개월)
       return (m.sectors || []).filter(function(x){ var q = (x.pathp || {})[p]; return q && q.length; }).length >= 4 ? p : "1M"; },
     today: function(){ return TD; },
     /* kind: "p" 기간만 · "b" 섹터 등락(오늘·1주 포함) · "t" 오늘 카드(오늘 포함) */
     tabs: function(kind){ var c = SECP.cur(), on = function(v){ return kind === "b" ? (BARK ? (v === "D" ? BARK === "r1" : v === "W" && BARK === "r5") : v === c) : kind === "t" ? (TD ? v === "D" : v === c) : v === c; };
       var bs = (kind === "b" ? [["D", "오늘"], ["W", "1주"]] : kind === "t" ? [["D", "오늘"]] : []).concat(PK.map(function(k){ return [k, SP[k].xl]; }));
-      return '<div class="seg2 secp" data-kind="' + (kind || "p") + '">' + bs.map(function(b){ return '<button type="button" data-secp="' + b[0] + '"' + (on(b[0]) ? ' class="on"' : '') + '>' + b[1] + '</button>'; }).join("") + '</div>'; },
+      var xb = (kind || "p") === "p" ? '<button type="button" data-secx="1" class="secx' + (window.store && store.secx === false ? '' : ' on') + '">📏 지수 대비</button>' : '';
+      return '<div class="seg2 secp" data-kind="' + (kind || "p") + '">' + bs.map(function(b){ return '<button type="button" data-secp="' + b[0] + '"' + (on(b[0]) ? ' class="on"' : '') + '>' + b[1] + '</button>'; }).join("") + xb + '</div>'; },
     reg: function(n, fn){ SREG[n] = fn; },
     body: function(n, k, html, tag, cls){ tag = tag || "div"; return '<' + tag + (cls ? ' class="' + cls + '"' : '') + ' data-secpb="' + n + '" data-mk="' + e(k) + '">' + html + '</' + tag + '>'; },
     refresh: function(){
@@ -935,6 +965,14 @@
         var nb = t.firstChild.children; [].forEach.call(w.children, function(b, i){ if (nb[i]) b.classList.toggle("on", nb[i].classList.contains("on")); }); });
     }
   };
+  document.addEventListener("click", function(ev){
+    var x = ev.target.closest && ev.target.closest("[data-secx]"); if (!x) return;
+    try { store.secx = store.secx === false ? true : false; save(); } catch(err) {}
+    SECP.refresh();
+  });
+  var cs = document.createElement("style");
+  cs.textContent = ".seg2.secp .secx{margin-left:auto}.seg2.secp .secx:not(.on){opacity:.65}.rotsv .clp{stroke-dasharray:2 2}.secp-out{font-size:12.5px;color:var(--sub);margin:4px 2px 2px;line-height:1.7}.secp-out span{white-space:nowrap;margin-right:8px}.secp-out i{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 4px 1px 4px;vertical-align:middle}";
+  document.head.appendChild(cs);
   document.addEventListener("click", function(ev){
     var b = ev.target.closest && ev.target.closest("[data-secp]"); if (!b) return;
     var v = b.dataset.secp;
@@ -998,10 +1036,11 @@
   }
   function rotSvgNow(m){
     var p = SECP.cur(), L = SP[p];
-    var ss = m.sectors.map(function(x){ var q = SECP.xy(x, p); return {s: x, x: q.x, y: q.y}; }).filter(function(o){ return o.x != null && o.y != null; });
+    var XS = SECP.xs(m), IXN = SECP.ixn(m);
+    var ss = m.sectors.map(function(x){ var q = SECP.xy(x, p, m); return {s: x, x: q.x, y: q.y}; }).filter(function(o){ return o.x != null && o.y != null; });
     if (ss.length < 4) return '<div class="empty">' + L.xl + ' 자료가 아직 모자라요 (상장·자료 기간이 짧은 시장).</div>';
     var TOP = V.topSet(ss.map(function(o){ return {k: o.s.k, r5: o.y, r20: o.x, r1: o.s.r1, n: o.s.n, name: o.s.name, p: o.s.p}; }), 10);
-    var W = 330, H = 250, P = 26, mx = Math.max.apply(null, ss.map(function(o){ return Math.abs(o.x); }).concat([1])) * 1.15, my = Math.max.apply(null, ss.map(function(o){ return Math.abs(o.y); }).concat([1])) * 1.15;
+    var W = 330, H = 250, P = 26, mx = SECP.lim(ss.map(function(o){ return o.x; })), my = SECP.lim(ss.map(function(o){ return o.y; }));
     var X = function(v){ return P + (v + mx) / (2 * mx) * (W - 2 * P); }, Y = function(v){ return P + (my - v) / (2 * my) * (H - 2 * P); };
     var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="rotsv">' +
       '<rect x="' + X(0) + '" y="' + P + '" width="' + (W - P - X(0)) + '" height="' + (Y(0) - P) + '" fill="#e66767" opacity=".08"/>' +
@@ -1009,22 +1048,26 @@
       '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + Y(0) + '" y2="' + Y(0) + '" stroke="#3a4358"/><line x1="' + X(0) + '" x2="' + X(0) + '" y1="' + P + '" y2="' + (H - P) + '" stroke="#3a4358"/>' +
       '<text x="' + (W - P - 2) + '" y="' + (P + 12) + '" text-anchor="end" class="rotq u">🔥 계속 강함</text><text x="' + (P + 2) + '" y="' + (P + 12) + '" class="rotq">🌱 새로 뜨는 중</text>' +
       '<text x="' + (W - P - 2) + '" y="' + (H - P - 6) + '" text-anchor="end" class="rotq">🍂 힘 빠지는 중</text><text x="' + (P + 2) + '" y="' + (H - P - 6) + '" class="rotq d">🧊 계속 약함</text>' +
-      '<text x="' + (W - P) + '" y="' + (H - 6) + '" text-anchor="end" class="rota">' + L.xl + ' 수익률 →</text><text x="6" y="' + (P - 8) + '" class="rota">↑ ' + L.yl + ' 수익률</text>';
-    ss.forEach(function(o, i){ var x = o.s, cx = X(o.x), cy = Y(o.y), h = x.heat || {};
-      s += '<g data-csec="' + e(x.k) + '" data-fam="' + V.famOf(x) + '"' + (TOP[x.k] ? ' data-top="1"' : '') + ' style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b><br>오늘 " + pct(x.r1) + " · 1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + (h["3M"] != null ? "<br>3개월 " + pct(h["3M"]) : "") + (h["6M"] != null ? " · 6개월 " + pct(h["6M"]) : "")) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="13" fill="transparent"/>' +
-        '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + V.secCol(x.k, i) + '" stroke="#121826" stroke-width="2"/>' +
-        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + V.secCol(x.k, i) + '">' + e(V.shortSec(x.name)) + '</text></g>'; });
-    return s + '</svg>';
+      '<text x="' + (W - P) + '" y="' + (H - 6) + '" text-anchor="end" class="rota">' + L.xl + (XS ? ' ' + e(IXN) + ' 대비' : ' 수익률') + ' →</text><text x="6" y="' + (P - 8) + '" class="rota">↑ ' + L.yl + (XS ? ' ' + e(IXN) + ' 대비' : ' 수익률') + '</text>';
+    var OUT = [];
+    ss.forEach(function(o, i){ var x = o.s, h = x.heat || {}, kx = SECP.clip(o.x, mx), ky = SECP.clip(o.y, my), cx = X(kx[0]), cy = Y(ky[0]), ar = SECP.arr(kx[1], ky[1]);
+      if (ar) OUT.push({n: x.name, c: V.secCol(x.k, i), v: kx[1] ? o.x : o.y});
+      s += '<g data-csec="' + e(x.k) + '" data-fam="' + V.famOf(x) + '"' + (TOP[x.k] ? ' data-top="1"' : '') + ' style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b><br>오늘 " + pct(x.r1) + " · 1주 " + pct(x.r5) + " · 1개월 " + pct(x.r20) + (h["3M"] != null ? "<br>3개월 " + pct(h["3M"]) : "") + (h["6M"] != null ? " · 6개월 " + pct(h["6M"]) : "") +
+          (XS ? "<br>" + IXN + " 대비 " + L.yl + " " + pct(o.y) + " · " + L.xl + " " + pct(o.x) : "") + (ar ? "<br>너무 멀어 가장자리에 붙임" : "")) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="13" fill="transparent"/>' +
+        '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + V.secCol(x.k, i) + '" stroke="' + (ar ? "#e8ecf4" : "#121826") + '" stroke-width="2"' + (ar ? ' class="clp"' : '') + '/>' +
+        (ar ? SECP.tri(cx, cy, kx[1], ky[1], V.secCol(x.k, i)) : '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + V.secCol(x.k, i) + '">' + e(V.shortSec(x.name)) + '</text>') + '</g>'; });
+    return s + '</svg>' + SECP.out(OUT);
   }
-  function rotNote(){ var L = SECP.lab();
-    return '오른쪽 위 = ' + L.xn + ' 내내 강하고 ' + L.yn + '도 강함 · 왼쪽 위 = ' + L.xn + '은 약했는데 ' + L.yn + ' 살아남 (새로 뜨는 곳) · 오른쪽 아래 = ' + L.xn + ' 강했지만 ' + L.yn + ' 식음.' +
-      ' <span class="mut">1개월 = 빠른 신호 · 3개월 = 비중 조절용 · 6개월 = 큰 흐름.</span>'; }
+  function rotNote(m){ var L = SECP.lab(), XS = m && SECP.xs(m);
+    return (XS ? '<b>가운데 선 = ' + e(SECP.ixn(m)) + '.</b> 오른쪽 = 지수보다 강함, 왼쪽 = 지수보다 약함 (장 전체가 빠져도 상대적으로 강한 곳이 보임). ' : '') +
+      '오른쪽 위 = ' + L.xn + ' 내내 강하고 ' + L.yn + '도 강함 · 왼쪽 위 = ' + L.xn + '은 약했는데 ' + L.yn + ' 살아남 (새로 뜨는 곳) · 오른쪽 아래 = ' + L.xn + ' 강했지만 ' + L.yn + ' 식음.' +
+      ' <span class="mut">1개월 = 빠른 신호 · 3개월 = 비중 조절용 · 6개월 = 큰 흐름. 삼각형(▶)이 붙은 섹터는 너무 멀리 있어 가장자리에 붙인 것 — 실제 값은 그림 아래 줄.</span>'; }
   SECP.reg("map", function(m){ return rotSvgNow(m); });
-  SECP.reg("mapn", function(){ return rotNote(); });
+  SECP.reg("mapn", function(m){ return rotNote(m); });
   function rotation(m, k){
     if (m.sectors.filter(function(x){ return x.r5 != null && x.r20 != null; }).length < 4) return "";
     var s = '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '">' + SECP.body("map", k, rotSvgNow(m)) + V.famChips("map") + '</div>';
-    return card("🔄 섹터 로테이션 지도 <span class='mut'>돈이 어디로 움직이나</span>", SECP.tabs("p") + s + SECP.body("mapn", k, rotNote(), "p", "note"));
+    return card("🔄 섹터 로테이션 지도 <span class='mut'>돈이 어디로 움직이나</span>", SECP.tabs("p") + s + SECP.body("mapn", k, rotNote(m), "p", "note"));
   }
   function highs(m){
     if (!m.high_list || !m.high_list.length) return "";
@@ -6800,7 +6843,7 @@
   }
   var RSEL = {};       // 되감기: 고른 섹터만 (10/11 사용자: "섹터 선택하면 그것만 돌려 볼 수 있게, 전체 누르면 다시 전체")
   /* 🗓 11/17 섹터 기간 탭(1·3·6개월) — 3·6개월을 고르면 그 기간 흐름(pathp)으로 되감기 */
-  function rpth(m){ var SP = window.SECP, p = SP ? SP.rp(m) : "1M"; return {p: p, L: SP ? SP.lab(p) : {xl: "1개월", yl: "1주"}, f: function(x){ return SP ? SP.path(x, p) : x.path; }}; }
+  function rpth(m){ var SP = window.SECP, p = SP ? SP.rp(m) : "1M"; return {p: p, L: SP ? SP.lab(p) : {xl: "1개월", yl: "1주"}, f: function(x){ return SP ? SP.path(x, p, m) : x.path; }}; }
   function rotSvg(m, di, sel){
     var RP = rpth(m);
     var ss = (m.sectors || []).map(function(x){ var o = Object.create(x); o.path = RP.f(x); o._s = x; return o; }).filter(function(x){ return x.path && x.path.length; });
@@ -6808,13 +6851,19 @@
     var W = 330, H = 250, Pd = 26, all = [];
     ss.forEach(function(x){ if (!sel || x.k === sel) x.path.forEach(function(p){ all.push(p); }); });
     var TOP = V.topSet(ss, 10);   // 한 섹터만 볼 땐 그 섹터 길이에 맞춰 크게
-    var mx = Math.max.apply(null, all.map(function(p){ return Math.abs(p[2]); }).concat([1])) * 1.12, my = Math.max.apply(null, all.map(function(p){ return Math.abs(p[1]); }).concat([1])) * 1.12;
-    var Xs = function(v){ return Pd + (v + mx) / (2 * mx) * (W - 2 * Pd); }, Ys = function(v){ return Pd + (my - v) / (2 * my) * (H - 2 * Pd); };
+    var SP = window.SECP, cur = [];
+    ss.forEach(function(x){ if (!sel || x.k === sel){ var q = x.path[Math.min(di, x.path.length - 1)]; if (q) cur.push(q); } });
+    // 📏 11/17 혼자 튄 섹터는 가장자리에 붙임 — 축은 지금 칸 기준(지난 길이 넘치면 가장자리에서 잘림)
+    var mx = SP ? SP.lim(cur.map(function(p){ return p[2]; })) : Math.max.apply(null, all.map(function(p){ return Math.abs(p[2]); }).concat([1])) * 1.12,
+        my = SP ? SP.lim(cur.map(function(p){ return p[1]; })) : Math.max.apply(null, all.map(function(p){ return Math.abs(p[1]); }).concat([1])) * 1.12;
+    var cX = function(v){ return Math.max(-mx * .94, Math.min(mx * .94, v)); }, cY = function(v){ return Math.max(-my * .94, Math.min(my * .94, v)); };
+    var Xs = function(v){ v = cX(v); return Pd + (v + mx) / (2 * mx) * (W - 2 * Pd); }, Ys = function(v){ v = cY(v); return Pd + (my - v) / (2 * my) * (H - 2 * Pd); };
     var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="rotsv">' +
       '<rect x="' + Xs(0) + '" y="' + Pd + '" width="' + (W - Pd - Xs(0)) + '" height="' + (Ys(0) - Pd) + '" fill="#e66767" opacity=".08"/><rect x="' + Pd + '" y="' + Ys(0) + '" width="' + (Xs(0) - Pd) + '" height="' + (H - Pd - Ys(0)) + '" fill="#3987e5" opacity=".08"/>' +
       '<line x1="' + Pd + '" x2="' + (W - Pd) + '" y1="' + Ys(0) + '" y2="' + Ys(0) + '" stroke="#3a4358"/><line x1="' + Xs(0) + '" x2="' + Xs(0) + '" y1="' + Pd + '" y2="' + (H - Pd) + '" stroke="#3a4358"/>' +
       '<text x="' + (W - Pd - 2) + '" y="' + (Pd + 12) + '" text-anchor="end" class="rotq u">🔥 계속 강함</text><text x="' + (Pd + 2) + '" y="' + (Pd + 12) + '" class="rotq">🌱 새로 뜨는 중</text>' +
       '<text x="' + (W - Pd - 2) + '" y="' + (H - Pd - 6) + '" text-anchor="end" class="rotq">🍂 힘 빠지는 중</text><text x="' + (Pd + 2) + '" y="' + (H - Pd - 6) + '" class="rotq d">🧊 계속 약함</text>';
+    var OUT = [];
     ss.forEach(function(x, i){
       if (sel && x.k !== sel) return;
       var p = x.path, k = Math.min(di, p.length - 1), tr = p.slice(sel ? 0 : Math.max(0, k - 4), k + 1);   // 한 섹터만 볼 땐 처음부터 지나온 길 전부
@@ -6824,9 +6873,11 @@
         (sel ? tr.slice(0, -1).map(function(q){ return '<circle cx="' + Xs(q[2]).toFixed(1) + '" cy="' + Ys(q[1]).toFixed(1) + '" r="2" fill="' + col + '" opacity=".6"/>'; }).join("") : '');
       var cx = Xs(p[k][2]), cy = Ys(p[k][1]);
       s += '<g data-csec="' + e(x.k) + '" data-cm="' + MKX + '" style="cursor:pointer" data-tip="' + e("<b>" + x.icon + " " + x.name + "</b> " + p[k][0] + "<br>" + RP.L.yl + " " + pct(p[k][1]) + " · " + RP.L.xl + " " + pct(p[k][2])) + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="5" fill="' + col + '" stroke="#121826" stroke-width="2"/>' +
-        '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(V.shortSec(x.name)) + '</text></g></g>';
+        (function(){ var q = p[k], dx = q[2] > mx * .94 ? 1 : q[2] < -mx * .94 ? -1 : 0, dy = q[1] > my * .94 ? 1 : q[1] < -my * .94 ? -1 : 0;
+          if ((dx || dy) && SP){ OUT.push({n: x.name, c: col, v: dx ? q[2] : q[1]}); return SP.tri(cx, cy, dx, dy, col) + '</g></g>'; }
+          return '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(V.shortSec(x.name)) + '</text></g></g>'; })();
     });
-    return s + '</svg>';
+    return s + '</svg>' + (SP ? SP.out(OUT) : '');
   }
   if (window.SECP) SECP.reg("rot", function(m, k){ var r = document.querySelector('[data-rot="' + k + '"]'); if (r) r._tok = Math.random();
     var n = rlen(m), v = r ? Math.min(+r.value, n - 1) : n - 1; if (r){ r.max = n - 1; r.value = v; } return rotSvg(m, v, RSEL[k]); });
@@ -7821,7 +7872,7 @@
   /* 🗓 11/17 섹터 기간 탭(1·3·6개월)을 같이 씀 — window.SECP (compass.js) */
   function clockSvg(m){
     var SP = window.SECP, p = SP ? SP.cur() : "1M", L = SP ? SP.lab(p) : {xl: "1개월", yl: "1주"};
-    var ss = (m.sectors || []).map(function(x){ var q = SP ? SP.xy(x, p) : {x: x.r20, y: x.r5}, pa = SP ? SP.path(x, p) : x.path;
+    var ss = (m.sectors || []).map(function(x){ var q = SP ? SP.xy(x, p, m) : {x: x.r20, y: x.r5}, pa = SP ? SP.path(x, p, m) : x.path;
       return {k: x.k, icon: x.icon, name: x.name, p: x.p, n: x.n, r1: x.r1, r5: q.y, r20: q.x, path: pa, _s: x}; }).filter(function(x){ return x.r5 != null && x.r20 != null; });
     if (ss.length < 4) return '<div class="empty">' + L.xl + ' 자료가 아직 모자라요.</div>';
     var med = function(k){ var v = ss.map(function(x){ return x[k]; }).sort(function(a, b){ return a - b; }); return v[Math.floor(v.length / 2)]; };
