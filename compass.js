@@ -91,7 +91,7 @@
     SECP.refresh();
   });
   var cs = document.createElement("style");
-  cs.textContent = ".seg2.secp .secx{margin-left:auto}.seg2.secp .secx:not(.on){opacity:.65}.rotsv .clp{stroke-dasharray:2 2}.secp-out{font-size:12.5px;color:var(--sub);margin:4px 2px 2px;line-height:1.7}.secp-out span{white-space:nowrap;margin-right:8px}.secp-out i{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 4px 1px 4px;vertical-align:middle}";
+  cs.textContent = ".seg2.secp .secx{margin-left:auto}.seg2.secp .secx:not(.on){opacity:.65}.rotsv .clp{stroke-dasharray:2 2}.rot-hd{font-size:12.5px;color:var(--sub);margin:0 2px 6px;line-height:1.5}.secp-out{font-size:12.5px;color:var(--sub);margin:4px 2px 2px;line-height:1.7}.secp-out span{white-space:nowrap;margin-right:8px}.secp-out i{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 4px 1px 4px;vertical-align:middle}";
   document.head.appendChild(cs);
   document.addEventListener("click", function(ev){
     var b = ev.target.closest && ev.target.closest("[data-secp]"); if (!b) return;

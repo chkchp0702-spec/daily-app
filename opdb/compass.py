@@ -428,11 +428,13 @@ def build(daily, hl, mkt_of, dest, hlh=None):
             a5, a20 = wm(R5).iloc[-15:], wm(R20).iloc[-15:]
             x["path"] = [[d.strftime("%m/%d"), _r(v5 * 100), _r(v20 * 100)] for d, v5, v20 in zip(a5.index, a5.values, a20.values) if v5 == v5 and v20 == v20]
             pp = {}
-            for lab_, YY, XX in (("3M", R20, R63), ("6M", R63, R126)):
+            # 🗓 11/17 사용자 「되감기 1·3·6개월 흐름 맞는겨?」 — 되감기 길이도 기간에 맞춤: 1개월 = 15거래일 매일 · 3개월 = 60거래일 4일 간격 · 6개월 = 120거래일 8일 간격 (모두 16칸)
+            for lab_, YY, XX, span, step in (("3M", R20, R63, 60, 4), ("6M", R63, R126, 120, 8)):
                 if XX is None:
                     continue
-                ay, ax = wm(YY).iloc[-15:], wm(XX).iloc[-15:]
-                q = [[d.strftime("%m/%d"), _r(vy * 100), _r(vx * 100)] for d, vy, vx in zip(ay.index, ay.values, ax.values) if vy == vy and vx == vx]
+                ay, ax = wm(YY), wm(XX)
+                ii = list(range(len(ay) - 1, max(-1, len(ay) - 2 - span), -step))[::-1]
+                q = [[ay.index[i].strftime("%m/%d"), _r(ay.iloc[i] * 100), _r(ax.iloc[i] * 100)] for i in ii if ay.iloc[i] == ay.iloc[i] and ax.iloc[i] == ax.iloc[i]]
                 if q:
                     pp[lab_] = q
             if pp:

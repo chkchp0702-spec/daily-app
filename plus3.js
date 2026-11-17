@@ -51,10 +51,16 @@
           if ((dx || dy) && SP){ OUT.push({n: x.name, c: col, v: dx ? q[2] : q[1]}); return SP.tri(cx, cy, dx, dy, col) + '</g></g>'; }
           return '<text x="' + (cx + 7).toFixed(1) + '" y="' + (cy + 3.5).toFixed(1) + '" class="rotl" style="fill:' + col + '">' + e(V.shortSec(x.name)) + '</text></g></g>'; })();
     });
-    return s + '</svg>' + (SP ? SP.out(OUT) : '');
+    var RI = {"1M": "최근 15거래일 · 하루 간격", "3M": "최근 약 3개월(60거래일) · 4거래일 간격", "6M": "최근 약 6개월(120거래일) · 8거래일 간격"}, want = SP ? SP.cur() : "1M";
+    var hd = '<div class="rot-hd">' + (want !== RP.p ? '⏳ <b>' + SP.lab(want).xl + ' 흐름은 오늘 저녁(16:20 가격 작업) 뒤부터</b> 나와요. 지금은 <b>1개월 흐름</b>을 보여 줘요.' :
+      '<b>' + RP.L.xl + ' 흐름</b> · ' + RI[RP.p] + ' · 꼬리 = 직전 4칸 · 가로 ' + RP.L.xl + ' · 세로 ' + RP.L.yl + (SP && SP.xs(m) ? ' (' + e(SP.ixn(m)) + ' 대비)' : '')) + '</div>';
+    return hd + s + '</svg>' + (SP ? SP.out(OUT) : '');
   }
   if (window.SECP) SECP.reg("rot", function(m, k){ var r = document.querySelector('[data-rot="' + k + '"]'); if (r) r._tok = Math.random();
-    var n = rlen(m), v = r ? Math.min(+r.value, n - 1) : n - 1; if (r){ r.max = n - 1; r.value = v; } return rotSvg(m, v, RSEL[k]); });
+    var n = rlen(m), v = n - 1; if (r){ r.max = n - 1; r.value = v; }
+    var RP = rpth(m), s0 = (m.sectors || []).filter(function(x){ var q = RP.f(x); return q && q.length; })[0], dd = document.getElementById("rotd-" + k);
+    if (dd && s0) dd.textContent = (RP.f(s0)[v] || [""])[0];
+    return rotSvg(m, v, RSEL[k]); });
   function rlen(m){ var RP = rpth(m); return Math.max.apply(null, (m.sectors || []).map(function(x){ var q = RP.f(x); return q ? q.length : 0; }).concat([1])); }
   function rotSlider(m, k){
     var RP = rpth(m);
@@ -62,7 +68,7 @@
     if (ss.length < 4) return "";
     var n = Math.max.apply(null, ss.map(function(x){ return RP.f(x).length; }));
     var days = RP.f(ss[0]).map(function(p){ return p[0]; });
-    return card("🎞️ 섹터 흐름 되감기 <span class='mut'>최근 " + n + "거래일 · 꼬리 = 지난 4일 이동</span>", (window.SECP ? SECP.tabs("p") : "") +
+    return card("🎞️ 섹터 흐름 되감기 <span class='mut'>기간 탭에 따라 1·3·6개월 흐름</span>", (window.SECP ? SECP.tabs("p") : "") +
       '<div class="famw" data-ff="' + ((window.store && store.secf) || "") + '"><div id="rotw-' + k + '"' + (window.SECP ? ' data-secpb="rot" data-mk="' + e(k) + '"' : '') + '>' + rotSvg(m, n - 1, RSEL[k]) + '</div>' + V.famChips("rot") +
       // 세부 섹터 칩: 고른 계열의 섹터만 보이고, 누르면 그 섹터만 재생 (10/11 사용자: "밑에 세부 섹터는 되감기 재생 안 됨")
       '<div class="rots">' + ['<button data-rsel="' + k + '|"' + (!RSEL[k] ? ' class="on"' : '') + '>전체</button>'].concat(ss.map(function(x, i){
