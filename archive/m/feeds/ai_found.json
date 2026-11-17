@@ -1,6 +1,118 @@
 {
  "items": [
   {
+   "title": "엔비디아, Arm CEO 르네 하스에 차기 CEO 타진 — 직원들은 황 복귀 원해(보도 종합)",
+   "url": "https://www.khaleejtimes.com/business/tech/nvidia-approaches-arm-ceo-haas",
+   "press": "Khaleej Times(WSJ·FT 보도 종합)",
+   "at": "2026-11-18 03:40",
+   "why": "NVDA 🐋 고래 신호·반도체 칸 — 실적 직전 지배구조 불확실성(외부 CEO vs 황 복귀)",
+   "summary": "이사회가 하이드릭&스트러글스로 CEO 후보 탐색, Arm CEO 하스와 접촉(WSJ). 직원들은 황 복귀 요구. 회사 공식 확인 전."
+  },
+  {
+   "title": "누가 젠슨 황을 잇나 — 엔비디아 정식 CEO 찾기 시작",
+   "url": "https://yourstory.com/2026/11/who-will-succeed-jensen-huang-race-to-find-permanent-chief-begins",
+   "press": "YourStory",
+   "at": "2026-11-18 03:40",
+   "why": "💬 2번 엔비디아 질문 — 후보군(내부·경쟁사·정치 추천) 정리",
+   "summary": "내부 인사·경쟁사 CEO·트럼프 측 추천까지 후보 거론(SCMP도 비슷한 분석). 확정 일정 미확인."
+  },
+  {
+   "title": "나스닥·S&P500, 엔비디아 실적·앤스로픽 상장 앞두고 1% 넘게 하락(로이터)",
+   "url": "https://www.marketscreener.com/news/nasdaq-s-p-500-fall-over-1-in-run-up-to-nvidia-results-anthropic-debut-ce785edfdd89fe26",
+   "press": "Reuters/MarketScreener",
+   "at": "2026-11-18 02:45",
+   "why": "실적·대형 IPO 두 이벤트 직전 위험 회피 — 나스닥100 코어 칸·🐻 나스닥 「조정」 판정",
+   "summary": "11/17 美 장중 나스닥·S&P500 −1%↑, 소프트웨어 약세로 다우도 급락(IBD). 블룸버그 「위험 회피 매수로 국채 강세」."
+  },
+  {
+   "title": "나스닥100, 대형 IPO 15거래일 고속 편입 규칙 — 앤스로픽도 대상",
+   "url": "https://www.marketscreener.com/news/nasdaq-100-emergency-plan-to-integrate-private-giants-within-15-days-ce7e51dedb8fff26",
+   "press": "MarketScreener",
+   "at": "2026-11-18 02:45",
+   "why": "앤스로픽 편입 시 QQQ 등 추종 자금이 기존 구성 종목을 줄여야 함 — 편입일 전후 빅테크 수급 부담",
+   "summary": "나스닥이 초대형 신규 상장 종목을 15거래일 안에 나스닥100에 넣는 규칙 도입(스페이스X 선례). 마켓워치 11/17 「나스닥100 펀드는 15거래일 뒤 앤스로픽을 보유하게 된다」."
+  },
+  {
+   "title": "젠슨 황 스캔들, 엔비디아 이사회 최대 시험대",
+   "url": "https://news.bgov.com/banking-law/jensen-huang-scandal-gives-nvidias-board-its-biggest-test-yet",
+   "press": "Bloomberg Government",
+   "at": "2026-11-18 00:35",
+   "why": "NVDA 🐋 고래 신호·💬 3번 — 실적 직후 이사회 지배구조·수출통제 감독위가 주가 변수로 남는다",
+   "summary": "황 사임 뒤 첫 실적(11/17 장 마감 뒤)을 앞두고 이사회가 독립 조사·국가안보·수출통제 감독위 신설로 대응. 12/1 하원 외교위 출석 예정(CNBC). 세부 숫자 미확인."
+  },
+  {
+   "title": "11월 주택건설업체 신뢰지수 여전히 바닥 — 가격 인하 확산",
+   "url": "https://probuilder.com/business-management/market-data-trends/news/55332351/home-builder-confidence-remains-low-in-november",
+   "press": "Pro Builder",
+   "at": "2026-11-18 00:35",
+   "why": "가설 ③ 12/9 FOMC — 10년 5%대 고금리가 주택부터 누름(14년 최저권) · 소매판매·산업생산 둔화와 함께 「매파 vs 식는 경기」",
+   "summary": "NAHB 지수 14년 최저권 유지, 건설사 절반 가까이 가격 인하·모기지 금리 보조(CNBC·블룸버그 11/17 피드 제목). 정확한 지수 값은 원문 확인 못 함."
+  },
+  {
+   "title": "앤스로픽 IPO, 기업가치 약 1조 달러 겨냥 — 한때 거론된 2조 달러의 절반",
+   "url": "https://investinglive.com/stocks/anthropic-ipo-targets-around-1-trillion-valuation-half-the-2-trillion-once-whispered/",
+   "press": "investingLive",
+   "at": "2026-11-17 23:40",
+   "why": "💬 5번 앤스로픽 — 오늘 밤 CNBC 「밴드 위 책정」 보도와 대비되는 몸값 기준선, 11/18 공모가 판정용",
+   "summary": "희망가 70~78달러 · 기업가치 약 1조 달러대 목표(원문 날짜 확인 필요). 피드: CNBC·블룸버그 11/17 「밴드 상단 또는 그 이상 책정 추진」."
+  },
+  {
+   "title": "美, 중국산 데이터센터 광트랜시버 금지 추진 — 美 하이퍼스케일러 공급망 재편",
+   "url": "https://thenextweb.com/news/fcc-optical-transceiver-ban-china-us-hyperscalers",
+   "press": "The Next Web",
+   "at": "2026-11-17 22:40",
+   "why": "광통신 칸(LITE→MRVL·COHR) — 오늘 코히런트 +10%·루멘텀 +8% 장 전 급등의 배경, 중국 이노라이트·이옵텍 대체 수요가 美 공급사로",
+   "summary": "美 당국이 중국산 광트랜시버 수입·사용 제한을 추진(원문 날짜 확인 필요). 피드: 코히런트 +10%·루멘텀 +8% 장 전(구글뉴스 11/17)·이데일리 「광기술주 개장 전↑」."
+  },
+  {
+   "title": "무살렘 세인트루이스 연은 총재 「내년 봄까지 여러 차례 인상 필요할 것」",
+   "url": "https://investinglive.com/central-banks/icymi-fed-s-musalem-says-more-rate-hikes-likely-needed-as-inflation-risks-stay-elevated/",
+   "press": "investingLive",
+   "at": "2026-11-17 22:40",
+   "why": "가설 ③ 12/9 FOMC — 「한 번 인상」이 아닌 「여러 번」 경로, 美 10년 5% 칸·성장주 부담",
+   "summary": "무살렘 「봄까지 여러 차례(several) 인상」(블룸버그 11/17 제목). 해맥 「더 크고 빠른 인상」에 이은 매파 발언. 숫자 경로는 원문 확인 필요."
+  },
+  {
+   "title": "다우 선물 소폭 상승 — 엔비디아 실적 앞두고 월가 4일 연속 하락 끊기 시도",
+   "url": "https://www.bizzbuzz.news/international/dow-futures-edge-higher-ahead-of-nvidia-earnings-wall-street-looks-to-break-4-day-slide-1378015",
+   "press": "BizzBuzz",
+   "at": "2026-11-17 21:40",
+   "why": "나스닥 칸·가설 ② — 실적 직전 매도 진정 여부, 피드 인베스팅 「선물 보합·기술주 매도 완화」와 같은 쪽",
+   "summary": "美 지수 선물 보합~소폭 상승, 4거래일 연속 하락 뒤 엔비디아 실적(장 마감 뒤) 대기. 세부 숫자는 원문 확인 필요(미확인)."
+  },
+  {
+   "title": "코히런트 +18%·루멘텀 +12% — 엔비디아 혼란에도 AI 광통신 반등 이어져",
+   "url": "https://www.tikr.com/blog/coherent-soars-18-lumentum-up-12-as-ai-optics-rebound-extends-despite-nvidia-turmoil",
+   "press": "TIKR",
+   "at": "2026-11-17 21:40",
+   "why": "광통신 칸(LITE→MRVL·COHR) — 반도체 정리 중 광통신만 역행 = 가설 ④ 「현금 도는 상류」 근거",
+   "summary": "제목 기준 코히런트 +18%·루멘텀 +12%로 AI 광학 반등 연장(기사 날짜 원문 확인 필요). 11/17 장 전 인베스팅 「Why is Coherent stock surging today?」와 이어짐."
+  },
+  {
+   "title": "BofA 11월 펀드매니저 설문 — 투자 심리 2월 이후 최고(XTB 정리)",
+   "url": "https://www.xtb.com/ae-en/market-analysis/news-and-research/what-do-institutional-investors-expect-bofa-fms-investor-sentiment-hits-its-highest-level-since-february",
+   "press": "XTB",
+   "at": "2026-11-17 20:35",
+   "why": "같은 날 블룸버그 「기술주 비중 2006년 이후 최대 축소」와 함께 보면 — 주식 전체는 낙관, 기술주만 덜어 냄 = 가설 ② 「업종 갈아타기」 쪽 근거, 나스닥 칸",
+   "summary": "BofA 11월 FMS: 투자 심리 2월 이후 최고(유럽 주식 낙관도 2월 이후 최고, 인베스팅 동일 보도) · 기술주 비중은 2006년 이후 최대 폭 축소(블룸버그 11/17) — 세부 숫자 미확인"
+  },
+  {
+   "title": "엔비디아 옵션, 실적 뒤 시총 약 3,350억~3,780억 달러 변동 반영",
+   "url": "https://fourweekmba.com/ai-nvidia-options-price-a-378b-swing-above-its-last-8-reports/",
+   "press": "FourWeekMBA",
+   "at": "2026-11-17 20:35",
+   "why": "엔비디아 실적(한국 11/18 아침) — 옵션이 지난 8번 실적 평균보다 큰 변동을 가격에 넣음 = 반도체 칸·🐋 NVDA 신호, 한국 반도체(💬 2·3·4번) 아침 변동 폭",
+   "summary": "로이터(인베스팅 11/17)는 실적 뒤 ±3,350억 달러 변동 반영 보도 · FourWeekMBA는 3,780억 달러로 최근 8번 실적보다 큼 — 기준 시점에 따라 숫자 차이"
+  },
+  {
+   "title": "엔비디아 실적 미리보기 — 「황 이후 시대」 첫 시험대",
+   "url": "https://www.forex.com/en/news-and-analysis/nvidia-earnings-preview-nvda-s-first-test-of-the-post-jenson-huang-era/",
+   "press": "FOREX.com",
+   "at": "2026-11-17 18:40",
+   "why": "오늘 밤(한국 11/18 아침) 엔비디아 실적 — 숫자보다 리더십·중국 변수, 반도체 칸·🐋 NVDA 고래·가설 ④",
+   "summary": "황 CEO 퇴진 뒤 첫 실적 — 시장은 「beat & raise」 기대, 관건은 가이던스와 中 매출 공백 설명 · 나스닥100 상승 추세가 갈림길(같은 매체 별도 글)"
+  },
+  {
    "title": "엔비디아, 클라우드 고객에 「중국 사업 49% 이하로」 — 임대 우회로 좁힌다",
    "url": "https://www.tikr.com/blog/nvidia-tells-cloud-clients-to-cap-chinese-business-at-49-narrowing-the-rental-loophole",
    "press": "TIKR",
@@ -527,119 +639,7 @@
    "at": "2026-11-16 05:45",
    "why": "11/17 임시 CEO 첫 실적 앞 — 황 복귀 논의(FT)와 이사회 조사가 동시에 진행, 반도체 칸·AI 차입 가설",
    "summary": "이사회 조사가 진행 중인 가운데 데이터센터 업계는 공급 일정·고객 관계 영향을 점검. 세부 숫자는 미확인."
-  },
-  {
-   "title": "연준 슈미드, 매파 합창에 합류 — 「금리 방향은 인상」",
-   "url": "https://www.morningstar.com/news/dow-jones/2026111010580/feds-schmid-joins-hawkish-chorus-on-rate-direction",
-   "press": "모닝스타(다우존스)",
-   "at": "2026-11-16 04:45",
-   "why": "12/9 FOMC 분수령 가설 — 11/15 「할 일 남았다」 재확인으로 지역 연은 총재 매파 쪽 일주일째, 11/18 의사록 앞",
-   "summary": "슈미드 캔자스시티 연은 총재가 11/10 인상 쪽 목소리에 합류, 11/15 「물가를 끌어내리려면 할 일이 남았다」(블룸버그·CNBC 제목) 재확인."
-  },
-  {
-   "title": "마이클 버리, 반도체 ETF 풋 25% 차익 실현 — 「여전히 매우 약세」",
-   "url": "https://247wallst.com/investing/2026/11/06/michael-burry-sold-25-of-his-chip-puts-and-says-hes-still-very-bearish/",
-   "press": "24/7 Wall St.",
-   "at": "2026-11-16 03:45",
-   "why": "11/16 홍콩 매체 「버리 나스닥·반도체 숏 확대」 제목과 엇갈림 — 11/6 기준 풋 일부 정리, 엔비디아 실적 앞 반도체 칸 「반등 추격 금지」 판단의 참고",
-   "summary": "11/5~6 버리가 반도체 ETF 풋 포지션 25%를 정리했지만 약세 시각은 유지. 11/16 홍콩 보도의 「숏 확대」는 시점·규모 미확인."
-  },
-  {
-   "title": "엔비디아 황 조사 착수 — 한국 칩 업체들 충격 대비",
-   "url": "https://www.koreajoongangdaily.com/business/as-nvidia-begins-huang-probe-korean-chipmakers-brace-for-impact/12965338",
-   "press": "코리아중앙데일리",
-   "at": "2026-11-16 02:45",
-   "why": "삼성전자·SK하이닉스 HBM 공급 일정과 수출 규제 위험 — 월요일 한국 반도체 개장·코스피 하락장 판정과 이어짐",
-   "summary": "엔비디아 내부 조사 착수 뒤 한국 메모리 업체 영향 점검 기사. 세부 숫자는 원문 미확인."
-  },
-  {
-   "title": "WSJ: 스페이스X, 텍사스·애리조나 데이터센터에 740억달러 넘게 투자 계획",
-   "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxPRHBDbl83ZEF3NVVUcjdrMG9mczZ2UGdtRWNpbWxiOVo3aHNodU03Z0RsRU8wSFZZZlBNQV83V09DOWVlendGdjliM0xvT0twMjhqbkIyZEZva21DZDhLOEtFQ3lha1NLM2J6Q01EWTNET3ZxNFlieWRHX29CRl9HVDByY05qLWNyU2NQcDhPcGxEeFlEUzFWM3hYVEtzRk9LbklfQ3JLaF9lYkZhenB3R3dB?oc=5",
-   "press": "WSJ",
-   "at": "2026-11-16 01:45",
-   "why": "황 퇴진·네비우스 하향 속에도 현금 많은 쪽 AI 설비는 커진다 — 「상류·전력이 빚으로 짓는 곳을 이긴다」 가설, 전력·냉각 칸",
-   "summary": "WSJ 11/15 제목 「스페이스X 텍사스·애리조나 데이터센터 740억달러↑」. 애리조나 코치스 카운티 6GW 캠퍼스는 11/10 지역 보도(KJZZ·Baxtel)로 확인, 740억 세부 내역은 원문 미확인."
-  },
-  {
-   "title": "스쿠프: 베선트, 상황실서 러트닉과 충돌 — 메가스피드·엔비디아 칩 중국 우회 방치 놓고",
-   "url": "https://axios.com/2026/11/11/bessent-lutnick-megaspeed-nvidia-china-chips",
-   "press": "Axios",
-   "at": "2026-11-16 00:45",
-   "why": "11/15 밤 베선트 「엔비디아 극적 쇄신 필요」(블룸버그 제목)의 배경 — 실적(11/17) 앞 정부의 수출 규제·지배구조 압박, 반도체 칸·AI 차입 가설",
-   "summary": "베선트 재무장관이 상황실 회의에서 러트닉 상무장관에게 메가스피드 등을 통한 엔비디아 칩 중국 우회 반입 대응 부족을 따짐(11/11 보도). 주말 블룸버그 「베선트, 황 퇴진 뒤 엔비디아 극적 쇄신 필요」 — 세부 숫자 미확인."
-  },
-  {
-   "title": "BofA 하트넷: 강달러가 글로벌 유동성 충격 — 위험자산 진입은 내년 봄으로 연기",
-   "url": "https://wallstreetcn.com/articles/3785968",
-   "press": "월스트리트CN(BofA Flow Show 요약)",
-   "at": "2026-11-15 23:45",
-   "why": "원/달러·🐻 코스피 다시 사기 시점·해외 포트 「덜 흔들리는 칸」 — 달러 정점 전엔 위험자산 진입 어렵다는 대표 전략가 판단",
-   "summary": "달러지수 연중 최고·높은 유가·끈질긴 물가로 진입 조건 3개 모두 미충족. 달러 정점 전망 내년 2~3월, 글로벌 인상 사이클 끝 내년 4월 FOMC로 연기. 「너무 비싸 사기 어렵고, 방어 세력이 있어 숏도 어렵다」."
-  },
-  {
-   "title": "이란, 바레인 美 공군기지 공격 주장 — 바레인 「여러 발 요격」, 몇 달 만의 전국 경보",
-   "url": "https://france24.com/en/middle-east/20261115-iran-claims-attack-on-us-military-airbase-in-bahrain",
-   "press": "France 24",
-   "at": "2026-11-15 22:45",
-   "why": "주말 「새 도발 없으면 이란 공격 중단 검토」(로이터) 전제가 흔들림 — 월요일 브렌트·장부 brent_95·에너지 칸·항공주",
-   "summary": "11/15 이란이 바레인 美 기지 공격을 발표, 바레인군은 공중 공격 여러 발을 목표 도달 전 요격(CNBC·France24) · 블룸버그 「이란, 美와 합의 길은 열려 있다」 반복 · 같은 날 이란 의회 「호르무즈 항로 연안국 2곳과 합의」(타스님)"
-  },
-  {
-   "title": "바레인, 몇 달 만에 첫 전국 경보 — 이란 「美 헬기 주둔 기지 공격」",
-   "url": "https://www.thenationalnews.com/news/gulf/2026/11/15/bahrain-issues-first-nationwide-alert-in-months-as-iran-claims-attack-on-base-hosting-us-helicopters/",
-   "press": "The National",
-   "at": "2026-11-15 22:45",
-   "why": "걸프 확전 여부 — 유가 「협상 기대 vs 무산」 축, 💬 18번 유가 답의 첫 근거",
-   "summary": "바레인 전국 경보는 몇 달 만에 처음 · 美 헬기 주둔 기지 대상(이란 주장) · 피해 규모 미확인"
-  },
-  {
-   "title": "마이크로소프트, 오라클 AI 클라우드 임대 계약(2023년) 정리 — 구형 엔비디아 칩 기반",
-   "url": "https://thenextweb.com/news/microsoft-winds-down-oracle-ai-cloud-capacity-deal",
-   "press": "The Next Web(블룸버그 보도 인용)",
-   "at": "2026-11-15 11:40",
-   "why": "「빚으로 짓는 곳(오라클·네오클라우드)이 진다」 가설 — 최대 고객이 임대 용량을 줄이는 첫 사례, 11/17 엔비디아 실적 앞 AI 인프라 수요 점검",
-   "summary": "MS가 오라클에서 빌리던 AI 연산 용량 계약을 연장하지 않고 축소(블룸버그, 11월 초) · 네비우스·IREN 등 네오클라우드 데이터센터 인도 일정도 늦춤(텔레그램 kimu_nim 요약)"
-  },
-  {
-   "title": "엔비디아 3분기 실적 미리보기 — AI 지출 위험·지배구조 우려가 상승 추세 위협",
-   "url": "https://www.marketpulse.com/markets/nvidia-nvda-q3-earnings-preview-ai-spending-risks-and-governance-concerns-threaten-major-uptrend/",
-   "press": "MarketPulse",
-   "at": "2026-11-15 11:40",
-   "why": "11/17 엔비디아 실적(임시 CEO 첫 발표) — 반도체 칸·🔭 SOXX 저점 방어 판단",
-   "summary": "AI 지출 둔화 위험과 CEO 사임 뒤 지배구조 우려를 핵심 변수로 꼽음 · 세부 숫자는 원문 확인 필요(미확인)"
-  },
-  {
-   "title": "비트코인 6.5만 달러 붕괴 — 4개월 새 약 50% 하락",
-   "url": "https://www.forbes.com.au/news/investing/bitcoin-crashes-below-65000-as-historic-free-fall-worsens-price-is-down-almost-50-in-4-months/",
-   "press": "Forbes Australia",
-   "at": "2026-11-15 07:40",
-   "why": "🫧 버블 경보 「현금 도피」 끝단 — 코인 급락이 네오클라우드·고베타 기술주로 번지는지(월요일 나스닥 칸)",
-   "summary": "비트코인 6.5만 달러 아래로 주간 하락 연장 · 고점 대비 4개월 새 약 −50% · 美 물가·ETF 자금 유출이 배경으로 거론"
-  },
-  {
-   "title": "「미스터 IPO」 제이 리터, 앤스로픽 상장 기업가치 위험 경고",
-   "url": "https://www.thestreet.com/investing/anthropic-ipo-valuation-risk-1-trillion-ceiling-jay-ritter",
-   "press": "TheStreet",
-   "at": "2026-11-15 04:45",
-   "why": "11/18~20 앤스로픽 상장 = AI 심리 시험대(💬 5번·나스닥 조정 판정) — 1조 달러대 공모가 「천장」 논쟁",
-   "summary": "IPO 연구 권위자 제이 리터가 앤스로픽 공모 기업가치(밴드 상단 약 1.4조 달러) 위험을 지적. 공모가 70~78달러 로드쇼 진행 중(기존 보도)."
-  },
-  {
-   "title": "워시의 연준 개편 구상 — 금리 결정 횟수는 줄이고 숙의는 늘린다",
-   "url": "https://wjla.com/news/nation-world/kevin-warsh-floats-fewer-fed-meetings-to-reduce-market-dependence-federal-reserve-central-bank-interest-rate-decisions",
-   "press": "WJLA(ABC 계열)·WSJ 제목",
-   "at": "2026-11-15 04:45",
-   "why": "11/16 워시 토론회·12/9 FOMC 분수령 가설 — 회의 횟수 축소는 「한 번의 결정」 무게를 키움",
-   "summary": "WSJ 11/14 보도 제목 기준(본문 미확인). 워시가 연간 FOMC 회의 축소를 검토한다는 보도는 ABC 계열(wjla 등)에도 실림."
-  },
-  {
-   "title": "시카고 연은 「은행의 AI 꼬리 위험」",
-   "url": "https://chicagofed.org/publications/chicago-fed-insights/2026/ai-tail-risk-for-banks",
-   "press": "시카고 연은",
-   "at": "2026-11-14 23:45",
-   "why": "🫧 「AI 차입이 약한 고리」 가설 — 은행 쪽으로 번지는 경로를 연준 계열이 직접 짚음(주말 「대형은행 AI 관련 약 1조 달러」 보도와 같은 방향)",
-   "summary": "AI 붐이 꺾일 때 은행 대출·익스포저의 꼬리 위험을 다룬 연은 글(2026, 게시일·세부 숫자 미확인). 같은 주말 「대형은행 AI 관련 약 1조 달러 묶여 — 붐 꺾이면?」(BeInCrypto) 보도."
   }
  ],
- "at": "2026-11-17 13:45"
+ "at": "2026-11-18 00:35"
 }
