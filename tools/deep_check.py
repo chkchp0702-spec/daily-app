@@ -151,6 +151,8 @@ def facts(texts, src, now):
             if re.search(r"이틀|사흘|한 달|주간|1주|5일|20일|어제", pre): continue
             sent = re.split(r"\n|:|\.(?!\d)", t[max(0, m.start() - 70):m.start()])[-1]   # 🔧 11/09: 「이번 주 S&P −2.7%·나스닥 −3.4%인데 코스피 −11.7%」 — 같은 문장 앞에 기간(이번 주·지난주·한 주)이 붙은 숫자는 오늘 숫자가 아님
             if re.search(r"이번 ?주|지난 ?주|한 ?주|주간|이번 달|올해|연초|고점", sent): continue
+            post = t[m.end():m.end() + 30].split("\n")[0]   # 🔧 11/18: 「🐻 코스피 −45.5%·코스닥 −47%(고점보다)」 — 뒤에 기간·기준(고점보다·고점 대비·1개월)이 붙은 숫자도 오늘 숫자가 아님
+            if re.search(r"고점|대비|개월|주간|년|연초|올해|누적", post): continue
             dm = re.search(r"(?<!\d)(\d{1,2})/(\d{1,2})\D*$", t[max(0, m.start() - 14):m.start()])   # 🔧 11/04: 「11/3 코스피 −3.6% — 그날 팔았다면?」처럼 날짜를 단 지난 숫자는 오늘 숫자가 아님
             if dm and (int(dm.group(1)), int(dm.group(2))) != (now.month, now.day): continue
             seen.append(_n(m.group(1)))
