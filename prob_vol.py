@@ -166,6 +166,13 @@ def conf(d, feats, lo=0.4, hi=0.6):
     return out
 
 
+# 🎯 11/18 14시 「자신 있는 날 넓히기」(probe/conf_bt.py · run 44242154353 · 2000~ 걸어가기, EWY 이 있는 날만 같은 표본):
+#   한국에 etfx = 간밤 미국 상장 한국 ETF(EWY) 그날 등락 − 코스피 그날 등락(한국 마감 뒤 더 움직인 몫) 더함 →
+#   골라진 날 비율·적중 앞 39.5%·68.6 → 40.0%·69.0 · 뒤 35.4%·73.0 → 37.0%·74.4 · 최근3년 36.1%·70.3 → 41.2%·72.3 · 방향 브라이어 0.2302→0.2290 ✅
+#   일본(EWJ)은 고른 날 늘지만 적중 앞 77.3→76.2·최근3년 75.6→73.2 ❌ · 홍콩(EWH) 뒤 고른 날 38.9→38.5 ❌ · 자기 등락 부호(r1) ❌ · 기준 58/42·62/38 은 비율↔적중 맞바꿈일 뿐 ❌
+CONF_ETF = {"KR": "EWY"}
+
+
 def run(H, MK, base_dates=None):
     """H: {sym: DataFrame(Close…)} · MK: prob.MK · base_dates: {mk: "YYYY-MM-DD"} 앱 확률의 기준일(그 시장 마지막 확정 종가)
     아시아 「아침판」 = 기준일 같은 날짜의 미국 종가(그날 밤 미국)가 이미 있을 때 · 아니면 「저녁판」"""
@@ -211,7 +218,17 @@ def run(H, MK, base_dates=None):
                 R["t"][tg] = {"name": TG[tg], "err": str(e)[:160]}
         if asia and sp is not None and morning:
             try:
-                R["conf"] = conf(d, ["usr", "ar1", "r5"] + (["lvix"] if vix_ is not None else []))
+                cf_ = ["usr", "ar1", "r5"] + (["lvix"] if vix_ is not None else [])
+                ex_ = None
+                et = H.get(CONF_ETF.get(mk, ""), pd.DataFrame()).get("Close")
+                if et is not None and len(et.dropna()) > 1500:
+                    e_ = et.dropna(); e_ = e_[e_.index <= bd]
+                    if len(e_) and e_.index[-1] >= bd:          # 기준일 밤 ETF 종가가 있어야(아침판)
+                        d["etfx"] = (_align(e_.pct_change() * 100, c_.index) - c_.pct_change() * 100).clip(-8, 8)
+                        cf_ = cf_ + ["etfx"]; ex_ = CONF_ETF[mk]
+                R["conf"] = conf(d, cf_)
+                if R["conf"] is not None:
+                    R["conf"]["etf"] = ex_
             except Exception as e:
                 R["conf"] = {"err": str(e)[:160]}
         out[mk] = R

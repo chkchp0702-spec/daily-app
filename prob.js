@@ -222,6 +222,12 @@
     return h + '</section>';
   }
   // 🌊 11/18 흔들림·급락 위험 + 🎯 자신 있는 날 — 「오를까」(거의 동전) 대신 미리 맞히기 쉬운 것 (prob_vol.py · 매 실행 걸어가기 검증)
+  // 🎯 11/18 14시: 오늘이 「자신 있는 날」(아침 방향 확률 60%↑·40%↓)이면 확률 카드 위에 한 줄 배지
+  function confBadge(mk, D){
+    var C = D.vol && D.vol[mk] && D.vol[mk].conf; if (!C || C.p == null || !C["전체"] || !(C.p >= 0.6 || C.p <= 0.4)) return '';
+    var up = C.p >= 0.6, A = C["전체"];
+    return '<div class="pr-anc">🎯 <b class="' + (up ? 'up' : 'dn') + '">오늘은 자신 있는 날 — ' + (up ? '오를 쪽 ' : '내릴 쪽 ') + pc(up ? C.p : 1 - C.p) + '</b> <small class="mut">이런 날만 골랐을 때 과거 적중 ' + A.sel_hit + '% (모든 날 ' + A.all_hit + '%) · 아래 🌊 카드에 근거</small></div>';
+  }
   function volCard(mk, D){
     var V0 = D.vol && D.vol[mk]; if (!V0 || !V0.t) return '';
     var rows = ["big1", "dn2", "dn5"].map(function(k){ var t = V0.t[k]; if (!t || t.p == null) return '';
@@ -233,7 +239,7 @@
           : '➖ 검증 미달(앞·뒤 기간 모두 평소보다 나아야 함) — 평소 비율만 보여요') + '</small></div>'; }).join("");
     var C = V0.conf, cf = '';
     if (C && C["전체"]){ var A = C["전체"], R3 = C["최근3년"] || {}, on = C.p != null && (C.p >= 0.6 || C.p <= 0.4);
-      cf = '<div class="pr-anc">🎯 <b>자신 있는 날만</b> — 간밤 미국을 본 아침 방향 확률이 60%↑·40%↓인 날(과거 ' + A.sel_share + '%의 날)만 골라 보면 적중 <b>' + A.sel_hit + '%</b> (모든 날 ' + A.all_hit + '% · 최근3년 ' + R3.sel_hit + '%). ' +
+      cf = '<div class="pr-anc">🎯 <b>자신 있는 날만</b> — 간밤 미국' + (C.etf ? '·' + e(C.etf) + '(미국 상장 ETF가 마감 뒤 더 움직인 몫)' : '') + '을 본 아침 방향 확률이 60%↑·40%↓인 날(과거 ' + A.sel_share + '%의 날)만 골라 보면 적중 <b>' + A.sel_hit + '%</b> (모든 날 ' + A.all_hit + '% · 최근3년 ' + R3.sel_hit + '%). ' +
         (on ? '<b class="' + (C.p >= 0.6 ? 'up' : 'dn') + '">오늘은 자신 있는 날 — ' + (C.p >= 0.6 ? '오를 쪽 ' : '내릴 쪽 ') + pc(C.p >= 0.6 ? C.p : 1 - C.p) + '</b><small class="mut"> (간밤 미국만 본 아침 확률 · 장중엔 위 큰 숫자가 더 정확)</small>' : '<span class="mut">오늘은 반반 쪽 날(간밤 미국만 본 아침 확률 ' + pc(C.p) + ') — 방향은 쉬어 가는 날</span>') + '</div>';
     }
     return '<section class="card"><h3>🌊 흔들림·급락 위험 <span class="mut">' + e(V0.mode || '') + ' · ' + md((V0.t.big1 || {}).at) + ' 종가 기준</span></h3>' + cf + rows +
@@ -272,7 +278,7 @@
     if (!SEL || !D.markets[SEL]) SEL = ks[0];
     var h = '<section class="card"><h3>🎲 다음 장 · 오를 확률 <span class="mut">' + stamp(D) + '</span></h3>' + strip(D) + warn(D) +
       '<p class="note">큰 숫자 = 다음 장에서 그 시장이 어제보다 오를 확률. ▲▼ = 「평소」(2000년 이후 오른 날 비율)보다 얼마나 높고 낮은지. 🧭 10/15부터 <b>이미 아는 정보를 닻</b>으로 써요 — 아시아는 간밤 미국 장, 미국은 선물 갭, 장이 열려 있으면 지금 등락과 남은 시간. 2012년 이후 걸어가며 검증한 적중률: 한국 62% · 일본 65% · 홍콩 60% · 중국 57% · 미국 64% (예전 52~54%). 60% 넘거나 40% 밑인 날은 67~79% 맞았어요.</p></section>';
-    h += mcard(D.markets[SEL], D) + volCard(SEL, D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
+    h += confBadge(SEL, D) + mcard(D.markets[SEL], D) + volCard(SEL, D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
     b.innerHTML = h;
     if (SEL === "KR" && window.twinKR) try { twinKR(document.getElementById("twinkr"), D.markets.KR); } catch(x) {}   // 🧲 A10/21-2
     [].forEach.call(b.querySelectorAll(".pr5c[data-m]"), function(x){ x.onclick = function(){ SEL = x.dataset.m; draw(D); window.scrollTo({top: 0, behavior: "smooth"}); }; });
