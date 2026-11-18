@@ -430,7 +430,7 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
 <main id="main"><div class="wow-sk tall" aria-hidden="true"></div><div class="wow-sk" aria-hidden="true"></div><div class="wow-sk" aria-hidden="true"></div><div class="loading" style="display:none">불러오는 중…</div></main>
 <footer>※ 참고용 자료입니다. 투자 판단과 책임은 본인에게 있습니다.</footer>
 
-<script src="early.js?v=2"></script>
+<script src="early.js?v=3"></script>
 <script src="livepx.js?v=1"></script>
 <script src="viz.js?v=13"></script>
 <script>
@@ -1662,7 +1662,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261118h";
+var APPV = "20261118i";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1741,8 +1741,8 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="app.b04.js?v=712ce008fe"></script>
 <script defer src="app.b05.js?v=77165feb6f"></script>
 <script defer src="app.b06.js?v=a4119ef778"></script>
-<script defer src="app.b07.js?v=bc3074f625"></script>
-<script defer src="app.b08.js?v=9fdd0ba8ff"></script>
+<script defer src="app.b07.js?v=e9a48138b2"></script>
+<script defer src="app.b08.js?v=1b6176c118"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1817,7 +1817,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="ux1105.js?v=1"></script>   <!· 🔍 11/05 냉정 분석 다 진행 — 13px·빈 카드 띠·운세 줄·첫 안내 ·>
 <script defer src="ux1105b.js?v=1"></script>   <!· 📐📋 11/05 A11/5-1 수익률 지도 · A11/5-3 받은 글 → 답장 한 장 ·>
 <script defer src="bond_outlook.js?v=1"></script>   <!· 📄 11/05 채권 전망 보고서 (국채·미국채·브라질 · 한 장 + PDF) ·>
-<script defer src="ux1105c.js?v=14"></script>   <!· 🔰 11/05 쉬운 화면 13가지 (끄기: localStorage ezmode=pro · 주소 ?ez=0) ·>
+<script defer src="ux1105c.js?v=15"></script>   <!· 🔰 11/05 쉬운 화면 13가지 (끄기: localStorage ezmode=pro · 주소 ?ez=0) ·>
 <script defer src="ux1109.js?v=1"></script>   <!· 🧊 11/09 냉정 재점검 17 — 뭐 살까 순서·정직 한 줄·카드 5개·머리 아이콘·전문어 밑줄 ·>
 <script defer src="ux1109b.js?v=3"></script>   <!· 🌱 11/09 A11/9-1 바닥 신호 4개의 과거 성적표 (계기판 체크리스트) ·>
 <script defer src="ux1110.js?v=1"></script>   <!· 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (반등 날에만) ·>
@@ -1832,7 +1832,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="ux1116.js?v=1"></script>   <!· 🧊 11/16 냉정 분석 5차 — 🩻 포트 진단 한 장 · 💬 고객 질문 답 그림 한 장 · 🎯 신호 한눈에(큰손·컵·갭·확률 합침) ·>
 <script defer src="tax.js?v=7"></script>   <!· 🧾 11/16 세무계산기 (연구실 › 세무계산기 · 금융소득·건보료 통합 경보기 + 연금·퇴직·해외주식·ISA · 세법 숫자는 tax.js LAW 한 곳) ·>
 <script defer src="ux1118.js?v=2"></script>   <!· 🧊 11/18 냉정 분석 6차 — 🆕 새로 생긴 것 · 📌 내 바로가기 · 🗺 섹터 지도 미리보기 · 제안서 완성본 먼저·지난번 그대로 · 🧾 절세 한 장 · 💼 성적 접기 ·>
-<script defer src="stab.js?v=1"></script>   <!· 🛡 11/18 안정도 — 화면 그리기 보호 · 끝없는 「불러오는 중」 막기 (맨 끝에 둘 것) ·>
+<script defer src="stab.js?v=2"></script>   <!· 🛡 11/18 안정도 — 화면 그리기 보호 · 끝없는 「불러오는 중」 막기 (맨 끝에 둘 것) ·>
 📦list-->
 <!-- 📦/JS -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>

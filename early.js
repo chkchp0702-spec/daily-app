@@ -43,6 +43,26 @@
   }
 })();
 
+/* 🛡 11/18 16시 안정도 2차 (사용자 「안정화 시키랬지…」 — 오늘 첫 화면 큰 칸이 회색 뼈대로 멈춤)
+   원인: 첫 화면 큰 칸은 자료 7개가 「다 와야」 그려지는데, 그중 오늘 한 장(pbcard.js)·여러 화면이 fetch 를 시간 제한 없이 직접 부름
+   → 5G 가 잠깐 끊기면 응답이 영영 안 와서 뼈대가 그대로. 1차(getJSON 25초)는 getJSON 을 거치는 것만 막았음.
+   고침: 앱 안 모든 자료 받기(GET · 이미 끊기 신호를 준 것 빼고)에 기본 15초 제한 — 넘으면 실패로 돌려 각 화면이 「못 불러왔어요/다시 시도」로 감. */
+(function(){
+  var F = window.fetch; if (!F || F.__to) return;
+  var tf = function(input, init){
+    var m = (init && init.method) || (input && input.method) || "GET";
+    if (String(m).toUpperCase() !== "GET" || (init && init.signal) || typeof AbortController !== "function") return F.apply(this, arguments);
+    var u = typeof input === "string" ? input : (input && input.url) || "";
+    if (/ntfy\.sh|cdnjs|jsdelivr|\.pdf(\?|$)/.test(u)) return F.apply(this, arguments);   // 알림·라이브러리·PDF(큼)는 그대로
+    var ac = new AbortController(), args = [input, Object.assign({}, init || {}, {signal: ac.signal})], self = this;
+    return new Promise(function(ok, no){
+      var t = setTimeout(function(){ try { ac.abort(); } catch(e) {} no(new TypeError("timeout 15s")); }, 15000);
+      F.apply(self, args).then(function(r){ clearTimeout(t); ok(r); }, function(e){ clearTimeout(t); no(e); });
+    });
+  };
+  tf.__to = 1; tf.__mir = F.__mir; window.fetch = tf;
+})();
+
 /* 🛡 11/18 안정도 (사용자 「어플 안정도를 좀 높여 포괄적으로」)
    ① 오류 수집: 실제 휴대폰에서 난 자바스크립트 오류를 모아(이름·입력값·따옴표 속 글자는 지움) 10분에 한 번 · 앱을 내릴 때 익명으로 보냄
       → usage.py 가 archive/x/errors.json 에 날짜·버전별로 쌓고 🩺 건강검진이 문제로 셈. 전엔 휴대폰 오류를 우리가 알 길이 없었음.

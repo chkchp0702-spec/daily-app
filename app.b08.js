@@ -863,11 +863,11 @@ __bk(86);
   if (!seen) return;
   setInterval(function(){
     if (document.hidden) return;
-    var L = document.querySelectorAll("#main .loading"), now = Date.now();
+    var L = document.querySelectorAll("#main .loading, #main .ez-skel, #main .wow-sk, #main .ez-ph"), now = Date.now();   // 🛡 11/18 16시: 회색 뼈대·「불러오는 중」 글자도
     for (var i = 0; i < L.length; i++){
       var el = L[i]; if (!el.offsetParent || el.__stabDone) continue;
       var t = seen.get(el); if (!t){ seen.set(el, now); continue; }
-      if (now - t < 30000) continue;
+      if (now - t < 25000) continue;
       el.__stabDone = 1;
       if (window.chErr) chErr("stuck", "30초 넘게 불러오는 중", "", " · " + (window.cur || "") + " · " + String(el.textContent || "").slice(0, 20));
       el.innerHTML = '⏳ 오래 걸려요 (인터넷이 느리거나 자료가 아직 없어요) <button type="button" class="btn" style="margin-left:6px">다시 시도</button>';

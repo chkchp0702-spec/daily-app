@@ -3,7 +3,7 @@
    · 앱 파일(js·css·그림, ?v= 붙은 것): 한 번 받으면 버전이 바뀔 때까지 저장본 → 두 번째부터 바로 뜸
    · 첫 화면(index.html): 새로 받기, 끊기면 저장본
    · 10/11: 저장본을 보여 줄 땐 X-From-Cache·X-Saved-At 머리표 + 화면에 메시지 → 위쪽 「⚠ 연결이 느려 HH:MM 저장본」 띠 · 앱 파일 저장소 이름에 버전 */
-var VER = "20261118h";                                  // 앱 버전과 같이 올림 → 옛 ?v= 파일 저장본은 activate 때 지움
+var VER = "20261118i";                                  // 앱 버전과 같이 올림 → 옛 ?v= 파일 저장본은 activate 때 지움
 try { importScripts("easy.js?v=4"); } catch(x) {}         // 🗣 10/28 쉬운 말 — 푸시 알림 글도 (못 불러와도 알림은 그대로)
 var DC = "ch-data-v1", SC = "ch-static-" + VER;
 var BC = "ch-bundle";                                    // 📦 11/18 앱 조각(app.bNN.js?v=내용해시) — 내용이 같으면 주소가 같으니 앱 버전이 올라가도 안 지움(바뀐 조각만 새로 받음)
@@ -31,6 +31,7 @@ function netFirst(req, name, wait, cid){
       var serveOld = function(m, why){ done = true; stale = true; var at = +(m.headers.get("X-Saved-At") || 0);
         tell(cid, {t: "stale", url: req.url, at: at, why: why}); ok(marked_(m)); };
       var t = setTimeout(function(){ old.then(function(m){ if (m && !done) serveOld(m, "slow"); }); }, wait);
+      setTimeout(function(){ if (!done) old.then(function(m){ if (done) return; if (m) serveOld(m, "slow"); else { done = true; no(new Error("timeout")); } }); }, 20000);   // 🛡 11/18 16시: 저장본도 없고 응답도 없으면 20초에 끊음(전엔 영영 대기)
       net.then(function(r){
         if (!done){ done = true; clearTimeout(t); ok(r); }
         else if (stale) tell(cid, {t: "fresh", url: req.url, ok: !!(r && r.ok)});

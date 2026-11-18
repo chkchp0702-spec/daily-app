@@ -62,7 +62,9 @@
     if (B && Date.now() - BT < 300000) return Promise.resolve(B);
     var p = window.__pbbrief ? window.__pbbrief() : gj5("archive/x/pbbrief.json");
     // 🧊 11/09: 신호등 판정에 🐻 하락장 계기판 · 적중률(scores) · 지수 값(live_kr·선물) · 바뀐 것(home.json) 같이
-    return Promise.all([Promise.resolve(p).catch(function(){ return null; }), gj5(RM + "bear.json"), gj5(RM + "scores.json", 900000), gj5("archive/x/live_kr.json", 120000), gj5("archive/x/live_us_pre.json", 120000), gj5(RM + "home.json"), gj5(RM + "bubble.json", 900000)])
+    /* 🛡 11/18 16시: 7개가 「다 와야」 그리던 것 → 하나씩 최대 8초만 기다리고 안 온 건 빼고 그림(한 파일이 늦어도 첫 화면 뼈대에서 안 멈춤) */
+    var w8 = function(q){ return Promise.race([Promise.resolve(q).catch(function(){ return null; }), new Promise(function(r){ setTimeout(function(){ r(null); }, 8000); })]); };
+    return Promise.all([w8(p), w8(gj5(RM + "bear.json")), w8(gj5(RM + "scores.json", 900000)), w8(gj5("archive/x/live_kr.json", 120000)), w8(gj5("archive/x/live_us_pre.json", 120000)), w8(gj5(RM + "home.json")), w8(gj5(RM + "bubble.json", 900000))])
       .then(function(r){ var d = r[0]; if (d){ d = Object.assign({}, d, {_bear: r[1], _sc: r[2], _kr: r[3], _fut: r[4], _home: r[5], _bub: r[6]}); B = d; BT = Date.now(); } return d || B; }).catch(function(){ return B; });
   }
   window.__ezBrief = function(){ return B; };
@@ -207,10 +209,16 @@
     if (an_.nextElementSibling !== rw) an_.insertAdjacentElement("afterend", rw);
     mnFold();
     if (Date.now() - HB > 60000){ HB = Date.now();
-      brief().then(function(b){ var x = document.getElementById("ezhero"), y = document.getElementById("ezrows"); if (!x) return; var ok = b && (b.one || b.talk);
-        x.innerHTML = ok ? heroHtml(b) : '<div class="ez-load">아직 오늘 자료가 안 올라왔어요 · 아래 「오늘 자세히 보기」를 눌러 주세요</div>';
-        if (y) y.innerHTML = ok ? rowsHtml(b) : '';   /* 참고용 문구는 화면 맨 아래 공통 고지가 맡음 */
-        x.classList.add("ez-done"); }); }
+      /* 🛡 11/18 16시: 실패·그리기 오류·12초 넘김 모두 뼈대 대신 「다시 불러오기」 단추 (전엔 실패하면 회색 뼈대가 영영 남음) */
+      var retry = '<div class="ez-load">⏳ 인터넷이 느려 오늘 자료를 아직 못 받았어요 <button type="button" class="btn" data-ezretry="1" style="margin-left:6px">다시 불러오기</button></div>';
+      var guard = setTimeout(function(){ var x = document.getElementById("ezhero"); if (x && !x.classList.contains("ez-done") && x.querySelector(".ez-skel")){ x.innerHTML = retry; HB = 0; if (window.chErr) chErr("stuck", "첫 화면 큰 칸 12초", "ux1105c.js"); } }, 12000);
+      brief().then(function(b){ clearTimeout(guard); var x = document.getElementById("ezhero"), y = document.getElementById("ezrows"); if (!x) return; var ok = b && (b.one || b.talk);
+        try {
+          x.innerHTML = ok ? heroHtml(b) : !b ? retry : '<div class="ez-load">아직 오늘 자료가 안 올라왔어요 · 아래 「오늘 자세히 보기」를 눌러 주세요</div>';   /* b 없음 = 못 받음 → 다시 불러오기 */
+          if (!b) HB = 0;
+          if (y) y.innerHTML = ok ? rowsHtml(b) : '';   /* 참고용 문구는 화면 맨 아래 공통 고지가 맡음 */
+        } catch(er){ x.innerHTML = retry; HB = 0; if (window.chErr) chErr("render", (er && er.message) || er, "ux1105c.js", " · 첫 화면 큰 칸"); }
+        x.classList.add("ez-done"); }, function(er){ clearTimeout(guard); var x = document.getElementById("ezhero"); if (x){ x.innerHTML = retry; HB = 0; } }); }
   }
 
   /* 🧹 11/11 ④ ⑦ 내 종목·대형주·이번 주·고객 질문(#mnbox, mine.js) — 쉬운 첫 화면에선 제목 한 줄씩, 누르면 펼침 · 시간대별 순서 */
@@ -224,6 +232,7 @@
     if (!EZ() || !ev.target.closest) return;
     var h = ev.target.closest("#mnbox .ez-f > h3");
     if (h && !ev.target.closest(".gd,.gdk,[data-gd],img")){ var c = h.parentNode; MNOPEN[c.id] = !MNOPEN[c.id]; c.classList.toggle("ez-x", MNOPEN[c.id]); ev.stopPropagation(); return; }
+    var rt = ev.target.closest("[data-ezretry]"); if (rt){ ev.stopPropagation(); B = null; BT = 0; HB = 0; if (window.getJSONdrop) try { getJSONdrop(); } catch(z) {} var x = document.getElementById("ezhero"); if (x){ x.classList.remove("ez-done"); x.innerHTML = '<div class="ez-load ez-skel"><i></i><i></i><i></i></div>'; } home(); return; }
     var k = ev.target.closest("[data-ezclamp]"); if (k){ k.classList.toggle("ez-open1"); return; }
     var bb = ev.target.closest("[data-ezbub]"); if (bb){ ev.stopPropagation();   // 🫧 버블 경보 → 「오늘 자세히 보기」를 열고 버블 경보판으로
       var hb = document.getElementById("hmbody"), op = document.querySelector("#ezmore .ez-open"); if (hb && !hb.classList.contains("ez-open") && op) op.click();
