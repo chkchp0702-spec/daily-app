@@ -2356,8 +2356,11 @@
   function takeSetting(){
     var m = /^#prop~([A-Za-z0-9_-]{4,4000})$/.exec(location.hash || ""); if (!m || !DATA) return;
     try { history.replaceState(history.state, "", location.pathname + location.search + "#prop"); } catch(z) {}
-    var o; try { o = JSON.parse(b64d(m[1])); } catch(z) { toast("세팅 링크를 읽지 못했어요"); return; }
-    if (!o || o.v !== 1 || !Array.isArray(o.s)) return;
+    applyCode(m[1]);
+  }
+  function applyCode(code, quiet){   // 🧊 11/18 6차 #6·#7 — 세팅 코드를 그대로 적용(링크·견본·지난번 그대로가 같은 길) · quiet 면 안내 글 없음
+    var o; try { o = JSON.parse(b64d(code)); } catch(z) { if (!quiet) toast("세팅 링크를 읽지 못했어요"); return false; }
+    if (!o || o.v !== 1 || !Array.isArray(o.s)) return false;
     var ok = function(k){ return typeof k === "string" && !!form(k); }, str = function(v, n){ return String(v == null ? "" : v).slice(0, n || 40); };
     if (o.p != null && +o.p >= 0 && +o.p <= 5) ST.prof = +o.p; else delete ST.prof;
     var sel = o.s.filter(ok).slice(0, 9); if (!sel.length) return;
@@ -2371,8 +2374,23 @@
       if (PK_F[k] && Array.isArray(y.p)){ var M = candMap(form(k)); q.pk = y.p.slice(0, 10).filter(function(z){ return Array.isArray(z) && M[z[0]]; }).map(function(z){ return {id: String(z[0]), pct: Math.max(0, Math.min(100, +z[1] || 0))}; }); if (!q.pk.length) delete q.pk; }
       ST.opt[k] = q; });
     ST.cust = ""; profFix(); keep();
-    toast("동료가 보낸 제안서 세팅을 불러왔어요 — 이름·소속은 내 것으로");
+    if (!quiet) toast("동료가 보낸 제안서 세팅을 불러왔어요 — 이름·소속은 내 것으로");
+    return true;
   }
+  /* 🧊 11/18 냉정 분석 6차 #6 「완성본 먼저」 · #7 「지난번 그대로」 (ux1118.js 가 씀)
+     code() 지금 세팅 코드 · apply(code, 고객 이름) 그 세팅으로 바꾸고 다시 그림 · sample(code) 지금 세팅은 그대로 두고 그 세팅의 한 장(1080px HTML)만 돌려줌 */
+  window.__prop = {
+    ready: function(){ return !!DATA; },
+    has: function(k){ return !!(DATA && form(k)); },
+    code: function(){ return DATA && ST.sel.length ? settingCode() : ""; },
+    info: function(){ return {names: ST.sel.map(function(k){ var f = form(k); return f ? f.short : k; }), total: total(), cust: ST.cust || "", prof: profSet() ? profName() : ""}; },
+    apply: function(code, cust){ if (!DATA) return false; if (!applyCode(code, true)) return false; ST.cust = String(cust || "").slice(0, 20); resetBtns(); draw(); return true; },
+    sample: function(code){ if (!DATA) return "";
+      var bak = JSON.stringify({sel: ST.sel, amt: ST.amt, opt: ST.opt}), bp = ST.prof, bc = ST.cust, h = "";
+      try { if (applyCode(code, true)) h = onePage(model()); } catch(x) { console.warn("prop sample", x); h = ""; }
+      var b = JSON.parse(bak); ST.sel = b.sel; ST.amt = b.amt; ST.opt = b.opt; if (bp == null) delete ST.prof; else ST.prof = bp; ST.cust = bc; keep();
+      return h; }
+  };
 
   // 시험·다른 화면에서 쓰도록
   window.PROPOSE = {load: load, _csim: function(k, al){ return cpxLoad().then(function(){ return csimCalc(k, al || (form(k) || {}).alloc, (form(k) || {}).sim); }); }, _formX: function(k){ return formX(k); }, mix: function(){ return mixCalc(model().items); }, _tierAlloc: function(al, t, cap, cdT){ return tierAlloc(al, t, cap, cdT); }, _code: function(){ return settingCode(); }, show: function(){ showOpen(); }, model: function(){ return model(); }, set: function(o){ if (o.sel) ST.sel = o.sel; if (o.amt) ST.amt = o.amt; if (o.cust != null) ST.cust = o.cust; if (o.pb != null) ME.pb = o.pb; if (o.org != null) ME.org = o.org; if (o.sim != null){ ME.simNo = o.sim; ME.simVer = DISC_VER; } if (o.simTo != null) ME.simTo = o.simTo; if (o.simFrom != null) ME.simFrom = o.simFrom; if (o.opt) ST.opt = o.opt; },

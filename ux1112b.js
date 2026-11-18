@@ -51,7 +51,7 @@
     });
   }
   function mapHtml(){
-    return '<p class="jm-h">할 수 있는 일 <small>아래 탭과 같아요</small></p><div class="jm-g">' + JOBS.map(function(j){
+    return '<p class="jm-h">할 수 있는 일 <small>아래 탭과 같아요</small></p>' + (window.__secTile ? __secTile() : "") + '<div class="jm-g">' + JOBS.map(function(j){
       return '<button type="button" class="jm-t' + (j[0] === "lab" ? " jm-lab" : "") + '" data-jm="' + j[0] + '">' + IC[j[1]] + '<b>' + j[2] + '</b><small>' + j[3] + '</small><em>' + e(LIVE[j[0]] || "") + '</em></button>'; }).join("") + '</div>';
   }
   function paint(){ var m = document.getElementById("jobmap"); if (!m) return; var h = mapHtml(); if (m._h !== h){ m.innerHTML = h; m._h = h; } }
@@ -89,7 +89,7 @@
       '<section class="card hub-c" data-cz="done"><p class="hub-h">고객이 이렇게 물으면 <small id="hubqn"></small></p><div class="hub-q" id="hubq"><p class="hub-p">불러오는 중…</p></div>' +
         '<button type="button" class="hub-sub" data-hub="@qa">질문 전부 보기 ›</button></section>' +
       '<section class="card hub-c" data-cz="done"><p class="hub-h">다른 것도 한 장으로</p><div class="hub-l">' +
-        [["diag", "🩻", "포트 진단 한 장", "고객 보유 종목 → 쏠림 · 배당 · 고점 대비"], ["bond", "🏦", "채권 전망도 한 장", "국고채 · 미국채 · 브라질국채"], ["prop", "📝", "제안서", "성향 → 상품 → 금액 → PDF·PPT"], ["onepager", "🔍", "종목 한 장", "종목을 찾아 위 📨 누르기"]].map(function(x){
+        [["diag", "🩻", "포트 진단 한 장", "고객 보유 종목 → 쏠림 · 배당 · 고점 대비"], ["tax", "🧾", "연말 절세 한 장", "세무계산기 결과 → 그림 한 장 (금융소득·건보료·연금·퇴직·해외주식)"], ["bond", "🏦", "채권 전망도 한 장", "국고채 · 미국채 · 브라질국채"], ["prop", "📝", "제안서", "성향 → 상품 → 금액 → PDF·PPT"], ["onepager", "🔍", "종목 한 장", "종목을 찾아 위 📨 누르기"]].map(function(x){
           return '<button type="button" data-hub="' + x[0] + '"><span>' + x[1] + '</span><b>' + x[2] + '</b><small>' + x[3] + '</small><i>›</i></button>'; }).join("") + '</div>' +
         '<p class="hub-n">어느 화면에서든 맨 위 📨 를 누르면 그 화면이 한 장이 돼요</p></section></div>';
   };

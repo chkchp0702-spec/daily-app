@@ -22,4 +22,4 @@ jobs:
       - name: 저장
         run: |
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "📦 묶음 $(TZ=Asia/Seoul date '+%F %H:%M')" app.bundle.js index.html
+          bash scripts/push.sh "📦 묶음 $(TZ=Asia/Seoul date '+%F %H:%M')" app.bundle.js "app.b*.js" index.html   # 📦 11/18 조각(app.bNN.js)으로 나눔 — 예전 한 파일은 지워짐

@@ -629,7 +629,7 @@ window.addEventListener("popstate", function(ev){
 });
 
 /* ⚡ 10/31 B10 무거운 탭은 열 때만 받기 — 첫 화면에서 운세·사주·타로·로또·제안서 파일(약 570KB)을 안 받음 */
-var LAZY = {luck: ["saju_core.js?v=4", "saju_txt.js?v=4", "saju.js?v=10", "tarot.js?v=4", "lotto.js?v=1"], prop: ["propose.js?v=37"]};
+var LAZY = {luck: ["saju_core.js?v=4", "saju_txt.js?v=4", "saju.js?v=10", "tarot.js?v=4", "lotto.js?v=1"], prop: ["propose.js?v=38"]};
 LAZY.saju = LAZY.tarot = LAZY.lotto = LAZY.luck;
 var LAZYP = {};
 function needMod(key){
@@ -1647,7 +1647,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261118a";
+var APPV = "20261118b";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1698,8 +1698,14 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 </script>
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
-<!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합친 한 파일. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.bundle.js?v=a9c22c975d"></script>
+<!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합쳐 약 320KB 씩 나눈 조각들. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
+<script defer src="app.b01.js?v=7913dec6c3"></script>
+<script defer src="app.b02.js?v=e350de2209"></script>
+<script defer src="app.b03.js?v=8765a9fb3e"></script>
+<script defer src="app.b04.js?v=63bdfbc069"></script>
+<script defer src="app.b05.js?v=ac75d64f40"></script>
+<script defer src="app.b06.js?v=1d53fefe5d"></script>
+<script defer src="app.b07.js?v=dbbfa882e4"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1715,7 +1721,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="els_design.js?v=4"></script>
 <script defer src="extras.js?v=11"></script>
 <script defer src="burst.js?v=2"></script>   <!· ⚠️ 10/28 거래폭발 = 따라 사지 마세요 ·>
-<script defer src="usage.js?v=2"></script>   <!· 📈 10/28 사용 현황(익명) ·>
+<script defer src="usage.js?v=3"></script>   <!· 📈 10/28 사용 현황(익명) ·>
 <script defer src="plus.js?v=5"></script>
 <script defer src="cpin.js?v=1"></script>   <!· 📌 10/28 내 고객 상품 ·>
 <script defer src="onepage.js?v=35"></script>   <!· 📨 10/28 고객에게 보내기 한 장 ·>
@@ -1727,7 +1733,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="plus6.js?v=16"></script>
 <script defer src="plus7.js?v=5"></script>
 <script defer src="plus8.js?v=13"></script>
-<script defer src="gsearch.js?v=8"></script>
+<script defer src="gsearch.js?v=9"></script>
 <script defer src="brain.js?v=9"></script>
 <script defer src="feed.js?v=11"></script>
 <script defer src="push.js?v=6"></script>
@@ -1781,13 +1787,14 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1110b.js?v=6"></script>   <!· 🫧 11/10 버블 경보판 (전병서 11/11 경보표 · 계기판 아래) · 🕰 11/11 버블 시계 ·>
 <script defer src="ux1112.js?v=3"></script>   <!· 🧭 11/12 계절 시계 (5개국 지수 달력·추세 · 버블 경보판 아래) ·>
 <script defer src="ux1111.js?v=1"></script>   <!· 🔭 11/11 신호 탭 「지켜보는 중」 모드 (코스피 🐻 동안 · bear_watch.json) ·>
-<script defer src="ux1112b.js?v=8"></script>   <!· 🧊 11/12 한 화면 · 할 일 5칸 · 🔬 연구실 · 첫 화면 기능 지도 (되돌리기: 브랜치 backup-before-job5-1112) ·>
+<script defer src="ux1112b.js?v=9"></script>   <!· 🧊 11/12 한 화면 · 할 일 5칸 · 🔬 연구실 · 첫 화면 기능 지도 (되돌리기: 브랜치 backup-before-job5-1112) ·>
 <script defer src="ux1112c.js?v=1"></script>   <!· ⬆ 11/12 언제나 접기 · ← 언제나 뒤로 (사용자) ·>
 <script defer src="ux1112d.js?v=2"></script>   <!· 🎯 11/12 신호 확률판 (경고·바닥 신호별 확률 · 계절 시계 아래) ·>
 <script defer src="ux1112e.js?v=1"></script>   <!· 🔁 11/12 닮은 장 백테스트 (지금과 닮았던 때만 · 그 뒤 2년) ·>
 <script defer src="ux1113.js?v=1"></script>   <!· 📏 11/13 A11/13-1 선이 내려오는 날 (가격 그대로면 50일선·장기선이 닿는 날짜 · bear.json meet) ·>
 <script defer src="ux1116.js?v=1"></script>   <!· 🧊 11/16 냉정 분석 5차 — 🩻 포트 진단 한 장 · 💬 고객 질문 답 그림 한 장 · 🎯 신호 한눈에(큰손·컵·갭·확률 합침) ·>
 <script defer src="tax.js?v=7"></script>   <!· 🧾 11/16 세무계산기 (연구실 › 세무계산기 · 금융소득·건보료 통합 경보기 + 연금·퇴직·해외주식·ISA · 세법 숫자는 tax.js LAW 한 곳) ·>
+<script defer src="ux1118.js?v=1"></script>   <!· 🧊 11/18 냉정 분석 6차 — 🆕 새로 생긴 것 · 📌 내 바로가기 · 🗺 섹터 지도 미리보기 · 제안서 완성본 먼저·지난번 그대로 · 🧾 절세 한 장 · 💼 성적 접기 ·>
 📦list-->
 <!-- 📦/JS -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>

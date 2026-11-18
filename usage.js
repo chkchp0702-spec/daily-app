@@ -18,17 +18,22 @@
   // ---------- 🎯 11/04 누른 것 · 본 화면 (사용자 「들어온 사람들이 어디를 제일 많이 봤니」) ----------
   //   이름·관심종목·입력한 글은 안 보냄. 단추·카드의 「짧은 이름」만 세서 모았다가 한 번에(앱을 내릴 때 · 10분마다) 보냄.
   var TK = "us_tap", NAMES = {home: "오늘", market: "시황", sector: "시장 흐름", prob: "오를 확률", flow: "수급", port: "포트", divc: "배당비교", score: "성적표", whale: "큰손", cup: "컵 차트", gap: "갭 상승", screen: "종목 찾기", sigmore: "신호 더 보기",
-    bond: "채권", fund: "펀드", els: "ELS", prop: "제안서", luck: "오늘의 운세", saju: "사주", tarot: "타로", lotto: "로또", feed: "피드", onepager: "종목리포트", alarm: "알림", idea: "의견함"};
+    bond: "채권", fund: "펀드", els: "ELS", prop: "제안서", luck: "오늘의 운세", saju: "사주", tarot: "타로", lotto: "로또", feed: "피드", onepager: "종목리포트", alarm: "알림", idea: "의견함", send: "한 장", lab: "연구실", tax: "세무계산기", diag: "포트 진단", sigall: "신호 한눈에"};
   function bag(){ var b = null; try { b = JSON.parse(localStorage.getItem(TK) || "null"); } catch(x) {} if (!b || b.day !== kst()) b = {day: kst(), taps: {}, views: {}, n: 0}; return b; }
   function put(b){ try { localStorage.setItem(TK, JSON.stringify(b)); } catch(x) {} }
   function add(kind, label){ if (!label) return; var b = bag(), m = kind === "v" ? b.views : b.taps; label = String(label).replace(/\s+/g, " ").trim().slice(0, kind === "v" ? 14 : 28); if (!label) return; m[label] = (m[label] || 0) + 1; b.n++; put(b); }
   var lastView = "";
   function view(){ var c = (typeof cur !== "undefined" && cur) || ""; if (!c || c === lastView) return; lastView = c; add("v", NAMES[c] || c); }
+  function isName(x){ if (!x || x.length > 24) return false; try { var a = JSON.parse(localStorage.getItem("op_clients") || "[]") || []; var h = JSON.parse(localStorage.getItem("pp_hist") || "[]") || [];
+      var L = a.concat(h.map(function(o){ return o && o.cust; })).concat([localStorage.getItem("pbname")]).filter(function(n){ return typeof n === "string" && n; });
+      for (var i = 0; i < L.length; i++) if (x === L[i] || x === L[i] + "님" || x === L[i] + " 고객님") return true; } catch(z) {} return false; }
   function labelOf(t){
     if (t.closest("input,textarea,select,[contenteditable]")) return null;
     var g = t.closest("#bnav button"); if (g) return "아래탭 · " + ((g.children[1] && g.children[1].textContent) || g.textContent).trim();
     if (t.closest("#gdbtn,.gd-b,.gd-i")) return "조이 설명";
     if (t.closest("#opbtn,#h2clb")) return "📨 보내기";
+    var x18 = t.closest("[data-sc18],[data-nw18],[data-pp18h],[data-pp18n],[data-pp18s],[data-pp18o],#tx18,#pf18,.sec18");   // 🧊 11/18 6차 — 새 단추는 이름을 고정(쓰이는지 재려고)
+    if (x18) return x18.dataset.sc18 ? "📌 바로가기 · " + x18.dataset.sc18 : x18.dataset.nw18 ? "🆕 새로 생긴 것 · " + x18.dataset.nw18 : x18.dataset.pp18h != null ? "제안서 · 🔁 지난번 그대로" : x18.dataset.pp18n != null ? "제안서 · 🔁 이름만 바꿔" : (x18.dataset.pp18s != null || x18.dataset.pp18o != null) ? "제안서 · 👀 완성본 먼저" : x18.id === "tx18" ? "세무 · 📨 절세 한 장" : x18.id === "pf18" ? "포트 · 📊 성적 펼치기" : "오늘 · 🗺 섹터 지도 타일";
     if (t.closest("#gsbtn")) return "🔍 검색"; if (t.closest("#wlbtn")) return "⭐ 관심종목"; if (t.closest("#uibtn")) return "⚙️ 설정";
     var r = t.closest(".h2-ring"); if (r) return "스토리 · " + ((r.querySelector("small") || r).textContent || "").trim();
     var d = t.closest(".h2-d"); if (d) return "오늘의 발견 · " + (d.getAttribute("data-goto") ? (NAMES[d.getAttribute("data-goto")] || d.getAttribute("data-goto")) : "");
@@ -37,6 +42,8 @@
     var op = t.closest("[data-op]"); if (op) return "종목 열기";   // 종목 이름은 안 보냄
     var gt = t.closest("[data-goto]"); if (gt) return "→ " + (NAMES[String(gt.getAttribute("data-goto")).split("~")[0]] || gt.getAttribute("data-goto"));
     var bt = t.closest("button,summary,.fold,a,[role=button]"); if (!bt || bt.closest("#gdq,#wowob,#usgx")) return null;
+    // 🔒 11/18 고객 이름 칩(최근 받는 분)을 누르면 단추 글자 = 고객 이름이 그대로 집계에 올라가던 것을 막음 — 이 휴대폰에 저장된 이름과 같은 글자의 단추는 세지 않음
+    if (bt.closest("[data-cl],[data-dvcl],[data-tx18c],.opc-rc,.tx18-rc,.pp18-r") || isName((bt.innerText || bt.textContent || "").replace(/\s+/g, " ").trim())) return null;
     var tx = (bt.innerText || bt.textContent || "").replace(/[\d,.%+−\-]+/g, "#").replace(/\s+/g, " ").trim();   // 숫자는 # 로(값 말고 단추 이름만)
     if (!tx || tx.length < 2) return null;
     var c = (typeof cur !== "undefined" && cur) || ""; return (NAMES[c] || c) + " · " + tx.slice(0, 20);

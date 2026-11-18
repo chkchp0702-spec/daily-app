@@ -117,10 +117,33 @@ def main():
                 Q[key][k] = Q[key].get(k, 0) + c
         for k, devs in (D.get("tapdev") or {}).items():
             Q["tapdev"][k] = Q["tapdev"].get(k, 0) + len(devs)
+    # 📈 11/18 재방문 (냉정 분석 6차 #4 · 사용자 「진행해」) — 「어제 온 사람이 오늘 또 왔나」를 세기 위해 주 단위로 바뀌는 익명 번호를 씀.
+    #    번호 = sha1(그 주 월요일 + 기기 난수) 앞 8자 → 주가 바뀌면 번호도 바뀌어 주를 넘어 한 사람을 따라갈 수 없음. 이름·기기 정보 없음.
+    #    weeks[월요일] = {dev: 그 주에 온 기기 수, d2: 2일 이상, d3: 3일 이상, _h: {번호: 온 날(월=0…일=6) 글자들}}
+    import hashlib as _hl
+    WK = PU.setdefault("weeks", {})
+    for day, D in days.items():
+        try:
+            d0 = dt.date.fromisoformat(day)
+        except Exception:
+            continue
+        mon = (d0 - dt.timedelta(days=d0.weekday())).isoformat()
+        Wk = WK.setdefault(mon, {"dev": 0, "d2": 0, "d3": 0, "_h": {}})
+        for d in D.get("dev", {}):
+            h = _hl.sha1((mon + "|" + d).encode()).hexdigest()[:8]
+            cur = Wk["_h"].get(h, "")
+            w = str(d0.weekday())
+            if w not in cur:
+                Wk["_h"][h] = "".join(sorted(cur + w))
+    for mon, Wk in WK.items():
+        v = list((Wk.get("_h") or {}).values())
+        Wk["dev"] = len(v); Wk["d2"] = sum(1 for x in v if len(x) >= 2); Wk["d3"] = sum(1 for x in v if len(x) >= 3)
+    cutw = (dt.datetime.now(KST) - dt.timedelta(days=70)).strftime("%Y-%m-%d")
+    PU["weeks"] = {k: v for k, v in WK.items() if k >= cutw}
     cut2 = (dt.datetime.now(KST) - dt.timedelta(days=35)).strftime("%Y-%m-%d")
     PU["days"] = {k: v for k, v in PU["days"].items() if k >= cut2}
     PU["at"] = at
-    PU["note"] = "화면별·누른 것별 횟수만 (기기 번호·이름 없음) · tabs = 처음 연 화면 · views = 본 화면 · taps = 누른 것 · tapdev = 그걸 누른 사람 수(대략) · 11/10부터"
+    PU["note"] = "화면별·누른 것별 횟수만 (기기 번호·이름 없음) · tabs = 처음 연 화면 · views = 본 화면 · taps = 누른 것 · tapdev = 그걸 누른 사람 수(대략) · 11/10부터 · weeks = 주별 재방문(dev 온 기기 · d2 2일 이상 · d3 3일 이상 · 번호는 주마다 바뀜) · 11/18부터"
     json.dump(PU, open(PP, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("새 신호", n, "· 몫", len(parts))
 

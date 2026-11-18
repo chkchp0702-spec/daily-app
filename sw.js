@@ -3,11 +3,12 @@
    · 앱 파일(js·css·그림, ?v= 붙은 것): 한 번 받으면 버전이 바뀔 때까지 저장본 → 두 번째부터 바로 뜸
    · 첫 화면(index.html): 새로 받기, 끊기면 저장본
    · 10/11: 저장본을 보여 줄 땐 X-From-Cache·X-Saved-At 머리표 + 화면에 메시지 → 위쪽 「⚠ 연결이 느려 HH:MM 저장본」 띠 · 앱 파일 저장소 이름에 버전 */
-var VER = "20261118a";                                  // 앱 버전과 같이 올림 → 옛 ?v= 파일 저장본은 activate 때 지움
+var VER = "20261118b";                                  // 앱 버전과 같이 올림 → 옛 ?v= 파일 저장본은 activate 때 지움
 try { importScripts("easy.js?v=4"); } catch(x) {}         // 🗣 10/28 쉬운 말 — 푸시 알림 글도 (못 불러와도 알림은 그대로)
 var DC = "ch-data-v1", SC = "ch-static-" + VER;
+var BC = "ch-bundle";                                    // 📦 11/18 앱 조각(app.bNN.js?v=내용해시) — 내용이 같으면 주소가 같으니 앱 버전이 올라가도 안 지움(바뀐 조각만 새로 받음)
 self.addEventListener("install", function(){ self.skipWaiting(); });
-self.addEventListener("activate", function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return [DC, SC, "ch-page", "ch-lib", "ch-badge"].indexOf(k) < 0; }).map(function(k){ return caches.delete(k); })); }).then(function(){ return self.clients.claim(); })); });
+self.addEventListener("activate", function(e){ e.waitUntil(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return [DC, SC, BC, "ch-page", "ch-lib", "ch-badge"].indexOf(k) < 0; }).map(function(k){ return caches.delete(k); })); }).then(function(){ return self.clients.claim(); })); });
 // 화면에 알리기: 저장본을 보여 줌(stale) · 새 것이 옴(fresh) · 끝내 못 받음(fail) → 앱 위쪽 띠 (10/11)
 function tell(id, msg){ if (!id) return; self.clients.get(id).then(function(c){ if (c) c.postMessage(msg); }).catch(function(){}); }
 // 저장할 때 받은 시각을 붙여 둠 → 저장본을 보여 줄 때 「HH:MM 저장본」
@@ -42,6 +43,11 @@ function netFirst(req, name, wait, cid){
 function cacheFirst(req, name){
   return caches.open(name).then(function(c){ return c.match(req).then(function(m){ return m || fetch(req).then(function(res){ if (res && res.ok) c.put(req, res.clone()).catch(function(){}); return res; }); }); });
 }
+function bundleFirst(req){   // 저장본 있으면 그것, 없으면 받아 저장하고 같은 조각의 옛 주소(?v= 다른 것)는 지움
+  return caches.open(BC).then(function(c){ return c.match(req).then(function(m){ return m || fetch(req).then(function(res){
+    if (res && res.ok) c.put(req, res.clone()).then(function(){ var p = new URL(req.url).pathname; return c.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return new URL(k.url).pathname === p && k.url !== req.url; }).map(function(k){ return c.delete(k); })); }); }).catch(function(){});
+    return res; }); }); });
+}
 self.addEventListener("fetch", function(e){
   var r = e.request; if (r.method !== "GET") return;
   var u = new URL(r.url);
@@ -52,6 +58,7 @@ self.addEventListener("fetch", function(e){
   // 10/19: 자료(JSON)는 브라우저 HTTP 캐시(GitHub Pages 10분)를 건너뛰고 늘 서버에 확인 — 장중 10분마다 바뀌는 파일이 옛것으로 보이던 문제
   if (u.hostname === "raw.githubusercontent.com" || (same && /\.json$/.test(u.pathname))) { e.respondWith(netFirst(new Request(r, {cache: "no-cache"}), DC, 3500, e.clientId)); return; }
   if (/cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com/.test(u.hostname)) { e.respondWith(cacheFirst(r, "ch-lib")); return; }   // 주소에 버전이 박힌 외부 도구 — 앱 버전과 무관
+  if (same && /\/app\.b\d+\.js$/.test(u.pathname) && u.search) { e.respondWith(bundleFirst(r)); return; }
   if (same && /\.(js|css|png|webmanifest)$/.test(u.pathname) && u.search) { e.respondWith(cacheFirst(r, SC)); return; }
 });
 /* 📛 10/31 C2 앱 아이콘 숫자 배지 — 알림이 올 때마다 +1 (앱을 열어 홈을 보면 0으로). 숫자는 ch-badge 저장소에 */
