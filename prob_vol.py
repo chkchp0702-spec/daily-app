@@ -172,6 +172,23 @@ def conf(d, feats, lo=0.4, hi=0.6):
 #   일본(EWJ)은 고른 날 늘지만 적중 앞 77.3→76.2·최근3년 75.6→73.2 ❌ · 홍콩(EWH) 뒤 고른 날 38.9→38.5 ❌ · 자기 등락 부호(r1) ❌ · 기준 58/42·62/38 은 비율↔적중 맞바꿈일 뿐 ❌
 CONF_ETF = {"KR": "EWY"}
 
+# 🌊 11/18 16시 「흔들림 모델 보강」(probe/volx_bt.py · run 44256638039 · 2006~ 해마다 걸어가기, 같은 표본):
+#   hl5 = 자기 지수 5일 평균 고가·저가 폭 log(H/L) — 종가만으론 안 보이는 장중 흔들림.
+#   앞·뒤·최근3년 실력이 한 판(저녁·아침)에서 모두 오르고 다른 판에서도 안 나빠진 곳만:
+#   한국 ±1% 저녁 15.6/10.3/11.2 → 16.7/12.3/14.5 · 아침 16.4/11.3/12.4 → 17.3/13.3/15.6 · 한국 5일 −3% 아침 4.9/2.9/3.7 → 5.1/3.3/5.2
+#   일본 −2% 저녁 2.7/2.8/0.4 → 2.9/3.1/0.9 · 중국 ±1% 아침 7.9/14.7/10.9 → 9.7/17.0/15.0 · 중국 −2% 아침 7.2/7.5/3.7 → 8.0/10.0/7.7
+#   홍콩 −2% 아침 20.8/2.9/−3.1 → 21.0/3.2/−3.0 · 미국 ±1% 18.4/20.1/11.1 → 18.7/21.0/12.5 · −2% 4.7/5.4/4.1 → 5.9/6.0/4.7 · 5일 −3% 6.6/3.2/5.2 → 6.7/3.9/6.8
+#   ❌ 한국 −2%(앞 13.0→12.6) · 일본·홍콩 ±1%(앞 같음) · 일본 5일(여전히 미달 — 저녁 0.5/1.1/−2.0) · 52주 낙폭·통화 5일·월/금 표시는 거의 다 ❌ · 닛케이 VI(^JNIV)·^VXFXI 야후 자료 없음
+HL_TG = {"KR": {"big1", "dn5"}, "JP": {"dn2"}, "CN": {"big1", "dn2"}, "HK": {"dn2"}, "US": {"big1", "dn2", "dn5"}}
+
+
+def _hl5(px, idx):
+    if not {"High", "Low"} <= set(px.columns):
+        return None
+    hl = np.log((px["High"] / px["Low"]).where(px["High"] > px["Low"]))
+    s = np.log(hl.reindex(idx).rolling(5, min_periods=3).mean() * 100 + 0.05)
+    return s if s.notna().sum() > 1500 else None
+
 
 def run(H, MK, base_dates=None):
     """H: {sym: DataFrame(Close…)} · MK: prob.MK · base_dates: {mk: "YYYY-MM-DD"} 앱 확률의 기준일(그 시장 마지막 확정 종가)
@@ -205,15 +222,24 @@ def run(H, MK, base_dates=None):
         else:
             dd, ff = d, base_f + (["usa", "usr"] if asia and sp is not None else [])
         R = {"mode": "아침판(간밤 미국 반영)" if morning else ("저녁판(간밤 미국 전)" if asia else "미국"), "t": {}}
+        hl5 = None
+        try:
+            hl5 = _hl5(px[px.index <= bd], dd.index)
+        except Exception:
+            hl5 = None
+        if hl5 is not None:
+            dd = dd.copy(); dd["hl5"] = hl5
         for tg in TG:
             try:
-                P, B = walk(dd, ff, tg)
+                f_ = ff + (["hl5"] if hl5 is not None and tg in HL_TG.get(mk, ()) else [])
+                P, B = walk(dd, f_, tg)
                 j = judge(dd, P, B, tg)
-                p_now, at = now_prob(dd, ff, tg)
+                p_now, at = now_prob(dd, f_, tg)
                 pc, kn, rg = calib(P, dd[tg], p_now)
                 base_now = float(dd[tg].dropna().iloc[-2520:].mean())     # 최근 10년 평소 비율
                 R["t"][tg] = {"name": TG[tg], "p": _r(pc if pc is not None else p_now, 3), "raw": _r(p_now, 3), "k": kn,
-                              "rng": [_r(rg[0], 3), _r(rg[1], 3)] if rg else None, "base": _r(base_now, 3), "at": at, "ok": bool(j and j["ok"]), "val": j}
+                              "rng": [_r(rg[0], 3), _r(rg[1], 3)] if rg else None, "base": _r(base_now, 3), "at": at, "ok": bool(j and j["ok"]), "val": j,
+                              "hl5": "hl5" in f_}
             except Exception as e:
                 R["t"][tg] = {"name": TG[tg], "err": str(e)[:160]}
         if asia and sp is not None and morning:

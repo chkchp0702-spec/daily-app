@@ -83,7 +83,7 @@ SOX_CAP = 0.2
 #   홍콩 ➖(다시 맞추면 좋아지나 닻 위 고정 기울기는 뒤·최근2년 나빠짐) · 일본·중국·미국 자신 ❌ · 5일 ❌(작음)
 CLV_B = {"KR": 0.2}
 CLV_CAP = 0.2
-CLV_SYM = {"^GSPC"}
+CLV_SYM = {"^GSPC", "^KS11", "^N225", "000001.SS", "^HSI"}   # 11/18 16시: 🌊 흔들림 hl5(지수 고가·저가 폭)용으로 아시아 지수도 고가·저가 받음
 # 😨 11/5 10시 #69b 「VKOSPI − VIX 백분위」: 한국 마감 때 VKOSPI 1년 백분위 − 그 뒤 미국 마감 VIX 1년 백분위 → 한국 닻을 조금 기울임
 #   (차이가 크게 음수 = 한국이 닫힌 뒤 미국 공포가 한국보다 훨씬 올라감 → 다음 날 코스피 덜 오름 · 양수 = 그 반대)
 #   검증(probe/vk69b_bt.py · CNBC .KSVKOSPI 2009-04~ + 야후, 한국 3,941일, 2018-07 기준 앞/뒤 · 닻 = 간밤 S&P + EWY 초과 + SOX 초과 로지스틱 위에 더함):
@@ -193,7 +193,7 @@ def load_hist(syms):
                 one = yf.download(s, start="2000-01-01", interval="1d", auto_adjust=False, progress=False)
                 if isinstance(one.columns, pd.MultiIndex):
                     one.columns = one.columns.get_level_values(0)
-                one = one[["Open", "Close"]].dropna(subset=["Close"])
+                one = one[["Open", "Close"] + (["High", "Low"] if s in CLV_SYM else [])].dropna(subset=["Close"])
                 one.index = pd.to_datetime(one.index).tz_localize(None)
                 out[s] = one[~one.index.duplicated(keep="last")]
                 print("다시 받음", s, len(out[s]))
