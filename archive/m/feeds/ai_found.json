@@ -1,6 +1,102 @@
 {
  "items": [
   {
+   "title": "아시아 증시 — 닛케이 +1.4%, 항셍은 엔비디아 경영진 사태로 약세",
+   "url": "https://investinglive.com/stock-market-update/asian-stocks-steady-as-nikkei-gains-1-4-hang-seng-slips-on-nvidia-leadership-fallout/",
+   "press": "investingLive",
+   "at": "2026-11-18 09:40",
+   "why": "🎯 일본·홍콩 칸 — 엔비디아 실적 뒤 아시아 반응이 나라별로 갈림(한국·일본 반도체 반등 vs 홍콩 약세)",
+   "summary": "제목 기준: 닛케이 +1.4% · 항셍 하락 — 엔비디아 리더십 공백 여파. 세부 숫자 미확인."
+  },
+  {
+   "title": "엔비디아, 중국용 AI 칩 생산 중단",
+   "url": "https://www.newsbytesapp.com/news/business/nvidia-halts-production-of-ai-chips-for-china/tldr",
+   "press": "NewsBytes",
+   "at": "2026-11-18 09:40",
+   "why": "가설 ④ — 엔비디아 4분기 가이던스는 중국 제외, 판매 중단은 숫자보다 미·중 단절 신호(블룸버그 11/18 피드와 같은 사건)",
+   "summary": "엔비디아 임시 경영진이 美 승인에도 중국에 AI 칩을 보내지 않는다고 밝힘(블룸버그 피드). 생산 중단 세부 숫자 미확인."
+  },
+  {
+   "title": "앤스로픽 IPO 일정 — 11/18 공모가 확정, 11/19 첫 거래",
+   "url": "https://fourweekmba.com/ai-anthropics-ipo-day-by-day-pricing-18-nov-trading-19-nov/",
+   "press": "FourWeekMBA",
+   "at": "2026-11-18 08:45",
+   "why": "나스닥100 코어 칸 — 상장 15거래일 뒤 편입 수급·오늘 밤 공모가가 성장주 자금 흐름 신호(💬 5·14번)",
+   "summary": "공모가 확정 11/18, 나스닥 첫 거래 11/19 일정 정리. 희망가 70~78달러(CNBC 소식통 11/17 보도) 위 확정 여부가 관전점."
+  },
+  {
+   "title": "S&P500·나스닥 선물 상승 — 엔비디아·코어위브 프리마켓 주목",
+   "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-futures-rise-premarket-crwv-gpro-spcx-nvda-nlst-stocks-in-focus/cNGDlb9R9B7",
+   "press": "Stocktwits",
+   "at": "2026-11-18 08:45",
+   "why": "가설 ④ — 실적 상회 뒤 네오클라우드(코어위브) 동반 반등: 「빚으로 짓는 쪽」까지 같이 오르면 갈림 가설 시험대",
+   "summary": "엔비디아 실적 뒤 미국 지수 선물 상승 전환, 코어위브·엔비디아가 프리마켓 주목 종목(세부 숫자 미확인)."
+  },
+  {
+   "title": "엔비디아 이사회 의장 「젠슨 황 CEO 복귀 계획 없음」 — 실적 라이브",
+   "url": "https://www.nbcnews.com/business/business-news/live-blog/nvidia-stock-earnings-report-jensen-huang-rcna609804",
+   "press": "NBC News",
+   "at": "2026-11-18 07:45",
+   "why": "NVDA 🐋 고래 신호·💬 3번 — 실적 상회 뒤에도 CEO 공백 장기화",
+   "summary": "이사회 의장 「황 복귀 계획 없음」 · 실적 매출 1,158억$·가이던스 1,300억$ 상회 · 시간외 상승"
+  },
+  {
+   "title": "엔비디아 실적 1시간 전 옵션 내재 변동 ±8.5% — 최근 8번 평균의 두 배",
+   "url": "https://247wallst.com/investing/2026/11/17/nvidia-reports-in-about-an-hour-options-price-an-8-5-move-twice-what-the-stock-has-averaged-after-its-last-8-reports/",
+   "press": "24/7 Wall St.",
+   "at": "2026-11-18 07:45",
+   "why": "실제 시간외 +3%대는 내재 변동의 절반 아래 = 「안도」 수준 — 한국 반도체 갭 크기 판단 기준",
+   "summary": "옵션 내재 ±8.5%(최근 8회 평균의 2배) · 실제 시간외 +2.5~3%대"
+  },
+  {
+   "title": "엔비디아 3분기(FY27) 매출 1,158억 달러·데이터센터 1,076억 — 다음 분기 1,300억 달러 전망, 시간외 약 +2%",
+   "url": "https://www.trendingtopics.eu/nvidia-without-huang-115-8-billion-in-revenue-beats-all-expectations/",
+   "press": "Trending Topics",
+   "at": "2026-11-18 06:35",
+   "why": "임시 CEO 첫 실적이 숫자로는 상회 — 한국 반도체(하이닉스·삼성) 오늘 갭·가설 ④",
+   "summary": "매출 1,158억$(+103% YoY, 예상 약 1,090억)·데이터센터 1,076억$(예상 1,019억)·총마진 74.8%→다음 분기 71~72% · 가이던스 1,300억$±3%(예상 1,252억) · 정규장 155.46$(−0.44%) 뒤 시간외 약 +2%"
+  },
+  {
+   "title": "엔비디아 실적 예상 상회 — EPS 2.68달러 vs 2.48, 가이던스 컨센 상회",
+   "url": "https://www.tipranks.com/news/nvidia-stock-rises-after-earnings-smash-estimates",
+   "press": "TipRanks",
+   "at": "2026-11-18 06:35",
+   "why": "실적 숫자 두 번째 출처 — 중국 데이터센터 매출 0 가정",
+   "summary": "EPS 2.68$(예상 2.48) · 4분기 매출 1,300억$±3%(컨센 1,249억) · 총마진 71~72% 전망 · 시간외 상승(폭 미기재)"
+  },
+  {
+   "title": "머디워터스, 엔비디아 공매도 공개 — 전직 임원의 중국 칩 밀수 사건 연루 가능성 제기",
+   "url": "https://cryptobriefing.com/muddy-waters-nvidia-short-china-smuggling/",
+   "press": "Crypto Briefing",
+   "at": "2026-11-18 05:50",
+   "why": "실적 직전 공매도 리포트 — 엔비디아·한국 반도체 갭 방향 변수(가설 ④)",
+   "summary": "머디워터스가 엔비디아 숏 포지션 공개·전직 임원 연루 의혹 제기(본문 확인 못 함, 제목 기준) · 인베스팅 영문도 같은 제목 보도"
+  },
+  {
+   "title": "美 증시 실적 앞두고 낙폭 확대 — S&P 7,331(−1.15%)·VIX 26",
+   "url": "https://finance.yahoo.com/markets/live/stock-market-today-tuesday-november-17-dow-sp-500-nasdaq-nvidia-earnings-retail-sales-143848454.html",
+   "press": "Yahoo Finance",
+   "at": "2026-11-18 05:50",
+   "why": "S&P500 200일선(7,328) 접촉 — 미국 칸·나스닥100 코어 적립 판단",
+   "summary": "13:03 ET 다우 50,839(−1.49%)·S&P 7,331(−1.15%)·나스닥 24,234(−1.13%)·VIX 25.99·10년 5.09% · NVDA 153.57(−1.65%), 실적 기대 매출 1,091.5억$·EPS 2.47$"
+  },
+  {
+   "title": "엔비디아 직원들, 이사회에 젠슨 황 복귀 요청 — 청원 15.5만 명 넘어",
+   "url": "https://fourweekmba.com/ai-huang-said-to-weigh-nvidia-comeback-as-petition-tops-155000/",
+   "press": "FourWeekMBA",
+   "at": "2026-11-18 04:40",
+   "why": "실적 직후 CEO 문제(황 복귀 vs 외부 하스)가 엔비디아·한국 반도체 갭 방향을 좌우",
+   "summary": "황 복귀 검토 보도 속 청원 15.5만 명↑ · 이사회는 외부 후보 탐색(WSJ) — 결정 미정"
+  },
+  {
+   "title": "엔비디아 52주 최저 터치에도 월가는 버텨",
+   "url": "https://www.wealthprofessional.ca/investments/equity-markets/wall-street-absorbs-the-hit-as-nvidia-touches-a-52-week-low/394013",
+   "press": "Wealth Professional",
+   "at": "2026-11-18 04:40",
+   "why": "칩 약세 속 지수 흡수 = 「업종 갈아타기」 가설 ② 근거",
+   "summary": "엔비디아 52주 최저 · 지수는 낙폭 제한 — 실적 직전 포지션 축소"
+  },
+  {
    "title": "엔비디아, Arm CEO 르네 하스에 차기 CEO 타진 — 직원들은 황 복귀 원해(보도 종합)",
    "url": "https://www.khaleejtimes.com/business/tech/nvidia-approaches-arm-ceo-haas",
    "press": "Khaleej Times(WSJ·FT 보도 종합)",
@@ -543,103 +639,7 @@
    "at": "2026-11-16 12:40",
    "why": "「12/9 FOMC 2018식 분수령」 가설 — 인상은 거의 가격에 들어갔고 남은 변수는 폭·1월 추가",
    "summary": "구글뉴스 제목: 12월 0.25%p 인상 확률 92% · 베선트 「에너지 충격은 근원 물가로 안 번진다 — 지나친 인상 경계」 · 세부 숫자 미확인"
-  },
-  {
-   "title": "인도 증시 반등 — AI 거래 되감기에 외국인 자금 복귀",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-15/india-stock-market-rebounds-as-ai-trade-unwinds-foreign-funds-return",
-   "press": "Bloomberg",
-   "at": "2026-11-16 12:40",
-   "why": "한국·대만·일본 AI 비중 → 인도 등 「AI 아닌 곳」으로 외국계 돈이 옮기는 그림 — 코스피 외국인 매도 해석과 직결",
-   "summary": "블룸버그: AI 거래가 풀리며 인도에 외국인 자금 복귀 · 항공우주주 「반AI 자금」 수혜(같은 날 별도 기사) · 같은 날 코스피 외국인 오전 약 −9,864억"
-  },
-  {
-   "title": "중국 10월 산업생산·소매판매·투자 모두 예상 하회 — 경기 둔화 심화",
-   "url": "https://www.cnbc.com/2026/11/16/china-retail-sales-october-industrial-output-investment.html",
-   "press": "CNBC",
-   "at": "2026-11-16 11:40",
-   "why": "상해 33%·H주 50% 칸 — 지표 쇼크인데 홍콩은 +1% 가까이(부양 기대)",
-   "summary": "산업생산 +4.8%(예상 +5.3%) · 소매판매 +0.4%(예상 +0.8%) · 1~10월 고정투자 −8.1%(예상 −7.0%) · 부동산 개발투자 −21.6% (하나중국 정리)"
-  },
-  {
-   "title": "모건스탠리, 글로벌 주식 「최대 비중확대」 — AI 설비투자 사이클 유효",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-16/morgan-stanley-max-overweight-global-stocks-on-intact-ai-cycle",
-   "press": "Bloomberg",
-   "at": "2026-11-16 11:40",
-   "why": "엔비디아 실적 전 아시아 급락과 반대되는 IB 판단 — S&P 정상 판정·해외 ETF 칸 유지 근거",
-   "summary": "AI 설비투자 사이클이 내년까지 경기·이익 성장을 받친다며 글로벌 주식 최대 비중확대 권고"
-  },
-  {
-   "title": "HSBC, 엔비디아 목표가 반토막 — 「정식 CEO 올 때까지 고전」",
-   "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1YdUdPNks5MDBUd1lBbDhzSUFKWF84Vkp1cjEtSlR5Y2ptOG5IaHpEODBNREl4c0FfS2RETW14WUprWWQyQ3NXaVY2YmtBbjlGXzBlcEc1N0x4eHdZVUlTY0pBTktyS1ptajRIc2I0NkI?oc=5",
-   "press": "연합인포맥스",
-   "at": "2026-11-16 11:40",
-   "why": "11/17 엔비디아 실적 직전 한국 반도체 −4% 배경 — 반도체 칸 2%·091160 관찰",
-   "summary": "젠슨 황 공백을 이유로 목표가 대폭 하향(세부 숫자 미확인) · 같은 날 황 복귀 검토 보도도 나옴"
-  },
-  {
-   "title": "닛케이, 일본 3분기 GDP 깜짝 역성장 뒤 하락 출발 — 엔비디아 실적·앤스로픽 상장 주간 시작",
-   "url": "https://mlq.ai/news/nikkei-opens-lower-after-japans-surprise-contraction-as-asia-starts-a-week-of-nvidia-results-and-the-anthropic-ipo/",
-   "press": "MLQ.ai",
-   "at": "2026-11-16 10:40",
-   "why": "아시아 동반 약세(닛케이 −600엔대) — 한국 급락이 한국만의 일이 아님, 일본 칸(지금 0%) 유지 근거",
-   "summary": "일본 3분기 GDP 연율 −0.1%로 예상 하회 · 닛케이 하락 출발 · 이번 주 엔비디아 실적(11/17)·앤스로픽 상장이 아시아 기술주 분수령."
-  },
-  {
-   "title": "아시아 증시, 엔비디아 리더십 충격 속 기술주 반등 힘 잃고 하락",
-   "url": "https://www.investing.com/news/stock-market-news/asia-stocks-steady-as-chipmakers-rebound-after-nvidia-leadership-shock-5024055",
-   "press": "Investing.com",
-   "at": "2026-11-16 10:40",
-   "why": "황 사임 뒤 반도체 반등이 아시아에서 꺾임 — 코스닥 칸·반도체 칸 판단 재료",
-   "summary": "칩주 반등 시도 뒤 다시 약세 — 엔비디아 CEO 공백·실적 앞 관망(제목 기준, 세부 숫자 미확인)."
-  },
-  {
-   "title": "엔비디아 11/17 실적 — EPS 2.47달러 예상·옵션 내재 변동 약 ±4.5%",
-   "url": "https://tradestie.com/news/nvda-earnings-nov-17-247-eps-expected-45-implied-move-20261117/",
-   "press": "Tradestie",
-   "at": "2026-11-16 09:40",
-   "why": "실적 뒤 반도체 칸·SMH 20일선 판단 기준 — 내재 변동보다 크게 움직이면 「업종 갈아타기」 가설 시험",
-   "summary": "주가 178.67달러 기준 EPS 2.47달러 예상, 옵션 내재 변동 약 ±4.5%(제목 기준 · 2차 출처라 미확인 취급)."
-  },
-  {
-   "title": "삼성SDI, 미국서 수조원대 ESS 배터리 수주…LFP 시장 공략 본격화",
-   "url": "https://n.news.naver.com/mnews/article/001/0016442965",
-   "press": "연합뉴스",
-   "at": "2026-11-16 08:15",
-   "why": "AI 데이터센터발 ESS 수요 = 「현금 도는 상류(전력)」 가설 근거 · 코스피 2차전지 칸 — 개별주는 👻, 표현은 ETF로",
-   "summary": "美에서 ESS용 LFP 배터리 수조원대 수주(머니투데이·연합 속보 제목). 금액·고객사 세부는 미확인. 앞서 25/12 2조원대·26/3 1.5조원 수주에 이은 美 ESS 연속 수주."
-  },
-  {
-   "title": "굴스비 시카고 연은 「끈질긴 물가가 더 공격적 인상 부를 수도 — 2%로 가는 길 아님」",
-   "url": "https://investinglive.com/central-banks/fed-policymaker-goolsbee-warns-strong-demand-may-be-fueling-us-inflation-as-rate-hike-outlook-hardens/",
-   "press": "investingLive",
-   "at": "2026-11-16 08:15",
-   "why": "12/9 FOMC 분수령(0.55) — 비둘기 쪽까지 인상 쪽, 「0.25%p 여러 번」 그림 강화 · 美 10년 5%대 지속",
-   "summary": "굴스비 「강한 수요가 물가를 밀어 올리는 중일 수 있다 · 인상 전망 굳어짐」. 12월 인상 확률 86.8% 거론(구글뉴스 제목, 세부 미확인)."
-  },
-  {
-   "title": "UBS, 브렌트 연말 110달러 전망 — 걸프 물량 전쟁 전 수준 회복 못 함",
-   "url": "https://oilprice.com/Latest-Energy-News/World-News/UBS-Sees-110-Brent-by-Year-End-as-Gulf-Flows-Stay-Below-Prewar-Levels.html",
-   "press": "OilPrice",
-   "at": "2026-11-16 07:45",
-   "why": "11/16 국내 재보도(인베스팅)는 10/27~28 UBS 상향의 재탕 — 새 전망 아님, 에너지 칸·brent_95 판단 때 「새 뉴스」로 세지 않기",
-   "summary": "UBS 10/27~28 브렌트 연말 전망 110달러로 상향(roic.ai 10/27·10/28 보도). 근거: 걸프 물량 전쟁 전 수준 미달·운임·공급 완충 부족. 브렌트 11/13 96.08(qa 18)."
-  },
-  {
-   "title": "세레브라스 3분기 — 클라우드·서비스 매출 급증 뒤 주가 반응 엇갈림",
-   "url": "https://parameter.io/cerebras-cbrs-stock-tumbles-12-even-as-cloud-and-services-revenue-jumps-281/",
-   "press": "Parameter",
-   "at": "2026-11-16 06:45",
-   "why": "엔비디아 실적(11/17) 전날 AI 추론 칩 경쟁사 실적 — 「현금 도는 상류」 가설과 반도체 칸 기대치 가늠",
-   "summary": "클라우드·서비스 매출 +281% 보도에도 주가 −12% 제목(발표 분기·날짜 미확인). WSJ 11/16 제목은 「3분기 클라우드 매출 급증으로 전망 상향」 — 세부 숫자 미확인."
-  },
-  {
-   "title": "엔비디아, 황의 관계 조사 — AI 업계가 파장을 따진다",
-   "url": "https://datacenterknowledge.com/data-center-chips/nvidia-probes-huang-ties-as-ai-industry-weighs-the-fallout",
-   "press": "Data Center Knowledge",
-   "at": "2026-11-16 05:45",
-   "why": "11/17 임시 CEO 첫 실적 앞 — 황 복귀 논의(FT)와 이사회 조사가 동시에 진행, 반도체 칸·AI 차입 가설",
-   "summary": "이사회 조사가 진행 중인 가운데 데이터센터 업계는 공급 일정·고객 관계 영향을 점검. 세부 숫자는 미확인."
   }
  ],
- "at": "2026-11-18 00:35"
+ "at": "2026-11-18 09:40"
 }
