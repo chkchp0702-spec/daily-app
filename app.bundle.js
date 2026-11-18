@@ -14102,9 +14102,9 @@
      자료: archive/x/port_px/pool/ (port_px.py — 배당 포함 수정종가 ÷ 환율 = 달러 값) · 없는 종목은 ntfy 로 요청 → 15분마다(pdz_req.yml) 받아 올림
      상장이 늦은 종목: 200일선 준비는 S&P 로 하고, 계산 시작만 그 종목 첫날로 미룸(전엔 같이 거래된 날만 남겨 200거래일이 더 깎였음) */
   var SXMAX = 5, REQT = "chkchp-ch-pdzreq-k4r8", POOL = null, SXC = ["#d55181", "#9b6bd6", "#e07b39", "#4fb0c6", "#b8a13a"];
-  var OLDSYM = {"삼성전자": "005930.KS", "SK하이닉스": "000660.KS", "현대차": "005380.KS", "한국전력": "015760.KS", "엔비디아": "NVDA", "애플": "AAPL", "브로드컴": "AVGO", "AMD": "AMD", "마이크론": "MU", "인텔": "INTC", "테슬라": "TSLA", "팔란티어": "PLTR", "KOSPI200": "^KS200", "NIKKEI225": "^N225", "EUROSTOXX50": "^STOXX50E", "HSCEI": "^HSCE"};
+  var OLDSYM = {"삼성전자": "005930.KS", "SK하이닉스": "000660.KS", "현대차": "005380.KS", "한국전력": "015760.KS", "엔비디아": "NVDA", "애플": "AAPL", "브로드컴": "AVGO", "AMD": "AMD", "마이크론": "MU", "인텔": "INTC", "테슬라": "TSLA", "팔란티어": "PLTR", "KOSPI200": "069500.KS", "NIKKEI225": "^N225", "EUROSTOXX50": "^STOXX50E", "HSCEI": "^HSCE"};
   if (!Array.isArray(ST.sx)) ST.sx = [];
-  if (ST.st){ if (OLDSYM[ST.st] && !ST.sx.some(function(x){ return x.s === OLDSYM[ST.st]; })) ST.sx.push({s: OLDSYM[ST.st], n: {"KOSPI200": "코스피200 지수", "NIKKEI225": "니케이225 지수", "EUROSTOXX50": "유로스탁스50 지수", "HSCEI": "항셍중국 지수"}[ST.st] || ST.st, m: "", w: ST.stw || 5}); ST.st = ""; }
+  if (ST.st){ if (OLDSYM[ST.st] && !ST.sx.some(function(x){ return x.s === OLDSYM[ST.st]; })) ST.sx.push({s: OLDSYM[ST.st], n: {"KOSPI200": "KODEX 200", "NIKKEI225": "니케이225 지수", "EUROSTOXX50": "유로스탁스50 지수", "HSCEI": "항셍중국 지수"}[ST.st] || ST.st, m: "", w: ST.stw || 5}); ST.st = ""; }
   var QUICK = [["005930.KS", "삼성전자"], ["000660.KS", "SK하이닉스"], ["NVDA", "엔비디아"], ["AAPL", "애플"], ["TSLA", "테슬라"], ["360750.KS", "TIGER 미국S&P500", 1], ["069500.KS", "KODEX 200", 1], ["SCHD", "미국 배당 SCHD", 1], ["JEPI", "JEPI 커버드콜", 1], ["SOXX", "반도체 SOXX", 1], ["IBIT", "비트코인 IBIT", 1], ["^N225", "니케이225", 1]];
   function sxCol(i){ return SXC[i % SXC.length]; }
   function sxKey(s){ return "X:" + s; }
