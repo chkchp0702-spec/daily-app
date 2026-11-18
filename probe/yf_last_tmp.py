@@ -1,27 +1,17 @@
-"""임시 시험(11/18): 야후가 마지막 마감 봉을 빼고 주는지 — period=1y vs start/end vs 직접 chart API"""
-import datetime as dt, json, time, urllib.request
-import yfinance as yf
-S = ["AAPL", "MSFT", "NVDA", "SPY", "JPM", "XOM", "005930.KS", "7203.T", "0700.HK", "600519.SS"]
-print("yfinance", yf.__version__, dt.datetime.utcnow().isoformat())
-def last(df):
+import datetime as dt
+import yfinance as yf, pandas as pd
+S = ["AAPL", "MSFT", "SPY", "XOM", "BRK-B", "005930.KS", "7203.T", "0700.HK", "600519.SS"]
+d = yf.download(S, period="5d", interval="1d", group_by="ticker", auto_adjust=False, threads=True, progress=False)
+print("일봉 꼬리 AAPL", d["AAPL"].tail(3).to_dict("split")["data"], [str(x) for x in d.index[-3:]])
+for iv in ("1h", "30m", "5m"):
+    h = yf.download(S, period="5d", interval=iv, group_by="ticker", auto_adjust=False, threads=True, progress=False, ignore_tz=False)
     out = {}
     for s in S:
         try:
-            c = df[s]["Close"].dropna(); out[s] = c.index[-1].strftime("%m-%d")
+            c = h[s]["Close"].dropna(); out[s] = (str(c.index[-1])[:16], round(float(c.iloc[-1]), 2))
         except Exception as e:
             out[s] = "x"
-    return out
-print("period=1y      ", last(yf.download(S, period="1y", interval="1d", group_by="ticker", auto_adjust=False, threads=True, progress=False)))
-now = dt.datetime.utcnow()
-print("start/end      ", last(yf.download(S, start=(now - dt.timedelta(days=370)).strftime("%Y-%m-%d"), end=(now + dt.timedelta(days=2)).strftime("%Y-%m-%d"), interval="1d", group_by="ticker", auto_adjust=False, threads=True, progress=False)))
-print("period=5d      ", last(yf.download(S, period="5d", interval="1d", group_by="ticker", auto_adjust=False, threads=True, progress=False)))
-print("US 만 period=1y", last(yf.download(S[:6], period="1y", interval="1d", group_by="ticker", auto_adjust=False, threads=True, progress=False)))
-for host in ("query1", "query2"):
-    for q in ("range=1y&interval=1d", "period1=%d&period2=%d&interval=1d" % (int(time.time()) - 370 * 86400, int(time.time()) + 86400)):
-        try:
-            u = "https://%s.finance.yahoo.com/v8/finance/chart/AAPL?%s" % (host, q)
-            j = json.loads(urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=20).read())
-            r = j["chart"]["result"][0]; ts = r["timestamp"]; cl = r["indicators"]["quote"][0]["close"]
-            print(host, q[:8], [(dt.datetime.utcfromtimestamp(t).strftime("%m-%d %H:%M"), None if c is None else round(c, 2)) for t, c in zip(ts[-3:], cl[-3:])], "regularMarketTime", dt.datetime.utcfromtimestamp(r["meta"]["regularMarketTime"]).strftime("%m-%d %H:%M"))
-        except Exception as e:
-            print(host, q[:8], "실패", str(e)[:120])
+    print(iv, out)
+for s in ("AAPL", "XOM"):
+    fi = yf.Ticker(s).fast_info
+    print(s, "fast_info last", fi["lastPrice"], "prev", fi["previousClose"])
