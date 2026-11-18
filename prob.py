@@ -943,17 +943,31 @@ def score(hist, H, res, vol=None):
         if cur:
             x["v"] = cur
             x.setdefault("ve", cur)
+    # 🔧 11/18 12시: 장중(마감 +20분 전)엔 오늘 봉이 미완성 → 그 봉으로 채점하지 않음.
+    #   전엔 10:15 실행이 코스피 장중 값(+3.04%)으로 11/17 행을 채점해 굳혀 버렸음 → 이제 매 실행 확정 종가로 다시 채점(지난 행도 바로잡힘).
+    cut = {}
+    for mk_, cfg_ in MK.items():
+        op_, loc_ = is_open_now(cfg_)
+        hm_ = loc_.hour * 100 + loc_.minute
+        if loc_.weekday() < 5 and cfg_["open"] <= hm_ < cfg_["close"] + 20:
+            cut[mk_] = pd.Timestamp(loc_.strftime("%Y-%m-%d"))
     for x in rows:
         px = H.get(MK[x["mk"]]["ix"])
         if px is None:
             continue
-        c = px["Close"]
+        c = px["Close"].dropna()
+        c = c[~c.index.duplicated(keep="first")]
+        if x["mk"] in cut:
+            c = c[c.index < cut[x["mk"]]]
         after = c[c.index > pd.Timestamp(x["base_date"])]
-        if x.get("r1") is None and len(after) >= 1:
+        if len(after) >= 1:
             x["r1"] = r2((float(after.iloc[0]) / x["c0"] - 1) * 100); x["hit1"] = int((x["r1"] > 0) == (x["p1"] >= 0.5)); x["y1"] = int(x["r1"] > 0)
             if x.get("p1m") is not None:
                 x["hit1m"] = int((x["r1"] > 0) == (x["p1m"] >= 0.5))
-        if x.get("r5") is None and len(after) >= 5:
+        elif x.get("r1") is not None and x["mk"] in cut and x["base_date"] >= str((cut[x["mk"]] - pd.offsets.BDay(1)).date()):
+            for k_ in ("r1", "hit1", "y1", "hit1m"):          # 장중 값으로 굳은 어제 기준 행 → 마감 뒤 다시 채점
+                x.pop(k_, None)
+        if len(after) >= 5:
             x["r5"] = r2((float(after.iloc[4]) / x["c0"] - 1) * 100); x["hit5"] = int((x["r5"] > 0) == (x["p5"] >= 0.5)); x["y5"] = int(x["r5"] > 0)
     rows = rows[-2000:]
     hist["rows"] = rows
