@@ -910,8 +910,14 @@ def market(mk, H, brain, events, G=None, ext=None, breadth=None):
 
 
 # ---------------- 채점 ----------------
-def score(hist, H, res):
-    """지난 예측을 실제 결과로 채점. hist = {"rows":[{d, mk, base_date, p1, p5, c0, c1?, c5?, r1?, r5?, hit1?, hit5?}]}"""
+VOL_Y = {"big1": lambda r1, r5: None if r1 is None else int(abs(r1) > 1),      # 🌊 흔들림 실제: 내일 ±1% 넘게
+         "dn2": lambda r1, r5: None if r1 is None else int(r1 < -2),           # 내일 −2% 넘게 빠짐
+         "dn5": lambda r1, r5: None if r5 is None else int(r5 < -3)}           # 일주일 뒤 −3% 넘게 빠져 있음
+
+
+def score(hist, H, res, vol=None):
+    """지난 예측을 실제 결과로 채점. hist = {"rows":[{d, mk, base_date, p1, p5, c0, c1?, c5?, r1?, r5?, hit1?, hit5?}]}
+    vol = prob_vol.run() 결과 — 🌊 흔들림 확률도 행마다 기록(v = 개장 전 마지막 · ve = 처음 기록)해서 실제로 채점"""
     rows = hist.get("rows", [])
     seen = {(x["mk"], x["base_date"]) for x in rows}
     byk = {(x["mk"], x["base_date"]): x for x in rows}
@@ -927,6 +933,16 @@ def score(hist, H, res):
             x = byk.get((mk, r["base_date"]))
             if x is not None and x.get("r1") is None:
                 x["p1m"], x["p5m"], x["mm"] = r["p1"], r["p5"], NOW.strftime("%Y-%m-%d %H:%M")
+    # 🌊 11/18 흔들림 실전 채점: 기준일이 같은 vol 확률(검증 통과 여부·평소 비율 함께)을 장 열리기 전까지 덮어씀
+    for x in rows:
+        if x.get("r1") is not None or (res.get(x["mk"]) or {}).get("open_now"):
+            continue
+        V = ((vol or {}).get(x["mk"]) or {}).get("t") or {}
+        cur = {tg: [v["p"], v["base"], int(bool(v.get("ok")))] for tg, v in V.items()
+               if v.get("p") is not None and v.get("base") is not None and v.get("at") == x["base_date"]}
+        if cur:
+            x["v"] = cur
+            x.setdefault("ve", cur)
     for x in rows:
         px = H.get(MK[x["mk"]]["ix"])
         if px is None:
@@ -966,7 +982,20 @@ def score(hist, H, res):
         return {"n": len(done), "brier": r2(float(np.mean((p - y) ** 2)), 3), "coin": r2(float(np.mean((0.5 - y) ** 2)), 3),
                 "hit": r2(float(np.mean((p >= 0.5) == (y == 1))) * 100, 0), "up": r2(float(y.mean()) * 100, 0),
                 "sel_n": int(sel.sum()), "sel_hit": r2(float(np.mean((p[sel] >= 0.5) == (y[sel] == 1))) * 100, 0) if sel.sum() else None}
-    sc = {"all": {"d1": summ(rows, "p1"), "d5": summ(rows, "p5"), "d1m": summ_m(rows)}}
+    def summ_v(rs):
+        """🌊 흔들림 실전 채점 — 목표별 모델 브라이어 vs 평소 비율 브라이어 (실력 = 1 − 모델/평소)"""
+        o = {}
+        for tg, f in VOL_Y.items():
+            pr = [(x["v"][tg], f(x.get("r1"), x.get("r5"))) for x in rs if (x.get("v") or {}).get(tg)]
+            pr = [(a, y) for a, y in pr if y is not None]
+            if not pr:
+                o[tg] = {"n": 0}; continue
+            p = np.array([a[0] for a, _ in pr]); b = np.array([a[1] for a, _ in pr]); y = np.array([y for _, y in pr], float)
+            bm, bb = float(np.mean((p - y) ** 2)), float(np.mean((b - y) ** 2))
+            o[tg] = {"n": len(pr), "brier": r2(bm, 3), "base": r2(bb, 3), "skill": r2((1 - bm / bb) * 100, 0) if bb > 0 else None,
+                     "pred": r2(p.mean() * 100, 0), "real": r2(y.mean() * 100, 0), "usual": r2(b.mean() * 100, 0)}
+        return o
+    sc = {"all": {"d1": summ(rows, "p1"), "d5": summ(rows, "p5"), "d1m": summ_m(rows), "vol": summ_v(rows)}}
     # 방법별 브라이어 (내일) — 60건 넘으면 다음 실행부터 가중치에 반영 (prob_hist.json auto_w)
     mb = {}
     for x in rows:
@@ -983,7 +1012,7 @@ def score(hist, H, res):
             hist["auto_w"][mk] = {k: r2(min(2.0, max(0.3, 1 + 20 * (base_b - np.mean(v)))), 2) for k, v in mb.items() if len(v) >= 60}
     for mk in MK:
         rs = [x for x in rows if x["mk"] == mk]
-        sc[mk] = {"d1": summ(rs, "p1"), "d5": summ(rs, "p5"), "d1m": summ_m(rs), "recent":[{"d": x["base_date"], "p1": x["p1"], "r1": x.get("r1"), "p5": x["p5"], "r5": x.get("r5")} for x in rs[-7:]]}
+        sc[mk] = {"d1": summ(rs, "p1"), "d5": summ(rs, "p5"), "d1m": summ_m(rs), "vol": summ_v(rs), "recent":[{"d": x["base_date"], "p1": x["p1"], "r1": x.get("r1"), "p5": x["p5"], "r5": x.get("r5")} for x in rs[-7:]]}
     return sc
 
 
@@ -1049,13 +1078,13 @@ def main():
         hist = json.load(open(HIST, encoding="utf-8")) if os.path.exists(HIST) else {}
     except Exception:
         hist = {}
-    sc = score(hist, H, res) if res else {}
     vol = {}
     try:
         import prob_vol      # 🌊 11/18 흔들림·급락 위험 확률 + 🎯 자신 있는 날 (방향 대신 맞히기 쉬운 것 · 매 실행 걸어가기 검증)
         vol = prob_vol.run(H, MK, {mk: r["base_date"] for mk, r in res.items()})
     except Exception as e:
         import traceback; traceback.print_exc(); ERRS.append("vol: " + str(e)[:300])
+    sc = score(hist, H, res, vol) if res else {}
     out = {"vol": vol, "at": int(time.time() * 1000), "t": NOW.strftime("%H:%M"), "date": NOW.strftime("%Y-%m-%d"), "markets": res, "score": sc, "shrink": SHRINK,
            "how": [
                ["가격", "📚 기저율", "지금과 같은 상태(연속 하락·상승 일수, 5일 수익률 부호)였던 2000년 이후의 날들이 다음 날·5일 뒤 어떻게 됐는지 그대로 셈. 가장 단순하고 가장 과소평가된 방법"],

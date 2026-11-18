@@ -259,6 +259,10 @@
         '<div><small>아침판 적중</small><b>' + (M.n ? M.hit + '%' : '–') + '</b><small class="mut">' + (M.n || 0) + '건</small></div><div><small>아침판 브라이어</small><b>' + (M.brier != null ? M.brier : '–') + '</b><small class="mut">동전 ' + (M.coin != null ? M.coin : '0.25') + '</small></div>' +
         '<div><small>자신 있는 날(60%↑·40%↓)</small><b>' + (M.sel_n ? M.sel_hit + '%' : '–') + '</b><small class="mut">' + (M.sel_n || 0) + '건</small></div><div><small>저녁판(마감 직후)</small><b>' + (A.d1.n ? A.d1.hit + '%' : '–') + '</b><small class="mut">간밤 미국 전</small></div></div>' +
         '<p class="note">위 「내일 적중」은 마감 직후(간밤 미국을 아직 모를 때) 기록한 저녁판이라 대부분 45~55% 반반이었어요. 11/18부터 아침에 실제로 보시는 개장 직전 숫자도 따로 채점해요.</p>'; })() +
+      (function(){ var V = A.vol || {}, nm = {big1: "내일 ±1% 흔들림", dn2: "내일 −2% 급락", dn5: "일주일 −3%"}, ks = ["big1", "dn2", "dn5"];
+        if (!ks.some(function(k){ return V[k] && V[k].n; })) return '<div class="sub2">🌊 흔들림 실전 채점 <span class="mut">11/18부터 쌓는 중 · 결과가 나오면 여기에</span></div>';
+        return '<div class="sub2">🌊 흔들림 실전 채점 <span class="mut">말한 확률 vs 평소 비율 — 실력 +면 평소보다 나음</span></div><div class="pr-rc">' + ks.map(function(k){ var v = V[k] || {};
+          return v.n ? '<span>' + nm[k] + ' <small>' + v.n + '건</small> 말한 ' + v.pred + '% · 평소 ' + v.usual + '% → 실제 ' + v.real + '% · 실력 ' + (v.skill > 0 ? '+' : '') + v.skill + '%</span>' : ''; }).join("") + '</div>'; })() +
       (A.d1.buckets && A.d1.buckets.length ? '<div class="sub2">보정표 (내일)</div><div class="pr-rc">' + bk(A.d1) + '</div>' : '') + '</section>';
   }
   function draw(D){ window.__probD = D;   // 📨 시장확률 한 장이 화면과 같은 값(장중 덧입힌 값)을 쓰게
