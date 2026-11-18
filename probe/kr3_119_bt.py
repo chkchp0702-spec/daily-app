@@ -41,13 +41,25 @@ if r0:
     v = pd.Series(dict(rows)).sort_index(); v = v[~v.index.duplicated()]
     print("NAVER IRR_GOVT03Y", len(v), v.index[0].date() if len(v) else None, v.index[-1].date() if len(v) else None, v.tail(3).to_dict())
     if len(v) > 1000: SER["n:3Y"] = v
-for u in ("https://m.stock.naver.com/front-api/marketIndex/prices?category=bond&reutersCode=KR3YT%3DRR&page=1&pageSize=60",
-          "https://api.stock.naver.com/marketindex/bond/KR3YT=RR/prices?page=1&pageSize=60"):
+def nm_page(p):
+    u = f"https://api.stock.naver.com/marketindex/bond/KR3YT=RR/prices?page={p}&pageSize=100"
     try:
-        r = requests.get(u, headers=UA, timeout=20); print("NAVER-M", u[:70], r.status_code, r.text[:150].replace("\n", " "))
-    except Exception as e: print("NAVER-M err", str(e)[:80])
-K3 = SER.get("n:3Y", SER.get("c:KR3Y", SER.get("c:KR3YT=RR")))
-if K3 is None: sys.exit("3년 자료 없음")
+        js = requests.get(u, headers=UA, timeout=20).json()
+        return [(pd.Timestamp(x["localTradedAt"][:10]), float(str(x["closePrice"]).replace(",", ""))) for x in js]
+    except Exception as e:
+        return []
+rows = []
+for b in range(0, 80, 16):
+    with ThreadPoolExecutor(16) as ex:
+        got = list(ex.map(nm_page, range(b + 1, b + 17)))
+    for g in got: rows += g
+    if not got[-1]: break
+if rows:
+    v = pd.Series(dict(rows)).sort_index(); v = v[~v.index.duplicated()]
+    print("NAVER-M KR3YT=RR", len(v), v.index[0].date(), v.index[-1].date(), v.tail(3).to_dict())
+    if len(v) > 1000: SER["n:3Y"] = v
+K3 = SER.get("n:3Y"); K5 = SER.get("c:KR5Y")
+if K3 is None: K3 = K5; print("3년 없음 → 5년으로")
 K10 = SER.get("c:KR10Y")
 print("요일", K3.index.dayofweek.value_counts().sort_index().to_dict(), "지금", K3.tail(5).to_dict())
 syms = sorted({c["ix"] for c in prob.MK.values()} | {"^TNX", "^GSPC"})
@@ -100,7 +112,7 @@ for mk, cfg in prob.MK.items():
     r10 = prob_x.align(prob_x.rank252(K10.diff(5)), d.index) if K10 is not None else None
     oth10 = oth + "|" + lab(r10, "kh", "kl") if r10 is not None else oth
     R = {}
-    FS = [("3년5일", K3.diff(5), 0), ("3년20일", K3.diff(20), 0), ("3년5일_lag1", K3.diff(5), 1)]
+    FS = [("3년5일", K3.diff(5), 0), ("3년20일", K3.diff(20), 0), ("3년5일_lag1", K3.diff(5), 1)] + ([("5년5일", K5.diff(5), 0), ("5년20일", K5.diff(20), 0)] if K5 is not None else [])
     for fn, ser, lg in FS:
         rg = prob_x.align(prob_x.rank252(ser), d.index).shift(lg); mid = d.index[len(d) // 2]; cells = {}
         for nm, f in (("≥90(금리 급등)", (rg >= 0.9).fillna(False)), ("≤10(금리 급락)", (rg <= 0.1).fillna(False))):
