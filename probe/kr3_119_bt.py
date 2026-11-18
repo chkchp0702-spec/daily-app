@@ -42,14 +42,14 @@ if r0:
     print("NAVER IRR_GOVT03Y", len(v), v.index[0].date() if len(v) else None, v.index[-1].date() if len(v) else None, v.tail(3).to_dict())
     if len(v) > 1000: SER["n:3Y"] = v
 def nm_page(p):
-    u = f"https://api.stock.naver.com/marketindex/bond/KR3YT=RR/prices?page={p}&pageSize=100"
+    u = f"https://api.stock.naver.com/marketindex/bond/KR3YT=RR/prices?page={p}&pageSize=60"
     try:
         js = requests.get(u, headers=UA, timeout=20).json()
         return [(pd.Timestamp(x["localTradedAt"][:10]), float(str(x["closePrice"]).replace(",", ""))) for x in js]
     except Exception as e:
-        return []
+        print("NM err", p, str(e)[:80]); return []
 rows = []
-for b in range(0, 80, 16):
+for b in range(0, 160, 16):
     with ThreadPoolExecutor(16) as ex:
         got = list(ex.map(nm_page, range(b + 1, b + 17)))
     for g in got: rows += g
