@@ -21,7 +21,8 @@
     bond: "채권", fund: "펀드", els: "ELS", prop: "제안서", luck: "오늘의 운세", saju: "사주", tarot: "타로", lotto: "로또", feed: "피드", onepager: "종목리포트", alarm: "알림", idea: "의견함", send: "한 장", lab: "연구실", tax: "세무계산기", diag: "포트 진단", sigall: "신호 한눈에"};
   function bag(){ var b = null; try { b = JSON.parse(localStorage.getItem(TK) || "null"); } catch(x) {} if (!b || b.day !== kst()) b = {day: kst(), taps: {}, views: {}, n: 0}; return b; }
   function put(b){ try { localStorage.setItem(TK, JSON.stringify(b)); } catch(x) {} }
-  function add(kind, label){ if (!label) return; var b = bag(), m = kind === "v" ? b.views : b.taps; label = String(label).replace(/\s+/g, " ").trim().slice(0, kind === "v" ? 14 : 28); if (!label) return; m[label] = (m[label] || 0) + 1; b.n++; put(b); }
+  // 🩹 11/18 글자를 UTF-16 길이로 자르면 이모지가 반쪽만 남을 수 있음 → 끝의 짝 없는 글자를 지움 (usage.py 가 이것 때문에 11/17 16시부터 멈췄음)
+  function add(kind, label){ if (!label) return; var b = bag(), m = kind === "v" ? b.views : b.taps; label = String(label).replace(/\s+/g, " ").trim().slice(0, kind === "v" ? 14 : 28).replace(/[\ud800-\udbff]$/, ""); if (!label) return; m[label] = (m[label] || 0) + 1; b.n++; put(b); }
   var lastView = "";
   function view(){ var c = (typeof cur !== "undefined" && cur) || ""; if (!c || c === lastView) return; lastView = c; add("v", NAMES[c] || c); }
   function isName(x){ if (!x || x.length > 24) return false; try { var a = JSON.parse(localStorage.getItem("op_clients") || "[]") || []; var h = JSON.parse(localStorage.getItem("pp_hist") || "[]") || [];
@@ -46,7 +47,7 @@
     if (bt.closest("[data-cl],[data-dvcl],[data-tx18c],.opc-rc,.tx18-rc,.pp18-r") || isName((bt.innerText || bt.textContent || "").replace(/\s+/g, " ").trim())) return null;
     var tx = (bt.innerText || bt.textContent || "").replace(/[\d,.%+−\-]+/g, "#").replace(/\s+/g, " ").trim();   // 숫자는 # 로(값 말고 단추 이름만)
     if (!tx || tx.length < 2) return null;
-    var c = (typeof cur !== "undefined" && cur) || ""; return (NAMES[c] || c) + " · " + tx.slice(0, 20);
+    var c = (typeof cur !== "undefined" && cur) || ""; return (NAMES[c] || c) + " · " + tx.slice(0, 20).replace(/[\ud800-\udbff]$/, "");
   }
   document.addEventListener("click", function(ev){ try { var t = ev.target; if (!t || !t.closest) return; add("t", labelOf(t)); } catch(x) {} }, true);
   function flush(){

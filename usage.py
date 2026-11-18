@@ -26,13 +26,19 @@ def _pub():
     return serialization.load_der_public_key(base64.b64decode(m.group(1)))
 
 
+def clean(s):
+    """🩹 11/18 짝 없는 서로게이트(이모지 반쪽) 지우기 — 휴대폰이 단추 글자를 UTF-16 길이로 자르다 이모지를 반으로 자르면
+    json.loads 는 받아 주지만 UTF-8 로 못 바꿔 seal()·usage_pub 저장이 통째로 죽었음(11/17 16:12~11/18 10:12 8번 연속)."""
+    return "".join(ch for ch in str(s) if not "\ud800" <= ch <= "\udfff")
+
+
 def seal(obj):
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
     from cryptography.hazmat.primitives.asymmetric import padding
     from cryptography.hazmat.primitives import hashes
     ak = AESGCM.generate_key(bit_length=256); iv = os.urandom(12)
     wk = _pub().encrypt(ak, padding.OAEP(mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
-    ct = AESGCM(ak).encrypt(iv, json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode(), None)
+    ct = AESGCM(ak).encrypt(iv, json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode("utf-8", "replace"), None)   # 🩹 그래도 남은 반쪽 글자는 ? 로
     return {"k": base64.b64encode(wk).decode(), "iv": base64.b64encode(iv).decode(), "ct": base64.b64encode(ct).decode()}
 
 
@@ -70,16 +76,16 @@ def main():
             if b.get("k") == "tap":   # 🎯 11/04 누른 것·본 화면 (사용자 「어디를 제일 많이 봤니」)
                 T = D.setdefault("taps", {}); V = D.setdefault("views", {}); W = D.setdefault("tapdev", {})
                 for k_, c_ in list((b.get("taps") or {}).items())[:60]:
-                    k_ = str(k_)[:28]; c_ = max(0, min(int(c_ or 0), 200))
+                    k_ = clean(k_)[:28]; c_ = max(0, min(int(c_ or 0), 200))
                     T[k_] = T.get(k_, 0) + c_; W.setdefault(k_, {})[d] = 1
                 for k_, c_ in list((b.get("views") or {}).items())[:30]:
-                    k_ = str(k_)[:14]; c_ = max(0, min(int(c_ or 0), 200)); V[k_] = V.get(k_, 0) + c_
+                    k_ = clean(k_)[:14]; c_ = max(0, min(int(c_ or 0), 200)); V[k_] = V.get(k_, 0) + c_
                 if len(T) > 400:
                     for k_ in sorted(T, key=lambda x: T[x])[:len(T) - 400]: T.pop(k_, None); W.pop(k_, None)
                 seen.add(mid); n += 1
                 continue
             D["dev"][d] = D["dev"].get(d, 0) + 1
-            tab = str(b.get("tab") or "home")[:12]
+            tab = clean(b.get("tab") or "home")[:12]
             D["tabs"][tab] = D["tabs"].get(tab, 0) + 1
             v = str(b.get("v") or "")[:12]
             if v:

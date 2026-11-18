@@ -67,6 +67,7 @@
   function nwGo(id){ var n = NEWS.filter(function(x){ return x[0] === id; })[0]; if (!n) return;
     var s = nwSeen(); s[id] = 1; ls("nw18", JSON.stringify(s));
     var k = n[5];
+    if (id === "n1118a") txIntent = 1;   // 🩹 11/18 절세 한 장 줄 → 세무 화면에 만드는 법 안내
     if (k === "@qa"){ if (window.__qaOpen) __qaOpen(); else goTo("send"); return; }
     if (k === "@design"){ goTo("port"); var c = 0; (function seek(){ var z = D.getElementById("podz"), more = D.getElementById("ezcapb");
       if (z && z.classList.contains("ez-cap-hid") && more) more.click();
@@ -283,12 +284,28 @@
       setTimeout(function(){ end(null); }, 8000); try { cv.toBlob(function(b){ end(b); }, "image/png"); } catch(x){ end(null); }
     });
   }
+  /* 🩹 11/18 「연말 절세 한 장」(🆕 줄 · 📨 보내기 화면 줄)으로 들어오면 계산기 6칸만 보이고 보내기 단추는 결과 밑에만 생겨 못 찾았음
+     → 그 두 입구로 왔을 때만: 결과가 나오기 전까지 맨 위에 만드는 법 한 줄, 단추가 생기면 한 번 반짝. 연구실에서 그냥 열면 그대로. */
+  var txIntent = 0, txWas = false;
+  D.addEventListener("click", function(ev){ var t = ev.target.closest && ev.target.closest('.hub-send [data-hub="tax"]'); if (t) txIntent = 1; }, true);
+  function txHint(has){
+    var h = D.getElementById("tx18h"), tx = D.getElementById("tx");
+    if (!txIntent || has || !tx){ if (h) h.remove(); return; }
+    if (h && h.parentNode === tx && tx.firstElementChild === h) return;
+    if (!h){ h = D.createElement("p"); h.id = "tx18h"; h.innerHTML = '<b>📨 연말 절세 한 장 만드는 법</b>① 아래에서 계산기를 고르고 ② 숫자를 넣으면 ③ 결과 맨 아래에 <u>「📨 이 결과를 고객에게 한 장으로」</u> 단추가 생겨요'; }
+    tx.insertBefore(h, tx.firstElementChild);
+  }
   function taxPaint(){
-    if (cur() !== "tax") return; var out = D.getElementById("txout"); if (!out || out.hidden) return;
-    var has = !!out.querySelector(".tx-big,.tx-bars"), b = D.getElementById("tx18");
+    if (cur() !== "tax"){ if (txWas){ txIntent = 0; txWas = false; } return; }
+    txWas = true;
+    var out = D.getElementById("txout"), has = !!(out && !out.hidden && out.querySelector(".tx-big,.tx-bars"));
+    txHint(has);
+    if (!out || out.hidden) return;
+    var b = D.getElementById("tx18");
     if (!has){ if (b) b.remove(); return; }
     if (b && b.parentNode === out && !b.nextElementSibling) return;
-    if (!b){ b = D.createElement("button"); b.type = "button"; b.id = "tx18"; b.className = "hub-cta"; b.setAttribute("data-j", "opch"); b.innerHTML = '📨 이 결과를 고객에게 한 장으로<small>받는 분 이름 · 심의필 번호를 넣을 수 있어요</small>'; }
+    if (!b){ b = D.createElement("button"); b.type = "button"; b.id = "tx18"; b.className = "hub-cta"; b.setAttribute("data-j", "opch"); b.innerHTML = '📨 이 결과를 고객에게 한 장으로<small>받는 분 이름 · 심의필 번호를 넣을 수 있어요</small>';
+      if (txIntent){ b.classList.add("tx18-hi"); txIntent = 0; } }
     out.appendChild(b);
   }
   D.addEventListener("click", function(ev){ var t = ev.target.closest && ev.target.closest("#tx18"); if (!t) return; ev.stopPropagation(); taxSheet(); });
@@ -334,6 +351,8 @@
     ".pp18-th{display:block;position:relative;height:270px;overflow:hidden;border-radius:10px;background:#fff;margin-bottom:6px;pointer-events:none}.pp18-th:after{content:'';position:absolute;left:0;right:0;bottom:0;height:46px;background:linear-gradient(rgba(255,255,255,0),#fff)}.pp18-th .loading{display:block;padding:20px 8px;font-style:normal;font-size:13px;color:#888;text-align:center}" +
     ".pp18-c b{font-size:15px;font-weight:800}.pp18-c small{font-size:13px;color:var(--sub);line-height:1.35}.pp18-c em{font-style:normal;font-size:13px;font-weight:700;color:#3182f6;margin-top:2px}" +
     /* 세무 한 장 */
+    "#tx18h{margin:0 0 10px;padding:12px 14px;border-radius:14px;background:rgba(49,130,246,.10);border:1px solid rgba(49,130,246,.35);font-size:14px;line-height:1.55;word-break:keep-all}#tx18h b{display:block;font-size:14.5px;margin-bottom:2px}#tx18h u{text-decoration:none;font-weight:700;color:#3182f6}" +
+    "#tx18.tx18-hi{animation:tx18hi 1.2s ease-in-out 3}@keyframes tx18hi{50%{box-shadow:0 0 0 4px rgba(49,130,246,.45)}}" +
     "#tx18{margin-top:14px}#tx18 small{display:block;font-size:12.5px;font-weight:500;opacity:.85;margin-top:2px}.tx18-rc{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 8px}.tx18-rc button{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--text);padding:4px 10px;cursor:pointer}.tx18-w{margin:4px 2px 10px;font-size:13px;line-height:1.45;color:var(--sub);word-break:keep-all}" +
     /* 포트 성적 접기 */
     ".pf18-off{display:none!important}#pf18{display:block;width:100%;font:inherit;font-size:15px;font-weight:800;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px 12px;margin:10px 0;cursor:pointer}#pf18 small{display:block;font-size:12.5px;font-weight:500;color:var(--sub);margin-top:3px}";
