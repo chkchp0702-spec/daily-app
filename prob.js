@@ -61,9 +61,10 @@
   }
   // 🔒 10/19 사용자 「확률이 개판」 → 실전 성적이 동전보다 확실히 낫기 전(20건↑·55%↑)엔 경고를 크게
   function warn(D){
-    var d = D.score && D.score.all && D.score.all.d1 || {};
+    var d = D.score && D.score.all && D.score.all.d1 || {}, dm = D.score && D.score.all && D.score.all.d1m || {};
     if ((d.n || 0) >= 20 && (d.hit || 0) >= 55) return "";
-    return '<div style="margin:8px 0 2px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,#ffb84d 22%,var(--panel));border:1px solid rgba(255,184,77,.6);font-size:13.5px;line-height:1.45">⚠️ <b>아직 동전보다 못함</b> — 실전 채점 다음 날 방향 ' + (d.n ? Math.round(d.hit / 100 * d.n) + '/' + d.n + ' 맞음 (' + Math.round(d.hit) + '%)' : '채점 전') + '. 아래 적중률(57~65%)은 과거 되짚기 성적이고 실전은 아직 못 따라와요 — 이 숫자로 사고팔지 마세요.</div>';
+    if ((dm.n || 0) >= 20 && (dm.hit || 0) >= 55) return "";      // 🌅 11/18 아침판 실전 성적이 넘으면 경고 내림
+    return '<div style="margin:8px 0 2px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,#ffb84d 22%,var(--panel));border:1px solid rgba(255,184,77,.6);font-size:13.5px;line-height:1.45">⚠️ <b>아직 동전보다 못함</b> — 실전 채점 다음 날 방향 ' + (d.n ? Math.round(d.hit / 100 * d.n) + '/' + d.n + ' 맞음 (' + Math.round(d.hit) + '%)' : '채점 전') + '. 이건 간밤 미국을 모르는 저녁판 채점이에요 — 아침판(개장 직전) 채점은 11/18부터 쌓는 중' + (dm.n ? '(' + dm.n + '건 ' + dm.hit + '%)' : '') + '. 이 숫자로 사고팔지 마세요.</div>';
   }
   function ep(v){ return v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(1) + "%p"; }
   // 10/15 사용자 「확률에 마이너스가 말이 되니?」 — 큰 숫자는 확률 그대로(31%), 평소와의 차이는 말로(「평소 54%보다 23%p 낮음」)
@@ -171,7 +172,7 @@
     };
     var RL = {"믿을 만": ["✅", "s3"], "약함": ["👀", "s2"], "동전 수준": ["💤", "s1"]}[S.rel] || ["", ""];
     return '<section class="card"><h3>🧭 섹터·종목 확률 <span class="mut">일주일 · 평소보다 · ' + secStamp(mk, S) + '</span></h3>' +
-      (S.rel ? '<div class="pr-sg"><span class="pr-bd ' + RL[1] + '">' + RL[0] + ' 모델 ' + e(S.rel) + '</span><small class="mut">검증 AUC ' + S.auc.y5 + (S.rel === "믿을 만" ? '' : ' — 확률을 평소 쪽으로 눌러 보여 줘요(순위는 그대로)') + '</small></div>' : '') +
+      (S.rel ? '<div class="pr-sg"><span class="pr-bd ' + RL[1] + '">' + RL[0] + ' 모델 ' + e(S.rel) + '</span><small class="mut">' + (S.wf_rel ? '「시장보다」 걸어가기 검증(달마다 다시 맞춰 같은 날 종목 순위 맞히기) AUC 앞 ' + S.wf_rel["앞"] + ' · 뒤 ' + S.wf_rel["뒤"] + ' (0.5 = 동전)' : '검증 AUC ' + S.auc.y5) + (S.rel === "믿을 만" ? '' : ' — 확률을 평소 쪽으로 눌러 보여 줘요(순위는 참고만)') + '</small></div>' : '') +
       show.map(row).join("") +
       (secs.length > 9 ? '<button class="fold ps-all" data-mk="' + mk + '">' + (all ? "줄이기 ▴" : "섹터 " + secs.length + "개 모두 보기 ▾") + '</button>' : '') +
       '<p class="note">큰 숫자 = 그 섹터(종목)가 일주일 뒤 오를 확률이 평소(' + pc(b5) + ')보다 얼마나 높고 낮은지 — 위 시장 확률(' + pc(mp5) + ')에 그 섹터·종목만의 기울기를 더한 값. 섹터를 누르면 종목 — 「시장보다」 높은 순. ' + S.n + '종목 · 검증 AUC 일주일 ' + (S.auc.y5 != null ? S.auc.y5 : "–") + ' · 시장 대비 ' + (S.auc.yr5 != null ? S.auc.yr5 : "–") + ' (0.5 = 동전, 0.55 넘으면 쓸 만)</p></section>';
@@ -220,6 +221,24 @@
     } else h += '<p class="note">🎯 채점은 마감 뒤 첫 기록부터 쌓여요 — 내일 예측은 다음 날, 일주일 예측은 5거래일 뒤 실제 결과와 맞춰 봐요.</p>';
     return h + '</section>';
   }
+  // 🌊 11/18 흔들림·급락 위험 + 🎯 자신 있는 날 — 「오를까」(거의 동전) 대신 미리 맞히기 쉬운 것 (prob_vol.py · 매 실행 걸어가기 검증)
+  function volCard(mk, D){
+    var V0 = D.vol && D.vol[mk]; if (!V0 || !V0.t) return '';
+    var rows = ["big1", "dn2", "dn5"].map(function(k){ var t = V0.t[k]; if (!t || t.p == null) return '';
+      var v = t.val || {}, a = v["전체"] || {}, ok = t.ok, d = t.base != null ? (t.p - t.base) * 100 : null;
+      var lvl = t.base ? t.p / t.base : 1, cl = k === "big1" ? "" : (lvl >= 2 ? "dn" : lvl <= 0.6 ? "up" : "");
+      return '<div class="pr-m"><div class="pr-mh"><span class="hm-i">' + ({big1: "🌊", dn2: "⚠️", dn5: "📉"})[k] + '</span><b>' + e(t.name) + '</b>' +
+        '<span class="pr-mp"><span class="' + cl + '">' + (ok ? pc(t.p) : '<span class="mut">' + pc(t.base) + '</span>') + '</span><small>평소 ' + pc(t.base) + (ok && t.base ? ' · ' + (lvl >= 1.15 ? '평소의 ' + lvl.toFixed(1) + '배' : lvl <= 0.87 ? '평소보다 낮음' : '평소쯤') : '') + '</small></span></div>' +
+        '<small class="pr-ev">' + (ok ? '✅ 검증 통과 — 2006년부터 해마다 그 전 자료로만 맞춰 다음 해를 맞힌 성적이 평소 비율보다 ' + a.skill + '% 나음(앞 ' + (v["앞"] || {}).skill + ' · 뒤 ' + (v["뒤"] || {}).skill + ' · 최근3년 ' + (v["최근3년"] || {}).skill + ' · 구별력 AUC ' + v.auc + ')' + (t.k ? ' · 과거 비슷한 확률이 나온 ' + t.k + '일의 실제 비율로 보정' : '')
+          : '➖ 검증 미달(앞·뒤 기간 모두 평소보다 나아야 함) — 평소 비율만 보여요') + '</small></div>'; }).join("");
+    var C = V0.conf, cf = '';
+    if (C && C["전체"]){ var A = C["전체"], R3 = C["최근3년"] || {}, on = C.p != null && (C.p >= 0.6 || C.p <= 0.4);
+      cf = '<div class="pr-anc">🎯 <b>자신 있는 날만</b> — 간밤 미국을 본 아침 방향 확률이 60%↑·40%↓인 날(과거 ' + A.sel_share + '%의 날)만 골라 보면 적중 <b>' + A.sel_hit + '%</b> (모든 날 ' + A.all_hit + '% · 최근3년 ' + R3.sel_hit + '%). ' +
+        (on ? '<b class="' + (C.p >= 0.6 ? 'up' : 'dn') + '">오늘은 자신 있는 날 — ' + (C.p >= 0.6 ? '오를 쪽 ' : '내릴 쪽 ') + pc(C.p >= 0.6 ? C.p : 1 - C.p) + '</b>' : '<span class="mut">오늘은 반반 쪽 날(' + pc(C.p) + ') — 방향은 쉬어 가는 날</span>') + '</div>';
+    }
+    return '<section class="card"><h3>🌊 흔들림·급락 위험 <span class="mut">' + e(V0.mode || '') + ' · ' + md((V0.t.big1 || {}).at) + ' 종가 기준</span></h3>' + cf + rows +
+      '<p class="note">방향(오를까)은 거의 동전이지만 「얼마나 흔들릴까」는 미리 꽤 맞힐 수 있어요(변동성은 뭉쳐 다님). 최근 흔들림·오늘 등락 크기·VIX' + (mk !== "US" ? '·간밤 미국 등락' : '') + '로 계산. 사라·팔라는 뜻이 아니라 「오늘 얼마나 조심할 날인가」예요.</p></section>';
+  }
   function howCard(D){
     var open = OPEN._how, last = null;
     return '<button class="fold pr-f' + (open ? " open" : "") + '" data-f="_how">📖 시장확률이란 — 어떻게 계산하나 (' + (D.how || []).length + '가지) <i class="fchev">▾</i></button>' +
@@ -236,6 +255,10 @@
     return '<section class="card"><h3>🎯 전체 채점 <span class="mut">5개 시장 합산</span></h3><div class="x4">' +
       '<div><small>내일 적중</small><b>' + (A.d1.n ? A.d1.hit + '%' : '–') + '</b><small class="mut">' + A.d1.n + '건</small></div><div><small>내일 브라이어</small><b>' + (A.d1.brier != null ? A.d1.brier : '–') + '</b><small class="mut">0.25 = 동전</small></div>' +
       '<div><small>일주일 적중</small><b>' + (A.d5.n ? A.d5.hit + '%' : '–') + '</b><small class="mut">' + A.d5.n + '건</small></div><div><small>일주일 브라이어</small><b>' + (A.d5.brier != null ? A.d5.brier : '–') + '</b><small class="mut"></small></div></div>' +
+      (function(){ var M = A.d1m || {}; return '<div class="sub2">🌅 아침판(개장 직전 마지막 예측) 채점 <span class="mut">11/18부터 · 간밤 미국 반영</span></div><div class="x4">' +
+        '<div><small>아침판 적중</small><b>' + (M.n ? M.hit + '%' : '–') + '</b><small class="mut">' + (M.n || 0) + '건</small></div><div><small>아침판 브라이어</small><b>' + (M.brier != null ? M.brier : '–') + '</b><small class="mut">동전 ' + (M.coin != null ? M.coin : '0.25') + '</small></div>' +
+        '<div><small>자신 있는 날(60%↑·40%↓)</small><b>' + (M.sel_n ? M.sel_hit + '%' : '–') + '</b><small class="mut">' + (M.sel_n || 0) + '건</small></div><div><small>저녁판(마감 직후)</small><b>' + (A.d1.n ? A.d1.hit + '%' : '–') + '</b><small class="mut">간밤 미국 전</small></div></div>' +
+        '<p class="note">위 「내일 적중」은 마감 직후(간밤 미국을 아직 모를 때) 기록한 저녁판이라 대부분 45~55% 반반이었어요. 11/18부터 아침에 실제로 보시는 개장 직전 숫자도 따로 채점해요.</p>'; })() +
       (A.d1.buckets && A.d1.buckets.length ? '<div class="sub2">보정표 (내일)</div><div class="pr-rc">' + bk(A.d1) + '</div>' : '') + '</section>';
   }
   function draw(D){ window.__probD = D;   // 📨 시장확률 한 장이 화면과 같은 값(장중 덧입힌 값)을 쓰게
@@ -245,7 +268,7 @@
     if (!SEL || !D.markets[SEL]) SEL = ks[0];
     var h = '<section class="card"><h3>🎲 다음 장 · 오를 확률 <span class="mut">' + stamp(D) + '</span></h3>' + strip(D) + warn(D) +
       '<p class="note">큰 숫자 = 다음 장에서 그 시장이 어제보다 오를 확률. ▲▼ = 「평소」(2000년 이후 오른 날 비율)보다 얼마나 높고 낮은지. 🧭 10/15부터 <b>이미 아는 정보를 닻</b>으로 써요 — 아시아는 간밤 미국 장, 미국은 선물 갭, 장이 열려 있으면 지금 등락과 남은 시간. 2012년 이후 걸어가며 검증한 적중률: 한국 62% · 일본 65% · 홍콩 60% · 중국 57% · 미국 64% (예전 52~54%). 60% 넘거나 40% 밑인 날은 67~79% 맞았어요.</p></section>';
-    h += mcard(D.markets[SEL], D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
+    h += mcard(D.markets[SEL], D) + volCard(SEL, D) + sentiCard(D.markets[SEL], D) + secCard(SEL, D.markets[SEL]) + allScore(D) + howCard(D);
     b.innerHTML = h;
     if (SEL === "KR" && window.twinKR) try { twinKR(document.getElementById("twinkr"), D.markets.KR); } catch(x) {}   // 🧲 A10/21-2
     [].forEach.call(b.querySelectorAll(".pr5c[data-m]"), function(x){ x.onclick = function(){ SEL = x.dataset.m; draw(D); window.scrollTo({top: 0, behavior: "smooth"}); }; });

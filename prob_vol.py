@@ -136,15 +136,26 @@ def now_prob(d, feats, tgt):
     return float(_pred(w, (last[feats].values - mu) / sd)[0]), str(last.index[0].date())
 
 
+def calib(P, y, p_now, k=300):
+    """보정: 걸어가기에서 지금과 가장 비슷한 확률이 나왔던 k일의 실제 비율 (로지스틱이 극단에서 부풀리는 것 막기)"""
+    m = P.notna() & y.reindex(P.index).notna()
+    if p_now is None or m.sum() < k * 3:
+        return None, 0, None
+    pp = P[m].values; yy = y.reindex(P.index)[m].values
+    o = np.argsort(np.abs(pp - p_now))[:k]
+    return float(yy[o].mean()), int(k), (float(pp[o].min()), float(pp[o].max()))
+
+
 def conf(d, feats, lo=0.4, hi=0.6):
     """🎯 자신 있는 날: 방향 확률 걸어가기에서 60%↑·40%↓ 날만 적중률"""
     P, B = walk(d, feats, "y1")
+    p_now, at = now_prob(d, feats, "y1")
     m = P.notna() & d["y1"].reindex(P.index).notna()
     if m.sum() < 500:
         return None
     y = d["y1"].reindex(P.index)[m].values; p = P[m].values; idx = P.index[m]
     mid = idx[len(idx) // 2]
-    out = {"n": int(m.sum()), "from": str(idx[0].date())}
+    out = {"n": int(m.sum()), "from": str(idx[0].date()), "p": _r(p_now, 3), "at": at}
     for nm, k in (("앞", idx < mid), ("뒤", idx >= mid), ("최근3년", idx >= idx[-1] - pd.Timedelta(days=1096)), ("전체", np.ones(len(idx), bool))):
         sel = k & ((p >= hi) | (p <= lo))
         hit_all = float(np.mean((p[k] >= 0.5) == (y[k] == 1)))
@@ -155,9 +166,10 @@ def conf(d, feats, lo=0.4, hi=0.6):
     return out
 
 
-def run(H, MK, fresh_us=None):
-    """H: {sym: DataFrame(Close…)} · MK: prob.MK · fresh_us: {mk: True} 간밤 미국 마감이 그 시장 마지막 봉 뒤에 나왔는지"""
-    sp = H.get("^GSPC", pd.DataFrame()).get("Close")
+def run(H, MK, base_dates=None):
+    """H: {sym: DataFrame(Close…)} · MK: prob.MK · base_dates: {mk: "YYYY-MM-DD"} 앱 확률의 기준일(그 시장 마지막 확정 종가)
+    아시아 「아침판」 = 기준일 같은 날짜의 미국 종가(그날 밤 미국)가 이미 있을 때 · 아니면 「저녁판」"""
+    spx = H.get("^GSPC", pd.DataFrame()).get("Close")
     vix = H.get("^VIX", pd.DataFrame()).get("Close")
     out = {}
     for mk, cfg in MK.items():
@@ -165,16 +177,23 @@ def run(H, MK, fresh_us=None):
         if px is None or len(px) < 1500:
             continue
         asia = mk != "US"
+        bd = pd.Timestamp((base_dates or {}).get(mk) or px.index[-1])
+        c_ = px["Close"].dropna(); c_ = c_[c_.index <= bd]            # 장중 미완성 봉은 빼고 기준일까지만
+        sp = vix_ = None
+        if spx is not None:
+            sp = spx.dropna(); sp = sp[sp.index <= (bd if asia else bd)]
+        if vix is not None:
+            vix_ = vix.dropna(); vix_ = vix_[vix_.index <= bd]
         try:
-            d = frame(px["Close"].dropna(), sp if asia else None, vix, asia)
+            d = frame(c_, sp if asia else None, vix_, asia)
         except Exception as e:
             out[mk] = {"err": str(e)[:120]}
             continue
-        base_f = ["lrv5", "lrv20", "ar1", "r5"] + (["lvix", "dvix"] if vix is not None else [])
+        base_f = ["lrv5", "lrv20", "ar1", "r5"] + (["lvix", "dvix"] if vix_ is not None else [])
         # 아시아: 간밤 미국이 이미 나왔으면 「아침판」(간밤 S&P 포함), 아니면 「저녁판」(간밤 미국 모름 → VIX 도 하루 전 값)
-        morning = bool(asia and (fresh_us or {}).get(mk) and sp is not None)
-        if asia and not morning and vix is not None:
-            d2 = frame(px["Close"].dropna(), None, vix.shift(1), True)
+        morning = bool(asia and sp is not None and len(sp) and sp.index[-1] >= bd)
+        if asia and not morning and vix_ is not None:
+            d2 = frame(c_, None, vix_.shift(1), True)
             dd, ff = d2, base_f
         else:
             dd, ff = d, base_f + (["usa", "usr"] if asia and sp is not None else [])
@@ -184,13 +203,15 @@ def run(H, MK, fresh_us=None):
                 P, B = walk(dd, ff, tg)
                 j = judge(dd, P, B, tg)
                 p_now, at = now_prob(dd, ff, tg)
+                pc, kn, rg = calib(P, dd[tg], p_now)
                 base_now = float(dd[tg].dropna().iloc[-2520:].mean())     # 최근 10년 평소 비율
-                R["t"][tg] = {"name": TG[tg], "p": _r(p_now, 3), "base": _r(base_now, 3), "at": at, "ok": bool(j and j["ok"]), "val": j}
+                R["t"][tg] = {"name": TG[tg], "p": _r(pc if pc is not None else p_now, 3), "raw": _r(p_now, 3), "k": kn,
+                              "rng": [_r(rg[0], 3), _r(rg[1], 3)] if rg else None, "base": _r(base_now, 3), "at": at, "ok": bool(j and j["ok"]), "val": j}
             except Exception as e:
                 R["t"][tg] = {"name": TG[tg], "err": str(e)[:160]}
-        if asia and sp is not None:
+        if asia and sp is not None and morning:
             try:
-                R["conf"] = conf(d, ["usr", "ar1", "r5"] + (["lvix"] if vix is not None else []))
+                R["conf"] = conf(d, ["usr", "ar1", "r5"] + (["lvix"] if vix_ is not None else []))
             except Exception as e:
                 R["conf"] = {"err": str(e)[:160]}
         out[mk] = R
@@ -203,5 +224,5 @@ if __name__ == "__main__":
     import prob
     syms = sorted({c["ix"] for c in prob.MK.values()} | {"^GSPC", "^VIX"})
     H = prob.load_hist(syms)
-    res = run(H, prob.MK, {m: True for m in prob.MK})
+    res = run(H, prob.MK)
     print(json.dumps(res, ensure_ascii=False)[:6000])

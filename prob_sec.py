@@ -197,6 +197,10 @@ def fit_market(P):
     mu, sd = Xall.mean(), Xall.std() + 1e-9
     out = {"n_rows": int(len(tr_all)), "last": str(pd.Timestamp(last_day).date()), "auc": {}, "base": {}}
     probs = pd.DataFrame(index=cur["s"].values)
+    try:
+        out["wf_rel"] = wf_rel(P, X_of, mu, sd)
+    except Exception as e:
+        print("wf_rel 실패", e); out["wf_rel"] = None
     for t in TGTS:
         D = tr_all.dropna(subset=[t])
         tr, te = D[D["date"] < cut], D[(D["date"] >= cut)]
@@ -208,6 +212,9 @@ def fit_market(P):
         # 검증 AUC 만큼만 믿기: 0.56↑ = 그대로, 0.50 이하 = 평소 쪽으로 80% 눌러 줌 (순위는 그대로)
         b = float(D[t].mean())
         k = 0.2 if a is None else min(1.0, max(0.2, (a - 0.5) / 0.06))
+        if t == "yr5" and out.get("wf_rel"):          # 11/18: 상대 확률은 걸어가기 「같은 날 안」 AUC 로만 믿음 (0.5 이하면 0.1 — 순위만 남김)
+            wa = min(out["wf_rel"]["앞"], out["wf_rel"]["뒤"])
+            k = min(1.0, max(0.1, (wa - 0.5) / 0.06)) if wa > 0.5 else 0.1
         lb = math.log(b / (1 - b))
         lr = np.log(np.clip(raw, 1e-4, 1 - 1e-4) / (1 - np.clip(raw, 1e-4, 1 - 1e-4)))
         probs[t] = 1 / (1 + np.exp(-(lb + k * (lr - lb))))
@@ -215,6 +222,35 @@ def fit_market(P):
         out["base"][t] = r2(b, 3)
         out.setdefault("k", {})[t] = r2(k, 2)
     return out, cur.set_index("s"), probs
+
+
+def wf_rel(P, X_of, mu, sd):
+    """🔢 11/18 「시장보다 나을 확률」(yr5) 검증을 제대로: 달마다 그 전 자료로만 맞춰 다음 달을 맞히고,
+    「같은 날 안에서」 종목 순위를 맞혔는지(AUC)를 날마다 재서 평균 → 시장 방향이 섞이지 않은 순수 상대 실력.
+    (예전 방식 = 마지막 66일을 섞어 한 번 → 시장 방향·한 국면에 좌우돼 0.45~0.47 같은 값이 나왔음)"""
+    D = P.dropna(subset=FEATS + ["yr5"])
+    dates = np.sort(D["date"].unique())
+    months = pd.Series(pd.to_datetime(dates)).dt.to_period("M").unique()
+    aucs = []
+    for m in months[6:]:
+        st, en = m.to_timestamp(), (m + 1).to_timestamp()
+        trd = dates[dates < np.datetime64(st)]
+        if len(trd) < 120:
+            continue
+        tr = D[D["date"] <= trd[-6]]; te = D[(D["date"] >= st) & (D["date"] < en)]
+        if not len(te):
+            continue
+        w = logistic_fit(((X_of(tr) - mu) / sd).values, tr["yr5"].values)
+        te = te.assign(p=pred(w, ((X_of(te) - mu) / sd).values))
+        for d, g in te.groupby("date"):
+            if len(g) >= 30:
+                a = auc(g["yr5"].values, g["p"].values)
+                if a is not None:
+                    aucs.append((d, a))
+    if len(aucs) < 60:
+        return None
+    a = pd.Series(dict(aucs)).sort_index(); h = len(a) // 2
+    return {"all": r2(a.mean(), 3), "앞": r2(a.iloc[:h].mean(), 3), "뒤": r2(a.iloc[h:].mean(), 3), "days": int(len(a))}
 
 
 # ---------------- 🐋 고래 원픽 ----------------
@@ -592,9 +628,11 @@ def main():
                              "r5": r2(wavg("r5"), 2), "up5": sum(1 for x in xs if (x["p5"] or 0) > mres["base"]["y5"]),
                              "st": [{**{kk: x[kk] for kk in ("s", "n", "p1", "p5", "pr5", "d1", "d5", "r1", "r5")}, **({"pead": x["pead"]} if x.get("pead") else {})} for x in xs]})
             secs.sort(key=lambda x: -(x["d5"] or 0))
-            a5 = mres["auc"].get("y5") or 0.5
-            rel = "믿을 만" if a5 >= 0.56 else "약함" if a5 >= 0.52 else "동전 수준"
-            res[mk] = {"name": cfg["name"], "flag": cfg["flag"], "n": len(st), "last": mres["last"], "auc": mres["auc"], "base": mres["base"], "k": mres.get("k"), "rel": rel, "rows": mres["n_rows"], "sectors": secs, "breadth": breadth}
+            # 11/18: 라벨은 「시장보다 나을 확률」 걸어가기 같은 날 AUC(앞·뒤 중 낮은 쪽)로 — 예전 y5 AUC 는 시장 방향이 섞여 부풀었음
+            wr = mres.get("wf_rel") or {}
+            a5 = min(wr.get("앞") or 0.5, wr.get("뒤") or 0.5) if wr else 0.5
+            rel = "믿을 만" if a5 >= 0.53 else "약함" if a5 >= 0.51 else "동전 수준"
+            res[mk] = {"name": cfg["name"], "flag": cfg["flag"], "n": len(st), "last": mres["last"], "auc": mres["auc"], "base": mres["base"], "k": mres.get("k"), "rel": rel, "wf_rel": mres.get("wf_rel"), "rows": mres["n_rows"], "sectors": secs, "breadth": breadth}
             print(mk, "섹터", len(secs), "종목", len(st), "AUC", mres["auc"], "기저", mres["base"], f"{time.time()-t0:.0f}s")
             if mk == "US":
                 try:

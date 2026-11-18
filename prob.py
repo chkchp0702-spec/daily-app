@@ -914,12 +914,19 @@ def score(hist, H, res):
     """지난 예측을 실제 결과로 채점. hist = {"rows":[{d, mk, base_date, p1, p5, c0, c1?, c5?, r1?, r5?, hit1?, hit5?}]}"""
     rows = hist.get("rows", [])
     seen = {(x["mk"], x["base_date"]) for x in rows}
+    byk = {(x["mk"], x["base_date"]): x for x in rows}
     for mk, r in res.items():
         if r.get("open_now"):
             continue                                   # 장중엔 종가가 안 정해졌으니 기록하지 않음 (마감 뒤 첫 실행이 기록)
         if (mk, r["base_date"]) not in seen:
             rows.append({"mk": mk, "base_date": r["base_date"], "made": NOW.strftime("%Y-%m-%d %H:%M"), "p1": r["p1"], "p5": r["p5"], "c0": r["last"],
                          "mp": {x["k"]: [x["p1"], x["p5"]] for x in r["methods"] if x.get("p1") is not None and x.get("w")}})
+        else:
+            # 🌅 11/18 「아침판」 채점: 마감 직후 기록(p1)은 간밤 미국을 모르는 저녁 예측이라 반반만 나옴(125건 중 112건 45~55%).
+            #   같은 기준일로 장 열리기 전까지 계속 덮어써서 「개장 직전 마지막 예측」(간밤 미국·선물 반영 = 사용자가 아침에 보는 숫자)을 따로 채점.
+            x = byk.get((mk, r["base_date"]))
+            if x is not None and x.get("r1") is None:
+                x["p1m"], x["p5m"], x["mm"] = r["p1"], r["p5"], NOW.strftime("%Y-%m-%d %H:%M")
     for x in rows:
         px = H.get(MK[x["mk"]]["ix"])
         if px is None:
@@ -928,6 +935,8 @@ def score(hist, H, res):
         after = c[c.index > pd.Timestamp(x["base_date"])]
         if x.get("r1") is None and len(after) >= 1:
             x["r1"] = r2((float(after.iloc[0]) / x["c0"] - 1) * 100); x["hit1"] = int((x["r1"] > 0) == (x["p1"] >= 0.5)); x["y1"] = int(x["r1"] > 0)
+            if x.get("p1m") is not None:
+                x["hit1m"] = int((x["r1"] > 0) == (x["p1m"] >= 0.5))
         if x.get("r5") is None and len(after) >= 5:
             x["r5"] = r2((float(after.iloc[4]) / x["c0"] - 1) * 100); x["hit5"] = int((x["r5"] > 0) == (x["p5"] >= 0.5)); x["y5"] = int(x["r5"] > 0)
     rows = rows[-2000:]
@@ -946,8 +955,18 @@ def score(hist, H, res):
             m = (p >= lo) & (p < hi)
             if m.sum():
                 bk.append({"k": lab, "n": int(m.sum()), "pred": r2(p[m].mean() * 100, 0), "real": r2(y[m].mean() * 100, 0)})
-        return {"n": len(done), "brier": r2(brier, 3), "hit": r2(hit * 100, 0), "buckets": bk}
-    sc = {"all": {"d1": summ(rows, "p1"), "d5": summ(rows, "p5")}}
+        return {"n": len(done), "brier": r2(brier, 3), "coin": r2(float(np.mean((0.5 - y) ** 2)), 3), "hit": r2(hit * 100, 0), "buckets": bk}
+    def summ_m(rs):
+        """🌅 아침판(개장 직전 마지막 예측) 채점 — 동전(50%)·평소 비율과 나란히"""
+        done = [x for x in rs if x.get("r1") is not None and x.get("p1m") is not None]
+        if not done:
+            return {"n": 0}
+        p = np.array([x["p1m"] for x in done]); y = np.array([x["y1"] for x in done], float)
+        sel = (p >= 0.6) | (p <= 0.4)
+        return {"n": len(done), "brier": r2(float(np.mean((p - y) ** 2)), 3), "coin": r2(float(np.mean((0.5 - y) ** 2)), 3),
+                "hit": r2(float(np.mean((p >= 0.5) == (y == 1))) * 100, 0), "up": r2(float(y.mean()) * 100, 0),
+                "sel_n": int(sel.sum()), "sel_hit": r2(float(np.mean((p[sel] >= 0.5) == (y[sel] == 1))) * 100, 0) if sel.sum() else None}
+    sc = {"all": {"d1": summ(rows, "p1"), "d5": summ(rows, "p5"), "d1m": summ_m(rows)}}
     # 방법별 브라이어 (내일) — 60건 넘으면 다음 실행부터 가중치에 반영 (prob_hist.json auto_w)
     mb = {}
     for x in rows:
@@ -964,7 +983,7 @@ def score(hist, H, res):
             hist["auto_w"][mk] = {k: r2(min(2.0, max(0.3, 1 + 20 * (base_b - np.mean(v)))), 2) for k, v in mb.items() if len(v) >= 60}
     for mk in MK:
         rs = [x for x in rows if x["mk"] == mk]
-        sc[mk] = {"d1": summ(rs, "p1"), "d5": summ(rs, "p5"), "recent": [{"d": x["base_date"], "p1": x["p1"], "r1": x.get("r1"), "p5": x["p5"], "r5": x.get("r5")} for x in rs[-7:]]}
+        sc[mk] = {"d1": summ(rs, "p1"), "d5": summ(rs, "p5"), "d1m": summ_m(rs), "recent":[{"d": x["base_date"], "p1": x["p1"], "r1": x.get("r1"), "p5": x["p5"], "r5": x.get("r5")} for x in rs[-7:]]}
     return sc
 
 
@@ -1031,7 +1050,13 @@ def main():
     except Exception:
         hist = {}
     sc = score(hist, H, res) if res else {}
-    out = {"at": int(time.time() * 1000), "t": NOW.strftime("%H:%M"), "date": NOW.strftime("%Y-%m-%d"), "markets": res, "score": sc, "shrink": SHRINK,
+    vol = {}
+    try:
+        import prob_vol      # 🌊 11/18 흔들림·급락 위험 확률 + 🎯 자신 있는 날 (방향 대신 맞히기 쉬운 것 · 매 실행 걸어가기 검증)
+        vol = prob_vol.run(H, MK, {mk: r["base_date"] for mk, r in res.items()})
+    except Exception as e:
+        import traceback; traceback.print_exc(); ERRS.append("vol: " + str(e)[:300])
+    out = {"vol": vol, "at": int(time.time() * 1000), "t": NOW.strftime("%H:%M"), "date": NOW.strftime("%Y-%m-%d"), "markets": res, "score": sc, "shrink": SHRINK,
            "how": [
                ["가격", "📚 기저율", "지금과 같은 상태(연속 하락·상승 일수, 5일 수익률 부호)였던 2000년 이후의 날들이 다음 날·5일 뒤 어떻게 됐는지 그대로 셈. 가장 단순하고 가장 과소평가된 방법"],
                ["가격", "📈 추세 국면", "200일선 위/아래 × 50일선 기울기 4개 국면. 상승 국면에선 오른 날 비율이 높고 하락 국면에선 낮다는 오래된 사실"],
@@ -1084,6 +1109,7 @@ def main():
                ["자금", "🚢 해운 운임 급등(미국)", "발틱 건화물 운임지수(BDI)가 20일·5일 기준 1년 중 상위 10%로 급히 오르면 켜짐 — 2000년 이후 S&P 다음 날은 평소보다 약 4~6%p, 일주일은 약 3~7%p 덜 자주 올랐어요(앞·뒤 기간 같은 쪽, 각 약 700일). 원가·물가 압력 신호로 봄. 아시아는 개선 없어 안 씀."],
                ["자금", "🇯🇵 해외서 일본 몰려 삼(일본 다음 날)", "미국에 상장된 일본 ETF(EWJ) 거래대금이 1년 중 상위 10%로 몰리면서 값도 5일간 오른 날만 켜짐 — 2001년 이후 그다음 닛케이는 평소보다 약 6~7%p 더 자주 올랐어요(앞·뒤 기간 같은 쪽, 345일). 최근 5년은 더 나아지지 않아 무게는 작게(0.3)."],
                ["자금", "💳 정크본드 매수 몰림(홍콩 다음 날)", "하이일드 채권(HYG) 거래대금이 1년 중 상위 10%로 몰리면서 값도 오른 날만 켜짐 — 2008년 이후 그다음 홍콩 장은 평소보다 약 7%p 더 자주 올랐어요(앞·뒤 기간 같은 쪽, 153일). 교차 검증 한쪽이 약해 무게는 작게(0.3)."],
+               ["흔들림", "🌊 흔들림·급락 위험 · 🎯 자신 있는 날 (11/18)", "방향(오를까)은 거의 동전이라, 미리 맞히기 쉬운 「내일 ±1% 넘게 움직일 확률 · 내일 −2% 넘게 빠질 확률 · 일주일 뒤 −3% 넘게 빠져 있을 확률」을 따로 냄. 최근 5·20일 흔들림·오늘 등락 크기·5일 수익·VIX(아시아는 + 간밤 미국 등락)로 로지스틱 · 2006년부터 해마다 그 전 자료로만 맞춰 다음 해를 맞히는 걸어가기로 매번 다시 검증 → 앞·뒤 절반 모두 평소 비율보다 나을 때만 숫자를 보여 줌(아니면 평소 비율). 과거 비슷한 확률이 나온 300일의 실제 비율로 보정. 🎯 = 간밤 미국을 본 아침 방향 확률이 60%↑·40%↓인 날만 골라 본 과거 적중률"],
                ["일정", "📣 이벤트", "FOMC·CPI·실적 등이 일주일 안이면 방향은 안 건드리고 예상 폭만 넓힘"],
                ["섹터", "🔁 업종 모멘텀(미국 섹터)", "미국 섹터 ETF 9개(XLK·XLE 등)의 12개월(최근 1달 뺌) 수익 − S&P500 순위. 1999년 이후 5일씩 끊어 본 결과, 상위 2개 업종은 다음 5일 S&P500 보다 나을 확률이 평소보다 +2.0%p(1999~2013)·+2.7%p(2013~), 꼴찌 업종은 −4.8·−2.5%p. 미국 섹터 카드의 「시장보다 나을 확률」에만 작게(측정값의 약 60%) 더함 — 20·60·120일 상대강도는 두 기간이 엇갈려 쓰지 않음"],
                ["종목", "🧾 실적 반응일(미국 종목)", "실적 발표 뒤 첫 반응일 종가에서 시장 대비 크게 오른 종목은 다음 5일도 시장보다 나을 확률이 높고, 크게 내린 종목은 낮음(실적 발표 뒤 흐름 PEAD). 미국 220종목 2018~ 6,198건: 반응 +4.5%↑ → +3.9·+1.7%p, −3.9%↓ → −5.3·−3.6%p(앞/뒤 기간). 반응일 하루만 「내일·시장보다 나을 확률」에 작게(5%p 반응당 로그오즈 0.05~0.06) 더함 — EPS 놀람% 자체는 두 기간 엇갈려 안 씀"],

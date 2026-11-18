@@ -5,7 +5,7 @@ import prob, prob_vol
 syms = sorted({c["ix"] for c in prob.MK.values()} | {"^GSPC", "^VIX"})
 H = prob.load_hist(syms)
 out = {}
-for nm, fr in (("아침", {m: True for m in prob.MK}), ("저녁", {})):
+for nm, fr in (("지금", None),):
     res = prob_vol.run(H, prob.MK, fr); out[nm] = res
     for mk, R in res.items():
         for tg, t in R.get("t", {}).items():
