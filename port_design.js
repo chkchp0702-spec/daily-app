@@ -11,9 +11,26 @@
   // 11/03 사용자 「거치식과 적립식을 구분 · 적립식이면 한 달에 얼마·며칠에 넣는지로 계산 · 거치식 누르면 적립식 칸은 닫히게」
   //   mode: lump(거치식) | dca(적립식) · dm 매달 넣는 돈(만원) · dd 매월 며칠(1~28, 31 = 말일) · d0 처음에 한 번(만원, 선택)
   var ST = {w: {SPY: 47.5, QQQ: 47.5, GLD: 5}, reg: 1, vol: 1, st: "", stw: 5, from: "", prev: null, last: null, ms: 0, pn: null, mode: "lump", dm: 100, dd: 1, d0: 0,
-    tx: "gen", brg: 26.4, brb: 44, of: 2000, txo: 1, bd: {}};   // 🏦 11/17 bd: 섞은 채권 {IEF|TLT|BRBOND: 비중 %}   // 🧾 11/05 세금: tx 탭(gen 일반 | big 금융소득종합과세 대상자) · brg/brb 종합소득 세율(지방세 포함 %) · of 다른 금융소득(만원/년) · txo 펼침
-  var KEEP = ["w", "reg", "vol", "st", "stw", "from", "mode", "dm", "dd", "d0", "tx", "brg", "brb", "of", "txo", "bd"];
+    tx: "gen", brg: 26.4, brb: 44, of: 2000, txo: 1, bd: {}, sx: []};   // ➕ 11/18 sx: 섞은 종목·ETF [{s 야후 코드, n 이름, m 시장, e ETF?, w %}]   // 🏦 11/17 bd: 섞은 채권 {IEF|TLT|BRBOND: 비중 %}   // 🧾 11/05 세금: tx 탭(gen 일반 | big 금융소득종합과세 대상자) · brg/brb 종합소득 세율(지방세 포함 %) · of 다른 금융소득(만원/년) · txo 펼침
+  var KEEP = ["w", "reg", "vol", "st", "stw", "from", "mode", "dm", "dd", "d0", "tx", "brg", "brb", "of", "txo", "bd", "sx"];
   try { var sv = JSON.parse(localStorage.getItem("pdz") || "null"); if (sv && sv.w) KEEP.forEach(function(k){ if (sv[k] !== undefined) ST[k] = sv[k]; }); } catch(x) {}
+  /* ➕ 11/18 종목·ETF 섞기 (사용자 「포트 설계기에 개별종목이나 etf도 넣는 칸을 만들자」)
+     앱 검색 목록(약 2.8만 종목 + ETF)에서 아무거나 · 최대 5개 · 각 5~50% · 종목 + 채권 합 80%까지 · 다른 칸에서 비율대로 떼어 옴 · 방어 규칙 밖
+     자료: archive/x/port_px/pool/ (port_px.py — 배당 포함 수정종가 ÷ 환율 = 달러 값) · 없는 종목은 ntfy 로 요청 → 15분마다(pdz_req.yml) 받아 올림
+     상장이 늦은 종목: 200일선 준비는 S&P 로 하고, 계산 시작만 그 종목 첫날로 미룸(전엔 같이 거래된 날만 남겨 200거래일이 더 깎였음) */
+  var SXMAX = 5, REQT = "chkchp-ch-pdzreq-k4r8", POOL = null, SXC = ["#d55181", "#9b6bd6", "#e07b39", "#4fb0c6", "#b8a13a"];
+  var OLDSYM = {"삼성전자": "005930.KS", "SK하이닉스": "000660.KS", "현대차": "005380.KS", "한국전력": "015760.KS", "엔비디아": "NVDA", "애플": "AAPL", "브로드컴": "AVGO", "AMD": "AMD", "마이크론": "MU", "인텔": "INTC", "테슬라": "TSLA", "팔란티어": "PLTR", "KOSPI200": "^KS200", "NIKKEI225": "^N225", "EUROSTOXX50": "^STOXX50E", "HSCEI": "^HSCE"};
+  if (!Array.isArray(ST.sx)) ST.sx = [];
+  if (ST.st){ if (OLDSYM[ST.st] && !ST.sx.some(function(x){ return x.s === OLDSYM[ST.st]; })) ST.sx.push({s: OLDSYM[ST.st], n: {"KOSPI200": "코스피200 지수", "NIKKEI225": "니케이225 지수", "EUROSTOXX50": "유로스탁스50 지수", "HSCEI": "항셍중국 지수"}[ST.st] || ST.st, m: "", w: ST.stw || 5}); ST.st = ""; }
+  var QUICK = [["005930.KS", "삼성전자"], ["000660.KS", "SK하이닉스"], ["NVDA", "엔비디아"], ["AAPL", "애플"], ["TSLA", "테슬라"], ["360750.KS", "TIGER 미국S&P500", 1], ["069500.KS", "KODEX 200", 1], ["SCHD", "미국 배당 SCHD", 1], ["JEPI", "JEPI 커버드콜", 1], ["SOXX", "반도체 SOXX", 1], ["IBIT", "비트코인 IBIT", 1], ["^N225", "니케이225", 1]];
+  function sxCol(i){ return SXC[i % SXC.length]; }
+  function sxKey(s){ return "X:" + s; }
+  function sxReady(x){ return !!(POOL && POOL.assets[x.s]); }
+  function sxOn(){ return (ST.sx || []).filter(sxReady); }
+  function sxReq(x){   // 자료가 없으면 요청(같은 종목은 30분에 한 번)
+    var k = "pdzreq:" + x.s; try { var t = +localStorage.getItem(k) || 0; if (Date.now() - t < 1800e3) return; localStorage.setItem(k, Date.now()); } catch(z) {}
+    try { fetch("https://ntfy.sh/" + REQT, {method: "POST", body: x.s + "|" + String(x.n || "").replace(/\|/g, " ").slice(0, 40), keepalive: true}).catch(function(){}); } catch(z) {}
+  }
   function keep(){ try { var o = {}; KEEP.forEach(function(k){ o[k] = ST[k]; }); localStorage.setItem("pdz", JSON.stringify(o)); } catch(x) {} }
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function sg(v, d){ return v == null || isNaN(v) ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d == null ? 1 : d); }
@@ -31,7 +48,7 @@
   var BDS = [["IEF", "🇺🇸 미국채 10년", "IEF · 7~10년 국채"], ["TLT", "🇺🇸 미국채 30년", "TLT · 20년 넘는 국채"], ["BRBOND", "🇧🇷 브라질국채", "헤알 국채 · 달러로 환산"]];
   var BDN = {IEF: "미국채 10년", TLT: "미국채 30년", BRBOND: "브라질국채"};
   function bdOn(){ var o = {}; BDS.forEach(function(b){ var v = +(ST.bd || {})[b[0]] || 0; if (v > 0 && IDX && IDX.assets[b[0]]) o[b[0]] = v; }); return o; }
-  function extW(){ var o = bdOn(), t = ST.st ? ST.stw : 0; for (var k in o) t += o[k]; return t; }   // 종목 + 채권 % 합
+  function extW(){ var o = bdOn(), t = 0; (ST.sx || []).forEach(function(x){ t += +x.w || 0; }); for (var k in o) t += o[k]; return t; }   // 종목(받는 중 포함) + 채권 % 합   // 종목 + 채권 % 합
 
   /* ── 자료 ── */
   function dec(j){ var t = Date.parse(j.d0 + "T00:00:00Z") / 864e5, d = new Int32Array(j.dd.length), c = new Float64Array(j.c.length);
@@ -40,11 +57,21 @@
     if (!IDXW) IDXW = Promise.all([
       getJSON("archive/x/port_px/index.json?" + Math.floor(Date.now() / 3600e3), {ttl: 3600e3}).catch(function(){ return null; }),
       getJSON("archive/x/els_px/index.json?" + Math.floor(Date.now() / 3600e3), {ttl: 3600e3}).catch(function(){ return null; }),
-      getJSON("archive/x/port_px/check.json?" + Math.floor(Date.now() / 3600e3), {ttl: 3600e3}).catch(function(){ return null; })
+      getJSON("archive/x/port_px/check.json?" + Math.floor(Date.now() / 3600e3), {ttl: 3600e3}).catch(function(){ return null; }),
+      poolLoad()
     ]).then(function(r){ IDX = r[0] && r[0].assets ? r[0] : {assets: {}}; EIDX = r[1] && r[1].assets ? r[1] : {assets: {}}; CHK = r[2]; return IDX; });
     return IDXW;
   }
+  var POOLT = 0;
+  function poolLoad(){   // 5분마다 새로(요청한 종목이 들어왔나)
+    if (POOL && Date.now() - POOLT < 300e3) return Promise.resolve(POOL);
+    return getJSON("archive/x/port_px/pool/index.json?" + Math.floor(Date.now() / 300e3), {ttl: 300e3}).then(function(j){ POOL = j && j.assets ? j : {assets: {}, bad: {}}; POOL.bad = POOL.bad || {}; POOLT = Date.now(); return POOL; })
+      .catch(function(){ if (!POOL) POOL = {assets: {}, bad: {}}; return POOL; });
+  }
   function px(k){
+    if (/^X:/.test(k)){ var s0 = k.slice(2), pa = POOL && POOL.assets[s0]; if (!pa) return Promise.resolve(null);
+      if (!PX[k]) PX[k] = getJSON("archive/x/port_px/pool/" + encodeURIComponent(pa.f) + "?" + String(pa.at || "").replace(/\D/g, ""), {ttl: 864e5}).then(function(j){ return j && j.dd ? dec(j) : null; }).catch(function(){ delete PX[k]; return null; });
+      return PX[k]; }
     if (PX[k]) return PX[k];
     var a = IDX && IDX.assets[k], b = !a && EIDX && EIDX.assets[k];
     if (!a && !b) return Promise.resolve(null);
@@ -224,7 +251,7 @@
       var y = yrOf(u), endY = u === N - 1 || yrOf(u + 1) !== y;
       if (endY){
         var w = r.WY && r.WY[y], py = 0;
-        if (w && w.n) for (var k in w) if (k !== "n" && k !== "BRBOND") py += w[k] / w.n * dyOf(k === "X" ? "X" : k, String(y)) / 100;   // 🇧🇷 비과세 → 분배금 세금에서 뺌
+        if (w && w.n) for (var k in w) if (k !== "n" && k !== "BRBOND") py += w[k] / w.n * dyOf(/^X/.test(k) ? "X" : k, String(y)) / 100;   // 🇧🇷 비과세 → 분배금 세금에서 뺌
         if (w) py *= Math.min(1, w.n / 252);
         brem = B;
         if (py > 0 && units > 0){
@@ -294,31 +321,42 @@
       '<div class="pz-txkey"><span><i class="n"></i>손에 쥐는 돈</span><span><i class="t"></i>세금</span><span><i class="f"></i>환전</span><span><i class="e"></i>넣은 돈</span></div>' +
       (gap >= 1e4 ? '<div class="pz-txwin">👑 이 조건이면 <b>' + nm[best.kind] + '</b>이 <b>' + won(gap) + '원</b> 더 남아요 <small>(' + (best === us ? '국내 ETF' : '달러 직투') + '보다 수익률 ' + Math.abs(us.ret - kr.ret).toFixed(1) + '%p)</small></div>' : '<div class="pz-txwin">두 방법 차이가 거의 없어요</div>') +
       warn +
-      (ST.st ? '<p class="note" style="margin:4px 0 0">섞은 종목(' + e(lab(ST.st)) + ')도 같은 방식으로 셈(근사 · 배당 빠짐).</p>' : '') +
+      (sxOn().length ? '<p class="note" style="margin:4px 0 0">➕ 섞은 종목·ETF(' + e(sxOn().map(function(x){ return x.n; }).join(" · ")) + ')도 같은 방식으로 셈(근사 · 배당은 값에 들어 있고 분배금 세금은 빼지 않음 · 국내 상장 주식 매매차익 비과세 같은 차이도 빼지 않음).</p>' : '') +
       (function(){ var B = bdOn(), L = []; if (B.IEF || B.TLT) L.push('미국채는 ETF 처럼 셈(분배금 = 이자 · 국내 ETF 칸은 국내 상장 미국채 ETF 가정)');
         if (B.BRBOND) L.push('🇧🇷 브라질국채 몫(기간 평균 ' + Math.round(us.free * 100) + '%)은 한-브라질 조세협약으로 이자·매매차익·환차익 비과세 · 금융소득종합과세에도 안 들어가 그 몫만큼 세금에서 뺌(근사) · 두 칸 모두 브라질국채는 직접 사는 것으로 같게 셈 · 브라질 현지 세금(IOF)·조세협약은 바뀔 수 있음');
         return L.length ? '<p class="note" style="margin:4px 0 0">🏦 ' + L.join(' · ') + '.</p>' : ''; })() +
       '<p class="note pz-txnote">가정 · 💵 양도세 = (원화로 본 차익 − 연 250만원) × 22%, 끝에 한 번에 판 셈(달마다 맞추며 판 차익 과세는 미룬 셈) · 미국 배당 15% 원천징수 · 환전 우대 0.1%씩 · 🇰🇷 국내 상장 해외 ETF 매매차익·분배금은 배당소득 15.4%, 그해 금융소득 2천만원 넘는 몫은 종합과세(구간 세율 한 칸으로 근사) · 분배금 = 해마다 실제 분배금 수익률' + (TXD.div ? '' : '(자료 준비 중 — 평균값)') + ' · 보수·과표기준가 차이·건강보험료(금융소득 1천만원 넘으면 영향)는 빼지 않음 · 2026년 세법 기준, 바뀔 수 있음 · 세무 상담이 아니에요.</p></details>';
   }
   function wts(){   // 화면 % → 엔진 비중(합 1, 종목은 다른 칸에서 비율대로 떼어 옴)
-    var s = ST.w.SPY / 100, q = ST.w.QQQ / 100, g = ST.w.GLD / 100, c = Math.max(0, 1 - s - q - g), x = ST.st ? ST.stw / 100 : 0, B = bdOn(), bt = 0;
+    var s = ST.w.SPY / 100, q = ST.w.QQQ / 100, g = ST.w.GLD / 100, c = Math.max(0, 1 - s - q - g), X = sxOn(), x = 0, B = bdOn(), bt = 0;
+    X.forEach(function(o){ x += (+o.w || 0) / 100; });
     for (var b in B) bt += B[b] / 100;
     var k = Math.max(0, 1 - x - bt);
-    var w = {SPY: s * k, QQQ: q * k, GLD: g * k, BIL: c * k}; if (x) w.X = x; for (var b2 in B) w[b2] = B[b2] / 100; return w;
+    var w = {SPY: s * k, QQQ: q * k, GLD: g * k, BIL: c * k}; X.forEach(function(o){ w[sxKey(o.s)] = (+o.w || 0) / 100; }); for (var b2 in B) w[b2] = B[b2] / 100; return w;
   }
   function series(){
-    var ks = ETF.slice(), names = {SPY: "SPY", QQQ: "QQQ", GLD: "GLD", BIL: "BIL"};
-    if (ST.st) ks.push("X");
+    var ks = ETF.slice(), xs = sxOn().map(function(o){ return sxKey(o.s); });
     Object.keys(bdOn()).forEach(function(b){ ks.push(b); });
-    return Promise.all(ks.map(function(k){ return px(k === "X" ? ST.st : k); })).then(function(ss){
-      if (ss.some(function(x){ return !x; })) return null;
-      var key = ks.join(",") + (ST.st || ""); if (ALN[key]) return ALN[key];
-      var o = {}; ks.forEach(function(k, i){ o[k] = ss[i]; }); ALN[key] = align(o); return ALN[key];
+    return Promise.all(ks.concat(xs).map(px)).then(function(ss){
+      if (ss.slice(0, ks.length).some(function(x){ return !x; })) return null;
+      var bad = xs.filter(function(k, i){ return !ss[ks.length + i]; }); if (bad.length) return null;
+      var key = ks.concat(xs).join(","); if (ALN[key]) return ALN[key];
+      var o = {}; ks.forEach(function(k, i){ o[k] = ss[i]; }); var A = align(o);
+      if (xs.length){ var X = {}; xs.forEach(function(k, i){ X[k] = ss[ks.length + i]; }); A = addX(A, X); }
+      ALN[key] = A; return A;
     });
+  }
+  function addX(A, X){   // ➕ 종목은 S&P 날짜에 맞춰 바로 앞 날 값으로 채움(휴장일 차이) · 상장 전은 첫 값(계산 시작은 상장 뒤로 미룸 → startOf)
+    var C = {}, XF = {}; for (var k0 in A.C) C[k0] = A.C[k0];
+    for (var k in X){ var s = X[k], arr = new Array(A.D.length), j = 0;
+      for (var i = 0; i < A.D.length; i++){ while (j + 1 < s.d.length && s.d[j + 1] <= A.D[i]) j++; arr[i] = s.c[j]; }
+      C[k] = arr; XF[k] = s.d[0]; }
+    return {D: A.D, C: C, XF: XF};
   }
   var START0 = "2007-06-01";   // BIL(현금) 상장(2007-05-30) + 200일선 준비 → 실제 시작 2008-03 · 2008 폭락·2009 바닥을 다 넣음
   function first(A){ return A && A.D.length > 201 ? day2s(A.D[201]) : "2008-03-17"; }   // 200일선·변동성 준비가 끝난 첫날
-  function startOf(A){ var f = first(A), last = A ? day2s(A.D[A.D.length - 6]) : "";
+  function xFirst(A){ var m = 0; if (A && A.XF) for (var k in A.XF) if (A.XF[k] > m) m = A.XF[k]; return m ? day2s(m + 1) : ""; }   // 가장 늦게 상장한 종목의 다음 날
+  function startOf(A){ var f = first(A), last = A ? day2s(A.D[A.D.length - 6]) : "", xf = xFirst(A); if (xf > f) f = xf;
     if (!ST.from) return f;
     var p = PER[ST.from]; if (p){ var t = new Date(Date.now() + 9 * 3600e3); if (p === "ytd") return (t.getUTCFullYear()) + "-01-01" > f ? t.getUTCFullYear() + "-01-01" : f;
       t.setUTCMonth(t.getUTCMonth() - p); var d = t.toISOString().slice(0, 10); return d > f ? d : f; }
@@ -348,13 +386,12 @@
   /* ── 화면 ── */
   function sl(k, lb){ return '<label class="pz-sl"><span><i style="background:' + COLS[k] + '"></i>' + lb + ' <b id="pzv' + k + '">' + ST.w[k] + '%</b></span><input type="range" min="0" max="100" step="5" value="' + ST.w[k] + '" data-pz="' + k + '"></label>'; }
   function barH(){
-    var w = wts(), seg = function(k, v){ return v > 0.0005 ? '<i style="flex:' + v.toFixed(4) + ';background:' + COLS[k] + '"></i>' : ''; };
-    return '<div class="pz-bar">' + seg("SPY", w.SPY) + seg("QQQ", w.QQQ) + seg("GLD", w.GLD) + seg("X", w.X || 0) + BDS.map(function(b){ return seg(b[0], w[b[0]] || 0); }).join("") + seg("BIL", w.BIL) + '</div>' +
-      '<div class="pz-lg">S&P ' + r1(w.SPY) + ' · 나스닥 ' + r1(w.QQQ) + ' · 금 ' + r1(w.GLD) + (w.X ? ' · <span style="color:' + COLS.X + '">' + e(lab(ST.st)) + ' ' + r1(w.X) + '</span>' : '') + BDS.map(function(b){ return w[b[0]] ? ' · <span style="color:' + COLS[b[0]] + '">' + BDN[b[0]] + ' ' + r1(w[b[0]]) + '</span>' : ''; }).join("") + ' · 현금 ' + r1(w.BIL) + '</div>';
+    var w = wts(), seg2 = function(c, v){ return v > 0.0005 ? '<i style="flex:' + v.toFixed(4) + ';background:' + c + '"></i>' : ''; }, seg = function(k, v){ return seg2(COLS[k], v); };
+    return '<div class="pz-bar">' + seg("SPY", w.SPY) + seg("QQQ", w.QQQ) + seg("GLD", w.GLD) + sxOn().map(function(o, i){ return seg2(sxCol(ST.sx.indexOf(o)), w[sxKey(o.s)] || 0); }).join("") + BDS.map(function(b){ return seg(b[0], w[b[0]] || 0); }).join("") + seg("BIL", w.BIL) + '</div>' +
+      '<div class="pz-lg">S&P ' + r1(w.SPY) + ' · 나스닥 ' + r1(w.QQQ) + ' · 금 ' + r1(w.GLD) + sxOn().map(function(o){ return ' · <span style="color:' + sxCol(ST.sx.indexOf(o)) + '">' + e(o.n) + ' ' + r1(w[sxKey(o.s)] || 0) + '</span>'; }).join("") + BDS.map(function(b){ return w[b[0]] ? ' · <span style="color:' + COLS[b[0]] + '">' + BDN[b[0]] + ' ' + r1(w[b[0]]) + '</span>' : ''; }).join("") + ' · 현금 ' + r1(w.BIL) + '</div>';
   }
   function r1(v){ return (Math.round(v * 1000) / 10) + "%"; }
   function head(my){
-    var stk = STK.filter(function(n){ return EIDX && EIDX.assets[n]; });
     return '<div class="pz-pre"><button data-pre="base">💼 기본 비중</button>' + (my ? '<button data-pre="mine">🙋 내 포트 비중</button>' : '') + '<button data-pre="spy">S&P 100%</button><button data-pre="6040">S&P 60 · 금 20 · 현금 20</button></div>' +
       sl("SPY", "S&P500") + sl("QQQ", "나스닥100") + sl("GLD", "금") +
       '<div id="pzbar">' + barH() + '</div>' +
@@ -367,10 +404,34 @@
           '<label>처음에 한 번 <input type="number" inputmode="numeric" min="0" step="100" id="pzd0" value="' + (ST.d0 || "") + '" placeholder="0"> 만원 <small>(선택)</small></label>' +
           '<small class="pz-dcn">시작은 위 「언제부터」 날짜 · 그날 종가에 사서 지금까지</small></div>' : '<small class="pz-dcn">시작 날짜에 ' + won(amt()) + '원을 한 번에 넣은 셈 (금액은 💼 내 포트 금액)</small>') + '</div>' +
       '<div class="pz-tg"><button data-tg="reg" class="' + (ST.reg ? "on" : "") + '">🛡 200일선 방어 <b>' + (ST.reg ? "켬" : "끔") + '</b></button><button data-tg="vol" class="' + (ST.vol ? "on" : "") + '">📉 변동성 맞춤 <b>' + (ST.vol ? "켬" : "끔") + '</b></button></div>' +
-      '<details class="pz-st"' + (ST.st ? " open" : "") + '><summary>➕ 종목 하나 섞어 보기 ' + (ST.st ? '<b>' + e(lab(ST.st)) + ' ' + ST.stw + '%</b>' : '<span class="mut">(지금 없음)</span>') + '</summary>' +
-        '<div class="pz-sc">' + stk.map(function(n){ var y = ((EIDX.assets[n] || {}).from || "").slice(0, 4); return '<button data-stk="' + e(n) + '" class="' + (ST.st === n ? "on" : "") + '">' + e(lab(n)) + (y > "2007" ? '<small>' + y + '~</small>' : '') + '</button>'; }).join("") + '</div>' +
-        '<label class="pz-sl"><span>비중 <b id="pzstv">' + ST.stw + '%</b></span><input type="range" min="5" max="20" step="5" value="' + ST.stw + '" id="pzstw"></label>' +
-        '<p class="note" style="margin:2px 0 0">종목은 다른 칸에서 비율대로 떼어 와요 · 방어 규칙 밖(그대로 둠) · 그 나라 통화 종가(배당 빠짐) · 상장이 늦으면 그때부터.</p></details>' + bondUI();
+      sxUI() + bondUI();
+  }
+  function tk(x){ return x.m === "US" || (!x.m && /^[A-Z][A-Z.\-]*$/.test(x.s)) ? x.s : (window.V && V.cd ? V.cd(x.s) : x.s.replace(/\.(KS|KQ)$/, "")); }   // 미국 종목은 이름 밑에 티커
+  function sxRow(x, i){
+    var a = POOL && POOL.assets[x.s], bad = POOL && POOL.bad && POOL.bad[x.s], y = a && a.from ? a.from.slice(0, 7).replace("-", ".") : "";
+    var st = a ? (y > "2008.03" ? '<small class="pz-sxok">' + y + ' 상장 → 그때부터</small>' : '') : bad ? '<small class="pz-sxbad">✗ 일봉 자료가 없어요 <button data-sxre="' + i + '">다시 요청</button></small>' : '<small class="pz-sxwait">⏳ 20년 일봉 받는 중 · 보통 15~30분 · 들어오면 자동으로 계산에 넣어요</small>';
+    return '<div class="pz-sxr' + (a ? '' : ' wait') + '"><div class="pz-sxh"><i style="background:' + sxCol(i) + '"></i><span><b>' + e(x.n) + '</b><em class="tk">' + e(tk(x)) + '</em></span>' +
+      '<b class="pz-sxv" id="pzsxv' + i + '">' + x.w + '%</b><button class="pz-sxx" data-sxdel="' + i + '" aria-label="빼기">✕</button></div>' +
+      '<input type="range" min="5" max="50" step="5" value="' + x.w + '" data-sxw="' + i + '"' + (a ? '' : ' disabled') + '>' + st + '</div>';
+  }
+  function sxUI(){   // ➕ 11/18 종목·ETF 섞어 보기
+    var L = ST.sx || [], have = {}; L.forEach(function(x){ have[x.s] = 1; });
+    var sum = L.length + '개 · ' + L.reduce(function(t, x){ return t + (+x.w || 0); }, 0) + '%';
+    return '<details class="pz-st pz-sx" id="pzsx"' + (L.length || ST.sxo ? " open" : "") + '><summary>➕ 종목·ETF 섞어 보기 ' + (L.length ? '<b>' + e(sum) + '</b>' : '<span class="mut">(지금 없음)</span>') + '</summary>' +
+      (L.length < SXMAX ? '<div class="pz-sxq"><input type="search" id="pzsxq" placeholder="이름·코드 (예: 삼성전자, SCHD)" autocomplete="off" autocapitalize="off" spellcheck="false"><div id="pzsxres" class="pz-sxres"></div></div>' +
+        '<div class="pz-sc pz-sxqk">' + QUICK.filter(function(q){ return !have[q[0]]; }).slice(0, 10).map(function(q){ return '<button data-sxq="' + e(q[0]) + '" data-nm="' + e(q[1]) + '" data-et="' + (q[2] ? 1 : 0) + '">' + e(q[1]) + '</button>'; }).join("") + '</div>'
+        : '<p class="note" style="margin:2px 0 6px">최대 ' + SXMAX + '개까지 — 하나를 빼면 더 넣을 수 있어요.</p>') +
+      L.map(sxRow).join("") +
+      '<p class="note" style="margin:2px 0 0">약 2.8만 종목·ETF(한·미·일·중·홍) 중 아무거나 · 최대 ' + SXMAX + '개 · 각 5~50% · 종목 + 채권 합 80%까지 · 고른 비중만큼 S&P·나스닥·금·현금에서 비율대로 떼어 와요 · 방어 규칙 밖(그대로 둠) · 달마다 맞춤 · 배당 포함 값을 달러로 바꿔 셈(원화 수익은 🧾 세금 칸에서 환율 반영) · 상장이 늦으면 그날부터 계산.</p></details>';
+  }
+  function sxAdd(s, n, m, et){
+    ST.sx = ST.sx || [];
+    if (ST.sx.some(function(x){ return x.s === s; })) return false;
+    if (ST.sx.length >= SXMAX){ if (window.P && P.toast) P.toast("종목·ETF 는 " + SXMAX + "개까지예요"); return false; }
+    var room = 80 - extW(); if (room < 5){ if (window.P && P.toast) P.toast("종목 + 채권은 합쳐 80%까지예요 — 다른 칸을 줄여 주세요"); return false; }
+    var x = {s: s, n: n || s, m: m || "", e: et ? 1 : 0, w: Math.min(10, Math.floor(room / 5) * 5)}; ST.sx.push(x);
+    if (!(POOL && POOL.assets[s])) sxReq(x);
+    return true;
   }
   function bondUI(){   // 🏦 11/17 채권 섞어 보기
     var B = bdOn(), on = Object.keys(B), br = IDX.assets.BRBOND;
@@ -535,6 +596,43 @@
       of.onchange = function(){ ST.of = Math.max(0, Math.round(+of.value || 0)); keep(); rr(); }; }
     [].forEach.call(document.querySelectorAll(".pz-yr>div"), function(d){ d.onclick = function(ev){ ev.stopPropagation(); if (window.P && P.toast) P.toast(d.title); }; });
   }
+  function bindSx(box){
+    var redo = function(sel){ var el = box.querySelector(sel), y0 = el ? el.getBoundingClientRect().top : 0; keep(); draw(box); calc(); pin("#pzsx", y0 || (box.querySelector("#pzsx") || {getBoundingClientRect: function(){ return {top: 0}; }}).getBoundingClientRect().top); };
+    var det = box.querySelector("#pzsx"); if (det) det.addEventListener("toggle", function(){ ST.sxo = det.open ? 1 : 0; });
+    var addOne = function(s, n, m, et){ var y0 = (box.querySelector("#pzsx") || box).getBoundingClientRect().top; if (!sxAdd(s, n, m, et)) return; ST.sxo = 1; keep(); draw(box); calc(); pin("#pzsx", y0);
+      setTimeout(function(){ var q = document.getElementById("pzsxq"); if (q && document.activeElement !== q && ST.sx.length < SXMAX) {} }, 0); };
+    [].forEach.call(box.querySelectorAll("[data-sxq]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); var s = b.getAttribute("data-sxq"); addOne(s, b.getAttribute("data-nm"), /\.(KS|KQ)$/.test(s) ? "KR" : /\.T$/.test(s) ? "JP" : /\.HK$/.test(s) ? "HK" : /^\^/.test(s) ? "" : "US", +b.getAttribute("data-et")); }; });
+    [].forEach.call(box.querySelectorAll("[data-sxdel]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); var i = +b.getAttribute("data-sxdel"), y0 = (box.querySelector("#pzsx") || box).getBoundingClientRect().top; ST.sx.splice(i, 1); ST.sxo = 1; keep(); draw(box); calc(); pin("#pzsx", y0); }; });
+    [].forEach.call(box.querySelectorAll("[data-sxre]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); var x = ST.sx[+b.getAttribute("data-sxre")]; if (!x) return; try { localStorage.removeItem("pdzreq:" + x.s); } catch(z) {} if (POOL && POOL.bad) delete POOL.bad[x.s]; sxReq(x); keep(); draw(box); if (window.P && P.toast) P.toast("다시 요청했어요 — 15~30분 뒤 다시 열어 보세요"); }; });
+    [].forEach.call(box.querySelectorAll("input[data-sxw]"), function(x){ var i = +x.getAttribute("data-sxw"), o = ST.sx[i]; if (!o) return;
+      x.oninput = function(){ var v = +x.value, room = 80 - (extW() - (+o.w || 0)); if (v > room){ v = Math.max(5, Math.floor(room / 5) * 5); x.value = v; } o.w = v; var t = document.getElementById("pzsxv" + i); if (t) t.textContent = v + "%"; var bb = document.getElementById("pzbar"); if (bb) bb.innerHTML = barH(); };
+      x.onchange = function(){ x.oninput(); keep(); calc(); var sm = box.querySelector("#pzsx summary b"); if (sm) sm.textContent = ST.sx.length + "개 · " + ST.sx.reduce(function(t, y){ return t + (+y.w || 0); }, 0) + "%"; };
+      x.addEventListener("click", function(ev){ ev.stopPropagation(); }); });
+    var q = box.querySelector("#pzsxq"), res = box.querySelector("#pzsxres");
+    if (q && res){
+      q.addEventListener("click", function(ev){ ev.stopPropagation(); });
+      var show = function(){ var t = q.value.trim(); if (!t){ res.innerHTML = ""; return; }
+        if (!window.opSearch || !window.OPIDX){ res.innerHTML = '<div class="pz-sxh2">종목 목록 불러오는 중…</div>'; return; }
+        var have = {}; (ST.sx || []).forEach(function(x){ have[x.s] = 1; });
+        var T = t.toUpperCase(), r0 = opSearch(t) || [], ex = (window.OPIDX || []).filter(function(x){ return x.sym.toUpperCase() === T || x.sym.toUpperCase().replace(/\.(KS|KQ|T|HK|SS|SZ)$/, "") === T; });   // 티커를 정확히 치면 그 종목이 맨 위(SCHD → 찰스 슈왑보다 SCHD ETF)
+        var r = ex.concat(r0.filter(function(x){ return ex.indexOf(x) < 0; })).slice(0, 7), FL = window.FLAG || {};
+        res.innerHTML = r.length ? r.map(function(x){ var rd = POOL && POOL.assets[x.sym];
+          return '<button type="button" data-sxa="' + e(x.sym) + '" data-nm="' + e(x.name) + '" data-mk="' + e(x.mkt || "") + '" data-et="' + (x.etf ? 1 : 0) + '"' + (have[x.sym] ? ' disabled' : '') + '>' + (FL[x.mkt] || "") + ' <b>' + e(x.name) + '</b>' + (x.etf ? ' <span class="gs-etf">ETF</span>' : '') +
+            '<small>' + e(x.mkt === "US" ? x.sym : (window.V && V.cd ? V.cd(x.sym) : x.sym)) + (have[x.sym] ? ' · 담음' : rd ? ' · 바로 계산' : ' · 처음이면 15~30분') + '</small></button>'; }).join("")
+          : '<div class="pz-sxh2">「' + e(t) + '」 — 못 찾았어요</div>';
+        [].forEach.call(res.querySelectorAll("[data-sxa]"), function(y){ var go1 = function(ev){ ev.preventDefault(); ev.stopPropagation(); if (y._done) return; y._done = 1; addOne(y.dataset.sxa, y.dataset.nm, y.dataset.mk, +y.dataset.et); };
+          y.onmousedown = go1; y.onclick = go1; });   // 누르는 순간(mousedown) 바로 담음 — 입력칸이 포커스를 잃으며 키보드가 내려가고 화면이 다시 그려져 탭이 빗나가는 일 막기 · 스크롤은 mousedown 이 안 생김
+      };
+      q.oninput = show; q.onkeydown = function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); var f = res.querySelector("[data-sxa]:not([disabled])"); if (f) f.click(); } };
+      q.onfocus = function(){ if (window.opLoadIdx && !window.OPIDX) opLoadIdx().then(show, function(){}); };
+    }
+    // ⏳ 받는 중인 종목이 있으면 열려 있는 동안 2분마다 다시 확인 → 들어오면 바로 계산
+    if ((ST.sx || []).some(function(x){ return !sxReady(x); }) && !SXT) SXT = setInterval(function(){
+      var bx = document.getElementById(box.id); if (!bx || !(ST.sx || []).some(function(x){ return !sxReady(x); })){ clearInterval(SXT); SXT = 0; return; }
+      var before = ST.sx.filter(sxReady).length; POOLT = 0;
+      poolLoad().then(function(){ if (ST.sx.filter(sxReady).length > before){ var b2 = document.getElementById(box.id); if (b2){ draw(b2); calc(); } if (window.P && P.toast) P.toast("➕ 요청한 종목 자료가 들어와 계산에 넣었어요"); } }); }, 120e3);
+  }
+  var SXT = 0;
   function bind(box){
     [].forEach.call(box.querySelectorAll("input[data-pz]"), function(x){
       var k = x.getAttribute("data-pz");
@@ -549,7 +647,7 @@
       var y0 = b.getBoundingClientRect().top; keep(); draw(box); calc(); pin("[data-pre=\"" + p + "\"]", y0); }; });
     [].forEach.call(box.querySelectorAll("[data-tg]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); var k = b.getAttribute("data-tg"); ST[k] = ST[k] ? 0 : 1;
       b.classList.toggle("on", !!ST[k]); b.querySelector("b").textContent = ST[k] ? "켬" : "끔"; keep(); calc(); }; });
-    [].forEach.call(box.querySelectorAll("[data-stk]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); var n = b.getAttribute("data-stk"); ST.st = ST.st === n ? "" : n; var y0 = b.getBoundingClientRect().top; keep(); draw(box); calc(); pin("[data-stk=\"" + n + "\"]", y0); }; });
+    bindSx(box);
     [].forEach.call(box.querySelectorAll("[data-bd]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); var k = b.getAttribute("data-bd"); ST.bd = ST.bd || {};
       if (ST.bd[k]) delete ST.bd[k]; else { var room = 80 - extW(); if (room < 5){ if (window.P && P.toast) P.toast("종목 + 채권은 합쳐 80%까지예요 — 다른 칸을 줄여 주세요"); return; } ST.bd[k] = Math.min(20, room); }
       var y0 = b.getBoundingClientRect().top; keep(); draw(box); calc(); pin("[data-bd=\"" + k + "\"]", y0); }; });
@@ -557,9 +655,6 @@
       x.oninput = function(){ var v = +x.value, room = 80 - (extW() - (ST.bd[k] || 0)); if (v > room){ v = Math.max(5, Math.floor(room / 5) * 5); x.value = v; } ST.bd[k] = v; var t = document.getElementById("pzbv" + k); if (t) t.textContent = v + "%"; var bb = document.getElementById("pzbar"); if (bb) bb.innerHTML = barH(); };
       x.onchange = function(){ x.oninput(); keep(); calc(); var sm = box.querySelector(".pz-bd summary b"); if (sm){ var B = bdOn(); sm.textContent = Object.keys(B).map(function(j){ return BDN[j] + " " + B[j] + "%"; }).join(" · "); } };
       x.addEventListener("click", function(ev){ ev.stopPropagation(); }); });
-    var sw = document.getElementById("pzstw");
-    if (sw){ sw.oninput = function(){ var room = 80 - (extW() - (ST.st ? ST.stw : 0)); if (+sw.value > room){ sw.value = Math.max(5, Math.floor(room / 5) * 5); } ST.stw = +sw.value; document.getElementById("pzstv").textContent = ST.stw + "%"; var b = document.getElementById("pzbar"); if (b) b.innerHTML = barH(); };
-      sw.onchange = function(){ sw.oninput(); keep(); if (ST.st) calc(); }; sw.addEventListener("click", function(ev){ ev.stopPropagation(); }); }
     [].forEach.call(box.querySelectorAll("[data-fr]"), function(b){ b.onclick = function(ev){ ev.stopPropagation(); ST.from = b.getAttribute("data-fr");
       [].forEach.call(box.querySelectorAll("[data-fr]"), function(x){ x.classList.toggle("on", x === b); }); var di = document.getElementById("pzdate"); if (di) di.value = ""; var f = document.getElementById("pzfrom"); if (f) f.textContent = ""; keep(); calc(); }; });
     var di = document.getElementById("pzdate");
@@ -580,23 +675,28 @@
   window.__pdz = {
     ready: function(){ return idx().then(function(){ return Promise.all(ETF.map(px)); }).then(function(ss){ return ss.every(Boolean) ? align({SPY: ss[0], QQQ: ss[1], GLD: ss[2], BIL: ss[3]}) : null; }); },
     panic: function(){ ST.from = ""; ST.last = null; keep(); window.__pdzFocus = 1; window.__pdzPanic = 1; },
-    tax: {sim: sim, flowsOf: flowsOf, taxH: taxH, set: function(x){ TXD = x; TXW = Promise.resolve(x); }}, engine: engine, wts: function(){ var w = wts(); return Object.keys(w).some(function(k){ return ETF.indexOf(k) < 0; }) ? null : w; }, cfg: function(){ return {reg: ST.reg, vol: ST.vol, w: ST.w, st: ST.st, stw: ST.stw, bd: bdOn()}; }
+    tax: {sim: sim, flowsOf: flowsOf, taxH: taxH, set: function(x){ TXD = x; TXW = Promise.resolve(x); }}, engine: engine, wts: function(){ var w = wts(); return Object.keys(w).some(function(k){ return ETF.indexOf(k) < 0; }) ? null : w; }, cfg: function(){ return {reg: ST.reg, vol: ST.vol, w: ST.w, st: "", stw: 0, sx: sxOn().map(function(x){ return {s: x.s, n: x.n, m: x.m, e: x.e, w: x.w}; }), bd: bdOn()}; }
   };
 
-  /* 📄 종목 화면: 「💼 이 종목 5% 넣어 보면」 */
-  var CODE = {"005930": "삼성전자", "000660": "SK하이닉스", "005380": "현대차", "015760": "한국전력", "NVDA": "엔비디아", "AAPL": "애플", "AVGO": "브로드컴", "AMD": "AMD", "MU": "마이크론", "INTC": "인텔", "TSLA": "테슬라", "PLTR": "팔란티어"};
+  /* 📄 종목 화면: 「💼 이 종목 5% 넣어 보면」 — 11/18 모든 종목·ETF 로 넓힘(자료가 없으면 요청) */
   var OLD = window.sigBadges;
   if (typeof OLD === "function") window.sigBadges = function(sym){
     return OLD(sym).then(function(h){
-      var n = CODE[String(sym || "").split(".")[0].toUpperCase()];
-      if (n) setTimeout(function(){ var el = document.getElementById("opsig"); if (!el || el.querySelector(".pz-go")) return;
+      var s = String(sym || "").trim(); if (!s) return h;
+      setTimeout(function(){ var el = document.getElementById("opsig"); if (!el || el.querySelector(".pz-go")) return;
+        var r = window.opFind ? opFind(s) : null; if (r && r.sym) s = r.sym;
         var b = document.createElement("button"); b.className = "pz-go"; b.type = "button";
         b.innerHTML = '💼 이 종목 5% 넣어 보면 <small>포트 설계기 · 2008년부터 다시 계산 ›</small>';
-        b.onclick = function(ev){ ev.stopPropagation(); ST.st = n; ST.stw = 5; ST.last = null; keep(); window.__pdzFocus = 1; if (window.go) go("port"); };
+        b.onclick = function(ev){ ev.stopPropagation();
+          var nm = r && r.name || s, mk = r && r.mkt || "", hit = (ST.sx || []).filter(function(x){ return x.s === s; })[0];
+          if (!hit){ if ((ST.sx || []).length >= SXMAX) ST.sx.shift(); var room = 80 - extW(); if (room < 5) ST.bd = {};
+            ST.sx.push({s: s, n: nm, m: mk, e: r && r.etf ? 1 : 0, w: 5}); poolLoad().then(function(){ if (!(POOL && POOL.assets[s])) sxReq({s: s, n: nm}); }); }
+          ST.sxo = 1; ST.last = null; keep(); window.__pdzFocus = 1; if (window.go) go("port"); };
         el.appendChild(b); }, 80);
       return h;
     });
   };
+
 
   var css = document.createElement("style");
   css.textContent =
@@ -653,6 +753,14 @@
     ".pz-txx{margin:6px 0 0;padding:7px 9px;border-radius:9px;background:color-mix(in srgb,#ff6b6b 10%,var(--panel));font-size:12.5px;word-break:keep-all}.pz-txx.ok{background:color-mix(in srgb,#3fb950 10%,var(--panel))}.pz-txnote{margin:8px 0 0;font-size:12px;word-break:keep-all}" +
     "@media (max-width:370px){.pz-txg{grid-template-columns:1fr}.pz-txk>div{grid-template-columns:repeat(2,1fr)}}" +
     ".pz-bd .pz-sc button.on{background:#1f9e8f}.pz-bd .pz-sc button.on small{color:#dff7f3}.pz-bd .pz-sc button small{display:block;margin:1px 0 0;font-size:11.5px}.pz-bd summary .mut{font-size:12.5px}" +
-    ".pz-go{display:block;width:100%;text-align:left;margin:8px 0 0;border:1px dashed #e9c46a;background:color-mix(in srgb,#e9c46a 10%,var(--panel));color:var(--text);border-radius:10px;padding:9px 11px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}.pz-go small{display:block;font-weight:400;font-size:12.5px;color:var(--sub)}";
+    ".pz-go{display:block;width:100%;text-align:left;margin:8px 0 0;border:1px dashed #e9c46a;background:color-mix(in srgb,#e9c46a 10%,var(--panel));color:var(--text);border-radius:10px;padding:9px 11px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}.pz-go small{display:block;font-weight:400;font-size:12.5px;color:var(--sub)}" +
+    ".pz-sxq{position:relative;margin:4px 0 6px}.pz-sxq input{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}" +
+    ".pz-sxres{display:flex;flex-direction:column;gap:4px;margin-top:4px}.pz-sxres button{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px;text-align:left;font:inherit;font-size:14px;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer}" +
+    ".pz-sxres button small{flex-basis:100%;font-size:12px;color:var(--sub)}.pz-sxres button[disabled]{opacity:.5}.pz-sxh2{font-size:13px;color:var(--sub);padding:4px 2px}" +
+    ".pz-sxqk{margin:0 0 6px}.pz-sxr{margin:6px 0;padding:8px 10px 6px;border-radius:10px;background:color-mix(in srgb,var(--text) 4%,var(--panel))}.pz-sxr.wait{opacity:.85}" +
+    ".pz-sxh{display:flex;align-items:center;gap:8px}.pz-sxh>i{flex:none;width:10px;height:10px;border-radius:3px}.pz-sxh>span{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}.pz-sxh>span b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}" +
+    ".pz-sxh>span .tk{font-style:normal;font-size:11.5px;color:var(--sub)}.pz-sxv{flex:none;font-size:15px}.pz-sxx{flex:none;border:0;background:none;color:var(--sub);font-size:16px;padding:4px 6px;cursor:pointer}" +
+    ".pz-sxr input[type=range]{width:100%;margin:4px 0 0}.pz-sxr small{display:block;font-size:12px;color:var(--sub);word-break:keep-all}.pz-sxwait{color:#c99a1a!important}.pz-sxbad{color:#d9534f!important}" +
+    ".pz-sxbad button{border:1px solid currentColor;background:none;color:inherit;border-radius:7px;font:inherit;font-size:11.5px;padding:1px 7px;margin-left:4px;cursor:pointer}";
   document.head.appendChild(css);
 })();

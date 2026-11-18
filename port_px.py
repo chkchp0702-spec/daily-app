@@ -9,6 +9,11 @@
       · 브라질국채 BRBOND: 헤알 국채 값 ÷ 달러/헤알(BRL=X) = 달러 값(설계기 엔진이 달러 기준이라)
         헤알 국채 값 = IRF-M ETF(IRFM11.SA, 헤알 고정금리 국채 지수) 실제 값 · 그 ETF 가 없던 앞쪽은 Selic 기준금리(BCB SGS 432)로 매일 이자만 쌓은 근사(금리 변화로 값이 오르내린 것은 빠짐)
         index.json 의 BRBOND.src·splice 에 무엇을 썼는지 남김 → 앱이 그대로 보여 줌
+   ④ 11/18 종목·ETF 섞기 (사용자 「포트 설계기에 개별종목이나 etf도 넣는 칸을 만들자」)
+      · pool/<코드>.json — 자주 쓰는 종목·ETF(SEED) 를 7일마다 + 앱에서 고른 새 종목은 요청(ntfy 주제 REQ_TOPIC)을 15분마다 받아 바로
+      · 값 = 야후 배당 포함 수정종가(auto_adjust) ÷ 그 나라 환율 → 달러 값(설계기 엔진이 달러 기준 · 세금 칸이 다시 원화로 바꿈)
+      · pool/index.json: assets{코드: f·from·to·n·at·name·mkt·cur} · bad{코드: 이유} · seen(처리한 요청 id)
+      · python port_px.py --req  = 요청만 처리(새 요청 없으면 야후를 안 부름)
    원칙: 숫자를 지어내지 않음 — 못 받으면 옛 파일 그대로."""
 import datetime
 import json
@@ -313,6 +318,201 @@ def tax_data(idx):
     return ch
 
 
+# ── ④ 11/18 종목·ETF 섞기 ──
+PD = os.path.join(D, "pool")
+REQ_TOPIC = "chkchp-ch-pdzreq-k4r8"
+SEED = [
+    ("005930.KS", "삼성전자"), ("000660.KS", "SK하이닉스"), ("005380.KS", "현대차"), ("015760.KS", "한국전력"), ("373220.KS", "LG에너지솔루션"),
+    ("207940.KS", "삼성바이오로직스"), ("035420.KS", "NAVER"), ("035720.KS", "카카오"), ("000270.KS", "기아"), ("105560.KS", "KB금융"),
+    ("055550.KS", "신한지주"), ("012450.KS", "한화에어로스페이스"), ("329180.KS", "HD현대중공업"), ("042660.KS", "한화오션"), ("068270.KS", "셀트리온"),
+    ("005490.KS", "POSCO홀딩스"),
+    ("069500.KS", "KODEX 200"), ("102110.KS", "TIGER 200"), ("360750.KS", "TIGER 미국S&P500"), ("379800.KS", "KODEX 미국S&P500"), ("133690.KS", "TIGER 미국나스닥100"),
+    ("458730.KS", "TIGER 미국배당다우존스"), ("446720.KS", "SOL 미국배당다우존스"), ("381180.KS", "TIGER 미국필라델피아반도체나스닥"), ("091160.KS", "KODEX 반도체"),
+    ("305720.KS", "KODEX 2차전지산업"), ("132030.KS", "KODEX 골드선물(H)"), ("148070.KS", "KIWOOM 국고채10년"),
+    ("NVDA", "엔비디아"), ("AAPL", "애플"), ("MSFT", "마이크로소프트"), ("AMZN", "아마존"), ("GOOGL", "알파벳"), ("META", "메타"), ("AVGO", "브로드컴"),
+    ("TSLA", "테슬라"), ("AMD", "AMD"), ("MU", "마이크론"), ("INTC", "인텔"), ("PLTR", "팔란티어"), ("JPM", "JP모간"), ("LLY", "일라이 릴리"),
+    ("COST", "코스트코"), ("NFLX", "넷플릭스"),
+    ("VOO", "Vanguard S&P500 (VOO)"), ("SCHD", "미국 배당 SCHD"), ("JEPI", "JEPI 커버드콜"), ("JEPQ", "JEPQ 나스닥 커버드콜"), ("SOXX", "반도체 SOXX"),
+    ("SMH", "반도체 SMH"), ("TQQQ", "나스닥 3배 TQQQ"), ("QLD", "나스닥 2배 QLD"), ("DIA", "다우 DIA"), ("IWM", "러셀2000 IWM"), ("VTI", "미국 전체 VTI"),
+    ("VT", "세계 전체 VT"), ("VNQ", "미국 리츠 VNQ"), ("XLE", "에너지 XLE"), ("XLK", "기술 XLK"), ("ARKK", "ARK 혁신 ARKK"), ("IBIT", "비트코인 IBIT"),
+    ("7203.T", "도요타자동차"), ("8035.T", "도쿄일렉트론"), ("6857.T", "어드밴테스트"), ("0700.HK", "텐센트"), ("9988.HK", "알리바바"), ("1810.HK", "샤오미"),
+    ("^KS200", "코스피200 지수"), ("^N225", "니케이225 지수"), ("^STOXX50E", "유로스탁스50 지수"), ("^HSCE", "항셍중국 지수"),
+]
+# 통화 → (환율 티커, 곱하기 여부) : 달러 값 = 현지 값 ÷ (1달러 = ? 현지) · 유로는 EURUSD(1유로 = ? 달러)라 곱함
+CUR_FX = {"KRW": ("USDKRW", False), "JPY": ("JPY=X", False), "HKD": ("HKD=X", False), "CNY": ("CNY=X", False), "EUR": ("EURUSD=X", True)}
+IDX_CUR = {"^KS200": "KRW", "^KS11": "KRW", "^KQ11": "KRW", "^N225": "JPY", "^HSCE": "HKD", "^HSI": "HKD", "^STOXX50E": "EUR"}
+
+
+def cur_of(s):
+    if s in IDX_CUR:
+        return IDX_CUR[s]
+    for suf, c in ((".KS", "KRW"), (".KQ", "KRW"), (".T", "JPY"), (".HK", "HKD"), (".SS", "CNY"), (".SZ", "CNY")):
+        if s.endswith(suf):
+            return c
+    return "USD"
+
+
+def mkt_of(s):
+    return {"KRW": "KR", "JPY": "JP", "HKD": "HK", "CNY": "CN", "EUR": "EU"}.get(cur_of(s), "US")
+
+
+def ok_sym(s):
+    import re
+    return bool(re.fullmatch(r"\^?[A-Z0-9][A-Z0-9.\-=]{0,14}", s or ""))
+
+
+def pool_file(s):
+    return s.replace("^", "_").replace("=", "_") + ".json"
+
+
+def read_pool():
+    try:
+        j = json.load(open(os.path.join(PD, "index.json"), encoding="utf-8"))
+        j.setdefault("assets", {}); j.setdefault("bad", {}); j.setdefault("seen", [])
+        return j
+    except Exception:
+        return {"assets": {}, "bad": {}, "seen": []}
+
+
+def save_pool(P):
+    P["updated"] = now(); P["seen"] = P["seen"][-300:]
+    json.dump(P, open(os.path.join(PD, "index.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+
+
+def write_pool(s, P, name):
+    ds = sorted(P); d0 = datetime.date.fromisoformat(ds[0]); prev, dd, cc = d0, [], []
+    for d in ds:
+        x = datetime.date.fromisoformat(d); dd.append((x - prev).days); prev = x
+        v = float("%.6g" % P[d]); cc.append(int(v) if v.is_integer() else v)
+    f = pool_file(s)
+    json.dump({"n": name, "s": s, "d0": ds[0], "dd": dd, "c": cc}, open(os.path.join(PD, f), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    return {"f": f, "from": ds[0], "to": ds[-1], "n": len(ds), "at": now(), "name": name, "mkt": mkt_of(s), "cur": cur_of(s)}
+
+
+_FX = {}
+
+
+def fx_series(cur):
+    if cur in _FX:
+        return _FX[cur]
+    t, mul = CUR_FX[cur]
+    if t == "USDKRW":
+        try:
+            F = load_file("USDKRW")
+        except Exception:
+            F = dl("KRW=X", "2006-01-01", False)
+    else:
+        F = dl(t, "2006-01-01", False)
+    if F:
+        F = despike(F, 0.08, t)
+    _FX[cur] = (F, mul)
+    return _FX[cur]
+
+
+def to_usd(P, cur):
+    """현지 통화 값 → 달러 값 · 그날 환율이 없으면 바로 앞 날 환율(휴장일 차이)"""
+    if cur == "USD":
+        return P
+    F, mul = fx_series(cur)
+    if not F:
+        return None
+    fd = sorted(F); out = {}; j = 0; last = None
+    for d in sorted(P):
+        while j < len(fd) and fd[j] <= d:
+            last = F[fd[j]]; j += 1
+        if last:
+            out[d] = P[d] * last if mul else P[d] / last
+    return out
+
+
+def dl_any(tick, start="2006-01-01"):
+    """dl 과 같지만 상장이 늦은 종목도(60거래일부터) · 배당 포함 수정종가"""
+    import yfinance as yf
+    for _ in range(2):
+        try:
+            h = yf.download(tick, start=start, interval="1d", progress=False, auto_adjust=True, threads=False)
+            c = h["Close"].dropna()
+            if hasattr(c, "columns"):
+                c = c.iloc[:, 0]
+            if len(c) >= 60:
+                return {d.strftime("%Y-%m-%d"): float(v) for d, v in c.items() if float(v) > 0}
+            return {}
+        except Exception as e:
+            print("✗", tick, e)
+    return None
+
+
+def pool_one(Pi, s, name):
+    raw = dl_any(s)
+    if raw is None:
+        print("✗ 못 받음(다음에 다시)", s); return False
+    if not raw:
+        Pi["bad"][s] = "야후에 일봉이 없거나 60거래일보다 짧음"; Pi["assets"].pop(s, None); print("✗ 자료 없음", s); return True
+    raw = despike(raw, 0.45, s)   # 하루만 45% 넘게 튀었다 돌아온 값(자료 오류) 버림
+    cur = cur_of(s); U = to_usd(raw, cur)
+    if not U:
+        print("✗ 환율 없음", s, cur); return False
+    Pi["assets"][s] = write_pool(s, U, name); Pi["bad"].pop(s, None); print("✓ pool", s, name, cur, len(U))
+    return True
+
+
+def ntfy_reqs(Pi):
+    """앱에서 보낸 요청: 본문 「코드|이름」 (최근 24시간 · 처리한 id 는 seen 에)"""
+    import urllib.request
+    try:
+        r = urllib.request.urlopen(urllib.request.Request("https://ntfy.sh/%s/json?poll=1&since=24h" % REQ_TOPIC, headers={"User-Agent": "ch-investing-pdz"}), timeout=30)
+        lines = r.read().decode("utf-8", "ignore").splitlines()
+    except Exception as x:
+        print("ntfy 못 읽음", x); return []
+    seen, out = set(Pi.get("seen") or []), []
+    for ln in lines:
+        try:
+            m = json.loads(ln)
+        except Exception:
+            continue
+        if m.get("event") != "message" or m.get("id") in seen:
+            continue
+        msg = str(m.get("message") or "").strip(); sym, _, nm = msg.partition("|")
+        sym = sym.strip().upper(); nm = nm.strip()[:40] or sym
+        out.append((m.get("id"), sym, nm))
+    return out
+
+
+def req_todo(Pi):
+    reqs = ntfy_reqs(Pi); todo = []
+    for mid, s, nm in reqs:
+        Pi["seen"].append(mid)
+        if not ok_sym(s):
+            print("✗ 이상한 코드", s); continue
+        a = Pi["assets"].get(s)
+        if (a and not stale(Pi, s, 1)) or any(t[0] == s for t in todo):
+            continue
+        todo.append((s, nm))
+    return reqs, todo
+
+
+def pool(full):
+    os.makedirs(PD, exist_ok=True)
+    Pi = read_pool()
+    reqs, todo = req_todo(Pi); ch = bool(reqs)
+    for s, nm in todo[:25]:
+        ch = pool_one(Pi, s, nm) or ch
+    if full:
+        names = dict(SEED)
+        for s, a in list(Pi["assets"].items()):
+            names.setdefault(s, a.get("name") or s)
+        n = 0
+        for s, nm in names.items():
+            if not stale(Pi, s, DAYS) or s in Pi["bad"] and s not in dict(SEED):
+                continue
+            ch = pool_one(Pi, s, nm) or ch; n += 1
+            if n >= 120:
+                break
+    if ch:
+        save_pool(Pi)
+    return ch
+
+
 def main():
     os.makedirs(D, exist_ok=True)
     idx = read_idx(); idx.setdefault("assets", {}); ch = False
@@ -352,6 +552,10 @@ def main():
         last = max(P); old = (idx["assets"].get("KOSPI") or {})
         if old.get("to") != last or old.get("n") != len(P) or old.get("last") != round(P[last], 2) or "--force" in sys.argv:
             idx["assets"]["KOSPI"] = write("KOSPI", P, 7); idx["assets"]["KOSPI"]["last"] = round(P[last], 2); ch = True; print("✓ KOSPI", len(P), last)
+    try:
+        pool(True)
+    except Exception as x:
+        print("종목 pool 못 함", x)
     if ch:
         idx["updated"] = now()
         json.dump(idx, open(os.path.join(D, "index.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
@@ -364,5 +568,11 @@ def main():
 if __name__ == "__main__":
     if "--check" in sys.argv:
         check()
+    elif "--req-check" in sys.argv:   # 워크플로 첫 단계: 새 요청이 있나만 (야후·pip 없이)
+        r, t = req_todo(read_pool()); print("새 요청", len(r), "받을 것", [x[0] for x in t])
+        if os.environ.get("GITHUB_OUTPUT"):
+            open(os.environ["GITHUB_OUTPUT"], "a").write("has=%d\n" % (1 if r else 0))
+    elif "--req" in sys.argv:
+        pool(False)
     else:
         main()

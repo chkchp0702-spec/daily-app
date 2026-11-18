@@ -1,0 +1,32 @@
+name: pdz_req
+# ➕ 11/18 포트 설계기 「종목·ETF 섞어 보기」 — 앱에서 고른 새 종목 요청(ntfy)을 15분마다 받아 일봉(달러 값)을 pool/ 에 올림
+#   새 요청이 없으면 첫 단계에서 끝(야후·pip 안 부름)
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: products
+  cancel-in-progress: false
+jobs:
+  req:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - id: chk
+        run: python port_px.py --req-check
+      - if: steps.chk.outputs.has == '1'
+        run: pip install -q yfinance pandas
+      - if: steps.chk.outputs.has == '1'
+        run: python port_px.py --req
+      - if: steps.chk.outputs.has == '1'
+        name: 저장
+        run: |
+          git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
+          bash scripts/push.sh "➕ 설계기 종목 $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/port_px/pool
