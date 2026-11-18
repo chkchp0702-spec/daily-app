@@ -33,7 +33,7 @@ def main():
     qdir = os.path.join(a.dest, "q")
     os.makedirs(qdir, exist_ok=True)
     for f in os.listdir(qdir):
-        if f.endswith(".json"):
+        if f.endswith(".json") and not f.startswith("_"):
             try:
                 qsh[f[:-5]] = json.load(open(os.path.join(qdir, f)))
             except Exception:
@@ -44,6 +44,40 @@ def main():
     for f in os.listdir(pdir):
         if f.endswith(".json"):
             shards[f[:-5]] = json.load(open(os.path.join(pdir, f)))
+    # 🧭 11/18 사용자 「섹터 자료 지연 당장 해결」 — 야후가 한국 밤~새벽(미국 장 시간, 17~22시 UTC)에는 아시아 종목의 「마지막 마감 봉」을 빼고 주는 날이 있음.
+    #   11/17 16:20 작업은 한국 11/17 마감까지 받았는데, 그 뒤 새벽 작업 둘(02:23·06:06)이 11/16 까지만 받아 덮어써서 아침 내내 한국·일본·중국·홍콩 섹터가 하루 전 것이었음.
+    #   → 지난 실행이 저장해 둔 일봉(q/)에 「이번에 받은 것보다 뒤 날짜」가 있고, 그 날짜가 「마감 뒤에 받은 것」으로 확인된 날(q/_fin.json)이면 그 봉을 이어 붙여 뒤로 가지 않게 한다.
+    #   (장중에 받은 봉은 _fin 에 안 올라가므로 이어 붙이지 않음 — 반쪽 숫자가 마감 값처럼 남지 않게)
+    finp = os.path.join(qdir, "_fin.json")
+    try:
+        FIN = json.load(open(finp))
+    except Exception:
+        FIN = {}
+    def mk_of(s):
+        if s in mkt_of:
+            return mkt_of[s]
+        u = s.upper()
+        return "KR" if u.endswith((".KS", ".KQ")) else "JP" if u.endswith(".T") else "CN" if u.endswith((".SS", ".SZ")) else "HK" if u.endswith(".HK") else "US"
+    def carry(s, c):
+        old = qsh.get(shard(s), {}).get(s)
+        fin = FIN.get(mk_of(s))
+        if not old or not fin or len(old) < 3:
+            return c
+        try:
+            d0 = pd.Timestamp(old[0]); last = c.index[-1]
+            tz = getattr(last, "tz", None)
+            add = {}
+            for off, v in zip(old[1], old[2]):
+                d = d0 + pd.Timedelta(days=int(off))
+                if d.strftime("%Y-%m-%d") > last.strftime("%Y-%m-%d") and d.strftime("%Y-%m-%d") <= fin:
+                    add[d.tz_localize(tz) if tz is not None else d] = float(v)
+            if not add:
+                return c
+            return pd.concat([c, pd.Series(add, dtype=c.dtype)]).sort_index()
+        except Exception:
+            return c
+    carried = defaultdict(int)
+    lastday = defaultdict(lambda: defaultdict(int))   # 시장 → 마지막 봉 날짜 → 종목 수 (이번에 받은 그대로)
     got = 0
     t0 = time.time()
     for i in range(0, len(syms), a.batch):
@@ -65,6 +99,10 @@ def main():
                 continue
             if len(c) < 2:
                 continue
+            lastday[mk_of(s)][c.index[-1].strftime("%Y-%m-%d")] += 1
+            n0 = len(c); c = carry(s, c)
+            if len(c) > n0:
+                carried[mk_of(s)] += 1
             w = c.resample("W-FRI").last().dropna()
             if s in mkt_of:
                 daily[s] = c.iloc[-260:]          # 나침반 섹터 히트맵(1주~12개월)까지 쓰려고 1년치
@@ -97,7 +135,20 @@ def main():
     for k, v in shards.items():
         json.dump(v, open(os.path.join(pdir, k + ".json"), "w"), separators=(",", ":"))
     for k, v in qsh.items():
+        if k == "_fin":
+            continue
         json.dump(v, open(os.path.join(qdir, k + ".json"), "w"), separators=(",", ":"))
+    # 이번에 받은 마지막 봉이 「마감 뒤」인 시장만 그 날짜를 확정으로 적어 둠(다음 실행의 이어 붙이기 기준)
+    try:
+        from compass import _live
+        for m, cnt in lastday.items():
+            d = max(cnt, key=lambda k: cnt[k])            # 그 시장 종목 대부분의 마지막 날짜
+            if not _live(m, pd.Timestamp(d)) and d > FIN.get(m, ""):
+                FIN[m] = d
+        json.dump(FIN, open(finp, "w"))
+        print("마감 확정일", FIN, "· 이어 붙인 종목", dict(carried), flush=True)
+    except Exception as e:
+        print("마감 확정일 기록 실패", e, flush=True)
     # 원화 환율 (1단위 = 몇 원)
     fx = {"KRW": 1.0}
     try:
