@@ -7,6 +7,7 @@
    사용: python3 tools/bundle.py [--check]   (--check 는 바뀌어야 하는지만 보고 exit 3)
 """
 import hashlib
+import json
 import os
 import re
 import subprocess
@@ -43,7 +44,7 @@ def main():
         if r.returncode:
             bad.append(f + " (문법 오류) " + (r.stderr.strip().splitlines() or [""])[-1][:160]); continue
         src = open(p, encoding="utf-8").read()
-        parts.append("/* ======== " + f + " ======== */\n" + src.rstrip() + "\n;\n")
+        parts.append("/* ======== " + f + " ======== */\n" + src.rstrip() + "\n;\n__bk(%d);\n" % len(parts))   # 🛡 11/18 파일마다 끝 표식 → 중간 파일이 시작하다 멈추면 early.js 가 다음 파일부터 이어서 실행
     if bad:
         print("합치지 않음 — 고칠 것:\n  " + "\n  ".join(bad)); sys.exit(1)
     # 📦 11/18 냉정 분석 6차 #14 「무게」 — 한 파일(2.6MB · 압축 830KB)이면 .js 하나만 고쳐도 모든 휴대폰이 전부 다시 받음(하루 여러 번 올리는 날은 그때마다).
@@ -58,9 +59,13 @@ def main():
     if cur:
         groups.append(cur)
     outs, tags, total = [], [], 0
+    idx = 0
     for n, g in enumerate(groups, 1):
         name = "app.b%02d.js" % n
-        body = "/* 📦 %s — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 %d/%d (%s … %s). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */\n" % (name, n, len(groups), g[0][0], g[-1][0]) + "".join(x[1] for x in g)
+        guard = 'if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}\n'   # early.js 가 옛 저장본이어도 안 깨지게
+        body = ("/* 📦 %s — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 %d/%d (%s … %s). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */\n" % (name, n, len(groups), g[0][0], g[-1][0])
+                + guard + "__bs(%d,%d,%s);\n" % (n, idx, json.dumps([x[0] for x in g])) + "".join(x[1] for x in g) + "__be(%d);\n" % n)
+        idx += len(g)
         h = hashlib.sha1(body.encode("utf-8")).hexdigest()[:10]
         outs.append((name, body)); tags.append('<script defer src="%s?v=%s"></script>' % (name, h)); total += len(body.encode("utf-8"))
     new_block = ("\n<!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합쳐 약 320KB 씩 나눈 조각들. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->\n"

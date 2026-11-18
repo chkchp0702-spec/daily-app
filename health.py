@@ -380,6 +380,25 @@ def easy_check():
     return probs
 
 
+def field_errors():
+    """🛡 11/18 실제 휴대폰에서 난 오류(early.js → usage.py → archive/x/errors.json) — 오늘·어제, 인터넷 끊김(net)은 빼고 기기 2대 이상이거나 5번 이상인 것"""
+    try:
+        E = json.loads(web(DA + "archive/x/errors.json") or "{}")
+    except Exception:
+        return []
+    days = [NOW.strftime("%Y-%m-%d"), (NOW - dt.timedelta(days=1)).strftime("%Y-%m-%d")]
+    rows = []
+    for d in days:
+        for k, R in ((E.get("days") or {}).get(d) or {}).items():
+            kind = k.split("|")[0]
+            if kind == "net":
+                continue
+            if len(R.get("dev") or []) >= 2 or (R.get("n") or 0) >= 5 or kind in ("load", "render", "boot"):
+                rows.append((R.get("n") or 0, k, R))
+    rows.sort(key=lambda x: -x[0])
+    return [f"📱 실사용 오류({len(r[2].get('dev') or [])}대·{r[0]}번 · 화면 {','.join(list((r[2].get('t') or {}).keys())[:3])}): {r[1][:120]}" for r in rows[:6]]
+
+
 def main():
     data, p1 = data_checks()
     try:
@@ -391,7 +410,7 @@ def main():
     except Exception as e:
         p2 = p2 + [f"🔰 쉬운 화면 검사 실패: {str(e)[:60]}"]
     jobs, p3 = job_checks() if not LOCAL else ([], [])
-    probs = p1 + p2 + p3
+    probs = p1 + p2 + p3 + field_errors()
     fixed = week_fixed()
     out = {"at": NOW.strftime("%Y-%m-%d %H:%M"), "ok": not probs, "problems": probs, "data": data, "app": app, "jobs": jobs, "week_fixed": fixed,
            "note": "매일 16:00 깊은 검진(모든 탭 · 내용·숫자·버튼·단추·사진). 「자가 업그레이드」(16:47)가 problems 를 모두 고치고, health-shots 브랜치의 탭 사진(<탭>_1·_2.jpg)을 눈으로 봐서 검사가 못 잡은 것도 찾아 고친 뒤 tools/deep_check.py 에 검사를 더한다. 인터넷이 막힌 곳에선 HEALTH_LOCAL=1 로 같은 검진."}

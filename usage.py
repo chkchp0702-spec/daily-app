@@ -51,6 +51,7 @@ def main():
     if "days" in J:   # 처음 한 번: 예전 평문을 통째로 잠가 첫 몫으로
         parts.append(dict(seal({"days": J["days"]}), days=sorted(J["days"]), at=J.get("at")))
     seen = set(J.get("seen") or [])
+    ERR = []
     U = {"days": {}}
     days = U["days"]
     try:
@@ -71,6 +72,9 @@ def main():
             b = json.loads(m.get("message") or "{}")
             d, day = str(b.get("d") or "")[:12], str(b.get("day") or "")[:10]
             if not d or len(day) != 10:
+                continue
+            if b.get("k") == "err":   # 🛡 11/18 실제 휴대폰 오류 (early.js chErr) → archive/x/errors.json (공개 · 기기 번호 없음 · 앱에서 이미 따옴표 속 글자·숫자 지움)
+                ERR.append((day, b)); seen.add(mid); n += 1
                 continue
             D = days.setdefault(day, {"dev": {}, "tabs": {}, "opens": 0, "ver": {}})
             if b.get("k") == "tap":   # 🎯 11/04 누른 것·본 화면 (사용자 「어디를 제일 많이 봤니」)
@@ -151,7 +155,46 @@ def main():
     PU["at"] = at
     PU["note"] = "화면별·누른 것별 횟수만 (기기 번호·이름 없음) · tabs = 처음 연 화면 · views = 본 화면 · taps = 누른 것 · tapdev = 그걸 누른 사람 수(대략) · 11/10부터 · weeks = 주별 재방문(dev 온 기기 · d2 2일 이상 · d3 3일 이상 · 번호는 주마다 바뀜) · 11/18부터"
     json.dump(PU, open(PP, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    print("새 신호", n, "· 몫", len(parts))
+    errors(ERR, at)
+    print("새 신호", n, "· 몫", len(parts), "· 오류 묶음", len(ERR))
+
+
+def errors(ERR, at):
+    """🛡 11/18 휴대폰 오류 모음 — days[날짜][종류|글|파일] = {n 횟수, dev 기기 수(대략), v 버전들, t 화면들, last}. 14일 보관.
+       🩺 health.py 가 오늘·어제 것을 「실사용 오류」로 셈 → 자가 업그레이드가 고침."""
+    import hashlib
+    EP = os.path.join("archive", "x", "errors.json")
+    try:
+        E = json.load(open(EP, encoding="utf-8"))
+    except Exception:
+        E = {"days": {}}
+    for day, b in ERR:
+        Dd = E["days"].setdefault(day, {})
+        h = hashlib.sha1((day + str(b.get("d") or "")).encode()).hexdigest()[:6]
+        for e in (b.get("e") or [])[:12]:
+            if not isinstance(e, dict):
+                continue
+            k = clean(str(e.get("k") or "js"))[:8] + "|" + clean(str(e.get("m") or ""))[:150] + "|" + clean(str(e.get("s") or ""))[:60]
+            R = Dd.setdefault(k, {"n": 0, "dev": [], "v": {}, "t": {}, "last": ""})
+            R["n"] += max(1, min(int(e.get("n") or 1), 500))
+            if h not in R["dev"]:
+                R["dev"].append(h)
+            v = clean(str(b.get("v") or ""))[:12]
+            if v:
+                R["v"][v] = R["v"].get(v, 0) + 1
+            t = clean(str(e.get("t") or ""))[:12]
+            if t:
+                R["t"][t] = R["t"].get(t, 0) + 1
+            R["last"] = at
+        if len(Dd) > 200:
+            for k in sorted(Dd, key=lambda x: Dd[x]["n"])[:len(Dd) - 200]:
+                Dd.pop(k, None)
+    cut = (dt.datetime.now(KST) - dt.timedelta(days=14)).strftime("%Y-%m-%d")
+    E["days"] = {k: v for k, v in E["days"].items() if k >= cut}
+    E["at"] = at
+    E["note"] = "휴대폰에서 난 자바스크립트 오류(early.js) · 키 = 종류|글|파일 · 종류 js 오류 · promise 처리 안 된 실패 · net 인터넷 · load 묶음 파일 시작 오류(스스로 이어 실행함) · render 화면 그리기 · stuck 30초 넘게 불러오는 중 · boot 목록 못 받음 · dev = 기기 수(날마다 바뀌는 짧은 해시) · 11/18부터"
+    os.makedirs(os.path.dirname(EP), exist_ok=True)
+    json.dump(E, open(EP, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 
 
 if __name__ == "__main__":

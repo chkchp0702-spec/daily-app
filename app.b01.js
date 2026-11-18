@@ -1,4 +1,6 @@
 /* 📦 app.b01.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 1/8 (views.js … mine.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
+if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
+__bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flow.js", "divc.js", "verdict.js", "mine.js"]);
 /* ======== views.js ======== */
 /* CH Investing — 탭별 화면 (그림·차트 우선, PDF는 아래 접어두기) */
 (function(){
@@ -562,6 +564,7 @@
   };
 })();
 ;
+__bk(0);
 /* ======== ixchart.js ======== */
 /* CH Investing — 나침반 「📈 대표 지수」 고퀄 차트 (10/7)
    나라별 대표 지수: 미국 다우·S&P500·나스닥 / 일본 닛케이 / 한국 코스피·코스닥 / 홍콩 HSCEI / 중국 상해·심천·과창판
@@ -877,6 +880,7 @@
   document.head.appendChild(css);
 })();
 ;
+__bk(1);
 /* ======== compass.js ======== */
 /* CH Investing — 🧭 나침반: 5개 시장 등락·지수 흐름·국면·강한 섹터 */
 (function(){
@@ -1293,6 +1297,7 @@
   };
 })();
 ;
+__bk(2);
 /* ======== problive.js ======== */
 /* ⚡ 10/19 장중 확률 다시 계산 — 사용자 「지금 거래서 플러스 전환했다…. 대단하다 진짜….」
    🎲 prob.json 은 매시간이라, 10:18 「코스피 −1.79% → 12% 거의 확실히 내린다」가 10:23 +0.54% 반전 뒤에도 남았음.
@@ -1344,6 +1349,7 @@
   };
 })();
 ;
+__bk(3);
 /* ======== prob.js ======== */
 /* CH Investing — 🎲 시장확률: 내일·일주일 뒤 오를 확률 (5개 시장, 10가지 방법 결합) · archive/x/prob.json (prob.yml 매시간)
    10/14 사용자 「다 합쳐서 확률로 만들어서 나침반 옆에 '시장확률' — 누르면 설명 나오고, 어떤 방법들인지 나오고 접고 · 다섯 개 시장 다」 */
@@ -1691,6 +1697,7 @@
     document.head.appendChild(st); })();
 })();
 ;
+__bk(4);
 /* ======== flow.js ======== */
 /* CH Investing — 🧲 수급: 국내 주식 누가 사고 있나 (외국인·기관 집중 매수) · archive/x/flow_kr.json (flow_kr.yml 하루 3번)
    11/10 사용자 「국내 주식 수급 분석, 외국인·기관 집중 매수 종목들 파악해서 그런 칸을」
@@ -1878,6 +1885,7 @@
     document.head.appendChild(st); })();
 })();
 ;
+__bk(5);
 /* ======== divc.js ======== */
 /* CH Investing — 💰 배당비교 (포트 묶음 · 포트·성적표 옆)
    11/10 사용자 「비슷한 상품의 배당 비교 — 몇 개 비교할지 묻고 → 그만큼 칸 → 종목·ETF 넣고 비교 →
@@ -2495,6 +2503,7 @@
     document.head.appendChild(st); })();
 })();
 ;
+__bk(6);
 /* ======== verdict.js ======== */
 /* CH Investing — 🧭 오늘의 결론 하나로 (11/10 냉정 분석 3차 #1)
    문제: 첫 화면 「현금 100%까지」(코스피 하락장) ↔ 뭐 살까? 「현금 0%」(S&P 기준 배분표) ↔ 계기판 「🟢 S&P 정상」 — 판정 3개가 따로 놀아 PB가 그대로 못 전함.
@@ -2563,6 +2572,7 @@
     document.head.appendChild(st); })();
 })();
 ;
+__bk(7);
 /* ======== mine.js ======== */
 /* CH Investing — 홈 4장 (11/10 냉정 분석 3차 · 사용자 「모든 걸 허락하고 다 실행」)
    #7 ⭐ 내 종목 — 관심종목 등락·수급·뉴스·실적일 한 화면 (네이버증권식 · 「내 것」이 있어야 매일 옴)
@@ -2874,3 +2884,5 @@
     document.head.appendChild(st); })();
 })();
 ;
+__bk(8);
+__be(1);

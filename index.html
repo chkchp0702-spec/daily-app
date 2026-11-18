@@ -430,7 +430,7 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
 <main id="main"><div class="wow-sk tall" aria-hidden="true"></div><div class="wow-sk" aria-hidden="true"></div><div class="wow-sk" aria-hidden="true"></div><div class="loading" style="display:none">불러오는 중…</div></main>
 <footer>※ 참고용 자료입니다. 투자 판단과 책임은 본인에게 있습니다.</footer>
 
-<script src="early.js?v=1"></script>
+<script src="early.js?v=2"></script>
 <script src="livepx.js?v=1"></script>
 <script src="viz.js?v=13"></script>
 <script>
@@ -702,6 +702,21 @@ function getText(u){ return fetch(u).then(function(r){ if (!r.ok) throw 0; retur
 /* 같은 주소 JSON 은 한 번만 받기 (10/11) — 동시에 여러 곳이 부르면 한 요청을 나눠 쓰고, 5분 동안은 받아 둔 글을 다시 씀.
    부르는 곳마다 새 객체를 줌(글에서 다시 읽음) → 한쪽이 고쳐도 다른 쪽에 안 번짐 · 실패는 저장 안 함 */
 var JC = {};
+/* 🛡 11/18 안정도: 자료 받기에 시간 제한 25초 + 한 번 더 — 전엔 휴대폰 신호가 약해 응답이 안 오면 「불러오는 중…」이 끝없이 돌았음(저장본도 없을 때).
+   이제 25초 넘으면 끊고 1.5초 뒤 한 번 더 받아 보고, 그래도 안 되면 각 화면의 「못 불러왔어요」로 감. 404(파일 없음)는 다시 안 받음. */
+function fetchT(u, n){
+  var ac = typeof AbortController === "function" ? new AbortController() : null, tm = null;
+  var p = new Promise(function(ok, no){
+    if (ac) tm = setTimeout(function(){ try { ac.abort(); } catch(e) {} no(new Error("timeout")); }, 25000);
+    fetch(u, ac ? {signal: ac.signal} : undefined).then(ok, no);
+  });
+  return p.then(function(r){ clearTimeout(tm); if (!r.ok){ var e = new Error("http " + r.status); e.st = r.status; throw e; } return r.text(); },
+    function(e){ clearTimeout(tm); throw e; })
+    .catch(function(e){
+      if (n >= 1 || (e && e.st && e.st < 500)) throw e;
+      return new Promise(function(r){ setTimeout(r, 1500); }).then(function(){ return fetchT(u, n + 1); });
+    });
+}
 function getJSON(u, o){
   var ttl = o && o.ttl != null ? o.ttl : 300000, now = Date.now();
   // 🧭 10/19 「그대로잖아」: 나침반(compass.json)은 장중 10분마다 다시 쓰이는데 주소가 같아 휴대폰이 옛 파일(브라우저 캐시 10분 + 메모리 5분)을 보여 줌 → 2분 단위로 주소를 바꿔 늘 새로 받음
@@ -709,7 +724,7 @@ function getJSON(u, o){
   var c = JC[u];
   if (!c || (c.t && now - c.t > ttl)){
     for (var k in JC) if (JC[k].t && now - JC[k].t > 600000) delete JC[k];
-    c = JC[u] = {t: 0, p: fetch(u).then(function(r){ if (!r.ok) throw 0; return r.text(); })};
+    c = JC[u] = {t: 0, p: fetchT(u, 0)};
     c.p.then(function(){ c.t = Date.now(); }, function(){ if (JC[u] === c) delete JC[u]; });
   }
   return c.p.then(function(t){ return JSON.parse(t); });
@@ -1647,7 +1662,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261118f";
+var APPV = "20261118h";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1663,10 +1678,25 @@ document.addEventListener("visibilitychange", function(){ if (!document.hidden) 
 setInterval(function(){ if (!document.hidden) chkVer(); }, 30 * 60e3);
 /* ---------- 시작 ---------- */
 // 목록을 못 받으면(사이트가 막 바뀌는 순간 등) 1.5초·4초 뒤 두 번 더 받아 보고 나서야 「준비 중」 (10/10)
-function getManifest(n){ return getJSON("manifest.json?" + Date.now()).catch(function(e){ if ((n || 0) >= 2) throw e; return new Promise(function(r){ setTimeout(r, n ? 4000 : 1500); }).then(function(){ return getManifest((n || 0) + 1); }); }); }
+function getManifest(n){ return getJSON("manifest.json?" + Date.now()).then(function(m){ if (!m || !m.cats) throw new Error("manifest"); try { localStorage.setItem("mf_last", JSON.stringify(m)); } catch(e) {} return m; }).catch(function(e){ if ((n || 0) >= 2) throw e; return new Promise(function(r){ setTimeout(r, n ? 4000 : 1500); }).then(function(){ return getManifest((n || 0) + 1); }); }); }
+/* 🛡 11/18 안정도: 목록(manifest.json)을 세 번 다 못 받으면 전엔 앱 전체가 「자료 준비 중 · 새로고침」에서 멈췄음(세무계산기·사주처럼 자료가 필요 없는 화면까지).
+   → 마지막으로 받은 목록(이 휴대폰 저장)으로 열고, 그것도 없으면 빈 목록으로라도 열어 쓸 수 있는 화면은 쓰게. 인터넷이 돌아오면 저절로 새 목록. */
+function bootManifest(){
+  return getManifest(0).catch(function(e){
+    var m = null; try { m = JSON.parse(localStorage.getItem("mf_last") || "null"); } catch(x) {}
+    if (window.chErr) chErr("boot", "목록 못 받음 · " + ((e && e.message) || e), "manifest.json", m ? " · 저장본" : " · 빈 목록");
+    if (!m || !m.cats) m = {cats: {}, updated: ""};
+    m.__stale = 1;
+    setTimeout(function(){ var b = document.createElement("div"); b.id = "bootbar"; b.style.cssText = "position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:9999;background:#7a4b00;color:#fff;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.4;box-shadow:0 4px 14px rgba(0,0,0,.3)";
+      b.innerHTML = "⚠ 인터넷이 약해 자료 목록을 못 받았어요 · 저장된 것으로 보여 드려요 <button style=\"margin-left:6px;border:0;border-radius:8px;padding:4px 10px;font-weight:700\">다시 받기</button>";
+      b.querySelector("button").onclick = function(){ location.reload(); }; document.body.appendChild(b);
+      window.addEventListener("online", function(){ setTimeout(function(){ location.reload(); }, 1200); }, {once: true}); }, 0);
+    return m;
+  });
+}
 // 아래 views·plus*.js 가 RENDER 를 다 덧입힌 뒤에 첫 화면을 그림 (목록이 먼저 와도 기다림 · 10/11)
 var DOMREADY = new Promise(function(r){ if (document.readyState !== "loading") r(); else document.addEventListener("DOMContentLoaded", function(){ r(); }); });
-Promise.all([getManifest(0), DOMREADY]).then(function(a){
+Promise.all([bootManifest(), DOMREADY]).then(function(a){
   var m = a[0];
   M = m;
   // 평일 장중엔 오늘 단타 칸을 미리 만들어 둠 (내용은 단타 프로그램 원본에서 바로 읽음)
@@ -1678,10 +1708,16 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
     setTimeout(stampDay, 60000); })();
   var hk = (location.hash || "").slice(1).split("~")[0];   // #port~pokick → 포트 탭의 킥 카드 (알림에서 바로)
   var first = CATS.some(function(c){ return c.key === hk; }) ? hk : "home";      // 10/10: 앱을 열면 🏠 오늘부터
-  NAV.silent = true; go(first); NAV.silent = false;
+  NAV.silent = true;
+  try { go(first); }
+  catch(e){   // 🛡 11/18: 첫 화면 그리기 오류를 전엔 「자료 준비 중」으로 덮어 앱이 멈춘 것처럼 보였음 → 알리고 홈으로 한 번 더
+    if (window.chErr) chErr("render", (e && e.message) || e, (e && e.stack && (/([^\/\s(]+\.js)/.exec(e.stack) || [])[1]) || "", " · 첫 화면 " + first);
+    try { if (first !== "home") go("home"); else throw e; } catch(e2){ $("main").innerHTML = '<div class="empty"><div class="big">🔧</div>화면을 그리다 멈췄어요.<br><button class="btn" onclick="location.reload()">다시 열기</button></div>'; }
+  }
+  NAV.silent = false;
   try { history.replaceState({t: "go", key: first, d: 0}, ""); } catch(e) {}
   updBack();
-}).catch(function(){ $("main").innerHTML = '<div class="empty"><div class="big">⏳</div>자료 준비 중이에요.<br>잠시 뒤 새로고침 해주세요.</div>'; });
+}).catch(function(e){ if (window.chErr) chErr("boot", (e && e.message) || e, ""); $("main").innerHTML = '<div class="empty"><div class="big">⏳</div>자료 준비 중이에요.<br><button class="btn" onclick="location.reload()">다시 열기</button></div>'; });
 
 /* ---------- 사용 알림 (ntfy) ---------- */
 (function(){
@@ -1699,14 +1735,14 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합쳐 약 320KB 씩 나눈 조각들. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.b01.js?v=66e381a778"></script>
-<script defer src="app.b02.js?v=90f137d876"></script>
-<script defer src="app.b03.js?v=ba311720b8"></script>
-<script defer src="app.b04.js?v=7ab6fc3c7d"></script>
-<script defer src="app.b05.js?v=e95e8cbf9c"></script>
-<script defer src="app.b06.js?v=98fbc9b8ec"></script>
-<script defer src="app.b07.js?v=5c0be3cd59"></script>
-<script defer src="app.b08.js?v=6e15982bb9"></script>
+<script defer src="app.b01.js?v=d8e8750b3d"></script>
+<script defer src="app.b02.js?v=7e5e9c3006"></script>
+<script defer src="app.b03.js?v=855aea37ec"></script>
+<script defer src="app.b04.js?v=712ce008fe"></script>
+<script defer src="app.b05.js?v=77165feb6f"></script>
+<script defer src="app.b06.js?v=a4119ef778"></script>
+<script defer src="app.b07.js?v=bc3074f625"></script>
+<script defer src="app.b08.js?v=9fdd0ba8ff"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1796,6 +1832,7 @@ Promise.all([getManifest(0), DOMREADY]).then(function(a){
 <script defer src="ux1116.js?v=1"></script>   <!· 🧊 11/16 냉정 분석 5차 — 🩻 포트 진단 한 장 · 💬 고객 질문 답 그림 한 장 · 🎯 신호 한눈에(큰손·컵·갭·확률 합침) ·>
 <script defer src="tax.js?v=7"></script>   <!· 🧾 11/16 세무계산기 (연구실 › 세무계산기 · 금융소득·건보료 통합 경보기 + 연금·퇴직·해외주식·ISA · 세법 숫자는 tax.js LAW 한 곳) ·>
 <script defer src="ux1118.js?v=2"></script>   <!· 🧊 11/18 냉정 분석 6차 — 🆕 새로 생긴 것 · 📌 내 바로가기 · 🗺 섹터 지도 미리보기 · 제안서 완성본 먼저·지난번 그대로 · 🧾 절세 한 장 · 💼 성적 접기 ·>
+<script defer src="stab.js?v=1"></script>   <!· 🛡 11/18 안정도 — 화면 그리기 보호 · 끝없는 「불러오는 중」 막기 (맨 끝에 둘 것) ·>
 📦list-->
 <!-- 📦/JS -->
 <button id="backbtn" onclick="goBack()" aria-label="뒤로">←<span>뒤로</span></button>

@@ -1,4 +1,6 @@
 /* 📦 app.b02.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 2/8 (products.js … onepage.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
+if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
+__bs(2,9,["products.js", "els_design.js", "extras.js", "burst.js", "usage.js", "plus.js", "cpin.js", "onepage.js"]);
 /* ======== products.js ======== */
 /* CH Investing — 🛍️ 상품: 미래에셋증권이 지금 파는 채권 · 펀드 · ELS (archive/x/products.json, products.yml 하루 3번 · 🇧🇷 브라질 실시간 금리·달러채 archive/x/brl_live.json 평일 20분마다)
    10/16 사용자: 「상품 카테고리 — 국채·미국채·브라질국채 / 펀드·사모펀드(수익률 순위) / ELS — 하위 3개 · 기존 카테고리 형식과 비슷하게」
@@ -986,6 +988,7 @@
   document.head.appendChild(css);
 })();
 ;
+__bk(9);
 /* ======== els_design.js ======== */
 /* 🎛 ELS 내 맘대로 설계기 — 10/20 A10/20-1 (사용자 「1,2 둘 다 실행」)
    🛍 상품 → 🎯 ELS → 「🎛 설계」: 기초자산(최대 3개)·첫/마지막 상환 조건·낙인(KI)·만기를 손가락으로 바꾸면
@@ -1214,6 +1217,7 @@
   document.head.appendChild(css);
 })();
 ;
+__bk(10);
 /* ======== extras.js ======== */
 /* CH Investing — 업그레이드 묶음: 신호 성적표·차트 그림·고래 합의·매집 수급·단타 대시보드·시황 할 일/검색 */
 (function(){
@@ -1578,6 +1582,7 @@
   }
 })();
 ;
+__bk(11);
 /* ======== burst.js ======== */
 /* ⚠️ 거래폭발 = 「따라 사지 마세요」 경고 (10/28 사용자 「넣어」)
    1분 자료 15거래일 검증: 거래가 갑자기 터진 종목(1분 거래대금이 그날 평균의 5배 + 2분 새 +1% 넘게 · VWAP 위)은
@@ -1639,6 +1644,7 @@
   soon();
 })();
 ;
+__bk(12);
 /* ======== usage.js ======== */
 /* 📈 사용 현황 (10/28 사용자 「동료 PB」가 자주 쓰게 — 1단계: 먼저 잰다)
    앱을 열 때 익명 신호 하나: 기기 번호(이름 없음·난수) · 날짜 · 처음 연 탭 · 앱 버전. 하루에 한 기기 1번 + 30분 넘게 닫았다 다시 열면 1번.
@@ -1763,6 +1769,7 @@
   document.head.appendChild(st);
 })();
 ;
+__bk(13);
 /* ======== plus.js ======== */
 /* CH Investing — 2차 업그레이드: ⭐ 관심종목·메모 + 9개 탭 기능 45개 */
 (function(){
@@ -1964,6 +1971,7 @@
                wrap: wrap, each: each, starBtn: starBtn, WL: function(){ return WL; }, todaySignals: todaySignals, whaleHolders: whaleHolders, toast: toast, sync: sync, memoForm: memoForm};
 })();
 ;
+__bk(14);
 /* ======== cpin.js ======== */
 /* 📌 내 고객 상품 (10/28 사용자 「동료 PB」 ③) — 동료 PB 가 자기 고객이 든 채권·펀드를 담아 두면
    🏠 오늘 맨 위에 「오늘 내 고객 상품 중 챙길 것」: 만기 D-n · 이자일 · 펀드 큰 등락 · ELS 다음 평가(ELS 는 📌 관제탑 것을 같이 씀).
@@ -2065,6 +2073,7 @@
   soon();
 })();
 ;
+__bk(15);
 /* ======== onepage.js ======== */
 /* 📨 고객에게 보내기 — 한 장 (10/28 사용자 「동료 PB」 ② · 09:57 「CH Investing 지우고 · 내용 조합·압축 · 그림 · 심플」)
    🏠·🌐 → 지금(오늘) 시장 한 장 · 💼 → 오늘의 자산배분 한 장 · 🏦·🎯·📦 → 펼친 상품 한 장.
@@ -3621,3 +3630,5 @@
   soon();
 })();
 ;
+__bk(16);
+__be(2);
