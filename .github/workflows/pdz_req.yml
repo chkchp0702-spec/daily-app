@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
+    inputs:
+      sym:
+        description: "직접 요청 (예: QQQM|QQQM) — 앱에서 누른 것과 같음"
+        required: false
 permissions:
   contents: write
 concurrency:
@@ -19,6 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - if: github.event.inputs.sym != ''
+        run: curl -s -d "${{ github.event.inputs.sym }}" https://ntfy.sh/chkchp-ch-pdzreq-k4r8 >/dev/null; sleep 3
       - id: chk
         run: python port_px.py --req-check
       - if: steps.chk.outputs.has == '1'
