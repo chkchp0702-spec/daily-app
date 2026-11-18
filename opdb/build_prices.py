@@ -79,6 +79,7 @@ def main():
     carried = defaultdict(int)
     lastday = defaultdict(lambda: defaultdict(int))   # 시장 → 마지막 봉 날짜 → 종목 수 (이번에 받은 그대로)
     got = 0
+    filled = 0
     t0 = time.time()
     for i in range(0, len(syms), a.batch):
         part = syms[i:i + a.batch]
@@ -92,6 +93,11 @@ def main():
                 time.sleep(20)
         else:
             continue
+        try:   # 🧭 11/18 야후가 마감 뒤 몇 시간 동안 마지막 일봉의 종가만 비워 줌 → 1시간 봉 마지막 값으로 채움 (compass.fill_last_close)
+            from compass import fill_last_close
+            filled += fill_last_close(df, part)
+        except Exception as e:
+            print("빈 종가 채우기 실패", str(e)[:120], flush=True)
         for s in part:
             try:
                 c = (df[s]["Close"] if isinstance(df.columns, pd.MultiIndex) else df["Close"]).dropna()
@@ -146,7 +152,7 @@ def main():
             if not _live(m, pd.Timestamp(d)) and d > FIN.get(m, ""):
                 FIN[m] = d
         json.dump(FIN, open(finp, "w"))
-        print("마감 확정일", FIN, "· 이어 붙인 종목", dict(carried), flush=True)
+        print("마감 확정일", FIN, "· 이어 붙인 종목", dict(carried), "· 빈 종가 채운 종목", filled, flush=True)
     except Exception as e:
         print("마감 확정일 기록 실패", e, flush=True)
     # 원화 환율 (1단위 = 몇 원)

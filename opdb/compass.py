@@ -213,6 +213,55 @@ def _live(mkt, d):
         return False
 
 
+def fill_last_close(df, syms):
+    """🧭 11/18 섹터 자료 지연의 진짜 원인 — 야후는 장이 끝난 뒤 몇 시간 동안 마지막 일봉을 「시가·고가·저가·거래량은 있고 종가만 빈 칸」으로 준다
+       (11/18 10:25 시험: AAPL 11/17 봉 종가 null · 그 시각 1시간 봉 마지막 값 351.90 · 현재가 351.91).
+       종가만 보고 빈 칸을 버리면(dropna) 그 시장 전체가 하루 전 마감으로 돌아감 → 그 봉의 종가를 같은 날 1시간 봉의 마지막 값으로 채운다.
+       df: yf.download(group_by="ticker") 결과(그 자리에서 고침) · 돌려주는 값 = 채운 종목 수"""
+    import pandas as pd
+    import yfinance as yf
+    if df is None:
+        return 0
+    multi = isinstance(df.columns, pd.MultiIndex)
+    need = {}
+    for s in syms:
+        try:
+            g = df[s] if multi else df
+            o = g["Open"].dropna()
+            if len(o) and pd.isna(g["Close"].loc[o.index[-1]]):
+                need[s] = o.index[-1]
+        except Exception:
+            pass
+    if not need:
+        return 0
+    try:
+        h = yf.download(list(need), period="5d", interval="1h", group_by="ticker", auto_adjust=False, threads=True, progress=False, ignore_tz=True)
+    except Exception as e:
+        print("빈 종가 채우기 실패", str(e)[:120], flush=True)
+        return 0
+    hm = isinstance(h.columns, pd.MultiIndex)
+    n = 0
+    for s, ts in need.items():
+        try:
+            hc = (h[s] if hm else h)["Close"].dropna()
+            hv = hc[hc.index.normalize() == pd.Timestamp(ts).normalize()]
+            if not len(hv):
+                continue
+            v = float(hv.iloc[-1])
+            if multi:
+                df.loc[ts, (s, "Close")] = v
+                if (s, "Adj Close") in df.columns:
+                    df.loc[ts, (s, "Adj Close")] = v
+            else:
+                df.loc[ts, "Close"] = v
+                if "Adj Close" in df.columns:
+                    df.loc[ts, "Adj Close"] = v
+            n += 1
+        except Exception:
+            pass
+    return n
+
+
 def index_block(mkt):
     import yfinance as yf
     import pandas as pd
@@ -223,6 +272,12 @@ def index_block(mkt):
     except Exception as e:
         print("지수 실패", mkt, e, flush=True)
         df = None
+    try:
+        nf = fill_last_close(df, syms)
+        if nf:
+            print("지수 빈 종가 채움", mkt, nf, flush=True)
+    except Exception as e:
+        print("지수 빈 종가 채우기 실패", mkt, e, flush=True)
     for s, nm in INDEX[mkt]:
         sub = None
         try:
