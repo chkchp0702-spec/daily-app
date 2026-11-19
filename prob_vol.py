@@ -171,6 +171,12 @@ def conf(d, feats, lo=0.4, hi=0.6):
 #   골라진 날 비율·적중 앞 39.5%·68.6 → 40.0%·69.0 · 뒤 35.4%·73.0 → 37.0%·74.4 · 최근3년 36.1%·70.3 → 41.2%·72.3 · 방향 브라이어 0.2302→0.2290 ✅
 #   일본(EWJ)은 고른 날 늘지만 적중 앞 77.3→76.2·최근3년 75.6→73.2 ❌ · 홍콩(EWH) 뒤 고른 날 38.9→38.5 ❌ · 자기 등락 부호(r1) ❌ · 기준 58/42·62/38 은 비율↔적중 맞바꿈일 뿐 ❌
 CONF_ETF = {"KR": "EWY"}
+# 🎯 11/19 16시 「자신 있는 날 넓히기 2」(probe/nkd_bt.py · run 44477318026 · 2008~ 해마다 걸어가기, 같은 표본 n 4613):
+#   일본에 nkg = log(CME 닛케이 선물 NKD=F 종가 / 닛케이 종가) 의 20일 평균 대비 벌어짐(도쿄 마감 뒤 선물이 더 움직인 몫 · 엔 지수 그대로라 EWJ 의 환율 잡음 없음) →
+#   골라진 날 비율·적중 앞 56.0%·74.5 → 69.2%·77.3 · 뒤 54.8%·75.8 → 69.1%·80.3 · 최근3년 51.8%·75.7 → 75.3%·78.9 · 방향 브라이어 0.2124→0.1871 ✅
+#   등락판(nkx = 선물 그날 등락 − 닛케이 그날 등락)은 최근3년 적중 75.7→72.0 ❌ · ES 마감 뒤(esx) 4개 시장 모두 거의 그대로 ❌ · 한국·중국·홍콩에 nkx ❌(브라이어 그대로·최근3년 적중↓)
+CONF_NKG = {"JP": "NKD=F"}
+CONF_LBL = {"EWY": "미국 상장 ETF가 마감 뒤 더 움직인 몫", "NKD=F": "CME 닛케이 선물이 도쿄 마감 뒤 더 움직인 몫"}
 
 # 🌊 11/18 16시 「흔들림 모델 보강」(probe/volx_bt.py · run 44256638039 · 2006~ 해마다 걸어가기, 같은 표본):
 #   hl5 = 자기 지수 5일 평균 고가·저가 폭 log(H/L) — 종가만으론 안 보이는 장중 흔들림.
@@ -285,9 +291,18 @@ def run(H, MK, base_dates=None):
                     if len(e_) and e_.index[-1] >= bd:          # 기준일 밤 ETF 종가가 있어야(아침판)
                         d["etfx"] = (_align(e_.pct_change() * 100, c_.index) - c_.pct_change() * 100).clip(-8, 8)
                         cf_ = cf_ + ["etfx"]; ex_ = CONF_ETF[mk]
+                nks = CONF_NKG.get(mk)
+                nk = H.get(nks or "", pd.DataFrame()).get("Close")
+                if nk is not None and len(nk.dropna()) > 1500:
+                    n_ = nk.dropna(); n_ = n_[n_.index <= bd]
+                    if len(n_) and n_.index[-1] >= bd:          # 기준일 밤(미국 날짜) 선물 종가가 있어야(아침판)
+                        g_ = np.log(_align(n_, c_.index) / c_)
+                        d["nkg"] = ((g_ - g_.rolling(20).mean().shift(1)) * 100).clip(-8, 8)
+                        cf_ = cf_ + ["nkg"]; ex_ = nks
                 R["conf"] = conf(d, cf_)
                 if R["conf"] is not None:
                     R["conf"]["etf"] = ex_
+                    R["conf"]["etl"] = CONF_LBL.get(ex_) if ex_ else None
             except Exception as e:
                 R["conf"] = {"err": str(e)[:160]}
         out[mk] = R
