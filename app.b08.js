@@ -544,9 +544,15 @@ __bk(85);
     try { var it = ((M.cats && M.cats.sector) || [])[0]; if (!it || (it.files || []).indexOf("compass.json") < 0) return;
       getJSON(file("sector", it.id, "compass.json"), {ttl: 300000}).then(function(C){ var m = C && C.markets && C.markets.KR; if (!m || !m.sectors) return;
         var ix = (m.index || [])[0] || {}, b20 = +ix.chg20 || 0, b5 = +ix.chg5 || 0;
-        var ss = m.sectors.filter(function(x){ return x.r20 != null && x.r5 != null; }).map(function(x){ return {n: String(x.name || "").replace(/\(.*$/, "").split("·")[0].trim(), x: x.r20 - b20, y: x.r5 - b5}; });
+        // 🗓 11/19 사용자 「왜 아직도 18일이냐고」 — 지수(chg20·chg5)는 장중 값으로 덧입혀져 있는데 업종은 어제 마감이라 날짜도 18일·비교도 어긋났음
+        //    → 서버가 붙여 둔 오늘 업종 등락(m.live.ss)을 1주·1달 수익에 곱해 오늘 장까지 넣고, 꼬리표는 「오늘 HH:MM 장중」
+        var td = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10), LV = m.live && m.live.date === td && m.live.ss ? m.live : null, TD = {};
+        if (LV) LV.ss.forEach(function(a){ TD[a[0]] = +a[1]; });
+        var gw = function(r, t){ return t == null ? r : ((1 + r / 100) * (1 + t / 100) - 1) * 100; };
+        var ss = m.sectors.filter(function(x){ return x.r20 != null && x.r5 != null; }).map(function(x){ var t = LV ? TD[x.name] : null; return {n: String(x.name || "").replace(/\(.*$/, "").split("·")[0].trim(), x: gw(x.r20, t) - b20, y: gw(x.r5, t) - b5}; });
         if (ss.length < 4) return;
-        SEC = {ss: ss, date: m.date || C.date, ix: ix.name || "코스피"}; }).catch(function(){}); } catch(x) {} }
+        var done = LV && new Date(Date.now() + 9 * 3600e3).toISOString().slice(11, 16) >= "15:40";
+        SEC = {ss: ss, date: m.date || C.date, ix: ix.name || "코스피", lt: LV ? (done ? "오늘 마감" : "오늘 " + (LV.t || "") + " 장중") : ""}; }).catch(function(){}); } catch(x) {} }
   window.__secTile = function(){
     secLoad(); if (!SEC) return "";
     var ss = SEC.ss, W = 108, H = 72, P = 6, lim = function(a){ var v = a.map(Math.abs).sort(function(p, q){ return p - q; }); return Math.max(1, v[Math.floor(v.length * 0.85)] || 1); };
@@ -557,7 +563,7 @@ __bk(85);
       '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + Y(0) + '" y2="' + Y(0) + '" stroke="currentColor" opacity=".25"/><line x1="' + X(0) + '" x2="' + X(0) + '" y1="' + P + '" y2="' + (H - P) + '" stroke="currentColor" opacity=".25"/>' +
       ss.map(function(o){ var hot = o.x > 0 && o.y > 0, cold = o.x < 0 && o.y < 0; return '<circle cx="' + X(o.x).toFixed(1) + '" cy="' + Y(o.y).toFixed(1) + '" r="3" fill="' + (hot ? "#e0524a" : cold ? "#3f7fe0" : "#9aa3b5") + '"/>'; }).join("") + '</svg>';
     var by = ss.slice().sort(function(a, b){ return b.x - a.x; }), up = by.slice(0, 2).map(function(o){ return o.n; }), dn = by.slice(-2).reverse().map(function(o){ return o.n; });
-    return '<button type="button" class="jm-t sec18" data-jm="sector">' + sv + '<span class="sec18-t"><b>오늘 섹터 지도</b><small>🇰🇷 한 달 ' + e(SEC.ix) + '보다 강한 곳 <u class="up">' + e(up.join(" · ")) + '</u></small><small>약한 곳 <u class="dn">' + e(dn.join(" · ")) + '</u></small><em>' + md(SEC.date) + ' 기준 · 5개 시장 보기 ›</em></span></button>'; };
+    return '<button type="button" class="jm-t sec18" data-jm="sector">' + sv + '<span class="sec18-t"><b>오늘 섹터 지도</b><small>🇰🇷 한 달 ' + e(SEC.ix) + '보다 강한 곳 <u class="up">' + e(up.join(" · ")) + '</u></small><small>약한 곳 <u class="dn">' + e(dn.join(" · ")) + '</u></small><em>' + (SEC.lt ? e(SEC.lt) : md(SEC.date) + ' 기준') + ' · 5개 시장 보기 ›</em></span></button>'; };
 
   /* ═════════ 홈에 얹기 (①·②) ═════════ */
   function homePaint(force){
