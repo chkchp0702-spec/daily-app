@@ -3573,6 +3573,46 @@ __bk(15);
     var nmI = document.getElementById("opcnm"); if (nmI) nmI.addEventListener("input", function(){ ls("pbname", nmI.value.trim().slice(0, 30)); });
     box.addEventListener("click", function(ev){ var t = ev.target; if (t === box || t.closest("[data-x]")){ box.remove(); return; } if (t.closest("[data-go]")){ box.remove(); run(); } });
   }
+  /* 🇰🇷 11/19 오늘 국장 한 장 — 첫 화면 「🇰🇷 오늘 국장」 칸의 📨 (사용자 「시황 한 장의 일부라도 고객에게」)
+     live_kr(10분마다) · wl_live(크게 움직인 대형주 뉴스 제목) · flow_kr(수급) · bear(큰 흐름) — 화면 칸과 같은 숫자 · 사라·팔라는 말 없음 */
+  SCREENS.krday = function(){
+    var q5 = "?" + Math.floor(Date.now() / 120000);
+    return Promise.all([gj("archive/x/live_kr.json" + q5), gj("archive/x/wl_live.json" + q5), window.__flowLine ? window.__flowLine().catch(function(){ return ""; }) : "", gj(RAWM + "market/bear.json" + q())]).then(function(r){
+      var K = r[0], WL = r[1], FL = r[2], BR = r[3]; if (!K || !K.index) return null;
+      var IX = {}; K.index.forEach(function(x){ IX[x.name] = x; }); var kp = IX["코스피"], kq = IX["코스닥"]; if (!kp) return null;
+      var td = today(), isT = K.date === td, closed = !isT || String(K.t || "") >= "15:30";
+      var when = isT ? (closed ? md(K.date) + " " + K.t + " 마감" : md(K.date) + " 장중 " + K.t + " 기준") : md(K.date) + " 마감";
+      var up = K.up || 0, dn = K.down || 0, tot = up + dn + (K.flat || 0), mood = moodOf(kp.chg);
+      var big = function(L){ return (L || []).filter(function(x){ return (x.n || 0) >= 8; }); };
+      var lead = function(L){ return (L || []).slice().sort(function(a, b){ return Math.abs(b.r) - Math.abs(a.r); }).slice(0, 3).map(function(x){ return x.n + " " + pct(x.r); }).join(" · "); };
+      var strong = big(K.strong).slice(0, 4).map(function(x){ return {n: x.name, s: lead(x.lead), v: x.r, bar: x.r}; });
+      var weak = big(K.weak).slice(0, 3).map(function(x){ return {n: x.name, s: lead(x.lead), v: x.r, bar: x.r}; });
+      var stars = (K.value || []).slice(0, 5).map(function(x){ return {n: x.n, r: x.r, p: x.p, v: x.v}; });
+      var why = ((WL && WL.why) || []).filter(function(w){ return w.day === K.date; }).sort(function(a, b){ return Math.abs(b.r) - Math.abs(a.r); }).slice(0, 4)
+        .map(function(w){ var nw = (w.news || [])[0]; return {n: w.n, s: nw ? nw.t : "관련 뉴스 없음 — 업종·수급 영향일 수 있어요", v: w.r}; });
+      var SN = isT ? (K.snaps || []) : [], line = SN.length >= 3 ? {a: SN.map(function(x){ return x[3]; }), b: SN.map(function(x){ return x[4]; }), la: "코스피", lb: "코스닥", from: SN[0][0]} : null;
+      var bk = ((BR && BR.markets) || []).filter(function(m){ return m.key === "kospi"; })[0];
+      var bigp = bk && bk.dd != null ? {h: "📏 큰 흐름", t: "코스피는 고점보다 " + pct(bk.dd) + (bk.state === "🐻" ? " — 하락장 구간(종가 기준)이에요. 하루 반등보다 큰 흐름이 돌아서는지가 중요해요." : bk.state === "🟡" ? " — 조정 구간(종가 기준)이에요." : " — 큰 흐름은 정상 구간이에요."), tone: bk.state === "🐻" ? "warn" : "info", max: 3} : null;
+      return {kind: "screen", scene: "city_" + mood, mood: mood, title: "오늘의 한국 증시", sub: when + " · 코스피·코스닥",
+        hero: {l: "🇰🇷 코스피 " + Math.round(kp.last).toLocaleString(), v: pct(kp.chg, 2), c: cOf(kp.chg), s: tot > 100 ? "오른 종목 " + up.toLocaleString() + " · 내린 종목 " + dn.toLocaleString() + " (" + Math.round(up / tot * 100) + "%가 올랐어요)" : ""},
+        stats: [kq ? {l: "코스닥 " + (Math.round(kq.last * 10) / 10).toLocaleString(), v: pct(kq.chg, 2), c: cOf(kq.chg)} : null, K.limit_up != null ? {l: "상한가", v: K.limit_up + "개", c: ""} : null].filter(Boolean),
+        blocks: [["line", line],
+          ["note", FL ? {h: "🧲 누가 샀나", t: FL.replace(/^코스피 /, "코스피 · "), max: 2} : null],
+          ["list", strong.length ? {title: "🔥 오늘 강한 업종 · 대표 종목", items: strong, rank: false} : null],
+          ["list", weak.length ? {title: "🧊 오늘 약한 업종", items: weak, rank: false} : null],
+          ["stars", stars.length >= 3 ? stars : null],
+          ["list", why.length ? {title: "⚡ 크게 움직인 대형주 — 뉴스 제목", items: why, rank: false} : null],
+          ["note", bigp]],
+        note: "한국거래소 시세(10분마다) · 뉴스 제목은 네이버 증권 · 제목이 이유를 다 말해 주진 않아요"};
+    });
+  };
+  function sendKr(){
+    ask("오늘 국장 한 장", function(){
+      toast("한 장 만드는 중…");
+      SCREENS.krday().then(function(C){ if (!C){ toast("오늘 국장 자료를 못 가져왔어요"); return; } var nm = pbname(), sp = share(safeDraw(C, nm), C.title); cliDone(); return sp; })
+        .catch(function(e){ console.warn(e); toast("만들지 못했어요"); });
+    });
+  }
   function go(R, now){
     if (!now){ ask(R ? "이 상품 한 장 보내기" : "한 장 보내기", function(){ go(R, true); }); return; }
     var k = cur(), p = null;
@@ -3626,7 +3666,7 @@ __bk(15);
   function soon(){ if (!T) T = setTimeout(function(){ T = null; try { fab(); } catch(x) {} try { rowBtns(); } catch(x) {} }, 300); }
   try { new MutationObserver(soon).observe(document.body, {childList: true, subtree: true}); } catch(x) {}
   window.addEventListener("hashchange", soon);
-  window.__onepage = {_safeDraw: function(C, nm){ return safeDraw(C, nm); }, _tainted: function(c){ return tainted(c); }, ready: readySheet, screens: SCREENS, dom: domScreen, sendChooser: sendChooser, go: go, draw: draw, chooser: chooser, _mkStock: mkStock, _mkMyEls: mkMyEls, _mkPin: mkPin, _goMany: goMany, _mkProduct: mkProduct, _mkPort: mkPort, _mkMarket: mkMarket};
+  window.__onepage = {sendKr: sendKr, _safeDraw: function(C, nm){ return safeDraw(C, nm); }, _tainted: function(c){ return tainted(c); }, ready: readySheet, screens: SCREENS, dom: domScreen, sendChooser: sendChooser, go: go, draw: draw, chooser: chooser, _mkStock: mkStock, _mkMyEls: mkMyEls, _mkPin: mkPin, _goMany: goMany, _mkProduct: mkProduct, _mkPort: mkPort, _mkMarket: mkMarket};
   soon();
 })();
 ;
