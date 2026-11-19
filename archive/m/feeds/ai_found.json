@@ -1,6 +1,126 @@
 {
  "items": [
   {
+   "title": "대만 금융감독위, 공매도 규제 추가 강화 — 2008년 이후 최대 월간 하락 앞두고",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-19/taiwan-tightens-short-selling-curbs-to-help-support-stock-market",
+   "press": "블룸버그",
+   "at": "2026-11-19 16:45",
+   "why": "가설 「아시아 AI 하드웨어 약세」·🐻 첫발 신호판 — 정책 방어(공매도 제한)가 바닥 근처에서 나오는 전형적 신호인지 대만 D+5로 확인",
+   "summary": "대만 가권 11/19 −4.60% 마감(반도체·PCB 하한가, 야후) 뒤 FSC가 공매도 규제를 다시 조임. 11월은 2008년 이후 최대 월간 하락 경로(블룸버그)."
+  },
+  {
+   "title": "MMF 잔고 300조 육박 역대 최대 · 증시 대기자금 84조원대 연중 최저",
+   "url": "https://www.yna.co.kr/view/AKR20261119106400008",
+   "press": "연합뉴스",
+   "at": "2026-11-19 16:45",
+   "why": "코스피 🐻 판정(주식 0%)과 같은 방향 — 돈이 증시 밖 단기자금으로 피신, 예탁금 반등이 수급 바닥 확인 줄",
+   "summary": "MMF 300조원 육박(2006년 집계 이후 최대, 반도체 차익 자금도 유입). 투자자예탁금 85조원 밑으로 다시 연중 최저(구글뉴스 11/19)."
+  },
+  {
+   "title": "금값 1년여 만의 최저 — 강달러·연준 매파 베팅 쌓여",
+   "url": "https://www.kitco.com/news/off-the-wire/2026-11-16/gold-hits-over-one-year-low-resilient-dollar-hawkish-fed-bets-build",
+   "press": "Kitco(로이터)",
+   "at": "2026-11-19 15:45",
+   "why": "금 칸 5% — 금리 인상 폭 논쟁(12/9)이 금을 누르는 경로, 오늘 3,750$ 아래로 연장",
+   "summary": "11/16 강달러·인상 베팅에 1년여 만 최저 → 11/18 −3% 3,800 붕괴 → 11/19 PM 3,750 아래(Kitco PM). 슈로더는 연말 반등에 베팅."
+  },
+  {
+   "title": "월러 「0.5%p 인상 폭탄」 뒤 금 하락 — CPI 예상 상회 겹쳐",
+   "url": "https://investinglive.com/commodities/gold-dips-after-fed-s-waller-drops-the-50-bps-hike-bomb-and-us-cpi-comes-above-expectations/",
+   "press": "investingLive",
+   "at": "2026-11-19 15:45",
+   "why": "가설③ 12/9 FOMC 분수령 — 0.5%p 꼬리가 금·성장주를 함께 누르는 첫 경로",
+   "summary": "월러 「12월 0.5%p로 충격 줄 수도」 + CPI 상회 뒤 금 하락. 금리선물 0.5%p 확률은 8%(11/19 09:01)로 아직 꼬리."
+  },
+  {
+   "title": "마이크론, 12월 350억 달러 자사주매입 빗장 풀려…역대급",
+   "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9FZDJ0Z2FLNFhPYkNPcVA5NjYwR1pZVERma052RFpncUFUcHJCc0ZyUjBaUUh6Yy1kWG9Idm5RUncyOFpmSU5HZlV3b1k2X1E4V1c5MlFiYWY0MDdVZDVNWEZjbFNlTjBTdXducUNSMDU?oc=5",
+   "press": "연합인포맥스",
+   "at": "2026-11-19 14:45",
+   "why": "가설④(현금이 스스로 도는 메모리 상류) · 반도체 2% 칸 — 10/13 승인한 350억$ 매입이 12월(12/9 전후) 실행 창에 들어가 메모리 수급 받침",
+   "summary": "마이크론 이사회가 10/13 승인한 자사주 350억$(역대 최대) 매입이 12월부터 실행 가능해짐. 승인 당일 주가는 −4%(코인센트럴) — 매입 실행 구간 주가 반응이 관건."
+  },
+  {
+   "title": "BofA 하트넷 「달러는 레킹볼 — 세계 유동성 압박, 위험자산 진입 시점은 내년 봄」",
+   "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5ZWWE3ZDZvTUNyVUQ5ODNXZDRxazJqVlg4OC13OF9YeTNfbnVlVUJWa3VFUDA0YV9tQkVKUm15SUg3aG50eExTNTR4NGNEX2xmUFZ4Z1RIMW54RmR4eGtuTXZOWUphaU1qRGNPNHozRngtanU4TVE?oc=5",
+   "press": "구글뉴스(BofA 하트넷)",
+   "at": "2026-11-19 14:45",
+   "why": "🐻 현금 비중·원/달러 질문 — 달러 19개월 고점이 아시아 유동성을 죄는 한 코스피 「50일선 넘으면 사기」 규칙 유지 근거",
+   "summary": "하트넷이 달러 강세를 세계 유동성의 「레킹볼」로 표현, 위험자산 진입 시점을 내년 봄으로 늦춤(11/15 「진입 조건 3개 미충족」의 연장)."
+  },
+  {
+   "title": "5천피 무너진 증시…'주식형 헤지펀드'도 3천400억원 자금 순유출",
+   "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE05WDVncGVtU1NhNHRRcHZPVnRwajZ6cHRzVnFra0IwenRURXZDbUJEYm42V2hfRi1fUkx0WUF1dk1GaFR2aEVLS201THVFMjFHQjVodGM5TVVVMHFaSmRKSldUN0VrNTVqbXEzeHNZTHk?oc=5",
+   "press": "구글뉴스",
+   "at": "2026-11-19 14:45",
+   "why": "🐻 코스피 하락장 판정 — 외국인 레버리지 축소에 국내 주식형 헤지펀드 환매까지 겹친 매도 압력, 「저점 다지기」 판정 보조",
+   "summary": "코스피 5,000선 이탈 국면에서 국내 주식형 헤지펀드 약 3,400억 원 순유출. 외국인 매도(11/19 12:54 잠정 −3,343억)와 같은 방향."
+  },
+  {
+   "title": "텐센트, 3분기 실적 예상 하회에 주가 2년 반 만에 최저",
+   "url": "https://www.investing.com/news/stock-market-news/tencent-shares-hit-212-yr-low-on-q3-earnings-miss-5037629",
+   "press": "Investing.com",
+   "at": "2026-11-19 13:45",
+   "why": "🇭🇰 H주 50% 칸·가설④(아시아 AI 따로 간다) — 항셍 23,000 붕괴의 주범, 홍콩 테크 약세가 실적 문제로 번짐",
+   "summary": "텐센트 3분기 실적이 예상을 밑돌며 주가가 2년 반 만에 최저(장중 −7% 가까이, 홍콩경제일보 반일 집계). 항셍은 반일 −439p로 23,000 아래, 알리바바도 −6% 가까이."
+  },
+  {
+   "title": "대만 가권 11/6 −4.5% 39,702 마감 — 4월 말 이후 최저, TSMC −4.7%",
+   "url": "https://tradingeconomics.com/taiwan/stock-market/news/598961",
+   "press": "Trading Economics",
+   "at": "2026-11-19 12:45",
+   "why": "가설④ 아시아 AI 하드웨어 — 오늘(11/19) 장중 38,500(−4.1%)으로 이 종가 저점 아래, 코스피 4,968 재시험과 같은 모양인지 기준선",
+   "summary": "11/6 대만 가권 39,702(−1,873p·−4.5%), 7일 연속 하락·주간 −12.2%. TSMC −4.7%·델타 −6.6%·훙하이 −4.5%. 11/9 공매도 제한·5천억 대만달러 안정기금 뒤 +4.9% 41,662 반등."
+  },
+  {
+   "title": "FOMC 의사록 — 위원 다수가 2026년 추가 인상 지지",
+   "url": "https://www.wealthprofessional.ca/news/industry-news/fed-minutes-show-most-officials-back-another-2026-rate-hike/393732",
+   "press": "Wealth Professional",
+   "at": "2026-11-19 11:40",
+   "why": "가설③ 12/9 FOMC 분수령 — 인상 쪽 근거, 💼 채권·신용 칸 금리 압력",
+   "summary": "10월 동결 회의 의사록에서 다수 위원이 추가 인상이 필요할 수 있다고 봄. 월러 「0.5%p로 충격 줄 필요」 발언과 같은 방향. 그런데도 10년물은 하락(인베스팅 2182722) — 성장 걱정 쪽 해석."
+  },
+  {
+   "title": "美 이란 해상 봉쇄 강화 — 상선 8척 회항·1척 무력화",
+   "url": "https://gulfnews.com/world/mena/us-tightens-naval-blockade-on-iran-8-commercial-ships-redirected-1-vessel-disabled-1.500615877",
+   "press": "Gulf News",
+   "at": "2026-11-19 11:40",
+   "why": "에너지 칸·장부 조건 brent_95 — 공급 쪽 재료인데 유가는 88~90에서 무덤덤",
+   "summary": "美가 이란 원유 해상 환적까지 제한(로이터 11/19 피드)·봉쇄 강화. 이란 수출 「거의 0」 보도도(Gulf News). 브렌트 11/18 88.63(−4.84%) — 공격·봉쇄 뉴스에도 내리는 장이 계속되는지가 시험. 기사 게재일 원문 미확인."
+  },
+  {
+   "title": "모건스탠리, 글로벌 주식 「최대 비중확대」·2027년 S&P500 목표 8,700",
+   "url": "https://stockanalysis.com/news/morgan-stanley-maximum-overweight-global-stocks/",
+   "press": "StockAnalysis",
+   "at": "2026-11-19 10:45",
+   "why": "🟢 S&P 정상 판정·가설② 「갈아타기 vs 현금 도피」 — 대형 IB는 「조정 마지막 국면」 쪽",
+   "summary": "마이크 윌슨: 글로벌 주식 최대 비중확대, 2027 S&P 8,700(약 +15~19%)·AI 투자와 이익 성장 근거 · 같은 날 골드만은 2027 미국 이익 성장 11%로 둔화 전망(gn_us_ib)"
+  },
+  {
+   "title": "푸틴, APEC서 우크라이나 놓고 트럼프·시진핑 3자 회담 제안 — 키이우는 빠져",
+   "url": "https://investinglive.com/commodities/putin-floats-trump-xi-summit-on-ukraine-at-apec-leaving-kyiv-out-of-the-room/",
+   "press": "investingLive",
+   "at": "2026-11-19 10:45",
+   "why": "🛢️ brent 조건·원자재 — 오늘(11/19) 선전 3자 회담 결과가 유가·방산 방향을 바꿈",
+   "summary": "신화통신: 시진핑·트럼프·푸틴 11/19(목) 선전 회담 확인 · 의제 우크라이나·무역·AI · 오늘 한국 방산 −1.78%(한화에어로 −3.3%, daily-app 10:23)"
+  },
+  {
+   "title": "연준 바 이사: 2% 물가 복귀 위해 추가 인상 필요할 가능성 높다",
+   "url": "https://investinglive.com/central-banks/fed-s-barr-further-rate-hikes-are-likely-needed-to-ensure-timely-return-to-2-inflation/",
+   "press": "investingLive",
+   "at": "2026-11-19 09:45",
+   "why": "가설③ 12/9 FOMC — 의사록 뒤 투표권 이사까지 인상 쪽, 0.5%p 확률 8%로 상승",
+   "summary": "바 이사(투표권) 「추가 인상 필요 가능성 높다」 · 12월 0.25%p 인상 확률 100%·0.5%p 2.4→8.0%(금리선물, 김우다 09:01) · 美 10년 선물은 강보합"
+  },
+  {
+   "title": "이란 전쟁 전환점 — 트럼프 더 넓은 공격 검토(호르무즈·핵시설)",
+   "url": "https://wjla.com/news/nation-world/iran-war-nears-turning-point-as-trump-weighs-broader-attack-strait-of-hormuz-nuclear-program-houthis-red-sea-middle-east-war",
+   "press": "WJLA(싱클레어)",
+   "at": "2026-11-19 09:45",
+   "why": "에너지 칸·장부 brent 조건 — 공격 뉴스에 무덤덤하던 유가가 반응하는지 확인",
+   "summary": "NYT 보도(트럼프 새 군사 공격 검토)와 같은 흐름 · 11/18 브렌트 88.63(−4.84%)·WTI 81.93 · 기사 날짜 미확인"
+  },
+  {
    "title": "모닝스타, 엔비디아 적정가 19% 하향 — CEO 교체·혼란 반영",
    "url": "https://www.morningstar.com/stocks/nvidia-we-cut-our-fair-value-estimate-given-firms-ceo-transition-turmoil",
    "press": "Morningstar",
@@ -519,127 +639,7 @@
    "at": "2026-11-17 21:40",
    "why": "나스닥 칸·가설 ② — 실적 직전 매도 진정 여부, 피드 인베스팅 「선물 보합·기술주 매도 완화」와 같은 쪽",
    "summary": "美 지수 선물 보합~소폭 상승, 4거래일 연속 하락 뒤 엔비디아 실적(장 마감 뒤) 대기. 세부 숫자는 원문 확인 필요(미확인)."
-  },
-  {
-   "title": "코히런트 +18%·루멘텀 +12% — 엔비디아 혼란에도 AI 광통신 반등 이어져",
-   "url": "https://www.tikr.com/blog/coherent-soars-18-lumentum-up-12-as-ai-optics-rebound-extends-despite-nvidia-turmoil",
-   "press": "TIKR",
-   "at": "2026-11-17 21:40",
-   "why": "광통신 칸(LITE→MRVL·COHR) — 반도체 정리 중 광통신만 역행 = 가설 ④ 「현금 도는 상류」 근거",
-   "summary": "제목 기준 코히런트 +18%·루멘텀 +12%로 AI 광학 반등 연장(기사 날짜 원문 확인 필요). 11/17 장 전 인베스팅 「Why is Coherent stock surging today?」와 이어짐."
-  },
-  {
-   "title": "BofA 11월 펀드매니저 설문 — 투자 심리 2월 이후 최고(XTB 정리)",
-   "url": "https://www.xtb.com/ae-en/market-analysis/news-and-research/what-do-institutional-investors-expect-bofa-fms-investor-sentiment-hits-its-highest-level-since-february",
-   "press": "XTB",
-   "at": "2026-11-17 20:35",
-   "why": "같은 날 블룸버그 「기술주 비중 2006년 이후 최대 축소」와 함께 보면 — 주식 전체는 낙관, 기술주만 덜어 냄 = 가설 ② 「업종 갈아타기」 쪽 근거, 나스닥 칸",
-   "summary": "BofA 11월 FMS: 투자 심리 2월 이후 최고(유럽 주식 낙관도 2월 이후 최고, 인베스팅 동일 보도) · 기술주 비중은 2006년 이후 최대 폭 축소(블룸버그 11/17) — 세부 숫자 미확인"
-  },
-  {
-   "title": "엔비디아 옵션, 실적 뒤 시총 약 3,350억~3,780억 달러 변동 반영",
-   "url": "https://fourweekmba.com/ai-nvidia-options-price-a-378b-swing-above-its-last-8-reports/",
-   "press": "FourWeekMBA",
-   "at": "2026-11-17 20:35",
-   "why": "엔비디아 실적(한국 11/18 아침) — 옵션이 지난 8번 실적 평균보다 큰 변동을 가격에 넣음 = 반도체 칸·🐋 NVDA 신호, 한국 반도체(💬 2·3·4번) 아침 변동 폭",
-   "summary": "로이터(인베스팅 11/17)는 실적 뒤 ±3,350억 달러 변동 반영 보도 · FourWeekMBA는 3,780억 달러로 최근 8번 실적보다 큼 — 기준 시점에 따라 숫자 차이"
-  },
-  {
-   "title": "엔비디아 실적 미리보기 — 「황 이후 시대」 첫 시험대",
-   "url": "https://www.forex.com/en/news-and-analysis/nvidia-earnings-preview-nvda-s-first-test-of-the-post-jenson-huang-era/",
-   "press": "FOREX.com",
-   "at": "2026-11-17 18:40",
-   "why": "오늘 밤(한국 11/18 아침) 엔비디아 실적 — 숫자보다 리더십·중국 변수, 반도체 칸·🐋 NVDA 고래·가설 ④",
-   "summary": "황 CEO 퇴진 뒤 첫 실적 — 시장은 「beat & raise」 기대, 관건은 가이던스와 中 매출 공백 설명 · 나스닥100 상승 추세가 갈림길(같은 매체 별도 글)"
-  },
-  {
-   "title": "엔비디아, 클라우드 고객에 「중국 사업 49% 이하로」 — 임대 우회로 좁힌다",
-   "url": "https://www.tikr.com/blog/nvidia-tells-cloud-clients-to-cap-chinese-business-at-49-narrowing-the-rental-loophole",
-   "press": "TIKR",
-   "at": "2026-11-17 17:40",
-   "why": "엔비디아 실적(한국 11/18 아침) 직전 중국 매출 축소 변수 — 반도체 칸·🐋 NVDA 고래·가설 ④",
-   "summary": "GPU의 50% 넘게를 중국 기업에 빌려주는 데이터센터에는 판매 중단 · 美 상무부 원격 접근 규정과 같은 날 · 동남아 DC·네오클라우드 수요에 부담"
-  },
-  {
-   "title": "ING, 스타게이트 몫 포함 5억 달러 데이터센터 대출 매각 추진",
-   "url": "https://www.ibtimes.com/ing-sells-data-center-loans-stargate-debt-3809516",
-   "press": "IBTimes",
-   "at": "2026-11-17 17:40",
-   "why": "가설 ①(AI 차입 → 크레딧) — 은행이 DC 대출을 덜어내는 흐름, 🫧 신용 경보 칸",
-   "summary": "ING 약 5억 달러 DC 대출 묶음 매각(블룸버그 보도 인용) · 11/17 하나중국 「ING·소시에테제네랄 8억 달러 매물」로 확대 보도 · 은행권 AI 인프라 익스포저 축소"
-  },
-  {
-   "title": "코스피 5,000 하회, 엔비디아 실적 앞두고 칩주 패닉 매도 — 삼성전자 −3%·소프트뱅크·키옥시아 −4%대",
-   "url": "https://www.tradingkey.com/analysis/stocks/more/262307942-japan-korea-stocks-skhy-kospi-nikkei-samsung-skhynix-softbank-kioxia-nvda-tradingkey",
-   "press": "TradingKey",
-   "at": "2026-11-17 16:45",
-   "why": "한국·일본 반도체 동반 매도 — 🐻 코스피 저점 이탈·반도체 칸과 연결",
-   "summary": "코스피 5,000 하회·닛케이 −1% · 삼성전자 −3%, 소프트뱅크·키옥시아 −4%대(제목 기준) · 마감 코스피 4,968.45(−2.59%)"
-  },
-  {
-   "title": "반도체 파티는 끝났나? 「AI 공포」에 코스피 5,000 위태",
-   "url": "https://www.asiae.co.kr/en/article/2026111710125252408",
-   "press": "아시아경제(영문)",
-   "at": "2026-11-17 16:45",
-   "why": "「메모리 사이클 정점」 논쟁 — 가설 ④(상류 vs 빚으로 짓는 곳)·반도체 칸 판단 근거",
-   "summary": "엔비디아 실적 전 AI 우려로 반도체 매도 집중 · 같은 날 하이닉스 7개월 만에 110만원 하회(연합)"
-  },
-  {
-   "title": "TSMC, 2027년부터 칩 가격 최대 10% 인상·CoWoS 최대 20% 검토(닛케이 보도 정리)",
-   "url": "https://aiweekly.co/alerts/tsmc-to-lift-chip-prices-up-to-10-from-2027-nikkei-reports",
-   "press": "AI Weekly(닛케이 인용)",
-   "at": "2026-11-17 15:40",
-   "why": "반도체 칸·가설 ④(현금 도는 칩 상류) — 오늘 공상시보 「10~20%↑ 통보」와 같은 방향, 메모리 하향 기사와 반대 근거",
-   "summary": "닛케이: TSMC가 2027년 첨단·성숙 공정 가격을 최대 10% 올릴 계획. 별도로 CoWoS 패키징 최대 20% 인상 검토(트렌드포스 10/27). 날짜 세부는 미확인."
-  },
-  {
-   "title": "연준 매파적 동결이 한은 11월 인상 근거를 키운다(10/29)",
-   "url": "https://www.koreatimes.co.kr/economy/20261029/feds-hawkish-hold-strengthens-case-for-boks-hike-in-november",
-   "press": "Korea Times",
-   "at": "2026-11-17 14:40",
-   "why": "🇰🇷 채권·국내 주식 — 한은 11월 인상 시나리오(오늘 씨티 「만장일치 25bp」 전망과 같은 쪽), 💬 15번 채권 답",
-   "summary": "10/29 기사: 연준 동결이 매파적이라 한은 11월 인상 가능성이 커졌다는 분석. 10/22 한은은 3% 동결하며 추가 인상 여지를 남김(Korea Times)."
-  },
-  {
-   "title": "한은 3% 동결, 추가 인상은 테이블 위에(10/22)",
-   "url": "https://www.koreatimes.co.kr/economy/20261022/bok-keeps-rate-steady-at-3-but-further-hikes-remain-on-table",
-   "press": "Korea Times",
-   "at": "2026-11-17 14:40",
-   "why": "🇰🇷 국고채 금리 — 지금 기준금리 3%, 11월 회의 인상 시 단기물 금리 부담",
-   "summary": "10/22 한은 기준금리 3.00% 동결, 추가 인상 가능성 열어 둠."
-  },
-  {
-   "title": "골드만삭스 보고서 5개의 같은 결론 — 「AI 잔치는 막바지, 시장이 경제보다 취약」",
-   "url": "https://wallstreetcn.com/articles/3786075",
-   "press": "월스트리트견문(하나중국 전재)",
-   "at": "2026-11-17 13:45",
-   "why": "가설 ①(AI 차입·크레딧이 다음 약한 고리) 직접 근거 — 골드만이 AI 채권 발행 확대로 신용 스프레드 확대를 예상",
-   "summary": "AI는 美 GDP 성장의 21%만 기여했지만 S&P500 이익 증가의 62%·시총 상승분의 92%를 견인. 이익 증가율 36%→11% 둔화 전망, 엔화를 최적의 AI 헤지로 제시, 금 4,650달러·구리 15,600달러 전망."
-  },
-  {
-   "title": "핌코 「데이터센터 붐이 식으면 AI 채권 스프레드는 오히려 좁혀질 수 있다」",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-17/pimco-says-ai-bond-spreads-may-tighten-as-data-center-boom-slows",
-   "press": "블룸버그",
-   "at": "2026-11-17 13:45",
-   "why": "가설 ①의 반대 근거 — 짓는 속도가 줄면 AI 연계 채권 발행이 줄어 신용 압박이 풀릴 수 있다는 채권 운용사 시각",
-   "summary": "데이터센터 건설 둔화가 AI 관련 채권 발행을 줄여 그간 신용시장에 쏟아진 공급 압박을 덜 수 있음(핌코). 같은 날 골드만은 스프레드 확대 전망 — 크레딧 쪽 의견이 갈림."
-  },
-  {
-   "title": "바클레이즈 「대만 증시 급락 주범은 개인 강제 청산 — 더 이어질 수 있다」",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-17/barclays-says-forced-retail-liquidation-behind-taiwan-stock-rout",
-   "press": "블룸버그",
-   "at": "2026-11-17 12:40",
-   "why": "🐻 계기판 반등 통계 — 아시아 AI칩 하락이 실적보다 빚(신용) 정리 국면이라는 진단, 한국 반대매매 급증(11/10 5배)과 같은 결",
-   "summary": "11/16(월) 대만 급락의 주된 동인은 개인 투자자 강제 매도이며 추가 압박 가능(바클레이즈). 같은 날 대만 가권 −6.03%, 11/17 장중 −3.1% 뒤 강보합."
-  },
-  {
-   "title": "드러켄밀러 3분기 13F — AMD·샌디스크·알파벳 전량 매도, TSMC 94% 축소, SpaceX·팔란티어·금광주 매수",
-   "url": "https://wallstreetcn.com/articles/3786071",
-   "press": "월스트리트CN",
-   "at": "2026-11-17 12:40",
-   "why": "가설 ④·반도체 칸 — 대가가 칩 하드웨어를 줄이고 소프트웨어·금으로 이동(3분기 말 기준이라 이미 지난 매매)",
-   "summary": "Duquesne 3Q: AMD·SanDisk·Alphabet 전량 매도, TSMC −94%, SpaceX 20만 주↑·팔란티어 8만 주↑ 신규, 금광주 매수, 최대 보유는 Natera 29.2%(하나중국 72261)."
   }
  ],
- "at": "2026-11-19 08:45"
+ "at": "2026-11-19 16:45"
 }
