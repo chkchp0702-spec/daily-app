@@ -3268,7 +3268,7 @@ __bk(83);
     var cl = (D.getElementById("dgcl") || {}).value || "";
     Promise.all([analyze(rows), window.__vdLoad ? __vdLoad().catch(function(){ return null; }) : null]).then(function(z){
       var R = z[0], vd = z[1]; if (vd && vd.text && rows.some(function(r){ return r.t === "s"; })){ R.vd = vd.text; R.vdAsof = vd.asof ? Number(vd.asof.slice(5, 7)) + "/" + Number(vd.asof.slice(8)) : ""; }
-      LASTR = R; var c = diagCanvas(R, cl.trim(), ls("pbname") || ""), url;
+      LASTR = R; window.__dgLast = R; var c = diagCanvas(R, cl.trim(), ls("pbname") || ""), url;
       try { url = c.toDataURL("image/png"); } catch(x){ url = ""; }
       out.innerHTML = '<section class="card hub-c no-clp" data-cz="done" data-xc="1"><p class="hub-h">진단 결과</p>' +
         '<ul class="dg-pt">' + R.pts.map(function(p){ return '<li><b>' + e(p[0]) + '</b>' + e(p[1]) + '</li>'; }).join("") + '</ul>' +

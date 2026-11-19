@@ -1662,7 +1662,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261118i";
+var APPV = "20261119a";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1741,8 +1741,8 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="app.b04.js?v=712ce008fe"></script>
 <script defer src="app.b05.js?v=77165feb6f"></script>
 <script defer src="app.b06.js?v=a4119ef778"></script>
-<script defer src="app.b07.js?v=e9a48138b2"></script>
-<script defer src="app.b08.js?v=1b6176c118"></script>
+<script defer src="app.b07.js?v=74e79b3644"></script>
+<script defer src="app.b08.js?v=ee598e84d2"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1832,6 +1832,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="ux1116.js?v=1"></script>   <!· 🧊 11/16 냉정 분석 5차 — 🩻 포트 진단 한 장 · 💬 고객 질문 답 그림 한 장 · 🎯 신호 한눈에(큰손·컵·갭·확률 합침) ·>
 <script defer src="tax.js?v=7"></script>   <!· 🧾 11/16 세무계산기 (연구실 › 세무계산기 · 금융소득·건보료 통합 경보기 + 연금·퇴직·해외주식·ISA · 세법 숫자는 tax.js LAW 한 곳) ·>
 <script defer src="ux1118.js?v=2"></script>   <!· 🧊 11/18 냉정 분석 6차 — 🆕 새로 생긴 것 · 📌 내 바로가기 · 🗺 섹터 지도 미리보기 · 제안서 완성본 먼저·지난번 그대로 · 🧾 절세 한 장 · 💼 성적 접기 ·>
+<script defer src="ux1119.js?v=1"></script>   <!· 🌅 11/19 아침 시황 업그레이드 — 넘겨 보는 카드 5장(오늘·시황 맨 위) · 포트 진단에 오늘 리포트 처방 ·>
 <script defer src="stab.js?v=2"></script>   <!· 🛡 11/18 안정도 — 화면 그리기 보호 · 끝없는 「불러오는 중」 막기 (맨 끝에 둘 것) ·>
 📦list-->
 <!-- 📦/JS -->
