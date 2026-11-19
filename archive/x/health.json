@@ -1,64 +1,67 @@
 {
- "at": "2026-11-19 17:04",
+ "at": "2026-11-20 01:27",
  "ok": false,
  "problems": [
-  "작업 실패: whale40/whale40 daily (11-19T07:18 failure)",
-  "📱 실사용 오류(1대·11번 · 화면 home): promise|Cannot set properties of null (setting …)|app.b01.js",
-  "📱 실사용 오류(1대·10번 · 화면 ): js|prompt() is not supported.|inline"
+  "피드 0개·실패: 이그전 (이은택의 그림 전략)",
+  "작업 실패: daily-app/pages-build-deployment (11-19T16:41 failure)",
+  "작업 실패: whale40/whale40 daily (11-19T07:18 failure)"
  ],
  "data": [
   {
    "name": "💼 포트",
    "ok": true,
-   "age_h": 1.0,
+   "age_h": 0.1,
    "lim": 3
   },
   {
    "name": "⚡ 킥",
    "ok": true,
-   "age_h": 1.0,
+   "age_h": 0.1,
    "lim": 3
   },
   {
    "name": "🏠 홈",
    "ok": true,
-   "age_h": 1.0,
+   "age_h": 0.1,
    "lim": 3
   },
   {
    "name": "📊 성적표",
    "ok": true,
-   "age_h": 1.0,
+   "age_h": 0.1,
    "lim": 3
   },
   {
    "name": "🌏 동종주",
    "ok": true,
-   "age_h": 1.0,
+   "age_h": 0.1,
    "lim": 3
   },
   {
    "name": "🎯 집중",
    "ok": true,
-   "age_h": 5.1,
+   "age_h": 13.5,
    "lim": 30
   },
   {
    "name": "📰 피드",
    "ok": true,
-   "age_h": 0.1,
-   "lim": 1.5
+   "age_h": 0.2,
+   "lim": 1.5,
+   "zero": [
+    "이그전 (이은택의 그림 전략)"
+   ]
   },
   {
    "name": "🧠 두뇌",
    "ok": true,
-   "age_h": 0.3,
+   "age_h": 0.7,
    "lim": 3
   },
   {
    "name": "🧪 단타 학습",
    "ok": true,
-   "age_h": 2.0,
+   "age_h": 10.4,
    "lim": 30
   },
   {
@@ -70,22 +73,22 @@
   {
    "name": "🎲 시장확률",
    "ok": true,
-   "age_h": 0.8,
+   "age_h": 0.1,
    "lim": 2
   },
   {
    "name": "🧭 섹터·종목 확률",
    "ok": true,
-   "age_h": 0.0,
+   "age_h": 7.7,
    "lim": 12
   }
  ],
  "app": [
   {
    "tab": "home",
-   "s": 0.6,
-   "cards": 19,
-   "len": 11021,
+   "s": 0.5,
+   "cards": 18,
+   "len": 10800,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -94,7 +97,7 @@
    "tab": "market",
    "s": 0.3,
    "cards": 30,
-   "len": 2671,
+   "len": 2673,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -110,25 +113,25 @@
   },
   {
    "tab": "feed",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 1,
-   "len": 10645,
+   "len": 10849,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "send",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 3,
-   "len": 1767,
+   "len": 1889,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "diag",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 1,
    "len": 229,
    "bad": [],
@@ -137,7 +140,7 @@
   },
   {
    "tab": "prop",
-   "s": 0.5,
+   "s": 0.4,
    "cards": 5,
    "len": 5128,
    "bad": [],
@@ -146,16 +149,16 @@
   },
   {
    "tab": "bond",
-   "s": 0.5,
+   "s": 0.3,
    "cards": 3,
-   "len": 3039,
+   "len": 3046,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "fund",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 2,
    "len": 302,
    "bad": [],
@@ -173,7 +176,7 @@
   },
   {
    "tab": "divc",
-   "s": 0.5,
+   "s": 0.2,
    "cards": 1,
    "len": 255,
    "bad": [],
@@ -191,7 +194,7 @@
   },
   {
    "tab": "flow",
-   "s": 0.3,
+   "s": 0.5,
    "cards": 6,
    "len": 2217,
    "bad": [],
@@ -200,7 +203,7 @@
   },
   {
    "tab": "lab",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 6,
    "len": 621,
    "bad": [],
@@ -209,34 +212,34 @@
   },
   {
    "tab": "port",
-   "s": 1.0,
+   "s": 0.8,
    "cards": 15,
-   "len": 910,
+   "len": 913,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "score",
-   "s": 0.5,
+   "s": 0.3,
    "cards": 11,
-   "len": 318,
+   "len": 298,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "sigall",
-   "s": 1.1,
+   "s": 0.7,
    "cards": 4,
-   "len": 841,
+   "len": 842,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "screen",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 0,
    "len": 2703,
    "bad": [],
@@ -245,9 +248,9 @@
   },
   {
    "tab": "sigmore",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 3,
-   "len": 1915,
+   "len": 1897,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -265,7 +268,7 @@
    "tab": "cup",
    "s": 0.2,
    "cards": 12,
-   "len": 2694,
+   "len": 2679,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -274,14 +277,14 @@
    "tab": "gap",
    "s": 0.2,
    "cards": 16,
-   "len": 2422,
+   "len": 2432,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "prob",
-   "s": 0.8,
+   "s": 0.4,
    "cards": 7,
    "len": 285,
    "bad": [],
@@ -290,7 +293,7 @@
   },
   {
    "tab": "luck",
-   "s": 0.6,
+   "s": 0.4,
    "cards": 1,
    "len": 136,
    "bad": [],
@@ -299,7 +302,7 @@
   },
   {
    "tab": "saju",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 1,
    "len": 139,
    "bad": [],
@@ -308,7 +311,7 @@
   },
   {
    "tab": "tarot",
-   "s": 0.4,
+   "s": 0.3,
    "cards": 4,
    "len": 734,
    "bad": [],
@@ -317,9 +320,9 @@
   },
   {
    "tab": "lotto",
-   "s": 0.5,
+   "s": 0.3,
    "cards": 4,
-   "len": 1761,
+   "len": 1759,
    "bad": [],
    "loading": 0,
    "errs": []
@@ -335,7 +338,7 @@
   },
   {
    "tab": "accum",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 10,
    "len": 1109,
    "bad": [],
@@ -345,15 +348,15 @@
   {
    "tab": "danta",
    "s": 0.2,
-   "cards": 12,
-   "len": 1881,
+   "cards": 11,
+   "len": 2002,
    "bad": [],
    "loading": 0,
    "errs": []
   },
   {
    "tab": "alarm",
-   "s": 0.3,
+   "s": 0.2,
    "cards": 4,
    "len": 881,
    "bad": [],
@@ -389,8 +392,7 @@
    "tab": "클릭 home → onepager",
    "ok": true,
    "got": [
-    "onepager",
-    true
+    "오늘 종목 링크 0개 — 건너뜀"
    ]
   },
   {
@@ -430,7 +432,7 @@
    "sweep": [
     {
      "tab": "home",
-     "buttons": 94,
+     "buttons": 88,
      "errs": [],
      "jumps": []
     },
@@ -442,7 +444,7 @@
     },
     {
      "tab": "sector",
-     "buttons": 33,
+     "buttons": 29,
      "errs": [],
      "jumps": []
     },
@@ -621,7 +623,7 @@
      "jumps": []
     }
    ],
-   "buttons": 708
+   "buttons": 698
   },
   {
    "tab": "숫자 맞추기",
@@ -639,8 +641,7 @@
     "💼 S&P500",
     "📊 성적표 공격",
     "📊 성적표 기본",
-    "📊 성적표 S&P",
-    "🏠 코스피 마감"
+    "📊 성적표 S&P"
    ],
    "bad": []
   },
@@ -657,8 +658,8 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 11021,
-     "cards": 19
+     "len": 10800,
+     "cards": 18
     },
     "market": {
      "bad": [],
@@ -670,7 +671,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 2671,
+     "len": 2673,
      "cards": 30
     },
     "sector": {
@@ -696,7 +697,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 10645,
+     "len": 10849,
      "cards": 1
     },
     "send": {
@@ -709,7 +710,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 1767,
+     "len": 1889,
      "cards": 3
     },
     "diag": {
@@ -748,7 +749,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 3039,
+     "len": 3046,
      "cards": 3
     },
     "fund": {
@@ -839,7 +840,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 910,
+     "len": 913,
      "cards": 15
     },
     "score": {
@@ -852,7 +853,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 318,
+     "len": 298,
      "cards": 11
     },
     "sigall": {
@@ -865,7 +866,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 841,
+     "len": 842,
      "cards": 4
     },
     "screen": {
@@ -891,7 +892,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 1915,
+     "len": 1897,
      "cards": 3
     },
     "whale": {
@@ -917,7 +918,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 2694,
+     "len": 2679,
      "cards": 12
     },
     "gap": {
@@ -930,7 +931,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 2422,
+     "len": 2432,
      "cards": 16
     },
     "prob": {
@@ -995,7 +996,7 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 1761,
+     "len": 1759,
      "cards": 4
     },
     "tax": {
@@ -1034,8 +1035,8 @@
      "tiny": [],
      "off": [],
      "goto": [],
-     "len": 1881,
-     "cards": 12
+     "len": 2002,
+     "cards": 11
     },
     "alarm": {
      "bad": [],
@@ -1083,7 +1084,7 @@
    "repo": "daily-app",
    "job": "brl_live",
    "ok": true,
-   "when": "2026-11-19T01:33"
+   "when": "2026-11-19T09:26"
   },
   {
    "repo": "daily-app",
@@ -1107,7 +1108,7 @@
    "repo": "daily-app",
    "job": "collect",
    "ok": true,
-   "when": "2026-11-19T07:56"
+   "when": "2026-11-19T15:39"
   },
   {
    "repo": "daily-app",
@@ -1131,7 +1132,7 @@
    "repo": "daily-app",
    "job": "els_dart",
    "ok": true,
-   "when": "2026-11-19T04:15"
+   "when": "2026-11-19T14:51"
   },
   {
    "repo": "daily-app",
@@ -1143,7 +1144,7 @@
    "repo": "daily-app",
    "job": "feedback",
    "ok": true,
-   "when": "2026-11-19T08:12"
+   "when": "2026-11-19T15:12"
   },
   {
    "repo": "daily-app",
@@ -1167,13 +1168,13 @@
    "repo": "daily-app",
    "job": "health",
    "ok": true,
-   "when": "2026-11-19T07:00"
+   "when": "2026-11-19T08:03"
   },
   {
    "repo": "daily-app",
    "job": "keeper",
    "ok": true,
-   "when": "2026-11-19T01:51"
+   "when": "2026-11-19T16:29"
   },
   {
    "repo": "daily-app",
@@ -1197,7 +1198,7 @@
    "repo": "daily-app",
    "job": "live",
    "ok": true,
-   "when": "2026-11-19T08:13"
+   "when": "2026-11-19T15:23"
   },
   {
    "repo": "daily-app",
@@ -1245,7 +1246,7 @@
    "repo": "daily-app",
    "job": "opnews",
    "ok": true,
-   "when": "2026-11-18T22:37"
+   "when": "2026-11-19T15:21"
   },
   {
    "repo": "daily-app",
@@ -1257,7 +1258,7 @@
    "repo": "daily-app",
    "job": "oppdf",
    "ok": true,
-   "when": "2026-11-19T02:49"
+   "when": "2026-11-19T14:21"
   },
   {
    "repo": "daily-app",
@@ -1275,7 +1276,7 @@
    "repo": "daily-app",
    "job": "pdz_req",
    "ok": true,
-   "when": "2026-11-19T04:26"
+   "when": "2026-11-19T13:46"
   },
   {
    "repo": "daily-app",
@@ -1287,19 +1288,19 @@
    "repo": "daily-app",
    "job": "prob",
    "ok": true,
-   "when": "2026-11-19T08:14"
+   "when": "2026-11-19T16:05"
   },
   {
    "repo": "daily-app",
    "job": "prob_sec",
    "ok": true,
-   "when": "2026-11-19T07:59"
+   "when": "2026-11-19T16:36"
   },
   {
    "repo": "daily-app",
    "job": "products",
    "ok": true,
-   "when": "2026-11-19T07:57"
+   "when": "2026-11-19T15:39"
   },
   {
    "repo": "daily-app",
@@ -1323,7 +1324,7 @@
    "repo": "daily-app",
    "job": "uspre",
    "ok": true,
-   "when": "2026-11-19T07:07"
+   "when": "2026-11-19T16:32"
   },
   {
    "repo": "daily-app",
@@ -1335,13 +1336,13 @@
    "repo": "daily-app",
    "job": "vote",
    "ok": true,
-   "when": "2026-11-19T04:31"
+   "when": "2026-11-19T16:41"
   },
   {
    "repo": "daily-app",
    "job": "watch",
    "ok": true,
-   "when": "2026-11-19T07:50"
+   "when": "2026-11-19T14:47"
   },
   {
    "repo": "daily-app",
@@ -1352,8 +1353,8 @@
   {
    "repo": "daily-app",
    "job": "pages-build-deployment",
-   "ok": true,
-   "when": "2026-11-19T08:14"
+   "ok": false,
+   "when": "2026-11-19T16:41"
   },
   {
    "repo": "market-strategy-report",
@@ -1371,7 +1372,7 @@
    "repo": "market-strategy-report",
    "job": "bear-fast",
    "ok": true,
-   "when": "2026-11-19T07:40"
+   "when": "2026-11-19T16:39"
   },
   {
    "repo": "market-strategy-report",
@@ -1383,7 +1384,7 @@
    "repo": "market-strategy-report",
    "job": "build-report",
    "ok": true,
-   "when": "2026-11-19T07:06"
+   "when": "2026-11-19T14:43"
   },
   {
    "repo": "market-strategy-report",
@@ -1401,19 +1402,19 @@
    "repo": "market-strategy-report",
    "job": "feed-score",
    "ok": true,
-   "when": "2026-11-19T03:42"
+   "when": "2026-11-19T16:29"
   },
   {
    "repo": "market-strategy-report",
    "job": "my-feed",
    "ok": true,
-   "when": "2026-11-19T02:45"
+   "when": "2026-11-19T12:03"
   },
   {
    "repo": "market-strategy-report",
    "job": "fetch-market",
    "ok": true,
-   "when": "2026-11-19T07:01"
+   "when": "2026-11-19T16:18"
   },
   {
    "repo": "market-strategy-report",
@@ -1431,7 +1432,7 @@
    "repo": "market-strategy-report",
    "job": "lab",
    "ok": true,
-   "when": "2026-11-19T07:06"
+   "when": "2026-11-19T14:43"
   },
   {
    "repo": "market-strategy-report",
@@ -1461,7 +1462,7 @@
    "repo": "market-strategy-report",
    "job": "sentiment",
    "ok": true,
-   "when": "2026-11-19T03:34"
+   "when": "2026-11-19T16:30"
   },
   {
    "repo": "market-strategy-report",
@@ -1509,7 +1510,7 @@
    "repo": "stock-screener",
    "job": "push-relay",
    "ok": true,
-   "when": "2026-11-19T02:36"
+   "when": "2026-11-19T11:47"
   },
   {
    "repo": "stock-screener",
@@ -1521,7 +1522,7 @@
    "repo": "stock-screener",
    "job": "screener",
    "ok": true,
-   "when": "2026-11-19T04:58"
+   "when": "2026-11-19T11:20"
   },
   {
    "repo": "stock-screener",
@@ -1577,8 +1578,7 @@
   "11/18 🩺 ① 💼 포트 시세 일시 빠짐 근본 수정(src/port.py) — 야후 한 번에 받기에서 빠진 종목만 하",
   "11/17 🩺 ① 🏠 「😱 그날 팔았다면?」(hmpanic) 카드가 빈 칸으로 보이던 것 — 접기(calm.js)가 제",
   "11/16 🩺 🛍️ 상품(채권·펀드·ELS) 「⚠️ 일부 자료를 못 받았어요」 줄에 영어 내부 이름·HTTP 기술 문구",
-  "11/14 🩺 ① 건강검진 「클릭 연동 실패 #home [data-op]」 거짓 경보 — 홈 종목 링크는 킥 사고팔기·",
-  "11/13 🩺 ① 🔰 쉬운 첫 화면 「▾ 오늘 자세히 보기」: 3초 rAF 붙잡기가 끝난 뒤 늦게 오는 큰 자료(상품·"
+  "11/14 🩺 ① 건강검진 「클릭 연동 실패 #home [data-op]」 거짓 경보 — 홈 종목 링크는 킥 사고팔기·"
  ],
  "note": "매일 16:00 깊은 검진(모든 탭 · 내용·숫자·버튼·단추·사진). 「자가 업그레이드」(16:47)가 problems 를 모두 고치고, health-shots 브랜치의 탭 사진(<탭>_1·_2.jpg)을 눈으로 봐서 검사가 못 잡은 것도 찾아 고친 뒤 tools/deep_check.py 에 검사를 더한다. 인터넷이 막힌 곳에선 HEALTH_LOCAL=1 로 같은 검진."
 }
