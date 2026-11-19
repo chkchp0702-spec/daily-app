@@ -430,7 +430,7 @@ em.tk{font-style:normal;font-size:12.5px;color:var(--dim);margin-left:4px;font-w
 <main id="main"><div class="wow-sk tall" aria-hidden="true"></div><div class="wow-sk" aria-hidden="true"></div><div class="wow-sk" aria-hidden="true"></div><div class="loading" style="display:none">불러오는 중…</div></main>
 <footer>※ 참고용 자료입니다. 투자 판단과 책임은 본인에게 있습니다.</footer>
 
-<script src="early.js?v=3"></script>
+<script src="early.js?v=4"></script>
 <script src="livepx.js?v=1"></script>
 <script src="viz.js?v=13"></script>
 <script>
@@ -1662,7 +1662,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261119d";
+var APPV = "20261119e";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1724,8 +1724,9 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
   var userName = null;
   try { userName = localStorage.getItem("userName"); } catch(e) {}
   if (!userName) {
-    userName = (prompt("처음 한 번만 이름을 입력해 주세요") || "").trim() || "이름없음";
-    try { localStorage.setItem("userName", userName); } catch(e) {}
+    var asked = true;
+    try { userName = (prompt("처음 한 번만 이름을 입력해 주세요") || "").trim() || "이름없음"; } catch(e) { userName = "이름없음"; asked = false; }   // 🛡 11/19 카톡 등 앱 속 브라우저는 prompt() 를 막아 오류(11/18 1대 10번) → 조용히 넘어감
+    if (asked) try { localStorage.setItem("userName", userName); } catch(e) {}
   }
   var ua = navigator.userAgent;
   var device = /iPhone|iPad/.test(ua) ? "아이폰" : /Android/.test(ua) ? "안드로이드" : "PC";
@@ -1735,14 +1736,14 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <!-- 10/11: defer = 순서는 그대로, 화면 글을 다 읽은 뒤 실행 · 첫 화면은 DOMREADY 뒤에 그림 -->
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합쳐 약 320KB 씩 나눈 조각들. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
-<script defer src="app.b01.js?v=00648f1ac2"></script>
-<script defer src="app.b02.js?v=a993a2269c"></script>
-<script defer src="app.b03.js?v=855aea37ec"></script>
-<script defer src="app.b04.js?v=712ce008fe"></script>
-<script defer src="app.b05.js?v=77165feb6f"></script>
-<script defer src="app.b06.js?v=a4119ef778"></script>
-<script defer src="app.b07.js?v=8a4758e46b"></script>
-<script defer src="app.b08.js?v=8f31ab1a73"></script>
+<script defer src="app.b01.js?v=cbd3f2d4c9"></script>
+<script defer src="app.b02.js?v=0e942aad4e"></script>
+<script defer src="app.b03.js?v=529cd18841"></script>
+<script defer src="app.b04.js?v=2123d282a0"></script>
+<script defer src="app.b05.js?v=96dbf7be3b"></script>
+<script defer src="app.b06.js?v=4ad2fe24bf"></script>
+<script defer src="app.b07.js?v=11ad58f0d1"></script>
+<script defer src="app.b08.js?v=0a70d91a96"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>

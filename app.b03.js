@@ -1,6 +1,6 @@
 /* 📦 app.b03.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 3/8 (pbcard.js … feed.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(3,17,["pbcard.js", "plus2.js", "plus3.js", "plus4.js", "plus5.js", "plus6.js", "plus7.js", "plus8.js", "gsearch.js", "brain.js", "feed.js"]);
+__bs(3,17,["pbcard.js", "plus2.js", "plus3.js", "plus4.js", "plus5.js", "plus6.js", "plus7.js", "plus8.js", "gsearch.js", "brain.js", "feed.js"],[4, 52, 374, 1020, 1340, 1730, 1959, 2135, 2322, 2570, 2635]);
 /* ======== pbcard.js ======== */
 /* ☀️ 오늘 한 장 카드 (10/28 사용자 「PB 한 장 → 오늘 한 장」으로 이름 바꿈) · 옛 이름 👔 PB 한 장 (10/28 사용자 「1·2번 내용은 장중 한 시간마다 갱신 · 알람은 그대로」)
    pbbrief.py 가 아침 1번 + 장중 매시간 쓰는 archive/x/pbbrief.json → 🏠 오늘 날씨판 바로 아래 카드. 10분마다 새 글이면 바꿔 그림.

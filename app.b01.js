@@ -1,6 +1,6 @@
 /* 📦 app.b01.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 1/8 (views.js … mine.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flow.js", "divc.js", "verdict.js", "mine.js"]);
+__bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flow.js", "divc.js", "verdict.js", "mine.js"],[4, 569, 885, 1303, 1355, 1703, 1891, 2509, 2578]);
 /* ======== views.js ======== */
 /* CH Investing — 탭별 화면 (그림·차트 우선, PDF는 아래 접어두기) */
 (function(){
@@ -73,10 +73,11 @@ __bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flo
     $("dashbtn").onclick = function(){
       $("dashbtn").remove(); $("dash").innerHTML = '<div class="loading">여는 중…</div>';
       getText(RAW + "market-strategy-report/main/docs/index.html").then(function(t){
+        if (!$("dash")) return;   // 🛡 11/19 받는 사이 탭을 옮기면 칸 없음
         $("dash").innerHTML = '<div class="card" style="padding:6px"><iframe class="rep" id="dashf"></iframe></div>';
         var f = $("dashf"); f.onload = function(){ try { var d = f.contentDocument; d.querySelectorAll("a").forEach(function(a){ a.target = "_blank"; }); f.style.height = d.documentElement.scrollHeight + 10 + "px"; } catch(x) {} };
         f.srcdoc = t;
-      }).catch(function(){ $("dash").innerHTML = '<div class="loading">대시보드를 못 불러왔어요.</div>'; });
+      }).catch(function(){ if ($("dash")) $("dash").innerHTML = '<div class="loading">대시보드를 못 불러왔어요.</div>'; });
     };
     if (!has("data.json")) return;
     Promise.all([getJSON(file("market", it.id, "data.json")), ledger()]).then(function(r){
@@ -1262,6 +1263,7 @@ __bk(1);
     if (it.files.indexOf("compass.json") < 0){ OLD(it, el); return; }
     el.innerHTML = '<div id="cpbox"><div class="loading">나침반 불러오는 중…</div></div><div id="cpold"></div>';
     getJSON(file("sector", it.id, "compass.json")).then(function(C){
+      if (!$("cpbox")) return;   // 🛡 11/19 받는 사이 다른 탭으로 넘어가면 칸이 없음 → null 에 innerHTML 오류(휴대폰 실사용 오류)
       var ks = ORDER.filter(function(k){ return C.markets[k]; });
       if (!ks.length){ $("cpbox").innerHTML = ""; return; }
       SECP.C = C;
@@ -1273,7 +1275,7 @@ __bk(1);
       if (window.CPLIVE) try { CPLIVE($("cplive"), C); } catch(err) { console.error(err); }
       if (window.CPREG) try { CPREG($("cpreg")); } catch(err) { console.error(err); }
       if (window.CPTOP) try { $("cptop").innerHTML = CPTOP(C); } catch(err) { console.error(err); }
-    }).catch(function(){ $("cpbox").innerHTML = '<div class="empty">나침반 자료를 못 불러왔어요.</div>'; });
+    }).catch(function(){ if ($("cpbox")) $("cpbox").innerHTML = '<div class="empty">나침반 자료를 못 불러왔어요.</div>'; });
     // 모닝 섹터 브리핑: 그날 것이 없으면(휴장·주말) 가장 최근 브리핑을 이어서 보여주기
     var rest = it.files.filter(function(f){ return f !== "compass.json"; });
     var hasBrief = rest.indexOf("briefing.txt") >= 0 || rest.indexOf("top.json") >= 0;

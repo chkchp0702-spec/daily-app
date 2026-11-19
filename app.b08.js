@@ -1,6 +1,6 @@
 /* 📦 app.b08.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 8/8 (ux1116.js … stab.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(8,84,["ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "stab.js"]);
+__bs(8,84,["ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "stab.js"],[4, 389, 847, 1225, 1418]);
 /* ======== ux1116.js ======== */
 /* 🧊 11/16 냉정 분석 5차 — 사용자 「1,5 진행하고 8번은 후자만 진행」
    ① 🩻 포트 진단 한 장 (#diag · 한 장 탭 위 작은 탭) — 고객 보유 종목·금액 → 쏠림 · 나라 · 업종 · 배당 · 1년 고점 대비를 그림 한 장(1080px)으로.

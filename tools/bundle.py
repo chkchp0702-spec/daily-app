@@ -60,11 +60,16 @@ def main():
         groups.append(cur)
     outs, tags, total = [], [], 0
     idx = 0
+    def starts(g):   # 🛡 11/19 조각 안 파일마다 시작 줄(머리 3줄 뒤) → early.js 가 휴대폰 오류의 「app.b01.js:줄」을 「compass.js」로 바꿔 보냄(어느 파일 오류인지 바로 앎)
+        r, ln = [], 4
+        for x in g:
+            r.append(ln); ln += x[1].count("\n")
+        return r
     for n, g in enumerate(groups, 1):
         name = "app.b%02d.js" % n
         guard = 'if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}\n'   # early.js 가 옛 저장본이어도 안 깨지게
         body = ("/* 📦 %s — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 %d/%d (%s … %s). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */\n" % (name, n, len(groups), g[0][0], g[-1][0])
-                + guard + "__bs(%d,%d,%s);\n" % (n, idx, json.dumps([x[0] for x in g])) + "".join(x[1] for x in g) + "__be(%d);\n" % n)
+                + guard + "__bs(%d,%d,%s,%s);\n" % (n, idx, json.dumps([x[0] for x in g]), json.dumps(starts(g))) + "".join(x[1] for x in g) + "__be(%d);\n" % n)
         idx += len(g)
         h = hashlib.sha1(body.encode("utf-8")).hexdigest()[:10]
         outs.append((name, body)); tags.append('<script defer src="%s?v=%s"></script>' % (name, h)); total += len(body.encode("utf-8"))

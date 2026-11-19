@@ -1,6 +1,6 @@
 /* 📦 app.b05.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 5/8 (vvfix.js … ux1022.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(5,35,["vvfix.js", "clamp.js", "ticker.js", "ux1013.js", "story.js", "ux1014.js", "ux1014b.js", "ux1014c.js", "ux1015.js", "ux1015b.js", "ux1015c.js", "ux1019.js", "ux1019b.js", "port_design.js", "twin.js", "threeway.js", "tidy.js", "smooth.js", "calm.js", "ux1022.js"]);
+__bs(5,35,["vvfix.js", "clamp.js", "ticker.js", "ux1013.js", "story.js", "ux1014.js", "ux1014b.js", "ux1014c.js", "ux1015.js", "ux1015b.js", "ux1015c.js", "ux1019.js", "ux1019b.js", "port_design.js", "twin.js", "threeway.js", "tidy.js", "smooth.js", "calm.js", "ux1022.js"],[4, 54, 135, 197, 426, 494, 653, 801, 973, 1115, 1361, 1501, 1721, 1807, 2576, 2699, 2826, 2960, 3109, 3326]);
 /* ======== vvfix.js ======== */
 /* 📱 11/02 사용자 「밑에 메뉴 화면이 왜 고정 안 되고 떠 있니」
    iOS 26 사파리·홈 화면 앱 버그: 글자 칸(검색·제안서 입력 등)에서 키보드를 열었다 닫으면 visualViewport.offsetTop 이 0으로 안 돌아와

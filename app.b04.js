@@ -1,6 +1,6 @@
 /* 📦 app.b04.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 4/8 (push.js … nav2.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(4,28,["push.js", "port.js", "simple.js", "pdfx.js", "honest.js", "up10.js", "nav2.js"]);
+__bs(4,28,["push.js", "port.js", "simple.js", "pdfx.js", "honest.js", "up10.js", "nav2.js"],[4, 164, 1327, 1577, 1778, 1843, 2391]);
 /* ======== push.js ======== */
 /* 🔔 알림 (10/9 단순화) — 이 앱을 설치한 휴대폰이 「알림 받기」만 켜고 끄면 끝.
    켜면: 알림 허락 → 웹 푸시 구독 → 구독 정보를 휴대폰에서 암호화(RSA 공개키)해서 보냄 → 서버(stock-screener 저장소의 push-relay, 6시간 이어달리기)가 신호마다 푸시.

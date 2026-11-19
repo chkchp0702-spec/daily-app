@@ -1,6 +1,6 @@
 /* 📦 app.b07.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 7/8 (design.js … ux1113.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(7,67,["design.js", "wow.js", "ux1105.js", "ux1105b.js", "bond_outlook.js", "ux1105c.js", "ux1109.js", "ux1109b.js", "ux1110.js", "ux1110b.js", "ux1112.js", "ux1111.js", "ux1112b.js", "ux1112c.js", "ux1112d.js", "ux1112e.js", "ux1113.js"]);
+__bs(7,67,["design.js", "wow.js", "ux1105.js", "ux1105b.js", "bond_outlook.js", "ux1105c.js", "ux1109.js", "ux1109b.js", "ux1110.js", "ux1110b.js", "ux1112.js", "ux1111.js", "ux1112b.js", "ux1112c.js", "ux1112d.js", "ux1112e.js", "ux1113.js"],[4, 152, 479, 636, 1080, 1161, 1729, 1928, 1994, 2085, 2262, 2387, 2495, 2671, 2759, 2863, 2951]);
 /* ======== design.js ======== */
 /* 🎨 디자인 한 벌 — 10/22 사용자 「다 진행해(D1~D8 + 다음)」 · 연구 문서: 프로젝트 「🎨 디자인 연구 (오늘 탭 중심) 2026-10-22」
    다른 작업과 안 부딪히게 **이 파일 하나**가 모양만 덮어씀(다른 파일의 내용·숫자·동작은 그대로). 맨 마지막에 읽힘.

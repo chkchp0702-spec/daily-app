@@ -1,6 +1,6 @@
 /* 📦 app.b02.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 2/8 (products.js … onepage.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(2,9,["products.js", "els_design.js", "extras.js", "burst.js", "usage.js", "plus.js", "cpin.js", "onepage.js"]);
+__bs(2,9,["products.js", "els_design.js", "extras.js", "burst.js", "usage.js", "plus.js", "cpin.js", "onepage.js"],[4, 992, 1221, 1586, 1648, 1773, 1975, 2077]);
 /* ======== products.js ======== */
 /* CH Investing — 🛍️ 상품: 미래에셋증권이 지금 파는 채권 · 펀드 · ELS (archive/x/products.json, products.yml 하루 3번 · 🇧🇷 브라질 실시간 금리·달러채 archive/x/brl_live.json 평일 20분마다)
    10/16 사용자: 「상품 카테고리 — 국채·미국채·브라질국채 / 펀드·사모펀드(수익률 순위) / ELS — 하위 3개 · 기존 카테고리 형식과 비슷하게」

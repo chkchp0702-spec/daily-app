@@ -125,6 +125,7 @@ def app_checks():
         if not (apv == swv == vt): probs.append(f"버전 짝 안 맞음: index {apv} · sw {swv} · version.txt {vt} → 휴대폰에 새 버전이 안 들어감")
     except Exception as ex:
         probs.append(f"버전 짝 검사 실패: {ex}")
+    src0 = fact_src()   # 🩺 11/19: 화면 읽기 전 자료도 한 벌 — 검진(20분) 도중 port.json 이 바뀌면(11/19 16:04 −8.04→−8.18) 화면은 옛 숫자·자료는 새 숫자라 「숫자 틀림」 6개 가짜 경보
     with sync_playwright() as p:
         b = p.chromium.launch()
         ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, service_workers="block")
@@ -258,16 +259,25 @@ def app_checks():
         b.close()
     probs += anchor_check(lints)
     # 🩺 10/29 ② 화면 숫자 ↔ 원래 자료
-    src = {}
-    for k, u in (("home", MSR + "market/home.json"), ("port", MSR + "market/port.json"), ("kick", MSR + "market/kick.json"), ("live_kr", DA + "archive/x/live_kr.json")):
-        try: src[k] = json.loads(web(u) or "null")
-        except Exception: src[k] = None
+    src = fact_src()
     fok, fp = DC.facts(texts, src, NOW)
+    if fp and src0:   # 앞·뒤 자료 중 하나와 맞으면 검진 도중 자료가 바뀐 것 → 문제로 안 셈
+        fok0, fp0 = DC.facts(texts, src0, NOW)
+        k0 = {x.split(' 화면 ')[0] for x in fp0}
+        fp = [x for x in fp if x.split(' 화면 ')[0] in k0]
     probs += fp
     res.append({"tab": "숫자 맞추기", "ok": fok, "bad": fp})
     res.append({"tab": "내용 검사", "lint": {t: {k: v for k, v in L.items() if k not in ("ids_here", "anchors")} for t, L in lints.items()}})
     if retried: res.append({"tab": "재시도로 열림", "tabs": retried})
     return res, probs
+
+
+def fact_src():
+    src = {}
+    for k, u in (("home", MSR + "market/home.json"), ("port", MSR + "market/port.json"), ("kick", MSR + "market/kick.json"), ("live_kr", DA + "archive/x/live_kr.json")):
+        try: src[k] = json.loads(web(u) or "null")
+        except Exception: src[k] = None
+    return src
 
 
 def anchor_check(lints):

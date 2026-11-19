@@ -1,6 +1,6 @@
 /* 📦 app.b06.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 6/8 (ux1023.js … home2.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(6,55,["ux1023.js", "ux1026.js", "voices.js", "ux1104.js", "mc.js", "iconz.js", "today.js", "vidmap.js", "guide.js", "easy.js", "habit.js", "home2.js"]);
+__bs(6,55,["ux1023.js", "ux1026.js", "voices.js", "ux1104.js", "mc.js", "iconz.js", "today.js", "vidmap.js", "guide.js", "easy.js", "habit.js", "home2.js"],[4, 387, 675, 875, 1372, 1531, 1710, 2105, 2173, 2488, 2602, 2960]);
 /* ======== ux1023.js ======== */
 /* 10/23 사용자 「1,2,3 다 진행하고 내 돈 전체 비상 훈련도 진행」 — 📱 앱 아이디어 A10/23-1·2·3 + 🧯 비상 훈련
    ① 🐇🐢 누가 먼저 말했나 (A10/23-1) — 📄 종목 화면 「🧵 앱 성적표」 위: 피드 채널마다 이 종목 이름을 처음 부른 때를 주가 선 위 점으로 +

@@ -69,10 +69,11 @@
     $("dashbtn").onclick = function(){
       $("dashbtn").remove(); $("dash").innerHTML = '<div class="loading">여는 중…</div>';
       getText(RAW + "market-strategy-report/main/docs/index.html").then(function(t){
+        if (!$("dash")) return;   // 🛡 11/19 받는 사이 탭을 옮기면 칸 없음
         $("dash").innerHTML = '<div class="card" style="padding:6px"><iframe class="rep" id="dashf"></iframe></div>';
         var f = $("dashf"); f.onload = function(){ try { var d = f.contentDocument; d.querySelectorAll("a").forEach(function(a){ a.target = "_blank"; }); f.style.height = d.documentElement.scrollHeight + 10 + "px"; } catch(x) {} };
         f.srcdoc = t;
-      }).catch(function(){ $("dash").innerHTML = '<div class="loading">대시보드를 못 불러왔어요.</div>'; });
+      }).catch(function(){ if ($("dash")) $("dash").innerHTML = '<div class="loading">대시보드를 못 불러왔어요.</div>'; });
     };
     if (!has("data.json")) return;
     Promise.all([getJSON(file("market", it.id, "data.json")), ledger()]).then(function(r){

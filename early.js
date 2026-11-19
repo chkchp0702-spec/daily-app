@@ -101,7 +101,16 @@
 
   /* ── ② 묶음 스스로 고치기 ── */
   var BK = window.__BKS = {last: -1, run: 0, ok: {}, names: {}, healed: []};
-  window.__bs = function(c, first, names){ BK.run = c; BK.last = first - 1; BK.names[c] = {first: first, list: names || []}; };
+  window.__bs = function(c, first, names, lines){ BK.run = c; BK.last = first - 1; BK.names[c] = {first: first, list: names || [], lines: lines || []}; };
+  // 🛡 11/19 오류 줄(app.b01.js:381)을 원래 파일 이름(compass.js)으로 — 묶음 이름만으론 9개 파일 중 어디인지 몰라 못 고치던 것(11/18 「app.b01.js」 11번)
+  var srcOf = window.__srcOf = function(stack, dflt){
+    try {
+      var m = /app\.b(\d+)\.js(?:\?[^:\s)]*)?:(\d+):/.exec(String(stack || "")); if (!m) return dflt;
+      var info = BK.names[+m[1]], ln = +m[2]; if (!info || !info.lines || !info.lines.length) return dflt;
+      for (var i = info.lines.length - 1; i >= 0; i--) if (ln >= info.lines[i]) return info.list[i] || dflt;
+    } catch(z) {}
+    return dflt;
+  };
   window.__bk = function(n){ BK.last = n; };
   window.__be = function(c){ BK.ok[c] = 1; if (BK.run === c) BK.run = 0; };
   function heal(c, src){
@@ -128,12 +137,12 @@
       return;
     }
     if (ev.target && ev.target !== window && (ev.target.src || ev.target.href)){ return; }   // 그림·스크립트 못 받음은 따로 안 셈(너무 흔함)
-    chErr("js", (ev.error && ev.error.message) || ev.message, src);
+    chErr("js", (ev.error && ev.error.message) || ev.message, srcOf(ev.error && ev.error.stack, src));
   }, true);
   window.addEventListener("unhandledrejection", function(ev){
     var r = ev.reason, msg = r && (r.message || (typeof r === "string" ? r : "")) || "";
     if (!msg) return;                        // throw 0 같은 「못 받음」 표시는 셈하지 않음
     var net = /Failed to fetch|Load failed|NetworkError|network connection|timed? ?out|offline/i.test(msg);
-    chErr(net ? "net" : "promise", msg, r && r.stack ? (/([^\/\s(]+\.js)/.exec(r.stack) || [])[1] : "");
+    chErr(net ? "net" : "promise", msg, r && r.stack ? srcOf(r.stack, (/([^\/\s(]+\.js)/.exec(r.stack) || [])[1]) : "");
   });
 })();
