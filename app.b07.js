@@ -1313,7 +1313,9 @@ __bk(71);
     if (o.k != null) N.push(["코스피", o.kv || "", o.k]);
     if (o.q != null) N.push(["코스닥", o.qv || "", o.q]);
     if (o.s != null) N.push([o.sl, o.sv || "", o.s]);
-    return '<p class="ez-top">' + e(String(b.asof || b.at || "").slice(11, 16) || b.label || "") + ' 갱신 · ' + PHN[o.ph] + (o.early ? ' · 09:30 전이라 전날 마감 기준' : '') + '</p>' +
+    // 🗓 11/19 「오늘 장이 반영 안 됐다」 — 숫자는 실시간 표(live_kr · 10분마다)인데 꼬리표는 두뇌 시각(한 시간마다)이라 옛 값처럼 보였음 → 숫자 시각을 그대로
+    var td_ = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10), lt_ = b._kr && b._kr.date === td_ && b._kr.t ? b._kr.t : "";
+    return '<p class="ez-top">' + (lt_ ? '지수 ' + e(lt_) + ' 기준' : e(String(b.asof || b.at || "").slice(11, 16) || b.label || "") + ' 갱신') + ' · ' + PHN[o.ph] + (o.early ? ' · 09:30 전이라 전날 마감 기준' : '') + '</p>' +
       '<div class="ez-light ' + o.L[0] + '"><div class="ez-lh"><b>' + o.L[1] + '</b><div><strong>' + e(o.L[2]) + '</strong><em>' + e(o.L[3].replace(/ · 오늘 .*$/, "")) + '</em></div></div>' +
         '<div data-vd class="vd-mini"></div>' +   /* 🧭 결론 두 줄(verdict.js)이 신호등 안으로 */
         warnHtml(o, b._bear, b._bub) + '</div>' +
