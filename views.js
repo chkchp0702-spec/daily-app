@@ -60,7 +60,7 @@
     var tail = "";
     if (has("review.md")) tail += '<section class="card md" id="mrev">…</section>';
     if (txt) tail += card("카톡 요약", '<div class="txt" id="mtxt">…</div>');
-    tail += pdfs.map(function(f){ return fold(/Summary/i.test(f) ? "요약본 PDF" : "전체 리포트 PDF", file("market", it.id, f)); }).join("");
+    tail += pdfs.map(function(f){ return fold(/Summary/i.test(f) ? "요약본 PDF" : "전체 리포트 PDF", file("market", it.id, f) + "?v=" + encodeURIComponent((window.M && M.updated) || Math.floor(Date.now() / 600000))); }).join("");   // 🌅 11/19 같은 날 PDF 를 다시 만들면 옛 저장본이 보이던 것 — 갱신 시각을 꼬리로
     tail += '<button class="fold" id="dashbtn">📊 전략 대시보드 펼치기</button><div id="dash"></div>';
     el.innerHTML = '<div id="mhead"></div><div id="live"></div><div id="mbody"></div>' + tail;
     marketBoard($("live"));
