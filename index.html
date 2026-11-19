@@ -1662,7 +1662,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261119b";
+var APPV = "20261119c";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1742,7 +1742,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="app.b05.js?v=77165feb6f"></script>
 <script defer src="app.b06.js?v=a4119ef778"></script>
 <script defer src="app.b07.js?v=74e79b3644"></script>
-<script defer src="app.b08.js?v=ee598e84d2"></script>
+<script defer src="app.b08.js?v=98eb92aff5"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>

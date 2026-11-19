@@ -73,21 +73,32 @@
   }
   function place(){
     var k = cur(), box = D.getElementById("mo19"), anchor = null, where = "after";
-    if (k === "home"){ anchor = D.getElementById("ezhero"); }
+    if (k === "home"){ anchor = D.getElementById("ezrows") || D.getElementById("jobmap"); }   // 11/19 고침: 첫 칸(ezhero) 바로 아래는 「할 수 있는 일」(ux1112b)이 자리 잡는 곳 — 둘이 서로 밀어내며 화면이 흔들렸음 → 그 아래로
     else if (k === "market"){ anchor = D.getElementById("live"); where = "before"; }
     if (!anchor || !MO || !fresh(MO)){ if (box && (!anchor || k !== box._k)) box.remove(); return; }
     if (!box){ box = D.createElement("section"); box.id = "mo19"; box.className = "card no-clp"; box.setAttribute("data-noemo", "1"); box.setAttribute("data-cz", "done"); box.setAttribute("data-xc", "1"); }
     box._k = k;
-    if (where === "after"){ if (anchor.nextElementSibling !== box) anchor.insertAdjacentElement("afterend", box); }
-    else if (anchor.previousElementSibling !== box) anchor.insertAdjacentElement("beforebegin", box);
+    var need = where === "after" ? anchor.nextElementSibling !== box : anchor.previousElementSibling !== box;
+    if (need){   // 다른 스크립트와 자리다툼이면(2초에 3번 넘게 옮김) 지금 자리에 그대로 둠 — 화면이 흔들리지 않게
+      var now = Date.now(); place.mv = (place.mv || []).filter(function(t){ return now - t < 2000; });
+      if (place.mv.length < 3 || !box.parentNode){ place.mv.push(now); if (where === "after") anchor.insertAdjacentElement("afterend", box); else anchor.insertAdjacentElement("beforebegin", box); }
+    }
     var key = MO.at + "|" + pIdx();
     if (box._h === key) return; box._h = key;
     var sl = D.getElementById("m19w"), x = sl ? sl.scrollLeft : 0;
     box.innerHTML = deck(MO);
     var w = D.getElementById("m19w"); if (w){ w.scrollLeft = x; w.addEventListener("scroll", dots, {passive: true}); }
+    fitH();
+    if (w && window.ResizeObserver){ var ro = new ResizeObserver(function(){ w._h = 0; fitH(); }); [].forEach.call(w.children, function(c){ ro.observe(c); }); }
+  }
+  function fitH(){   // 넘김 칸 높이 = 지금 보는 카드 높이 (긴 카드에 맞춰 짧은 카드 밑이 텅 비던 것)
+    var w = D.getElementById("m19w"); if (!w || !w.children.length) return;
+    var i = Math.max(0, Math.min(w.children.length - 1, Math.round(w.scrollLeft / Math.max(1, w.children[0].offsetWidth + 10))));
+    var h = w.children[i].offsetHeight + 8; if (h > 40 && w._h !== h){ w._h = h; w.style.height = h + "px"; }
   }
   function dots(){ var w = D.getElementById("m19w"), d = D.getElementById("m19dot"); if (!w || !d) return;
-    var i = Math.round(w.scrollLeft / Math.max(1, w.clientWidth * 0.88)); [].forEach.call(d.children, function(x, k){ x.classList.toggle("on", k === i); });
+    clearTimeout(dots.t); dots.t = setTimeout(fitH, 90);
+    var i = Math.round(w.scrollLeft / Math.max(1, w.children[0].offsetWidth + 10)); [].forEach.call(d.children, function(x, k){ x.classList.toggle("on", k === i); });
     if (i >= 1 && !dots.used){ dots.used = 1; try { window.__track && __track("mo19swipe"); } catch(x) {} } }
 
   /* ═════════ ⑦ 고객 포트 대입 (포트 진단 결과 아래) ═════════ */
@@ -138,8 +149,8 @@
   var st = D.createElement("style");
   st.textContent =
     "#mo19{padding:14px 0 10px;overflow:hidden}#mo19 .m19h{margin:0 16px 8px;font-size:16px;font-weight:800;color:var(--text)}#mo19 .m19h small{font-size:12.5px;font-weight:500;color:var(--sub);margin-left:6px}" +
-    ".m19w{display:flex;align-items:flex-start;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 16px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.m19w::-webkit-scrollbar{display:none}" +
-    ".m19c{flex:0 0 88%;scroll-snap-align:center;border:1px solid var(--line);border-radius:18px;padding:14px 14px 12px;background:var(--panel);box-sizing:border-box;min-height:260px;word-break:keep-all}" +
+    ".m19w{display:flex;align-items:flex-start;gap:10px;overflow-x:auto;overflow-y:hidden;transition:height .25s ease;scroll-snap-type:x mandatory;padding:2px 16px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.m19w::-webkit-scrollbar{display:none}" +
+    ".m19c{flex:0 0 88%;scroll-snap-align:center;border:1px solid var(--line);border-radius:18px;padding:14px 14px 12px;background:var(--panel);box-sizing:border-box;word-break:keep-all}" +
     ".m19c.c1{background:linear-gradient(160deg,#1f2d4d,#2c4a86);color:#fff;border:0}.m19c.c1 .m19k,.m19c.c1 .m19k small{color:#c9d6ea}.m19c.c1 .m19so{color:#ffd27a}" +
     ".m19k{font-size:13px;font-weight:800;color:var(--sub);margin-bottom:8px}.m19k span{display:inline-block;font-size:11px;border:1px solid currentColor;border-radius:999px;padding:0 7px;margin-right:6px;opacity:.8}.m19k small{font-weight:500;margin-left:6px}" +
     ".m19big{font-size:19px;font-weight:800;line-height:1.42;margin:0 0 10px}.m19big .ok{color:#1f9d55}.m19so{font-size:15px;line-height:1.5;font-weight:700;margin:0}.m19sw{margin:14px 0 0;font-size:12.5px;opacity:.7}" +
@@ -174,5 +185,6 @@
   function soon(){ if (!q) q = setTimeout(tick, 200); }
   function start(){ load().then(tick); try { new MutationObserver(soon).observe(D.body, {childList: true, subtree: true}); } catch(x) {} setInterval(function(){ load().then(tick); }, 60000); }
   if (D.readyState === "loading") D.addEventListener("DOMContentLoaded", start); else start();
+  window.addEventListener("resize", function(){ var w = D.getElementById("m19w"); if (w) w._h = 0; fitH(); });
   window.__ux1119 = {load: load, deck: deck, rx: rx};   // 점검용
 })();
