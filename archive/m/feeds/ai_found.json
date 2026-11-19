@@ -1,6 +1,78 @@
 {
  "items": [
   {
+   "title": "SEC, 젠슨 황 퇴진 뒤 엔비디아 공시 민사 조사(테크크런치)",
+   "url": "https://techcrunch.com/2026/11/17/sec-reportedly-investigating-nvidia-amid-huang-exit/",
+   "press": "TechCrunch",
+   "at": "2026-11-20 08:40",
+   "why": "NVDA(🐋 신호 종목)·나스닥100 코어 — 11/19 캘리포니아 법무장관 소환장까지 규제 조사 3겹(SEC·주 법무·의회)",
+   "summary": "SEC가 황 CEO 퇴진과 관련해 엔비디아 공시를 민사 조사 중(WSJ 단독 인용). 11/19엔 캘리포니아 법무장관이 中 칩 밀반출·투자자 공시 관련 소환장 발부(CNBC). 주가 146.0$(−3.29%, 6거래일 시총 −6,110억$)."
+  },
+  {
+   "title": "S&P500: 옵션 만기와 변동성 급등, 금요일 출렁이는 출발 예고(인베스팅)",
+   "url": "https://www.investing.com/analysis/sp-500-options-expiry-and-surging-volatility-point-to-a-volatile-friday-open-200670550",
+   "press": "Investing.com",
+   "at": "2026-11-20 08:40",
+   "why": "오늘 밤(11/20 美) 월간 옵션 만기 — 딜러 숏감마면 하락·반등 모두 커짐 · 🔴 뼈대 전환 타이밍(분할)과 연결",
+   "summary": "VIX 24.56→28.44(+15.8%, 키움 김승혁·김우다 텔레그램 인용) · 11/20 만기 델타 중 콜 비중 약 35%로 평소(50~70%)보다 낮은 풋 쏠림 → 딜러 숏감마 환경. 만기 뒤 자동 반등은 이르다는 평."
+  },
+  {
+   "title": "美 은행주 하락 — KBW 은행지수, 약세 기술 신호(데드크로스) 근접",
+   "url": "https://tradersunion.com/news/stocks/show/4291330-us-bank-stocks-slide-kbw-index/",
+   "press": "Traders Union",
+   "at": "2026-11-20 07:45",
+   "why": "가설①(AI 차입 → 신용 스트레스) 확산 경로 — 은행주가 S&P 200일선 이탈과 같이 꺾이는지 · 🫧 신용 칸",
+   "summary": "KBW 은행지수가 50일선이 200일선을 밑도는 약세 신호에 근접(원문 날짜 미확인) · 이데일리 11/20 「美 은행주 4일새 6.6% 급락·데드크로스」와 같은 흐름"
+  },
+  {
+   "title": "월가, 2027년 S&P500 이익 증가율 35%→15%로 반토막 예상",
+   "url": "https://247wallst.com/investing/2026/10/03/wall-street-expects-sp-500-profit-growth-to-collapse-from-35-to-15-in-2027/",
+   "press": "24/7 Wall St.",
+   "at": "2026-11-20 07:45",
+   "why": "11/20 피드 「Wall Street sees earnings growth halving in 2027」의 숫자 배경 — 고점 −8% S&P의 밸류 부담 · 가설②",
+   "summary": "2026년 이익 증가 약 35% → 2027년 약 15% 컨센(10/3 기사) · 이익 둔화 + 금리 5%면 멀티플 방어 어려움"
+  },
+  {
+   "title": "美 상무부, 中 기업에 AI 칩 87만9천 개 넘게 판매 승인 — 매스트 하원 외교위원장",
+   "url": "https://www.cnbc.com/2026/11/19/nvidia-amd-china-chip-sales-congress.html",
+   "press": "CNBC",
+   "at": "2026-11-20 06:40",
+   "why": "엔비디아·AMD 中 판매 정치 압박(하원 조사) — NVDA 🐋 신호(11/17)·AMD 공매도 보고서와 같은 「中 노출」 할인 축 · 가설④",
+   "summary": "매스트 의원 「상무부가 中 기업 대상 AI 칩 87.9만 개 이상 판매 승인」 · 같은 날 NVDA −3.29%(146.0$)·SOXX −2.71%(daily-app 05:58)"
+  },
+  {
+   "title": "코어위브 공동창업자, 급락한 자사 회사채에 3천만 달러 투자",
+   "url": "https://www.marketwatch.com/story/a-coreweave-co-founder-just-made-an-unconventional-30-million-wager-on-its-battered-bonds-5586b0e9",
+   "press": "MarketWatch",
+   "at": "2026-11-20 06:40",
+   "why": "가설①(AI 차입 크레딧) 반대 쪽 첫 내부자 신호 — 네오클라우드 채권 바닥 여부 · 🫧 신용 칸",
+   "summary": "브라이언 벤투로가 코어위브 회사채 3,000만$ 매수 · 엔비디아 6거래일 시총 6,110억$ 감소(마켓워치) 같은 날"
+  },
+  {
+   "title": "美 증시 하락 — 매도는 칩 종목에 몰려(전 업종 확산 아님)",
+   "url": "https://investinglive.com/stocks/us-stock-markets-slide-but-the-selling-is-localized-around-chip-names/",
+   "press": "investingLive",
+   "at": "2026-11-20 05:45",
+   "why": "🫧 「현금 도피」 판정 반대 근거 — 매도가 칩에 몰렸다는 시각 vs 「전 업종 매도·소비재 선두」(구글뉴스) · S&P 200일선 사흘째",
+   "summary": "칩 종목 중심 매도 · 05:32 SOXX −2.6%·엔비디아 −2.62%·메타 −3.18%·알파벳 −2.95%(daily-app)"
+  },
+  {
+   "title": "AMD, 공매도 보고서 「中 제재 기업에서 AMD 펌웨어」 의혹에 급락 — 회사 「미국 법 준수」",
+   "url": "https://www.cnbc.com/2026/11/19/amd-falls-on-short-seller-report-of-alleged-china-exposure.html",
+   "press": "CNBC",
+   "at": "2026-11-20 05:45",
+   "why": "엔비디아(머디워터스·하원 조사)에 이어 AMD까지 공매도 보고서 — 칩 「규제·신뢰」 할인 확산, SOXX D+5 관찰",
+   "summary": "AMD 장중 약 −8%(이데일리) · 하원 위원회 中 AI칩 수출 라이선스 정보 공개(인베스팅) 같은 날"
+  },
+  {
+   "title": "이번 주 10년 물가연동채(TIPS) 입찰 미리보기 — 실질금리 2.6%대 기대",
+   "url": "https://tipswatch.com/2026/11/15/this-weeks-10-year-tips-auction-shows-a-lot-of-potential/",
+   "press": "TIPSWatch",
+   "at": "2026-11-20 04:45",
+   "why": "11/20 입찰이 2002년 이후 최고 실질금리로 낙찰(구글뉴스) — 가설③ 12/9 FOMC·美 장기채 나눠 사기 자리",
+   "summary": "9/17 재입찰 실질 2.653%로 18년 만 최고 · 11/20 신규 10년물 입찰이 그보다 높을 가능성 예고(11/15 글) · 실제 낙찰 숫자는 미확인"
+  },
+  {
    "title": "엔비디아, 황 퇴진 뒤 SEC 조사 착수 — 캘리포니아 법무장관도 조치 검토",
    "url": "https://www.investmentnews.com/equities/embattled-nvidia-faces-sec-probe-as-california-attorney-general-mulls-action/269054",
    "press": "InvestmentNews",
@@ -567,79 +639,7 @@
    "at": "2026-11-18 12:40",
    "why": "공모 규모·밸류(최대 1.4조$ 보도)가 NVDA 🐋·SMH 수급과 겹침 — 첫 거래 날 AI 칩주 반응 확인용",
    "summary": "희망가 70~78$·몸값 최대 약 1.4조$(TNW 보도와 같은 수치). 일부 보도는 약 1조$ 목표(investingLive) — 수치 엇갈림."
-  },
-  {
-   "title": "겐슬러 전 SEC 위원장 「엔비디아 조사 핵심은 황이 주주를 오도했는지 — AI 재평가 앞」",
-   "url": "https://stocktwits.com/news-articles/markets/equity/gary-gensler-says-key-question-in-nvidia-probe-is-whether-huang-misled-shareholders-sees-ai-repricing-ahead/cNGrO6sR9ev",
-   "press": "Stocktwits",
-   "at": "2026-11-18 11:40",
-   "why": "NVDA 🐋·💬 2번 — 실적 상회 뒤에도 SEC 조사(WSJ)가 갭 상단을 누르는 이유",
-   "summary": "WSJ 「SEC 엔비디아 공시 조사」 보도 뒤 겐슬러가 핵심 쟁점을 「주주 오도 여부」로 정리, AI 재평가를 예상. 보도 시점 정확히 미확인."
-  },
-  {
-   "title": "세마포 「美 법무부 여러 조사가 엔비디아로 번질 수 있다」(정부 관계자 2명)",
-   "url": "https://www.newsquawk.com/headlines/multiple-us-doj-probes-threaten-to-sweep-up-nvidia-nvda-reports-semafor-citing-two-admin-officials",
-   "press": "Newsquawk(세마포 인용)",
-   "at": "2026-11-18 11:40",
-   "why": "가설 ④·한국 반도체 갭 — 숫자 밖 규제 꼬리 위험, 오늘 한국 갭 전부 반납의 배경 재료",
-   "summary": "세마포가 행정부 관계자 2명을 인용해 법무부 복수 조사가 엔비디아를 휩쓸 수 있다고 보도. 보도 날짜 미확인."
-  },
-  {
-   "title": "BIS, 중국 기업의 해외 AI 연산(원격 접속) 경로 차단",
-   "url": "https://aiweekly.co/alerts/bis-closes-overseas-ai-compute-route-for-chinese-firms",
-   "press": "AI Weekly",
-   "at": "2026-11-18 10:45",
-   "why": "가설 ④ · 한국 반도체 — 美 규제가 칩 판매에서 「해외 데이터센터 원격 사용」까지 넓어짐, 중국 보복 경고(블룸버그)와 묶어 내일 APEC 미·중 정상회담 변수",
-   "summary": "제목 기준: 美 상무부 BIS가 중국 기업이 해외 데이터센터로 첨단 AI 칩을 쓰는 길을 막음. 세부 숫자·시행일 미확인."
-  },
-  {
-   "title": "중국, 美 「AI 패권주의」 비판하며 대응 조치 위협",
-   "url": "https://thenextweb.com/news/china-us-ai-hegemonism-countermeasures",
-   "press": "The Next Web",
-   "at": "2026-11-18 10:45",
-   "why": "중국 보복 수단(희토류·장비·소프트웨어 금지)이 한국·대만 AI 상류 공급망으로 번지는지 — 반도체 갭 유지 여부와 연결",
-   "summary": "제목 기준: 중국이 美 AI 칩 규제를 「패권주의」로 비판·대응 조치 예고. 원문 날짜·세부 미확인."
-  },
-  {
-   "title": "아시아 증시 — 닛케이 +1.4%, 항셍은 엔비디아 경영진 사태로 약세",
-   "url": "https://investinglive.com/stock-market-update/asian-stocks-steady-as-nikkei-gains-1-4-hang-seng-slips-on-nvidia-leadership-fallout/",
-   "press": "investingLive",
-   "at": "2026-11-18 09:40",
-   "why": "🎯 일본·홍콩 칸 — 엔비디아 실적 뒤 아시아 반응이 나라별로 갈림(한국·일본 반도체 반등 vs 홍콩 약세)",
-   "summary": "제목 기준: 닛케이 +1.4% · 항셍 하락 — 엔비디아 리더십 공백 여파. 세부 숫자 미확인."
-  },
-  {
-   "title": "엔비디아, 중국용 AI 칩 생산 중단",
-   "url": "https://www.newsbytesapp.com/news/business/nvidia-halts-production-of-ai-chips-for-china/tldr",
-   "press": "NewsBytes",
-   "at": "2026-11-18 09:40",
-   "why": "가설 ④ — 엔비디아 4분기 가이던스는 중국 제외, 판매 중단은 숫자보다 미·중 단절 신호(블룸버그 11/18 피드와 같은 사건)",
-   "summary": "엔비디아 임시 경영진이 美 승인에도 중국에 AI 칩을 보내지 않는다고 밝힘(블룸버그 피드). 생산 중단 세부 숫자 미확인."
-  },
-  {
-   "title": "앤스로픽 IPO 일정 — 11/18 공모가 확정, 11/19 첫 거래",
-   "url": "https://fourweekmba.com/ai-anthropics-ipo-day-by-day-pricing-18-nov-trading-19-nov/",
-   "press": "FourWeekMBA",
-   "at": "2026-11-18 08:45",
-   "why": "나스닥100 코어 칸 — 상장 15거래일 뒤 편입 수급·오늘 밤 공모가가 성장주 자금 흐름 신호(💬 5·14번)",
-   "summary": "공모가 확정 11/18, 나스닥 첫 거래 11/19 일정 정리. 희망가 70~78달러(CNBC 소식통 11/17 보도) 위 확정 여부가 관전점."
-  },
-  {
-   "title": "S&P500·나스닥 선물 상승 — 엔비디아·코어위브 프리마켓 주목",
-   "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-futures-rise-premarket-crwv-gpro-spcx-nvda-nlst-stocks-in-focus/cNGDlb9R9B7",
-   "press": "Stocktwits",
-   "at": "2026-11-18 08:45",
-   "why": "가설 ④ — 실적 상회 뒤 네오클라우드(코어위브) 동반 반등: 「빚으로 짓는 쪽」까지 같이 오르면 갈림 가설 시험대",
-   "summary": "엔비디아 실적 뒤 미국 지수 선물 상승 전환, 코어위브·엔비디아가 프리마켓 주목 종목(세부 숫자 미확인)."
-  },
-  {
-   "title": "엔비디아 이사회 의장 「젠슨 황 CEO 복귀 계획 없음」 — 실적 라이브",
-   "url": "https://www.nbcnews.com/business/business-news/live-blog/nvidia-stock-earnings-report-jensen-huang-rcna609804",
-   "press": "NBC News",
-   "at": "2026-11-18 07:45",
-   "why": "NVDA 🐋 고래 신호·💬 3번 — 실적 상회 뒤에도 CEO 공백 장기화",
-   "summary": "이사회 의장 「황 복귀 계획 없음」 · 실적 매출 1,158억$·가이던스 1,300억$ 상회 · 시간외 상승"
   }
  ],
- "at": "2026-11-20 01:45"
+ "at": "2026-11-20 08:40"
 }
