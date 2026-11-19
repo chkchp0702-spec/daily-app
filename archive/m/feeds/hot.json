@@ -1,5 +1,5 @@
 {
- "at": "2026-11-19 02:45",
+ "at": "2026-11-19 08:45",
  "rule": "🔴 핵심 = 정말 큰 것만(하루 0~3개, 대부분 시간은 0개): 연준·한은 깜짝·지수 −3%↓ 급변·보유 칸/킥 종목 직격·핵심 가설을 뒤집는 숫자 / 🟡 주목 = 그다음 중요한 것만(시간당 0~3개) · 나머지는 표시 안 함",
  "items": {
   "globalmktinsight/7914": {
@@ -96,6 +96,56 @@
    "lv": 1,
    "why": "한중 정상회담 FTA 서비스·투자 협상 타결 — 한한령 해제와 겹쳐 미디어·여행 시가 갭(관찰 칸·💬 12·15번)",
    "at": "2026-11-19 02:45"
+  },
+  "n/3f114c0ab3c1abd8ef0f03832cc80copperpricesplungetohtmltsrcrss": {
+   "lv": 1,
+   "why": "가설①④ — 구리 급락 이유가 「AI 데이터센터 베팅 철수」: 빚으로 짓는 AI 축소가 원자재까지 번짐",
+   "at": "2026-11-19 03:45"
+  },
+  "n/ESHp0MmZBT3pEbHE1NExsbkhMTEVpRFVyMEFSLWVBeXhZSmExQlE5SW5Soc5": {
+   "lv": 1,
+   "why": "가설③ 12/9 FOMC 분수령 — 시장이 내년 9월까지 인상 0.8%p 반영, 「오래 높게」 쪽",
+   "at": "2026-11-19 03:45"
+  },
+  "n/s20261118fedminutesshowalmostallofficialsexpectmoreratehikes": {
+   "lv": 1,
+   "why": "가설③ 12/9 FOMC 분수령 — 10월 의사록 「거의 모든 위원 추가 인상 예상·일부 12월 0.25%p 초과 검토」+ AI가 물가 올릴 걱정(CNBC) · 💬 6·14번",
+   "at": "2026-11-19 04:50"
+  },
+  "n/klMeHhybGw3MWpGckxMZjlsY3RhbE82d21YN3gxLUxPZ2RZcGd4cDloMAoc5": {
+   "lv": 1,
+   "why": "가설① AI 차입 약한 고리 — 크레딧 책임자들 「빚 한꺼번에 재가격」 공포 경고 = 🫧 신용 칸 근거",
+   "at": "2026-11-19 05:40"
+  },
+  "n/autiousstanceonchinaafterhuangsdeparture194945165htmltsrcrss": {
+   "lv": 1,
+   "why": "반도체 칸·가설④ — 엔비디아 황 퇴진 뒤 중국 판매 더 보수적(H200) = 4분기 가이던스 중국 0 굳히기",
+   "at": "2026-11-19 05:40"
+  },
+  "n/comnewsarticles20261118anthropicissaidtopriceipoat83pershare": {
+   "lv": 1,
+   "why": "가설④ AI 안 갈림 — 앤스로픽 공모가 83달러(희망가 상단 위) vs 같은 날 엔비디아 −2.95% = 돈이 새 AI 공모로 이동, 오늘 밤 첫 거래가 AI 심리 시험대",
+   "at": "2026-11-19 06:45"
+  },
+  "n/liRVdXc3VvcW5VYXlWcU1OQU9DV1BpeGJwaXFfa3BKbE9QTWdvbU1uc0Uoc5": {
+   "lv": 1,
+   "why": "가설③ 12/9 FOMC — 월러 「12월 0.5%p 인상 필요」 공개 발언, 의사록 직후 달러 19개월 최고 = 「폭」 꼬리 굵어짐",
+   "at": "2026-11-19 06:45"
+  },
+  "n/straintswillbeeventighterin2027microncto215815321htmltsrcrss": {
+   "lv": 1,
+   "why": "가설④ 칩/메모리 상류 — 마이크론 CTO 「2027년 메모리 공급 더 빠듯」 · 한국 반도체 칸(091160) · 💬 5번",
+   "at": "2026-11-19 07:50"
+  },
+  "n/sarticlesmoodylowersnvidiaratingsoutlook222901110htmltsrcrss": {
+   "lv": 1,
+   "why": "가설①(AI 차입·크레딧) — 엔비디아 신용 전망 하향(경영 공백) · 💬 3·9번",
+   "at": "2026-11-19 08:45"
+  },
+  "kimu_nim/49541": {
+   "lv": 1,
+   "why": "watch 한한령 — 청와대 「공연은 민감」 = 엔터 기대 일부 꺾임, 오늘 시가 갭 유지 판정 · 💬 4번",
+   "at": "2026-11-19 08:45"
   }
  }
 }

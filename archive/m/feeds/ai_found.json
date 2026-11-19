@@ -1,6 +1,94 @@
 {
  "items": [
   {
+   "title": "모닝스타, 엔비디아 적정가 19% 하향 — CEO 교체·혼란 반영",
+   "url": "https://www.morningstar.com/stocks/nvidia-we-cut-our-fair-value-estimate-given-firms-ceo-transition-turmoil",
+   "press": "Morningstar",
+   "at": "2026-11-19 08:45",
+   "why": "가설①·④ — 엔비디아 경영 공백이 AI 자금 조달(백스톱) 위축으로 번지는지 · 무디스 전망 하향과 같은 방향",
+   "summary": "CEO 교체·혼란을 이유로 적정가 −19% · 같은 날 무디스 신용 전망 긍정적→안정적(Aa1 유지) · 모닝스타는 「황 이탈이 AI 딜·자금 조달을 늦출 수 있다」고 경고"
+  },
+  {
+   "title": "소형주 「데드크로스」 — 증시 전체엔 무슨 뜻인가",
+   "url": "https://ca.finance.yahoo.com/m/2a887375-0a28-353a-a2c5-dc054503089e/ss_small-caps-just-entered-a.html",
+   "press": "MarketWatch(야후)",
+   "at": "2026-11-19 08:45",
+   "why": "가설②(현금 도피 vs 업종 갈아타기) — 소형주 추세 붕괴는 금리 압력 쪽, S&P 200일선 3일째 판정과 함께 볼 것",
+   "summary": "러셀2000 50일선이 200일선 아래로 · S&P 5일 연속 하락·200일선 아래 2일째와 겹침 · 12월 인상 우려에 변동금리 빚 많은 소형주가 먼저 맞음"
+  },
+  {
+   "title": "마이크론 「메모리 공급 부족, 2028년까지 더 빠듯해진다」",
+   "url": "https://www.computerworld.com/article/4229635/memory-squeeze-set-to-tighten-through-2028-micron-says-3.html",
+   "press": "Computerworld",
+   "at": "2026-11-19 07:50",
+   "why": "가설④(칩·메모리 상류가 빚으로 짓는 곳을 이긴다) · 한국 반도체 칸·💬 5번 근거",
+   "summary": "마이크론 경영진(TomorrowX Summit 11/18): 메모리 수급이 2026년보다 2027·2028년에 더 빠듯 · AI 데이터센터 수요가 공급 증설을 앞섬 · BofA 낸드 현물 하락 전망과 엇갈림(D램·HBM vs 낸드)"
+  },
+  {
+   "title": "마이크론 「메모리, 2027·2028년이 2026년보다 더 타이트」",
+   "url": "https://pasqualepillitteri.it/en/news/20862/micron-memory-tighter-2027-2028",
+   "press": "Pasquale Pillitteri",
+   "at": "2026-11-19 07:50",
+   "why": "SemiAnalysis 2028 HBM 수요 하향·키움 「27년 공급 과잉」과 반대 쪽 근거 — 메모리 사이클 논쟁 채점용",
+   "summary": "마이크론 발언 정리 — 2027·2028 공급 제약 심화 · 같은 날 SK하닉 ADR·마이크론은 하락(美 반도체지수 강보합)"
+  },
+  {
+   "title": "월러 연준 이사 「12월 0.5%p 인상이 더 편하다 — 데이터는 지켜볼 것」",
+   "url": "https://www.sharecast.com/news/international-economic/feds-waller-more-comfortable-with-50bp-december-rate-hike-but-watching-data--11432018.html",
+   "press": "Sharecast",
+   "at": "2026-11-19 06:45",
+   "why": "가설③ 12/9 FOMC 분수령 — 「폭」 꼬리, 💬 7번 답 근거",
+   "summary": "월러 이사 12월 50bp 인상 쪽에 더 무게(데이터 확인 조건) · 의사록 「거의 모든 위원 추가 인상」 직후 · 달러인덱스 103.8로 18개월 최고(Finviz)"
+  },
+  {
+   "title": "데일리 총재 긴축 지지에 연준 인상 베팅 굳어져 — 달러 강세",
+   "url": "https://stockwirex.com/?p=56167",
+   "press": "StockWireX",
+   "at": "2026-11-19 06:45",
+   "why": "가설③·환율 칸 — 매파 합창이 달러를 밀어 원/달러 1,330원대 반등 압력",
+   "summary": "데일리 샌프란 연은 총재 「추가 인상 필요」 · 인상 베팅 강화로 달러 상승 · 반면 2년 금리는 4.83%로 하락(구글뉴스) — 금리보다 성장 둔화 반영"
+  },
+  {
+   "title": "엔비디아, 중국행 H200 생산 중단하고 베라 루빈에 집중",
+   "url": "https://finance.yahoo.com/news/nvidia-halts-china-bound-h200-120248594.html",
+   "press": "야후 파이낸스",
+   "at": "2026-11-19 05:40",
+   "why": "반도체 칸·가설④ — 중국 매출 0 전제 굳히기, 황 퇴진 뒤 중국 보수화와 같은 방향",
+   "summary": "엔비디아가 중국 수출용 H200 생산을 멈추고 베라 루빈으로 돌림(보도) · 11/19 05:34 NVDA 150.93(−2.91%) · 홍콩 기사 「엔비디아 대중 H200 판매 중단에 A주 연산력주 급등」 — 중국 자국 칩 수혜 쪽"
+  },
+  {
+   "title": "연준 10월 의사록 — 위원들 추가 인상 예상, AI가 물가에 미칠 영향 걱정",
+   "url": "https://www.cnbc.com/2026/11/18/fed-minutes-october-2026.html",
+   "press": "CNBC",
+   "at": "2026-11-19 04:50",
+   "why": "가설③ 12/9 FOMC 분수령 — 「몇 번·얼마나」 중 「여러 번」 쪽 확인 · 해외 포트 채권·달러 나눠 사기 근거",
+   "summary": "거의 모든 위원 추가 인상 예상(블룸버그 제목) · 일부는 12월 25bp 초과 인상 검토 가능(인베스팅) · AI 투자가 물가를 밀어 올릴 위험 언급(CNBC 제목)"
+  },
+  {
+   "title": "美 2년 금리 보합 — 트레이더들 월러 발언·연준 의사록 저울질",
+   "url": "https://www.cnbc.com/2026/11/18/treasury-yields-bonds-fed.html",
+   "press": "CNBC",
+   "at": "2026-11-19 04:50",
+   "why": "채권 질문(💬 15번)·가설③ — 의사록 앞뒤 단기 금리 반응 확인용",
+   "summary": "의사록 직전 국채 금리 1주 저점 근처(인베스팅) · 국채 사흘째 강세·유가 하락(블룸버그) · 2년물은 보합권"
+  },
+  {
+   "title": "구리 값 수개월 최저 급락 — AI 데이터센터 베팅 철수",
+   "url": "https://finance.yahoo.com/m/9233f114-c0ab-3c1a-bd8e-f0f03832cc80/copper-prices-plunge-to.html?.tsrc=rss",
+   "press": "Yahoo Finance",
+   "at": "2026-11-19 03:45",
+   "why": "가설①④ — AI 인프라 축소가 구리(전력·DC 수요)로 번짐 · 에너지·AI 하드웨어 칸 선행 신호",
+   "summary": "구리 수개월 최저 · 트레이더들이 데이터센터 관련 베팅을 거둬들이는 중(야후) · 드러켄밀러 구리 매도 전환(11/18)과 같은 방향"
+  },
+  {
+   "title": "다우 하락 — 연준 위원 「인상으로 충격 줘야」·로우스 전망 미달, 의사록 대기",
+   "url": "https://finance.yahoo.com/m/3b6d51d3-7bfb-3b08-a92e-3b70e9f0655b/stock-market-today%3A-dow-sinks.html?.tsrc=rss",
+   "press": "Yahoo Finance",
+   "at": "2026-11-19 03:45",
+   "why": "S&P 200일선 아래 이틀째 판정·가설③ — 매파 발언에 소비 실적 미달 겹침",
+   "summary": "다우 하락·월러 「충격 필요할 수도」 · 로우스 전망 미달 · 엔비디아 −2.05%(152.27, daily-app 03:34) · SOXX 보합 · 04:00 의사록"
+  },
+  {
    "title": "엔비디아 실적도 지수를 못 살렸다 — 다우 약 600pt 하락, 앤스로픽 상장 대기(야후)",
    "url": "https://finance.yahoo.com/markets/stocks/articles/stock-market-today-nasdaq-p-125812319.html",
    "press": "야후 파이낸스",
@@ -551,95 +639,7 @@
    "at": "2026-11-17 12:40",
    "why": "가설 ④·반도체 칸 — 대가가 칩 하드웨어를 줄이고 소프트웨어·금으로 이동(3분기 말 기준이라 이미 지난 매매)",
    "summary": "Duquesne 3Q: AMD·SanDisk·Alphabet 전량 매도, TSMC −94%, SpaceX 20만 주↑·팔란티어 8만 주↑ 신규, 금광주 매수, 최대 보유는 Natera 29.2%(하나중국 72261)."
-  },
-  {
-   "title": "트럼프 행정부, 美 AI칩 「원격 접근」 겨냥 규정 — 중국 반도체주는 자립 기대에 급등",
-   "url": "https://digg.com/tech/ltrlu4m5",
-   "press": "Digg(원문 보도 묶음)",
-   "at": "2026-11-17 11:40",
-   "why": "반도체 칸·가설 ④ — 규제 당일 대만 −3%→강보합, 한국 하이닉스 보합, 中 화훙 +12%·SMIC +4%: 규제가 美 칩 수요보다 中 자립주에 먼저 반영",
-   "summary": "중국·마카오 본사 기업의 해외 DC 통한 첨단 AI칩 원격 사용을 허가 대상으로 묶음(하나중국 72253 세부). 같은 날 홍콩 화훙 +12%대·SMIC +4%대(구글뉴스 홍콩). 날짜·세부 숫자 원문 미확인."
-  },
-  {
-   "title": "아시아 증시, 일본 GDP 위축·엔비디아 실적 앞두고 하락",
-   "url": "https://noortrends.ae/en/asia-stocks-slip-as-japan-gdp-contracts-nvidia-earnings-keep-tech-on-edge/11/17/market-updates",
-   "press": "Noor Trends",
-   "at": "2026-11-17 10:40",
-   "why": "🐻 일본 칸(닛케이 주식 0%) — 3분기 GDP 위축 + 반도체 규제로 아시아 기술주 압박",
-   "summary": "11/17 아시아 하락 정리. 피드 기준 닛케이 장중 5만9천 엔 하회·어드반테스트 한때 −5.8%·대만 가권 39,807(−3%). 기사 내 숫자는 미확인."
-  },
-  {
-   "title": "엔비디아 GPU 단속, 중국 연계 동남아 데이터센터 직격",
-   "url": "https://www.pulse.bot/hardware/news/nvidia-gpu-crackdown-hits-china-linked-southeast-asia-data-centers-573966ec-05af-48e5-bbce-dd33d7ac4808/",
-   "press": "Pulse",
-   "at": "2026-11-17 08:50",
-   "why": "반도체 칸·SOXX — 美 상무부가 싱가포르·말레이시아·태국·인니·브라질 DC 칩 구매를 사안별 허가제로(블룸버그 11/17) = 엔비디아 실적 직전 판매 경로 축소",
-   "summary": "블룸버그: 원격접속 우회 차단, 재무부·NSC 지시 규정. 이 기사 날짜·숫자는 미확인 — 블룸버그 요약으로 확인."
-  },
-  {
-   "title": "HSBC, 문제 생긴 뉴멕시코 데이터센터 대출 약 3억 달러를 큰 할인에 매각",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-16/hsbc-sold-300-million-troubled-data-center-loan-at-discount",
-   "press": "Bloomberg",
-   "at": "2026-11-17 07:45",
-   "why": "가설 ①(AI 차입이 다음 약한 고리) — 은행이 DC 대출을 손해 보고 털기 시작 · 🫧 버블 경보판 신용 칸",
-   "summary": "HSBC가 뉴멕시코 데이터센터 건설 대출 중 약 3억 달러 몫을 큰 할인에 매각(블룸버그 11/16). 할인율은 미확인. 블랙스톤 QTS 채권 축소·말레이 DC 대출 지연에 이은 DC 자금 차질 세 번째."
-  },
-  {
-   "title": "정체불명 매도자, 중간선거 직후 데이터센터 대출 5억 달러 경매",
-   "url": "https://runtimewire.com/article/mystery-seller-500m-data-center-loans-stargate-cyrusone",
-   "press": "Runtime Wire",
-   "at": "2026-11-17 07:45",
-   "why": "가설 ① 근거 — DC 대출 2차 시장 매물 증가(스타게이트·사이러스원 관련)",
-   "summary": "약 5억 달러 규모 데이터센터 대출이 경매에 나옴(스타게이트·CyrusOne 관련 보도). 날짜·가격은 원문 기준, 세부 미확인."
-  },
-  {
-   "title": "골드만삭스 「AI 매도는 청산이 아니라 업종 갈아타기」",
-   "url": "https://cryptobriefing.com/goldman-sachs-ai-unwind-rotation-not-liquidation/",
-   "press": "Crypto Briefing",
-   "at": "2026-11-17 05:40",
-   "why": "「업종 갈아타기 vs 현금 도피」 가설(0.5) 판정 — 골드만은 갈아타기 쪽",
-   "summary": "골드만은 AI 매도를 포지션 회전으로 해석(날짜 미확인). 같은 날 피드에 골드만 「美 기술주 매도 끝 무렵일 수 있다」 보도."
-  },
-  {
-   "title": "마이클 버리, AI 숏 확대 — 반도체·나스닥 ETF 풋 추가",
-   "url": "https://www.kucoin.com/news/flash/michael-burry-expands-ai-short-bets-adds-semiconductors-and-nasdaq-etfs",
-   "press": "KuCoin News",
-   "at": "2026-11-17 05:40",
-   "why": "반도체 칸·SOXX — 「내년 반도체 하락」 쪽 대표 반대 목소리",
-   "summary": "버리가 반도체·나스닥 ETF 풋을 늘림(날짜 미확인). 연합인포맥스 11/17 「나스닥 약세 베팅 확대·내년 반도체 하락 전망」과 같은 흐름."
-  },
-  {
-   "title": "앤스로픽, 610억 달러 공모 조건 확정 — 희망가 70~78달러·기업가치 약 1.2조 달러",
-   "url": "https://www.renaissancecapital.com/IPO-Center/News/122657/anthropic-sets-terms-for-61-billion-ipo-targeting-a-1.2-trillion-market-cap",
-   "press": "Renaissance Capital",
-   "at": "2026-11-17 04:40",
-   "why": "가설 ②(갈아타기·현금 도피)·④ — 역대 최대급 공모가 엔비디아 실적 바로 다음 날 가격 결정, AI 대형주 수급 공백",
-   "summary": "8억2,500만 주·약 610억 달러, 밴드 중간 완전희석 시총 약 1.2조 달러(전환사채 1,110억 달러 제외) · 나스닥 ANT · 260억 달러 사모 별도 · 가격 결정 11/16 주간(11/18 가격·11/19 거래 보도)"
-  },
-  {
-   "title": "뉴욕 연은 제조업지수 7.8로 급락(예상 16.7) · 상무부, 해외 데이터센터 원격 칩 접근 규제",
-   "url": "https://www.stocktitan.net/articles/stock-market-today-live-november-16-2026",
-   "press": "StockTitan",
-   "at": "2026-11-17 04:40",
-   "why": "「성장 걱정형 갈아타기」(경기민감 동반 하락)의 숫자 근거 · 반도체 칸·엔비디아 실적 전 규제 변수",
-   "summary": "11월 엠파이어스테이트 지수 −18p → 7.8(예상 16.7) · 마이크론 −6.4%·인텔 −6.0%(10:06 ET) · 엔비디아 실적 11/17 16:20 ET · 소매판매 11/17 08:30 ET"
-  },
-  {
-   "title": "「코어위브 멀리하라」 — 황 스캔들로 엔비디아의 63억 달러 뒷배(백스톱)가 주목",
-   "url": "https://www.tikr.com/blog/stay-away-from-coreweave-huangs-scandal-puts-nvidias-6-3-billion-backstop-in-focus",
-   "press": "TIKR",
-   "at": "2026-11-17 03:45",
-   "why": "가설 ①(AI 차입 크레딧)·④(빚으로 짓는 곳이 진다) — 블룸버그 「황 퇴진, 엔비디아의 네오클라우드 지원 의문」과 같은 줄기",
-   "summary": "엔비디아가 코어위브 미사용 용량을 사 주기로 한 약 63억 달러 약정이 황 체제 이후에도 유지될지가 쟁점 · 게시 날짜 미확인"
-  },
-  {
-   "title": "금 1년 최저 — 연준 인상 베팅에 마진콜이 낙폭을 키웠다",
-   "url": "https://investinglive.com/commodities/gold-s-slide-to-one-year-low-margin-calls-amplified-a-fall-driven-by-fed-hike-bets/",
-   "press": "investingLive",
-   "at": "2026-11-17 03:45",
-   "why": "💬 금 질문·포트 금 5% — 위험 회피 날에도 금이 방패 역할을 못 하는 이유(마진콜·인상 베팅)",
-   "summary": "금이 1년 최저로 — 연준 인상 베팅이 원인, 다른 자산 손실을 메우려는 마진콜 매도가 낙폭 확대 · 11/16 밤 금 선물 3,869.9달러(−0.42%, CNBC) · 게시 날짜 미확인"
   }
  ],
- "at": "2026-11-19 02:45"
+ "at": "2026-11-19 08:45"
 }
