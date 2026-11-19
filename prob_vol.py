@@ -181,6 +181,32 @@ CONF_ETF = {"KR": "EWY"}
 #   ❌ 한국 −2%(앞 13.0→12.6) · 일본·홍콩 ±1%(앞 같음) · 일본 5일(여전히 미달 — 저녁 0.5/1.1/−2.0) · 52주 낙폭·통화 5일·월/금 표시는 거의 다 ❌ · 닛케이 VI(^JNIV)·^VXFXI 야후 자료 없음
 HL_TG = {"KR": {"big1", "dn5"}, "JP": {"dn2"}, "CN": {"big1", "dn2"}, "HK": {"dn2"}, "US": {"big1", "dn2", "dn5"}}
 
+# 🌊 11/19 14시 「달력 근거」(probe/calvol_bt.py · run 44463114061 · 2006~ 해마다 걸어가기, 같은 표본):
+#   gap = 내일 거래일까지 달력 일수(로그) — 연휴 앞에서는 「내일 −2%」 위험이 큼(쉬는 동안 쌓인 소식을 한 번에 반영).
+#   한국 −2% 저녁 8.1/7.8/4.6 → 8.6/8.1/5.2 · 아침 17.3/10.3/10.6 → 18.2/10.9/11.6 (앞/뒤/최근3년 실력 %, 두 판 모두 세 칸↑) ✅
+#   일본 −2% 아침 18.6/11.8/17.2 → 19.1/12.8/17.4 · 저녁 2.9/3.0/0.8 → 3.1/3.3/0.6(앞·뒤↑) ✅
+#   ❌ 붙이지 않음: 만기일(opx) 중국 −2% +0.1~0.2 · 월말·월초(me) 일본 ±1% +0.1 — 세 칸↑이지만 108번 시험 중 너무 작아 우연과 구별 안 됨 ·
+#      gap 홍콩·중국·미국·5일 목표 최근3년↓ · VIX 하루 변화(dvix1) 미국 −2% 앞 그대로
+GAP_TG = {"KR": {"dn2"}, "JP": {"dn2"}}
+
+
+def _gap(idx, mk):
+    """그날 → 다음 거래일 달력 일수(로그). 과거 = 지수 날짜 · 마지막 날 = holidays 거래소 달력(없으면 None)"""
+    import datetime as _dt
+    import holidays as _HL
+    i = pd.Series(idx, index=idx)
+    g = (i.shift(-1) - i).dt.days.astype(float)
+    yrs = range(idx[-1].year, idx[-1].year + 2)
+    cal = _HL.country_holidays(mk, years=yrs)
+    for y in yrs:
+        for md in (((12, 31), (1, 2), (1, 3)) if mk == "JP" else ((12, 31),)):
+            cal[_dt.date(y, *md)] = "연말"
+    t1 = idx[-1] + pd.Timedelta(days=1)
+    while t1.weekday() >= 5 or t1.date() in cal:
+        t1 += pd.Timedelta(days=1)
+    g.iloc[-1] = float((t1 - idx[-1]).days)
+    return np.log(g)
+
 
 def _hl5(px, idx):
     if not {"High", "Low"} <= set(px.columns):
@@ -229,9 +255,16 @@ def run(H, MK, base_dates=None):
             hl5 = None
         if hl5 is not None:
             dd = dd.copy(); dd["hl5"] = hl5
+        gap = None
+        if mk in GAP_TG:
+            try:
+                gap = _gap(dd.index, mk)
+                dd = dd.copy(); dd["gap"] = gap
+            except Exception:
+                gap = None
         for tg in TG:
             try:
-                f_ = ff + (["hl5"] if hl5 is not None and tg in HL_TG.get(mk, ()) else [])
+                f_ = ff + (["hl5"] if hl5 is not None and tg in HL_TG.get(mk, ()) else []) + (["gap"] if gap is not None and tg in GAP_TG.get(mk, ()) else [])
                 P, B = walk(dd, f_, tg)
                 j = judge(dd, P, B, tg)
                 p_now, at = now_prob(dd, f_, tg)
@@ -239,7 +272,7 @@ def run(H, MK, base_dates=None):
                 base_now = float(dd[tg].dropna().iloc[-2520:].mean())     # 최근 10년 평소 비율
                 R["t"][tg] = {"name": TG[tg], "p": _r(pc if pc is not None else p_now, 3), "raw": _r(p_now, 3), "k": kn,
                               "rng": [_r(rg[0], 3), _r(rg[1], 3)] if rg else None, "base": _r(base_now, 3), "at": at, "ok": bool(j and j["ok"]), "val": j,
-                              "hl5": "hl5" in f_}
+                              "hl5": "hl5" in f_, "gap": ("gap" in f_) and int(round(float(np.exp(gap.iloc[-1])))) or None}
             except Exception as e:
                 R["t"][tg] = {"name": TG[tg], "err": str(e)[:160]}
         if asia and sp is not None and morning:
