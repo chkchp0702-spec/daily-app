@@ -27,7 +27,7 @@ jobs:
         env:
           KRX_ID: ${{ secrets.KRX_ID }}
           KRX_PW: ${{ secrets.KRX_PW }}
-      - run: timeout 120m python tools/krx_deriv.py || true   # 선물 미결제·옵션 투자자별 (처음엔 2010~ 몰아받기, 그 뒤 이어받기)
+      - run: timeout 120m python tools/krx_deriv.py || true   # 선물 미결제·옵션 투자자별 (2010~ 한 줄씩 나눠 받기 · 100분 상한 · 3일 연속 실패면 멈추고 다음 실행에 이어받기)
         env:
           KRX_ID: ${{ secrets.KRX_ID }}
           KRX_PW: ${{ secrets.KRX_PW }}

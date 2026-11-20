@@ -3,9 +3,8 @@
        KRX 원시 주소 MDCSTAT12501(pykrx 함수는 미결제 열을 버림 → 원시 응답 ACC_OPNINT_QTY 사용)
    archive/x/kr_opt_inv.csv (date, inv, net_val, bid_val, ask_val) — 코스피200 옵션 투자자별 거래(MDCSTAT13101, 시험 중:
        11/20 시험에서 표는 나왔지만 금융투자 행이 0 — 값이 맞는지 다음 회차 확인)
-   이어받기: 각 csv 의 마지막 날 다음부터 · 처음엔 2010-01 부터(시간 오래 — 스레드 4개)."""
-import datetime as dt, os, sys, csv
-from concurrent.futures import ThreadPoolExecutor
+   이어받기: 각 csv 의 마지막 날 다음부터 · 처음엔 2010-01 부터(11/20 16시: 스레드 4개는 188일 뒤 막혀 → 한 줄씩·쉼·3일 연속 실패면 멈춤, 여러 번에 나눠 받음)."""
+import datetime as dt, os, sys, csv, time
 import pandas as pd
 from pykrx import stock
 from pykrx.website.krx.krxio import KrxWebIo
@@ -64,42 +63,75 @@ def opt(day):
 
 def days(a):
     b = dt.date.today().strftime("%Y%m%d")
-    o = stock.get_index_ohlcv(a, b, "1001")
-    return [d.strftime("%Y%m%d") for d in pd.to_datetime(o.index)]
+    try:
+        o = stock.get_index_ohlcv(a, b, "1001")
+        ds = [d.strftime("%Y%m%d") for d in pd.to_datetime(o.index)]
+        if ds:
+            return ds
+    except Exception:
+        pass
+    # 지수 달력이 막히면 평일 전체(휴장일은 빈 응답 → 건너뜀)
+    return [d.strftime("%Y%m%d") for d in pd.bdate_range(a, b)]
 
 
-def run(path, fn, flat, cols):
+BUDGET = float(os.environ.get("BUDGET_MIN", "100")) * 60   # 한 번 실행 시간 상한(초)
+GAP = float(os.environ.get("GAP_S", "0.8"))                  # 요청 사이 쉼(초)
+
+
+def save(path, res, flat, cols):
+    new = pd.DataFrame(res, columns=cols)
+    old = pd.read_csv(path) if os.path.exists(path) else pd.DataFrame(columns=cols)
+    key = cols[:2] if flat else ["date"]
+    df = pd.concat([x for x in (old, new) if len(x)]) if len(old) or len(new) else new
+    df = df.drop_duplicates(key, keep="last").sort_values(key)
+    df.to_csv(path, index=False)
+    return new, df
+
+
+def run(path, fn, flat, cols, t0):
+    """11/20 16시 고침: 스레드 4개로 몰아 받다 188일 뒤 KRX 가 막음(실패 3968) →
+       한 줄씩·쉼 GAP 초·실패하면 30·60·120초 쉬고 다시 · 3일 연속 실패나 시간 상한이면 멈추고 저장
+       (빈 날 없이 이어받기 — 마지막 성공일 다음부터)."""
     lt = last(path)
     a = (pd.Timestamp(lt) + pd.Timedelta(days=1)).strftime("%Y%m%d") if lt else START
     ds = days(a)
     print(path, "받을 날", len(ds), a, flush=True)
-    if not ds:
-        return
-    res, bad = [], 0
-    def safe(d):
-        try:
-            return fn(d)
-        except Exception as e:
-            return ("ERR", str(e)[:80])
-    with ThreadPoolExecutor(4) as ex:
-        for r in ex.map(safe, ds):
-            if isinstance(r, tuple):
-                bad += 1; continue
-            if r is None:
-                continue
-            res.extend(r if flat else [r])
-    new = pd.DataFrame(res, columns=cols)
-    old = pd.read_csv(path) if os.path.exists(path) else pd.DataFrame(columns=cols)
-    df = pd.concat([old, new]).drop_duplicates(cols[:2] if flat else ["date"], keep="last").sort_values(cols[:2] if flat else ["date"])
-    df.to_csv(path, index=False)
-    print(path, "새", len(new), "실패", bad, "전체", len(df), flush=True)
+    res, streak, got, stop = [], 0, 0, ""
+    for i, d in enumerate(ds):
+        if time.time() - t0 > BUDGET:
+            stop = "시간 상한"; break
+        r, ok = None, False
+        for w in (0, 30, 60, 120):
+            if w:
+                time.sleep(w)
+            try:
+                r = fn(d); ok = True; break
+            except Exception as e:
+                err = str(e)[:80]
+        if not ok:
+            streak += 1
+            print("실패", d, err, flush=True)
+            if streak >= 3:
+                stop = "3일 연속 실패(" + d + ")"; break
+            continue
+        streak = 0
+        if r:
+            res.extend(r if flat else [r]); got += 1
+        if got and got % 100 == 0:
+            save(path, res, flat, cols); print("중간 저장", d, got, flush=True)
+        time.sleep(GAP)
+    new, df = save(path, res, flat, cols) if res else (pd.DataFrame(), pd.read_csv(path) if os.path.exists(path) else pd.DataFrame())
+    print(path, "새 날", got, "전체", len(df), "멈춤:", stop or "끝까지", flush=True)
     if len(new):
         print(new.tail(4 if not flat else 11).to_string()[:1500], flush=True)
+    return not stop
 
 
 if __name__ == "__main__":
     which = sys.argv[1:] or ["fut", "opt"]
+    t0, done = time.time(), True
     if "fut" in which:
-        run(FO, fut, False, ["date", "oi_all", "oi_front", "vol_front", "close_front"])
-    if "opt" in which:
-        run(OP, opt, True, ["date", "inv", "net_val", "bid_val", "ask_val"])
+        done = run(FO, fut, False, ["date", "oi_all", "oi_front", "vol_front", "close_front"], t0)
+    # 옵션 투자자별은 값 확인 전 — 선물 미결제 이력을 다 받은 뒤에만(요청 아끼기)
+    if "opt" in which and done:
+        run(OP, opt, True, ["date", "inv", "net_val", "bid_val", "ask_val"], t0)
