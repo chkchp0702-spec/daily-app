@@ -1502,6 +1502,11 @@ def skew_shadow(get, msr):
         for d, v in (lg or {}).items():
             if d.startswith("_") or not isinstance(v, dict) or v.get("skew90") is None:
                 continue
+            try:      # 로그 날짜 = 한국 날짜 → 미국 장 날짜로(KST 09시 전에 받은 값은 전날 미국 장)
+                if int(str(v.get("at", "12:00"))[:2]) < 9:
+                    d = str((pd.Timestamp(d) - pd.offsets.BDay(1)).date())
+            except Exception:
+                pass
             r = h.setdefault(d, {})
             for k in ("skew90", "skew95", "pc_vol", "pc_oi", "vix", "vix_vix3m"):
                 if v.get(k) is not None and r.get(k) is None:
