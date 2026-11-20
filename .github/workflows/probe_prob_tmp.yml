@@ -11,4 +11,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q yfinance pandas numpy holidays
-      - run: python probe/skew_bt.py
+      - run: python probe/skewvol_bt.py

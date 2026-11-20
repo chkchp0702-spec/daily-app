@@ -1,100 +1,97 @@
-"""11/20 10시 🌊 2-A 옵션 꼬리 가격 → 흔들림·급락 위험 (퀀트 기법 총점검 뒤 「다 해」)
-  후보 자료(미국 날짜 t 값 → 아시아는 날짜 t 에 맞춤: 아침판 = 그날 밤 값, 저녁판 = 하루 전 값):
-    skew  CBOE SKEW(^SKEW) — 외가 풋이 얼마나 비싼가
-    pcr   Cboe 전체 풋/콜 비율(archive/x/pcr_total.csv — 2006-11~)
-    v9    VIX9D/VIX(^VIX9D, 2011~) — 가까운 만기 겁(역전 = 당장 겁)
-  형태(결과 보기 전에 정함) 3가지씩: 수준(lv) · 1년 백분위(pc, 252일) · 5일 변화(d5)
-  기본 = 지금 화면 특성(lrv5·lrv20·ar1·r5·lvix·dvix [+usa·usr 아침판] + hl5(HL_TG)) · gap 은 뺌(같은 표본 비교라 상대 판정엔 영향 적음)
-  표본: 자료마다 그 자료가 있는 날로 같은 표본(기본도 그 표본에서 다시)
-  붙이는 조건: 앞·뒤·최근3년 실력 모두 기본보다↑ 그리고 최근3년 > 0"""
-import json, os, sys
-sys.path.insert(0, os.getcwd())
+"""#58 CBOE SKEW(^SKEW) 1년 백분위 꼬리 → 5개 시장 다음 날·5일 — 확률 보강 일지 11/3 11시 (Actions)
+SKEW = 옵션 시장이 매기는 「꼬리 급락」 값. 수준·5일 변화 1년 백분위 ≥90%·≤10% 한쪽씩 칸.
+미국 날짜 값 → 다음 아시아 장(prob_x.align). 걸어가며 사전 100 브라이어 앞/뒤·최근5년.
+겹침: VIX 수준 꼬리·S&P 5일 꼬리 칸 위에 더해도 좋아지는지 + 교차 로지스틱."""
+import json, sys, os
 import numpy as np, pandas as pd
-import yfinance as yf
-import prob, prob_vol
+sys.path.insert(0, os.getcwd())
+import prob, prob_x
 
-syms = sorted({c["ix"] for c in prob.MK.values()} | {"^GSPC", "^VIX", "^SKEW", "^VIX9D"})
-H = {}
-for s in syms:
-    x = yf.download(s, start="1995-01-01", interval="1d", auto_adjust=False, progress=False)
-    if isinstance(x.columns, pd.MultiIndex):
-        x.columns = x.columns.get_level_values(0)
-    x.index = pd.to_datetime(x.index).tz_localize(None)
-    x = x[["Open", "High", "Low", "Close"]].dropna(subset=["Close"])
-    H[s] = x[~x.index.duplicated(keep="last")]
-    print("자료", s, len(H[s]), str(H[s].index[0].date()) if len(H[s]) else "-", str(H[s].index[-1].date()) if len(H[s]) else "-", flush=True)
-
-pcr = pd.read_csv("archive/x/pcr_total.csv", index_col=0, parse_dates=True)["pcr"].astype(float)
-pcr = pcr[pcr > 0]
-print("자료 pcr", len(pcr), str(pcr.index[0].date()), str(pcr.index[-1].date()), flush=True)
-spx = H["^GSPC"]["Close"]; vix = H["^VIX"]["Close"]
-SRC = {}
-if len(H["^SKEW"]) > 1000:
-    SRC["skew"] = np.log(H["^SKEW"]["Close"])
-SRC["pcr"] = np.log(pcr)
-if len(H["^VIX9D"]) > 1000:
-    v9 = H["^VIX9D"]["Close"]
-    SRC["v9"] = np.log(v9 / vix.reindex(v9.index)).dropna()
+syms = sorted({c["ix"] for c in prob.MK.values()} | {"^SKEW", "^VIX", "^GSPC"})
+H = prob.load_hist(syms)
+def cs(s):
+    x = H[s]["Close"].dropna(); return x[x > 0]
+sk, vx, sp = cs("^SKEW"), cs("^VIX"), cs("^GSPC")
+print("SKEW", sk.index[0].date(), sk.index[-1].date(), len(sk), round(float(sk.iloc[-1]), 1))
 
 
-def forms(s):
-    s = s.dropna()
-    return {"lv": s, "pc": s.rolling(252, min_periods=200).rank(pct=True), "d5": (s - s.shift(5))}
+def wf(d, lab, ycol, h, prior=100):
+    y = d[ycol]
+    known = y.shift(h); base = known.expanding().mean(); p = base.copy()
+    for L in [x for x in lab.dropna().unique()]:
+        f = (lab == L); fm = f.shift(h, fill_value=False)
+        k = known.where(fm).fillna(0).cumsum(); n = (known.notna() & fm).astype(float).cumsum()
+        p = p.where(~f, (k + prior * base) / (n + prior))
+    return p, base
 
 
-out = {}; summary = []; ntest = 0
+def score(d, ycol, ps, start="2002-01-01"):
+    y = d[ycol]; ev = y.notna() & (d.index >= start)
+    for p in ps.values(): ev &= p.notna()
+    mid = d.index[ev][len(d.index[ev]) // 2]
+    r = {"mid": str(mid.date())}
+    for nm, msk in (("앞", ev & (d.index < mid)), ("뒤", ev & (d.index >= mid)), ("최근5년", ev & (d.index >= d.index[-1] - pd.Timedelta(days=1826)))):
+        r[nm] = {k: round(float(((p[msk] - y[msk]) ** 2).mean()), 5) for k, p in ps.items()}
+    return r
+
+
+def lab(r, hi, lo):
+    return pd.Series(np.where(r >= 0.9, hi, np.where(r <= 0.1, lo, "-")), index=r.index, dtype=object).where(r.notna())
+def one(r, cond_, nm):
+    return pd.Series(np.where(cond_, nm, "-"), index=r.index, dtype=object).where(r.notna())
+
+
+def logit_fit(X, y, l2=1.0, it=100):
+    w = np.zeros(X.shape[1])
+    for _ in range(it):
+        p = 1 / (1 + np.exp(-X @ w)); g = X.T @ (p - y) / len(y) + l2 * np.r_[0, w[1:]] / len(y)
+        Hs = (X * (p * (1 - p))[:, None]).T @ X / len(y) + np.eye(X.shape[1]) * l2 / len(y)
+        w -= np.linalg.solve(Hs, g)
+    return w
+
+
+out = {}
 for mk, cfg in prob.MK.items():
-    px = H[cfg["ix"]]; c = px["Close"]; idx = c.index
-    asia = mk != "US"
-    hl = np.log((px["High"] / px["Low"]).where(px["High"] > px["Low"]))
-    hl5 = np.log(hl.rolling(5, min_periods=3).mean() * 100 + 0.05)
-    modes = ("저녁판", "아침판") if asia else ("미국",)
+    d = prob.feats(H[cfg["ix"]]); d = d[d.index >= "1995-01-01"].copy()
+    A = (lambda s: prob_x.align(prob_x.rank252(s), d.index)) if mk != "US" else (lambda s: prob_x.rank252(s).reindex(d.index).ffill())
+    rv = A(vx); rs = A(np.log(sp).diff(5))
+    oth = lab(rv, "vh", "vl") + "|" + lab(rs, "sh", "sl")
     R = {}
-    for mn in modes:
-        if mn == "저녁판":
-            d = prob_vol.frame(c, None, vix.shift(1), True); base0 = ["lrv5", "lrv20", "ar1", "r5", "lvix", "dvix"]
-        elif mn == "아침판":
-            d = prob_vol.frame(c, spx, vix, True); base0 = ["lrv5", "lrv20", "ar1", "r5", "lvix", "dvix", "usa", "usr"]
-        else:
-            d = prob_vol.frame(c, None, vix, False); base0 = ["lrv5", "lrv20", "ar1", "r5", "lvix", "dvix"]
-        d["hl5"] = hl5
-        for sn, s in SRC.items():
-            for fn, f in forms(s).items():
-                if mn == "저녁판":
-                    f = f.shift(1)
-                d[sn + "_" + fn] = prob_vol._align(f, idx) if asia else f.reindex(idx).ffill()
-        for tg in prob_vol.TG:
-            base = base0 + (["hl5"] if tg in prob_vol.HL_TG.get(mk, ()) else [])
-            for sn in SRC:
-                cols = [sn + "_" + fn for fn in ("lv", "pc", "d5")]
-                dd = d.dropna(subset=base + cols)
-                res = {}
-                try:
-                    P, B = prob_vol.walk(dd, base, tg); res["기본"] = prob_vol.judge(dd, P, B, tg)
-                except Exception as e:
-                    print(mk, mn, tg, sn, "기본 err", e, flush=True); continue
-                for col in cols:
-                    ntest += 1
-                    try:
-                        P, B = prob_vol.walk(dd, base + [col], tg); res["+" + col] = prob_vol.judge(dd, P, B, tg)
-                    except Exception as e:
-                        res["+" + col] = {"err": str(e)[:100]}
-                b = res["기본"]
-                if not b:
-                    print(mk, mn, tg, sn, "표본 부족", flush=True); continue
-                for nm, j in res.items():
-                    if not j or "err" in j:
-                        print(mk, mn, tg, nm, j, flush=True); continue
-                    better = nm != "기본" and all(j[k]["skill"] > b[k]["skill"] for k in ("앞", "뒤", "최근3년")) and j["최근3년"]["skill"] > 0
-                    line = f"{mk} {mn} {tg} {nm:10s} 앞 {j['앞']['skill']} 뒤 {j['뒤']['skill']} 최근3년 {j['최근3년']['skill']} 전체 {j['전체']['skill']} auc {j['auc']} n {j['n']} from {j['from']} {'✅' if better else ''}"
-                    print(line, flush=True)
-                    if better:
-                        summary.append(line + f"  (기본 {b['앞']['skill']}/{b['뒤']['skill']}/{b['최근3년']['skill']})")
-                R[f"{mn}_{tg}_{sn}"] = {k: ({x: v[x] for x in ("앞", "뒤", "최근3년", "전체", "auc", "ok", "n", "from")} if v and "err" not in v else v) for k, v in res.items()}
+    for fn, ser in (("수준", sk), ("5일변화", np.log(sk).diff(5))):
+        rg = A(ser); mid = d.index[len(d) // 2]; cells = {}
+        for nm, f in (("≥90(꼬리 공포 큼)", (rg >= 0.9).fillna(False)), ("≤10(꼬리 공포 작음)", (rg <= 0.1).fillna(False))):
+            cells[nm] = {}
+            for half, msk in (("앞", d.index < mid), ("뒤", d.index >= mid)):
+                c_ = prob.cond(d[msk], f[msk], nm)
+                cells[nm][half] = None if not c_ else [c_["n"], round((c_["p1"] - d.loc[msk, "y1"].mean()) * 100, 1), round(((c_["p5"] or 0) - d.loc[msk, "y5"].mean()) * 100, 1)]
+        fh = (rg >= 0.9).fillna(False); fl = (rg <= 0.1).fillna(False)
+        ov = {"높음일": int(fh.sum()), "높음&VIX≥90": int((fh & (rv >= 0.9)).sum()), "높음&VIX≤10": int((fh & (rv <= 0.1)).sum()),
+              "낮음일": int(fl.sum()), "낮음&VIX≥90": int((fl & (rv >= 0.9)).sum()), "낮음&S&P≤10": int((fl & (rs <= 0.1)).sum())}
+        gh, gl, gb = one(rg, rg >= 0.9, "gh"), one(rg, rg <= 0.1, "gl"), lab(rg, "gh", "gl")
+        r = {"mid": str(mid.date()), "cur_rank": None if pd.isna(rg.iloc[-1]) else round(float(rg.iloc[-1]), 3), "칸(n,y1차,y5차)": cells, "겹침": ov}
+        for ycol, h in (("y1", 1), ("y5", 5)):
+            P = {"평소": wf(d, gb, ycol, h)[1], "높음": wf(d, gh, ycol, h)[0], "낮음": wf(d, gl, ycol, h)[0],
+                 "기존(VIX·S&P)": wf(d, oth, ycol, h)[0], "기존+높음": wf(d, oth + "|" + gh, ycol, h)[0],
+                 "기존+낮음": wf(d, oth + "|" + gl, ycol, h)[0], "기존+양쪽": wf(d, oth + "|" + gb, ycol, h)[0]}
+            r[ycol] = score(d, ycol, P)
+        # 교차 로지스틱
+        D = pd.DataFrame({"c": 1.0, "vh": rv >= .9, "vl": rv <= .1, "sh": rs >= .9, "sl": rs <= .1, "gh": rg >= .9, "gl": rg <= .1}, index=d.index).astype(float)
+        ok = rv.notna() & rs.notna() & rg.notna() & (d.index >= "2002-01-01")
+        X = {}
+        for ycol in ("y1", "y5"):
+            m = ok & d[ycol].notna(); idx = d.index[m]; md = idx[len(idx) // 2]
+            y = d.loc[m, ycol].values.astype(float); Xa = D[m].values; a, b = idx < md, idx >= md
+            xr = {}
+            for nm, tr, te in (("앞→뒤", a, b), ("뒤→앞", b, a)):
+                s = {}
+                for k, cols in (("기존", [0, 1, 2, 3, 4]), ("+높음", [0, 1, 2, 3, 4, 5]), ("+낮음", [0, 1, 2, 3, 4, 6])):
+                    w = logit_fit(Xa[tr][:, cols], y[tr]); p = 1 / (1 + np.exp(-Xa[te][:, cols] @ w))
+                    s[k] = round(float(((p - y[te]) ** 2).mean()), 5)
+                    if k != "기존": s[k + "계수"] = round(float(w[-1]), 3)
+                xr[nm] = s
+            X[ycol] = xr
+        r["교차"] = X
+        R[fn] = r
+        print(mk, fn, json.dumps(r, ensure_ascii=False))
     out[mk] = R
-json.dump(out, open("probe/skew_bt.json", "w"), ensure_ascii=False)
-print("==== 시험 수", ntest)
-print("==== 통과(앞·뒤·최근3년 모두↑ + 최근3년>0)")
-for s in summary:
-    print(s)
-print("끝")
+json.dump(out, open("probe/skew_bt.json", "w"), ensure_ascii=False, indent=1)
