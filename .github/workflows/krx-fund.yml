@@ -1,5 +1,5 @@
 name: krx-fund
-# 🔑 KRX 지수 PER·PBR (tools/krx_fund.py → archive/x/kr_fund.csv) — 비밀값 KRX_ID·KRX_PW · 평일 아침 · 시황리포트 alt_fetch 가 받아 감
+# 🔑 KRX 지수 PER·PBR (tools/krx_fund.py → archive/x/kr_fund.csv) + 공매도 거래 비중(tools/krx_short.py → kr_short.csv, 11/20) — 비밀값 KRX_ID·KRX_PW · 평일 아침 · 시황리포트 alt_fetch 가 받아 감
 on:
   workflow_dispatch:
   schedule:
@@ -23,7 +23,11 @@ jobs:
         env:
           KRX_ID: ${{ secrets.KRX_ID }}
           KRX_PW: ${{ secrets.KRX_PW }}
+      - run: python tools/krx_short.py || true
+        env:
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
       - name: 저장
         run: |
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "krx-fund $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/kr_fund.csv
+          bash scripts/push.sh "krx-fund $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/kr_fund.csv archive/x/kr_short.csv
