@@ -1,0 +1,39 @@
+{
+"rows": [
+{
+"date": "2026-11-20",
+"slot": "mid",
+"ts": "2026-11-20 14:09",
+"r": 0.0415,
+"vix": 28.44,
+"sym": "SPY",
+"spot": 715.87,
+"n_exp": 28,
+"n_opt": 7444,
+"call_gex": 7.223,
+"put_gex": 26.254,
+"net_gex": -19.031,
+"flip": 743.35,
+"flip_dist": -3.7
+},
+{
+"date": "2026-11-20",
+"slot": "mid",
+"ts": "2026-11-20 14:09",
+"r": 0.0415,
+"vix": 28.44,
+"sym": "^SPX",
+"spot": 7175.83,
+"n_exp": 50,
+"n_opt": 179,
+"call_gex": 0.072,
+"put_gex": 0.004,
+"net_gex": 0.068,
+"flip": null,
+"flip_dist": null
+}
+],
+"note": "📐 딜러 감마 그림자(화면 없음) — net=콜−풋(10억$, 1% 움직임당) · flip_dist=(현재가/flip−1)% · gex.py",
+"errors": [],
+"updated": "2026-11-20 14:09 KST"
+}
