@@ -1482,3 +1482,47 @@ def methods(mk, d, H, G, ext, cond, sec_breadth=None):
                   "ev": f"50일선 위 종목 {b['pct50']:.0f}% · 10일 상승 비율 {b['adv10']:.0f}%" + (" · ⚡ 폭 급반전(쯔바이크 신호)" if b.get("thrust") else "") +
                         f" → 같은 구간 {b['n']}일(최근 2년): 다음 날 {b['p1']*100:.0f}% · 5일 {b['p5']*100:.0f}%"})
     return M, research
+
+
+SKEW_FILE = "archive/x/skew_hist.json"
+
+
+def skew_shadow(get, msr):
+    """🌊 그림자(11/20 2-A): SPY 외가 풋 IV − 등가 콜 IV 매일 이력 → archive/x/skew_hist.json
+       원본 = market-strategy-report src/sentiment.py(10/19~, 그쪽 로그는 180일만 남김) · 250거래일 쌓이면 prob_vol 🌊 미국·아시아에 걸어가기 검증.
+       화면·확률에는 아직 안 씀."""
+    import os
+    try:
+        h = json.load(open(SKEW_FILE, encoding="utf-8")) if os.path.exists(SKEW_FILE) else {}
+    except Exception:
+        h = {}
+    n0 = len(h)
+    try:
+        lg = get(msr + "market/sentiment_log.json")
+        for d, v in (lg or {}).items():
+            if d.startswith("_") or not isinstance(v, dict) or v.get("skew90") is None:
+                continue
+            r = h.setdefault(d, {})
+            for k in ("skew90", "skew95", "pc_vol", "pc_oi", "vix", "vix_vix3m"):
+                if v.get(k) is not None and r.get(k) is None:
+                    r[k] = v[k]
+    except Exception as e:
+        print("외가 풋 이력(로그) 실패", e)
+    try:
+        sj = get(msr + "market/sentiment.json")
+        o = (sj or {}).get("spy_opt") or {}
+        us = (sj or {}).get("us") or {}
+        if o.get("m") and o.get("skew90") is not None:
+            r = h.setdefault(o["m"], {})
+            for k in ("skew90", "skew95", "pc_vol", "pc_oi", "atm_civ", "p90_iv", "p95_iv", "dte"):
+                if o.get(k) is not None:
+                    r[k] = o[k]
+            if us.get("skew_idx") is not None:
+                r["skew_idx"] = us["skew_idx"]
+    except Exception as e:
+        print("외가 풋 이력(오늘) 실패", e)
+    if h:
+        h = dict(sorted(h.items()))
+        json.dump(h, open(SKEW_FILE, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        print("외가 풋 그림자 이력", len(h), "일 (+", len(h) - n0, ")", min(h), "→", max(h))
+    return h

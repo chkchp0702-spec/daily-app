@@ -235,7 +235,7 @@
       var lvl = t.base ? t.p / t.base : 1, cl = k === "big1" ? "" : (lvl >= 2 ? "dn" : lvl <= 0.6 ? "up" : "");
       return '<div class="pr-m"><div class="pr-mh"><span class="hm-i">' + ({big1: "🌊", dn2: "⚠️", dn5: "📉"})[k] + '</span><b>' + e(t.name) + '</b>' +
         '<span class="pr-mp"><span class="' + cl + '">' + (ok ? pc(t.p) : '<span class="mut">' + pc(t.base) + '</span>') + '</span><small>평소 ' + pc(t.base) + (ok && t.base ? ' · ' + (lvl >= 1.15 ? '평소의 ' + lvl.toFixed(1) + '배' : lvl <= 0.87 ? '평소보다 낮음' : '평소쯤') : '') + '</small></span></div>' +
-        '<small class="pr-ev">' + (ok ? '✅ 검증 통과 — 2006년부터 해마다 그 전 자료로만 맞춰 다음 해를 맞힌 성적이 평소 비율보다 ' + a.skill + '% 나음(앞 ' + (v["앞"] || {}).skill + ' · 뒤 ' + (v["뒤"] || {}).skill + ' · 최근3년 ' + (v["최근3년"] || {}).skill + ' · 구별력 AUC ' + v.auc + ')' + (t.k ? ' · 과거 비슷한 확률이 나온 ' + t.k + '일의 실제 비율로 보정' : '')
+        '<small class="pr-ev">' + (ok ? '✅ 검증 통과 — 2006년부터 해마다 그 전 자료로만 맞춰 다음 해를 맞힌 성적이 평소 비율보다 ' + a.skill + '% 나음(앞 ' + (v["앞"] || {}).skill + ' · 뒤 ' + (v["뒤"] || {}).skill + ' · 최근3년 ' + (v["최근3년"] || {}).skill + ' · 구별력 AUC ' + v.auc + ')' + (t.k ? ' · 과거 비슷한 확률이 나온 ' + t.k + '일의 실제 비율로 보정' : '') + (t.opt ? ' · 근거에 미국 옵션 ' + e(t.opt) + ' 포함' : '')
           : '➖ 검증 미달(앞·뒤 기간 모두 평소보다 나아야 함) — 평소 비율만 보여요') + '</small></div>'; }).join("");
     var C = V0.conf, cf = '';
     if (C && C["전체"]){ var A = C["전체"], R3 = C["최근3년"] || {}, on = C.p != null && (C.p >= 0.6 || C.p <= 0.4);

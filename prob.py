@@ -1050,6 +1050,10 @@ def main():
             brain = get(MSR + "brain/state.json")
         except Exception as e:
             print("두뇌 실패", e)
+        try:
+            prob_x.skew_shadow(get, MSR)       # 🌊 그림자: SPY 외가 풋 IV − 등가 콜 IV 이력(250일 뒤 검증)
+        except Exception as e:
+            print("외가 풋 그림자 실패", e)
     try:
         events = json.load(open(EV_FILE, encoding="utf-8")).get("events", []) if os.path.exists(EV_FILE) else []
     except Exception:

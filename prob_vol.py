@@ -195,6 +195,36 @@ HL_TG = {"KR": {"big1", "dn5"}, "JP": {"dn2"}, "CN": {"big1", "dn2"}, "HK": {"dn
 #      gap 홍콩·중국·미국·5일 목표 최근3년↓ · VIX 하루 변화(dvix1) 미국 −2% 앞 그대로
 GAP_TG = {"KR": {"dn2"}, "JP": {"dn2"}}
 
+# 🌊 11/20 10시 「옵션 꼬리 가격」 2-A(probe/skewvol_bt.py · run 44651400589 · 2006~ 해마다 걸어가기, 자료마다 같은 표본):
+#   후보 3자료 × 3형태(수준·1년 백분위·5일 변화) × 5시장·3목표·저녁/아침판 = 243번 시험 → 「앞·뒤·최근3년 모두↑ + 최근3년>0」 12개.
+#   우연(243번 중 5%)과 구별하려고 그중 세 칸 모두 +0.3 넘고 다른 판에서도 안 나빠진 것만 붙임:
+#   v9  = log(VIX9D/VIX) 수준 — 미국 ±1% 15.6~: 26.2/13.7/10.4 → 26.9/14.7/11.1 (AUC 0.786→0.793, 백분위판도 통과)
+#   skew= log(CBOE SKEW) 수준 — 한국 5일 −3% 저녁 11.6/4.2/3.4 → 12.5/4.7/4.3 · 아침 13.0/5.7/3.7 → 13.9/6.0/4.0
+#   ❌ 작아서 안 붙임: 미국 −2% +풋콜(+0.2~0.6) · 한국 −2% +SKEW·풋콜 백분위(한 칸 +0.1~0.2 또는 다른 판 최근3년↓) · 일본 −2% +v9(아침판 뒤·최근3년↓) · 홍콩·중국 전부
+OPT_TG = {"US": {"big1": "v9"}, "KR": {"dn5": "skew"}}
+OPT_LBL = {"v9": "9일 공포 ÷ 30일 공포(VIX9D/VIX)", "skew": "옵션 꼬리 급락 값(CBOE SKEW)"}
+
+
+def _opt(H, kind, idx, bd, asia, morning):
+    """미국 옵션 꼬리 자료 → 지수 날짜에 맞춤(아시아 아침판 = 그날 밤 값 · 저녁판 = 하루 전 값)"""
+    vix = H.get("^VIX", pd.DataFrame()).get("Close")
+    if kind == "v9":
+        a = H.get("^VIX9D", pd.DataFrame()).get("Close")
+        if a is None or vix is None:
+            return None
+        s = np.log(a / vix.reindex(a.index))
+    else:
+        a = H.get("^SKEW", pd.DataFrame()).get("Close")
+        if a is None:
+            return None
+        s = np.log(a.where(a > 0))
+    s = s.dropna(); s = s[s.index <= bd]
+    if len(s) < 1500:
+        return None
+    if asia:
+        return _align(s if morning else s.shift(1), idx)
+    return s.reindex(idx).ffill()
+
 
 def _gap(idx, mk):
     """그날 → 다음 거래일 달력 일수(로그). 과거 = 지수 날짜 · 마지막 날 = holidays 거래소 달력(없으면 None)"""
@@ -268,9 +298,18 @@ def run(H, MK, base_dates=None):
                 dd = dd.copy(); dd["gap"] = gap
             except Exception:
                 gap = None
+        opk = {}
+        for tg_, kind in OPT_TG.get(mk, {}).items():
+            try:
+                o_ = _opt(H, kind, dd.index, bd, asia, morning)
+                if o_ is not None and pd.notna(o_.iloc[-1]):
+                    dd = dd.copy(); dd["opt_" + kind] = o_; opk[tg_] = kind
+            except Exception:
+                pass
         for tg in TG:
             try:
-                f_ = ff + (["hl5"] if hl5 is not None and tg in HL_TG.get(mk, ()) else []) + (["gap"] if gap is not None and tg in GAP_TG.get(mk, ()) else [])
+                f_ = ff + (["hl5"] if hl5 is not None and tg in HL_TG.get(mk, ()) else []) + (["gap"] if gap is not None and tg in GAP_TG.get(mk, ()) else []) \
+                    + (["opt_" + opk[tg]] if tg in opk else [])
                 P, B = walk(dd, f_, tg)
                 j = judge(dd, P, B, tg)
                 p_now, at = now_prob(dd, f_, tg)
@@ -278,7 +317,7 @@ def run(H, MK, base_dates=None):
                 base_now = float(dd[tg].dropna().iloc[-2520:].mean())     # 최근 10년 평소 비율
                 R["t"][tg] = {"name": TG[tg], "p": _r(pc if pc is not None else p_now, 3), "raw": _r(p_now, 3), "k": kn,
                               "rng": [_r(rg[0], 3), _r(rg[1], 3)] if rg else None, "base": _r(base_now, 3), "at": at, "ok": bool(j and j["ok"]), "val": j,
-                              "hl5": "hl5" in f_, "gap": ("gap" in f_) and int(round(float(np.exp(gap.iloc[-1])))) or None}
+                              "hl5": "hl5" in f_, "opt": OPT_LBL.get(opk.get(tg)), "gap": ("gap" in f_) and int(round(float(np.exp(gap.iloc[-1])))) or None}
             except Exception as e:
                 R["t"][tg] = {"name": TG[tg], "err": str(e)[:160]}
         if asia and sp is not None and morning:
