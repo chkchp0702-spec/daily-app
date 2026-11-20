@@ -1,6 +1,94 @@
 {
  "items": [
   {
+   "title": "금·은 6시간 만에 시가총액 1조 달러 증발 — 연준 인상 베팅",
+   "url": "https://beincrypto.com/gold-silver-lose-1-trillion-fed-rate-hike/",
+   "press": "BeInCrypto",
+   "at": "2026-11-20 15:45",
+   "why": "💼 🔴 뼈대 금 5→11% 채우는 날 방패도 같이 빠짐 — 금이 위험자산처럼 움직이는 「현금 마련 매도」 근거 · 💬 17번",
+   "summary": "금 3,521달러·은 41.19달러로 1년여 만의 최저(김현석 텔레그램 15:02 인용). 연준 인상 기대·AI 투매가 겹친 동반 매도."
+  },
+  {
+   "title": "젠슨 황 「이사회가 원하면 엔비디아 CEO로 돌아가겠다」 — 사임 5일 만",
+   "url": "https://www.khaleejtimes.com/business/jensen-huang-says-willing-to-return-as-nvidia-ceo-5-days-after-exit",
+   "press": "Khaleej Times",
+   "at": "2026-11-20 14:40",
+   "why": "NVDA(🐋 11/17 신호) — CEO 공백·규제 리스크가 주가 할인 요인, 복귀 여부가 반도체 심리 변수 · 가설③",
+   "summary": "황 「복귀하면 영광」 발언 · 이사회 의장은 11/17 「복귀시킬 의도 없음」(WRDW) — 엇갈림, 결정 미확인"
+  },
+  {
+   "title": "소프트뱅크 14% 급락 — AI 주식 투매가 아시아 시장 강타",
+   "url": "https://www.kaohooninternational.com/?p=569330",
+   "press": "Kaohoon International",
+   "at": "2026-11-20 14:40",
+   "why": "AI 투자 지주사까지 급락 = 앤트로픽 상장 뒤 「AI 차입」 의심이 아시아로 · 가설① 크레딧 · 🐻 일본 칸",
+   "summary": "소프트뱅크 −14~15%(손 회장 「앤트로픽 투자 안 한 것 후회」 인베스팅) · 닛케이 14시 −2,900엔 · TSMC −5%"
+  },
+  {
+   "title": "美 국채 랠리 — AI 매도에 안전자산 쏠림, 10년 금리 한 달 최저(제목 기준·날짜 미확인)",
+   "url": "https://investinglive.com/news/some-good-news-treasuries-rally-as-ai-selloff-drives-flight-to-safety-10-year-yield-at-one-month-low/",
+   "press": "investingLive",
+   "at": "2026-11-20 13:45",
+   "why": "💼 🔴 뼈대 현금·단기채 26% · 💬 15 채권 — 주식 급락에 美 금리 내려가는지(가설② FOMC 매파와 줄다리기)",
+   "summary": "제목만 확인 — 본문 숫자·날짜 미확인 · 같은 시각 구글뉴스 「S&P 선물 하락·美 국채금리↓」(11/20)와 방향 같음"
+  },
+  {
+   "title": "LME 구리 4개월 최저 — AI 매도세·중국 약세가 짓눌러",
+   "url": "https://news.metal.com/newscontent/HPSJFB5W7OIYMM4YPU4ZEOJU7MTVWGRUBNTCQ2A-lme-copper-hits-four-month-low-as-ai-selloff-and-china-weakness-weigh",
+   "press": "SMM(상하이메탈마켓)",
+   "at": "2026-11-20 12:45",
+   "why": "AI 투매가 원자재(구리·금)까지 번짐 = 「AI 설비투자 수요」 가설의 가격 쪽 반대 신호 · 블룸버그 「Copper Rout Deepens」(피드)와 같은 흐름",
+   "summary": "LME 구리 4개월 최저(SMM). 블룸버그도 「AI 매도세가 금속 시장 휩쓸어」. 같은 날 금은 14개월 최저·달러 19개월 최고(연합)."
+  },
+  {
+   "title": "후앙 없는 엔비디아 — AI 거래 멈칫이 금속에 주는 뜻",
+   "url": "https://oilprice.com/Metals/Commodities/Nvidia-Without-Huang-What-a-Pause-in-AI-Deals-Means-for-Metals.html",
+   "press": "OilPrice",
+   "at": "2026-11-20 12:45",
+   "why": "엔비디아 경영 공백→AI 딜 보류→구리·전력 금속 수요 기대 후퇴 경로 · NVDA 🐋(11/17)·가설③",
+   "summary": "엔비디아 리더십 공백이 AI 인프라 계약 속도를 늦출 수 있다는 분석 — 구리 등 금속 수요 기대 약화(숫자는 원문 확인 필요)."
+  },
+  {
+   "title": "美, 중국의 해외 데이터센터 우회로 막는 AI 칩 수출 통제 강화",
+   "url": "https://www.scmp.com/tech/article/3374639/us-tightens-ai-chip-export-curbs-close-chinas-overseas-data-centre-loophole",
+   "press": "SCMP",
+   "at": "2026-11-20 11:40",
+   "why": "TSMC 中 AI 칩 출하 조이기(인베스팅 11/20)의 배경 — 오늘 삼성 −6%·하닉 −6%·대만 −5% · 가설③ AI 안 갈림·💬 2번",
+   "summary": "美가 중국 기업의 해외 데이터센터를 통한 AI 칩 확보 경로를 막는 규정을 강화. 같은 날 TSMC가 中 AI 칩 통제를 더 조인다는 보도(로이터 인용)·상해 반도체 주도 하락 출발."
+  },
+  {
+   "title": "금, 연준 인상 다가오며 3년 연속 상승 끝날 듯",
+   "url": "https://www.scmp.com/business/commodities/article/3374547/gold-set-snap-blistering-run-three-year-gains-fed-rate-increase-looms",
+   "press": "SCMP",
+   "at": "2026-11-20 11:40",
+   "why": "💼 🔴 뼈대로 금 5→11% 늘리는 날 금이 주식과 같이 빠짐 — 나눠 채우기 근거 · 💬 17번",
+   "summary": "금리 인상 전망에 금이 3년 연속 상승을 멈출 전망. daily-app 기준 11/20 11:30 금 선물 3,538달러로 11/19 마감 3,650.8보다 약 3% 더 낮음(연중 최저 헤드라인)."
+  },
+  {
+   "title": "소프트뱅크 16% 넘게 급락 — 앤스로픽 상장 뒤 아시아 기술주 AI 매도",
+   "url": "https://www.cnbc.com/2026/11/20/softbank-ai-tech-stocks-slide-anthropic-debut.html",
+   "press": "CNBC",
+   "at": "2026-11-20 10:40",
+   "why": "앤스로픽 상장 = AI 끝물 걱정이 아시아로 — 코스피 반도체·🐻 계기판·가설③(AI 안 갈림)",
+   "summary": "11/20 소프트뱅크 −16%↑ · 일본·한국 기술주 동반 급락 · 닛케이 장중 −2,800엔↑(일본 보도)"
+  },
+  {
+   "title": "신흥국 주식, AI 주도 기술주 하락에 약세장 진입 향해",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-20/emerging-market-stocks-set-for-bear-market-on-ai-led-tech-slide",
+   "press": "Bloomberg",
+   "at": "2026-11-20 10:40",
+   "why": "MSCI EM 6월 고점 −20% — 한국·대만 반도체 비중 큰 지수가 약세장 문턱 · 미국 밖 비중 한도(35%)·💬 13번",
+   "summary": "AI 매도·세계 금리 상승·무역 긴장이 원인(블룸버그) · 대만 가권 −4%·항셍테크 −3% 개장(하나중국 72458)"
+  },
+  {
+   "title": "엔비디아, 중국向 H200 공급 중단",
+   "url": "https://finance.yahoo.com/news/nvidia-pulls-plug-china-h200-111505059.html",
+   "press": "Yahoo Finance",
+   "at": "2026-11-20 09:35",
+   "why": "NVDA(🐋 11/17)·한국 반도체 — 수출 허가 칩까지 中 출하가 끊기면 가설③(AI 안 갈림)의 「규제 할인」 확대",
+   "summary": "엔비디아가 허가받은 호퍼 계열(H200 포함) 中 출하 중단 보도(gn_us_tech 헤드라인과 같은 사건) · 같은 날 FT 「삼성·TSMC 일부 中 고객 첨단 칩 출하 중단」 · 오늘 코스피 반도체 소부장 −10~12%"
+  },
+  {
    "title": "SEC, 젠슨 황 퇴진 뒤 엔비디아 공시 민사 조사(테크크런치)",
    "url": "https://techcrunch.com/2026/11/17/sec-reportedly-investigating-nvidia-amid-huang-exit/",
    "press": "TechCrunch",
@@ -551,95 +639,7 @@
    "at": "2026-11-18 18:40",
    "why": "🫧 버블 경보판 신용·밸류 칸 — 중앙은행이 AI 밸류·재정·지정학을 3대 위험으로 명시(가설① AI 크레딧)",
    "summary": "ECB가 AI 관련 주식 집중·고평가가 급격한 재평가로 이어질 위험을 경고 · 비은행(헤지펀드) 레버리지가 국채 변동성 키운다는 경고도 함께(블룸버그 11/18)."
-  },
-  {
-   "title": "삼성·SK하이닉스·마이크론·샌디스크 AI 메모리 장기계약 58건",
-   "url": "https://fourweekmba.com/ai-samsung-sk-hynix-micron-sandisk-hold-58-ai-memory-deals/",
-   "press": "FourWeekMBA",
-   "at": "2026-11-18 18:40",
-   "why": "삼성 다년 D램 공급계약 임박 보도(야후 11/18)와 이어짐 — 메모리 사이클 정점론(SemiAnalysis) 반대 근거, 091160·MU",
-   "summary": "메모리 4사가 AI 고객과 장기 공급계약 58건 보유(정리 기사) · 다년 계약은 가격 하락기 물량 완충 — 단 낸드는 내년 2분기 하락(트렌드포스)."
-  },
-  {
-   "title": "트렌드포스: HBM 공급 빠듯 2027년까지 — 내년 HBM 가격 전년비 +121% 전망",
-   "url": "https://iconnect007.com/article/151778/hbm-supply-constraints-persist-2027-prices-seen-rising-121-yoy/151775/aep",
-   "press": "I-Connect007(TrendForce)",
-   "at": "2026-11-18 17:45",
-   "why": "반도체 칸·가설④ 메모리 상류 — HBM은 빡빡·낸드는 2분기 하락(11/18 트렌드포스 텔레그램 전재)으로 메모리 안 갈림",
-   "summary": "트렌드포스는 HBM 공급 제약이 2027년까지 이어져 HBM 가격이 전년비 +121% 오를 수 있다고 봄. 11/18 전재 기사는 HBM4 내년 +100%↑, 낸드는 내년 2분기부터 하락 전환."
-  },
-  {
-   "title": "마이크론, 자사주 매입 한도 350억 달러로 확대",
-   "url": "https://www.xtb.com/int/market-analysis/news-and-research/micron-expands-share-buybacks-to-35-billion",
-   "press": "XTB",
-   "at": "2026-11-18 16:40",
-   "why": "반도체 칸·가설④ 메모리 상류 — 12월 매입 창이 열리면 낸드 약세 구간 하방 받침(연합인포맥스 11/18)",
-   "summary": "10/13 이사회 승인 자사주 매입 한도 350억$ — 발표일 주가 −4%(뉴스에 팜). 연합인포맥스 11/18 「12월 빗장 풀려」."
-  },
-  {
-   "title": "S&P500, 다섯 번째 지지선 테스트 — BTIG 「이번엔 버티기 어려울 수도」(목표 하단 7,000)",
-   "url": "https://wallstreetcn.com/articles/3786166",
-   "press": "월스트리트CN(하나증권 중국 경유)",
-   "at": "2026-11-18 16:40",
-   "why": "💬8·🟢 S&P 판정 — 7,250~7,350 지지 다섯 번째 시험, 200일선 7,328과 겹침(사흘 아래면 현금 26%)",
-   "summary": "BTIG 수석 기술전략가: 지지선 반복 시험 → 이탈 확률↑, 소형주·나스닥·반도체 200일선 방어 어려울 수도. 하단 7,000 제시."
-  },
-  {
-   "title": "앤스로픽 공모가 수요일 확정·목요일 첫 거래 — 희망가 70~78달러",
-   "url": "https://aitoolsrecap.com/Blog/anthropic-ipo-prices-wednesday-trades-thursday",
-   "press": "AI Tools Recap",
-   "at": "2026-11-18 15:40",
-   "why": "💬6 앤스로픽 공모·AI 자금 이동 — 11/19 첫 거래가 AI 대형주 수급(엔비디아·소프트웨어)과 💬3·5에 영향",
-   "summary": "공모가는 11/18(수, 미국) 확정·11/19(목) 나스닥 첫 거래 일정 · 희망가 70~78달러(RTTNews) · 블룸버그 「희망가 상단 또는 위로 안내」(피드)."
-  },
-  {
-   "title": "이란군, 쿠웨이트의 미군 드론·미사일 기지 겨냥 — 걸프 공격 이어져",
-   "url": "https://www.cnbc.com/2026/11/18/trump-iran-war-hormuz-oil-.html",
-   "press": "CNBC",
-   "at": "2026-11-18 15:40",
-   "why": "🛢️ brent_95 조건(85↓ 에너지 축소)·💬19 — 공격 확대에도 유가 무반응이 이어지는지가 에너지 칸 판단",
-   "summary": "11/18 이란이 쿠웨이트 미군 시설 겨냥 발표·호르무즈 가스운반선 공격(인베스팅 피드) · 유가 숫자는 미확인(블룸버그 「보합」)."
-  },
-  {
-   "title": "걸프 긴장 고조 — 이란이 쿠웨이트 타격, 미국은 호르무즈 인근 공습",
-   "url": "https://www.ksl.com/article/51506116/gulf-tensions-escalate-as-iran-hits-kuwait-us-strikes-near-hormuz",
-   "press": "KSL(AP)",
-   "at": "2026-11-18 14:45",
-   "why": "🛢️ 브렌트 95 장부 조건·에너지 칸·💬19 — 휴전 흔들림이 유가 하방(85 축소 선)을 막는 재료",
-   "summary": "이란군이 쿠웨이트 알리 알 살렘 기지의 美 드론·미사일 시설을 겨냥(CNBC 11/18). 미국은 호르무즈 인근 타격. 블룸버그는 유가 「보합(steadies)」 — 공격 뉴스만으로 못 오르는 장 지속, 브렌트 숫자는 미확인."
-  },
-  {
-   "title": "황의 퇴진과 미국 규제 — 중국 AI 연산력이 위태롭다",
-   "url": "https://asiatimes.com/2026/11/huangs-fall-us-curbs-put-chinas-ai-computing-in-peril/",
-   "press": "Asia Times",
-   "at": "2026-11-18 14:45",
-   "why": "엔비디아 임시 CEO 「중국에 첨단 칩 안 보냄」 — 4분기 1,300억$ 가이던스가 중국 제외라 숫자 영향은 작지만 中 보복(희토·광학) 위험 · 가설④",
-   "summary": "임시 CEO 크레스가 중국 첨단 반도체 수출 중단을 밝힘(블룸버그 11/18). 中 광학 수출 금지 추진 보도(gn_us_tech)와 겹쳐 공급망 보복 위험."
-  },
-  {
-   "title": "골드만삭스, 연말 「산타 랠리」 반등 전망",
-   "url": "https://www.tipranks.com/news/goldman-sachs-gs-forecasts-a-year-end-santa-claus-rally",
-   "press": "TipRanks",
-   "at": "2026-11-18 13:45",
-   "why": "S&P 200일선 아래(7,340) 판정 중 IB 연말 반등 논리 — 🟢 S&P 칸·💬9 「참고」 의견",
-   "summary": "골드만이 연말 계절성 반등을 전망(제목 기준·세부 숫자 미확인). 피드 gn_us_ib 「Santa Claus Rally 2026」과 같은 흐름."
-  },
-  {
-   "title": "엔비디아 이사회 「황 복귀 없음」·SEC 조사 보도",
-   "url": "https://letsdatascience.com/news/nvidia-ceo-jensen-huang-resigns-cfo-colette-kress-named-inte-c5e83b05",
-   "press": "Let's Data Science",
-   "at": "2026-11-18 13:45",
-   "why": "NVDA 🐋(11/17)·SMH·한국 반도체 갭의 지배 변수 — 경영 공백·신용 엄격화가 AI 공급망 투자에 미치는 영향",
-   "summary": "황 사임 뒤 CFO 크레스 임시 CEO(보도). 로이터: 이사회 재고용 거부·WSJ SEC 조사, 블룸버그: 트럼프 복귀 지지·이사회 새 CEO 물색."
-  },
-  {
-   "title": "앤스로픽 희망가 70~78달러, 11/19 나스닥 상장",
-   "url": "https://abhs.in/blog/anthropic-ipo-ant-70-78-price-range-1-4-trillion-november-19-2026",
-   "press": "abhs.in",
-   "at": "2026-11-18 12:40",
-   "why": "공모 규모·밸류(최대 1.4조$ 보도)가 NVDA 🐋·SMH 수급과 겹침 — 첫 거래 날 AI 칩주 반응 확인용",
-   "summary": "희망가 70~78$·몸값 최대 약 1.4조$(TNW 보도와 같은 수치). 일부 보도는 약 1조$ 목표(investingLive) — 수치 엇갈림."
   }
  ],
- "at": "2026-11-20 08:40"
+ "at": "2026-11-20 10:40"
 }
