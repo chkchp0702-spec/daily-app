@@ -1,6 +1,6 @@
 /* 📦 app.b02.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 2/8 (products.js … onepage.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(2,9,["products.js", "els_design.js", "extras.js", "burst.js", "usage.js", "plus.js", "cpin.js", "onepage.js"],[4, 992, 1221, 1586, 1648, 1773, 1975, 2077]);
+__bs(2,9,["products.js", "els_design.js", "extras.js", "burst.js", "usage.js", "plus.js", "cpin.js", "onepage.js"],[4, 992, 1221, 1586, 1648, 1777, 1979, 2081]);
 /* ======== products.js ======== */
 /* CH Investing — 🛍️ 상품: 미래에셋증권이 지금 파는 채권 · 펀드 · ELS (archive/x/products.json, products.yml 하루 3번 · 🇧🇷 브라질 실시간 금리·달러채 archive/x/brl_live.json 평일 20분마다)
    10/16 사용자: 「상품 카테고리 — 국채·미국채·브라질국채 / 펀드·사모펀드(수익률 순위) / ELS — 하위 3개 · 기존 카테고리 형식과 비슷하게」
@@ -1652,12 +1652,15 @@ __bk(12);
    관심종목·메모·이름은 보내지 않음. 설정 ⚙️ › 「📈 사용 현황」에서 봄. */
 (function(){
   var TOPIC = "chkchp-ch-open", KEY = "us_last";
+  // 🩹 11/20 자동 검진·화면 찍기(로봇 브라우저)가 단추를 차례로 눌러 11/18부터 집계가 「누른 수 = 누른 사람 수」로 오염 → 사람 손만 셈
+  var BOT = (function(){ try { return !!navigator.webdriver || /HeadlessChrome|Playwright|puppeteer/i.test(navigator.userAgent) || /[?&]embed=1/.test(location.search); } catch(x) { return false; } })();
   function ls(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(x) {} return null; }
   function kst(){ return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
   function dev(){ var d = ls("us_dev"); if (!d){ d = Math.random().toString(36).slice(2, 10); ls("us_dev", d); } return d; }
   function ping(){
     var d = kst(), tab = (typeof cur !== "undefined" && cur) || (location.hash || "#home").slice(1) || "home";
     var body = {d: dev(), day: d, tab: String(tab).slice(0, 12), v: (typeof APPV !== "undefined" ? APPV : ""), t: new Date(Date.now() + 9 * 3600e3).toISOString().slice(11, 16)};
+    if (BOT) return;
     try { fetch("https://ntfy.sh/" + TOPIC, {method: "POST", body: JSON.stringify(body), headers: {"Title": "open"}, keepalive: true}).catch(function(){}); } catch(x) {}
     ls(KEY, String(Date.now()));
   }
@@ -1702,6 +1705,7 @@ __bk(12);
     var b = bag(); if (!b.n) return;
     var body = {k: "tap", d: dev(), day: b.day, v: (typeof APPV !== "undefined" ? APPV : ""), taps: b.taps, views: b.views};
     var s = JSON.stringify(body); if (s.length > 3800){ var ks = Object.keys(b.taps).sort(function(a, c){ return b.taps[c] - b.taps[a]; }).slice(0, 40), t2 = {}; ks.forEach(function(k){ t2[k] = b.taps[k]; }); body.taps = t2; s = JSON.stringify(body); }
+    if (BOT){ put({day: b.day, taps: {}, views: {}, n: 0}); return; }
     try { fetch("https://ntfy.sh/" + TOPIC, {method: "POST", body: s, headers: {"Title": "tap"}, keepalive: true}).catch(function(){}); } catch(x) {}
     put({day: b.day, taps: {}, views: {}, n: 0});
   }

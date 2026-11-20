@@ -77,6 +77,11 @@ def main():
                 ERR.append((day, b)); seen.add(mid); n += 1
                 continue
             D = days.setdefault(day, {"dev": {}, "tabs": {}, "opens": 0, "ver": {}})
+            if b.get("k") == "tap" and len(b.get("taps") or {}) >= 25 and max([int(c or 0) for c in (b.get("taps") or {}).values()] or [0]) <= 1:
+                # 🩹 11/20 로봇 브라우저가 단추를 차례로 한 번씩 누른 꾸러미(11/18~ 오염) — 사람은 10분에 서로 다른 단추 25개를 꼭 한 번씩만 누르지 않음
+                D0 = days.setdefault(day, {"dev": {}, "tabs": {}, "opens": 0, "ver": {}}); D0["bot"] = D0.get("bot", 0) + 1
+                seen.add(mid); n += 1
+                continue
             if b.get("k") == "tap":   # 🎯 11/04 누른 것·본 화면 (사용자 「어디를 제일 많이 봤니」)
                 T = D.setdefault("taps", {}); V = D.setdefault("views", {}); W = D.setdefault("tapdev", {})
                 for k_, c_ in list((b.get("taps") or {}).items())[:60]:

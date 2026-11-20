@@ -1,6 +1,6 @@
 /* 📦 app.b01.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 1/8 (views.js … mine.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flow.js", "divc.js", "verdict.js", "mine.js"],[4, 569, 885, 1303, 1355, 1703, 1891, 2509, 2578]);
+__bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flow.js", "divc.js", "verdict.js", "mine.js"],[4, 569, 885, 1303, 1355, 1703, 1891, 2509, 2584]);
 /* ======== views.js ======== */
 /* CH Investing — 탭별 화면 (그림·차트 우선, PDF는 아래 접어두기) */
 (function(){
@@ -2520,15 +2520,19 @@ __bk(6);
   function load(){
     if (P) return P;
     var t = Math.floor(Date.now() / 600000);
-    P = Promise.all([getJSON(RM + "bear.json?" + t, {ttl: 600000}).catch(function(){ return null; }), getJSON(RM + "port.json?" + t, {ttl: 600000}).catch(function(){ return null; })])
-      .then(function(r){ V = build(r[0], r[1]); setTimeout(function(){ P = null; }, 600000); return V; });
+    P = Promise.all([getJSON(RM + "bear.json?" + t, {ttl: 600000}).catch(function(){ return null; }), getJSON(RM + "port.json?" + t, {ttl: 600000}).catch(function(){ return null; }), getJSON(RM.replace(/market\/$/, "") + "ledger/ledger.json?" + t, {ttl: 600000}).catch(function(){ return null; })])
+      .then(function(r){ V = build(r[0], r[1], r[2]); setTimeout(function(){ P = null; }, 600000); return V; });
     return P;
   }
-  function build(B, PO){
+  function build(B, PO, LG){
     if (!B || !B.markets) return null;
     var M = {}; B.markets.forEach(function(m){ M[m.key] = m; });
     var k = M.kospi, s = M.sp500, cash = null;
     try { (PO.hold || []).forEach(function(h){ if (/현금/.test(h.name)) cash = (cash || 0) + (+h.pct || 0); }); } catch(x) {}
+    // 🩹 11/20 현금은 장부 배분표(ledger allocation)가 정본 — port.json hold 는 어제 종가에 들고 있던 몫이라 🔴 전환 날 「현금 0%」가 나갔음
+    var skel = null, chgToday = false;
+    try { var lc = null; (LG.allocation || []).forEach(function(a){ if (/현금/.test(a.name)) lc = (lc || 0) + (+a.pct || 0); }); if (lc != null) cash = lc;
+      skel = (LG.skeleton || {}).now || null; var cn = LG.change_note || {}, td = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); chgToday = cn.date === td && /판정 바뀜/.test(cn.why || ""); } catch(x) {}
     if (!k || !s) return null;
     function line(m, isPort){
       var st = ST[m.state] || ["", m.state];
@@ -2543,6 +2547,8 @@ __bk(6);
     var ka = an(k), qa = an(M.kosdaq);
     if (ka || qa) o.kr.act = [ka, qa].filter(Boolean).join(" / ");
     if (s.analog) o.us.act = s.analog.stock >= 100 ? "배분표 그대로" + (cash != null ? " · 현금 " + Math.round(cash) + "%" : "") : "주식 " + s.analog.stock + "% · " + s.analog.next;
+    if (skel === "down" && (!s.analog || s.analog.stock >= 100)){   // 💼 🔴 기본 틀(S&P 200일선 아래 3일) — 계기판 🟢 이어도 배분표 자체가 줄어든 상태
+      o.us.act = (chgToday ? "오늘 배분표 바뀜 · " : "") + "🔴 S&P 200일선 아래 → 현금 " + (cash != null ? Math.round(cash) : 26) + "%"; o.us.c = "dn"; }
     o.split = k.state !== s.state;
     o.text = "🇰🇷 국내 주식: " + o.kr.st + " → " + o.kr.act + "\n🌏 해외 주식(포트): S&P500 " + o.us.st + " → " + o.us.act;
     return o;

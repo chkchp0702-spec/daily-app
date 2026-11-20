@@ -4,12 +4,15 @@
    관심종목·메모·이름은 보내지 않음. 설정 ⚙️ › 「📈 사용 현황」에서 봄. */
 (function(){
   var TOPIC = "chkchp-ch-open", KEY = "us_last";
+  // 🩹 11/20 자동 검진·화면 찍기(로봇 브라우저)가 단추를 차례로 눌러 11/18부터 집계가 「누른 수 = 누른 사람 수」로 오염 → 사람 손만 셈
+  var BOT = (function(){ try { return !!navigator.webdriver || /HeadlessChrome|Playwright|puppeteer/i.test(navigator.userAgent) || /[?&]embed=1/.test(location.search); } catch(x) { return false; } })();
   function ls(k, v){ try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch(x) {} return null; }
   function kst(){ return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
   function dev(){ var d = ls("us_dev"); if (!d){ d = Math.random().toString(36).slice(2, 10); ls("us_dev", d); } return d; }
   function ping(){
     var d = kst(), tab = (typeof cur !== "undefined" && cur) || (location.hash || "#home").slice(1) || "home";
     var body = {d: dev(), day: d, tab: String(tab).slice(0, 12), v: (typeof APPV !== "undefined" ? APPV : ""), t: new Date(Date.now() + 9 * 3600e3).toISOString().slice(11, 16)};
+    if (BOT) return;
     try { fetch("https://ntfy.sh/" + TOPIC, {method: "POST", body: JSON.stringify(body), headers: {"Title": "open"}, keepalive: true}).catch(function(){}); } catch(x) {}
     ls(KEY, String(Date.now()));
   }
@@ -54,6 +57,7 @@
     var b = bag(); if (!b.n) return;
     var body = {k: "tap", d: dev(), day: b.day, v: (typeof APPV !== "undefined" ? APPV : ""), taps: b.taps, views: b.views};
     var s = JSON.stringify(body); if (s.length > 3800){ var ks = Object.keys(b.taps).sort(function(a, c){ return b.taps[c] - b.taps[a]; }).slice(0, 40), t2 = {}; ks.forEach(function(k){ t2[k] = b.taps[k]; }); body.taps = t2; s = JSON.stringify(body); }
+    if (BOT){ put({day: b.day, taps: {}, views: {}, n: 0}); return; }
     try { fetch("https://ntfy.sh/" + TOPIC, {method: "POST", body: s, headers: {"Title": "tap"}, keepalive: true}).catch(function(){}); } catch(x) {}
     put({day: b.day, taps: {}, views: {}, n: 0});
   }
