@@ -1,0 +1,25 @@
+name: gex
+# 📐 딜러 감마(GEX) 그림자 기록 (gex.py → archive/x/gex_hist.json, 11/20 🎲 2-C) — 화면 없음 · 돈·AI 안 씀
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "33 21 * * 1-5"   # KST 화~토 06:33 — 미국 마감 뒤(close)
+    - cron: "37 17 * * 1-5"   # 뉴욕 12~13시 장중(mid)
+permissions:
+  contents: write
+concurrency:
+  group: gex
+  cancel-in-progress: false
+jobs:
+  g:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q yfinance pandas numpy
+      - run: python gex.py
+      - name: 저장
+        run: bash scripts/push.sh "gex $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/gex_hist.json

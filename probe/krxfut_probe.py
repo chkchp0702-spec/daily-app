@@ -17,7 +17,7 @@ fut = sorted(c for c in codes if "fut" in c[0].lower() or "opt" in c[0].lower())
 print("선물·옵션 bld:", fut)
 out = {}
 for n in names:
-    if not n.startswith("get_future_ohlcv"): continue
+    continue
     f = getattr(s, n)
     for args in (("20241115",), ("20241115", "KRDRVFUK2I"), ("20100104", "KRDRVFUK2I")):
         t0 = time.time()
@@ -34,7 +34,8 @@ try:
         def __init__(self, bld): super().__init__(); self._bld = bld
         @property
         def bld(self): return self._bld
-        def fetch(self, **kw): return self.read(**kw).json()
+        def fetch(self, **kw):
+            r = self.read(**kw); return r if isinstance(r, dict) else r.json()
     tries = [("dbms/MDC/STAT/standard/MDCSTAT13101", dict(trdDd="20241115", prodId="KRDRVOPK2I", inqTpCd="1")),
              ("dbms/MDC/STAT/standard/MDCSTAT13102", dict(strtDd="20241101", endDd="20241115", prodId="KRDRVOPK2I", inqTpCd="2")),
              ("dbms/MDC/STAT/standard/MDCSTAT12501", dict(trdDd="20241115", prodId="KRDRVFUK2I", mktTpCd="T")),
@@ -43,7 +44,7 @@ try:
         try:
             j = Raw(bld).fetch(**kw)
             ks = list(j.keys()); v = j[ks[0]] if ks else None
-            print("RAW", bld, ks, (v[:2] if isinstance(v, list) else str(v)[:300]))
+            print("RAW", bld, ks, (v[:2] if isinstance(v, list) else str(v)[:300]), len(v) if isinstance(v, list) else '')
         except Exception as e:
             print("RAW ✗", bld, str(e)[:200])
 except Exception as e:
