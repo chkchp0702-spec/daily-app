@@ -136,6 +136,17 @@
       heal(c, src);
       return;
     }
+    // 🔧 11/20 묶음 조각(app.bNN.js)을 통째로 못 받으면 그 조각의 화면(📰 피드 등)이 모두 「… is not defined」 → 1.5초 뒤 한 번 다시 받고, 오류 띠가 떠 있으면 그 화면을 다시 그림
+    var tsrc = (ev.target && ev.target !== window && ev.target.tagName === "SCRIPT") ? String(ev.target.src || "") : "", tb = /\/app\.b(\d+)\.js/.exec(tsrc);
+    if (tb && !BK.ok[+tb[1]] && !(BK.rt = BK.rt || {})[tb[1]]){
+      BK.rt[tb[1]] = 1; chErr("load", "조각 못 받음 → 다시 받기", tsrc, "");
+      setTimeout(function(){
+        var s = document.createElement("script"); s.src = tsrc;
+        s.onload = function(){ try { var b = document.getElementById("stabbar"); if (b && window.cur && typeof window.go === "function"){ b.remove(); window.go(window.cur); } } catch(z) {} };
+        document.body.appendChild(s);
+      }, 1500);
+      return;
+    }
     if (ev.target && ev.target !== window && (ev.target.src || ev.target.href)){ return; }   // 그림·스크립트 못 받음은 따로 안 셈(너무 흔함)
     chErr("js", (ev.error && ev.error.message) || ev.message, srcOf(ev.error && ev.error.stack, src));
   }, true);
