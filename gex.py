@@ -65,7 +65,7 @@ def gex_at(S, a, r):
 
 def one(sym, now, r):
     S, nexp, a = chain(sym, now)
-    if a is None or len(a) < 50:
+    if a is None or len(a) < 1000:   # ^SPX 는 야후 미결제가 비어 있는 날이 많음(11/20 179개) → 얇으면 버림
         raise RuntimeError(f"체인 비어 있음({0 if a is None else len(a)})")
     a = a[(a[:, 0] > S * 0.5) & (a[:, 0] < S * 1.5)]
     c, p = gex_at(S, a, r)
@@ -86,11 +86,14 @@ def one(sym, now, r):
 def main():
     now = dt.datetime.utcnow()
     kst = now + dt.timedelta(hours=9)
-    # 미국 장 날짜: KST 06~12시 실행 = 전날 미국 장 마감 뒤(close), 그 밖(미국 장중) = 그날(mid)
-    if 5 <= kst.hour < 13:
+    # 미국 장 날짜: KST 06~22시 실행 = 미국 장 닫힘 → 직전 미국 장 마감 값(close, 날짜 = KST 전날)
+    #               KST 23~05시 = 미국 장중(mid, 날짜 = 뉴욕 그날) · 주말 실행은 금요일 값으로 덮어씀
+    if 6 <= kst.hour < 23:
         slot, day = "close", (kst - dt.timedelta(days=1)).date()
     else:
-        slot, day = "mid", (now - dt.timedelta(hours=4)).date()
+        slot, day = "mid", (now - dt.timedelta(hours=5)).date()
+    while day.weekday() >= 5:
+        day -= dt.timedelta(days=1)
     r = rate()
     try:
         vix = round(float(yf.Ticker("^VIX").history(period="5d")["Close"].dropna().iloc[-1]), 2)
