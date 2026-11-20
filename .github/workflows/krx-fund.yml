@@ -1,5 +1,5 @@
 name: krx-fund
-# 🔑 KRX 지수 PER·PBR (tools/krx_fund.py → archive/x/kr_fund.csv) + 공매도 거래 비중(tools/krx_short.py → kr_short.csv, 11/20) — 비밀값 KRX_ID·KRX_PW · 평일 아침 · 시황리포트 alt_fetch 가 받아 감
+# 🔑 KRX 지수 PER·PBR + 선물 미결제·옵션 투자자별(tools/krx_deriv.py, 11/20 14시) (tools/krx_fund.py → archive/x/kr_fund.csv) + 공매도 거래 비중(tools/krx_short.py → kr_short.csv, 11/20) — 비밀값 KRX_ID·KRX_PW · 평일 아침 · 시황리포트 alt_fetch 가 받아 감
 on:
   workflow_dispatch:
   schedule:
@@ -12,7 +12,7 @@ concurrency:
 jobs:
   k:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,7 +27,12 @@ jobs:
         env:
           KRX_ID: ${{ secrets.KRX_ID }}
           KRX_PW: ${{ secrets.KRX_PW }}
+      - run: timeout 120m python tools/krx_deriv.py || true   # 선물 미결제·옵션 투자자별 (처음엔 2010~ 몰아받기, 그 뒤 이어받기)
+        env:
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
       - name: 저장
+        if: always()
         run: |
           git config user.name "bot"; git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "krx-fund $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/kr_fund.csv archive/x/kr_short.csv
+          bash scripts/push.sh "krx-fund $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/kr_fund.csv archive/x/kr_short.csv archive/x/kr_fut_oi.csv archive/x/kr_opt_inv.csv
