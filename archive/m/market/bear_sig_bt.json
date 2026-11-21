@@ -1,5 +1,5 @@
 {
- "at": "2026-11-21 06:25",
+ "at": "2026-11-22 06:31",
  "rules": {
   "판정": "낙폭(252일 최고 종가 대비) > −10% 🟢 정상 · −10~−20% 🟡 조정 · −20% 이하 🐻 하락장 (🐻 은 낙폭 −10% 위 + 200일선 위까지 유지)",
   "바닥 신호": "① 60일 저점 10거래일 안 깨짐 ② 20일선 위 2일 연속 ③ VIX 20 아래 ④ 🇰🇷 외국인 3일 연속 순매수 / 🇺🇸 50일선 위",
@@ -484,33 +484,33 @@
      "in": "2026-07-08",
      "out": "진행 중",
      "bottom": "2026-11-20",
-     "bottom_dd": -46.7,
+     "bottom_dd": -46.6,
      "len": 92,
      "sig": [
       {
        "fake": 1,
-       "fake_more": -28.8,
+       "fake_more": -28.5,
        "on": null,
        "after": null,
        "up": null
       },
       {
        "fake": 4,
-       "fake_more": -30.7,
+       "fake_more": -30.5,
        "on": null,
        "after": null,
        "up": null
       },
       {
        "fake": 3,
-       "fake_more": -14.6,
+       "fake_more": -14.3,
        "on": null,
        "after": null,
        "up": null
       },
       {
        "fake": 2,
-       "fake_more": -30.6,
+       "fake_more": -30.4,
        "on": null,
        "after": null,
        "up": null

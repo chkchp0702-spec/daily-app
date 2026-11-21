@@ -1,6 +1,54 @@
 {
  "items": [
   {
+   "title": "이란 혁명수비대 「걸프 상공 美 F-16에 미사일 발사」 주장 — 미국은 피해 부인",
+   "url": "https://www.israelnationalnews.com/flashes/687476",
+   "press": "Israel National News(로이터 동반 보도)",
+   "at": "2026-11-22 08:45",
+   "why": "주말 호르무즈 긴장 2번째 재료 — 월요일 브렌트 90 회복·에너지 칸(brent_95·85 축소 선)",
+   "summary": "IRGC가 걸프 상공 美 F-16에 미사일을 쐈다고 주장, 미국은 기체 손상 부인(로이터 11/22). 같은 주말 오만 인근 유조선 공격 3건·기뢰 주장과 겹침. 11/20 브렌트 89.87$(3주 연속 주간 하락)."
+  },
+  {
+   "title": "엔비디아 이사회 「젠슨 황 CEO 복귀 계획 없다」 — 12/1 전망이 다음 관문",
+   "url": "https://1023jack.com/news/huang-offered-to-return-nvidia-s-board-said-no-what-happens-before-december-1/",
+   "press": "1023jack(SCMP·NPR 11/17 보도 정리)",
+   "at": "2026-11-22 08:45",
+   "why": "주말 트럼프 「황 복귀해야」 발언과 이사회 입장이 엇갈림 — NVDA·SOXX·한국 반도체 월요일 반응 변수",
+   "summary": "이사회 의장 11/17 「황 복귀 의도 없음」(SCMP·NPR). 황은 복귀 의사(WSJ), 트럼프 「사과하면 복귀」(블룸버그 11/21). 12/1 전 일정은 본문 미확인."
+  },
+  {
+   "title": "美 국채, 한 달 동안 AI 칩 주가를 따라 움직였다 — 10년 금리 44bp 하락",
+   "url": "https://fourweekmba.com/ai-treasuries-tracked-ai-chips-for-a-month-10-year-fell-44bp/",
+   "press": "FourWeekMBA",
+   "at": "2026-11-22 07:45",
+   "why": "가설② 12/9 FOMC 분수령·🧾 채권 답 — 연준 매파 말보다 AI 위험자산이 금리를 끌어내림(완화 전환 경로 근거) · 💼 단기채·현금 칸",
+   "summary": "한 달 사이 美 10년 금리 −44bp, AI 칩 주가와 같은 방향(제목 기준 · 시작·끝 수치 미확인) · 주말 WSJ 「채권시장의 AI 거래에 대한 의외의 해석」과 같은 흐름"
+  },
+  {
+   "title": "오만 카사브 북쪽서 두 번째 유조선 공격 — 승조원 행방불명",
+   "url": "https://www.khaleejtimes.com/gulf/tanker-crew-unaccounted-for-second-attack-oman-khasab",
+   "press": "Khaleej Times",
+   "at": "2026-11-22 06:45",
+   "why": "🛢️ 장부 brent_95 조건·에너지 칸 85 축소 선 — 월요일 브렌트 갭 재료(공격 뉴스에 무덤덤한 유가가 바뀌는지)",
+   "summary": "UKMTO가 오만 카사브 인근 유조선 공격을 이틀 사이 연달아 보고(금요일 화재 1건 뒤 2건, CNBC 11/21) · 이란은 호르무즈 동쪽에서 선박이 기뢰에 부딪쳤다고 주장(로이터) · 세부 피해는 기사 제목 기준(미확인)"
+  },
+  {
+   "title": "머스크는 「순수 AI 클라우드엔 돈 안 빌려준다」 — 골드만은 SpaceX의 400억$ GPU 부채를 판다",
+   "url": "https://www.tikr.com/blog/musk-would-never-lend-money-to-pure-ai-clouds-goldman-is-selling-spacexs-40-billion-gpu-debt",
+   "press": "TIKR",
+   "at": "2026-11-22 04:45",
+   "why": "가설①(AI 차입) — 빅테크 GPU 부채가 장부 밖 구조로 옮겨 가는 흐름, 💼 나스닥100 코어 위험",
+   "summary": "SpaceX GPU 관련 약 400억$ 부채를 골드만이 투자자에게 판매하는 구조(제목 기준) · 블룸버그 Credit Weekly 「골드만의 SpaceX 제안이 AI 부채 퍼즐을 푼다」와 같은 소식 · 세부 숫자는 미확인"
+  },
+  {
+   "title": "추수감사절 주간 S&P500 — 1950~2025년 연도별 기록",
+   "url": "https://www.simianx.ai/stories/thanksgiving-week-stock-market-sp-500-every-year-since-1950",
+   "press": "SimianX",
+   "at": "2026-11-22 04:45",
+   "why": "이번 주(11/26 휴장·11/27 조기 마감) 계절성 — 🐻 반등 통계와 비교할 참고",
+   "summary": "1950년 이후 추수감사절 주간 S&P500 기록 정리 · 야후 「S&P500이 고점 아래로 추수감사절 주간 진입」과 같은 주제 · 이번엔 고점 −10% 조정 속 진입(평균 숫자는 원문 확인 필요)"
+  },
+  {
    "title": "아마존, AI 영상 스타트업 디카르트 약 70억$ 인수 협상(FT 보도 75억$)",
    "url": "https://www.pymnts.com/?p=4299570",
    "press": "PYMNTS",
@@ -615,30 +663,6 @@
    "at": "2026-11-20 06:40",
    "why": "가설①(AI 차입 크레딧) 반대 쪽 첫 내부자 신호 — 네오클라우드 채권 바닥 여부 · 🫧 신용 칸",
    "summary": "브라이언 벤투로가 코어위브 회사채 3,000만$ 매수 · 엔비디아 6거래일 시총 6,110억$ 감소(마켓워치) 같은 날"
-  },
-  {
-   "title": "美 증시 하락 — 매도는 칩 종목에 몰려(전 업종 확산 아님)",
-   "url": "https://investinglive.com/stocks/us-stock-markets-slide-but-the-selling-is-localized-around-chip-names/",
-   "press": "investingLive",
-   "at": "2026-11-20 05:45",
-   "why": "🫧 「현금 도피」 판정 반대 근거 — 매도가 칩에 몰렸다는 시각 vs 「전 업종 매도·소비재 선두」(구글뉴스) · S&P 200일선 사흘째",
-   "summary": "칩 종목 중심 매도 · 05:32 SOXX −2.6%·엔비디아 −2.62%·메타 −3.18%·알파벳 −2.95%(daily-app)"
-  },
-  {
-   "title": "AMD, 공매도 보고서 「中 제재 기업에서 AMD 펌웨어」 의혹에 급락 — 회사 「미국 법 준수」",
-   "url": "https://www.cnbc.com/2026/11/19/amd-falls-on-short-seller-report-of-alleged-china-exposure.html",
-   "press": "CNBC",
-   "at": "2026-11-20 05:45",
-   "why": "엔비디아(머디워터스·하원 조사)에 이어 AMD까지 공매도 보고서 — 칩 「규제·신뢰」 할인 확산, SOXX D+5 관찰",
-   "summary": "AMD 장중 약 −8%(이데일리) · 하원 위원회 中 AI칩 수출 라이선스 정보 공개(인베스팅) 같은 날"
-  },
-  {
-   "title": "이번 주 10년 물가연동채(TIPS) 입찰 미리보기 — 실질금리 2.6%대 기대",
-   "url": "https://tipswatch.com/2026/11/15/this-weeks-10-year-tips-auction-shows-a-lot-of-potential/",
-   "press": "TIPSWatch",
-   "at": "2026-11-20 04:45",
-   "why": "11/20 입찰이 2002년 이후 최고 실질금리로 낙찰(구글뉴스) — 가설③ 12/9 FOMC·美 장기채 나눠 사기 자리",
-   "summary": "9/17 재입찰 실질 2.653%로 18년 만 최고 · 11/20 신규 10년물 입찰이 그보다 높을 가능성 예고(11/15 글) · 실제 낙찰 숫자는 미확인"
   }
  ],
  "at": "2026-11-21 22:45"
