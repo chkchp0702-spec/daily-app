@@ -19,37 +19,37 @@
 {
 "date": "2026-11-20",
 "slot": "close",
-"ts": "2026-11-21 08:20",
+"ts": "2026-11-21 11:47",
 "r": 0.0412,
 "vix": 35.89,
 "sym": "SPY",
 "spot": 689.81,
-"n_exp": 28,
-"n_opt": 6726,
-"call_gex": 4.499,
-"put_gex": 14.162,
-"net_gex": -9.663,
-"flip": 722.99,
-"flip_dist": -4.59
+"n_exp": 30,
+"n_opt": 7171,
+"call_gex": 4.657,
+"put_gex": 14.168,
+"net_gex": -9.511,
+"flip": 733.11,
+"flip_dist": -5.91
 },
 {
 "date": "2026-11-20",
 "slot": "close",
-"ts": "2026-11-21 08:20",
+"ts": "2026-11-21 11:47",
 "r": 0.0412,
 "vix": 35.89,
 "sym": "^SPX",
 "spot": 6910.39,
-"n_exp": 50,
-"n_opt": 9289,
-"call_gex": 3.045,
-"put_gex": 0.01,
-"net_gex": 3.035,
-"flip": 6889.96,
-"flip_dist": 0.3
+"n_exp": 53,
+"n_opt": 10007,
+"call_gex": 3.653,
+"put_gex": 0.013,
+"net_gex": 3.64,
+"flip": 6872.46,
+"flip_dist": 0.55
 }
 ],
 "note": "📐 딜러 감마 그림자(화면 없음) — net=콜−풋(10억$, 1% 움직임당) · flip_dist=(현재가/flip−1)% · gex.py",
 "errors": [],
-"updated": "2026-11-21 08:20 KST"
+"updated": "2026-11-21 11:47 KST"
 }
