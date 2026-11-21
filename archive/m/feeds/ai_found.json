@@ -1,6 +1,94 @@
 {
  "items": [
   {
+   "title": "아마존, AI 영상 스타트업 디카르트 약 70억$ 인수 협상(FT 보도 75억$)",
+   "url": "https://www.pymnts.com/?p=4299570",
+   "press": "PYMNTS",
+   "at": "2026-11-22 03:45",
+   "why": "가설③(현금 도는 AI가 빚으로 짓는 AI를 이긴다) — 하락장에서도 현금 많은 빅테크는 AI 자산을 산다",
+   "summary": "아마존이 디카르트를 약 70억$에 인수 협상(5월 기업가치의 약 1.75배, 포윅MBA). 시킹알파는 FT 인용 75억$. 기술주 하락장 한복판의 현금 인수."
+  },
+  {
+   "title": "나스닥100, 2008년 이후 최악의 11월로 향한다",
+   "url": "https://www.webull.com/news/15939186383319040",
+   "press": "웨불",
+   "at": "2026-11-22 03:45",
+   "why": "💼 나스닥100 코어 — 고점 −20% 하락장 선까지 49포인트(247월스트리트 11/21), 🔴 뼈대 유지 근거",
+   "summary": "나스닥100 11월 낙폭이 2008년 이후 최대 페이스. 247월스트리트: 금요일 하루로 하락장 선까지 49포인트만 남음, 월요일 작은 하락에도 공식 하락장."
+  },
+  {
+   "title": "美 캘리포니아 법무장관, 엔비디아에 조사 소환장 — 「중국 위험을 투자자에게 숨겼나」",
+   "url": "https://www.newsquawk.com/headlines/california-ag-issued-an-investigative-subpoena-on-nvidia-nvda-to-prove-if-the-co-misled-investors-regarding-china-risks",
+   "press": "뉴스스쿼크",
+   "at": "2026-11-22 02:45",
+   "why": "엔비디아(🐋 11/17·💬 3) — 블룸버그 「형사 위반까지 조사」와 같은 사건, 월요일 프리마켓 규제 재료",
+   "summary": "캘리포니아 법무장관(본타)이 엔비디아에 조사 소환장 발부 — 대중 첨단칩 판매와 투자자 기만 여부. 블룸버그 11/21: 주 형법 위반 가능성까지 범위 확대. 11/17 본타 「레드 플래그」 발언(gvwire)의 후속."
+  },
+  {
+   "title": "골드만 「미국 기술주 폭락 뒤 AI 회사채 공급 압력이 신용시장에 쌓인다」",
+   "url": "https://www.itiger.com/news/1114322179",
+   "press": "타이거브로커스(골드만 크레딧 위클리 전재)",
+   "at": "2026-11-22 01:45",
+   "why": "가설①(다음 약한 고리 = AI 차입) 직결 — 🫧 버블 경보판·HYG/LQD 스프레드 관찰",
+   "summary": "골드만은 3년간 AI 관련 부채 약 1.5조 달러 발행을 예상하며 공급이 크레딧 가격을 누른다고 경고(investinglive 요약). 블룸버그 「골드만의 스페이스X 피치가 AI 부채 퍼즐을 푼다」(11/21 크레딧 위클리)와 같은 흐름 — 세부 숫자는 원문 확인 필요."
+  },
+  {
+   "title": "베선트 vs 러트닉 — 누가 중국 칩 논쟁에서 이기나",
+   "url": "https://www.aljazeera.com/economy/2026/11/17/bessent-vs-lutnick-who-is-winning-the-china-chip-debate",
+   "press": "알자지라",
+   "at": "2026-11-22 01:45",
+   "why": "엔비디아·삼성·TSMC 대중 수출 규제 방향(💬 3·5) — 11/22 SA 「베선트, 엔비디아 대중 판매 추가 제한 배제」 보도의 배경",
+   "summary": "재무장관 베선트가 상무부(러트닉)의 메가스피드 등 엔비디아 칩 대중 우회 수출 단속이 느리다고 비판(11/13 AP)한 뒤 행정부 안 대중 칩 정책 엇갈림. 11/22 SA 뉴스 제목은 「추가 제한 배제」 — 세부 미확인."
+  },
+  {
+   "title": "연준 의사록: 거의 모든 위원이 「AI 붕괴」 위험을 논의",
+   "url": "https://247wallst.com/investing/2026/11/19/almost-every-fed-official-discussed-the-risk-of-an-ai-bust-minutes-show/",
+   "press": "247월스트리트",
+   "at": "2026-11-22 00:45",
+   "why": "가설① AI 차입(크레딧) — 연준이 AI 금융 위험을 공식 의제로, 쿡 「자금 조달 주시」(로이터 11/21)와 같은 흐름",
+   "summary": "10월 FOMC 의사록에서 대부분 위원이 AI 투자 붕괴 시 금융·경제 파급을 언급. 금리 결정 변수에 「AI 신용」이 들어온 것."
+  },
+  {
+   "title": "골드만 「금, 2028년에야 5,600달러 회복」 — 금리 인하가 서방 투자자를 다시 불러올 때",
+   "url": "https://kitco.com/news/article/2026-11-17/gold-will-reclaim-5600oz-2028-rate-cuts-bring-western-investors-back",
+   "press": "키트코",
+   "at": "2026-11-22 00:45",
+   "why": "💼 금 11% 방패 칸 — 14개월 최저 급락 뒤 IB 장기 목표는 유지, 회복은 연준 인하가 조건",
+   "summary": "골드만은 금 고점 회복 시점을 2028년으로 미룸. 열쇠는 연준 인하와 서방 ETF 자금 복귀 — 단기 반등 근거는 아님."
+  },
+  {
+   "title": "트럼프 「젠슨 황이 엔비디아로 돌아와도 전혀 괜찮다 — 큰 교훈을 얻었다」",
+   "url": "https://gizmodo.com/trump-says-he-would-not-mind-jensen-huang-returning-because-he-learned-a-big-lesson-2000840489",
+   "press": "Gizmodo",
+   "at": "2026-11-21 23:45",
+   "why": "엔비디아(🐋 고래 11/17)·반도체 — 7주 −46% 뒤 「경영 공백·정치 리스크」가 풀릴 수 있다는 첫 신호(WSJ: 황도 복귀 의사)",
+   "summary": "트럼프가 황 전 CEO의 복귀를 반대하지 않는다고 밝힘(블룸버그 제목은 「큰 사과 뒤 복귀해야」). 이사회 결정은 아직 없음 — SEC 회계 조사는 그대로."
+  },
+  {
+   "title": "[뉴욕채권] 단기물 주도 초강세…美 기술주 패닉에 '내달 동결' 고개",
+   "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1jeDE2eHM4cldpZVNyb2Uxc3Zxc0NOVGc5M2V2cnd6SC1ZMUdIMU1KOFY5N2dWS21kSVFQTlZVcVBjcDlGMHJyMVZMSXp2RE5SeEdNMEpfeGRVVEdsYk1tQzlITW1BaGpUdDFwbzB0MUg?oc=5",
+   "press": "연합인포맥스",
+   "at": "2026-11-21 22:45",
+   "why": "12/9 FOMC 분수령 가설 — 「인상 거의 확실」이던 채권시장이 기술주 패닉 뒤 동결 쪽을 사기 시작(2018→2019 전환 경로의 첫 표지 후보)",
+   "summary": "11/20 뉴욕 채권 단기물 주도 강세 · 기술주 급락(나스닥 −5.3%)에 12월 동결 전망 고개 · 수치는 원문 미확인"
+  },
+  {
+   "title": "골드만삭스, 중국 H주 비중확대 상향…2027년 수익 성장 가속 전망",
+   "url": "https://kr.investing.com/news/economy-news/article-2186209",
+   "press": "인베스팅닷컴",
+   "at": "2026-11-21 22:45",
+   "why": "🐻 H주 0%(200일선 8,466 아래)와 반대 의견 — 남향자금 순매수와 함께 「닮은 장」 복귀 선 근처에서 볼 참고",
+   "summary": "골드만 H주 투자의견 비중확대로 상향 · 2027년 기업이익 성장 가속 전망 · 세부 숫자 미확인"
+  },
+  {
+   "title": "트럼프, 해외에 데이터센터 짓는 기업에 과세 위협",
+   "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxPY0lBOFpCc3ZDVDVFN1gyaXVvLTYzaWcyZmZuMWp5VDNUdEY2Sm9RNG5nRy1BcjM4OFhJVTNNQ1RnaEYwTmhQS2tzX0k1dXBLTWhnVjBjMXk1djI2ZS1GaUJUcWlKOVFTYlFvVWc3NGVwYjd3N1NlTGZRZUFJcC05MkszQUJFdTMzdzVqS0VtcTgwaWNPZWVIaGRUa3FQdkZHSDljVFlZQWtXSTktazNaaXRR?oc=5",
+   "press": "Bloomberg",
+   "at": "2026-11-21 22:45",
+   "why": "가설③ — 미국 안 전력·데이터 인프라 수요엔 순풍, 해외 데이터센터(중동·아시아) 투자 계획엔 역풍",
+   "summary": "블룸버그 11/21 · 해외 데이터센터 건설 기업 과세 위협 · 대상·세율 미확인"
+  },
+  {
    "title": "대만, 2001년 이후 최악의 주 뒤 월요일부터 공매도 제한",
    "url": "https://www.crowdfundinsider.com/?p=322433",
    "press": "Crowdfund Insider",
@@ -551,95 +639,7 @@
    "at": "2026-11-20 04:45",
    "why": "11/20 입찰이 2002년 이후 최고 실질금리로 낙찰(구글뉴스) — 가설③ 12/9 FOMC·美 장기채 나눠 사기 자리",
    "summary": "9/17 재입찰 실질 2.653%로 18년 만 최고 · 11/20 신규 10년물 입찰이 그보다 높을 가능성 예고(11/15 글) · 실제 낙찰 숫자는 미확인"
-  },
-  {
-   "title": "엔비디아, 황 퇴진 뒤 SEC 조사 착수 — 캘리포니아 법무장관도 조치 검토",
-   "url": "https://www.investmentnews.com/equities/embattled-nvidia-faces-sec-probe-as-california-attorney-general-mulls-action/269054",
-   "press": "InvestmentNews",
-   "at": "2026-11-20 01:45",
-   "why": "🐋 NVDA 신호·가설④ — 경영 공백이 공시 조사로 번짐, 반도체 칸 변동성 꼬리",
-   "summary": "WSJ 단독 보도 인용: SEC가 황 CEO 퇴진 관련 엔비디아 공시를 조사. 캘리포니아 법무장관도 조치 검토. 같은 날 황은 「이사회가 원하면 복귀」 신호."
-  },
-  {
-   "title": "젠슨 황 「이사회가 요청하면 CEO 복귀」 — 사임 뒤 첫 입장",
-   "url": "https://stockanalysis.com/news/jensen-huang-ready-to-return-as-nvidia-ceo/",
-   "press": "StockAnalysis(AP)",
-   "at": "2026-11-20 01:45",
-   "why": "NVDA 경영 공백 해소 가능성 — SEC 조사와 반대 방향 재료, 🐋 NVDA bet 판단 보류 근거",
-   "summary": "황 전 CEO가 복귀 의사를 처음 밝힘. 이사회는 앞서 「복귀 고려 안 함」(CNBC). 엔비디아 01:20 +1.19%(152.76$)."
-  },
-  {
-   "title": "앤스로픽(ANT) 오늘 첫 거래 — 공모가 83$, 강세 104$·약세 78$ 시나리오",
-   "url": "https://financefeeds.com/anthropic-ant-stock-first-trade-today-after-83-ipo-bull-104-bear-78/",
-   "press": "FinanceFeeds",
-   "at": "2026-11-20 00:45",
-   "why": "💬 6번·나스닥100 칸 — 첫날 「뉴스에 팔기」 여부 가늠 기준선",
-   "summary": "공모가 83$ 확정 뒤 첫 거래일 정리. 강세 104$·약세 78$ 시나리오 제시. 첫 체결가는 이 시각 미확인."
-  },
-  {
-   "title": "오늘의 증시: 앤스로픽 IPO가 AI주 끌어올려 S&P·나스닥 상승",
-   "url": "https://coinpaper.com/36493/stock-market-today-sp-500-nasdaq-rise-as-anthropic-ipo-lifts-ai-stocks",
-   "press": "Coinpaper",
-   "at": "2026-11-20 00:45",
-   "why": "S&P 200일선 사흘째 판정일 — 개장 랠리가 마감까지 가는지(💬 9번)",
-   "summary": "11/19 개장 뒤 앤스로픽 기대에 S&P·나스닥 상승, AI·칩주 주도. 피드 기준 개장 초 S&P +0.77%·나스닥 +1.62%·필라 반도체 +4.3%."
-  },
-  {
-   "title": "앤스로픽 IPO 라이브 — ANT 첫 거래일",
-   "url": "https://www.stocktitan.net/articles/anthropic-ipo-live-ant-first-trading-day-2026",
-   "press": "StockTitan",
-   "at": "2026-11-19 23:40",
-   "why": "💬 6번·나스닥100 칸 — 첫 체결가 vs 공모가 83$, 메모리·칩주 동반 반등이 첫날 뒤에도 버티는지",
-   "summary": "11/19 나스닥 ANT 첫 거래 실시간 정리. 공모가 83$·약 810억$(로이터) · 장외 +25%(야후). 첫 체결 숫자는 이 시각 미확인."
-  },
-  {
-   "title": "시장은 평화에 걸지만 호르무즈 선박 공격은 계속된다",
-   "url": "https://www.bairdmaritime.com/security/markets-are-betting-on-peace-but-hormuz-ship-attacks-persist",
-   "press": "Baird Maritime",
-   "at": "2026-11-19 23:40",
-   "why": "🛢️ 브렌트 95 조건·에너지 칸 85 축소 선 — 공격 뉴스에도 원유가 못 오르는 「무덤덤 장」의 배경",
-   "summary": "美 봉쇄·이란 공격이 이어져도 유가는 평화 기대 쪽 · 블룸버그 11/19 「유가 하락 속 공격 강화」와 같은 방향. 기사 날짜·수치는 미확인."
-  },
-  {
-   "title": "앤스로픽 장외 거래, 첫날 약 25% 상승 시사",
-   "url": "https://finance.yahoo.com/news/anthropic-futures-trading-suggests-25-leap-in-opening-day",
-   "press": "Yahoo/Benzinga",
-   "at": "2026-11-19 22:45",
-   "why": "오늘 밤 AI 심리 판정 — 나스닥100 선물 +2%·칩 장비 프리마켓 강세의 근원(가설④·NQ 칸)",
-   "summary": "공모가 83달러 대비 회색시장 약 +25% · 영국 개인 10만 명 이상 청약(FT) · 은행 수수료 약 5.5억$(블룸버그)"
-  },
-  {
-   "title": "트럼프 「이란 군사행동 불가피」…미·이스라엘 합동작전 임박 관측",
-   "url": "https://www.wowtv.co.kr/NewsCenter/News/Read?articleId=A202611190172&t=NN",
-   "press": "한국경제TV",
-   "at": "2026-11-19 22:45",
-   "why": "장부 조건 brent_95·에너지 칸 축소 선 85달러 — 공격 경고에도 원유가 내리는지",
-   "summary": "22시 속보 · 같은 시각 브렌트 89.9달러(−2.2%)·WTI 83.16(−0.1%)(daily-app 22:33) · 저녁 미·중·러 정제유 공급 확대 선언과 충돌"
-  },
-  {
-   "title": "퇴진한 젠슨 황 「이사회가 요청하면 엔비디아 CEO로 복귀할 의향」 (WSJ 보도)",
-   "url": "https://www.newsquawk.com/headlines/former-nvidia-nvda-ceo-huang-says-he-is-willing-to-return-as-ceo-if-directors-asked-him-to-do-so-wsj-reports",
-   "press": "Newsquawk(WSJ 인용)",
-   "at": "2026-11-19 21:40",
-   "why": "가설① 엔비디아 경영 공백·NVDA 🐋 고래 신호(11/17) — 이사회 「복귀 의도 없음」과 정면 충돌, 지배구조 변수",
-   "summary": "황 전 CEO가 이사회 요청 시 복귀 의향(WSJ). 이사회 의장은 11/17 「복귀 의도 없음」, 베선트는 외부 CEO 영입 요구(SCMP). 무디스 전망 하향·SEC 조사와 같은 줄."
-  },
-  {
-   "title": "젠슨 황, 사임 며칠 만에 엔비디아 복귀 검토 (FT 보도)",
-   "url": "https://investinglive.com/stocks/jensen-huang-weighs-nvidia-comeback-days-after-quitting-over-scandal-ft-reports/",
-   "press": "investingLive(FT 인용)",
-   "at": "2026-11-19 21:40",
-   "why": "엔비디아 CEO 공백 해소 여부 = AI 대형주 심리·💬 3번 답의 변수",
-   "summary": "FT: 황이 스캔들로 물러난 지 며칠 만에 복귀를 저울질. 측근들이 조사 결론 전 복귀 추진(보도). 결론 미확인."
-  },
-  {
-   "title": "SEC, 황 퇴진 뒤 엔비디아 공시 민사 조사 착수 — 캘리포니아 검찰총장도 조치 검토",
-   "url": "https://www.investmentnews.com/equities/embattled-nvidia-faces-sec-probe-as-california-attorney-general-eyes-action/269054",
-   "press": "InvestmentNews",
-   "at": "2026-11-19 20:45",
-   "why": "가설① AI 차입·가설④ — 엔비디아 경영 공백이 규제 리스크로 번짐, 네오클라우드 백스톱 축소와 같은 방향",
-   "summary": "WSJ 단독 보도 이후 SEC가 황 CEO 퇴진 관련 투자자 공시를 들여다보는 중. 캘리포니아 검찰총장도 조치 검토. 엔비디아 7주 연속 주간 하락 중."
   }
  ],
- "at": "2026-11-21 07:45"
+ "at": "2026-11-21 22:45"
 }
