@@ -15,6 +15,7 @@
     var same = h.rule_up == null || (h.rule_up === h.hold_up && h.rule_big === h.hold_big) || (m.analog && m.analog.stock >= 100 && m.analog.k === "floor");
     var why = (h.why || []).map(function(x){ return '<li>' + e(x) + '</li>'; }).join("");
     return '<div class="hp"><div class="hp-h">🎲 <b>' + e(h.shape_name || "") + '</b> 꼴 — 과거 같은 꼴 ' + e(h.n) + '번의 2년 뒤</div>' +
+      (h.regime ? '<p class="hp-reg">' + e(h.regime) + '</p>' : '') +   // 🇺🇸 11/22 지금과 같은 조건만 본 숫자(몇 년째 상승+금리 상승+기술주 거품)
       row("그냥 들고 가면", h.hold_up, h.hold_big, "hp-a") + (same ? "" : row("규칙대로 하면", h.rule_up, h.rule_big, "hp-b")) +
       (h.act ? '<p class="hp-act">👉 ' + e(h.act) + '</p>' : '') +
       '<details class="hp-why"><summary>왜 그런가요</summary><ul>' + why + '<li>「크게 잃을 확률」 = 2년 뒤 −20% 넘게 손실로 끝난 비율 · 과거 빈도일 뿐 앞날을 보장하지 않아요 · 매수·매도 추천 아님</li></ul></details></div>';
@@ -31,6 +32,7 @@
     ".hp-l{grid-area:l;font-size:12.5px;font-weight:700;word-break:keep-all}.hp-bar{grid-area:bar;height:10px;border-radius:6px;background:rgba(127,127,127,.18);overflow:hidden;display:block}" +
     ".hp-bar i{display:block;height:100%;border-radius:6px;background:#9aa3ad}.hp-b .hp-bar i{background:#2f80ed}" +
     ".hp-r b{grid-area:p;font-size:14px;white-space:nowrap}.hp-b b{color:#2f80ed}.hp-r small{grid-area:s;font-size:11.5px;color:var(--sub,#888);display:block;margin:1px 0 0}" +
+    ".hp-reg{margin:0 0 8px;padding:7px 9px;border-radius:9px;background:rgba(229,72,77,.10);font-size:12.5px;line-height:1.5;font-weight:700;word-break:keep-all;color:var(--text,#111)}" +
     ".hp-act{margin:7px 0 2px;font-size:13px;line-height:1.5;font-weight:700;word-break:keep-all;color:var(--text,#111)}" +
     ".hp-why{margin-top:4px}.hp-why summary{font-size:12px;color:var(--sub,#888);cursor:pointer;padding:4px 0}.hp-why ul{margin:4px 0 0;padding-left:16px}" +
     ".hp-why li{font-size:11.5px;line-height:1.5;color:var(--sub,#888);margin:2px 0;word-break:keep-all;display:list-item}" +
