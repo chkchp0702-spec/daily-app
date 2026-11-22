@@ -1,6 +1,94 @@
 {
  "items": [
   {
+   "title": "애플, 직원 AI 도구 하루 예산 300→100달러로 축소 — 비용 긴축",
+   "url": "https://macworld.com/article/3277678/apple-reportedly-slashes-employee-ai-usage-limits-amid-cost-cutting-effort.html",
+   "press": "Macworld",
+   "at": "2026-11-23 05:45",
+   "why": "가설①③(AI 차입·현금 도는 AI) — 현금 많은 빅테크도 AI 사용 비용을 죄기 시작 = 추론 수요 성장 가정에 균열 신호",
+   "summary": "애플이 직원 AI 사용 한도를 하루 300→100달러로 낮췄고 추가 축소도 계획(아이클래리파이드). 같은 주 엔비디아 −13.8%·AI 회사채 공급 압력 경고(골드만)와 겹침."
+  },
+  {
+   "title": "골드만 트레이더들 「美 주식 진입 기회 보이지만 위험 경고」 — 포지션 아직 높아 항복 부족",
+   "url": "https://www.bloomberglinea.com/mercados/operadores-de-goldman-ven-oportunidad-de-compra-ante-la-caida-de-acciones/",
+   "press": "블룸버그 리네아",
+   "at": "2026-11-23 04:45",
+   "why": "🇺🇸 🔴 뼈대·같은 조건(A) 규칙 — 「싸 보여도 200일선 복귀 전엔 서둘러 되사지 않는다」와 같은 결론, 💬 2·9번",
+   "summary": "골드만 트레이딩 데스크: 지난주 매도로 美 주식에 매력적인 진입 기회. 다만 투자자 포지션이 여전히 높아 의미 있는 반등에 필요한 광범위한 항복은 아직 없다(블룸버그 11/22 원문 요약)."
+  },
+  {
+   "title": "대만 증시 1주 −17.5% 36년 만 최악 — 행정원장 23일 금융·테크 업계 긴급 회의",
+   "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE9uX1NCZGhRakNEWEpJWWNpUUliSUprbFFyTkFCMm0yQnllX0NPYWhVeldicGx0aS1feVl1NkU0VE1Ic1M4TUZ3ajhON1NFY0J0S1FzWllkd2NlYXd4dWF3UE5sZzdlMXdwaVdJWHQtdUh5Y0VW?oc=5",
+   "press": "BigGo 파이낸스(구글뉴스 일본)",
+   "at": "2026-11-23 04:45",
+   "why": "반도체 칸·코스피 반도체 갭 — 한·중·대만 동시 받침 조치(공매도 제한·증안펀드) 다음 단계, 💬 3·5번",
+   "summary": "가권 1주 −17.5%로 1990년 이후 최악. 卓榮泰 행정원장 11/23 금융·테크 업계 긴급 회담. 주말엔 공매도 직전가 이하 금지·증거금 150% 등 5대 조치 발표(블룸버그)."
+  },
+  {
+   "title": "베선트, 엔비디아 이사회에 「수출통제 실패 10일 안에 설명하라」",
+   "url": "https://cryptobriefing.com/bessent-nvidia-board-export-controls-deadline/",
+   "press": "Crypto Briefing",
+   "at": "2026-11-23 03:45",
+   "why": "엔비디아·반도체 칸 — 재무장관이 준 답변 시한이 이번 주 근처(정확한 날짜 미확인), 11/23 「中 판매 답 받겠다」 재언급과 이어짐",
+   "summary": "베선트가 엔비디아 이사회에 中 수출통제 문제(메가스피드 경로) 해명 시한 10일을 줬다는 보도. 11/13 상무부(러트닉) 늑장 비판에 이은 압박."
+  },
+  {
+   "title": "美 정보당국, 젠슨 황 연계 中 스파이 의혹 조사 경과",
+   "url": "https://tech-insider.org/china-spy-claim-jensen-huang-alice-huang-megaspeed-2026/",
+   "press": "Tech Insider",
+   "at": "2026-11-23 03:45",
+   "why": "엔비디아(💬 3번) — 11/23 블룸버그 「정보수장 조사 공개 확인」 배경 정리, 규제 위험이 연방 정보기관까지",
+   "summary": "메가스피드 칩 수출 경로·황 측근 스파이 의혹 정리. 11/23 블룸버그는 美 정보수장이 「전 엔비디아 CEO 연계 의혹」 조사를 공개 확인했다고 보도(제목 기준)."
+  },
+  {
+   "title": "12/9 하루에 연준 결정·브로드컴 실적·마이크론 자사주 제한 해제가 겹친다",
+   "url": "https://cryptobriefing.com/fed-broadcom-micron-december-9/",
+   "press": "Crypto Briefing",
+   "at": "2026-11-23 02:45",
+   "why": "가설② 12/9 FOMC 분수령·반도체 칸 — 같은 날 브로드컴 실적(구글 주문 축소 우려 −12%)과 마이크론 칩스법 자사주 매입 제한 해제가 겹쳐 반도체 변동성이 한 날에 몰림",
+   "summary": "12/9 FOMC(인상 폭 0.25 vs 0.5%p)와 브로드컴 실적 발표가 같은 날. 마이크론은 칩스법 보조금에 묶였던 자사주 매입 제한이 12/9 풀려 대규모 매입 여지(야후 파이낸스 X·24/7 Wall St. 8/21)."
+  },
+  {
+   "title": "미 법무부, 엔비디아 스캔들 중심 메가스피드 수출 조사 확인",
+   "url": "https://www.khaleejtimes.com/americas/us-probing-megaspeed-chip-exports-nvidia-scandal",
+   "press": "Khaleej Times",
+   "at": "2026-11-23 02:45",
+   "why": "엔비디아(🐋 11/17·💬 3) — 캘리포니아 형사 범위 확대에 이어 연방 법무부도 칩 수출 경로 조사, 규제 위험이 주 정부·연방 양쪽으로",
+   "summary": "미국이 엔비디아 칩 대중 수출 의혹 업체 메가스피드 조사를 확인(날짜·세부 미확인). 별도로 약 75억$ 규모 대중 밀반출 보도(디지털트렌드)·세마포 「여러 법무부 조사가 엔비디아에 닿을 수 있다」."
+  },
+  {
+   "title": "대만, 신용 담보유지비율 130%→120% 인하 추진 — 증시 안정 조치",
+   "url": "https://www.bloomberg.com/news/articles/2026-11-22/taiwan-mulls-lowering-margin-requirement-to-support-stock-market",
+   "press": "Bloomberg",
+   "at": "2026-11-23 01:45",
+   "why": "반도체 칸·🐻 — 한(자사주 한도·증안펀드)·중(증거금 100→80%)에 이어 대만도 반대매매 고리 끊기, 월요일 아시아 반도체 갭 크기 변수",
+   "summary": "대만 거래소 신용 담보유지비율 130%→120% 검토(블룸버그 11/22) · 주간 낙폭 사상 최대(가권 −7,641p, COINOTAG) · 직전가 아래 공매도 금지 11/23부터"
+  },
+  {
+   "title": "12월 제조업 경기전망 97로 넉 달 만에 기준선 아래 — ICT 업황 올해 첫 「부정적」",
+   "url": "https://www.hankookilbo.com/news/article/A2026112214310001951",
+   "press": "한국일보",
+   "at": "2026-11-23 01:45",
+   "why": "반도체 칸·💬 5번 — 수출 1조$·메모리 「완판」 속 ICT 기업 심리 올해 처음 100 아래, 주가(−50%)에 이어 심리도 꺾임",
+   "summary": "12월 제조업 업황 전망 97(4개월 만에 100 하회) · ICT 부문 올해 처음 기준치 하회(TV서울·네이트) · 반도체·자동차는 상대 선방, 철강·휴대폰 한파(이투데이)"
+  },
+  {
+   "title": "델 3분기 실적 프리뷰: AI 서버 출하·이익률 버티기가 초점",
+   "url": "https://seekingalpha.com/news/4525418-dell-q3-earnings-preview-ai-server-shipments-and-margin-resilience-in-focus",
+   "press": "Seeking Alpha",
+   "at": "2026-11-23 00:45",
+   "why": "가설③(삽 장수 값 전가)·👀 DELL 11/24 실적 — FT 「AI 서버값 최대 45% 인상」이 이익률로 보이는지 첫 시험, 반도체 칸 재진입 판단 보조",
+   "summary": "11/24(화) 장 뒤 실적(나스닥 달력 EPS 예상 6.55$) · 초점은 AI 서버 출하와 메모리 원가 속 이익률(제목 기준)"
+  },
+  {
+   "title": "델, 950억 달러 AI 주문 잔고를 메모리 제약 속에서도 매출로 바꿀 수 있나",
+   "url": "https://finviz.com/news/423394/dell-must-prove-its-95-billion-ai-backlog-can-convert-despite-memory-constraints",
+   "press": "Finviz",
+   "at": "2026-11-23 00:45",
+   "why": "가설①·③ — AI 수요(잔고 950억$)는 남아 있는데 메모리 부족·원가가 병목인지, 델 실적이 AI 투자 붕괴론 vs 공급 병목론을 가른다",
+   "summary": "AI 잔고 약 950억$(제목) · 메모리 공급 제약이 매출 전환 속도를 좌우(제목 기준, 본문 미확인)"
+  },
+  {
    "title": "사우디·바레인 새 공격 발표 — 바레인 산업시설 이란 발사체 피격, 이란은 「미국과 협상 여지」",
    "url": "https://www.cnbc.com/2026/11/22/saudi-houthi-bahrain-iran-attacks-araghchi-talks.html",
    "press": "CNBC",
@@ -559,86 +647,6 @@
    "at": "2026-11-21 01:45",
    "why": "💬 채권 답 — 주식 급락에 美 국채가 다시 피난처 역할을 하는지(5% 선)",
    "summary": "美 10년 금리 하락(정확한 수치는 원문·마감 뒤 확인 — 미확인)"
-  },
-  {
-   "title": "데이터센터 빚 매도세가 AI 건설을 붙잡다 (Distress Watch)",
-   "url": "https://news.bgov.com/bankruptcy-law/distress-watch-data-center-debt-selloff-snags-ai-buildouts",
-   "press": "Bloomberg Government",
-   "at": "2026-11-21 01:45",
-   "why": "가설① AI 차입 — 데이터센터 관련 채권·대출 매도가 실제 착공을 늦추는지",
-   "summary": "데이터센터 연계 부채 매도 → AI 건설 자금 조달 차질(게시 날짜 미확인)"
-  },
-  {
-   "title": "앤트로픽 상장 이틀째 프리마켓 −9.6% — 페이스북·우버도 2일째 −11%였다",
-   "url": "https://247wallst.com/investing/2026/11/20/anthropic-stock-falls-9-6-before-the-bell-on-its-second-day-of-trading-facebook-and-uber-both-fell-11-on-day-2-heres-what-happened-next/",
-   "press": "24/7 Wall St.",
-   "at": "2026-11-21 00:45",
-   "why": "초대형 IPO 2일째 급락의 과거 사례 — 💬 5번 앤트로픽 답·🫧 버블 경보판 IPO 공모가 회귀 관찰",
-   "summary": "앤트로픽 2일째 개장 전 −9.6%. 페이스북·우버도 상장 2일째 −11% 하락했던 전례 비교(이후 흐름은 원문)."
-  },
-  {
-   "title": "11/20 증시 라이브: 美 개장 뒤에도 반도체 하락 지속",
-   "url": "https://www.stocktitan.net/articles/stock-market-today-live-november-20-2026",
-   "press": "StockTitan",
-   "at": "2026-11-21 00:45",
-   "why": "정규장에서도 반도체 집중 매도 — SOXX −6%·엔비디아 −5%(daily-app 00:24) · 🔴 뼈대 나스닥100 50% 칸·NVDA 🐋 11/17 신호",
-   "summary": "美 개장 후 칩주 하락 지속. daily-app 00:24 기준 SOXX −6.06%·NVDA −5.26%·ANET −8.6% vs GOOGL +2.3%."
-  },
-  {
-   "title": "월러 연준 이사 「물가가 뜨거우면 12월 0.5%p 인상 환영」",
-   "url": "https://stockanalysis.com/news/fed-waller-december-rate-hike-half-point/",
-   "press": "스톡애널리시스",
-   "at": "2026-11-20 23:40",
-   "why": "가설 12/9 FOMC 분수령 — 0.5%p 쪽 목소리가 이사급에서 공개 · 💬 6번",
-   "summary": "월러 「12월 인상 지지, 물가가 뜨거우면 반 포인트도 환영」 · 머니투데이 11/20 「물가 잡으려면 충격 줘야」로 재보도 · 금리선물 0.5%p 확률 숫자는 이번 시간 미확인"
-  },
-  {
-   "title": "씨티 약세 지표, 2000년 이후 세 번뿐 — 며칠 안 발동 직전",
-   "url": "https://finance.yahoo.com/markets/stocks/articles/rare-citi-signal-seen-just-141209545.html",
-   "press": "인베스팅(야후)",
-   "at": "2026-11-20 23:40",
-   "why": "🫧 버블 경보판·🔴 뼈대 — 반등을 「복귀 신호」로 착각하지 않게 하는 근거 · 💬 8번",
-   "summary": "씨티 퀀트팀 대형 약세 지표가 며칠 안 켜질 전망 · 2000년 이후 3번 켜졌고 매번 S&P500·나스닥100 큰 하락이 뒤따름 · 지표 이름·발동 조건은 원문 미확인"
-  },
-  {
-   "title": "씨티, 거래 기록 오류로 위험자산 350억 달러 과소 계상 — 로이터 단독",
-   "url": "https://www.investing.com/news/stock-market-news/exclusivecitiincorrectly-booked-trades-underestimatedrisky-assets-by-35-billion-sources-say-5040342",
-   "press": "로이터(인베스팅)",
-   "at": "2026-11-20 22:45",
-   "why": "🧠 AI 차입·크레딧 가설 — 은행 자본 쪽 균열, 美 은행주 4일 −6.6%·데드크로스와 같은 방향",
-   "summary": "씨티가 일부 거래를 잘못 기록해 위험가중자산을 약 350억$ 적게 잡았다는 소식(소식통) · 세부 자본비율 영향은 미확인"
-  },
-  {
-   "title": "BofA 하트넷 「추수감사절 뒤 반등은 짧을 가능성 — 큰 상승장엔 세 조건 필요」",
-   "url": "https://wallstreetcn.com/articles/3786381",
-   "press": "월스트리트CN(하나중국 전재)",
-   "at": "2026-11-20 22:45",
-   "why": "💼 🔴 뼈대 복귀 시점·🐻 반등 통계 — 단기 반등과 추세 전환을 나눠 보는 기준",
-   "summary": "글로벌 상승 종목 폭 극단적 축소 → 단기 기술적 반등 가능성 높음 · 큰 상승장 조건: 美 10년 4.5%↓·WTI 70$↓·달러 정점 확인 · 주식 자금 유입 지속·포지션 청산 덜 됨"
-  },
-  {
-   "title": "나스닥100 선물 −1.6%, AMD 프리마켓 −7%·TSMC −4.2% — 대만 1991년 이후 최악의 주 뒤",
-   "url": "https://247wallst.com/investing/2026/11/20/amd-stock-drops-another-7-0-before-the-bell-and-taiwan-semiconductor-slides-4-2-as-nasdaq-futures-fall-1-6-after-asias-chip-selloff/",
-   "press": "24/7 Wall St.",
-   "at": "2026-11-20 21:45",
-   "why": "💼 🔴 뼈대(나스닥100 50%)·「아시아 단독 투매」 관찰 — 美 선물이 저녁보다 두 배로 깊어짐",
-   "summary": "나스닥100 선물 −1.6%·다우 선물 보합 · AMD 프리 −7.0%(공매도 보고서 이틀째)·TSM −4.2% · 대만 이번 주 1991년 이후 최악"
-  },
-  {
-   "title": "앤트로픽 상장에도 美 선물 하락 — AI 매도가 아시아·유럽으로 번져",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-20/us-stock-futures-fall-as-ai-selloff-spreads-to-asia-and-europe",
-   "press": "블룸버그",
-   "at": "2026-11-20 21:45",
-   "why": "AI 차입 가설·🫧 버블 경보판 — 매도가 지역·업종 밖으로 번지는지",
-   "summary": "美 주가 선물 하락, 앤트로픽 데뷔가 AI 불안을 잠재우지 못함 · 아시아·유럽 동반 약세 — 본문 세부 숫자 미확인"
-  },
-  {
-   "title": "씨티 「핵심 주식 신호 빨간불 직전 — 심리가 더 나빠지면 장기채가 답」",
-   "url": "https://www.marketwatch.com/story/citi-warns-a-key-stock-market-signal-is-close-to-flashing-red-5cbee1c3",
-   "press": "마켓워치",
-   "at": "2026-11-20 21:45",
-   "why": "🔴 뼈대 방패 칸(금 11%·현금 26%) — 금이 주식과 같이 빠지는 지금 장기채가 대안인지",
-   "summary": "씨티는 한 달 넘게 위험 회피 · 급락에도 위험자산을 늘릴 이유 없음 · 심리 악화 시 장기채 매수 권고 — 신호 이름·수치는 미확인"
   }
  ],
  "at": "2026-11-22 23:45"
