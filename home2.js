@@ -362,7 +362,7 @@
     var rows = (B.markets || []).map(function(m){
       var D = METH[m.key]; if (!D) return "";
       var ap = m.analog;   // 🔁 11/12 닮은 장 규칙 채택 — 설명을 그 규칙으로 바꿔 보여 줌
-      if (ap) D = {t: "🔁 " + ap.rule, how: "지금 장과 닮았던 " + ap.n + "번에서 2년 뒤 가운데값이 가장 좋았던 방식이에요 — " + ap.rule, back: ap.next,
+      if (ap) D = {t: "🔁 " + ap.rule, how: (ap.shape_name ? "지금은 「" + ap.shape_name + "」 꼴이에요 — " + (ap.why || "") + " → " + ap.rule : "지금 장과 닮았던 " + ap.n + "번에서 2년 뒤 가운데값이 가장 좋았던 방식이에요 — " + ap.rule), back: ap.next,
         why: "닮은 때 2년 뒤 가운데값 " + sg(ap.y2_med) + " · 가장 나빴던 때 " + sg(ap.y2_worst) + " · 현금보다 나았던 때 " + ap.beat_cash + "/" + ap.n + "번 (지금 다 샀다면 가운데 " + sg(ap.lump_med) + " · 최악 " + sg(ap.lump_worst) + ")",
         note: "하나 빼고 고르기 검증: 가운데 " + sg(ap.loo.med) + " · 최악 " + sg(ap.loo.worst) + (m.cash_old != null && m.cash_old !== m.cash ? " · 예전 규칙이면 " + (m.to || "현금") + " " + m.cash_old + "% — " + METH[m.key].t : " · 예전 방식: " + METH[m.key].t)};
       var b = m.best || {}, ck = m.checks || [], nb = ck.filter(function(c){ return c.on; }).length;
@@ -382,7 +382,7 @@
         (b.since && b.on ? '<p class="bm-note">' + e(b.ent === "credit200" ? "신용 경보+200일선" : b.ent === "clock6" ? "시계 6시" : b.ent === "clock4.5" ? "시계 4시 반" : "신호") + ' 켜진 날 ' + e(md(b.since)) + ' · 대리 버블 시계 지금 ' + (b.h_free != null ? b.h_free + "시" : "–") + '</p>' : '') +
         '</div>' + backNow + '</details>';
     }).join("");
-    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🔁 지금 장과 닮았던 때에서 가장 나았던 방식 · 누르면 설명</small></div>' + rows + '<p class="bm-note">💼 기본 포트는 S&P500 200일선 규칙이 먼저예요 · 🔁 닮은 장 규칙은 국내 주식과 시장별 참고용 — 🇺🇸 200일선 아래로 내려가 두 규칙이 엇갈리기 시작하면 알림</p></div>';
+    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🧱 같은 꼴이었던 과거 결과로 정한 고정 표 · 누르면 설명</small></div>' + rows + '<p class="bm-note">💼 기본 포트는 S&P500 🎯 판정(200일선 아래 3일이면 줄이고 · 50일선 위 3일이면 다시 담기)이 먼저예요 · 🧱 장 꼴 규칙은 국내 주식과 시장별 참고용 — 🇺🇸 200일선 아래로 내려가 두 규칙이 엇갈리기 시작하면 알림</p></div>';
   }
   function moreHtml(B){   // 🌏 11/12 일본·중국·홍콩 — 판정 + 닮은 장 규칙 (bear.json more)
     var A = B.more || []; if (!A.length) return "";
@@ -402,7 +402,7 @@
     var det = bad.map(function(m){
       var ladder = m.state === "🐻" ? [30, 30, 20, 10, 0] : [10, 10, 5, 0, 0];
       return '<div class="bg-m"><div class="bg-mh">' + FL[m.nat] + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' · 고점보다 ' + sg(m.dd) + ' · 지금 권고 현금 <b>' + m.cash + '%</b></div>' +
-        (m.analog ? '<div class="bg-n">🔁 닮은 장 규칙 — <b>' + e(m.analog.rule) + '</b> · 다음: ' + e(m.analog.next) + ' · 아래 신호는 참고</div>'
+        (m.analog ? '<div class="bg-n">' + (m.analog.shape_name ? '🧱 ' + e(m.analog.shape_name) + ' 꼴' : '🔁 닮은 장 규칙') + ' — <b>' + e(m.analog.rule) + '</b> · 다음: ' + e(m.analog.next) + ' · 아래 신호는 참고</div>'
           : m.rule && m.rule.id === "OFF" ? '<div class="bg-n">⏸ 이 시장은 현금 규칙을 꺼 뒀어요 — 2013년 이후엔 어떤 현금 규칙도 그냥 보유를 못 이겼어요 · 판정과 아래 신호는 참고</div>'
           : m.rule && !m.nuse ? '<div class="bg-n">🌱 ' + e(m.rule.name) + ' · 아래 신호는 참고</div>'
           : '<div class="bg-n">🌱 다시 사는 조건 <b>' + m.n + '/' + (m.nuse || 4) + '</b> — ' + e(m.rule ? m.rule.name : "켜질수록 3분의 1씩 다시 사기") + '</div>') +   // 🌱 11/09 시장별 다시 사기 규칙
