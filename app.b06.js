@@ -3155,8 +3155,10 @@ __bk(65);
     var BM = {}; ((d.bear && d.bear.markets) || []).forEach(function(m){ BM[m.key] = m; });
     var bw = [BM.kospi, BM.sp500].filter(function(m){ return m && m.state === "🐻"; })[0], yw = [BM.kospi, BM.sp500].filter(function(m){ return m && m.state === "🟡"; })[0];
     if (bw){
-      var bn = bw.n || 0, nm = bw.name + " 하락장(고점 " + sg(bw.dd) + ")";
-      if (bn >= 2) V = {ic: "🌱", t: "오늘은 조금 담는 날", c: "", s: nm + " · 바닥 신호 " + bn + "/4 — 현금 " + bw.cash + "%는 남기고 나눠서만"};
+      var bn = bw.n || 0, nm = bw.name + " 하락장(고점 " + sg(bw.dd) + ")", ba = bw.analog;
+      if (ba) V = ba.stock > 0 ? {ic: "🌱", t: "오늘은 나눠 담는 날", c: "", s: nm + " · 주식 " + ba.stock + "% — 다시 늘리는 때: " + ba.next}   // 🧭 11/22 계기판(장 꼴 규칙)과 같은 말
+                               : {ic: "🛡", t: "오늘은 지키는 날", c: "dn", s: nm + " · 주식 0% — 다시 늘리는 때: " + ba.next + " · 투매는 금지"};
+      else if (bn >= 2) V = {ic: "🌱", t: "오늘은 조금 담는 날", c: "", s: nm + " · 바닥 신호 " + bn + "/4 — 현금 " + bw.cash + "%는 남기고 나눠서만"};
       else V = {ic: "🛡", t: "오늘은 지키는 날", c: "dn", s: nm + " · 바닥 신호 " + bn + "/4 — " + (up ? "오늘 반등은 현금 " + bw.cash + "% 맞출 기회 · 새로 사기는 신호 2개부터" : "현금 " + bw.cash + "%까지 · 투매는 금지")};
     } else if (yw && V.c === "up"){
       V = {ic: "👀", t: "오늘은 지켜보는 날", c: "", s: yw.name + " 조정(고점 " + sg(yw.dd) + ") · 오늘 강해도 추격 말고 계획대로 나눠서"};
