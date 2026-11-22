@@ -1,6 +1,48 @@
-/* 📦 app.b08.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 8/8 (ux1116.js … stab.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
+/* 📦 app.b08.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 8/8 (ux1122.js … stab.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(8,84,["ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "stab.js"],[4, 389, 847, 1225, 1418]);
+__bs(8,84,["ux1122.js", "ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "stab.js"],[4, 46, 431, 889, 1267, 1460]);
+/* ======== ux1122.js ======== */
+/* 🎲 11/22 「들고 가면 · 규칙대로 하면 — 이익 확률」 (사용자: 「지금은 이걸 이렇게 들고 가는 게 이익 볼 확률이 몇 퍼센트다 — 표현은 직관적으로 ·
+   왜 그런지는 밑에 자세히 탭으로 · 분할해서 현금/주식 비중을 늘려요 같은 표현도」)
+   계산은 만드는 쪽(market-strategy-report src/hold_prob.py → bear.json markets[]/more[] 의 hold 칸: 같은 꼴이었던 과거 달들의 2년 뒤 빈도) — 이 파일은 그리기만.
+   붙는 곳: 🐻 하락장 계기판 시장 줄 · 🌏 일본·중국·홍콩 줄 (📏 선이 내려오는 날 한 토막 바로 위 · 새 화면 없음)
+   과거 빈도 · 앞날 보장 아님 · 매수·매도 권유 없음 · 밝은·어두운 화면 둘 다 */
+(function(){
+  "use strict";
+  function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
+  function row(lab, up, big, cls){
+    return '<div class="hp-r ' + cls + '"><span class="hp-l">' + lab + '</span><span class="hp-bar"><i style="width:' + Math.max(4, Math.min(100, up)) + '%"></i></span>' +
+      '<b>이익 ' + up + '%</b><small>크게 잃을 확률 ' + big + '%</small></div>';
+  }
+  function holdHtml(m){
+    var h = m && m.hold; if (!h || h.hold_up == null) return "";
+    var same = h.rule_up == null || (h.rule_up === h.hold_up && h.rule_big === h.hold_big) || (m.analog && m.analog.stock >= 100 && m.analog.k === "floor");
+    var why = (h.why || []).map(function(x){ return '<li>' + e(x) + '</li>'; }).join("");
+    return '<div class="hp"><div class="hp-h">🎲 <b>' + e(h.shape_name || "") + '</b> 꼴 — 과거 같은 꼴 ' + e(h.n) + '번의 2년 뒤</div>' +
+      row("그냥 들고 가면", h.hold_up, h.hold_big, "hp-a") + (same ? "" : row("규칙대로 하면", h.rule_up, h.rule_big, "hp-b")) +
+      (h.act ? '<p class="hp-act">👉 ' + e(h.act) + '</p>' : '') +
+      '<details class="hp-why"><summary>왜 그런가요</summary><ul>' + why + '<li>「크게 잃을 확률」 = 2년 뒤 −20% 넘게 손실로 끝난 비율 · 과거 빈도일 뿐 앞날을 보장하지 않아요 · 매수·매도 추천 아님</li></ul></details></div>';
+  }
+  window.__holdHtml = holdHtml;
+  var prev = window.__meetLine;
+  window.__meetLine = function(m, cls){ var a = ""; try { a = holdHtml(m); } catch (_) {} return a + (prev ? prev(m, cls) : ""); };
+
+  var css = document.createElement("style"); css.id = "ux1122css";
+  css.textContent =
+    ".hp{margin:8px 0 6px;padding:9px 10px;border:1px solid var(--line,#e5e7eb);border-radius:12px;display:block;width:100%;box-sizing:border-box;text-align:left}" +
+    ".hp-h{font-size:12px;color:var(--sub,#888);margin-bottom:6px;word-break:keep-all}.hp-h b{color:var(--text,#111)}" +
+    ".hp-r{display:grid;grid-template-columns:92px 1fr auto;grid-template-areas:'l bar p' 'l s s';column-gap:8px;align-items:center;margin:5px 0}" +
+    ".hp-l{grid-area:l;font-size:12.5px;font-weight:700;word-break:keep-all}.hp-bar{grid-area:bar;height:10px;border-radius:6px;background:rgba(127,127,127,.18);overflow:hidden;display:block}" +
+    ".hp-bar i{display:block;height:100%;border-radius:6px;background:#9aa3ad}.hp-b .hp-bar i{background:#2f80ed}" +
+    ".hp-r b{grid-area:p;font-size:14px;white-space:nowrap}.hp-b b{color:#2f80ed}.hp-r small{grid-area:s;font-size:11.5px;color:var(--sub,#888);display:block;margin:1px 0 0}" +
+    ".hp-act{margin:7px 0 2px;font-size:13px;line-height:1.5;font-weight:700;word-break:keep-all;color:var(--text,#111)}" +
+    ".hp-why{margin-top:4px}.hp-why summary{font-size:12px;color:var(--sub,#888);cursor:pointer;padding:4px 0}.hp-why ul{margin:4px 0 0;padding-left:16px}" +
+    ".hp-why li{font-size:11.5px;line-height:1.5;color:var(--sub,#888);margin:2px 0;word-break:keep-all;display:list-item}" +
+    ":root:not([data-ui=light]) .hp-b .hp-bar i{background:#5aa0ff}:root:not([data-ui=light]) .hp-b b{color:#5aa0ff}";
+  document.head.appendChild(css);
+})();
+;
+__bk(84);
 /* ======== ux1116.js ======== */
 /* 🧊 11/16 냉정 분석 5차 — 사용자 「1,5 진행하고 8번은 후자만 진행」
    ① 🩻 포트 진단 한 장 (#diag · 한 장 탭 위 작은 탭) — 고객 보유 종목·금액 → 쏠림 · 나라 · 업종 · 배당 · 1년 고점 대비를 그림 한 장(1080px)으로.
@@ -385,7 +427,7 @@ __bs(8,84,["ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "stab.js"],[4, 389, 
   D.head.appendChild(st);
 })();
 ;
-__bk(84);
+__bk(85);
 /* ======== tax.js ======== */
 /* CH Investing — 🧾 11/16 세무계산기 (🔬 연구실 › 세무계산기 · #tax)
    사용자: 「세무계산기 카테고리 — 통합으로 진행 · 연구실에 넣고 · 항목 선택하면 필요값만 입력하면 계산 결과 나오는 형태로」
@@ -843,7 +885,7 @@ __bk(84);
   D.head.appendChild(st);
 })();
 ;
-__bk(85);
+__bk(86);
 /* ======== ux1118.js ======== */
 /* 🧊 11/18 냉정 분석 6차 「만드는 속도 vs 쓰이는 속도」 — 사용자 「1,2,3,4,5,6,7,8,14 진행해」
    새 화면은 없음(2주 동결) — 있는 것을 찾기 쉽게·다시 쓰기 쉽게만.
@@ -1221,7 +1263,7 @@ __bk(85);
   window.__ux1118 = {news: NEWS, taxNodes: taxNodes, taxCanvas: taxCanvas};   // 점검용
 })();
 ;
-__bk(86);
+__bk(87);
 /* ======== ux1119.js ======== */
 /* 🌅 11/19 아침 시황 업그레이드 — 사용자 「매일 아침 시황리포트를 냉정·객관적으로 분석해 업그레이드 · PB·고객이 아침에 보고 전략·리밸런싱에 쓰게 · 우와」 → 「전부 다 진행」
    자료: market-strategy-report src/morning.py → market/morning.json (리포트 새 1·2쪽과 같은 숫자)
@@ -1414,7 +1456,7 @@ __bk(86);
   window.__ux1119 = {load: load, deck: deck, rx: rx};   // 점검용
 })();
 ;
-__bk(87);
+__bk(88);
 /* ======== stab.js ======== */
 /* 🛡 11/18 안정도 (사용자 「어플 안정도를 좀 높여 포괄적으로」) — 묶음 맨 끝에서 읽힘
    ① 화면 그리기 보호: go()(탭 열기)가 그리다 오류를 내면 전엔 화면이 반쯤 그려진 채 멈추거나 비었음
@@ -1462,5 +1504,5 @@ __bk(87);
   }, 3000);
 })();
 ;
-__bk(88);
+__bk(89);
 __be(8);
