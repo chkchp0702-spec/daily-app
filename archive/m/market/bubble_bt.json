@@ -1,19 +1,19 @@
 {
- "at": "2026-11-15 11:06",
+ "at": "2026-11-22 11:38",
  "from": "1999-01-22",
- "to": "2026-11-13",
+ "to": "2026-11-20",
  "rules": "(바꾸려면 이 글과 bubble_bt.json rules 를 같이 고친다)\n  ─ 시계 계산 = 앱과 같음: 칸 점수 🔴1 · 🟠½ · 🟢0 → 단계 점수 = 칸 평균 · 단계마다 3시간 · 앞 단계가 ¾ 넘어야 다음 단계\n  ─ 손 칸(빅테크 FCF·회사채 발행·AI CDS·규제)은 과거 자료가 없어 기계 칸으로만 다시 만든 「대리 시계」:\n     💳 신용   ① 하이일드÷국채 = 뱅가드 하이일드(VWEHX) ÷ 중기국채(VFITX) — 앱의 HYG/IEF 와 같은 규칙(20일 −1.5%↓ 또는 60일 −3%↓ 🔴 · 20일 −0.5%↓ 🟠)\n               ② 하이일드 펀드 1년 고점 대비 −5%↓ 🔴 · −2%↓ 🟠 (앱의 회사채·CDS 칸 대신)\n     📈 금리   ③ 10년물 5% 위 5일 연속 🔴 · 4.75%↑ 🟠 (앱과 같음)   ④ 유가 브렌트(없으면 WTI) 100$ 🔴 · 90$ 🟠 (앱과 같음)\n     🧊 속살   ⑤ 동일가중 S&P(RSP · 2003년 전엔 NYSE 종합 ^NYA) 1년 고점 −15% 🔴 · −8% 🟠\n               ⑥ 방어 3종 − 기술 20일 +3%p 🟠 · 나스닥100 하루 −5%↓ + 방어주도 하락 + 신용 20일 하락이 최근 20일 안에 🔴 (앱과 같음)\n     🛟 완충   ⑦ 장단기 금리차(10년 − 3개월) 1년 안에 뒤집혔다가 지금 +0.5%p 넘게 다시 벌어짐 🔴 · 지금 뒤집힘 🟠 (경기침체 칸 대신)\n               ⑧ 3개월 금리가 6개월 새 1%p 넘게 내렸는데(급히 내림) S&P 가 200일선 아래 🔴 · 200일선 아래만 🟠 (반등 완충 칸 대신)\n  ─ 매매: 그날 종가로 시계 → 다음 날 비중 · 시계 ≥ T 면 주식 몫의 c% 를 현금 · 시계가 T − 1.5시간 아래로 내려오면 다시 다 삼\n          T ∈ {3, 4.5, 6, 7.5, 9} · c ∈ {50, 100} · 추가로 「T 넘고 + 지수가 200일선 아래일 때만」(확인형) 판\n          현금 연 2% · 비중 바꿀 때 0.1% · 가격지수(배당 제외) — 🐻 계기판 백테스트와 같은 조건\n  ─ 고르는 법: 2012년까지(앞)에서 고르고 2013년부터(뒤)에서 확인 — 앞·뒤 둘 다 보유를 이겨야 「검증됨」\n  ─ 시장: S&P500 · 나스닥 · 코스피(미국 버블 신호를 한국에 쓰면?)",
  "now": {
-  "h": 1.0,
+  "h": 1.5,
   "cells": {
-   "credit": 0.0,
+   "credit": 0.5,
    "hydd": 0.5,
    "rate": 0.5,
    "oil": 0.5,
    "breadth": 0.0,
-   "flow": 0.5,
+   "flow": 1.0,
    "curve": 0.0,
-   "buffer": 0.0
+   "buffer": 0.5
   }
  },
  "dist": {
@@ -41,17 +41,17 @@
       "cash_pct": 23.9
      },
      "back": {
-      "cagr": 12.1,
+      "cagr": 11.36,
       "mdd": -26.4,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 1.4,
       "cash_pct": 10.5
      },
      "full": {
-      "cagr": 7.51,
+      "cagr": 7.15,
       "mdd": -43.2,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 1.8,
       "cash_pct": 17.2
@@ -73,17 +73,17 @@
       "cash_pct": 23.9
      },
      "back": {
-      "cagr": 11.3,
+      "cagr": 10.56,
       "mdd": -21.8,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 1.4,
       "cash_pct": 10.5
      },
      "full": {
-      "cagr": 7.74,
+      "cagr": 7.39,
       "mdd": -40.3,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 1.8,
       "cash_pct": 17.2
@@ -105,17 +105,17 @@
       "cash_pct": 6.6
      },
      "back": {
-      "cagr": 12.4,
+      "cagr": 11.66,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 1.0,
       "cash_pct": 1.4
      },
      "full": {
-      "cagr": 7.32,
+      "cagr": 6.97,
       "mdd": -48.5,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.8,
       "cash_pct": 4.0
@@ -137,23 +137,23 @@
       "cash_pct": 6.6
      },
      "back": {
-      "cagr": 12.18,
+      "cagr": 11.43,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 1.0,
       "cash_pct": 1.4
      },
      "full": {
-      "cagr": 7.69,
+      "cagr": 7.33,
       "mdd": -47.0,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.8,
       "cash_pct": 4.0
      },
      "edge_front": 2.11,
-     "edge_back": -0.42,
+     "edge_back": -0.43,
      "ok": false
     },
     {
@@ -169,17 +169,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.61,
+      "cagr": 11.87,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.3,
       "cash_pct": 0.1
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.43,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.1,
       "cash_pct": 0.1
@@ -201,23 +201,23 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.63,
+      "cagr": 11.88,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.3,
       "cash_pct": 0.1
      },
      "full": {
-      "cagr": 6.79,
+      "cagr": 6.43,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.1,
       "cash_pct": 0.1
      },
      "edge_front": 0.0,
-     "edge_back": 0.03,
+     "edge_back": 0.02,
      "ok": false
     },
     {
@@ -233,17 +233,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.6,
+      "cagr": 11.86,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.42,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -265,17 +265,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.6,
+      "cagr": 11.86,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.42,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -297,17 +297,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.6,
+      "cagr": 11.86,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.42,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -329,17 +329,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.6,
+      "cagr": 11.86,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.42,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -361,17 +361,17 @@
       "cash_pct": 20.3
      },
      "back": {
-      "cagr": 12.02,
+      "cagr": 11.28,
       "mdd": -26.4,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.9,
       "cash_pct": 8.5
      },
      "full": {
-      "cagr": 7.28,
+      "cagr": 6.93,
       "mdd": -44.1,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 1.4,
       "cash_pct": 14.4
@@ -393,17 +393,17 @@
       "cash_pct": 20.3
      },
      "back": {
-      "cagr": 11.17,
+      "cagr": 10.43,
       "mdd": -19.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.9,
       "cash_pct": 8.5
      },
      "full": {
-      "cagr": 7.32,
+      "cagr": 6.96,
       "mdd": -41.7,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 1.4,
       "cash_pct": 14.4
@@ -425,23 +425,23 @@
       "cash_pct": 6.6
      },
      "back": {
-      "cagr": 12.45,
+      "cagr": 11.7,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.6,
       "cash_pct": 1.2
      },
      "full": {
-      "cagr": 7.34,
+      "cagr": 6.99,
       "mdd": -48.5,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.6,
       "cash_pct": 3.9
      },
      "edge_front": 1.22,
-     "edge_back": -0.15,
+     "edge_back": -0.16,
      "ok": false
     },
     {
@@ -457,23 +457,23 @@
       "cash_pct": 6.6
      },
      "back": {
-      "cagr": 12.27,
+      "cagr": 11.52,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.6,
       "cash_pct": 1.2
      },
      "full": {
-      "cagr": 7.73,
+      "cagr": 7.37,
       "mdd": -47.0,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.6,
       "cash_pct": 3.9
      },
      "edge_front": 2.11,
-     "edge_back": -0.33,
+     "edge_back": -0.34,
      "ok": false
     },
     {
@@ -489,17 +489,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.6,
+      "cagr": 11.86,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.42,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -521,17 +521,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.6,
+      "cagr": 11.86,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.42,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -553,17 +553,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.6,
+      "cagr": 11.86,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.42,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -585,17 +585,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.6,
+      "cagr": 11.86,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.42,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -617,17 +617,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.6,
+      "cagr": 11.86,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.42,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -649,17 +649,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 12.6,
+      "cagr": 11.86,
       "mdd": -33.9,
-      "hold_cagr": 12.6,
+      "hold_cagr": 11.86,
       "hold_mdd": -33.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 6.78,
+      "cagr": 6.42,
       "mdd": -56.8,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -677,9 +677,9 @@
     "edge_back": -1.3,
     "ok": false,
     "full": {
-     "cagr": 7.74,
+     "cagr": 7.39,
      "mdd": -40.3,
-     "hold_cagr": 6.78,
+     "hold_cagr": 6.42,
      "hold_mdd": -56.8,
      "sw_y": 1.8,
      "cash_pct": 17.2
@@ -692,15 +692,15 @@
      "T": 3,
      "c": 100,
      "edge_front": 4.78,
-     "edge_back": -6.01,
+     "edge_back": -5.28,
      "ok": false,
      "full": {
       "cagr": 6.0,
       "mdd": -15.9,
-      "hold_cagr": 6.78,
+      "hold_cagr": 6.42,
       "hold_mdd": -56.8,
       "sw_y": 2.6,
-      "cash_pct": 48.8
+      "cash_pct": 48.9
      }
     },
     "grid": [
@@ -708,44 +708,44 @@
       "T": 3,
       "c": 50,
       "edge_front": 2.86,
-      "edge_back": -2.78,
+      "edge_back": -2.4,
       "ok": false,
       "full": {
-       "cagr": 6.78,
+       "cagr": 6.6,
        "mdd": -31.6,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
        "sw_y": 2.6,
-       "cash_pct": 48.8
+       "cash_pct": 48.9
       }
      },
      {
       "T": 3,
       "c": 100,
       "edge_front": 4.78,
-      "edge_back": -6.01,
+      "edge_back": -5.28,
       "ok": false,
       "full": {
        "cagr": 6.0,
        "mdd": -15.9,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
        "sw_y": 2.6,
-       "cash_pct": 48.8
+       "cash_pct": 48.9
       }
      },
      {
       "T": 4.5,
       "c": 50,
       "edge_front": 1.91,
-      "edge_back": -1.56,
+      "edge_back": -1.33,
       "ok": false,
       "full": {
-       "cagr": 7.04,
+       "cagr": 6.79,
        "mdd": -36.1,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
-       "sw_y": 2.7,
+       "sw_y": 2.8,
        "cash_pct": 24.3
       }
      },
@@ -753,14 +753,14 @@
       "T": 4.5,
       "c": 100,
       "edge_front": 3.04,
-      "edge_back": -3.48,
+      "edge_back": -3.01,
       "ok": false,
       "full": {
-       "cagr": 6.69,
+       "cagr": 6.56,
        "mdd": -29.0,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
-       "sw_y": 2.7,
+       "sw_y": 2.8,
        "cash_pct": 24.3
       }
      },
@@ -771,9 +771,9 @@
       "edge_back": -0.9,
       "ok": false,
       "full": {
-       "cagr": 7.7,
+       "cagr": 7.34,
        "mdd": -41.0,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
        "sw_y": 1.4,
        "cash_pct": 15.0
@@ -786,9 +786,9 @@
       "edge_back": -2.05,
       "ok": false,
       "full": {
-       "cagr": 8.16,
+       "cagr": 7.8,
        "mdd": -35.2,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
        "sw_y": 1.4,
        "cash_pct": 15.0
@@ -801,9 +801,9 @@
       "edge_back": -0.6,
       "ok": false,
       "full": {
-       "cagr": 7.0,
+       "cagr": 6.65,
        "mdd": -49.0,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
        "sw_y": 0.9,
        "cash_pct": 6.9
@@ -816,9 +816,9 @@
       "edge_back": -1.37,
       "ok": false,
       "full": {
-       "cagr": 6.94,
+       "cagr": 6.59,
        "mdd": -49.4,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
        "sw_y": 0.9,
        "cash_pct": 6.9
@@ -831,9 +831,9 @@
       "edge_back": -0.43,
       "ok": false,
       "full": {
-       "cagr": 6.25,
+       "cagr": 5.9,
        "mdd": -59.3,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
        "sw_y": 0.4,
        "cash_pct": 2.0
@@ -846,9 +846,9 @@
       "edge_back": -0.98,
       "ok": false,
       "full": {
-       "cagr": 5.64,
+       "cagr": 5.3,
        "mdd": -62.8,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
        "sw_y": 0.4,
        "cash_pct": 2.0
@@ -861,9 +861,9 @@
       "edge_back": 0.0,
       "ok": false,
       "full": {
-       "cagr": 6.78,
+       "cagr": 6.42,
        "mdd": -56.8,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
        "sw_y": 0.0,
        "cash_pct": 0.0
@@ -876,9 +876,9 @@
       "edge_back": 0.0,
       "ok": false,
       "full": {
-       "cagr": 6.78,
+       "cagr": 6.42,
        "mdd": -56.8,
-       "hold_cagr": 6.78,
+       "hold_cagr": 6.42,
        "hold_mdd": -56.8,
        "sw_y": 0.0,
        "cash_pct": 0.0
@@ -905,23 +905,23 @@
       "cash_pct": 23.9
      },
      "back": {
-      "cagr": 15.89,
+      "cagr": 14.99,
       "mdd": -29.3,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 1.4,
       "cash_pct": 10.5
      },
      "full": {
-      "cagr": 10.65,
+      "cagr": 10.23,
       "mdd": -63.5,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 1.8,
       "cash_pct": 17.2
      },
      "edge_front": 3.6,
-     "edge_back": -0.4,
+     "edge_back": -0.39,
      "ok": false
     },
     {
@@ -937,23 +937,23 @@
       "cash_pct": 23.9
      },
      "back": {
-      "cagr": 15.11,
+      "cagr": 14.21,
       "mdd": -24.3,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 1.4,
       "cash_pct": 10.5
      },
      "full": {
-      "cagr": 11.61,
+      "cagr": 11.18,
       "mdd": -54.6,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 1.8,
       "cash_pct": 17.2
      },
      "edge_front": 6.16,
-     "edge_back": -1.18,
+     "edge_back": -1.17,
      "ok": false
     },
     {
@@ -969,23 +969,23 @@
       "cash_pct": 6.6
      },
      "back": {
-      "cagr": 16.07,
+      "cagr": 15.17,
       "mdd": -37.6,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 1.0,
       "cash_pct": 1.4
      },
      "full": {
-      "cagr": 9.8,
+      "cagr": 9.37,
       "mdd": -75.6,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.8,
       "cash_pct": 4.0
      },
      "edge_front": 1.82,
-     "edge_back": -0.22,
+     "edge_back": -0.21,
      "ok": false
     },
     {
@@ -1001,17 +1001,17 @@
       "cash_pct": 6.6
      },
      "back": {
-      "cagr": 15.81,
+      "cagr": 14.9,
       "mdd": -39.2,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 1.0,
       "cash_pct": 1.4
      },
      "full": {
-      "cagr": 10.4,
+      "cagr": 9.97,
       "mdd": -73.5,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.8,
       "cash_pct": 4.0
@@ -1033,23 +1033,23 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.31,
+      "cagr": 15.41,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.3,
       "cash_pct": 0.1
      },
      "full": {
-      "cagr": 8.94,
+      "cagr": 8.52,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.1,
       "cash_pct": 0.1
      },
      "edge_front": 0.0,
-     "edge_back": 0.02,
+     "edge_back": 0.03,
      "ok": false
     },
     {
@@ -1065,17 +1065,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.34,
+      "cagr": 15.43,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.3,
       "cash_pct": 0.1
      },
      "full": {
-      "cagr": 8.95,
+      "cagr": 8.53,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.1,
       "cash_pct": 0.1
@@ -1097,17 +1097,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.29,
+      "cagr": 15.38,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.93,
+      "cagr": 8.51,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1129,17 +1129,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.29,
+      "cagr": 15.38,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.93,
+      "cagr": 8.51,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1161,17 +1161,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.29,
+      "cagr": 15.38,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.93,
+      "cagr": 8.51,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1193,17 +1193,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.29,
+      "cagr": 15.38,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.93,
+      "cagr": 8.51,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1225,23 +1225,23 @@
       "cash_pct": 19.2
      },
      "back": {
-      "cagr": 15.59,
+      "cagr": 14.69,
       "mdd": -29.3,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 1.0,
       "cash_pct": 9.3
      },
      "full": {
-      "cagr": 9.95,
+      "cagr": 9.53,
       "mdd": -68.2,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 1.4,
       "cash_pct": 14.2
      },
      "edge_front": 2.55,
-     "edge_back": -0.7,
+     "edge_back": -0.69,
      "ok": false
     },
     {
@@ -1257,23 +1257,23 @@
       "cash_pct": 19.2
      },
      "back": {
-      "cagr": 14.52,
+      "cagr": 13.62,
       "mdd": -24.3,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 1.0,
       "cash_pct": 9.3
      },
      "full": {
-      "cagr": 10.29,
+      "cagr": 9.86,
       "mdd": -61.5,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 1.4,
       "cash_pct": 14.2
      },
      "edge_front": 4.16,
-     "edge_back": -1.77,
+     "edge_back": -1.76,
      "ok": false
     },
     {
@@ -1289,17 +1289,17 @@
       "cash_pct": 6.5
      },
      "back": {
-      "cagr": 16.13,
+      "cagr": 15.22,
       "mdd": -37.6,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.6,
       "cash_pct": 1.2
      },
      "full": {
-      "cagr": 9.76,
+      "cagr": 9.34,
       "mdd": -75.6,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.6,
       "cash_pct": 3.8
@@ -1321,23 +1321,23 @@
       "cash_pct": 6.5
      },
      "back": {
-      "cagr": 15.91,
+      "cagr": 15.01,
       "mdd": -39.2,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.6,
       "cash_pct": 1.2
      },
      "full": {
-      "cagr": 10.34,
+      "cagr": 9.91,
       "mdd": -73.5,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.6,
       "cash_pct": 3.8
      },
      "edge_front": 2.98,
-     "edge_back": -0.38,
+     "edge_back": -0.37,
      "ok": false
     },
     {
@@ -1353,17 +1353,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.29,
+      "cagr": 15.38,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.93,
+      "cagr": 8.51,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1385,17 +1385,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.29,
+      "cagr": 15.38,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.93,
+      "cagr": 8.51,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1417,17 +1417,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.29,
+      "cagr": 15.38,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.93,
+      "cagr": 8.51,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1449,17 +1449,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.29,
+      "cagr": 15.38,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.93,
+      "cagr": 8.51,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1481,17 +1481,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.29,
+      "cagr": 15.38,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.93,
+      "cagr": 8.51,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1513,17 +1513,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 16.29,
+      "cagr": 15.38,
       "mdd": -36.4,
-      "hold_cagr": 16.29,
+      "hold_cagr": 15.38,
       "hold_mdd": -36.4,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.93,
+      "cagr": 8.51,
       "mdd": -77.9,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1538,12 +1538,12 @@
     "c": 100,
     "confirm": false,
     "edge_front": 6.16,
-    "edge_back": -1.18,
+    "edge_back": -1.17,
     "ok": false,
     "full": {
-     "cagr": 11.61,
+     "cagr": 11.18,
      "mdd": -54.6,
-     "hold_cagr": 8.93,
+     "hold_cagr": 8.51,
      "hold_mdd": -77.9,
      "sw_y": 1.8,
      "cash_pct": 17.2
@@ -1556,12 +1556,12 @@
      "T": 6,
      "c": 100,
      "edge_front": 6.26,
-     "edge_back": -2.72,
+     "edge_back": -2.69,
      "ok": false,
      "full": {
-      "cagr": 10.92,
+      "cagr": 10.49,
       "mdd": -59.8,
-      "hold_cagr": 8.93,
+      "hold_cagr": 8.51,
       "hold_mdd": -77.9,
       "sw_y": 1.4,
       "cash_pct": 15.0
@@ -1572,44 +1572,44 @@
       "T": 3,
       "c": 50,
       "edge_front": 3.15,
-      "edge_back": -3.88,
+      "edge_back": -3.41,
       "ok": false,
       "full": {
-       "cagr": 8.64,
+       "cagr": 8.43,
        "mdd": -48.8,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
        "sw_y": 2.6,
-       "cash_pct": 48.8
+       "cash_pct": 48.9
       }
      },
      {
       "T": 3,
       "c": 100,
       "edge_front": 4.53,
-      "edge_back": -8.36,
+      "edge_back": -7.45,
       "ok": false,
       "full": {
        "cagr": 7.04,
        "mdd": -18.9,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
        "sw_y": 2.6,
-       "cash_pct": 48.8
+       "cash_pct": 48.9
       }
      },
      {
       "T": 4.5,
       "c": 50,
       "edge_front": 2.46,
-      "edge_back": -1.68,
+      "edge_back": -1.34,
       "ok": false,
       "full": {
-       "cagr": 9.44,
+       "cagr": 9.17,
        "mdd": -65.7,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
-       "sw_y": 2.7,
+       "sw_y": 2.8,
        "cash_pct": 24.3
       }
      },
@@ -1617,14 +1617,14 @@
       "T": 4.5,
       "c": 100,
       "edge_front": 3.55,
-      "edge_back": -3.84,
+      "edge_back": -3.18,
       "ok": false,
       "full": {
-       "cagr": 8.98,
+       "cagr": 8.86,
        "mdd": -56.8,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
-       "sw_y": 2.7,
+       "sw_y": 2.8,
        "cash_pct": 24.3
       }
      },
@@ -1632,12 +1632,12 @@
       "T": 6,
       "c": 50,
       "edge_front": 3.62,
-      "edge_back": -1.2,
+      "edge_back": -1.18,
       "ok": false,
       "full": {
-       "cagr": 10.28,
+       "cagr": 9.86,
        "mdd": -68.7,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
        "sw_y": 1.4,
        "cash_pct": 15.0
@@ -1647,12 +1647,12 @@
       "T": 6,
       "c": 100,
       "edge_front": 6.26,
-      "edge_back": -2.72,
+      "edge_back": -2.69,
       "ok": false,
       "full": {
-       "cagr": 10.92,
+       "cagr": 10.49,
        "mdd": -59.8,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
        "sw_y": 1.4,
        "cash_pct": 15.0
@@ -1662,12 +1662,12 @@
       "T": 7.5,
       "c": 50,
       "edge_front": 1.58,
-      "edge_back": -1.03,
+      "edge_back": -1.02,
       "ok": false,
       "full": {
-       "cagr": 9.28,
+       "cagr": 8.86,
        "mdd": -75.8,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
        "sw_y": 0.9,
        "cash_pct": 6.9
@@ -1677,12 +1677,12 @@
       "T": 7.5,
       "c": 100,
       "edge_front": 2.53,
-      "edge_back": -2.24,
+      "edge_back": -2.21,
       "ok": false,
       "full": {
-       "cagr": 9.22,
+       "cagr": 8.8,
        "mdd": -74.4,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
        "sw_y": 0.9,
        "cash_pct": 6.9
@@ -1692,12 +1692,12 @@
       "T": 9,
       "c": 50,
       "edge_front": -1.36,
-      "edge_back": -0.65,
+      "edge_back": -0.64,
       "ok": false,
       "full": {
-       "cagr": 7.89,
+       "cagr": 7.48,
        "mdd": -81.3,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
        "sw_y": 0.4,
        "cash_pct": 2.0
@@ -1707,12 +1707,12 @@
       "T": 9,
       "c": 100,
       "edge_front": -2.83,
-      "edge_back": -1.42,
+      "edge_back": -1.4,
       "ok": false,
       "full": {
-       "cagr": 6.75,
+       "cagr": 6.34,
        "mdd": -84.3,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
        "sw_y": 0.4,
        "cash_pct": 2.0
@@ -1725,9 +1725,9 @@
       "edge_back": 0.0,
       "ok": false,
       "full": {
-       "cagr": 8.93,
+       "cagr": 8.51,
        "mdd": -77.9,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
        "sw_y": 0.0,
        "cash_pct": 0.0
@@ -1740,9 +1740,9 @@
       "edge_back": 0.0,
       "ok": false,
       "full": {
-       "cagr": 8.93,
+       "cagr": 8.51,
        "mdd": -77.9,
-       "hold_cagr": 8.93,
+       "hold_cagr": 8.51,
        "hold_mdd": -77.9,
        "sw_y": 0.0,
        "cash_pct": 0.0
@@ -1769,17 +1769,17 @@
       "cash_pct": 23.9
      },
      "back": {
-      "cagr": 7.81,
-      "mdd": -44.8,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 7.14,
+      "mdd": -46.4,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 1.5,
       "cash_pct": 10.4
      },
      "full": {
-      "cagr": 9.62,
-      "mdd": -45.6,
-      "hold_cagr": 8.68,
+      "cagr": 9.28,
+      "mdd": -46.4,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 1.8,
       "cash_pct": 17.2
@@ -1801,17 +1801,17 @@
       "cash_pct": 23.9
      },
      "back": {
-      "cagr": 8.07,
-      "mdd": -44.8,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 7.4,
+      "mdd": -46.4,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 1.5,
       "cash_pct": 10.4
      },
      "full": {
-      "cagr": 9.99,
-      "mdd": -44.8,
-      "hold_cagr": 8.68,
+      "cagr": 9.65,
+      "mdd": -46.4,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 1.8,
       "cash_pct": 17.2
@@ -1833,17 +1833,17 @@
       "cash_pct": 6.5
      },
      "back": {
-      "cagr": 7.23,
-      "mdd": -44.2,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.56,
+      "mdd": -45.8,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 1.0,
       "cash_pct": 1.4
      },
      "full": {
-      "cagr": 9.06,
+      "cagr": 8.73,
       "mdd": -56.0,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.8,
       "cash_pct": 4.0
@@ -1865,17 +1865,17 @@
       "cash_pct": 6.5
      },
      "back": {
-      "cagr": 7.08,
-      "mdd": -43.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.41,
+      "mdd": -45.1,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 1.0,
       "cash_pct": 1.4
      },
      "full": {
-      "cagr": 9.25,
+      "cagr": 8.91,
       "mdd": -56.5,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.8,
       "cash_pct": 4.0
@@ -1897,17 +1897,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.46,
-      "mdd": -44.2,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.79,
+      "mdd": -45.8,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.3,
       "cash_pct": 0.1
      },
      "full": {
-      "cagr": 8.74,
+      "cagr": 8.4,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.1,
       "cash_pct": 0.1
@@ -1929,17 +1929,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.57,
-      "mdd": -43.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.9,
+      "mdd": -45.1,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.3,
       "cash_pct": 0.1
      },
      "full": {
-      "cagr": 8.79,
+      "cagr": 8.45,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.1,
       "cash_pct": 0.1
@@ -1961,17 +1961,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.36,
-      "mdd": -44.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.69,
+      "mdd": -46.6,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.68,
+      "cagr": 8.34,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -1993,17 +1993,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.36,
-      "mdd": -44.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.69,
+      "mdd": -46.6,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.68,
+      "cagr": 8.34,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -2025,17 +2025,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.36,
-      "mdd": -44.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.69,
+      "mdd": -46.6,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.68,
+      "cagr": 8.34,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -2057,17 +2057,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.36,
-      "mdd": -44.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.69,
+      "mdd": -46.6,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.68,
+      "cagr": 8.34,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -2089,17 +2089,17 @@
       "cash_pct": 17.1
      },
      "back": {
-      "cagr": 7.94,
-      "mdd": -44.8,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 7.27,
+      "mdd": -46.4,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 1.3,
       "cash_pct": 10.3
      },
      "full": {
-      "cagr": 9.99,
-      "mdd": -45.8,
-      "hold_cagr": 8.68,
+      "cagr": 9.65,
+      "mdd": -46.4,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 1.5,
       "cash_pct": 13.7
@@ -2121,23 +2121,23 @@
       "cash_pct": 17.1
      },
      "back": {
-      "cagr": 8.34,
-      "mdd": -44.8,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 7.66,
+      "mdd": -46.4,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 1.3,
       "cash_pct": 10.3
      },
      "full": {
-      "cagr": 10.83,
-      "mdd": -44.8,
-      "hold_cagr": 8.68,
+      "cagr": 10.48,
+      "mdd": -46.4,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 1.5,
       "cash_pct": 13.7
      },
      "edge_front": 3.33,
-     "edge_back": 0.98,
+     "edge_back": 0.97,
      "ok": true
     },
     {
@@ -2153,17 +2153,17 @@
       "cash_pct": 6.5
      },
      "back": {
-      "cagr": 7.23,
-      "mdd": -44.2,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.56,
+      "mdd": -45.8,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 1.0,
       "cash_pct": 1.4
      },
      "full": {
-      "cagr": 9.06,
+      "cagr": 8.73,
       "mdd": -56.0,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.8,
       "cash_pct": 4.0
@@ -2185,17 +2185,17 @@
       "cash_pct": 6.5
      },
      "back": {
-      "cagr": 7.08,
-      "mdd": -43.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.41,
+      "mdd": -45.1,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 1.0,
       "cash_pct": 1.4
      },
      "full": {
-      "cagr": 9.25,
+      "cagr": 8.91,
       "mdd": -56.5,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.8,
       "cash_pct": 4.0
@@ -2217,17 +2217,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.46,
-      "mdd": -44.2,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.79,
+      "mdd": -45.8,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.3,
       "cash_pct": 0.1
      },
      "full": {
-      "cagr": 8.74,
+      "cagr": 8.4,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.1,
       "cash_pct": 0.1
@@ -2249,17 +2249,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.57,
-      "mdd": -43.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.9,
+      "mdd": -45.1,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.3,
       "cash_pct": 0.1
      },
      "full": {
-      "cagr": 8.79,
+      "cagr": 8.45,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.1,
       "cash_pct": 0.1
@@ -2281,17 +2281,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.36,
-      "mdd": -44.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.69,
+      "mdd": -46.6,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.68,
+      "cagr": 8.34,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -2313,17 +2313,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.36,
-      "mdd": -44.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.69,
+      "mdd": -46.6,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.68,
+      "cagr": 8.34,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -2345,17 +2345,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.36,
-      "mdd": -44.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.69,
+      "mdd": -46.6,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.68,
+      "cagr": 8.34,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -2377,17 +2377,17 @@
       "cash_pct": 0.0
      },
      "back": {
-      "cagr": 7.36,
-      "mdd": -44.9,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "cagr": 6.69,
+      "mdd": -46.6,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.0,
       "cash_pct": 0.0
      },
      "full": {
-      "cagr": 8.68,
+      "cagr": 8.34,
       "mdd": -55.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.0,
       "cash_pct": 0.0
@@ -2402,12 +2402,12 @@
     "c": 100,
     "confirm": true,
     "edge_front": 3.33,
-    "edge_back": 0.98,
+    "edge_back": 0.97,
     "ok": true,
     "full": {
-     "cagr": 10.83,
-     "mdd": -44.8,
-     "hold_cagr": 8.68,
+     "cagr": 10.48,
+     "mdd": -46.4,
+     "hold_cagr": 8.34,
      "hold_mdd": -55.7,
      "sw_y": 1.5,
      "cash_pct": 13.7
@@ -2415,17 +2415,17 @@
    },
    "n_ok": 4,
    "free": {
-    "n_ok": 2,
+    "n_ok": 3,
     "pick": {
      "T": 7.5,
      "c": 100,
      "edge_front": 3.93,
-     "edge_back": -0.46,
+     "edge_back": -0.45,
      "ok": false,
      "full": {
-      "cagr": 10.39,
+      "cagr": 10.05,
       "mdd": -52.3,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.8,
       "cash_pct": 7.3
@@ -2436,12 +2436,12 @@
       "T": 3,
       "c": 50,
       "edge_front": 2.18,
-      "edge_back": -1.65,
+      "edge_back": -1.3,
       "ok": false,
       "full": {
-       "cagr": 9.02,
+       "cagr": 8.85,
        "mdd": -38.6,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 2.5,
        "cash_pct": 49.1
@@ -2451,12 +2451,12 @@
       "T": 3,
       "c": 100,
       "edge_front": 2.54,
-      "edge_back": -3.8,
+      "edge_back": -3.13,
       "ok": false,
       "full": {
-       "cagr": 8.18,
+       "cagr": 8.17,
        "mdd": -38.6,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 2.5,
        "cash_pct": 49.1
@@ -2466,42 +2466,42 @@
       "T": 4.5,
       "c": 50,
       "edge_front": 2.36,
-      "edge_back": 0.25,
+      "edge_back": 0.4,
       "ok": true,
       "full": {
-       "cagr": 9.98,
+       "cagr": 9.72,
        "mdd": -49.6,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 2.8,
-       "cash_pct": 24.2
+       "cash_pct": 24.3
       }
      },
      {
       "T": 4.5,
       "c": 100,
       "edge_front": 3.52,
-      "edge_back": 0.18,
+      "edge_back": 0.49,
       "ok": true,
       "full": {
-       "cagr": 10.52,
+       "cagr": 10.33,
        "mdd": -48.3,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 2.8,
-       "cash_pct": 24.2
+       "cash_pct": 24.3
       }
      },
      {
       "T": 6,
       "c": 50,
       "edge_front": 1.01,
-      "edge_back": 0.0,
-      "ok": false,
+      "edge_back": 0.01,
+      "ok": true,
       "full": {
-       "cagr": 9.19,
+       "cagr": 8.85,
        "mdd": -56.1,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 1.4,
        "cash_pct": 14.9
@@ -2514,9 +2514,9 @@
       "edge_back": -0.16,
       "ok": false,
       "full": {
-       "cagr": 9.17,
+       "cagr": 8.83,
        "mdd": -62.4,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 1.4,
        "cash_pct": 14.9
@@ -2529,9 +2529,9 @@
       "edge_back": -0.18,
       "ok": false,
       "full": {
-       "cagr": 9.68,
+       "cagr": 9.34,
        "mdd": -52.3,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 0.8,
        "cash_pct": 7.3
@@ -2541,12 +2541,12 @@
       "T": 7.5,
       "c": 100,
       "edge_front": 3.93,
-      "edge_back": -0.46,
+      "edge_back": -0.45,
       "ok": false,
       "full": {
-       "cagr": 10.39,
+       "cagr": 10.05,
        "mdd": -52.3,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 0.8,
        "cash_pct": 7.3
@@ -2556,12 +2556,12 @@
       "T": 9,
       "c": 50,
       "edge_front": -0.69,
-      "edge_back": -0.02,
+      "edge_back": -0.01,
       "ok": false,
       "full": {
-       "cagr": 8.33,
+       "cagr": 7.99,
        "mdd": -57.1,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 0.4,
        "cash_pct": 2.0
@@ -2574,9 +2574,9 @@
       "edge_back": -0.1,
       "ok": false,
       "full": {
-       "cagr": 7.91,
+       "cagr": 7.58,
        "mdd": -60.3,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 0.4,
        "cash_pct": 2.0
@@ -2589,9 +2589,9 @@
       "edge_back": 0.0,
       "ok": false,
       "full": {
-       "cagr": 8.68,
+       "cagr": 8.34,
        "mdd": -55.7,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 0.0,
        "cash_pct": 0.0
@@ -2604,9 +2604,9 @@
       "edge_back": 0.0,
       "ok": false,
       "full": {
-       "cagr": 8.68,
+       "cagr": 8.34,
        "mdd": -55.7,
-       "hold_cagr": 8.68,
+       "hold_cagr": 8.34,
        "hold_mdd": -55.7,
        "sw_y": 0.0,
        "cash_pct": 0.0
@@ -2625,20 +2625,20 @@
       "cash_pct": 35.9
      },
      "back": {
-      "cagr": 8.11,
+      "cagr": 8.1,
       "mdd": -33.7,
-      "hold_cagr": 7.36,
-      "hold_mdd": -44.9,
+      "hold_cagr": 6.69,
+      "hold_mdd": -46.6,
       "sw_y": 0.7,
-      "cash_pct": 20.7
+      "cash_pct": 20.8
      },
      "full": {
-      "cagr": 8.9,
+      "cagr": 8.89,
       "mdd": -33.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 0.8,
-      "cash_pct": 28.3
+      "cash_pct": 28.4
      }
     },
     "best_plus": {
@@ -2648,9 +2648,9 @@
      "d_front": 1.6,
      "d_back": 1.01,
      "full": {
-      "cagr": 10.21,
+      "cagr": 10.2,
       "mdd": -28.7,
-      "hold_cagr": 8.68,
+      "hold_cagr": 8.34,
       "hold_mdd": -55.7,
       "sw_y": 1.1,
       "cash_pct": 29.9
@@ -2746,18 +2746,18 @@
    "max": 6.0,
    "max_d": "2026-10-16",
    "trough": {
-    "d": "2026-06-10",
-    "dd": -4.5
+    "d": "2026-11-20",
+    "dd": -11.6
    },
    "3": {
     "d": "2026-10-16",
     "dd": -2.0,
-    "then": -4.0
+    "then": -9.8
    },
    "6": {
     "d": "2026-10-16",
     "dd": -2.0,
-    "then": -4.0
+    "then": -9.8
    }
   }
  ],
@@ -4103,7 +4103,7 @@
    1.5
   ]
  ],
- "free_now": 3.0,
+ "free_now": 5.0,
  "free_dist": {
   "4.5": 18.7,
   "6": 10.6,
