@@ -3317,6 +3317,7 @@ __bk(65);
     nasdaq: {t: "그냥 들고 있기", how: "신호가 와도 팔지 않아요", back: "—",
             why: "200가지 넘게 돌려 봤는데 2012년까지와 2013년 뒤를 둘 다 이긴 방식이 없었어요 — 크게 빠져도 빨리 회복해서 팔면 손해", note: "크게 흔들리는 시장이라 처음부터 비중을 적당히 두는 게 방패예요"}
   };
+  var BODY = {};
   function methHtml(B){
     var FL = {kr: "🇰🇷", us: "🇺🇸"};
     var rows = (B.markets || []).map(function(m){
@@ -3334,6 +3335,9 @@ __bk(65);
       var out = m.cash || 0, to = m.to || "현금";
       var now = m.key === "nasdaq" && !ap ? "주식 그대로" : out ? "주식 " + (100 - out) + "% · " + to + " " + out + "%" : "주식 100%";
       var backNow = ap ? "" : out && m.key !== "nasdaq" ? '<div class="bm-back">🌱 다시 사는 신호 <b>' + nb + '/4</b> — ' + e(D.back) + '</div>' : "";
+      var bx = '<div class="bm-x"><p><b>' + (ap ? "어떤 방식" : "언제 옮기나") + '</b> ' + e(D.how) + '</p>' + (ap ? '<p><b>다음에 바뀌는 때</b> ' + e(D.back) + '</p>' : m.key !== "nasdaq" ? '<p><b>언제 다시 사나</b> ' + e(D.back) + '</p>' : '') +
+        (window.__meetLine ? __meetLine(m) : '') + '<p><b>왜 이 방식</b> ' + e(D.why) + '</p>' + (D.note ? '<p class="bm-note">' + e(D.note) + '</p>' : '') + '</div>';
+      BODY[m.key] = bx;   // 🧭 11/22 한 줄 표가 펼칠 때 쓰는 설명(글은 그대로)
       return '<details class="bm-r' + (out ? " on" : "") + '"><summary><span class="bm-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small>' + e(D.t) + '</small></span>' +
         '<span class="bm-now"><b>' + e(now) + '</b>' + (sig.length ? '<span class="bm-sg">' + sig.map(function(x){ return '<i class="' + (x[1] ? "on" : "") + '">' + (x[1] ? "🔴 " : "⚪ ") + e(x[0]) + '</i>'; }).join("") + '</span>' : '') + '</span></summary>' +
         '<div class="bm-x"><p><b>' + (ap ? "어떤 방식" : "언제 옮기나") + '</b> ' + e(D.how) + '</p>' + (ap ? '<p><b>다음에 바뀌는 때</b> ' + e(D.back) + '</p>' : m.key !== "nasdaq" ? '<p><b>언제 다시 사나</b> ' + e(D.back) + '</p>' : '') +
@@ -3342,7 +3346,7 @@ __bk(65);
         (b.since && b.on ? '<p class="bm-note">' + e(b.ent === "credit200" ? "신용 경보+200일선" : b.ent === "clock6" ? "시계 6시" : b.ent === "clock4.5" ? "시계 4시 반" : "신호") + ' 켜진 날 ' + e(md(b.since)) + ' · 대리 버블 시계 지금 ' + (b.h_free != null ? b.h_free + "시" : "–") + '</p>' : '') +
         '</div>' + backNow + '</details>';
     }).join("");
-    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🧱 같은 꼴이었던 과거 결과로 정한 고정 표 · 누르면 설명</small></div>' + rows + '<p class="bm-note">💼 기본 포트는 S&P500 🎯 판정(200일선 아래 3일이면 줄이고 · 50일선 위 3일이면 다시 담기)이 먼저예요 · 🧱 장 꼴 규칙은 국내 주식과 시장별 참고용 — 🇺🇸 200일선 아래로 내려가 두 규칙이 엇갈리기 시작하면 알림</p></div>';
+    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🧱 같은 꼴이었던 과거 결과로 정한 고정 표 · 누르면 설명</small></div>' + rows + '<p class="bm-note">💼 기본 포트는 S&P500 🎯 판정(200일선 아래 3일이면 줄이고 · 다시 위로 3일이면 담기)이 먼저예요 · 🧱 장 꼴 규칙은 국내 주식과 시장별 참고용 — 🇺🇸 200일선 아래로 내려가 두 규칙이 엇갈리기 시작하면 알림</p></div>';
   }
   function moreHtml(B){   // 🌏 11/12 일본·중국·홍콩 — 판정 + 닮은 장 규칙 (bear.json more)
     var A = B.more || []; if (!A.length) return "";
@@ -3352,6 +3356,39 @@ __bk(65);
         return '<div class="bmm"><span>' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' <small>고점보다 ' + sg(m.dd) + '</small></span><em>' + (ap ? "주식 " + ap.stock + "%" : "정하지 않음") + '</em>' +
           '<small>' + (ap ? '🔁 ' + e(ap.rule) + ' · 다음: ' + e(ap.next) : '닮은 장에서 통하는 방식이 없었어요 — 한 번에 사지 말고 나눠 사기만 참고') + '</small>' + (window.__meetLine ? __meetLine(m) : '') + '</div>'; }).join("") +   // 📏 11/13
       '<p class="bm-note">상태나 주식 몫이 바뀌면 알림이 가요 · 매수·매도 추천 아님</p></details>';
+  }
+  /* 🧭 11/22 사용자 「여전히 숫자가 통일이 안 되어 있고 복잡 — 설명은 안 건드려도 되니 더 직관적으로」
+     칩·결론 줄·시장별 방식·일본·중국 줄을 「시장마다 한 줄」 표 하나로: 주식 몫(큰 숫자 + 막대) · 다시 늘리는 때(선 + 거리) — 누르면 예전 설명 그대로 */
+  function nextOf(m){
+    var a = m.analog || {}, st = a.stock, c = m.close, k = a.k;
+    if (st == null) return {t: "정하지 않음 — 나눠 사기만 참고"};
+    if (st >= 100) return {t: k === "a50" ? "50일선 아래로 내려가면 줄여요" : k === "a200" ? "200일선 아래로 내려가면 줄여요" : "그대로 들고 가요", ok: true};
+    var ln = null, nm = "";
+    if (k === "a50") { ln = m.m50; nm = "50일선"; }
+    else if (k === "a200" || k === "half200") { ln = m.m200; nm = "200일선"; }
+    else if (k === "half5020" || k === "third") { if (st < (k === "third" ? 67 : 75)) { ln = m.m50; nm = "50일선"; } else { ln = m.m200; nm = "200일선"; } }
+    if (!ln || !c) return {t: a.next || ""};
+    var g = (ln / c - 1) * 100;
+    return {t: nm + " " + Math.round(ln).toLocaleString("en-US"), d: g};
+  }
+  function rowHtml(m, body){
+    var FL = {kr: "🇰🇷", us: "🇺🇸", jp: "🇯🇵", cn: "🇨🇳", hk: "🇭🇰"};
+    var a = m.analog || {}, st = a.stock, nx = nextOf(m);
+    var col = st == null ? "s-na" : st >= 100 ? "s-full" : st > 0 ? "s-half" : "s-zero";
+    var ddc = m.state === "🐻" ? "dd3" : m.state === "🟡" ? "dd2" : "dd1";
+    return '<details class="ub-r ' + col + '"><summary>' +
+      '<span class="ub-n">' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b><small class="' + ddc + '">' + sg(m.dd, 0) + '</small></span>' +
+      '<span class="ub-v"><b>' + (st == null ? "–" : st + "%") + '</b><i class="ub-bar"><i style="width:' + (st || 0) + '%"></i></i></span>' +
+      '<span class="ub-nx">' + (nx.ok ? "✓ " : "다시 늘리는 때 · ") + e(nx.t) + (nx.d != null ? ' <em>' + (nx.d > 0 ? "+" : "") + nx.d.toFixed(1).replace("-", "−") + '%</em>' : '') + '</span></summary>' +
+      '<div class="ub-x">' + (a.shape_name ? '<p class="ub-sh">🧱 지금 꼴: <b>' + e(a.shape_name) + '</b> — ' + e(a.rule || "") + '</p>' : '') + (body || "") + '</div></details>';
+  }
+  function unifiedHtml(B){
+    methHtml(B);   // BODY 채우기(설명 글)
+    var main = (B.markets || []).map(function(m){ return rowHtml(m, BODY[m.key] || (window.__meetLine ? __meetLine(m) : "")); }).join("");
+    var more = (B.more || []).map(function(m){ return rowHtml(m, '<p class="ub-p"><b>다음에 바뀌는 때</b> ' + e((m.analog || {}).next || "") + '</p>' + (window.__meetLine ? __meetLine(m) : "")); }).join("");
+    return '<div class="ub"><div class="ub-hd"><span>시장 · 고점 대비</span><span>주식 몫</span></div>' + main +
+      (more ? '<details class="ub-more"><summary>다른 시장 ' + (B.more || []).length + '개 — 일본·중국·홍콩·기술 지수 ▾</summary>' + more + '</details>' : '') +
+      '<p class="ub-note">주식 몫 = 그 시장 주식을 지금 얼마나 들고 갈지(나머지는 현금) · 줄을 누르면 왜 그런지 · 💼 기본 포트는 이 표와 따로 S&P500 판정(200일선)으로 움직여요 — 실제 비중은 포트 탭</p></div>';
   }
   function bearHtml(d){
     var B = d.bear; if (!B || !B.markets || !B.markets.length) return "";
@@ -3373,7 +3410,7 @@ __bk(65);
         '<p class="bg-ad">' + e(m.advice) + '</p></div>';
     }).join("");
     return '<section class="card h2-bear" id="bear" data-cz="done"><div class="bg-h">🐻 하락장 계기판 <small>' + e(md(B.at)) + ' ' + e(String(B.at || "").slice(11, 16)) + ' · 종가 판정</small></div>' +
-      '<div class="bg-cs">' + chips + '</div><p class="bg-lead' + (bad.length ? " warn" : "") + '">' + e(lead) + '</p>' + methHtml(B) + moreHtml(B) +
+      unifiedHtml(B) +
       (bad.length ? '<details class="bg-d"><summary>무엇을 보면 다시 사나 · 체크리스트 펼치기</summary>' + det +
         '<p class="note bg-ru">판정: 고점보다 −10% 조정 · −20% 하락장 (종가) · 현금 권고(11/11부터): 위 🏁 시장별 방식 — 1999년부터 200여 가지를 돌려 2012년까지·2013년 뒤 둘 다 그냥 들고 있기를 이긴 것 중 수익 1등(best_bt). 판정 규칙은 결과 보기 전 등록 · 매수·매도 추천 아님 — 고객 성향·기간에 맞춰 판단.</p></details>' : '') +
       '</section>';
@@ -3443,6 +3480,14 @@ __bk(65);
     ".h2-bear{padding:16px 16px 14px!important}.bg-h{font-size:16px;font-weight:900;letter-spacing:-.3px}.bg-h small{font-size:12px;font-weight:600;color:var(--sub);margin-left:4px}" +
     ".bg-cs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 8px}.bg-c{display:inline-flex;align-items:baseline;gap:4px;font-size:13.5px;border-radius:12px;padding:7px 10px;background:var(--panel2)}.bg-c b{font-weight:800}.bg-c small{font-size:12px;color:var(--sub);font-weight:700}" +
     ".bg-c.s3{background:rgba(47,111,221,.14);box-shadow:inset 0 0 0 1.5px rgba(47,111,221,.45)}.bg-c.s2{background:rgba(240,180,60,.16)}.bg-c.s1{opacity:.85}" +
+    ".ub{margin:10px 0 4px}.ub-hd{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub);font-weight:700;padding:0 12px 4px}" +
+    ".ub-r{border-radius:12px;background:var(--panel,rgba(127,127,127,.07));margin-top:6px;padding:9px 12px}.ub-r>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:1fr auto;grid-template-areas:'n v' 'x x';column-gap:10px;row-gap:3px;align-items:center}" +
+    ".ub-r>summary::-webkit-details-marker{display:none}.ub-n{grid-area:n;min-width:0;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ub-n b{font-weight:900}.ub-n small{margin-left:6px;font-size:12px;font-weight:700;color:var(--sub)}.ub-n small.dd3{color:#2f6fdd}" +
+    ".ub-v{grid-area:v;display:flex;align-items:center;gap:8px}.ub-v b{font-size:19px;font-weight:900;min-width:52px;text-align:right}.ub-bar{display:block;width:56px;height:9px;border-radius:5px;background:rgba(127,127,127,.22);overflow:hidden}.ub-bar i{display:block;height:100%;background:#e5484d;border-radius:5px}" +
+    ".s-zero .ub-v b{color:#2f6fdd}.s-half .ub-v b{color:#d9822b}.s-full .ub-v b{color:#e5484d}.s-half .ub-bar i{background:#d9822b}" +
+    ".ub-nx{grid-area:x;font-size:12px;letter-spacing:-.2px;color:var(--sub);font-weight:700;word-break:keep-all}.ub-nx em{font-style:normal;color:var(--text);font-weight:900;white-space:nowrap}" +
+    ".ub-x{margin-top:8px;padding-top:8px;border-top:1px solid var(--line,rgba(127,127,127,.2))}.ub-sh,.ub-p{margin:0 0 6px;font-size:12.5px;line-height:1.5;word-break:keep-all}.ub-x .bm-x{display:block}" +
+    ".ub-more{margin-top:8px}.ub-more>summary{cursor:pointer;font-size:13px;font-weight:800;padding:8px 2px;color:var(--sub)}.ub-note{margin:8px 2px 0;font-size:11.5px;line-height:1.5;color:var(--sub);word-break:keep-all}" +
     ".bg-lead{margin:0;font-size:15.5px;line-height:1.5;font-weight:700;word-break:keep-all;text-wrap:pretty}.bg-lead.warn{color:var(--text)}" +
     ".bg-d{margin-top:10px}.bg-d summary{cursor:pointer;font-size:14px;font-weight:800;color:var(--accent,#3182f6);list-style:none}.bg-d summary::-webkit-details-marker{display:none}.bg-d summary:after{content:' ▾'}.bg-d[open] summary:after{content:' ▴'}" +
     ".bg-m{background:var(--panel2);border-radius:14px;padding:12px;margin-top:10px}.bg-mh{font-size:14.5px;line-height:1.5;word-break:keep-all}.bg-n{font-size:14px;font-weight:700;margin:6px 0 4px}" +
