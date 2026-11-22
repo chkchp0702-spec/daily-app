@@ -3323,8 +3323,8 @@ __bk(65);
       var D = METH[m.key]; if (!D) return "";
       var ap = m.analog;   // 🔁 11/12 닮은 장 규칙 채택 — 설명을 그 규칙으로 바꿔 보여 줌
       if (ap) D = {t: "🔁 " + ap.rule, how: (ap.shape_name ? "지금은 「" + ap.shape_name + "」 꼴이에요 — " + (ap.why || "") + " → " + ap.rule : "지금 장과 닮았던 " + ap.n + "번에서 2년 뒤 가운데값이 가장 좋았던 방식이에요 — " + ap.rule), back: ap.next,
-        why: "닮은 때 2년 뒤 가운데값 " + sg(ap.y2_med) + " · 가장 나빴던 때 " + sg(ap.y2_worst) + " · 현금보다 나았던 때 " + ap.beat_cash + "/" + ap.n + "번 (지금 다 샀다면 가운데 " + sg(ap.lump_med) + " · 최악 " + sg(ap.lump_worst) + ")",
-        note: "하나 빼고 고르기 검증: 가운데 " + sg(ap.loo.med) + " · 최악 " + sg(ap.loo.worst) + (m.cash_old != null && m.cash_old !== m.cash ? " · 예전 규칙이면 " + (m.to || "현금") + " " + m.cash_old + "% — " + METH[m.key].t : " · 예전 방식: " + METH[m.key].t)};
+        why: ap.shape_name && m.hold && m.hold.head ? "🎲 " + m.hold.head : "닮은 때 2년 뒤 가운데값 " + sg(ap.y2_med) + " · 가장 나빴던 때 " + sg(ap.y2_worst) + " · 현금보다 나았던 때 " + ap.beat_cash + "/" + ap.n + "번 (지금 다 샀다면 가운데 " + sg(ap.lump_med) + " · 최악 " + sg(ap.lump_worst) + ")",
+        note: (ap.shape_name ? "닮았던 12번으로 날마다 다시 고르던 방식은 참고로만(11/22)" : "하나 빼고 고르기 검증: 가운데 " + sg((ap.loo || {}).med) + " · 최악 " + sg((ap.loo || {}).worst)) + (m.cash_old != null && m.cash_old !== m.cash ? " · 예전 규칙이면 " + (m.to || "현금") + " " + m.cash_old + "% — " + METH[m.key].t : " · 예전 방식: " + METH[m.key].t)};
       var b = m.best || {}, ck = m.checks || [], nb = ck.filter(function(c){ return c.on; }).length;
       var sig = [];
       if (ap) sig = [];
@@ -3346,8 +3346,8 @@ __bk(65);
   }
   function moreHtml(B){   // 🌏 11/12 일본·중국·홍콩 — 판정 + 닮은 장 규칙 (bear.json more)
     var A = B.more || []; if (!A.length) return "";
-    var FL = {jp: "🇯🇵", cn: "🇨🇳", hk: "🇭🇰"}, NM = {"🟢": "정상", "🟡": "조정", "🐻": "하락장"};
-    return '<details class="bm bm-more"><summary class="bm-h">🌏 일본·중국·홍콩 <small>' + A.map(function(m){ return m.state + e(m.name.replace("225", "").replace("종합", "").replace("성분", "")); }).join(" ") + '</small></summary>' +
+    var FL = {jp: "🇯🇵", cn: "🇨🇳", hk: "🇭🇰", us: "🇺🇸"}, NM = {"🟢": "정상", "🟡": "조정", "🐻": "하락장"};
+    return '<details class="bm bm-more"><summary class="bm-h">🌏 일본·중국·홍콩·기술 지수 <small>' + A.map(function(m){ return m.state + e(m.name.replace("225", "").replace("종합", "").replace("성분", "")); }).join(" ") + '</small></summary>' +
       A.map(function(m){ var ap = m.analog;
         return '<div class="bmm"><span>' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b> ' + m.state + ' ' + NM[m.state] + ' <small>고점보다 ' + sg(m.dd) + '</small></span><em>' + (ap ? "주식 " + ap.stock + "%" : "정하지 않음") + '</em>' +
           '<small>' + (ap ? '🔁 ' + e(ap.rule) + ' · 다음: ' + e(ap.next) : '닮은 장에서 통하는 방식이 없었어요 — 한 번에 사지 말고 나눠 사기만 참고') + '</small>' + (window.__meetLine ? __meetLine(m) : '') + '</div>'; }).join("") +   // 📏 11/13
