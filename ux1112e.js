@@ -11,7 +11,16 @@
   var SHORT = {lump: "지금 다 사기", cash: "계속 현금", dca6: "6개월 나눠 사기", dca12: "12개월 나눠 사기", dip: "더 빠질 때마다 사기", half200: "절반 지금 + 절반 200일선 회복 때", third: "3분의 1씩 나눠(지금·50일선·200일선)",
                floor: "바닥 신호마다 3분의 1씩", bear: "하락장이면 현금 · 풀리면 주식", ma10: "10개월선 위로 올라오면 사기", ddl: "−10% 절반 · −20% 현금", deep: "10개월선 + 많이 싸면 절반", mom12: "1년 전보다 높으면 주식",
                step3: "신호 3개 계단", a200: "200일선 위로 올라오면 사기", a50: "50일선 위로 올라오면 사기"};
+  /* 🧭 11/22 사용자 「두 개가 다른 말을 하잖아 — 통일성을 갖추라고」: 이 카드는 따로 판정하지 않고 🐻 하락장 계기판(장 꼴 규칙 = pick)과 같은 말을 함.
+     닮은 12번 숫자는 「참고 기록」으로만 아래에 남김 */
   function verdict(m){
+    var p = m.pick || {}, st = p.stock;
+    if (st != null && p.ok !== false){
+      var nx = p.next || "";
+      if (st >= 100) return ["buy", "주식 100% · 들고 가기", "🐻 하락장 계기판과 같은 규칙(" + (p.shape_name || "") + " 꼴) — " + nx];
+      if (st <= 0) return ["wait", "주식 0% · 현금 지키기", "🐻 하락장 계기판과 같은 규칙(" + (p.shape_name || "") + " 꼴) — 다음: " + nx];
+      return ["mid", "주식 " + st + "% · 나눠서", "🐻 하락장 계기판과 같은 규칙(" + (p.shape_name || "") + " 꼴) — 다음: " + nx];
+    }
     var f = m.fwd, L = {}; m.rules.forEach(function(r){ L[r.k] = r; });
     var lump = L.lump, n = f.n;
     if (lump.beat_cash >= Math.ceil(n * 0.75) && lump.y2_med >= 15) return ["buy", "사는 쪽이 유리했음", "닮은 때 " + n + "번 중 " + lump.beat_cash + "번, 지금 사서 2년 들고 있는 게 현금보다 나았어요"];
@@ -38,9 +47,9 @@
     var tb = show.map(function(r, i){ return '<tr class="' + (i === 0 ? "pk" : "") + '"><td>' + e(SHORT[r.k] || r.name) + '</td><td>' + sg(r.y2_med) + '</td><td>' + sg(r.y2_worst) + '</td><td>' + r.beat_cash + '/' + r.n + '</td></tr>'; }).join("");
     var eps = m.episodes.map(function(ep){ return '<li>' + (FL[ep.nat] || "") + ' ' + e(ep.name) + ' <b>' + e(ep.date.slice(0, 7).replace("-", "년 ") + "월") + '</b><em>더 ' + mn(ep.more) + '% · 1년 뒤 ' + sg(ep.y1) + ' · 2년 뒤 ' + sg(ep.y2) + '</em></li>'; }).join("");
     var sens = (m.sens || []).map(function(s){ return "닮은 때 " + s.n + "번으로 보면 1등 「" + (SHORT[s.top[0][0]] || s.top[0][0]) + "」 · 지금 다 사기 " + sg(s.lump[0]) + " (현금보다 " + s.lump[1] + "/" + s.n + ")"; }).join(" / ");
-    return '<details class="an-r"><summary><span class="an-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small>2년 새 ' + sg(now.run) + ' 오른 뒤 고점보다 ' + mn(now.dd) + '% · ' + now.since + '일째</small></span>' +
+    return '<details class="an-r"><summary><span class="an-n">' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b><small>2년 새 ' + sg(now.run) + ' 오른 뒤 고점보다 ' + mn(now.dd) + '% · ' + now.since + '일째</small></span>' +
       '<span class="an-v ' + v[0] + '"><b>' + e(v[1]) + '</b></span></summary>' +
-      '<div class="an-x"><p class="an-why">' + e(v[2]) + '</p>' + chart(m) +
+      '<div class="an-x"><p class="an-why">' + e(v[2]) + '</p><p class="an-cap">아래는 지금과 숫자가 닮았던 12번의 참고 기록이에요 — 판단은 위 규칙으로 해요</p>' + chart(m) +
       '<p class="an-cap">가는 선 = 닮았던 때 하나하나(그날 샀다면) · 굵은 선 = 가운데 길</p>' +
       '<ul class="an-f"><li><small>그 뒤 가장 깊이 더 빠진 폭(가운데값)</small><b>' + mn(f.more_med) + '%</b></li><li><small>10% 넘게 더 빠진 때</small><b>' + f.more10 + '/' + n + '번</b></li><li><small>바닥까지 걸린 기간</small><b>약 ' + Math.max(1, Math.round(f.to_low_med / 21)) + '개월</b></li><li><small>1년 뒤 플러스 · 2년 뒤 플러스</small><b>' + f.y1_up + '/' + n + ' · ' + f.y2_up + '/' + n + '번</b></li></ul>' +
       '<p class="an-b"><b>가장 나았던 방식 — ' + e(SHORT[best.k] || best.name) + '</b> · 2년 뒤 가운데값 ' + sg(best.y2_med) + ' · 가장 나빴던 때 ' + sg(best.y2_worst) + ' · 현금보다 나았던 때 ' + best.beat_cash + '/' + best.n + '번</p>' +
@@ -48,6 +57,7 @@
       '<details class="an-e"><summary>닮았던 때 ' + n + '번 보기</summary><ul>' + eps + '</ul><small>' + e(sens) + '</small></details></div></details>';
   }
   function pickHtml(A){
+    return '<p class="an-sum">🧭 지금 주식 몫·다시 늘리는 때는 <b>🐻 하락장 계기판</b>과 같아요(장 꼴 규칙). 이 카드는 그 판단을 보조하는 참고 기록이에요.</p>';
     var P = A.markets.filter(function(m){ return m.pick; }); if (!P.length) return "";
     var rows = P.map(function(m){ var p = m.pick;
       return '<li class="' + (p.ok ? "" : "no") + '"><span>' + FL[m.nat] + ' <b>' + e(m.name) + '</b></span>' +
@@ -59,8 +69,8 @@
   window.__analogCard = function(A){
     if (!A || !A.markets || !A.markets.length) return "";
     var by = {buy: [], wait: [], mid: []}; A.markets.forEach(function(m){ by[verdict(m)[0]].push(m.name); });
-    var lead = [by.wait.length ? "더 기다리는 쪽: " + by.wait.join("·") : "", by.buy.length ? "사는 쪽: " + by.buy.join("·") : "", by.mid.length ? "나눠서: " + by.mid.join("·") : ""].filter(Boolean).join(" / ");
-    return '<section class="card an" id="analog" data-cz="done"><div class="an-h">🔁 닮은 장 백테스트 <small>' + e(String(A.at || "").slice(5, 16).replace("-", "/")) + ' · 종가 기준</small></div>' +
+    var lead = [by.wait.length ? "주식 0%: " + by.wait.join("·") : "", by.mid.length ? "나눠서: " + by.mid.join("·") : "", by.buy.length ? "들고 가기: " + by.buy.join("·") : ""].filter(Boolean).join(" / ");
+    return '<section class="card an" id="analog" data-cz="done"><div class="an-h">🔁 닮은 장 참고 기록 <small>' + e(String(A.at || "").slice(5, 16).replace("-", "/")) + ' · 종가 기준</small></div>' +
       '<p class="an-lead">' + e(lead) + '</p>' +
       '<p class="an-sum">지금 장과 <b>닮았던 때만</b> 골라 그 뒤 2년을 봤어요. 닮았다 = 고점 전 급등 폭 · 고점에서 빠진 폭 · 고점 뒤 며칠째 · 200일선·5년 평균선과의 거리 · 출렁임이 지금과 가까운 날(9개 지수 + 나스닥100 + 반도체 지수 · 1985년~ · 지수마다 12번).</p>' +
       pickHtml(A) + A.markets.map(row).join("") +

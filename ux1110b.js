@@ -97,9 +97,9 @@
       var nmb = function(k){ return /^current\+/.test(k) ? "지금 규칙 + " + (NMB[k.slice(8)] || k.slice(8)) : k === "current" ? "지금 규칙" : (NMB[k] || k); };
       if (BT && BT.markets) BT.markets.forEach(function(m){
         var b = m.best, flag = /kos/.test(m.key) ? "🇰🇷 " : "🇺🇸 ";
-        li.push('<li><b>' + flag + e(m.name) + '</b> — ' + (b ? e(nmb(b.ent)) + ' → ' + e(nmb(b.exit)) + ' · ' + e(NMB[b.alt] || b.alt) + ' ' + Math.round(b.frac * 100) + '% · 연 ' + b.full.cagr + '% (그냥 들고 있기 ' + m.hold.cagr + '%) · 최대 낙폭 ' + String(b.full.mdd).replace('-', '−') + '% (' + String(m.hold.mdd).replace('-', '−') + '%)' : '판 ' + m.n + '개 중 앞·뒤 모두 보유를 이긴 방식이 없어 <b>그냥 들고 있기</b>') + '</li>');
+        li.push('<li><b>' + flag + e(m.name) + '</b> <small>(11/11 예전 연구 · 지금 규칙 아님)</small> — ' + (b ? e(nmb(b.ent)) + ' → ' + e(nmb(b.exit)) + ' · ' + e(NMB[b.alt] || b.alt) + ' ' + Math.round(b.frac * 100) + '% · 연 ' + b.full.cagr + '% (그냥 들고 있기 ' + m.hold.cagr + '%) · 최대 낙폭 ' + String(b.full.mdd).replace('-', '−') + '% (' + String(m.hold.mdd).replace('-', '−') + '%)' : '판 ' + m.n + '개 중 앞·뒤 모두 보유를 이긴 방식이 없어 <b>그냥 들고 있기</b>') + '</li>');
       });
-      el.innerHTML = '<summary>🕰 과거엔? — 1999년부터 다시 돌려 봄</summary><ul>' + li.join("") + '</ul><small>손 칸(FCF·CDS·규제)은 옛 자료가 없어 기계 칸으로 만든 대리 시계라 앱 시계보다 낮게 나와요 · 2012년까지 고르고 2013년부터 확인 · ' + e(String(R.at || "").slice(5, 10).replace("-", "/")) + ' 계산 · 매수·매도 추천 아님</small>';
+      el.innerHTML = '<summary>🕰 과거엔? — 1999년부터 다시 돌려 봄 (참고 · 지금 주식 몫은 🐻 계기판)</summary><ul>' + li.join("") + '</ul><small>손 칸(FCF·CDS·규제)은 옛 자료가 없어 기계 칸으로 만든 대리 시계라 앱 시계보다 낮게 나와요 · 2012년까지 고르고 2013년부터 확인 · ' + e(String(R.at || "").slice(5, 10).replace("-", "/")) + ' 계산 · 매수·매도 추천 아님</small>';
       el.hidden = false;
     });
   }
