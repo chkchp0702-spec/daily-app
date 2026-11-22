@@ -1,6 +1,102 @@
 {
  "items": [
   {
+   "title": "사우디·바레인 새 공격 발표 — 바레인 산업시설 이란 발사체 피격, 이란은 「미국과 협상 여지」",
+   "url": "https://www.cnbc.com/2026/11/22/saudi-houthi-bahrain-iran-attacks-araghchi-talks.html",
+   "press": "CNBC",
+   "at": "2026-11-22 23:45",
+   "why": "🛢️ 장부 brent_95·에너지 칸 — 공격이 걸프 연안 시설로 번졌지만 이란이 협상 문을 열어 둠, 월요일 브렌트(89.87$) 갭 방향 판단",
+   "summary": "사우디는 후티 드론 격추, 바레인은 이란 발사체에 산업시설 피격(방공망 일부 요격). 아락치 외무장관 「미국과 합의 여지 유지」. 유가 숫자는 월요일 개장 전 미확인."
+  },
+  {
+   "title": "씨티 「메모리 가격 내년 정점」 — 마이크론 목표가 18% 하향(8월 노트, 이번 주말 현물 약세 전망의 배경)",
+   "url": "https://www.tipranks.com/news/memory-prices-will-peak-next-year-warns-citi-as-it-cuts-micron-mu-price-target-by-18",
+   "press": "TipRanks",
+   "at": "2026-11-22 23:45",
+   "why": "반도체 칸·가설③(메모리 상류) — 씨티가 8월부터 「2027년 2분기 정점」을 말해 왔고 11/22 「상반기 현물 약세·고정가 견조」로 이어짐, 💬 5번",
+   "summary": "씨티: D램·낸드 가격 2027년 2분기 정점 전망, 마이크론 목표가 하향(8월). 11/22 텔레그램 전재 새 노트: DDR5 64GB RDIMM 현물 9~10월 약 3,300$ → 2027년 상반기 약 2,000$, 하반기 반등."
+  },
+  {
+   "title": "대만, 공매도 제한 다시 강화 — 가권 2008년 이후 최대 월간 하락 페이스",
+   "url": "https://lapaasvoice.com/taiwan-tightens-short-selling-curbs-again-as-taiex-faces-biggest-monthly-decline-since-2008/",
+   "press": "Lapaas Voice",
+   "at": "2026-11-22 22:45",
+   "why": "아시아 주말 받침(한·대만·중) — 대만은 공매도 제한에 이어 신용 증거금 인하 검토(블룸버그 피드), 월요일 TSMC·한국 반도체 갭 크기와 연결",
+   "summary": "제목 기준: 대만 금융당국 공매도 제한 추가 강화, 가권 월간 낙폭 2008년 이후 최대 페이스(본문 숫자 미확인). 블룸버그 11/22: 35년 만의 최악 주간 뒤 신용 증거금 비율 인하 검토."
+  },
+  {
+   "title": "하이퍼리퀴드 주말 거래로 한국 증시 월요일 시가를 예측할 수 있나(포필라스 리서치)",
+   "url": "https://research.4pillars.io/en/research/can-hyperliquids-weekend-trading-predict-monday-opens-for-korean-stocks",
+   "press": "4Pillars",
+   "at": "2026-11-22 20:45",
+   "why": "이번 주말 F4 대책 뒤 하이퍼리퀴드 코스피 ETF·하이닉스 ADR 반등 — 월요일 갭 크기 판단과 🐻 「시가에 던지지 않기」 근거",
+   "summary": "주말 온체인 한국 ETF·종목 가격이 월요일 시가 방향을 맞히는지 분석(HTX 재인용 「정확도 74%」, 원문 수치 미확인). 이번 주말: 코스피 ETF −8.4%→−5.1%, 하이닉스 ADR −13.1%→약 −8%(시황맨 텔레그램)."
+  },
+  {
+   "title": "무디스, 美 신용등급 Aa1 유지 — 「올해 경제 예상보다 강해, 성장 2.3%」",
+   "url": "https://investinglive.com/news/moody-s-keeps-us-rating-at-aa1-as-the-economy-beats-forecasts-seeing-2-3-growth-this-year/",
+   "press": "investingLive",
+   "at": "2026-11-22 20:45",
+   "why": "주가 폭락 속 실물 경기는 버팀 = 가설②(12/9 분수령)에서 연준이 인상을 멈출 명분이 약한 쪽 · 💼 🔴 뼈대 유지 근거",
+   "summary": "무디스 Aa1 유지, 2026년 성장 2.3% 전망·「예상보다 강하게 성장」·중간선거 뒤에도 재정 궤적 큰 변화 없을 것(뉴스퀵)."
+  },
+  {
+   "title": "한국, 중동 위기 때 약 680억달러 시장안정 프로그램 가동(3/5) — 이번 증안펀드 「준비」의 올해 선례",
+   "url": "https://www.bloomberg.com/news/articles/2026-03-05/korea-s-lee-touts-68-billion-emergency-fund-after-volatility",
+   "press": "Bloomberg",
+   "at": "2026-11-22 19:45",
+   "why": "🐻 코스피 「반등 때 나눠 덜기」 — 정책 받침이 발표 vs 실제 투입일 중 언제 효과가 있었나 비교할 올해 표본(ideas 11/22 18:45)",
+   "summary": "2026-03-05 중동 위기 변동성에 약 680억달러 규모 긴급 시장안정 자금 가동(블룸버그·자카르타포스트). 11/22 F4는 「시장 상황 따라 바로 가동되도록 준비 착수」·블룸버그 표현은 「단계적(phased) 조치」."
+  },
+  {
+   "title": "블랙먼데이 공포에 F4 「증안펀드 가동 준비·자사주 매입 규제 완화」",
+   "url": "https://www.seoul.co.kr/news/economy/2026/11/22/20261122500096",
+   "press": "서울신문",
+   "at": "2026-11-22 18:22",
+   "why": "🐻 코스피 0%·코스닥 50% 판정 아래 정책 받침 — 월요일 갭 크기와 증안펀드 실제 투입 시점이 관전",
+   "summary": "증안펀드 가동 준비 즉시 착수(규모·시점 미정) · 상장사 하루 자사주 매수 주문 한도 11/24부터 3개월 완화 · 불법 공매도 3개월 집중 감시·반대매매 사전 안내 강화 · 회의 약 2시간 20분"
+  },
+  {
+   "title": "골드만 「다음 주 CTA 어떤 경우든 매도 — 최대 약 800억$」",
+   "url": "https://www.analyticsinsight.net/news/goldman-sachs-warns-80b-in-cta-selling-could-extend-stock-slide-and-pressure-bitcoin",
+   "press": "Analytics Insight(골드만 전언)",
+   "at": "2026-11-22 18:40",
+   "why": "가설② 12/9 FOMC 분수령·S&P 고점 −20% 6,255 선 — 추수감사절 얇은 주에 기계적 매도 압력(국내 보도 「월가 108조 추가매물」과 같은 흐름)",
+   "summary": "골드만 트레이딩 데스크: 추세추종(CTA) 펀드가 다음 주 시나리오 불문 매도 · 하락 시 최대 약 800억$ · 비트코인 압력 동반(세부 숫자는 원문 기준, 날짜 미확인)"
+  },
+  {
+   "title": "美 증시 폭락에 긴급 F4회의…증시 안정책 나오나",
+   "url": "https://www.ajunews.com/view/20261122172305194",
+   "press": "아주경제",
+   "at": "2026-11-22 17:27",
+   "why": "🐻 코스피 0%·코스닥 50% 판정 — 월요일 갭 크기와 정부 대책이 「반등 때 나눠 줄이기」 타이밍을 정함, 💬 1·5·15번",
+   "summary": "이형일 부총리·신현송 한은 총재·이억원 금융위원장·이찬진 금감원장 F4 — 17시 반 기준 확정 대책 없음(증안펀드 거론) · 코스피200 야간선물 −6.99% · 지난주 외국인 유가 4조5,159억 순매도·코스피 주간 −7.95%"
+  },
+  {
+   "title": "골드만 2027년 S&P 8,700 — 경쟁 두 곳과 같은 숫자, 종가 대비 +17%",
+   "url": "https://fourweekmba.com/ai-goldmans-2027-sp-8700-ties-two-rivals-17-over-the-close/",
+   "press": "FourWeekMBA",
+   "at": "2026-11-22 17:40",
+   "why": "가설②(12/9 분수령) 반대편 — 월가 「하락장 없음」 합의 vs BofA 「S&P 세계에서 가장 붐비는 티커」, 💬 9번 미국 질문 반대 근거",
+   "summary": "골드만 2027년 말 8,700(두 경쟁사와 같음) · UBS 8,900(2027 EPS 430$ +18%) · BofA 서브라마니안 「지수 유출 첫 환경 가능」 경고(스톡트윗 11/10)"
+  },
+  {
+   "title": "호르무즈 최근 공격 — 오만 인근 유조선 미확인 발사체 피격",
+   "url": "https://gulfnews.com/world/gulf/oman/tanker-hit-by-unknown-projectile-near-oman-in-latest-hormuz-attack-1.500752860",
+   "press": "걸프뉴스",
+   "at": "2026-11-22 16:45",
+   "why": "장부 brent_95·에너지 칸 85 축소 선 — 주말 공격이 이어져 월요일 브렌트(89.87) 갭 위험, 💬 19",
+   "summary": "UKMTO 보고 오만 인근 유조선 피격(세부 피해 미확인) · 연합 속보 「호르무즈서 유조선 잇단 피격」과 같은 흐름 · 금요일 브렌트 3주 연속 주간 하락 뒤"
+  },
+  {
+   "title": "대만·중국은 증시 안정기금 꺼냈다 — 한국은 왜 안 하나",
+   "url": "https://www.koreatimes.co.kr/economy/20261111/taiwan-china-tap-market-rescue-funds-why-wont-korea",
+   "press": "코리아타임스",
+   "at": "2026-11-22 16:45",
+   "why": "일요일 긴급 F4 결과·대만 11/23 공매도 제한 첫날 — 한국이 꺼낼 수 있는 카드(증안펀드) 비교, 🐻 코스피 0%·💬 1·10·15",
+   "summary": "11/11 기사 · 대만·중국은 국가 안정기금 투입, 한국은 증안펀드 미가동 · 11/22 F4 결과 보도는 16시 반까지 미확인"
+  },
+  {
    "title": "델·HPE·레노버·슈퍼마이크로, 계약 몇 달 뒤 AI 서버 값 최대 45% 인상",
    "url": "https://www.ft.com/content/dd2a6594-6146-4ff1-ac8e-54749c1fc99f",
    "press": "FT",
@@ -543,103 +639,7 @@
    "at": "2026-11-20 21:45",
    "why": "🔴 뼈대 방패 칸(금 11%·현금 26%) — 금이 주식과 같이 빠지는 지금 장기채가 대안인지",
    "summary": "씨티는 한 달 넘게 위험 회피 · 급락에도 위험자산을 늘릴 이유 없음 · 심리 악화 시 장기채 매수 권고 — 신호 이름·수치는 미확인"
-  },
-  {
-   "title": "美 10년 금리 5% 위 이틀 더 — 2007년 연속 기록과 동률",
-   "url": "https://247wallst.com/investing/2026/11/18/two-more-days-above-5-and-treasury-yields-tie-2007s-run/",
-   "press": "24/7 Wall St.",
-   "at": "2026-11-20 20:45",
-   "why": "12/9 FOMC 분수령 가설·🔴 뼈대 단기채 칸 — 고금리가 주식 급락에도 오래 버티는지",
-   "summary": "10년 5% 위 마감이 2007년 연속 기록과 같아짐(11/18) · 이후 주식 급락에 안전자산 쏠림으로 되돌림 중 — 본문 세부 숫자 미확인"
-  },
-  {
-   "title": "SK하이닉스 관계사, 키옥시아 최대주주로 — 의결권은 제한",
-   "url": "https://www.koreaherald.com/article/10838975",
-   "press": "코리아헤럴드",
-   "at": "2026-11-20 20:45",
-   "why": "11/20 CB 1.3조 주식 전환(12월 취득)의 배경 — 💬 2번·메모리 상류 가설",
-   "summary": "8월 도시바 지분 축소로 SK하이닉스 쪽이 사실상 최대주주(약 14%) · 의결권 제한 · 낸드 시장 선택지 확대 — 11/20 전환으로 확정 단계"
-  },
-  {
-   "title": "앤트로픽, AI 매도세 속 프리마켓 6% 가까이 하락 — 엔비디아·AMD도 약세",
-   "url": "https://www.cnbc.com/2026/11/20/anthropic-stock-ai-amd-nvidia.html",
-   "press": "CNBC",
-   "at": "2026-11-20 19:45",
-   "why": "상장 이틀째 공모주 열기도 AI 매도를 못 막음 — 나스닥100 칸(🔴 뼈대 50%)·💬 5번",
-   "summary": "첫날 공모가 대비 +17% 마감 뒤 이튿날 프리마켓 약 −6% · 엔비디아·AMD 동반 약세 · 美 선물 매도 지속(야후)"
-  },
-  {
-   "title": "美 의회, 엔비디아 조사 확대 — 젠슨 황·트럼프 행정부 관계자 증언 요구",
-   "url": "https://www.scmp.com/news/china/diplomacy/article/3374412/us-congress-widens-nvidia-probe-seeking-testimony-jensen-huang-and-trump-officials",
-   "press": "SCMP",
-   "at": "2026-11-20 19:45",
-   "why": "엔비디아 규제 악재가 SEC·캘리포니아에 이어 하원 민주당까지 세 겹 — 반도체 칸·💬 2번",
-   "summary": "하원 민주당, 상무부 메가스피드 조사에 엔비디아가 미친 영향 조사 착수(인베스팅) · 의회는 젠슨 황 증언 요구(SCMP)"
-  },
-  {
-   "title": "JP모건·도이체 등 「연준 3번째 인상」을 전망에 추가",
-   "url": "https://www.fxstreet.com/analysis/us-fed-update-we-add-a-third-hike-to-our-fed-forecast-202611180511",
-   "press": "FXStreet",
-   "at": "2026-11-20 18:45",
-   "why": "12/9 FOMC 분수령 가설 — 「한 번 더」가 아니라 「연속 인상」 경로로 IB 컨센서스가 이동, 💼 현금 26% 칸의 단기채 금리 근거",
-   "summary": "11/18 IB 리서치가 연준 인상 전망을 3회로 늘림(12월·1월·3월). 연합 11/20 「JP모건 美 금리 3연속 인상 전망, IMF도 경고」로 국내 보도."
-  },
-  {
-   "title": "美 AI 칩 수출 규제에 중국 기술주 타격 — 자급 가속",
-   "url": "https://www.investing.com/news/stock-market-news/us-ai-chip-curbs-hit-china-tech-stocks-spur-selfsufficiency-push-5040932",
-   "press": "Investing.com",
-   "at": "2026-11-20 18:45",
-   "why": "항셍 1년 반 최저·고점 −19% 날 — H주 50% 칸, AMD·엔비디아 중국 매출 리스크와 이어짐",
-   "summary": "美 AI 칩 수출 규제 강화로 중국 기술주 급락, 중국은 칩 자급 추진 가속. 같은 날 항셍 −430p·주간 −1,226p, 남향자금 118억 HKD 순유입."
-  },
-  {
-   "title": "캘리포니아 법무장관, 엔비디아에 조사 소환장 발부",
-   "url": "https://www.wsj.com/tech/california-attorney-general-issues-investigative-subpoena-to-nvidia",
-   "press": "WSJ",
-   "at": "2026-11-20 17:45",
-   "why": "🐋 NVDA 신호(11/24 155.46$ 판정)·반도체 칸 — SEC 조사에 이어 주 법무장관 소환장",
-   "summary": "캘리포니아 주 법무장관이 엔비디아에 조사 소환장 발부(WSJ 11/20). 11/17엔 「위험 신호(red flags)」 발언(블룸버그). 17:33 나스닥100 선물 −0.68%."
-  },
-  {
-   "title": "캘리포니아 법무장관 본타, 엔비디아·젠슨 황 조사 「위험 신호」 짚어",
-   "url": "https://stocktwits.com/news-articles/markets/equity/california-ag-rob-bonta-highlights-red-flags-in-his-investigation-into-nvidia-and-jensen-huang/cNbO44MR9hO",
-   "press": "Stocktwits",
-   "at": "2026-11-20 17:45",
-   "why": "NVDA 규제 악재가 연방(SEC)·주 두 갈래로 — 🐋 신호 실패 쪽 근거",
-   "summary": "본타 법무장관이 엔비디아 스캔들 관련 레드 플래그를 언급, 조사 진행. 소환장 발부로 이어짐(WSJ 11/20)."
-  },
-  {
-   "title": "황, 엔비디아 복귀 의사 — WSJ 「SEC 조사」 보도",
-   "url": "https://www.koreajoongangdaily.com/business/huang-pitches-nvidia-comeback-wsj-reports-sec-probing-the-chipmaker/12978169",
-   "press": "코리아중앙데일리",
-   "at": "2026-11-20 16:40",
-   "why": "복귀 의사(호재)와 SEC 조사(악재)가 같은 날 — 오늘 밤 NVDA 정규장이 어느 쪽에 반응하나가 삼성·하닉 월요일 시가로 이어짐",
-   "summary": "황은 이사회가 원하면 복귀 의향, 같은 날 WSJ가 SEC 조사 보도. 이사회는 11/17 「복귀 의도 없음」."
-  },
-  {
-   "title": "금·은 6시간 만에 시가총액 1조 달러 증발 — 연준 인상 베팅",
-   "url": "https://beincrypto.com/gold-silver-lose-1-trillion-fed-rate-hike/",
-   "press": "BeInCrypto",
-   "at": "2026-11-20 15:45",
-   "why": "💼 🔴 뼈대 금 5→11% 채우는 날 방패도 같이 빠짐 — 금이 위험자산처럼 움직이는 「현금 마련 매도」 근거 · 💬 17번",
-   "summary": "금 3,521달러·은 41.19달러로 1년여 만의 최저(김현석 텔레그램 15:02 인용). 연준 인상 기대·AI 투매가 겹친 동반 매도."
-  },
-  {
-   "title": "젠슨 황 「이사회가 원하면 엔비디아 CEO로 돌아가겠다」 — 사임 5일 만",
-   "url": "https://www.khaleejtimes.com/business/jensen-huang-says-willing-to-return-as-nvidia-ceo-5-days-after-exit",
-   "press": "Khaleej Times",
-   "at": "2026-11-20 14:40",
-   "why": "NVDA(🐋 11/17 신호) — CEO 공백·규제 리스크가 주가 할인 요인, 복귀 여부가 반도체 심리 변수 · 가설③",
-   "summary": "황 「복귀하면 영광」 발언 · 이사회 의장은 11/17 「복귀시킬 의도 없음」(WRDW) — 엇갈림, 결정 미확인"
-  },
-  {
-   "title": "소프트뱅크 14% 급락 — AI 주식 투매가 아시아 시장 강타",
-   "url": "https://www.kaohooninternational.com/?p=569330",
-   "press": "Kaohoon International",
-   "at": "2026-11-20 14:40",
-   "why": "AI 투자 지주사까지 급락 = 앤트로픽 상장 뒤 「AI 차입」 의심이 아시아로 · 가설① 크레딧 · 🐻 일본 칸",
-   "summary": "소프트뱅크 −14~15%(손 회장 「앤트로픽 투자 안 한 것 후회」 인베스팅) · 닛케이 14시 −2,900엔 · TSMC −5%"
   }
  ],
- "at": "2026-11-22 13:45"
+ "at": "2026-11-22 23:45"
 }
