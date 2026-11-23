@@ -388,7 +388,7 @@
         (b.since && b.on ? '<p class="bm-note">' + e(b.ent === "credit200" ? "신용 경보+200일선" : b.ent === "clock6" ? "시계 6시" : b.ent === "clock4.5" ? "시계 4시 반" : "신호") + ' 켜진 날 ' + e(md(b.since)) + ' · 대리 버블 시계 지금 ' + (b.h_free != null ? b.h_free + "시" : "–") + '</p>' : '') +
         '</div>' + backNow + '</details>';
     }).join("");
-    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🧱 같은 꼴이었던 과거 결과로 정한 고정 표 · 누르면 설명</small></div>' + rows + '<p class="bm-note">💼 기본 포트는 S&P500 🎯 판정(200일선 아래 3일이면 줄이고 · 다시 위로 3일이면 담기)이 먼저예요 · 🧱 장 꼴 규칙은 국내 주식과 시장별 참고용 — 🇺🇸 200일선 아래로 내려가 두 규칙이 엇갈리기 시작하면 알림</p></div>';
+    return '<div class="bm"><div class="bm-h">🏁 시장별 방식 <small>🧱 같은 꼴이었던 과거 결과로 정한 고정 표 · 누르면 설명</small></div>' + rows + '<p class="bm-note">💼 기본 포트는 S&P500 🎯 판정이 먼저예요 — 200일선 아래 3일이면 현금 26% · 「몇 년째 상승+금리 상승+기술주 거품」이 겹친 지금 같은 장에선 미국 주식 몫 절반은 바로, 나머지 절반은 S&P500 이 20일선 위로 반등하는 날 현금으로(11/24) · 200일선 위 3일이면 전부 다시 담기 · 🧱 장 꼴 규칙은 국내 주식과 시장별 참고용 — 단계가 바뀌면 알림</p></div>';
   }
   function moreHtml(B){   // 🌏 11/12 일본·중국·홍콩 — 판정 + 닮은 장 규칙 (bear.json more)
     var A = B.more || []; if (!A.length) return "";

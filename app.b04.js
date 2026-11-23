@@ -382,7 +382,7 @@ __bk(28);
       '<div class="po-rcp"><div class="po-rch">🧾 주문서 <small>' + won(S.amt) + '원 · ' + (S.mode === "kr" ? "₩ 원화" : "💵 외화") + '</small></div>' +
       // 10/14 A11-4: 「갖고 있는 주 수」를 넣으면 주문서가 「처음부터 다 사기」 대신 「바꿀 것만」(+n주 사기 · −n주 팔기 · 그대로)
       '<div class="po-hv"><button type="button" id="pohvt" class="' + (S.hv ? "on" : "") + '">' + (S.hv ? "✍️ 갖고 있는 주 수 넣는 중" : "✍️ 갖고 있는 주 수 넣기") + '</button><small>' + (S.hv ? "주문서가 「바꿀 것만」 보여 줘요 · 휴대폰에만 저장" : "넣으면 「바꿀 것만」 보여 줘요") + '</small></div>' +
-      '<p class="po-rl" style="margin:6px 0 2px;font-size:12px;line-height:1.45;color:var(--sub);word-break:keep-all">💼 기본 포트는 S&P500 🎯 판정(200일선 아래 3일이면 줄이고 · 50일선 위 3일이면 다시 담기)이 먼저예요 · 🧱 장 꼴 규칙은 국내 주식과 시장별 참고용 (11/12)</p>' +   // 🔁 11/12 사용자 「그 한 줄 넣고」
+      '<p class="po-rl" style="margin:6px 0 2px;font-size:12px;line-height:1.45;color:var(--sub);word-break:keep-all">💼 기본 포트는 S&P500 🎯 판정이 먼저예요 — 200일선 아래 3일이면 현금 26% · 「몇 년째 상승+금리 상승+기술주 거품」이 겹친 지금 같은 장에선 미국 주식 몫 절반은 바로, 나머지 절반은 S&P500 이 20일선 위로 반등하는 날 현금으로(11/24) · 200일선 위 3일이면 전부 다시 담기 · 🧱 장 꼴 규칙은 국내 주식과 시장별 참고용 (11/12)</p>' +   // 🔁 11/12 사용자 「그 한 줄 넣고」
       bearBtn() +
       '<div id="porows"></div><div id="pobrx"></div><div id="pohvx"></div>' +
       '<div class="po-cp"><button class="btn" id="pocopy">📋 주문 목록 복사</button><span id="pocpst"></span></div></div>' +
@@ -406,7 +406,7 @@ __bk(28);
         '<div class="po-vcs">' + VW.rows.map(function(x, i){ var st = x.ret == null ? "wait" : x.ret - (VW.core || 0) >= 0 ? "g" : "b";
           return '<button class="po-vc ' + st + '" data-vi="' + i + '"><b>' + e(x.name.replace(/\s*\(.*\)$/, "")) + '</b> ' + realPct(x) + '%<small>' + (x.ret == null ? "대기" : sg(x.ret, 1) + (st === "g" ? " ↑" : " ↓")) + '</small></button>'; }).join("") + '</div>' +
         '<div class="po-vd" id="povd"></div>' +
-        '<p class="note" style="margin:6px 0 0">10/11부터 💼 기본 포트 뼈대는 검증한 규칙(🟢 S&P·나스닥 코어 95%·금 5% / 🔴 코어 63%·금 11%·현금 26%)이 정해요. 2017년 이후 옛 뼈대(섹터 칸 + 현금 26% 상시)는 S&P보다 연 −1.5%p, 새 뼈대는 +1.9%p였어요.</p></section>';
+        '<p class="note" style="margin:6px 0 0">10/11부터 💼 기본 포트 뼈대는 검증한 규칙(🟢 나스닥100 코어·섹터 95%·금 5% / 🔴 63%·금 11%·현금 26% / ✂️ 셋 다 겹친 장의 🔴 은 미국 주식 몫을 절반 → 전부 현금으로 나눠 줄임)이 정해요. 2017년 이후 옛 뼈대(섹터 칸 + 현금 26% 상시)는 S&P보다 연 −1.5%p, 새 뼈대는 +1.9%p였어요.</p></section>';
     }
 
     // 🌏 해외 동종주 (market/peers.json) — 미국 강세 섹터와 같은 일을 하는 일·중·홍·대만·한국 종목을 달러 기준으로 비교
@@ -948,7 +948,7 @@ __bk(28);
       '<div class="po-brn">현금·단기 <b>' + (cr ? cr.x.pct0 : 0) + '%</b> → <b class="po-bcv">' + (cr ? cr.x.pct : 0) + '%</b> <small>(' + (cut ? '+' + won(cut) + '원' : '바뀌는 줄 없음') + ')</small></div>' +
       '<ul>' + lines + '</ul>' +
       '<p>시장마다 그 시장 칸에만 🔁 닮은 장 규칙의 현금 몫을 적용 — 금·자산 추세·현금·상품은 그대로 · 켜 둔 동안 「주문 목록 복사」도 이대로</p>' +
-      '<p class="po-brt2">💼 기본 포트는 S&P500 🎯 판정(200일선 아래 3일이면 줄이고 · 50일선 위 3일이면 다시 담기)이 먼저예요 · 🧱 장 꼴 규칙은 국내 주식과 시장별 참고용 · 보기 전용 · 매수·매도 권유 아님</p></div>';
+      '<p class="po-brt2">💼 기본 포트는 S&P500 🎯 판정이 먼저예요 — 200일선 아래 3일이면 현금 26% · 「몇 년째 상승+금리 상승+기술주 거품」이 겹친 지금 같은 장에선 미국 주식 몫 절반은 바로, 나머지 절반은 S&P500 이 20일선 위로 반등하는 날 현금으로(11/24) · 200일선 위 3일이면 전부 다시 담기 · 🧱 장 꼴 규칙은 국내 주식과 시장별 참고용 · 보기 전용 · 매수·매도 권유 아님</p></div>';
   }
   function rows(){
     var box = document.getElementById("porows"); if (!box) return;

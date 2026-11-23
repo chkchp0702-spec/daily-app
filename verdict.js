@@ -38,7 +38,12 @@
     var ka = an(k), qa = an(M.kosdaq);
     if (ka || qa) o.kr.act = [ka, qa].filter(Boolean).join(" / ");
     if (s.analog) o.us.act = s.analog.stock >= 100 ? "배분표 그대로" + (cash != null ? " · 현금 " + Math.round(cash) + "%" : "") : "주식 " + s.analog.stock + "% · " + s.analog.next;
-    if (skel === "down" && (!s.analog || s.analog.stock >= 100)){   // 💼 🔴 기본 틀(S&P 200일선 아래 3일) — 계기판 🟢 이어도 배분표 자체가 줄어든 상태
+    if (skel === "down_half" || skel === "down_all"){   // ✂️ 11/24 사용자 「2번」 — 미국 주식 몫 나눠 줄이는 중 (src/us_cut.py)
+      var CT = LG.skeleton.cut || {};
+      o.us.act = (/절반|반등/.test((LG.change_note || {}).why || "") && (LG.change_note || {}).date === new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10) ? "오늘 배분표 바뀜 · " : "") +
+        (skel === "down_half" ? "✂️ 미국 주식 몫 절반 현금 · 나머지 절반은 S&P500 20일선" + (CT.ma20 ? "(" + Math.round(CT.ma20).toLocaleString() + ")" : "") + " 위 반등 날" : "✂️ 미국 주식 몫 전부 현금") +
+        " → 현금 " + (cash != null ? Math.round(cash) : (skel === "down_half" ? 58 : 89)) + "% · 200일선 위 3일이면 복귀"; o.us.c = "dn"; }
+    else if (skel === "down" && (!s.analog || s.analog.stock >= 100)){   // 💼 🔴 기본 틀(S&P 200일선 아래 3일) — 계기판 🟢 이어도 배분표 자체가 줄어든 상태
       o.us.act = (chgToday ? "오늘 배분표 바뀜 · " : "") + "🔴 S&P 200일선 아래 → 현금 " + (cash != null ? Math.round(cash) : 26) + "%"; o.us.c = "dn"; }
     o.split = k.state !== s.state;
     o.text = "🇰🇷 국내 주식: " + o.kr.st + " → " + o.kr.act + "\n🌏 해외 주식(포트): S&P500 " + o.us.st + " → " + o.us.act;
