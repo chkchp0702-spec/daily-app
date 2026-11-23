@@ -106,7 +106,7 @@ EUX_CAP = 0.2
 #   적합 계수보다 낮게 0.15/1%p, 로그오즈 ±0.25 상한. 중국 ➖(KWEB−S&P 교차·걸어가기 앞/뒤 좋아지나 최근3년 0.24593→0.24663 나빠짐) · 한국 ❌
 KWX_B = {"HK": 0.15}
 KWX_CAP = 0.25
-EXTRA = ["^VIX", "ES=F", "NKD=F", "^SOX", "^STOXX", "KWEB"] + list(ETF_X.values()) + prob_x.XSYMS
+EXTRA = ["^VIX", "ES=F", "NKD=F", "^SOX", "^STOXX", "KWEB", "FXI"] + list(ETF_X.values()) + prob_x.XSYMS
 # 2026 FOMC 결정일 (둘째 날) — 연준 공개 일정. 그 밖의 이벤트는 prob_events.json 에서
 FOMC_2026 = ["2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-09",
              # 10/23 #5: 연준 fomccalendars.htm 에서 읽은 2027 일정 (probe/fomc_bt.py)
