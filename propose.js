@@ -358,8 +358,13 @@
       : k === "gl_stock" && !c.spx && !c.ndx && !mus.length ? '<p class="pp-pw">💡 해외 주식인데 미국 지수가 빠져 있어요 — 위 칩을 켜거나 아래 ⭐ 추천 종목으로 해외 종목·ETF를 넣어 주세요</p>' : '';
     var many = CORE.filter(function(x){ return has0(x[0]); }).length > 1;
     var same2 = function(a, b){ return CORE.every(function(x){ return !has0(x[0]) || !!a[x[0]] === !!b[x[0]]; }); };
+    // 11/23 「시황 그대로만 왜 선택 안 돼?」 — 폼에 없는 칸(예: 금 없는 폼)을 켜는 묶음은 빼고, 이 폼에서 결과가 같은 묶음은 하나만 남김 (두 개가 같이 켜져 보이던 문제)
+    var preList = function(){ var seen = {}, ix = ["spx", "ndx", "k200"].filter(has0).length;
+      return PRESET.filter(function(q){ if (q[0] !== "all" && CORE.some(function(x){ return q[2][x[0]] && !has0(x[0]); })) return false;
+        var m = CORE.map(function(x){ return has0(x[0]) && q[2][x[0]] ? 1 : 0; }).join(""); if (seen[m]) return false; seen[m] = 1; return true; })
+        .map(function(q){ return q[0] === "all" ? [q[0], q[1], q[2], "지수 " + ix + "개" + (has0("gold") ? " + 금" : "")] : q; }); };
     return '<div class="pp-ol"><span data-tip="' + e(JOY.core) + '">🧩 기본 구성 고르기 ⓘ</span> <span class="mut">(한 번에 고르고 · 아래에서 하나씩 켜고 끔)</span></div>' +
-      (many ? '<div class="pp-pre">' + PRESET.map(function(q){ return '<button type="button" data-cp="' + k + '" data-pv="' + q[0] + '"' + (same2(c, q[2]) ? ' class="on"' : '') + '><b>' + q[1] + '</b><small>' + q[3] + '</small></button>'; }).join("") + '</div>' : '') +
+      (many ? '<div class="pp-pre">' + preList().map(function(q){ return '<button type="button" data-cp="' + k + '" data-pv="' + q[0] + '"' + (same2(c, q[2]) ? ' class="on"' : '') + '><b>' + q[1] + '</b><small>' + q[3] + '</small></button>'; }).join("") + '</div>' : '') +
       '<div class="pp-core" style="grid-template-columns:repeat(' + (function(n){ return n > 3 ? 2 : n; })(CORE.filter(function(x){ return has0(x[0]); }).length) + ',1fr)">' + CORE.filter(function(x){ return has0(x[0]); }).map(function(x){ return '<button type="button" data-ck="' + k + '" data-cv="' + x[0] + '"' + (c[x[0]] ? ' class="on"' : '') + '>' + x[1] + ' ' + x[2] + '<small>' + (c[x[0]] ? "넣음" : "안 넣음") + '</small></button>'; }).join("") + '</div>' +
       empty +
       '<div class="pp-cs"><span class="mut">끈 칸의 몫은 켠 칸에 비율대로</span>' + (same ? '<span class="pp-cd">✓ 내 기본값</span>' : '<button type="button" data-cd="' + k + '">📌 이 구성을 내 기본값으로</button>') + '</div>';
