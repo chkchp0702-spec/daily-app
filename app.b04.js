@@ -1,6 +1,6 @@
 /* 📦 app.b04.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 4/8 (push.js … nav2.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(4,29,["push.js", "port.js", "simple.js", "pdfx.js", "honest.js", "up10.js", "nav2.js"],[4, 164, 1327, 1577, 1778, 1843, 2391]);
+__bs(4,28,["push.js", "port.js", "simple.js", "pdfx.js", "honest.js", "up10.js", "nav2.js"],[4, 164, 1327, 1577, 1778, 1843, 2391]);
 /* ======== push.js ======== */
 /* 🔔 알림 (10/9 단순화) — 이 앱을 설치한 휴대폰이 「알림 받기」만 켜고 끄면 끝.
    켜면: 알림 허락 → 웹 푸시 구독 → 구독 정보를 휴대폰에서 암호화(RSA 공개키)해서 보냄 → 서버(stock-screener 저장소의 push-relay, 6시간 이어달리기)가 신호마다 푸시.
@@ -160,7 +160,7 @@ __bs(4,29,["push.js", "port.js", "simple.js", "pdfx.js", "honest.js", "up10.js",
   (function(){ var c = document.createElement("style"); c.textContent = ".pu-opt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer}.pu-opt.on{border-color:var(--acc,#7c9cff);background:rgba(124,156,255,.08)}.pu-opt input{margin-top:4px}.pu-opt b{display:block;font-size:14.5px}.pu-opt small{color:var(--sub,#aab);font-size:12.5px;line-height:1.4}"; document.head.appendChild(c); })();
 })();
 ;
-__bk(29);
+__bk(28);
 /* ======== port.js ======== */
 /* 💼 포트 (10/9) — 「시황리포트 배분표대로 투자했다면」
    자료: market-strategy-report/market/port.json (src/port.py, 매시간 갱신)
@@ -1323,7 +1323,7 @@ __bk(29);
   document.head.appendChild(css);
 })();
 ;
-__bk(30);
+__bk(29);
 /* ======== simple.js ======== */
 /* CH Investing — 보기 단순하게 (10/6)
    탭마다 핵심 카드만 바로 보여주고, 나머지 카드는 맨 아래 「📂 더 보기」에 제목 한 줄씩 모은다.
@@ -1573,7 +1573,7 @@ __bk(30);
   watch();
 })();
 ;
-__bk(31);
+__bk(30);
 /* ======== pdfx.js ======== */
 /* CH Investing — 화면 그대로 PDF (10/6)
    예전: 리포트 전체를 큰 캔버스 한 장으로 그림 → 아이폰 캔버스 한도에 걸려 그림(주가·매출)이 빠지고 카드가 잘림.
@@ -1774,7 +1774,7 @@ __bk(31);
   };
 })();
 ;
-__bk(32);
+__bk(31);
 /* ======== honest.js ======== */
 /* CH Investing — 🧾 정직 성적 (10/11)
    지금 숫자 옆에 「정직 계산」(다음 날 가격에 사고 · 수수료·세금·환전 비용을 뺀 값)을 나란히.
@@ -1839,7 +1839,7 @@ __bk(32);
   });
 })();
 ;
-__bk(33);
+__bk(32);
 /* ======== up10.js ======== */
 /* CH Investing — 앱 업그레이드 10 (10/10 사용자: "어플 전체를 업그레이드하는 전략 열 개 … 다 진행해")
    ① 🏠 오늘 — 첫 화면 한 장 (market/home.json)
@@ -2387,7 +2387,7 @@ __bk(33);
   window.addEventListener("resize", hh); setTimeout(hh, 300); setTimeout(hh, 1500);
 })();
 ;
-__bk(34);
+__bk(33);
 /* ======== nav2.js ======== */
 /* CH Investing — 화면 정리 (10/11 사용자: "보기 좋게 심플하게 · 상위 하위 · 펼치기 접기 · 중복은 빼도 됨 · 돋보기가 있는데 종목 카테고리가 있는 것도")
    ① 아래 탭 바 5개(오늘·시장·포트·신호·피드) → 위에는 그 묶음의 작은 탭만 (14칸 격자 대신)
@@ -2875,5 +2875,5 @@ __bk(34);
   if (window.cur) try { window.drawTabs(); } catch(x) {}
 })();
 ;
-__bk(35);
+__bk(34);
 __be(4);

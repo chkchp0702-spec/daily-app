@@ -27,8 +27,8 @@
   // 🩹 11/18 글자를 UTF-16 길이로 자르면 이모지가 반쪽만 남을 수 있음 → 끝의 짝 없는 글자를 지움 (usage.py 가 이것 때문에 11/17 16시부터 멈췄음)
   function add(kind, label){ if (!label) return; var b = bag(), m = kind === "v" ? b.views : b.taps; label = String(label).replace(/\s+/g, " ").trim().slice(0, kind === "v" ? 14 : 28).replace(/[\ud800-\udbff]$/, ""); if (!label) return; m[label] = (m[label] || 0) + 1; b.n++; put(b); }
   var lastView = "";
-  function view(){ var c = (typeof cur !== "undefined" && cur) || ""; if (!c || c === lastView) return; lastView = c; add("v", NAMES[c] || c); try { if (window.__chGA) __chGA("v", NAMES[c] || c, c); } catch(x) {} }   /* 📊 11/23 GA(ga.js) — 같은 화면 이름 */
-  // 🔒 11/23 단추 글자 「안에」 고객 이름이 섞인 경우(예 📨 한 장 「📨 홍길동 고객님께 보내기」)도 이름을 ○○ 로 바꿔서만 셈 — 앱 집계(ntfy)·GA 둘 다
+  function view(){ var c = (typeof cur !== "undefined" && cur) || ""; if (!c || c === lastView) return; lastView = c; add("v", NAMES[c] || c); }
+  // 🔒 11/23 단추 글자 「안에」 고객 이름이 섞인 경우(예 📨 한 장 「📨 홍길동 고객님께 보내기」)도 이름을 ○○ 로 바꿔서만 셈
   function names(){ try { var a = JSON.parse(localStorage.getItem("op_clients") || "[]") || [], h = JSON.parse(localStorage.getItem("pp_hist") || "[]") || [];
       return a.concat(h.map(function(o){ return o && o.cust; })).concat([localStorage.getItem("pbname")]).filter(function(n){ return typeof n === "string" && n.trim().length >= 2; }).map(function(n){ return n.trim(); }); } catch(z){ return []; } }
   function scrub(x){ var L = names().sort(function(p, q){ return q.length - p.length; }); for (var i = 0; i < L.length; i++) x = x.split(L[i]).join("○○"); return x; }
@@ -57,7 +57,7 @@
     if (!tx || tx.length < 2) return null;
     var c = (typeof cur !== "undefined" && cur) || ""; return (NAMES[c] || c) + " · " + tx.slice(0, 20).replace(/[\ud800-\udbff]$/, "");
   }
-  document.addEventListener("click", function(ev){ try { var t = ev.target; if (!t || !t.closest) return; var l = labelOf(t); add("t", l); if (l && window.__chGA) __chGA("t", l); } catch(x) {} }, true);   /* 📊 11/23 GA 도 같은 단추 이름(고객 이름·숫자·종목 이름 걸러진 것)만 */
+  document.addEventListener("click", function(ev){ try { var t = ev.target; if (!t || !t.closest) return; add("t", labelOf(t)); } catch(x) {} }, true);
   function flush(){
     var b = bag(); if (!b.n) return;
     var body = {k: "tap", d: dev(), day: b.day, v: (typeof APPV !== "undefined" ? APPV : ""), taps: b.taps, views: b.views};
