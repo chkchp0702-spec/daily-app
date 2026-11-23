@@ -1589,6 +1589,8 @@
   function soon(){ if (!T) T = setTimeout(function(){ T = null; try { fab(); } catch(x) {} try { rowBtns(); } catch(x) {} }, 300); }
   try { new MutationObserver(soon).observe(document.body, {childList: true, subtree: true}); } catch(x) {}
   window.addEventListener("hashchange", soon);
-  window.__onepage = {sendKr: sendKr, _safeDraw: function(C, nm){ return safeDraw(C, nm); }, _tainted: function(c){ return tainted(c); }, ready: readySheet, screens: SCREENS, dom: domScreen, sendChooser: sendChooser, go: go, draw: draw, chooser: chooser, _mkStock: mkStock, _mkMyEls: mkMyEls, _mkPin: mkPin, _goMany: goMany, _mkProduct: mkProduct, _mkPort: mkPort, _mkMarket: mkMarket};
+  window.__onepage = {sendKr: sendKr, _safeDraw: function(C, nm){ return safeDraw(C, nm); }, _tainted: function(c){ return tainted(c); }, ready: readySheet,
+    /* 📨 11/23 A11/23-1 한 장 화면 미리보기(ux1123.js)가 받는 분·보내기 길을 그대로 쓰게 — 저장 원칙(보낸 뒤 비움 · 최근 8명 칩)은 여기 것 그대로 */
+    _client: function(v){ if (v !== undefined) CLIENT = String(v || "").trim().slice(0, 20); return CLIENT; }, _cliRecent: cliRecent, _cliDone: cliDone, _share: share, _pbname: function(){ return ls("pbname") || ""; }, screens: SCREENS, dom: domScreen, sendChooser: sendChooser, go: go, draw: draw, chooser: chooser, _mkStock: mkStock, _mkMyEls: mkMyEls, _mkPin: mkPin, _goMany: goMany, _mkProduct: mkProduct, _mkPort: mkPort, _mkMarket: mkMarket};
   soon();
 })();

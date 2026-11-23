@@ -1662,7 +1662,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261120b";
+var APPV = "20261123a";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1737,13 +1737,13 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <!-- 📦JS -->
 <!-- 📦 JS 묶음 (tools/bundle.py) — 아래 📦list 주석 안 목록 순서대로 합쳐 약 320KB 씩 나눈 조각들. 새 .js 는 목록에 줄을 넣고 python3 tools/bundle.py (push 때 Actions 가 자동으로도 돌림) -->
 <script defer src="app.b01.js?v=16d3a2c6ce"></script>
-<script defer src="app.b02.js?v=129026e146"></script>
+<script defer src="app.b02.js?v=5a1d6b7fb7"></script>
 <script defer src="app.b03.js?v=529cd18841"></script>
 <script defer src="app.b04.js?v=0819bef3d7"></script>
 <script defer src="app.b05.js?v=96dbf7be3b"></script>
 <script defer src="app.b06.js?v=2f83074ae8"></script>
 <script defer src="app.b07.js?v=426e6c165c"></script>
-<script defer src="app.b08.js?v=b431928940"></script>
+<script defer src="app.b08.js?v=246050ef87"></script>
 <!--📦list
 <script defer src="views.js?v=36"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1762,7 +1762,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="usage.js?v=4"></script>   <!· 📈 10/28 사용 현황(익명) ·>
 <script defer src="plus.js?v=5"></script>
 <script defer src="cpin.js?v=1"></script>   <!· 📌 10/28 내 고객 상품 ·>
-<script defer src="onepage.js?v=36"></script>   <!· 📨 10/28 고객에게 보내기 한 장 ·>
+<script defer src="onepage.js?v=37"></script>   <!· 📨 10/28 고객에게 보내기 한 장 ·>
 <script defer src="pbcard.js?v=6"></script>   <!· 👔 10/28 PB 한 장 카드(장중 매시간) ·>
 <script defer src="plus2.js?v=3"></script>
 <script defer src="plus3.js?v=22"></script>
@@ -1835,6 +1835,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="tax.js?v=7"></script>   <!· 🧾 11/16 세무계산기 (연구실 › 세무계산기 · 금융소득·건보료 통합 경보기 + 연금·퇴직·해외주식·ISA · 세법 숫자는 tax.js LAW 한 곳) ·>
 <script defer src="ux1118.js?v=2"></script>   <!· 🧊 11/18 냉정 분석 6차 — 🆕 새로 생긴 것 · 📌 내 바로가기 · 🗺 섹터 지도 미리보기 · 제안서 완성본 먼저·지난번 그대로 · 🧾 절세 한 장 · 💼 성적 접기 ·>
 <script defer src="ux1119.js?v=1"></script>   <!· 🌅 11/19 아침 시황 업그레이드 — 넘겨 보는 카드 5장(오늘·시황 맨 위) · 포트 진단에 오늘 리포트 처방 ·>
+<script defer src="ux1123.js?v=1"></script>   <!· 📨 11/23 A11/23-1 한 장 화면 = 오늘 실제로 나갈 그림 먼저 + 보내기 하나 · 홈 자세히 보기 안 같은 결론 상자 숨김 ·>
 <script defer src="stab.js?v=2"></script>   <!· 🛡 11/18 안정도 — 화면 그리기 보호 · 끝없는 「불러오는 중」 막기 (맨 끝에 둘 것) ·>
 📦list-->
 <!-- 📦/JS -->
