@@ -27,7 +27,11 @@
   // 🩹 11/18 글자를 UTF-16 길이로 자르면 이모지가 반쪽만 남을 수 있음 → 끝의 짝 없는 글자를 지움 (usage.py 가 이것 때문에 11/17 16시부터 멈췄음)
   function add(kind, label){ if (!label) return; var b = bag(), m = kind === "v" ? b.views : b.taps; label = String(label).replace(/\s+/g, " ").trim().slice(0, kind === "v" ? 14 : 28).replace(/[\ud800-\udbff]$/, ""); if (!label) return; m[label] = (m[label] || 0) + 1; b.n++; put(b); }
   var lastView = "";
-  function view(){ var c = (typeof cur !== "undefined" && cur) || ""; if (!c || c === lastView) return; lastView = c; add("v", NAMES[c] || c); }
+  function view(){ var c = (typeof cur !== "undefined" && cur) || ""; if (!c || c === lastView) return; lastView = c; add("v", NAMES[c] || c); try { if (window.__chGA) __chGA("v", NAMES[c] || c, c); } catch(x) {} }   /* 📊 11/23 GA(ga.js) — 같은 화면 이름 */
+  // 🔒 11/23 단추 글자 「안에」 고객 이름이 섞인 경우(예 📨 한 장 「📨 홍길동 고객님께 보내기」)도 이름을 ○○ 로 바꿔서만 셈 — 앱 집계(ntfy)·GA 둘 다
+  function names(){ try { var a = JSON.parse(localStorage.getItem("op_clients") || "[]") || [], h = JSON.parse(localStorage.getItem("pp_hist") || "[]") || [];
+      return a.concat(h.map(function(o){ return o && o.cust; })).concat([localStorage.getItem("pbname")]).filter(function(n){ return typeof n === "string" && n.trim().length >= 2; }).map(function(n){ return n.trim(); }); } catch(z){ return []; } }
+  function scrub(x){ var L = names().sort(function(p, q){ return q.length - p.length; }); for (var i = 0; i < L.length; i++) x = x.split(L[i]).join("○○"); return x; }
   function isName(x){ if (!x || x.length > 24) return false; try { var a = JSON.parse(localStorage.getItem("op_clients") || "[]") || []; var h = JSON.parse(localStorage.getItem("pp_hist") || "[]") || [];
       var L = a.concat(h.map(function(o){ return o && o.cust; })).concat([localStorage.getItem("pbname")]).filter(function(n){ return typeof n === "string" && n; });
       for (var i = 0; i < L.length; i++) if (x === L[i] || x === L[i] + "님" || x === L[i] + " 고객님") return true; } catch(z) {} return false; }
@@ -36,6 +40,7 @@
     var g = t.closest("#bnav button"); if (g) return "아래탭 · " + ((g.children[1] && g.children[1].textContent) || g.textContent).trim();
     if (t.closest("#gdbtn,.gd-b,.gd-i")) return "조이 설명";
     if (t.closest("#opbtn,#h2clb")) return "📨 보내기";
+    if (t.closest("#x23go")) return "한 장 · 📨 완성본 보내기";   // 🔒 11/23 이 단추 글자엔 방금 친(아직 저장 안 된) 받는 분 이름이 들어가므로 이름을 고정
     var x18 = t.closest("[data-sc18],[data-nw18],[data-pp18h],[data-pp18n],[data-pp18s],[data-pp18o],#tx18,#pf18,.sec18");   // 🧊 11/18 6차 — 새 단추는 이름을 고정(쓰이는지 재려고)
     if (x18) return x18.dataset.sc18 ? "📌 바로가기 · " + x18.dataset.sc18 : x18.dataset.nw18 ? "🆕 새로 생긴 것 · " + x18.dataset.nw18 : x18.dataset.pp18h != null ? "제안서 · 🔁 지난번 그대로" : x18.dataset.pp18n != null ? "제안서 · 🔁 이름만 바꿔" : (x18.dataset.pp18s != null || x18.dataset.pp18o != null) ? "제안서 · 👀 완성본 먼저" : x18.id === "tx18" ? "세무 · 📨 절세 한 장" : x18.id === "pf18" ? "포트 · 📊 성적 펼치기" : "오늘 · 🗺 섹터 지도 타일";
     if (t.closest("#gsbtn")) return "🔍 검색"; if (t.closest("#wlbtn")) return "⭐ 관심종목"; if (t.closest("#uibtn")) return "⚙️ 설정";
@@ -47,12 +52,12 @@
     var gt = t.closest("[data-goto]"); if (gt) return "→ " + (NAMES[String(gt.getAttribute("data-goto")).split("~")[0]] || gt.getAttribute("data-goto"));
     var bt = t.closest("button,summary,.fold,a,[role=button]"); if (!bt || bt.closest("#gdq,#wowob,#usgx")) return null;
     // 🔒 11/18 고객 이름 칩(최근 받는 분)을 누르면 단추 글자 = 고객 이름이 그대로 집계에 올라가던 것을 막음 — 이 휴대폰에 저장된 이름과 같은 글자의 단추는 세지 않음
-    if (bt.closest("[data-cl],[data-dvcl],[data-tx18c],.opc-rc,.tx18-rc,.pp18-r") || isName((bt.innerText || bt.textContent || "").replace(/\s+/g, " ").trim())) return null;
-    var tx = (bt.innerText || bt.textContent || "").replace(/[\d,.%+−\-]+/g, "#").replace(/\s+/g, " ").trim();   // 숫자는 # 로(값 말고 단추 이름만)
+    if (bt.closest("[data-cl],[data-dvcl],[data-tx18c],[data-x23cl],.opc-rc,.tx18-rc,.pp18-r,.x23-rc") || isName((bt.innerText || bt.textContent || "").replace(/\s+/g, " ").trim())) return null;
+    var tx = scrub(bt.innerText || bt.textContent || "").replace(/[\d,.%+−\-]+/g, "#").replace(/\s+/g, " ").trim();   // 숫자는 # 로(값 말고 단추 이름만)
     if (!tx || tx.length < 2) return null;
     var c = (typeof cur !== "undefined" && cur) || ""; return (NAMES[c] || c) + " · " + tx.slice(0, 20).replace(/[\ud800-\udbff]$/, "");
   }
-  document.addEventListener("click", function(ev){ try { var t = ev.target; if (!t || !t.closest) return; add("t", labelOf(t)); } catch(x) {} }, true);
+  document.addEventListener("click", function(ev){ try { var t = ev.target; if (!t || !t.closest) return; var l = labelOf(t); add("t", l); if (l && window.__chGA) __chGA("t", l); } catch(x) {} }, true);   /* 📊 11/23 GA 도 같은 단추 이름(고객 이름·숫자·종목 이름 걸러진 것)만 */
   function flush(){
     var b = bag(); if (!b.n) return;
     var body = {k: "tap", d: dev(), day: b.day, v: (typeof APPV !== "undefined" ? APPV : ""), taps: b.taps, views: b.views};
