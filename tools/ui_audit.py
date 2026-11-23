@@ -44,6 +44,10 @@ async def main():
                 except Exception as ex:
                     continue
                 await pg.wait_for_timeout(700)
+                # 🩹 11/23 아래에서 올라오는 창(#sheet)이 텅 빈 채 열리면 오류로 (사용자 「섹터 로테이션 지도」 빈 창 — 숨김 표시가 붙은 채 옮겨짐)
+                shh=await pg.evaluate("(()=>{var s=document.getElementById('sheet'); if(!s) return null; var b=s.querySelector('.sh-body'); return b?Math.round(b.getBoundingClientRect().height):0})()")
+                if shh is not None and shh<60:
+                    errs.append("빈 창: "+str(info[1])+" (내용 높이 "+str(shh)+"px)")
                 h1=await pg.evaluate("location.hash")
                 if jumpby:
                     await pg.goto("http://app/index.html#"+tab); await pg.wait_for_timeout(2500); await pg.evaluate(JS_LIST, SEL); continue

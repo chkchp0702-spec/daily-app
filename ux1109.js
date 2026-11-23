@@ -186,7 +186,7 @@
   var R = "html[data-ez=easy]", st = document.createElement("style");
   st.textContent =
     R + " #wlbtn," + R + " #opbtn," + R + " #uibtn," + R + " #stamp{display:none!important}" +
-    ".ez-cap-hid{display:none!important}" +
+    "#main .ez-cap-hid{display:none!important}" +
     "#ezcapb{display:block;width:100%;font:inherit;font-size:15px;font-weight:800;color:var(--text);background:var(--panel);border:1px dashed var(--line);border-radius:16px;padding:12px;margin:4px 0 14px;cursor:pointer}#ezcapb small{display:block;font-weight:500;font-size:12.5px!important;color:var(--sub);margin-top:2px}" +
     ".ez-hon{margin:6px 0 8px;padding:9px 11px;border-radius:12px;font-size:13.5px;line-height:1.45}.ez-hon.bad{background:rgba(49,130,246,.09)}.ez-hon.ok{background:rgba(240,68,82,.08)}" +
     ".ez-hon b{display:block;font-size:14.5px}.ez-hon span{display:block;color:var(--sub);word-break:keep-all}.ez-hon-go{margin-top:4px;font:inherit;font-size:13px;font-weight:700;color:#3182f6;background:none;border:0;padding:0;cursor:pointer}" +

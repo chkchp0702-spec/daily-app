@@ -1663,7 +1663,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261123f";
+var APPV = "20261123g";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1740,10 +1740,10 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="app.b01.js?v=a2fc5f6019"></script>
 <script defer src="app.b02.js?v=4291d873ca"></script>
 <script defer src="app.b03.js?v=529cd18841"></script>
-<script defer src="app.b04.js?v=abd7509553"></script>
+<script defer src="app.b04.js?v=5214600d96"></script>
 <script defer src="app.b05.js?v=96dbf7be3b"></script>
 <script defer src="app.b06.js?v=2f83074ae8"></script>
-<script defer src="app.b07.js?v=426e6c165c"></script>
+<script defer src="app.b07.js?v=ee1fd72a56"></script>
 <script defer src="app.b08.js?v=246050ef87"></script>
 <!--📦list
 <script defer src="views.js?v=37"></script>
@@ -1777,7 +1777,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="feed.js?v=11"></script>
 <script defer src="push.js?v=6"></script>
 <script defer src="port.js?v=61"></script>
-<script defer src="simple.js?v=20"></script>
+<script defer src="simple.js?v=21"></script>
 <script defer src="pdfx.js?v=9"></script>
 <script defer src="honest.js?v=1"></script>
 <script defer src="up10.js?v=30"></script>
@@ -1820,7 +1820,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="ux1105b.js?v=1"></script>   <!· 📐📋 11/05 A11/5-1 수익률 지도 · A11/5-3 받은 글 → 답장 한 장 ·>
 <script defer src="bond_outlook.js?v=1"></script>   <!· 📄 11/05 채권 전망 보고서 (국채·미국채·브라질 · 한 장 + PDF) ·>
 <script defer src="ux1105c.js?v=16"></script>   <!· 🔰 11/05 쉬운 화면 13가지 (끄기: localStorage ezmode=pro · 주소 ?ez=0) ·>
-<script defer src="ux1109.js?v=1"></script>   <!· 🧊 11/09 냉정 재점검 17 — 뭐 살까 순서·정직 한 줄·카드 5개·머리 아이콘·전문어 밑줄 ·>
+<script defer src="ux1109.js?v=2"></script>   <!· 🧊 11/09 냉정 재점검 17 — 뭐 살까 순서·정직 한 줄·카드 5개·머리 아이콘·전문어 밑줄 ·>
 <script defer src="ux1109b.js?v=3"></script>   <!· 🌱 11/09 A11/9-1 바닥 신호 4개의 과거 성적표 (계기판 체크리스트) ·>
 <script defer src="ux1110.js?v=1"></script>   <!· 📨 11/10 A11/10-1 이번 하락장 반등 날 기록 (반등 날에만) ·>
 <script defer src="ux1110b.js?v=6x"></script>   <!· 🫧 11/10 버블 경보판 (전병서 11/11 경보표 · 계기판 아래) · 🕰 11/11 버블 시계 ·>

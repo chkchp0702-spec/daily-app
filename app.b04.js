@@ -1,6 +1,6 @@
 /* 📦 app.b04.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 4/8 (push.js … nav2.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(4,28,["push.js", "port.js", "simple.js", "pdfx.js", "honest.js", "up10.js", "nav2.js"],[4, 164, 1327, 1577, 1778, 1843, 2391]);
+__bs(4,28,["push.js", "port.js", "simple.js", "pdfx.js", "honest.js", "up10.js", "nav2.js"],[4, 164, 1327, 1582, 1783, 1848, 2396]);
 /* ======== push.js ======== */
 /* 🔔 알림 (10/9 단순화) — 이 앱을 설치한 휴대폰이 「알림 받기」만 켜고 끄면 끝.
    켜면: 알림 허락 → 웹 푸시 구독 → 구독 정보를 휴대폰에서 암호화(RSA 공개키)해서 보냄 → 서버(stock-screener 저장소의 push-relay, 6시간 이어달리기)가 신호마다 푸시.
@@ -1515,7 +1515,11 @@ __bk(29);
     sh.querySelector("b").textContent = t;
     document.body.appendChild(sh); document.body.classList.add("sheet-open");
     c.classList.remove("xs-hid"); sh.querySelector(".sh-body").appendChild(c);
-    OPEN = {c: c, ph: ph};
+    // 🩹 11/23 사용자 화면 「섹터 로테이션 지도·섹터 흐름 되감기」 창이 텅 빔 — 쉬운 화면 「카드 5개만」(ux1109)이 붙인 ez-cap-hid(display:none)가 남은 채 창으로 옮겨짐
+    //    → 창에 열 땐 숨김 표시를 모두 떼고, 그래도 안 보이면 강제로 보이게 (닫으면 원래대로)
+    var capHid = c.classList.contains("ez-cap-hid"); c.classList.remove("ez-cap-hid");
+    var forced = false; try { if (getComputedStyle(c).display === "none"){ c.style.setProperty("display", "block", "important"); forced = true; } } catch(e) {}
+    OPEN = {c: c, ph: ph, capHid: capHid, forced: forced};
     try { history.pushState({t: "xs", d: navD() + 1}, "", location.pathname + "#" + cur); } catch(e) {}
     if (window.updBack) updBack();
   }
@@ -1523,6 +1527,7 @@ __bk(29);
     if (!OPEN) return;
     var o = OPEN; OPEN = null;
     if (o.ph.parentNode){ o.ph.parentNode.insertBefore(o.c, o.ph); o.ph.remove(); }
+    if (o.forced) o.c.style.removeProperty("display");
     o.c.classList.add("xs-hid");
   }
   // 기존 시트 닫기에 "카드 제자리로" 끼워 넣기

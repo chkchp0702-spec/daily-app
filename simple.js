@@ -188,7 +188,11 @@
     sh.querySelector("b").textContent = t;
     document.body.appendChild(sh); document.body.classList.add("sheet-open");
     c.classList.remove("xs-hid"); sh.querySelector(".sh-body").appendChild(c);
-    OPEN = {c: c, ph: ph};
+    // 🩹 11/23 사용자 화면 「섹터 로테이션 지도·섹터 흐름 되감기」 창이 텅 빔 — 쉬운 화면 「카드 5개만」(ux1109)이 붙인 ez-cap-hid(display:none)가 남은 채 창으로 옮겨짐
+    //    → 창에 열 땐 숨김 표시를 모두 떼고, 그래도 안 보이면 강제로 보이게 (닫으면 원래대로)
+    var capHid = c.classList.contains("ez-cap-hid"); c.classList.remove("ez-cap-hid");
+    var forced = false; try { if (getComputedStyle(c).display === "none"){ c.style.setProperty("display", "block", "important"); forced = true; } } catch(e) {}
+    OPEN = {c: c, ph: ph, capHid: capHid, forced: forced};
     try { history.pushState({t: "xs", d: navD() + 1}, "", location.pathname + "#" + cur); } catch(e) {}
     if (window.updBack) updBack();
   }
@@ -196,6 +200,7 @@
     if (!OPEN) return;
     var o = OPEN; OPEN = null;
     if (o.ph.parentNode){ o.ph.parentNode.insertBefore(o.c, o.ph); o.ph.remove(); }
+    if (o.forced) o.c.style.removeProperty("display");
     o.c.classList.add("xs-hid");
   }
   // 기존 시트 닫기에 "카드 제자리로" 끼워 넣기
