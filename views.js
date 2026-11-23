@@ -494,9 +494,9 @@
     el.innerHTML = '<div id="tlog"></div><div id="sbody"><div class="loading">불러오는 중…</div></div>';
     themeLog($("tlog"), it.id.slice(0, 10));
     var jobs = [
-      has("briefing.txt") ? getText(file("sector", it.id, "briefing.txt")) : Promise.resolve(""),
-      has("top.json") ? getJSON(file("sector", it.id, "top.json")) : Promise.resolve(null),
-      has("returns.csv") ? getText(file("sector", it.id, "returns.csv")) : Promise.resolve("")
+      has("briefing.txt") ? getText(file("sector", it.id, "briefing.txt")).catch(function(){ return ""; }) : Promise.resolve(""),   // 🩹 11/23 하나 못 받아도 나머지는 그림(전엔 「불러오는 중…」에서 멈춤)
+      has("top.json") ? getJSON(file("sector", it.id, "top.json")).catch(function(){ return null; }) : Promise.resolve(null),
+      has("returns.csv") ? getText(file("sector", it.id, "returns.csv")).catch(function(){ return ""; }) : Promise.resolve("")
     ];
     Promise.all(jobs).then(function(r){
       var t = r[0], top = r[1], ret = r[2], h = "", b = t ? parseBrief(t) : null;
@@ -530,7 +530,8 @@
           '</tbody></table></div>');
       }
       if (t) h += '<button class="fold" id="brfb">📝 원문 브리핑 펼치기</button><div id="brfbox"></div>';
-      $("sbody").innerHTML = h || '<div class="empty">자료 없음</div>';
+      if (!$("sbody")) return;
+      $("sbody").innerHTML = h || '<div class="empty">브리핑을 잠깐 못 불러왔어요 — 새로고침하면 다시 받아요.</div>';
       if ($("brfb")) $("brfb").onclick = function(){ $("brfb").remove();
         var safe = e(t.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")).replace(/&lt;(\/?)(b|i)&gt;/g, "<$1$2>");
         $("brfbox").innerHTML = card("원문 브리핑", '<div class="txt">' + safe.trim() + '</div>'); };

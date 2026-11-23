@@ -1,6 +1,6 @@
 /* 📦 app.b01.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 1/8 (views.js … mine.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flow.js", "divc.js", "verdict.js", "mine.js"],[4, 569, 885, 1303, 1355, 1703, 1891, 2509, 2584]);
+__bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flow.js", "divc.js", "verdict.js", "mine.js"],[4, 570, 886, 1318, 1370, 1718, 1906, 2524, 2599]);
 /* ======== views.js ======== */
 /* CH Investing — 탭별 화면 (그림·차트 우선, PDF는 아래 접어두기) */
 (function(){
@@ -498,9 +498,9 @@ __bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flo
     el.innerHTML = '<div id="tlog"></div><div id="sbody"><div class="loading">불러오는 중…</div></div>';
     themeLog($("tlog"), it.id.slice(0, 10));
     var jobs = [
-      has("briefing.txt") ? getText(file("sector", it.id, "briefing.txt")) : Promise.resolve(""),
-      has("top.json") ? getJSON(file("sector", it.id, "top.json")) : Promise.resolve(null),
-      has("returns.csv") ? getText(file("sector", it.id, "returns.csv")) : Promise.resolve("")
+      has("briefing.txt") ? getText(file("sector", it.id, "briefing.txt")).catch(function(){ return ""; }) : Promise.resolve(""),   // 🩹 11/23 하나 못 받아도 나머지는 그림(전엔 「불러오는 중…」에서 멈춤)
+      has("top.json") ? getJSON(file("sector", it.id, "top.json")).catch(function(){ return null; }) : Promise.resolve(null),
+      has("returns.csv") ? getText(file("sector", it.id, "returns.csv")).catch(function(){ return ""; }) : Promise.resolve("")
     ];
     Promise.all(jobs).then(function(r){
       var t = r[0], top = r[1], ret = r[2], h = "", b = t ? parseBrief(t) : null;
@@ -534,7 +534,8 @@ __bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flo
           '</tbody></table></div>');
       }
       if (t) h += '<button class="fold" id="brfb">📝 원문 브리핑 펼치기</button><div id="brfbox"></div>';
-      $("sbody").innerHTML = h || '<div class="empty">자료 없음</div>';
+      if (!$("sbody")) return;
+      $("sbody").innerHTML = h || '<div class="empty">브리핑을 잠깐 못 불러왔어요 — 새로고침하면 다시 받아요.</div>';
       if ($("brfb")) $("brfb").onclick = function(){ $("brfb").remove();
         var safe = e(t.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")).replace(/&lt;(\/?)(b|i)&gt;/g, "<$1$2>");
         $("brfbox").innerHTML = card("원문 브리핑", '<div class="txt">' + safe.trim() + '</div>'); };
@@ -1262,7 +1263,14 @@ __bk(1);
   RENDER.sector = function(it, el){
     if (it.files.indexOf("compass.json") < 0){ OLD(it, el); return; }
     el.innerHTML = '<div id="cpbox"><div class="loading">나침반 불러오는 중…</div></div><div id="cpold"></div>';
-    getJSON(file("sector", it.id, "compass.json")).then(function(C){
+    // 🩹 11/23 사용자 「섹터 보기에서 자꾸 화면이 아무것도 안 나와」: compass.json(860KB)은 장중 10분마다 새로 올라가
+    // 그 사이(배포 중 404·끊김·덜 받은 글)엔 「못 불러왔어요」 한 줄만 남던 것 → 2.5초 뒤 한 번 더 · 그래도 안 되면 바로 전 날짜 나침반을 보여 주고 「🔄 다시 받기」
+    var cpGet = function(id){ return getJSON(file("sector", id, "compass.json")); };
+    var cpPrev = (M.cats.sector || []).filter(function(x){ return x.id < it.id && x.files.indexOf("compass.json") >= 0; })[0];
+    var cpNote = "";
+    cpGet(it.id).catch(function(){ return new Promise(function(r){ setTimeout(r, 2500); }).then(function(){ return cpGet(it.id); }); })
+      .catch(function(err){ if (!cpPrev) throw err; cpNote = cpPrev.id.slice(5, 10).replace("-", "/"); return cpGet(cpPrev.id); })
+      .then(function(C){
       if (!$("cpbox")) return;   // 🛡 11/19 받는 사이 다른 탭으로 넘어가면 칸이 없음 → null 에 innerHTML 오류(휴대폰 실사용 오류)
       var ks = ORDER.filter(function(k){ return C.markets[k]; });
       if (!ks.length){ $("cpbox").innerHTML = ""; return; }
@@ -1275,7 +1283,14 @@ __bk(1);
       if (window.CPLIVE) try { CPLIVE($("cplive"), C); } catch(err) { console.error(err); }
       if (window.CPREG) try { CPREG($("cpreg")); } catch(err) { console.error(err); }
       if (window.CPTOP) try { $("cptop").innerHTML = CPTOP(C); } catch(err) { console.error(err); }
-    }).catch(function(){ if ($("cpbox")) $("cpbox").innerHTML = '<div class="empty">나침반 자료를 못 불러왔어요.</div>'; });
+      if (cpNote) cpRetryBar('⚠️ 오늘 자료를 잠깐 못 받아 <b>' + cpNote + '</b> 나침반을 보여 줘요', true);
+    }).catch(function(err){ console.error(err); cpRetryBar('나침반 자료를 잠깐 못 불러왔어요 (인터넷이 느리거나 자료를 올리는 중)', false); });
+    function cpRetryBar(msg, top){
+      var b = $("cpbox"); if (!b) return;
+      var h = '<div class="empty cp-retry" style="padding:14px 12px">' + msg + '<br><button type="button" class="btn" data-cpretry="1" style="margin-top:8px">🔄 다시 받기</button></div>';
+      if (top) b.insertAdjacentHTML("afterbegin", h); else b.innerHTML = h;
+      var x = b.querySelector("[data-cpretry]"); if (x) x.onclick = function(){ if (window.getJSONdrop) getJSONdrop(); RENDER.sector(it, el); };
+    }
     // 모닝 섹터 브리핑: 그날 것이 없으면(휴장·주말) 가장 최근 브리핑을 이어서 보여주기
     var rest = it.files.filter(function(f){ return f !== "compass.json"; });
     var hasBrief = rest.indexOf("briefing.txt") >= 0 || rest.indexOf("top.json") >= 0;

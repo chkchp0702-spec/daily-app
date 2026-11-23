@@ -377,7 +377,14 @@
   RENDER.sector = function(it, el){
     if (it.files.indexOf("compass.json") < 0){ OLD(it, el); return; }
     el.innerHTML = '<div id="cpbox"><div class="loading">나침반 불러오는 중…</div></div><div id="cpold"></div>';
-    getJSON(file("sector", it.id, "compass.json")).then(function(C){
+    // 🩹 11/23 사용자 「섹터 보기에서 자꾸 화면이 아무것도 안 나와」: compass.json(860KB)은 장중 10분마다 새로 올라가
+    // 그 사이(배포 중 404·끊김·덜 받은 글)엔 「못 불러왔어요」 한 줄만 남던 것 → 2.5초 뒤 한 번 더 · 그래도 안 되면 바로 전 날짜 나침반을 보여 주고 「🔄 다시 받기」
+    var cpGet = function(id){ return getJSON(file("sector", id, "compass.json")); };
+    var cpPrev = (M.cats.sector || []).filter(function(x){ return x.id < it.id && x.files.indexOf("compass.json") >= 0; })[0];
+    var cpNote = "";
+    cpGet(it.id).catch(function(){ return new Promise(function(r){ setTimeout(r, 2500); }).then(function(){ return cpGet(it.id); }); })
+      .catch(function(err){ if (!cpPrev) throw err; cpNote = cpPrev.id.slice(5, 10).replace("-", "/"); return cpGet(cpPrev.id); })
+      .then(function(C){
       if (!$("cpbox")) return;   // 🛡 11/19 받는 사이 다른 탭으로 넘어가면 칸이 없음 → null 에 innerHTML 오류(휴대폰 실사용 오류)
       var ks = ORDER.filter(function(k){ return C.markets[k]; });
       if (!ks.length){ $("cpbox").innerHTML = ""; return; }
@@ -390,7 +397,14 @@
       if (window.CPLIVE) try { CPLIVE($("cplive"), C); } catch(err) { console.error(err); }
       if (window.CPREG) try { CPREG($("cpreg")); } catch(err) { console.error(err); }
       if (window.CPTOP) try { $("cptop").innerHTML = CPTOP(C); } catch(err) { console.error(err); }
-    }).catch(function(){ if ($("cpbox")) $("cpbox").innerHTML = '<div class="empty">나침반 자료를 못 불러왔어요.</div>'; });
+      if (cpNote) cpRetryBar('⚠️ 오늘 자료를 잠깐 못 받아 <b>' + cpNote + '</b> 나침반을 보여 줘요', true);
+    }).catch(function(err){ console.error(err); cpRetryBar('나침반 자료를 잠깐 못 불러왔어요 (인터넷이 느리거나 자료를 올리는 중)', false); });
+    function cpRetryBar(msg, top){
+      var b = $("cpbox"); if (!b) return;
+      var h = '<div class="empty cp-retry" style="padding:14px 12px">' + msg + '<br><button type="button" class="btn" data-cpretry="1" style="margin-top:8px">🔄 다시 받기</button></div>';
+      if (top) b.insertAdjacentHTML("afterbegin", h); else b.innerHTML = h;
+      var x = b.querySelector("[data-cpretry]"); if (x) x.onclick = function(){ if (window.getJSONdrop) getJSONdrop(); RENDER.sector(it, el); };
+    }
     // 모닝 섹터 브리핑: 그날 것이 없으면(휴장·주말) 가장 최근 브리핑을 이어서 보여주기
     var rest = it.files.filter(function(f){ return f !== "compass.json"; });
     var hasBrief = rest.indexOf("briefing.txt") >= 0 || rest.indexOf("top.json") >= 0;
