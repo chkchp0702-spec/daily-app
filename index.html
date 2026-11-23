@@ -1662,7 +1662,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261123b";
+var APPV = "20261123c";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1739,7 +1739,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="app.b01.js?v=16d3a2c6ce"></script>
 <script defer src="app.b02.js?v=5a1d6b7fb7"></script>
 <script defer src="app.b03.js?v=529cd18841"></script>
-<script defer src="app.b04.js?v=0819bef3d7"></script>
+<script defer src="app.b04.js?v=abd7509553"></script>
 <script defer src="app.b05.js?v=96dbf7be3b"></script>
 <script defer src="app.b06.js?v=2f83074ae8"></script>
 <script defer src="app.b07.js?v=426e6c165c"></script>
@@ -1775,7 +1775,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="brain.js?v=9"></script>
 <script defer src="feed.js?v=11"></script>
 <script defer src="push.js?v=6"></script>
-<script defer src="port.js?v=60"></script>
+<script defer src="port.js?v=61"></script>
 <script defer src="simple.js?v=20"></script>
 <script defer src="pdfx.js?v=9"></script>
 <script defer src="honest.js?v=1"></script>

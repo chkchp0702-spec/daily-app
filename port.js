@@ -647,11 +647,11 @@
         [].forEach.call(pres.querySelectorAll("[data-padd]"), function(y){ y.onclick = function(){
           var x = PCAT.items.filter(function(z){ return z.id === y.dataset.padd; })[0]; if (!x) return;
           var dd = (document.getElementById("myd0") || {}).value || P.start; if (dd < P.dates[0]) dd = P.dates[0];
-          S.my.prod = (S.my.prod || []).concat([{id: x.id, g: x.g, name: x.name, sub: x.sub, y: x.y, per: x.per, asof: x.asof, cur: x.cur, w: 10, d0: dd}]); redraw(); }; });
+          S.my.prod = (S.my.prod || []).concat([{id: x.id, g: x.g, name: x.name, sub: x.sub, y: x.y, per: x.per, asof: x.asof, cur: x.cur, w: 10, d0: dd}]); redraw('[data-padd="' + String(x.id).replace(/"/g, '\\"') + '"]'); }; });   // 🔧 11/23: 담은 상품 줄이 위에 늘어도 누른 단추 그 자리(ui_audit port 담기 390→−782px 11개)
       };
       pq.oninput = pshow; pshow(); if (!PCAT) pcat().then(pshow);
     }
-    [].forEach.call(b.querySelectorAll("[data-mypg]"), function(x){ x.onclick = function(){ S.myPg = x.dataset.mypg; redraw(); }; });
+    [].forEach.call(b.querySelectorAll("[data-mypg]"), function(x){ x.onclick = function(){ S.myPg = x.dataset.mypg; redraw('[data-mypg="' + x.dataset.mypg + '"]'); }; });
     // 💾 저장 · 다른 이름 · 이름 바꾸기 · 삭제 · 불러오기 · 새 포트
     var ask = function(msg, def){ var n = window.prompt(msg, def || ""); n = (n || "").trim().slice(0, 20); return n || null; };
     var put = function(n){ S.mySaved = (S.mySaved || []).filter(function(x){ return x.nm !== n; }); S.mySaved.push({nm: n, cfg: myCfg()}); S.my.nm = n; };
