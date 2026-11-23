@@ -1,6 +1,62 @@
 {
  "items": [
   {
+   "title": "젠슨 황 「이사회가 요청하면 엔비디아 CEO 복귀 의향」(WSJ 보도)",
+   "url": "https://www.newsquawk.com/headlines/former-nvidia-nvda-ceo-huang-says-he-is-willing-to-return-as-ceo-if-directors-asked-him-to-do-so-wsj-reports",
+   "press": "Newsquawk(WSJ 인용)",
+   "at": "2026-11-23 10:40",
+   "why": "엔비디아·반도체 칸 — 경영 공백 완화 재료 후보, 베선트 선회와 겹침(이사회·SEC 조사는 그대로)",
+   "summary": "황 전 CEO가 이사회 요청 시 복귀 의사를 밝힘(WSJ). 이사회는 앞서 복원 계획 없다고 밝힌 보도도 있음(pbxscience). 美 야간 거래에서 엔비디아 +5% 안팎(하나중국 텔레그램)."
+  },
+  {
+   "title": "골드만삭스 「美 증시 패닉지수 극단 수준…저가 매수 기회」",
+   "url": "https://www.hankyung.com/article/2026112334847",
+   "press": "한국경제",
+   "at": "2026-11-23 10:40",
+   "why": "🇺🇸 🔴 뼈대·가설② — 패닉 극단 = 역발상 신호지만 우리 규칙은 S&P 200일선 3일 회복 전 추격 안 함",
+   "summary": "골드만 패닉지수 극단 구간 진입, 과거엔 이후 반등이 많았다는 분석. 같은 골드만 데스크는 「포지션 아직 높다·매도 더 갈 수 있다」고도 경고(11/22)."
+  },
+  {
+   "title": "엔비디아 후폭풍 2주째 — 아시아 증시 월요일 하락 출발(AP)",
+   "url": "https://www.ajc.com/news/2026/11/stocks-decline-in-asia-as-investor-concerns-over-nvidia-fallout-extend-into-another-week/",
+   "press": "AP(AJC 게재)",
+   "at": "2026-11-23 09:40",
+   "why": "반도체 칸·🐻 코스피 0% — 美 선물 반등에도 아시아는 엔비디아 우려 이어 하락 출발, 코스피 시가 −2.77%와 같은 그림",
+   "summary": "AP: 엔비디아 사태 우려가 새 주로 이어지며 아시아 증시 하락 · 코스피 09:33 −2.78%(4,734.55)·코스닥 −1.01%(daily-app) · 세부 지수 숫자는 원문 확인"
+  },
+  {
+   "title": "베선트 「핵심은 엔비디아가 고객을 알았느냐」 — 황 개인 문제 아냐",
+   "url": "https://stocktwits.com/news-articles/markets/equity/scott-bessent-says-real-story-is-did-nvidia-know-their-client-not-jensen-huang-personal-conduct/cNbRE1ER9fk",
+   "press": "Stocktwits",
+   "at": "2026-11-23 09:40",
+   "why": "엔비디아·💬 2번 — 재무장관 초점이 리더십 교체에서 수출통제 준수(고객 확인)로 이동, 경영 공백 재료는 완화·규제 재료는 남음",
+   "summary": "베선트: 진짜 쟁점은 엔비디아가 中 고객을 알았는지 · 황 복귀 가능성 배제 안 함(FT FirstFT 11/23) · 폴리마켓 황 복귀 11→14%(하나중국)"
+  },
+  {
+   "title": "美 재무 「연준 긴축 과도하면 정책 실수」 — 금융여건 상당히 조여져",
+   "url": "https://biz.sbs.co.kr/article/20000348043",
+   "press": "SBS Biz",
+   "at": "2026-11-23 08:45",
+   "why": "가설② 12/9 FOMC 분수령 — 재무장관이 「빅스텝 반대」(11/21)에서 「과잉 긴축 = 실수」로 수위를 올림, 2019년 1월식 말 바꾸기 압력 · 💬 6번",
+   "summary": "베선트 「금융여건 상당히 긴축」 · 연준 과도 긴축 시 정책 실수 우려 · 美 선물 08시 재개 나스닥 +1.8%·S&P +1.1%(하나중국)"
+  },
+  {
+   "title": "美 재무 「엔비디아, 中 반도체 유출 의혹 답변 아직 못 받아」",
+   "url": "https://www.fnnews.com/news/202611230458045235",
+   "press": "파이낸셜뉴스",
+   "at": "2026-11-23 08:45",
+   "why": "엔비디아·반도체 칸 — 젠슨 황 복귀 가능성은 열어 두되 「수출통제 준수 여부가 핵심」 = 규제 갈래가 닫히지 않음(ideas 「겹치는 규제 조사 수」)",
+   "summary": "베선트 「엔비디아 규정 준수 여부가 핵심, 황 개인사와 별개」 · 中 판매 경위 설명 요구 · 답변 미수령"
+  },
+  {
+   "title": "중국 기술주 5개월 새 시총 2,289조원 증발 — 당국, 10개월 만에 처음으로 신용 증거금 인하(100→80%)",
+   "url": "https://en.fnnews.com/news/202611230005333769",
+   "press": "파이낸셜뉴스",
+   "at": "2026-11-23 06:45",
+   "why": "🐻 상해 33%·H주 0% 칸 — 1월 과열 억제로 올렸던 증거금을 되돌린 첫 완화, 한국 F4·대만 공매도 제한과 같은 주말 3국 동시 구제",
+   "summary": "中 기술주 5개월 시총 약 2,289조원 증발 · 상해·심천·베이징 거래소 신용 최저 증거금 100%→80%(10개월 만 첫 인하·약 4,000억 위안 유입 추정) · 창업판 시장조성자·수수료 인하 병행"
+  },
+  {
    "title": "애플, 직원 AI 도구 하루 예산 300→100달러로 축소 — 비용 긴축",
    "url": "https://macworld.com/article/3277678/apple-reportedly-slashes-employee-ai-usage-limits-amid-cost-cutting-effort.html",
    "press": "Macworld",
@@ -583,71 +639,7 @@
    "at": "2026-11-21 05:45",
    "why": "엔비디아 서버 협력사 동남아 출하 중단(닛케이)의 배경 — SOXX·대만 서버 ODM·한국 메모리 수요 칸",
    "summary": "美 AI 칩 수출 규칙이 동남아 데이터센터 수요를 막을 수 있다는 분석(11/16). 11/20 닛케이는 엔비디아 서버 공급사들이 동남아 출하를 멈췄다고 보도 — 해외 DC 세금 경고와 같은 방향."
-  },
-  {
-   "title": "美 AI 칩 규제, 동남아 데이터센터 붐 위협 — 관련주 급락",
-   "url": "https://www.thestandard.com.hk/innovation/article/348740/US-AI-chip-curbs-threaten-Southeast-Asia-data-center-boom-shares-slump",
-   "press": "The Standard(HK)",
-   "at": "2026-11-21 05:45",
-   "why": "규제 세 겹(SEC·中·동남아)이 AI 하드웨어 수요 기대를 깎는 경로 — 가설③(현금 도는 곳 vs 빚으로 짓는 곳)",
-   "summary": "동남아 DC 관련주가 규제 우려로 급락. 정확한 낙폭 수치는 미확인."
-  },
-  {
-   "title": "연준 폴슨 「점진적 추가 인상 지지」 — 더 빨리 올릴 세 가지 조건 제시",
-   "url": "https://investinglive.com/central-banks/fed-s-paulson-backs-further-gradual-rate-hikes-names-three-triggers-for-faster-action/",
-   "press": "investingLive",
-   "at": "2026-11-21 04:45",
-   "why": "12/9 FOMC 가설② — 쿡에 이어 비둘기 쪽까지 매파, 증시 급락에도 「구제」 신호 없음",
-   "summary": "폴슨 필라델피아 연은 총재, 연속 인상 검토 가능하되 「신중한 속도」. 블룸버그도 같은 날 보도. 美 10년은 AI 매도 피난에 5% 아래."
-  },
-  {
-   "title": "SEC, 엔비디아가 이익을 부풀리려 투자자를 오도했는지 조사",
-   "url": "https://www.tweaktown.com/news/114760/sec-opens-investigation-into-nvidia-over-whether-investors-were-misled-to-boost-earnings/index.html",
-   "press": "TweakTown",
-   "at": "2026-11-21 04:45",
-   "why": "엔비디아 장중 −11.5%(129$) — 규제 리스크가 회계 신뢰 문제로 번짐, 💬3·월요일 한국 반도체",
-   "summary": "SEC 민사 조사가 공시·실적 부풀리기 여부까지. 시킹알파 「회계 문제 살펴」·야후 「매출채권 810억$」. 11/21 04:32 NVDA −11.51%·SOXX −9.64%(daily-app)."
-  },
-  {
-   "title": "AI주가 S&P500을 11/5 저점 쪽으로 다시 끌어내린다",
-   "url": "https://pro.thestreet.com/market-commentary/ai-stocks-drag-the-sp-500-back-toward-the-november-5th-lows",
-   "press": "TheStreet Pro",
-   "at": "2026-11-21 03:45",
-   "why": "🔴 뼈대·S&P 조정 — 11/5 저점이 다음 지지선인지(🐻 계기판 S&P −20% 6,255 전 단계)",
-   "summary": "11/20 AI 매도로 S&P가 11/5 저점 근처로 후퇴 · 세부 숫자는 원문(유료) 미확인"
-  },
-  {
-   "title": "골드만·아폴로, 스페이스X 400억$ AI 칩 빚 조각 판매 서둘러",
-   "url": "https://www.thewealthadvisor.com/article/goldman-and-apollo-race-sell-pieces-spacexs-40-billion-ai-deal",
-   "press": "The Wealth Advisor(블룸버그 전재)",
-   "at": "2026-11-21 03:45",
-   "why": "가설① AI 차입 — 은행이 GPU 빚을 장부에서 빨리 떼어내려는지(입찰 수요)가 신용 칸 시험대",
-   "summary": "10/26 아폴로 주도 400억$ GPU 리스(테크크런치) · 11/20 인베스팅 「아폴로·골드만 440억$ 주관」 · 블룸버그 11/20 스페이스X AI 칩 채권 금리 8%↑"
-  },
-  {
-   "title": "나스닥 조정 영역 — AI·기술주에서 한발 물러서는 투자자",
-   "url": "https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-dow-futures-dip-as-investors-step-back-from-ai-and-tech-with-nasdaq-in-correction-territory-nvda-aapl-uber-soxx-in-focus/cNGlIylR94A",
-   "press": "Stocktwits",
-   "at": "2026-11-21 02:45",
-   "why": "💼 나스닥100 코어 — 나스닥 고점 −10% 조정 진입, SOXX·엔비디아 중심",
-   "summary": "나스닥 조정 영역(고점 −10%↓) · AI·기술주 회피 · SOXX·NVDA 주목(세부 수치 원문 확인)"
-  },
-  {
-   "title": "앤트로픽 후퇴에 AI 불안 확대 — 나스닥 약세 출발",
-   "url": "https://www.marketscreener.com/news/nasdaq-set-for-lower-open-as-anthropic-retreat-deepens-ai-jitters-ce785ed3db8ff525",
-   "press": "MarketScreener(로이터)",
-   "at": "2026-11-21 01:45",
-   "why": "가설③ AI 안 갈림 · 🔴 뼈대 — 앤트로픽 이틀째 하락이 AI 심리 전체를 누름",
-   "summary": "11/20 美 개장 전 나스닥 선물 약세 · 앤트로픽 이틀째 하락이 AI 거래 회복 실패로 이어짐(세부 숫자는 원문 확인)"
-  },
-  {
-   "title": "美 10년물 금리 소폭 하락",
-   "url": "https://tradingeconomics.com/united-states/government-bond-yield/news/601580",
-   "press": "Trading Economics",
-   "at": "2026-11-21 01:45",
-   "why": "💬 채권 답 — 주식 급락에 美 국채가 다시 피난처 역할을 하는지(5% 선)",
-   "summary": "美 10년 금리 하락(정확한 수치는 원문·마감 뒤 확인 — 미확인)"
   }
  ],
- "at": "2026-11-22 23:45"
+ "at": "2026-11-23 10:40"
 }
