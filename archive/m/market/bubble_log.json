@@ -610,5 +610,39 @@
 "breadth": "🟢",
 "flow": "🔴"
 }
+},
+{
+"at": "2026-11-23 14:06",
+"head": "🫧 버블 경보 🔴4 · 🟠4 · 🟢3 · 신용 경보 켜짐",
+"states": {
+"fcf": "🔴",
+"bonds": "🔴",
+"cds": "🔴",
+"credit": "🟠",
+"rate": "🟠",
+"policy": "🟠",
+"geo": "🟠",
+"buffer": "🟢",
+"recession": "🟢",
+"breadth": "🟢",
+"flow": "🔴"
+}
+},
+{
+"at": "2026-11-23 15:59",
+"head": "🫧 버블 경보 🔴4 · 🟠3 · 🟢4 · 신용 경보 켜짐",
+"states": {
+"fcf": "🔴",
+"bonds": "🔴",
+"cds": "🔴",
+"credit": "🟠",
+"rate": "🟠",
+"policy": "🟠",
+"geo": "🟢",
+"buffer": "🟢",
+"recession": "🟢",
+"breadth": "🟢",
+"flow": "🔴"
+}
 }
 ]
