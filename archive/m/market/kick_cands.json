@@ -7500,6 +7500,42 @@
 "src": "ins",
 "score": 70.6,
 "note": "기회형 내부자 3명 · 557천 달러 (10일 안 공시)"
+},
+"603129.SS|2026-11-23": {
+"code": "603129.SS",
+"name": "春风动力",
+"mkt": "CN",
+"d": "2026-11-23",
+"src": "cup",
+"score": 71.8,
+"lv": 325.32
+},
+"UFPT|2026-11-23|e": {
+"code": "UFPT",
+"name": "UFP Technologies, Inc. - Common Stock",
+"mkt": "US",
+"d": "2026-11-23",
+"src": "earn",
+"score": 67.8,
+"lv": 279.49
+},
+"VCEL|2026-11-23|e": {
+"code": "VCEL",
+"name": "Vericel Corporation - Common Stock",
+"mkt": "US",
+"d": "2026-11-23",
+"src": "earn",
+"score": 65.2,
+"lv": 46.87
+},
+"ABNB|2026-11-23|e": {
+"code": "ABNB",
+"name": "Airbnb, Inc. - Class A Common Stock",
+"mkt": "US",
+"d": "2026-11-23",
+"src": "earn",
+"score": 59.8,
+"lv": 156.5
 }
 },
 "sent": [
@@ -7519,27 +7555,5 @@
 "2026-11-05|팔기|LGND",
 "2026-11-06|팔기|PAGP"
 ],
-"whale": [
-"APP",
-"BKNG",
-"BMY",
-"COF",
-"CPNG",
-"CVS",
-"DIS",
-"GDS",
-"GPN",
-"HUM",
-"MA",
-"MCHP",
-"META",
-"NVDA",
-"ONON",
-"ORCL",
-"RIG",
-"SGI",
-"SPGI",
-"SW",
-"TSM"
-]
+"whale": []
 }
