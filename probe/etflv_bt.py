@@ -11,6 +11,12 @@ import numpy as np, pandas as pd
 import prob, prob_vol
 syms = sorted({c["ix"] for c in prob.MK.values()} | {"^GSPC", "^VIX", "EWY", "EWH", "FXI"})
 H = prob.load_hist(syms)
+import time
+for s_ in ("EWY", "EWH", "FXI"):   # yfinance 캐시 잠김(database is locked) 대비 — 빠진 것만 하나씩 다시
+    for _ in range(3):
+        if len(H.get(s_, pd.DataFrame()).get("Close", pd.Series(dtype=float)).dropna()):
+            break
+        time.sleep(3); H.update(prob.load_hist([s_]))
 for s in ("EWY", "EWH", "FXI"):
     x = H.get(s, pd.DataFrame()).get("Close")
     print("자료", s, None if x is None else (len(x.dropna()), str(x.dropna().index[0].date()), str(x.dropna().index[-1].date())), flush=True)
