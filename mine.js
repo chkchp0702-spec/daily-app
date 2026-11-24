@@ -83,11 +83,20 @@
   }
 
   /* ── #10 💬 고객 질문 (11/10 10개 → 11/11 20개 → 11/12 25개 = 기본 20 + 🔥 이슈 5) ── */
+  /* 🔧 11/24 자가 업그레이드: 고객 질문 답(qa.json)의 근거·본문에 자료 파일 이름(daily-app live_kr·live_us_pre·flow_kr·wl_live)이 그대로 보이고
+     카톡 복사에도 그대로 나가던 것 → 화면·복사 모두 한글 이름으로 (건강검진 「#home 영어 내부 이름 그대로: live_kr」) */
+  var QA_KO = [[/daily-app\s*/g, ""], [/\blive_kr\b/g, "앱 국장 실시간"], [/\blive_us_pre\b/g, "앱 미국·해외 시세"], [/\bflow_kr\b/g, "앱 수급"], [/\bwl_live\b/g, "앱 관심종목 시세"], [/\bprob\.json\b/g, "앱 확률"], [/\b([a-z]+_[a-z_]+)\.json\b/g, "앱 자료"]];
+  function qaKo(v){
+    if (typeof v === "string"){ QA_KO.forEach(function(x){ v = v.replace(x[0], x[1]); }); return v; }
+    if (Array.isArray(v)) return v.map(qaKo);
+    if (v && typeof v === "object"){ var o = {}; for (var k in v) o[k] = qaKo(v[k]); return o; }
+    return v;
+  }
   var QD = null;
   function qload(){
     if (QD) return Promise.resolve(QD);
     return Promise.all([gj(RM + "bear.json", 600000), gj(RM + "port.json", 600000), gj("archive/x/flow_kr.json", 600000), gj("archive/x/wl_live.json", 120000), gj("archive/x/live_kr.json", 120000), gj("archive/x/products.json", 1800000), gj(RM + "qa.json", 300000)])
-      .then(function(r){ QD = {B: r[0] || {}, P: r[1] || {}, F: r[2] || {}, W: r[3] || {}, L: r[4] || {}, PR: r[5] || {}, QA: r[6] || null}; setTimeout(function(){ QD = null; }, 600000); return QD; });
+      .then(function(r){ QD = {B: r[0] || {}, P: r[1] || {}, F: r[2] || {}, W: r[3] || {}, L: r[4] || {}, PR: r[5] || {}, QA: qaKo(r[6]) || null}; setTimeout(function(){ QD = null; }, 600000); return QD; });
   }
   function qa(Q){
     var M = {}; (Q.B.markets || []).forEach(function(m){ M[m.key] = m; });
