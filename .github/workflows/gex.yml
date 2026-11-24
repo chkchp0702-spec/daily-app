@@ -4,7 +4,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "33 21 * * 1-5"   # KST 화~토 06:33 — 미국 마감 뒤(close)
-    - cron: "37 17 * * 1-5"   # 뉴욕 12~13시 장중(mid)
+    - cron: "37 17 * * 1-5"   # 뉴욕 12~13시 장중
+    # 11/24: 예약이 3~5시간씩 밀려 장중 값이 한 번도 안 잡혔음 → 여러 번 걸어 두고 slot(am·pm·close)은 gex.py 가 실제 실행 시각으로 정함
+    - cron: "7 9,11,13,15,19 * * 1-5"
 permissions:
   contents: write
 concurrency:
@@ -22,4 +24,4 @@ jobs:
       - run: pip install -q yfinance pandas numpy
       - run: python gex.py
       - name: 저장
-        run: bash scripts/push.sh "gex $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/gex_hist.json
+        run: bash scripts/push.sh "gex $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/gex_hist.json archive/x/gex.json
