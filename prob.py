@@ -1099,6 +1099,13 @@ def main():
     vol = {}
     try:
         import prob_vol      # 🌊 11/18 흔들림·급락 위험 확률 + 🎯 자신 있는 날 (방향 대신 맞히기 쉬운 것 · 매 실행 걸어가기 검증)
+        for _mk, _fn in (("KR", prob_x.vkospi_daily), ("JP", prob_x.jniv_daily), ("HK", prob_x.vhsi_daily)):   # 🌊 11/24 그 나라 변동성 지수
+            try:
+                _s = _fn()
+                if _s is not None:
+                    H["cv:" + _mk] = _s
+            except Exception:
+                pass
         vol = prob_vol.run(H, MK, {mk: r["base_date"] for mk, r in res.items()})
     except Exception as e:
         import traceback; traceback.print_exc(); ERRS.append("vol: " + str(e)[:300])

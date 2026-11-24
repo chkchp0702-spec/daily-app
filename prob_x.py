@@ -422,6 +422,30 @@ def jniv_daily():
     return s
 
 
+_VH = {}
+def vhsi_daily():
+    """11/24 12시 🌊: 항셍 변동성 지수(VHSI) 일별 — CNBC ts-api .VHSI(2010-07~). 날짜 확인: 같은 날 항셍과 상관 −0.52 · 다음 날 0.00."""
+    if "s" in _VH:
+        return _VH["s"]
+    s = None
+    try:
+        import prob
+        if not prob.FAKE:
+            end = (pd.Timestamp.today() + pd.Timedelta(days=2)).strftime("%Y%m%d")
+            u = f"https://ts-api.cnbc.com/harmony/app/bars/.VHSI/1D/20100101000000/{end}000000/adjusted/EST5EDT.json"
+            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                bars = json.loads(r.read().decode("utf-8")).get("barData", {}).get("priceBars", [])
+            v = pd.Series({pd.Timestamp(x["tradeTime"][:8]): float(x["close"]) for x in bars if x.get("close")}, dtype=float).sort_index()
+            v = v[~v.index.duplicated(keep="last")]
+            v = v[v > 0]
+            if len(v) > 600:
+                s = v
+    except Exception:
+        s = None
+    _VH["s"] = s
+    return s
+
 _CN10 = {}
 def cn10y_daily():
     """11/11 16시 #101: 중국 국채 10년 금리 일별 — CNBC ts-api CN10Y-CN(2002-06~). 중국 날짜(중국 장 마감 = 미국 장 열리기 전)."""

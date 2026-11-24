@@ -210,6 +210,19 @@ GAP_TG = {"KR": {"dn2"}, "JP": {"dn2"}}
 OPT_TG = {"US": {"big1": "v9"}, "KR": {"dn5": "skew"}}
 OPT_LBL = {"v9": "9일 공포 ÷ 30일 공포(VIX9D/VIX)", "skew": "옵션 꼬리 급락 값(CBOE SKEW)"}
 
+# 🌊 11/24 12시 「그 나라 자기 변동성 지수」(probe/cvix_bt.py · run 45317476778 · 해마다 걸어가기, 자료 있는 날만 같은 표본):
+#   11/18 volx_bt 땐 야후에 ^JNIV·^VXFXI 가 없어 못 봄 → CNBC ts-api 로 VKOSPI(.KSVKOSPI 2009~)·닛케이 VI(.JNIV 2003~)·VHSI(.VHSI 2010~).
+#   날짜 확인: 하루 변화 vs 지수 등락 상관 같은 날 −0.51/−0.57/−0.52 · 다음 날 0.00/0.05/0.00(앞날 정보 없음).
+#   미리 정한 3형태(수준 log·1년 백분위·5일 변화) × 3시장 × 3목표 × 저녁/아침판 = 54번 → 한 판 세 칸 모두 +0.3↑·최근3년>0·다른 판 앞·뒤 안 나빠짐:
+#   cv = log(수준) — 한국 ±1% 저녁 13.5/13.7/16.9 → 13.9/15.5/20.2 · 아침 14.2/14.9/18.5 → 14.6/16.3/21.1
+#                    한국 −2% 저녁 15.5/3.5/3.0 → 15.9/7.9/9.3 (AUC 0.776→0.839) · 아침 8.6/6.7/6.9 → 8.6/14.0/17.6
+#                    일본 ±1% 저녁 8.8/6.9/4.3 → 9.4/8.3/4.8 · 아침 12.3/9.7/4.8 → 12.7/11.2/5.5
+#                    홍콩 ±1% 저녁 3.0/2.7/−3.1 → 3.7/5.7/1.4 · 아침 3.2/2.8/−2.7 → 3.9/5.7/1.7 (최근3년 마이너스 → 플러스)
+#   ❌ 홍콩 −2%(저녁 +0.2/+0.6/+1.4 · 아침 앞↓) · 한국·일본 −2% 5일 변화(아침만 +0.1~1.5) · 5일 −3% 모두 · 백분위판 모두
+#   그날 값이 없으면(지수 사이트 늦음) 그 목표는 이 근거 없이 계산(묵은 값 안 씀).
+CV_TG = {"KR": {"big1", "dn2"}, "JP": {"big1"}, "HK": {"big1"}}
+CV_LBL = {"KR": "한국 공포지수 VKOSPI", "JP": "닛케이 변동성 지수", "HK": "항셍 변동성 지수 VHSI"}
+
 
 def _opt(H, kind, idx, bd, asia, morning):
     """미국 옵션 꼬리 자료 → 지수 날짜에 맞춤(아시아 아침판 = 그날 밤 값 · 저녁판 = 하루 전 값)"""
@@ -312,10 +325,20 @@ def run(H, MK, base_dates=None):
                     dd = dd.copy(); dd["opt_" + kind] = o_; opk[tg_] = kind
             except Exception:
                 pass
+        cvk = False
+        if mk in CV_TG:
+            try:
+                cs = H.get("cv:" + mk)
+                if cs is not None and len(cs.dropna()) > 1500:
+                    cv_ = np.log(cs[~cs.index.duplicated(keep="last")].where(cs > 0)).reindex(dd.index)   # 같은 날 값만(ffill 안 함)
+                    if pd.notna(cv_.iloc[-1]):
+                        dd = dd.copy(); dd["cv"] = cv_; cvk = True
+            except Exception:
+                cvk = False
         for tg in TG:
             try:
                 f_ = ff + (["hl5"] if hl5 is not None and tg in HL_TG.get(mk, ()) else []) + (["gap"] if gap is not None and tg in GAP_TG.get(mk, ()) else []) \
-                    + (["opt_" + opk[tg]] if tg in opk else [])
+                    + (["opt_" + opk[tg]] if tg in opk else []) + (["cv"] if cvk and tg in CV_TG.get(mk, ()) else [])
                 P, B = walk(dd, f_, tg)
                 j = judge(dd, P, B, tg)
                 p_now, at = now_prob(dd, f_, tg)
@@ -323,7 +346,7 @@ def run(H, MK, base_dates=None):
                 base_now = float(dd[tg].dropna().iloc[-2520:].mean())     # 최근 10년 평소 비율
                 R["t"][tg] = {"name": TG[tg], "p": _r(pc if pc is not None else p_now, 3), "raw": _r(p_now, 3), "k": kn,
                               "rng": [_r(rg[0], 3), _r(rg[1], 3)] if rg else None, "base": _r(base_now, 3), "at": at, "ok": bool(j and j["ok"]), "val": j,
-                              "hl5": "hl5" in f_, "opt": OPT_LBL.get(opk.get(tg)), "gap": ("gap" in f_) and int(round(float(np.exp(gap.iloc[-1])))) or None}
+                              "hl5": "hl5" in f_, "opt": OPT_LBL.get(opk.get(tg)), "cv": CV_LBL.get(mk) if "cv" in f_ else None, "gap": ("gap" in f_) and int(round(float(np.exp(gap.iloc[-1])))) or None}
             except Exception as e:
                 R["t"][tg] = {"name": TG[tg], "err": str(e)[:160]}
         if asia and sp is not None and morning:
