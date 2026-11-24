@@ -68,7 +68,14 @@
   window.goBack = function(){
     if (document.getElementById("sheet") || navD() > 0) return _goBack();
     var t = (cur === "onepager" && store.lastTab && store.lastTab !== "onepager") ? store.lastTab : "home";
-    if (cur !== t) go(t); else window.scrollTo({top: 0, behavior: "smooth"});
+    if (cur !== t){ go(t); return; }
+    /* 🛡 11/24 사용자 「더보기 더보기 누르다가 초기 화면으로 돌아가」 — 오른쪽 아래 떠 있는 「← 뒤로」가 오른쪽 끝 「더 보기 ▾」 단추와 겹쳐, 잘못 눌리면 오늘 맨 위로 날아갔음.
+       → 돌아갈 화면이 없을 때: ① 지금 보고 있는 펼친 칸이 있으면 그것만 접고 제자리 ② 없으면 「한 번 더 누르면 맨 위로」 안내만 · 2초 안에 다시 누르면 그때 맨 위로 */
+    if (window.__foldInner && __foldInner()) return;
+    if (scrollY < 200){ return; }
+    if (Date.now() - (window.__bk2 || 0) < 2000){ window.__bk2 = 0; window.scrollTo({top: 0, behavior: "smooth"}); return; }
+    window.__bk2 = Date.now();
+    try { var t2 = document.createElement("div"); t2.className = "ch-toast"; t2.textContent = "한 번 더 누르면 맨 위로 가요"; document.body.appendChild(t2); setTimeout(function(){ t2.remove(); }, 1900); } catch(x) {}
   };
   // ③ 탭 머리: 누르면 소개 글
   document.addEventListener("click", function(ev){
