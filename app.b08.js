@@ -1,6 +1,6 @@
 /* 📦 app.b08.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 8/8 (ux1122.js … stab.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(8,84,["ux1122.js", "ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "ux1123.js", "ux1124.js", "ux1124b.js", "say.js", "stab.js"],[4, 48, 433, 891, 1269, 1462, 1591, 1680, 1775, 1973]);
+__bs(8,84,["ux1122.js", "ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "ux1123.js", "ux1124.js", "ux1124b.js", "say.js", "stab.js"],[4, 48, 433, 891, 1269, 1462, 1591, 1681, 1776, 1974]);
 /* ======== ux1122.js ======== */
 /* 🎲 11/22 「들고 가면 · 규칙대로 하면 — 이익 확률」 (사용자: 「지금은 이걸 이렇게 들고 가는 게 이익 볼 확률이 몇 퍼센트다 — 표현은 직관적으로 ·
    왜 그런지는 밑에 자세히 탭으로 · 분할해서 현금/주식 비중을 늘려요 같은 표현도」)
@@ -1597,28 +1597,29 @@ __bk(89);
 (function(){
   "use strict";
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
-  var IC = {on: "✔", half: "△", off: "✖"}, NM = {on: "켜짐", half: "반쯤", off: "꺼짐"};
+  var IC = {on: "✔", half: "△", off: "✖", na: "?"}, NM = {on: "켜짐", half: "반쯤", off: "꺼짐", na: "자료 확인 중"};   // 🩹 11/24 na = 숫자가 말이 안 돼 빼고 센 칸
   function dots(cells){ return cells.map(function(c){ return '<i class="fc-' + c.st + '" title="' + e(c.k) + '"></i>'; }).join(""); }
   function rows(cells){
     return cells.map(function(c){
-      return '<li class="fc-' + c.st + '"><span class="fc-i" aria-label="' + NM[c.st] + '">' + IC[c.st] + '</span><b>' + e(c.k) + '</b><small>' + e(c.d) + (c.asof ? ' <em>' + e(c.asof) + ' 기준</em>' : '') + '</small></li>';
+      return '<li class="fc-' + c.st + '"><span class="fc-i" aria-label="' + NM[c.st] + '">' + IC[c.st] + '</span><b>' + e(c.k) + '</b><small>' + e(c.d) + (c.asof ? ' <em>' + e(c.asof) + ' 기준</em>' : '') + (c.bad ? ' <em class="fc-bad">자료 확인 중 · ' + e(c.bad) + ' — 셈에서 뺌</em>' : '') + '</small></li>';
     }).join("");
   }
   function floorHtml(m){
     var f = m && m.floor; if (!f || !f.cells || !f.cells.length) return "";
     var S = f.cells.filter(function(c){ return c.g === "sell"; }), C = f.cells.filter(function(c){ return c.g === "conf"; });
+    var nS = S.filter(function(c){ return c.st !== "na"; }).length, nC = C.filter(function(c){ return c.st !== "na"; }).length;
     var past = (f.past && f.past.lines || []).map(function(x){ return '<li>' + e(x) + '</li>'; }).join("");
     var d = String(f.asof || "").slice(5).replace("-", "/").replace(/^0/, "");
     return '<div class="fc"><div class="fc-h">🔦 ' + e(f.name || m.name || "") + ' 바닥 점검표 <small>' + e(d) + ' 종가 · ' + f.cells.length + '칸</small></div>' +
       '<div class="fc-v fc-' + e(f.lv) + '">' + e(f.head) + '</div>' +
-      '<div class="fc-g"><span>팔 사람은 다 팔았나</span><span class="fc-dots">' + dots(S) + '</span><b>' + f.sell_on + '/' + S.length + '</b></div>' +
-      '<div class="fc-g"><span>살 사람이 들어왔나</span><span class="fc-dots">' + dots(C) + '</span><b>' + f.conf_on + '/' + C.length + '</b></div>' +
+      '<div class="fc-g"><span>팔 사람은 다 팔았나</span><span class="fc-dots">' + dots(S) + '</span><b>' + f.sell_on + '/' + nS + '</b></div>' +
+      '<div class="fc-g"><span>살 사람이 들어왔나</span><span class="fc-dots">' + dots(C) + '</span><b>' + f.conf_on + '/' + nC + '</b></div>' +
       (f.chg && f.chg.k && f.chg.k.length ? '<p class="fc-chg">🔄 ' + e(String(f.chg.d || "").slice(5).replace("-", "/")) + ' 바뀐 칸: ' + e(f.chg.k.join(" · ")) + '</p>' : '') +
       '<details class="fc-d"><summary>' + f.cells.length + '칸 펼치기</summary>' +
         '<div class="fc-t">투매·청산 — 팔 사람은 다 팔았나</div><ul class="fc-ul">' + rows(S) + '</ul>' +
         '<div class="fc-t">확인 — 살 사람이 들어왔나</div><ul class="fc-ul">' + rows(C) + '</ul>' +
         '<p class="fc-n">확인 5칸↑ = 🟢 바닥 확인 쪽 · 확인 3칸↑ + 투매 4칸↑ = 🟡 가능성 높아짐 · 투매 4칸↑ = 🟠 바닥 구간일 수 있음(확인 전)</p>' +
-        (past ? '<div class="fc-t">과거 같은 자리의 그 뒤</div><ul class="fc-past">' + past + '</ul>' : '') +
+        (past ? '<div class="fc-t">과거 채점 — 같은 판정이 켜졌던 때의 그 뒤</div><ul class="fc-past">' + past + '</ul>' : '') +
         '<p class="fc-n">' + e(f.note || "규칙은 그대로 · 기록 · 매수·매도 추천 아님") + '</p></details></div>';
   }
   window.__floorHtml = floorHtml;
@@ -1638,7 +1639,7 @@ __bk(89);
     return '<div class="fa"><div class="fa-h">🔦 바닥 점검표 <small>시장 ' + (ms.length + mo.length) + '곳 · 누르면 칸마다</small></div>' + grp.filter(function(g){ return g[1].length; }).map(function(g){ return (g[0] ? '<div class="fa-sub">' + g[0] + '</div>' : '') + g[1].map(faRow).join(""); }).join("") + '</div>';
   }
   function faRow(m){
-      var f = m.floor, ns = f.cells.filter(function(c){ return c.g === "sell"; }).length, nc = f.cells.length - ns;
+      var f = m.floor, ns = f.cells.filter(function(c){ return c.g === "sell" && c.st !== "na"; }).length, nc = f.cells.filter(function(c){ return c.g === "conf" && c.st !== "na"; }).length;
       return '<details class="fa-r fc-' + e(f.lv) + '"><summary><span class="fa-n">' + (FL[m.nat] || "") + ' <b>' + e(f.name || m.name) + '</b></span>' +
         '<span class="fa-v">' + e(String(f.head || "").replace(" · 확인 전", "")) + '</span>' +
         '<span class="fa-c">팔 사람 <b>' + f.sell_on + '/' + ns + '</b> · 살 사람 <b>' + f.conf_on + '/' + nc + '</b></span></summary>' + floorHtml(m) + '</details>';
@@ -1658,7 +1659,7 @@ __bk(89);
     ".fc-g{display:grid;grid-template-columns:118px 1fr auto;column-gap:8px;align-items:center;margin:5px 0;font-size:12.5px;font-weight:700}" +
     ".fc-g span:first-child{word-break:keep-all}.fc-g b{font-size:14px;white-space:nowrap}" +
     ".fc-dots{display:flex;gap:4px;flex-wrap:nowrap;min-width:0}.fc-dots i{flex:1 1 0;max-width:22px;height:10px;border-radius:5px;background:rgba(127,127,127,.22);display:block}" +
-    ".fc-dots i.fc-on{background:#22a05a}.fc-dots i.fc-half{background:#f0b429}" +
+    ".fc-dots i.fc-na{background:transparent;border:1px dashed rgba(127,127,127,.45)}.fc-bad{color:#b45309!important;white-space:normal!important}.fc-dots i.fc-on{background:#22a05a}.fc-dots i.fc-half{background:#f0b429}" +
     ".fc-chg{margin:6px 0 2px;font-size:12px;line-height:1.5;color:var(--text,#111);word-break:keep-all}" +
     ".fc-d{margin-top:4px}.fc-d summary{font-size:12px;color:var(--sub,#888);cursor:pointer;padding:6px 0;min-height:24px}" +
     ".fc-t{font-size:12px;font-weight:800;margin:8px 0 4px;color:var(--text,#111)}" +

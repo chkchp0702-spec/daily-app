@@ -69,6 +69,11 @@ def main():
         S = {"markets": [], "facts": {}}
     elif B.get("at") and S.get("bear_at") and S["bear_at"] < B["at"]:
         add("원본이 늦음", "market/say.json", f"say {S.get('bear_at')} < bear {B.get('at')}", "bear_gate 뒤에 src.say 가 도는지 확인")
+    # 🩹 11/24 바닥 점검표 칸 값 검사(floor_check sane) — 말이 안 되는 칸
+    FCJ = jread(os.path.join(MSR, "market", "floor_check.json"), {}) or {}
+    for k_, m_ in (FCJ.get("markets") or {}).items():
+        for b_ in (m_.get("bad") or []):
+            add("점검표 칸 값", "바닥 점검표 " + str(m_.get("name")), b_, "그 칸 자료(받는 곳·열 이름)를 확인")
     F = S.get("facts") or {}
     us = next((m for m in S.get("markets") or [] if m.get("key") == "us"), {})
     T, ats = texts()
