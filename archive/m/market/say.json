@@ -1,5 +1,5 @@
 {
- "at": "2026-11-24 12:06",
+ "at": "2026-11-24 12:31",
  "asof": "2026-11-23",
  "bear_at": "2026-11-24 12:06",
  "word": "줄이기",
@@ -21,6 +21,30 @@
    "cond": "50일선 6,020 위 종가면 다시",
    "dd": -48.3,
    "rule": "50일선 위면 주식 · 아래면 현금",
+   "steps": [
+    {
+     "share": 0,
+     "cond": "50일선 아래 — 현금으로 기다림",
+     "now": true
+    },
+    {
+     "share": 100,
+     "cond": "50일선 6,020 위 종가",
+     "line": 6020.41,
+     "dist": 27.9,
+     "now": false,
+     "dir": "up"
+    }
+   ],
+   "odds": {
+    "rule_up": 62,
+    "hold_up": 45,
+    "rule_big": 14,
+    "hold_big": 34,
+    "n": 117,
+    "events": 20,
+    "shape": "거품 뒤 급락"
+   },
    "prev_share": null,
    "move": "same"
   },
@@ -39,6 +63,38 @@
    "cond": "50일선 773 위면 4분의 1 더",
    "dd": -48.2,
    "rule": "절반 지금 + 4분의 1은 50일선 회복 때 + 4분의 1은 200일선 회복 때",
+   "steps": [
+    {
+     "share": 50,
+     "cond": "절반은 지금부터 들고 감",
+     "now": true
+    },
+    {
+     "share": 75,
+     "cond": "50일선 773 위로",
+     "line": 773.04,
+     "dist": 21.7,
+     "now": false,
+     "dir": "up"
+    },
+    {
+     "share": 100,
+     "cond": "200일선 949.2 위로",
+     "line": 949.21,
+     "dist": 49.4,
+     "now": false,
+     "dir": "up"
+    }
+   ],
+   "odds": {
+    "rule_up": 80,
+    "hold_up": 81,
+    "rule_big": 6,
+    "hold_big": 6,
+    "n": 278,
+    "events": 38,
+    "shape": "급등 없던 깊은 하락"
+   },
    "prev_share": null,
    "move": "same"
   },
@@ -66,6 +122,38 @@
     "금": 11,
     "현금·단기채": 57.5
    },
+   "odds": {
+    "rule_up": 60,
+    "hold_up": 40,
+    "rule_big": 0,
+    "hold_big": 40,
+    "n": 5,
+    "events": 2,
+    "shape": "금리 오르는 거품 뒤 꺾임"
+   },
+   "steps": [
+    {
+     "share": 0,
+     "cond": "20일선 7,477 위·200일선 아래 마감 날 나머지 절반도 현금",
+     "line": 7477.25,
+     "dist": 3.3,
+     "now": false,
+     "dir": "down"
+    },
+    {
+     "share": 50,
+     "cond": "평소 몫의 절반만 들고 감",
+     "now": true
+    },
+    {
+     "share": 100,
+     "cond": "200일선 7,350 위 3일 — 전부 복귀",
+     "line": 7350.1,
+     "dist": 1.6,
+     "now": false,
+     "dir": "up"
+    }
+   ],
    "prev_share": null,
    "move": "down"
   }
