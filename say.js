@@ -43,6 +43,8 @@
         dist_txt: d == null ? "" : dtxt(d), prev_txt: live && r.dist != null && Math.abs(r.dist - d) >= 0.3 ? "어제 " + (r.dist > 0 ? "+" : "−") + Math.abs(r.dist).toFixed(1) + "%" : "",
         fill: d == null ? 0 : Math.max(3, Math.min(100, 100 - d * 3.3)), prev_fill: r.dist == null ? null : Math.max(3, Math.min(100, 100 - r.dist * 3.3)), move: r.move};
       if (r.key === "us" && fut && fut.chg != null && r.close && r.line){ o.fut = fut.chg; o.fut_over = r.close * (1 + fut.chg / 100) > r.line; }
+      o.odds = r.odds || null;
+      o.steps = (r.steps || []).map(function(t){ var dd = t.line && px ? (t.line / px - 1) * 100 : t.dist; return {share: t.share, cond: t.cond, now: !!t.now, dir: t.dir || "", dist: dd, dprev: px && t.dist != null && Math.abs(t.dist - dd) >= 0.3 ? t.dist : null}; });
       return o;
     });
     // 한 문장 = 오늘 사실(코스피) + 오늘 규칙 한 단어
@@ -78,14 +80,26 @@
       '<div class="say-head w-' + M.word_key + '"><div class="say-bd"><b>' + e(M.word) + '</b><span>' + e(M.why_word || "") + '</span></div>' +
       '<p class="say-h1">' + (M.lead ? e(M.lead) + ',<br>' : '') + e(M.tail) + '</p>' + (M.num ? '<p class="say-num">' + e(M.num) + '</p>' : '') + '</div>';
     if (M.tiles.length) h += '<div class="say-ts">' + M.tiles.map(function(t){ return '<div><small>' + e(t.n) + (M.isT ? '' : ' · 지난 장') + '</small><p><b class="' + cl(t.chg) + '">' + sg(t.chg) + '</b><em>' + e(t.v) + '</em></p></div>'; }).join("") + '</div>';
-    h += '<div class="say-sh"><div class="say-shh"><b>지금 주식 몫</b><span>다시 늘리는 선 · 남은 거리</span></div>' + M.rows.map(function(r){
-      var full = r.share != null && r.share >= 100;
-      return '<button type="button" class="say-r" data-saygo="rule" data-j="1"><span class="say-rn"><b>' + e(r.name) + '</b><strong>' + e(r.share_txt) + '</strong></span>' +
-        '<i class="say-bar' + (full ? " full" : "") + '">' + (r.live && r.prev_fill != null && Math.abs(r.prev_fill - r.fill) > 1.5 ? '<u style="left:' + r.prev_fill.toFixed(1) + '%"></u>' : '') + '<i style="width:' + (full ? 100 : r.fill).toFixed(1) + '%"></i></i>' +
-        '<span class="say-rc"><span>' + e(r.line_txt) + '</span><em>' + (r.prev_txt ? '<small>' + e(r.prev_txt) + ' → </small>' : '') + (r.fut != null ? '<small>선물 ' + sg(r.fut) + ' · </small>' : '') + e(r.dist_txt) + '</em></span></button>'; }).join("") + '</div>';
+    h += '<div class="say-sh"><div class="say-shh"><b>지금 주식 몫 · 다음 계단</b><span>규칙이 밟는 단계</span></div>' + M.rows.map(stepRow).join("") + '</div>';
     h += '<button type="button" class="say-cta" data-saysend="1">📨 이 화면 고객에게 한 장</button>';
     if (M.why.length) h += '<div class="say-why"><div class="say-shh"><b>' + e(M.whyTitle) + '</b></div>' + M.why.map(function(w){ return '<div class="say-w"' + (w.go ? ' data-ezgo="' + w.go + '"' : '') + '><small>' + e(w.k) + '</small><p>' + w.h + '</p></div>'; }).join("") + '</div>';
     return h;
+  }
+  /* 🪜 11/24 사용자 「막대그래프보다 좀 더 직관적으로 · 0·50·100% 는 너무 성의 없지 않니」 — 몫 하나만 보여 주던 막대 → 규칙이 밟는 계단 전체(지금 칸 · 다음 칸까지 남은 거리 · 어제보다 얼마나 다가왔나) + 같은 꼴 장의 이익 확률 */
+  function dTxt(d){ return d == null ? "" : d > 0.05 ? "+" + d.toFixed(1) + "% 남음" : "넘음"; }
+  function stepRow(r){
+    var S = r.steps && r.steps.length ? r.steps : [{share: r.share, cond: "", now: true}], ci = 0;
+    S.forEach(function(t, i){ if (t.now) ci = i; });
+    var nx = S.filter(function(t, i){ return i > ci && t.dist != null; })[0], dn = S.filter(function(t, i){ return i < ci && t.dir === "down" && t.dist != null; })[0];
+    var cells = S.map(function(t, i){
+      var cls = i === ci ? "now" : i < ci ? (t.dir === "down" ? "dn" : "past") : "next";
+      return '<span class="sp-c ' + cls + '"><b>' + (t.share == null ? "–" : t.share + "%") + '</b><small>' + (i === ci ? "지금" : t.dist != null ? (t.dist > 0.05 ? "+" + t.dist.toFixed(1) + "%" : "넘음") : "") + '</small></span>' + (i < S.length - 1 ? '<i class="sp-a' + (i + 1 === ci && t.dir === "down" ? " back" : "") + '"></i>' : '');
+    }).join("");
+    var go = nx ? '<p class="sp-go"><span class="sp-up">↑ 다음</span>' + e(nx.cond) + ' → <b>주식 ' + nx.share + '%</b>' + (nx.dprev != null ? ' <small>어제 +' + nx.dprev.toFixed(1) + '% → 오늘 ' + e(dTxt(nx.dist)) + '</small>' : '') + (r.fut != null && r.key === "us" ? ' <small>밤사이 선물 ' + sg(r.fut) + '</small>' : '') + '</p>' : '';
+    var dw = dn ? '<p class="sp-go dnl"><span class="sp-dn">↓ 반대로</span>' + e(dn.cond) + '</p>' : '';
+    var od = r.odds ? '<p class="sp-od">같은 꼴 장에서 2년 뒤 이익 본 비율 <b>규칙대로 ' + r.odds.rule_up + '%</b> · 그냥 들고 가면 ' + r.odds.hold_up + '%' + (r.odds.n && r.odds.n < 12 ? ' <small>(사례 ' + r.odds.n + '번뿐)</small>' : '') + '</p>' : '';
+    return '<button type="button" class="say-r" data-saygo="rule" data-j="1"><span class="say-rn"><b>' + e(r.name) + '</b><strong>' + e(r.share_txt) + '</strong></span>' +
+      '<span class="sp" style="grid-template-columns:' + S.map(function(){ return "auto"; }).join(" minmax(10px,1fr) ") + '">' + cells + '</span>' + go + dw + od + '</button>';
   }
   function listHtml(){
     var B = window.__ezBrief ? __ezBrief() : null, kp = S.markets[0] || {}, hit = "", bub = "";
@@ -140,7 +154,7 @@
     ".say-bd b{font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px;background:#fde68a;color:#7a4a00}.say-head.w-up .say-bd b{background:#bbf7d0;color:#14532d}.say-head.w-down .say-bd b{background:#fecaca;color:#7f1d1d}" +
     ".say-bd span{font-size:12px;color:#c7d2e5}.say-h1{margin:0;font-size:22px;line-height:1.28;font-weight:900;color:#fff}.say-num{margin:6px 0 0;font-size:13px;line-height:1.45;color:#c7d2e5}" +
     ".say-ts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.say-ts>div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:7px 13px}.say-ts small{font-size:12px;color:var(--sub)}" +
-    ".say-ts p{margin:1px 0 0;display:flex;align-items:baseline;gap:8px}.say-ts b{font-size:22px;font-weight:900}.say-ts b.up,.say-one b.up,.say-w b.up{color:var(--up)}.say-ts b.dn,.say-one b.dn,.say-w b.dn{color:var(--down)}.say-ts em{font-style:normal;font-size:13px;color:var(--sub)}" +
+    ".say-ts p{margin:1px 0 0;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:0}.say-ts b,.say-ts em{white-space:nowrap}.say-ts b{font-size:clamp(18px,6vw,22px);font-weight:900}.say-ts b.up,.say-one b.up,.say-w b.up{color:var(--up)}.say-ts b.dn,.say-one b.dn,.say-w b.dn{color:var(--down)}.say-ts em{font-style:normal;font-size:13px;color:var(--sub)}" +
     ".say-sh,.say-why,#saylist{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:11px 15px 4px}.say-why{padding-bottom:6px}#saylist{margin:0 0 12px;padding-bottom:4px}" +
     ".say-shh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}.say-shh b{font-size:15px;font-weight:900;color:var(--text)}.say-shh span{font-size:12px;color:var(--sub)}" +
     ".say-r{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:1px solid var(--line);padding:8px 0 8px;cursor:pointer}.say-r:first-of-type{border-top:0}" +
@@ -153,6 +167,16 @@
     ".say-w{display:flex;gap:10px;font-size:13px;line-height:1.45;padding:8px 0;border-top:1px solid var(--line)}.say-w small{font-size:13px;color:var(--sub);flex:0 0 78px}.say-w p{margin:0;font-weight:700;flex:1;min-width:0}.say-w u{text-decoration:none}" +
     ".say-l{display:flex;width:100%;align-items:baseline;gap:10px;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:1px solid var(--line);padding:12px 0;cursor:pointer;min-height:44px}" +
     ".say-l b{font-size:14px;font-weight:700;flex:1;min-width:0}.say-l span{font-size:12px;color:var(--sub);flex:0 0 auto}.say-l i{font-style:normal;color:var(--sub);flex:0 0 auto}.say-l.on b{color:var(--acc)}" +
+    ".sp{display:grid;align-items:start;margin:8px 0 6px}.sp-c{display:flex;flex-direction:column;align-items:center;min-width:52px}" +
+    ".sp-c b{display:block;font-size:14px;font-weight:900;line-height:1;padding:7px 10px;border-radius:999px;border:1.5px solid var(--line);color:var(--sub);background:var(--panel);white-space:nowrap}" +
+    ".sp-c small{display:block;margin-top:4px;font-size:11px;font-weight:700;color:var(--sub);white-space:nowrap}" +
+    ".sp-c.now b{background:#0f1e3d;border-color:#0f1e3d;color:#fff;font-size:15px;padding:8px 12px}.sp-c.now small{color:var(--text)}" +
+    ".sp-c.next b{border-style:dashed;color:var(--text)}.sp-c.next small{color:var(--acc)}.sp-c.dn b{border-style:dashed;color:var(--down)}.sp-c.dn small{color:var(--down)}" +
+    ".sp-a{align-self:start;height:2px;margin:15px 4px 0;background:repeating-linear-gradient(90deg,var(--sub) 0 4px,transparent 4px 8px);opacity:.6;position:relative}" +
+    ".sp-a::after{content:'';position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left:7px solid var(--sub);border-right:0}.sp-a.back::after{right:auto;left:-1px;border-left:0;border-right:7px solid var(--sub)}" +
+    ".sp-go{margin:2px 0 0;font-size:12.5px;line-height:1.5;color:var(--text);word-break:keep-all}.sp-go b{font-weight:900}.sp-go small{font-size:11.5px;color:var(--sub);white-space:nowrap}" +
+    ".sp-up,.sp-dn{display:inline-block;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-right:6px;background:rgba(37,99,235,.12);color:var(--acc)}.sp-dn{background:rgba(57,135,229,.10);color:var(--down)}.sp-go.dnl{color:var(--sub)}" +
+    ".sp-od{margin:3px 0 0;font-size:11.5px;line-height:1.45;color:var(--sub);word-break:keep-all}.sp-od b{color:var(--text)}" +
     ".say-skel{display:flex;flex-direction:column;gap:8px}.say-skel i{display:block;border-radius:18px;background:var(--panel);border:1px solid var(--line);height:150px}.say-skel i:nth-child(2){height:66px}.say-skel i:nth-child(3){height:330px}" +
     ":root[data-ui=light] .say-bar>i{background:#2563eb}";
   document.head.appendChild(st);
