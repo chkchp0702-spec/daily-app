@@ -1,6 +1,6 @@
 /* 📦 app.b08.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 8/8 (ux1122.js … stab.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(8,84,["ux1122.js", "ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "ux1123.js", "ux1124.js", "ux1124b.js", "say.js", "stab.js"],[4, 48, 433, 891, 1269, 1462, 1591, 1680, 1775, 1961]);
+__bs(8,84,["ux1122.js", "ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "ux1123.js", "ux1124.js", "ux1124b.js", "say.js", "stab.js"],[4, 48, 433, 891, 1269, 1462, 1591, 1680, 1775, 1973]);
 /* ======== ux1122.js ======== */
 /* 🎲 11/22 「들고 가면 · 규칙대로 하면 — 이익 확률」 (사용자: 「지금은 이걸 이렇게 들고 가는 게 이익 볼 확률이 몇 퍼센트다 — 표현은 직관적으로 ·
    왜 그런지는 밑에 자세히 탭으로 · 분할해서 현금/주식 비중을 늘려요 같은 표현도」)
@@ -1796,7 +1796,7 @@ __bk(91);
 
   function load(){
     if (S && Date.now() - T0 < 120000) return Promise.resolve(S);
-    return Promise.all([gj(RM + "say.json"), gj("archive/x/live_kr.json", 120000), gj("archive/x/live_us_pre.json", 120000), window.__flowLine ? window.__flowLine().catch(function(){ return ""; }) : ""])
+    return Promise.all([gj(RM + "say.json", 120000), gj("archive/x/live_kr.json", 120000), gj("archive/x/live_us_pre.json", 120000), window.__flowLine ? window.__flowLine().catch(function(){ return ""; }) : ""])
       .then(function(r){ if (r[0] && r[0].markets){ var first = !S; S = r[0]; T0 = Date.now(); if (first) setTimeout(function(){ try { if (window.__h2apply) __h2apply(true); } catch(x) {} }, 60); } K = r[1] || K; FU = r[2] || FU; FL = r[3] || FL; return S; });
   }
   window.__sayNow = function(){ return S; };
@@ -1819,7 +1819,7 @@ __bk(91);
         fill: d == null ? 0 : Math.max(3, Math.min(100, 100 - d * 3.3)), prev_fill: r.dist == null ? null : Math.max(3, Math.min(100, 100 - r.dist * 3.3)), move: r.move};
       if (r.key === "us" && fut && fut.chg != null && r.close && r.line){ o.fut = fut.chg; o.fut_over = r.close * (1 + fut.chg / 100) > r.line; }
       o.odds = r.odds || null;
-      o.steps = (r.steps || []).map(function(t){ var dd = t.line && px ? (t.line / px - 1) * 100 : t.dist; return {share: t.share, cond: t.cond, now: !!t.now, dir: t.dir || "", dist: dd, dprev: px && t.dist != null && Math.abs(t.dist - dd) >= 0.3 ? t.dist : null}; });
+      o.steps = (r.steps && r.steps.length > 1 ? r.steps : fallbackSteps(r)).map(function(t){ var dd = t.line && px ? (t.line / px - 1) * 100 : t.dist; return {share: t.share, cond: t.cond, now: !!t.now, dir: t.dir || "", dist: dd, dprev: px && t.dist != null && Math.abs(t.dist - dd) >= 0.3 ? t.dist : null}; });
       return o;
     });
     // 한 문장 = 오늘 사실(코스피) + 오늘 규칙 한 단어
@@ -1846,6 +1846,18 @@ __bk(91);
     var one = [fm ? "외국인 " + fm[1] : "", secs.length ? "강한 곳 " + secs[0].name + " " + sg(secs[0].r) : "", upr != null ? "오른 종목 " + upr + "%" : ""].filter(Boolean);
     return {word: S.word, word_key: wk, why_word: S.why, lead: lead, tail: tail, num: num, tiles: tiles, rows: rows, when: when, isT: isT, big: big,
       whyTitle: !K || !K.date ? "" : isT ? (big != null && big < 0 ? "오늘 왜 내렸나" : "오늘 왜 올랐나") : md(K.date) + " 장은 이랬어요", why: why, one: one, note: S.note};
+  }
+  /* 🩹 11/24 사용자 「장난하냐」 — 앱은 새것인데 say.json 이 계단(steps) 넣기 전 캐시 파일이면 「지금」 칸 하나만 그려졌음 → 줄 정보(선·거리·조건)로 계단을 직접 만듦 */
+  function fallbackSteps(r){
+    var sh = r.share, up = {cond: r.cond, line: r.line, dist: r.dist, dir: "up"};
+    if (r.key === "us"){
+      if (sh === 50) return [{share: 0, cond: r.cond2 || "20일선 위·200일선 아래 마감 날 나머지 절반도 현금", dir: "down"}, {share: 50, cond: "평소 몫의 절반", now: true}, Object.assign({share: 100}, up)];
+      if (sh === 0) return [{share: 0, cond: "현금으로 기다림", now: true}, Object.assign({share: 100}, up)];
+      return [{share: sh, now: true}];
+    }
+    if (sh >= 100) return [{share: 100, now: true}];
+    if (r.key === "kosdaq" && sh === 50) return [{share: 50, cond: "절반은 지금부터 들고 감", now: true}, Object.assign({share: 75}, up), {share: 100, cond: "200일선 위로", dir: "up"}];
+    return [{share: sh, cond: "현금으로 기다림", now: true}, Object.assign({share: 100}, up)];
   }
   window.__sayModel = function(){ return load().then(model); };
 
@@ -1874,7 +1886,7 @@ __bk(91);
     var dw = dn ? '<p class="sp-go dnl"><span class="sp-dn">↓ 반대로</span>' + e(dn.cond) + '</p>' : '';
     var od = r.odds ? '<p class="sp-od">같은 꼴 장에서 2년 뒤 이익 본 비율 <b>규칙대로 ' + r.odds.rule_up + '%</b> · 그냥 들고 가면 ' + r.odds.hold_up + '%' + (r.odds.n && r.odds.n < 12 ? ' <small>(사례 ' + r.odds.n + '번뿐)</small>' : '') + '</p>' : '';
     return '<button type="button" class="say-r" data-saygo="rule" data-j="1"><span class="say-rn"><b>' + e(r.name) + '</b><strong>' + e(r.share_txt) + '</strong></span>' +
-      '<span class="sp" style="grid-template-columns:' + S.map(function(){ return "auto"; }).join(" minmax(10px,1fr) ") + '">' + cells + '</span>' + go + dw + od + '</button>';
+      (S.length < 2 ? '<p class="sp-go">' + e(r.cond || "") + '</p>' : '<span class="sp" style="grid-template-columns:' + S.map(function(){ return "auto"; }).join(" minmax(10px,1fr) ") + '">' + cells + '</span>') + go + dw + od + '</button>';
   }
   function listHtml(){
     var B = window.__ezBrief ? __ezBrief() : null, kp = S.markets[0] || {}, hit = "", bub = "";
