@@ -3615,6 +3615,33 @@ __bk(15);
         note: "한국거래소 시세(10분마다) · 뉴스 제목은 네이버 증권 · 제목이 이유를 다 말해 주진 않아요"};
     });
   };
+  /* 🗣 11/24 냉정 분석 7차 ⑫ 「보는 화면 = 보내는 한 장」 — 첫 화면(say.js)과 같은 모델(window.__sayModel)로 그림. 숫자·말을 여기서 다시 짓지 않음 */
+  SCREENS.say = function(){
+    if (!window.__sayModel) return Promise.resolve(null);
+    return Promise.all([window.__sayModel(), gj("archive/x/live_kr.json?" + Math.floor(Date.now() / 120000))]).then(function(r){
+      var M = r[0], K = r[1]; if (!M) return null;
+      var t0 = M.tiles[0], t1 = M.tiles[1], mood = moodOf(t0 ? t0.chg : 0);
+      var SN = M.isT && K ? (K.snaps || []) : [], line = SN.length >= 3 ? {a: SN.map(function(x){ return x[3]; }), b: SN.map(function(x){ return x[4]; }), la: "코스피", lb: "코스닥", from: SN[0][0]} : null;
+      var rows = M.rows.map(function(x){ return {n: x.name, v: x.share_txt, v2: x.dist_txt + (x.prev_txt ? " · " + x.prev_txt : ""), s: x.cond}; });
+      var why = M.why.map(function(w){ return {n: w.k + " — " + w.t}; });
+      return {kind: "screen", scene: "city_" + mood, mood: mood, title: "오늘 시장 한 장", sub: M.when,
+        hero: t0 ? {l: "🇰🇷 코스피 " + t0.v, v: sg1(t0.chg), c: cOf(t0.chg), s: M.one.slice(0, 2).join(" · ")} : null,
+        stats: [t1 ? {l: "코스닥 " + t1.v, v: sg1(t1.chg), c: cOf(t1.chg)} : null].filter(Boolean),
+        blocks: [["note", {h: "🗣 오늘 한 문장 · " + M.word, t: (M.lead ? M.lead + ", " : "") + M.tail + (M.num ? " — " + M.num : ""), tone: M.word_key === "up" ? "info" : "warn", max: 4}],
+          ["line", line],
+          ["list", {title: "📏 지금 주식 몫 · 다시 늘리는 선까지 남은 거리", items: rows, rank: false, wrap2: true}],
+          ["list", why.length ? {title: "🔎 " + (M.whyTitle || "오늘 장"), items: why, rank: false, wrap2: true} : null]],
+        note: "종가 기준 규칙 판정 · 장중 숫자는 한국거래소 시세(10분마다) · 과거 기록에 따른 참고 자료"};
+    });
+  };
+  function sg1(v){ return pct(v, 1); }
+  function sendSay(){
+    ask("오늘 시장 한 장", function(){
+      toast("한 장 만드는 중…");
+      SCREENS.say().then(function(C){ if (!C){ toast("오늘 자료를 못 가져왔어요"); return; } var nm = pbname(), sp = share(safeDraw(C, nm), C.title); cliDone(); return sp; })
+        .catch(function(e){ console.warn(e); toast("만들지 못했어요"); });
+    });
+  }
   function sendKr(){
     ask("오늘 국장 한 장", function(){
       toast("한 장 만드는 중…");
@@ -3675,7 +3702,7 @@ __bk(15);
   function soon(){ if (!T) T = setTimeout(function(){ T = null; try { fab(); } catch(x) {} try { rowBtns(); } catch(x) {} }, 300); }
   try { new MutationObserver(soon).observe(document.body, {childList: true, subtree: true}); } catch(x) {}
   window.addEventListener("hashchange", soon);
-  window.__onepage = {sendKr: sendKr, _safeDraw: function(C, nm){ return safeDraw(C, nm); }, _tainted: function(c){ return tainted(c); }, ready: readySheet,
+  window.__onepage = {sendKr: sendKr, sendSay: sendSay, _say: function(){ return SCREENS.say(); }, _safeDraw: function(C, nm){ return safeDraw(C, nm); }, _tainted: function(c){ return tainted(c); }, ready: readySheet,
     /* 📨 11/23 A11/23-1 한 장 화면 미리보기(ux1123.js)가 받는 분·보내기 길을 그대로 쓰게 — 저장 원칙(보낸 뒤 비움 · 최근 8명 칩)은 여기 것 그대로 */
     _client: function(v){ if (v !== undefined) CLIENT = String(v || "").trim().slice(0, 20); return CLIENT; }, _cliRecent: cliRecent, _cliDone: cliDone, _share: share, _pbname: function(){ return ls("pbname") || ""; }, screens: SCREENS, dom: domScreen, sendChooser: sendChooser, go: go, draw: draw, chooser: chooser, _mkStock: mkStock, _mkMyEls: mkMyEls, _mkPin: mkPin, _goMany: goMany, _mkProduct: mkProduct, _mkPort: mkPort, _mkMarket: mkMarket};
   soon();

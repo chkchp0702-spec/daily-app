@@ -416,6 +416,8 @@
   function rowHtml(m, body){
     var FL = {kr: "🇰🇷", us: "🇺🇸", jp: "🇯🇵", cn: "🇨🇳", hk: "🇭🇰"};
     var a = m.analog || {}, st = a.stock, nx = nextOf(m);
+    try { var SY = window.__sayNow && __sayNow(), U = SY && SY.us;   // 🗣 11/24 3번 — S&P500·나스닥 줄은 💼 포트 규칙과 같은 말(주식 절반 · 200일선 위 3일이면 복귀)
+      if (U && U.share != null && (U.keys || []).indexOf(m.key) >= 0){ st = U.share; if (st < 100 && m.m200 && m.close) nx = {t: "200일선 " + Math.round(m.m200).toLocaleString("en-US") + " 위 3일", d: (m.m200 / m.close - 1) * 100}; body = '<p class="ub-p"><b>💼 포트 규칙과 같은 말</b> ' + e(U.cond + (U.cond2 ? " · " + U.cond2 : "")) + '</p>' + (body || ""); } } catch(x) {}
     var col = st == null ? "s-na" : st >= 100 ? "s-full" : st > 0 ? "s-half" : "s-zero";
     var ddc = m.state === "🐻" ? "dd3" : m.state === "🟡" ? "dd2" : "dd1";
     return '<details class="ub-r ' + col + '"><summary>' +
@@ -430,7 +432,7 @@
     var more = (B.more || []).map(function(m){ return rowHtml(m, '<p class="ub-p"><b>다음에 바뀌는 때</b> ' + e((m.analog || {}).next || "") + '</p>' + (window.__meetLine ? __meetLine(m) : "")); }).join("");
     return '<div class="ub"><div class="ub-hd"><span>시장 · 고점 대비</span><span>주식 몫</span></div>' + main +
       (more ? '<details class="ub-more"><summary>다른 시장 ' + (B.more || []).length + '개 — 일본·중국·홍콩·기술 지수 ▾</summary>' + more + '</details>' : '') +
-      '<p class="ub-note">주식 몫 = 그 시장 주식을 지금 얼마나 들고 갈지(나머지는 현금) · 줄을 누르면 왜 그런지 · 💼 기본 포트는 이 표와 따로 S&P500 판정(200일선)으로 움직여요 — 실제 비중은 포트 탭</p></div>';
+      '<p class="ub-note">주식 몫 = 그 시장 주식을 지금 얼마나 들고 갈지(나머지는 현금) · 줄을 누르면 왜 그런지 · 🇺🇸 두 줄은 💼 포트 규칙과 같은 말이에요(11/24) — 실제 비중은 포트 탭</p></div>';
   }
   function bearHtml(d){
     var B = d.bear; if (!B || !B.markets || !B.markets.length) return "";

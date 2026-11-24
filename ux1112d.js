@@ -18,7 +18,7 @@
     var own = ((P.targets.down.per_market[m.key] || {}).top || []).concat(((P.targets.crash.per_market[m.key] || {}).top || []));
     var seen = {}, ownL = own.filter(function(x){ if (seen[x.k]) return false; seen[x.k] = 1; return true; }).slice(0, 5);
     var on = {}; (d.on || []).concat(c ? c.on : [], d.own_on || [], c ? c.own_on : []).forEach(function(k){ on[k] = 1; });
-    return '<details class="sp-r"><summary><span class="sp-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small>고점보다 ' + String(m.dd).replace("-", "−") + '% · 경고 ' + d.n + '/' + d.of + '개 켜짐</small></span>' +
+    return '<details class="sp-r"><summary><span class="sp-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small>고점보다 ' + String((function(){ var F = window.__sayNow && __sayNow() && __sayNow().facts, f = F && F[m.key]; return f && f.dd != null ? f.dd : m.dd; })() /* 🗣 11/24 계기판과 같은 낙폭(say.json facts) */).replace("-", "−") + '% · 경고 ' + d.n + '/' + d.of + '개 켜짐</small></span>' +
       '<span class="sp-p"><b>' + (pd != null ? pd + "%" : "–") + '</b><small>평소 ' + Math.round(d.base_mk || d.base) + '% · ' + e(word) + '</small>' + bar(pd, d.base_mk || d.base) + '</span></summary>' +
       '<div class="sp-x"><p><b>6개월 안에 10% 넘게 더 빠질 확률</b> ' + (pd != null ? pd + "%" : "–") + ' (이 지수 평소 ' + Math.round(d.base_mk || d.base) + '%' + (d.p_mk_ep ? ' · 이런 때가 과거 ' + d.p_mk_ep + '번' : '') + ')</p>' +
         (c ? '<p><b>1년 안에 20% 넘게 더 빠질 확률</b> ' + (pc != null ? pc + "%" : "–") + ' (이 지수 평소 ' + Math.round(c.base_mk || c.base) + '%)</p>' : '') +

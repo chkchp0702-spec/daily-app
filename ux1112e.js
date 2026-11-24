@@ -15,6 +15,8 @@
      닮은 12번 숫자는 「참고 기록」으로만 아래에 남김 */
   function verdict(m){
     var p = m.pick || {}, st = p.stock;
+    try { var SY = window.__sayNow && __sayNow(), U = SY && SY.us;   // 🗣 11/24 3번 — S&P500·나스닥 줄은 💼 포트 규칙과 같은 말(say.json us)
+      if (U && U.share != null && (U.keys || []).indexOf(m.key) >= 0) return [U.share >= 100 ? "buy" : U.share <= 0 ? "wait" : "mid", U.share_txt + (U.share >= 100 ? " · 들고 가기" : U.share <= 0 ? " · 현금 지키기" : " · 나눠서"), "💼 포트 규칙과 같은 말 — " + U.cond + (U.cond2 ? " · " + U.cond2 : "")]; } catch(x) {}
     if (st != null && p.ok !== false){
       var nx = p.next || "";
       if (st >= 100) return ["buy", "주식 100% · 들고 가기", "🐻 하락장 계기판과 같은 규칙(" + (p.shape_name || "") + " 꼴) — " + nx];
@@ -47,7 +49,7 @@
     var tb = show.map(function(r, i){ return '<tr class="' + (i === 0 ? "pk" : "") + '"><td>' + e(SHORT[r.k] || r.name) + '</td><td>' + sg(r.y2_med) + '</td><td>' + sg(r.y2_worst) + '</td><td>' + r.beat_cash + '/' + r.n + '</td></tr>'; }).join("");
     var eps = m.episodes.map(function(ep){ return '<li>' + (FL[ep.nat] || "") + ' ' + e(ep.name) + ' <b>' + e(ep.date.slice(0, 7).replace("-", "년 ") + "월") + '</b><em>더 ' + mn(ep.more) + '% · 1년 뒤 ' + sg(ep.y1) + ' · 2년 뒤 ' + sg(ep.y2) + '</em></li>'; }).join("");
     var sens = (m.sens || []).map(function(s){ return "닮은 때 " + s.n + "번으로 보면 1등 「" + (SHORT[s.top[0][0]] || s.top[0][0]) + "」 · 지금 다 사기 " + sg(s.lump[0]) + " (현금보다 " + s.lump[1] + "/" + s.n + ")"; }).join(" / ");
-    return '<details class="an-r"><summary><span class="an-n">' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b><small>2년 새 ' + sg(now.run) + ' 오른 뒤 고점보다 ' + mn(now.dd) + '% · ' + now.since + '일째</small></span>' +
+    return '<details class="an-r"><summary><span class="an-n">' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b><small>2년 새 ' + sg(now.run) + ' 오른 뒤 고점보다 ' + mn((function(){ var F = window.__sayNow && __sayNow() && __sayNow().facts, f = F && F[m.key]; return f && f.dd != null ? f.dd : now.dd; })()) + '% · ' + now.since + '일째</small></span>' +
       '<span class="an-v ' + v[0] + '"><b>' + e(v[1]) + '</b></span></summary>' +
       '<div class="an-x"><p class="an-why">' + e(v[2]) + '</p><p class="an-cap">아래는 지금과 숫자가 닮았던 12번의 참고 기록이에요 — 판단은 위 규칙으로 해요</p>' + chart(m) +
       '<p class="an-cap">가는 선 = 닮았던 때 하나하나(그날 샀다면) · 굵은 선 = 가운데 길</p>' +

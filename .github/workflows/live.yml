@@ -46,11 +46,18 @@ jobs:
           # 🩺 10/30: 15:40 장 끝 ~ 16:04 첫 갱신 사이 「15:03 장중 코스피 −4.8%」가 마감(−3.5%) 뒤에도 남던 것 → 15:41~15:59 에도 한 번 더(마감판)
           M=$(TZ=Asia/Seoul date +%M); HM=$(TZ=Asia/Seoul date +%H%M); if [ "$M" -lt 15 ] || { [ "$HM" -ge 1541 ] && [ "$HM" -le 1559 ]; } || [ -n "$FORCE" ]; then python pbbrief.py || echo "PB 한 장 실패"; python proposal.py || echo "📝 제안서 기본폼 실패"; fi
           python wl_live.py || echo "⭐ 관심종목 시세 실패"   # 10/28 고객 한 장용 실시간 시세·뉴스
+      - name: 🪞 시황 자료 사본 + 🗣 말 맞춤 검사 (11/24 — mirror.yml 예약이 몇 시간씩 밀려 회사망에선 옛 문장이 보였음 → 장중 10분마다 여기서도)
+        continue-on-error: true
+        run: |
+          git clone -q --depth 1 --filter=blob:none --sparse https://github.com/chkchp0702-spec/market-strategy-report /tmp/msr
+          git -C /tmp/msr sparse-checkout set --no-cone '/market/*.json' '/brain/state.json' '/feeds/*.json' '/ledger/ledger.json'
+          python3 tools/mirror.py /tmp/msr archive/m
+          python3 tools/say_check.py /tmp/msr archive/x/say_check.json || echo "말 맞춤 검사 실패"
       - name: 저장
         run: |
           git config user.name "bot"
           git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/x/live_*.json archive/x/focus_live.json archive/x/cup_live.json archive/x/pbbrief.json archive/x/proposal.json archive/x/wl_live.json "$(cat /tmp/cp.txt)"
+          bash scripts/push.sh "live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/m archive/x/say_check.json archive/x/live_*.json archive/x/focus_live.json archive/x/cup_live.json archive/x/pbbrief.json archive/x/proposal.json archive/x/wl_live.json "$(cat /tmp/cp.txt)"
       - name: 지킴이 살아 있나 (없으면 켬)
         if: always()
         env:

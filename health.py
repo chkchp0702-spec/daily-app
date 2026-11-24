@@ -409,6 +409,15 @@ def field_errors():
     return [f"📱 실사용 오류({len(r[2].get('dev') or [])}대·{r[0]}번 · 화면 {','.join(list((r[2].get('t') or {}).keys())[:3])}): {r[1][:120]}" for r in rows[:6]]
 
 
+def say_problems():
+    """🗣 11/24 말 맞춤 검사(tools/say_check.py · live.yml 10분마다) — 원본 say.json 과 다른 말을 하는 글"""
+    try:
+        J = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "archive", "x", "say_check.json"), encoding="utf-8"))
+    except Exception:
+        return []
+    return [f"🗣 말 맞춤({p.get('k')}) {p.get('where')}: {str(p.get('text'))[:70]} → {p.get('want')}" for p in (J.get("problems") or [])[:8]]
+
+
 def main():
     data, p1 = data_checks()
     try:
@@ -420,7 +429,7 @@ def main():
     except Exception as e:
         p2 = p2 + [f"🔰 쉬운 화면 검사 실패: {str(e)[:60]}"]
     jobs, p3 = job_checks() if not LOCAL else ([], [])
-    probs = p1 + p2 + p3 + field_errors()
+    probs = p1 + p2 + p3 + field_errors() + say_problems()
     fixed = week_fixed()
     out = {"at": NOW.strftime("%Y-%m-%d %H:%M"), "ok": not probs, "problems": probs, "data": data, "app": app, "jobs": jobs, "week_fixed": fixed,
            "note": "매일 16:00 깊은 검진(모든 탭 · 내용·숫자·버튼·단추·사진). 「자가 업그레이드」(16:47)가 problems 를 모두 고치고, health-shots 브랜치의 탭 사진(<탭>_1·_2.jpg)을 눈으로 봐서 검사가 못 잡은 것도 찾아 고친 뒤 tools/deep_check.py 에 검사를 더한다. 인터넷이 막힌 곳에선 HEALTH_LOCAL=1 로 같은 검진."}

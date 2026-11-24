@@ -70,9 +70,9 @@
     R + " #main{padding-bottom:96px!important}" +
     /* ⑫ 조이 얼굴은 화면당 1개 — 카드 안·칩 안의 얼굴은 작은 ⓘ 점으로 (누르면 똑같이 조이 설명) */
     R + " h3.tt-h>.gd-b," + R + " .mk-lab.tt-h>.gd-b{width:20px!important;height:20px!important;background:var(--panel2)!important;box-shadow:inset 0 0 0 1.5px var(--line)!important;vertical-align:-3px!important;margin-left:6px!important;text-align:center;line-height:20px;color:var(--sub);font:italic 700 12px/20px Georgia,serif}" +
-    R + " h3.tt-h>.gd-b::after," + R + " .mk-lab.tt-h>.gd-b::after{content:'i'}" +
+    R + " h3.tt-h>.gd-b::after," + R + " .mk-lab.tt-h>.gd-b::after{content:'i';display:flex!important;align-items:center;justify-content:center}" +
     R + " .gd-i{width:16px!important;height:16px!important;background:var(--panel2)!important;box-shadow:inset 0 0 0 1.5px var(--line)!important;vertical-align:-3px!important;text-align:center;color:var(--sub);font:italic 700 11px/16px Georgia,serif}" +
-    R + " .gd-i::after{content:'i'}" +
+    R + " .gd-i::after{content:'i';display:flex!important;align-items:center;justify-content:center}" +   /* 🩹 11/24 글자 i 가 동그라미 밖 위로 뜸 — 누르는 칸을 넓힌 ::after(inset −12px) 안에서 글자가 왼쪽 위에 붙어서였음 → 가운데로 */
     R + " .gd-b.new::before{display:none!important}" +
     /* ⑬ 색 4개 — 운세·사주·타로 전면 색 바탕 → 카드 한 벌 안에서 강조색만 */
     R + " .tr-hero{background:var(--panel)!important;color:var(--text)!important;border:1px solid var(--line)!important;box-shadow:none!important}" +

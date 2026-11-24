@@ -1,6 +1,6 @@
 /* 📦 app.b01.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 1/8 (views.js … mine.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flow.js", "divc.js", "verdict.js", "mine.js"],[4, 570, 886, 1318, 1370, 1718, 1906, 2524, 2604]);
+__bs(1,0,["views.js", "ixchart.js", "compass.js", "problive.js", "prob.js", "flow.js", "divc.js", "verdict.js", "mine.js"],[4, 570, 886, 1318, 1370, 1718, 1906, 2524, 2616]);
 /* ======== views.js ======== */
 /* CH Investing — 탭별 화면 (그림·차트 우선, PDF는 아래 접어두기) */
 (function(){
@@ -2535,8 +2535,8 @@ __bk(6);
   function load(){
     if (P) return P;
     var t = Math.floor(Date.now() / 600000);
-    P = Promise.all([getJSON(RM + "bear.json?" + t, {ttl: 600000}).catch(function(){ return null; }), getJSON(RM + "port.json?" + t, {ttl: 600000}).catch(function(){ return null; }), getJSON(RM.replace(/market\/$/, "") + "ledger/ledger.json?" + t, {ttl: 600000}).catch(function(){ return null; })])
-      .then(function(r){ V = build(r[0], r[1], r[2]); setTimeout(function(){ P = null; }, 600000); return V; });
+    P = Promise.all([getJSON(RM + "bear.json?" + t, {ttl: 600000}).catch(function(){ return null; }), getJSON(RM + "port.json?" + t, {ttl: 600000}).catch(function(){ return null; }), getJSON(RM.replace(/market\/$/, "") + "ledger/ledger.json?" + t, {ttl: 600000}).catch(function(){ return null; }), getJSON(RM + "say.json?" + t, {ttl: 600000}).catch(function(){ return null; })])
+      .then(function(r){ V = build(r[0], r[1], r[2]); V = sayOver(V, r[3]); setTimeout(function(){ P = null; }, 600000); return V; });
     return P;
   }
   function build(B, PO, LG){
@@ -2573,10 +2573,22 @@ __bk(6);
     o.text = "🇰🇷 국내 주식: " + o.kr.st + " → " + o.kr.act + "\n🌏 해외 주식(포트): S&P500 " + o.us.st + " → " + o.us.act;
     return o;
   }
+  /* 🗣 11/24 한 목소리 — 주식 몫·선·조건은 say.json(원본 하나) 말 그대로. 낙폭 옆 「🟢 정상」 같은 딱지는 뺌(주식 몫과 엇갈려 보였음) */
+  function sayOver(o, S){
+    if (!o || !S || !S.markets) return o;
+    var M = {}; S.markets.forEach(function(m){ M[m.key] = m; });
+    var one = function(m){ return m ? m.name.replace(" (포트)", "") + " " + m.share_txt + " · " + m.cond : ""; };
+    var kr = [one(M.kospi), one(M.kosdaq)].filter(Boolean).join(" / ");
+    if (kr) o.kr.act = kr;
+    if (M.us){ o.us.act = M.us.share_txt + " · " + M.us.cond + (M.us.cond2 ? " · " + M.us.cond2 : ""); o.us.c = M.us.share != null && M.us.share < 100 ? "dn" : "up"; }
+    o.kr.st = ""; o.us.st = ""; o.word = S.word; o.say = true;
+    o.text = "오늘 규칙: " + S.word + "\n🇰🇷 국내 주식: " + o.kr.act + "\n🌏 해외 주식(포트): " + o.us.act;
+    return o;
+  }
   function html(o){
     if (!o) return "";
-    function row(f, lab, idx, L){ return '<div class="vd-r ' + L.c + '"><span class="vd-f">' + f + '</span><span class="vd-l"><b>' + lab + ' <small>' + e(idx) + ' ' + e(L.st) + ' · 고점 ' + sg(L.dd) + '</small></b><em>→ ' + e(L.act) + '</em></span></div>'; }
-    return '<div class="vd-in"><div class="vd-h">🧭 오늘의 결론 <small>' + (o.asof ? Number(o.asof.slice(5, 7)) + "/" + Number(o.asof.slice(8)) + " 종가 판정" : "종가 판정") + '</small></div>' +
+    function row(f, lab, idx, L){ return '<div class="vd-r ' + L.c + '"><span class="vd-f">' + f + '</span><span class="vd-l"><b>' + lab + ' <small>' + e(idx) + (L.st ? ' ' + e(L.st) : '') + ' · 고점 ' + sg(L.dd) + '</small></b><em>→ ' + e(L.act) + '</em></span></div>'; }
+    return '<div class="vd-in"><div class="vd-h">🧭 오늘의 결론' + (o.word ? ' · ' + e(o.word) : '') + ' <small>' + (o.asof ? Number(o.asof.slice(5, 7)) + "/" + Number(o.asof.slice(8)) + " 종가 판정" : "종가 판정") + '</small></div>' +
       row("🇰🇷", "국내 주식", o.kr.idx, o.kr) + row("🌏", "해외 주식(포트)", o.us.idx, o.us) +
       (o.split ? '<p class="vd-n">포트는 해외 ETF 위주라 국내 판정과 따로 움직여요 — 국내 주식 가진 고객은 🇰🇷 줄, 해외·연금 ETF는 🌏 줄</p>' : '') + '</div>';
   }

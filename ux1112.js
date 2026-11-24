@@ -68,7 +68,7 @@
     var hold = b.k === "hold", w = b.w_now;
     var tb = (m.methods || []).map(function(x){ return '<tr class="' + (x.k === b.k ? "pk" : "") + '"><td>' + (x.both ? "✅ " : "") + e(SHORT[x.k] || x.name) + '</td><td>' + x.cagr + '%</td><td>' + mn(x.mdd) + '%</td><td>' + x.w_now + '%</td></tr>'; }).join("");
     var bm = BM[m.key];
-    return '<details class="sc-r"><summary class="sc-bs"><span class="sc-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small class="sc-w w' + (hold ? "h" : w >= 100 ? 2 : w > 0 ? 1 : 0) + '">' + (hold ? (bm ? "🏁 시장별 방식" : "계절은 참고만") : "주식 " + w + "%") + '</small></span>' +
+    return '<details class="sc-r"><summary class="sc-bs"><span class="sc-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small class="sc-w w' + (hold ? "h" : w >= 100 ? 2 : w > 0 ? 1 : 0) + '">' + (function(){ var SH = window.__sayNow && __sayNow() && __sayNow().shares, v = SH ? SH[m.key] : null; return v != null ? "주식 " + v + "%" : hold ? (bm ? "🏁 시장별 방식" : "계절은 참고만") : "주식 " + w + "%"; })() /* 🗣 11/24 계기판과 같은 숫자(say.json shares) — 전엔 상해·항셍이 여기선 0%, 닮은 장에선 50% */ + '</small></span>' +
       band(m) + '<span class="sc-st"><b>' + s[0] + ' ' + e(s[1]) + '</b><small>' + m.now.days + '일째</small></span></summary>' +
       '<div class="sc-x"><div class="sc-d">' + dial(m) + '<ul class="sc-f">' +
         '<li><small>지금 ' + e(s[1]) + '일 때 3개월 뒤 올라 있던 비율</small><b>' + (st.up60 != null ? st.up60 + "%" : "–") + '</b><em>평균 ' + (st.avg60 > 0 ? "+" : "") + mn(st.avg60) + '%</em></li>' +

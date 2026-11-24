@@ -1,6 +1,6 @@
 /* 📦 app.b07.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 7/8 (design.js … ux1113.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(7,67,["design.js", "wow.js", "ux1105.js", "ux1105b.js", "bond_outlook.js", "ux1105c.js", "ux1109.js", "ux1109b.js", "ux1110.js", "ux1110b.js", "ux1112.js", "ux1111.js", "ux1112b.js", "ux1112c.js", "ux1112d.js", "ux1112e.js", "ux1113.js"],[4, 152, 479, 636, 1080, 1161, 1729, 1928, 1994, 2085, 2262, 2387, 2495, 2671, 2759, 2863, 2961]);
+__bs(7,67,["design.js", "wow.js", "ux1105.js", "ux1105b.js", "bond_outlook.js", "ux1105c.js", "ux1109.js", "ux1109b.js", "ux1110.js", "ux1110b.js", "ux1112.js", "ux1111.js", "ux1112b.js", "ux1112c.js", "ux1112d.js", "ux1112e.js", "ux1113.js"],[4, 152, 479, 636, 1080, 1161, 1732, 1931, 1997, 2088, 2265, 2390, 2498, 2674, 2762, 2866, 2966]);
 /* ======== design.js ======== */
 /* 🎨 디자인 한 벌 — 10/22 사용자 「다 진행해(D1~D8 + 다음)」 · 연구 문서: 프로젝트 「🎨 디자인 연구 (오늘 탭 중심) 2026-10-22」
    다른 작업과 안 부딪히게 **이 파일 하나**가 모양만 덮어씀(다른 파일의 내용·숫자·동작은 그대로). 맨 마지막에 읽힘.
@@ -222,9 +222,9 @@ __bk(67);
     R + " #main{padding-bottom:96px!important}" +
     /* ⑫ 조이 얼굴은 화면당 1개 — 카드 안·칩 안의 얼굴은 작은 ⓘ 점으로 (누르면 똑같이 조이 설명) */
     R + " h3.tt-h>.gd-b," + R + " .mk-lab.tt-h>.gd-b{width:20px!important;height:20px!important;background:var(--panel2)!important;box-shadow:inset 0 0 0 1.5px var(--line)!important;vertical-align:-3px!important;margin-left:6px!important;text-align:center;line-height:20px;color:var(--sub);font:italic 700 12px/20px Georgia,serif}" +
-    R + " h3.tt-h>.gd-b::after," + R + " .mk-lab.tt-h>.gd-b::after{content:'i'}" +
+    R + " h3.tt-h>.gd-b::after," + R + " .mk-lab.tt-h>.gd-b::after{content:'i';display:flex!important;align-items:center;justify-content:center}" +
     R + " .gd-i{width:16px!important;height:16px!important;background:var(--panel2)!important;box-shadow:inset 0 0 0 1.5px var(--line)!important;vertical-align:-3px!important;text-align:center;color:var(--sub);font:italic 700 11px/16px Georgia,serif}" +
-    R + " .gd-i::after{content:'i'}" +
+    R + " .gd-i::after{content:'i';display:flex!important;align-items:center;justify-content:center}" +   /* 🩹 11/24 글자 i 가 동그라미 밖 위로 뜸 — 누르는 칸을 넓힌 ::after(inset −12px) 안에서 글자가 왼쪽 위에 붙어서였음 → 가운데로 */
     R + " .gd-b.new::before{display:none!important}" +
     /* ⑬ 색 4개 — 운세·사주·타로 전면 색 바탕 → 카드 한 벌 안에서 강조색만 */
     R + " .tr-hero{background:var(--panel)!important;color:var(--text)!important;border:1px solid var(--line)!important;box-shadow:none!important}" +
@@ -1262,6 +1262,7 @@ __bk(71);
     o.mix = (o.L[0] === "g" && bad) ? "뉴스는 나쁜데 지수는 버티는 중 — 엇갈릴 땐 서두르지 않기" : (o.L[0] === "r" && good) ? "뉴스는 좋은데 큰 흐름은 아직 아래 — 하루 반등에 서두르지 않기" : "";
     var rd = String((b.advice && b.advice.read) || "").split(/(?:[.!?])\s+/).map(function(x){ return /[.!?]$/.test(x) ? x : x + "."; }).filter(function(x){ return x.trim(); });
     o.act = rd.length ? rd[rd.length - 1] : (((b.advice && b.advice.plan) || [])[1] || "");
+    try { var SY = window.__sayNow && __sayNow(); if (SY && SY.word && o.L) o.L[2] = "오늘 규칙 · " + SY.word; } catch(x) {}   // 🗣 11/24 이름 하나 — 「조심하는 장」 대신 say.json 의 한 단어(늘리기·지키기·줄이기)
     var md = String(b.mode || b.label || "");
     o.ph = /마감|장 끝|저녁/.test(md) ? 2 : /장중/.test(md) ? 1 : 0;
     return o;
@@ -1338,6 +1339,8 @@ __bk(71);
     var row = function(ic, lab, h, attr){ R.push('<' + (attr ? 'button type="button" ' + attr : 'div') + ' class="kr19-r"><span class="kr19-ic">' + ic + '</span><small>' + lab + '</small><p>' + h + '</p>' + (attr ? '<i>›</i>' : '') + '</' + (attr ? 'button' : 'div') + '>'); };
     var big = function(L){ return (L || []).filter(function(x){ return (x.n || 0) >= 8; }).slice(0, 2); };
     var st = big(K.strong), wk = big(K.weak);
+    var SEC = (K.sectors || []).filter(function(x){ return (x.n || 0) >= 30 && x.r != null; }).slice().sort(function(x, y){ return y.r - x.r; });   // 🗣 11/24 업종 분류 하나 — 첫 화면·한 장·업종 지도와 같은 큰 업종 표
+    if (SEC.length >= 4){ st = SEC.slice(0, 2); wk = SEC.slice(-2).reverse(); }
     if (st.length) row("🔥", "강한 업종", st.map(function(x){ var l = krNm(x.lead); return e(x.name) + ' <b class="up">' + sg(x.r) + '</b>' + (l ? ' <span class="kr19-m">' + e(l) + '</span>' : ''); }).join(" · "), 'data-ezgo="sector"');
     if (wk.length) row("🧊", "약한 업종", wk.map(function(x){ return e(x.name) + ' <b class="' + cl(x.r) + '">' + sg(x.r) + '</b>'; }).join(" · "), 'data-ezgo="sector"');
     var V = (K.value || []).slice(0, 3);
@@ -2330,7 +2333,7 @@ __bk(76);
     var hold = b.k === "hold", w = b.w_now;
     var tb = (m.methods || []).map(function(x){ return '<tr class="' + (x.k === b.k ? "pk" : "") + '"><td>' + (x.both ? "✅ " : "") + e(SHORT[x.k] || x.name) + '</td><td>' + x.cagr + '%</td><td>' + mn(x.mdd) + '%</td><td>' + x.w_now + '%</td></tr>'; }).join("");
     var bm = BM[m.key];
-    return '<details class="sc-r"><summary class="sc-bs"><span class="sc-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small class="sc-w w' + (hold ? "h" : w >= 100 ? 2 : w > 0 ? 1 : 0) + '">' + (hold ? (bm ? "🏁 시장별 방식" : "계절은 참고만") : "주식 " + w + "%") + '</small></span>' +
+    return '<details class="sc-r"><summary class="sc-bs"><span class="sc-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small class="sc-w w' + (hold ? "h" : w >= 100 ? 2 : w > 0 ? 1 : 0) + '">' + (function(){ var SH = window.__sayNow && __sayNow() && __sayNow().shares, v = SH ? SH[m.key] : null; return v != null ? "주식 " + v + "%" : hold ? (bm ? "🏁 시장별 방식" : "계절은 참고만") : "주식 " + w + "%"; })() /* 🗣 11/24 계기판과 같은 숫자(say.json shares) — 전엔 상해·항셍이 여기선 0%, 닮은 장에선 50% */ + '</small></span>' +
       band(m) + '<span class="sc-st"><b>' + s[0] + ' ' + e(s[1]) + '</b><small>' + m.now.days + '일째</small></span></summary>' +
       '<div class="sc-x"><div class="sc-d">' + dial(m) + '<ul class="sc-f">' +
         '<li><small>지금 ' + e(s[1]) + '일 때 3개월 뒤 올라 있던 비율</small><b>' + (st.up60 != null ? st.up60 + "%" : "–") + '</b><em>평균 ' + (st.avg60 > 0 ? "+" : "") + mn(st.avg60) + '%</em></li>' +
@@ -2777,7 +2780,7 @@ __bk(80);
     var own = ((P.targets.down.per_market[m.key] || {}).top || []).concat(((P.targets.crash.per_market[m.key] || {}).top || []));
     var seen = {}, ownL = own.filter(function(x){ if (seen[x.k]) return false; seen[x.k] = 1; return true; }).slice(0, 5);
     var on = {}; (d.on || []).concat(c ? c.on : [], d.own_on || [], c ? c.own_on : []).forEach(function(k){ on[k] = 1; });
-    return '<details class="sp-r"><summary><span class="sp-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small>고점보다 ' + String(m.dd).replace("-", "−") + '% · 경고 ' + d.n + '/' + d.of + '개 켜짐</small></span>' +
+    return '<details class="sp-r"><summary><span class="sp-n">' + FL[m.nat] + ' <b>' + e(m.name) + '</b><small>고점보다 ' + String((function(){ var F = window.__sayNow && __sayNow() && __sayNow().facts, f = F && F[m.key]; return f && f.dd != null ? f.dd : m.dd; })() /* 🗣 11/24 계기판과 같은 낙폭(say.json facts) */).replace("-", "−") + '% · 경고 ' + d.n + '/' + d.of + '개 켜짐</small></span>' +
       '<span class="sp-p"><b>' + (pd != null ? pd + "%" : "–") + '</b><small>평소 ' + Math.round(d.base_mk || d.base) + '% · ' + e(word) + '</small>' + bar(pd, d.base_mk || d.base) + '</span></summary>' +
       '<div class="sp-x"><p><b>6개월 안에 10% 넘게 더 빠질 확률</b> ' + (pd != null ? pd + "%" : "–") + ' (이 지수 평소 ' + Math.round(d.base_mk || d.base) + '%' + (d.p_mk_ep ? ' · 이런 때가 과거 ' + d.p_mk_ep + '번' : '') + ')</p>' +
         (c ? '<p><b>1년 안에 20% 넘게 더 빠질 확률</b> ' + (pc != null ? pc + "%" : "–") + ' (이 지수 평소 ' + Math.round(c.base_mk || c.base) + '%)</p>' : '') +
@@ -2878,6 +2881,8 @@ __bk(81);
      닮은 12번 숫자는 「참고 기록」으로만 아래에 남김 */
   function verdict(m){
     var p = m.pick || {}, st = p.stock;
+    try { var SY = window.__sayNow && __sayNow(), U = SY && SY.us;   // 🗣 11/24 3번 — S&P500·나스닥 줄은 💼 포트 규칙과 같은 말(say.json us)
+      if (U && U.share != null && (U.keys || []).indexOf(m.key) >= 0) return [U.share >= 100 ? "buy" : U.share <= 0 ? "wait" : "mid", U.share_txt + (U.share >= 100 ? " · 들고 가기" : U.share <= 0 ? " · 현금 지키기" : " · 나눠서"), "💼 포트 규칙과 같은 말 — " + U.cond + (U.cond2 ? " · " + U.cond2 : "")]; } catch(x) {}
     if (st != null && p.ok !== false){
       var nx = p.next || "";
       if (st >= 100) return ["buy", "주식 100% · 들고 가기", "🐻 하락장 계기판과 같은 규칙(" + (p.shape_name || "") + " 꼴) — " + nx];
@@ -2910,7 +2915,7 @@ __bk(81);
     var tb = show.map(function(r, i){ return '<tr class="' + (i === 0 ? "pk" : "") + '"><td>' + e(SHORT[r.k] || r.name) + '</td><td>' + sg(r.y2_med) + '</td><td>' + sg(r.y2_worst) + '</td><td>' + r.beat_cash + '/' + r.n + '</td></tr>'; }).join("");
     var eps = m.episodes.map(function(ep){ return '<li>' + (FL[ep.nat] || "") + ' ' + e(ep.name) + ' <b>' + e(ep.date.slice(0, 7).replace("-", "년 ") + "월") + '</b><em>더 ' + mn(ep.more) + '% · 1년 뒤 ' + sg(ep.y1) + ' · 2년 뒤 ' + sg(ep.y2) + '</em></li>'; }).join("");
     var sens = (m.sens || []).map(function(s){ return "닮은 때 " + s.n + "번으로 보면 1등 「" + (SHORT[s.top[0][0]] || s.top[0][0]) + "」 · 지금 다 사기 " + sg(s.lump[0]) + " (현금보다 " + s.lump[1] + "/" + s.n + ")"; }).join(" / ");
-    return '<details class="an-r"><summary><span class="an-n">' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b><small>2년 새 ' + sg(now.run) + ' 오른 뒤 고점보다 ' + mn(now.dd) + '% · ' + now.since + '일째</small></span>' +
+    return '<details class="an-r"><summary><span class="an-n">' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b><small>2년 새 ' + sg(now.run) + ' 오른 뒤 고점보다 ' + mn((function(){ var F = window.__sayNow && __sayNow() && __sayNow().facts, f = F && F[m.key]; return f && f.dd != null ? f.dd : now.dd; })()) + '% · ' + now.since + '일째</small></span>' +
       '<span class="an-v ' + v[0] + '"><b>' + e(v[1]) + '</b></span></summary>' +
       '<div class="an-x"><p class="an-why">' + e(v[2]) + '</p><p class="an-cap">아래는 지금과 숫자가 닮았던 12번의 참고 기록이에요 — 판단은 위 규칙으로 해요</p>' + chart(m) +
       '<p class="an-cap">가는 선 = 닮았던 때 하나하나(그날 샀다면) · 굵은 선 = 가운데 길</p>' +

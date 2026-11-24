@@ -24,6 +24,19 @@ def jl(p, d=None):
         return d
 
 
+def clip(t, n):
+    """🩹 11/24 글자 수로 뚝 자르면 「…쫓지 말고, 美 200일선」처럼 문장이 중간에 끊김 → n 자 안에서 마지막 마디(· — , . ｜) 끝에서 자름"""
+    t = (t or "").strip()
+    if len(t) <= n:
+        return t
+    cut = t[:n]
+    best = max(cut.rfind(x) for x in (". ", " ｜ ", " — "))          # 큰 마디 먼저(문장·｜·—) — 「…쫓지 말고」처럼 쉼표에서 끊으면 여전히 덜 끝난 말
+    if best < n * 0.4:
+        best = max(cut.rfind(x) for x in (" · ", ", "))
+    if best < n * 0.4:
+        best = cut.rfind(" ")
+    return cut[:best].rstrip(" ,·—｜") if best > 0 else cut
+
 def strip(t):
     return re.sub(r"<[^>]+>", "", re.sub(r"<br\s*/?>", " ｜ ", str(t or ""), flags=re.I)).replace("&nbsp;", " ").replace("\n", " ").strip()   # 11/10: <br> 을 그냥 지워 「−8%유가발」처럼 두 문장이 붙던 것
 
@@ -144,7 +157,7 @@ def closed_view(d):
     elif moves:
         one = "마지막 장은 시장마다 엇갈렸어요 — " + " · ".join(f"{m[0]} {sg(m[1])}" for m in moves[:5])
     else:
-        one = strip(d.get("one_liner"))[:90]
+        one = clip(strip(d.get("one_liner")), 130)
     base = ud or NOW.date()
     lab = f"주말판 · {base.month}/{base.day}({WDK[base.weekday()]}) 마감 기준" if NOW.weekday() >= 5 else f"휴장 · {base.month}/{base.day} 마감 기준"
     return {"label": lab, "one": one, "talk": talk[:4]}
@@ -295,7 +308,7 @@ def advice(d):
 def main():
     d = market_data()
     reg = regime_line()
-    one = strip(d.get("one_liner"))[:90]
+    one = clip(strip(d.get("one_liner")), 130)
     kk = [strip(x) for x in ((d.get("kakao") or {}).get("lines") or [])] or [strip(x) for x in ((d.get("summary") or {}).get("three_lines") or [])]
     hh, mi = NOW.hour, NOW.minute
     live = intraday(d) if NOW.weekday() < 5 and (9 <= hh < 15 or (hh == 15 and mi <= 40)) else None
@@ -318,7 +331,7 @@ def main():
         if lab == "마감" and L.get("index"):
             # 🩺 10/29 아침 한 줄(어제 「코스피 6,012(+6.6%)」)이 오늘 마감 −1.2% 옆에 그대로 나와 오늘 숫자처럼 보이던 것 → 코스피·코스닥 문장은 오늘 마감으로 바꿈
             keep = [x for x in re.split(r"(?<=[.!?])\s+", one) if x and not re.search(r"코스피|코스닥", x)]
-            one = (f"코스피 {ks.get('last', 0):,.0f}({sg(ks.get('chg'))}) 마감. " + " ".join(keep)).strip()[:110]
+            one = clip((f"코스피 {ks.get('last', 0):,.0f}({sg(ks.get('chg'))}) 마감. " + " ".join(keep)).strip(), 110)
         out = {"mode": lab, "asof": f"{TODAY} {NOW.strftime('%H:%M')}", "label": f"{d.get('date', TODAY)[5:].replace('-', '/')} {lab}", "regime": reg, "one": one, "talk": talk, "events": events(d)}
     try:
         out["advice"] = advice(d)

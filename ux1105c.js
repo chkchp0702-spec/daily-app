@@ -101,6 +101,7 @@
     o.mix = (o.L[0] === "g" && bad) ? "뉴스는 나쁜데 지수는 버티는 중 — 엇갈릴 땐 서두르지 않기" : (o.L[0] === "r" && good) ? "뉴스는 좋은데 큰 흐름은 아직 아래 — 하루 반등에 서두르지 않기" : "";
     var rd = String((b.advice && b.advice.read) || "").split(/(?:[.!?])\s+/).map(function(x){ return /[.!?]$/.test(x) ? x : x + "."; }).filter(function(x){ return x.trim(); });
     o.act = rd.length ? rd[rd.length - 1] : (((b.advice && b.advice.plan) || [])[1] || "");
+    try { var SY = window.__sayNow && __sayNow(); if (SY && SY.word && o.L) o.L[2] = "오늘 규칙 · " + SY.word; } catch(x) {}   // 🗣 11/24 이름 하나 — 「조심하는 장」 대신 say.json 의 한 단어(늘리기·지키기·줄이기)
     var md = String(b.mode || b.label || "");
     o.ph = /마감|장 끝|저녁/.test(md) ? 2 : /장중/.test(md) ? 1 : 0;
     return o;
@@ -177,6 +178,8 @@
     var row = function(ic, lab, h, attr){ R.push('<' + (attr ? 'button type="button" ' + attr : 'div') + ' class="kr19-r"><span class="kr19-ic">' + ic + '</span><small>' + lab + '</small><p>' + h + '</p>' + (attr ? '<i>›</i>' : '') + '</' + (attr ? 'button' : 'div') + '>'); };
     var big = function(L){ return (L || []).filter(function(x){ return (x.n || 0) >= 8; }).slice(0, 2); };
     var st = big(K.strong), wk = big(K.weak);
+    var SEC = (K.sectors || []).filter(function(x){ return (x.n || 0) >= 30 && x.r != null; }).slice().sort(function(x, y){ return y.r - x.r; });   // 🗣 11/24 업종 분류 하나 — 첫 화면·한 장·업종 지도와 같은 큰 업종 표
+    if (SEC.length >= 4){ st = SEC.slice(0, 2); wk = SEC.slice(-2).reverse(); }
     if (st.length) row("🔥", "강한 업종", st.map(function(x){ var l = krNm(x.lead); return e(x.name) + ' <b class="up">' + sg(x.r) + '</b>' + (l ? ' <span class="kr19-m">' + e(l) + '</span>' : ''); }).join(" · "), 'data-ezgo="sector"');
     if (wk.length) row("🧊", "약한 업종", wk.map(function(x){ return e(x.name) + ' <b class="' + cl(x.r) + '">' + sg(x.r) + '</b>'; }).join(" · "), 'data-ezgo="sector"');
     var V = (K.value || []).slice(0, 3);
