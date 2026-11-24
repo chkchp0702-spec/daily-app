@@ -56,13 +56,39 @@ def _add_vint(txt, tag):
         if 2000 <= t_.year <= 2027 and 8 <= t_.day <= 22 and t_.weekday() < 5:
             CD.add(t_); k += 1
     SRC.append((tag, k)); print("cpi src", tag, k, flush=True)
-TRY = [("alfred_html", "https://alfred.stlouisfed.org/series?seid=CPIAUCNS"),
+def _add_text(txt, tag):
+    k = 0
+    for m in re.finditer(r"([A-Z][a-z]+)\.?\s+(\d{1,2}),\s+((?:19|20)\d\d)", txt):
+        if m.group(1) in MON:
+            t_ = pd.Timestamp(int(m.group(3)), MON[m.group(1)], int(m.group(2)))
+            if 8 <= t_.day <= 22 and t_.weekday() < 5: CD.add(t_); k += 1
+    SRC.append((tag, k)); print("cpi src", tag, k, flush=True)
+# 11/24 2차: fred 연도별 발표 달력(rid=10 = CPI)
+try:
+    r = requests.get("https://fred.stlouisfed.org/releases/calendar?rid=10&y=2015", headers=UA, timeout=15)
+    print("cpi fredcal 2015", r.status_code, len(r.text), flush=True)
+    if r.status_code == 200 and "2015" in r.text:
+        i_ = r.text.find("2015"); print(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", r.text))[:1500], flush=True)
+        for y in range(2006, 2027):
+            try:
+                t = requests.get(f"https://fred.stlouisfed.org/releases/calendar?rid=10&y={y}", headers=UA, timeout=15).text
+                _add_text(re.sub(r"<[^>]+>", " ", t), f"fredcal{y}")
+            except Exception as e:
+                print("fredcal", y, e, flush=True)
+except Exception as e:
+    print("cpi err fredcal", e, flush=True)
+for u_ in ("https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0", "https://www.bls.gov/cpi/"):
+    try:
+        r = requests.get(u_, headers={"User-Agent": "Mozilla/5.0"}, timeout=15); print("cpi try", u_, r.status_code, len(r.text), flush=True)
+    except Exception as e:
+        print("cpi err", u_, e, flush=True)
+TRY = [] if len([x for x in CD if 2006 <= x.year <= 2020]) >= 150 else [("alfred_html", "https://alfred.stlouisfed.org/series?seid=CPIAUCNS"),
        ("alfred_dl", "https://alfred.stlouisfed.org/series/downloaddata?seid=CPIAUCNS"),
        ("alfred_vint", "https://alfred.stlouisfed.org/graph/api/series/?id=CPIAUCNS"),
        ("bls_arch", "https://www.bls.gov/bls/news-release/cpi.htm")]
 for tag, url in TRY:
     try:
-        r = requests.get(url, headers=UA, timeout=40)
+        r = requests.get(url, headers=UA, timeout=15)
         print("cpi", tag, r.status_code, len(r.text), r.text[:200].replace("\n", " "), flush=True)
         if r.status_code == 200:
             if tag == "bls_arch":
