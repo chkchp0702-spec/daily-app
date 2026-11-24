@@ -3622,14 +3622,18 @@ __bk(15);
       var M = r[0], K = r[1]; if (!M) return null;
       var t0 = M.tiles[0], t1 = M.tiles[1], mood = moodOf(t0 ? t0.chg : 0);
       var SN = M.isT && K ? (K.snaps || []) : [], line = SN.length >= 3 ? {a: SN.map(function(x){ return x[3]; }), b: SN.map(function(x){ return x[4]; }), la: "코스피", lb: "코스닥", from: SN[0][0]} : null;
-      var rows = M.rows.map(function(x){ return {n: x.name, v: x.share_txt, v2: x.dist_txt + (x.prev_txt ? " · " + x.prev_txt : ""), s: x.cond}; });
+      var E = M.easy || null;
+      var rows = E ? E.rows.map(function(x){ return {n: x.name, v: x.lab, s: (x.when ? "다시 사는 때: " + x.when : "") + (x.far ? " · " + x.far.replace(/^지금 [\d,.]+ · /, "") : "")}; })
+        : M.rows.map(function(x){ return {n: x.name, v: x.share_txt, v2: x.dist_txt + (x.prev_txt ? " · " + x.prev_txt : ""), s: x.cond}; });
+      var bots = E && E.bot.length ? E.bot.map(function(b){ return {n: b.name + " — " + ["아직 바닥 신호 아님", "바닥 근처일 수 있음", "바닥 가능성 높아짐", "바닥 다지는 중"][b.lv], s: b.t}; }) : [];
       var why = M.why.map(function(w){ return {n: w.k + " — " + w.t}; });
       return {kind: "screen", scene: "city_" + mood, mood: mood, title: "오늘 시장 한 장", sub: M.when,
         hero: t0 ? {l: "🇰🇷 코스피 " + t0.v, v: sg1(t0.chg), c: cOf(t0.chg), s: M.one.slice(0, 2).join(" · ")} : null,
         stats: [t1 ? {l: "코스닥 " + t1.v, v: sg1(t1.chg), c: cOf(t1.chg)} : null].filter(Boolean),
-        blocks: [["note", {h: "🗣 오늘 한 문장 · " + M.word, t: (M.lead ? M.lead + ", " : "") + M.tail + (M.num ? " — " + M.num : ""), tone: M.word_key === "up" ? "info" : "warn", max: 4}],
+        blocks: [["note", {h: "🗣 오늘 한 문장 · " + M.word, t: E ? E.h1 + ". " + E.h2 + "." + (E.num ? " " + E.num : "") : (M.lead ? M.lead + ", " : "") + M.tail + (M.num ? " — " + M.num : ""), tone: M.word_key === "up" ? "info" : "warn", max: 5}],
           ["line", line],
-          ["list", {title: "📏 지금 주식 몫 · 다시 늘리는 선까지 남은 거리", items: rows, rank: false, wrap2: true}],
+          ["list", {title: E ? "📏 시장마다 주식을 얼마나 · 다시 사는 때" : "📏 지금 주식 몫 · 다시 늘리는 선까지 남은 거리", items: rows, rank: false, wrap2: true}],
+          ["list", bots.length ? {title: "🔦 바닥인가요?", items: bots, rank: false, wrap2: true} : null],
           ["list", why.length ? {title: "🔎 " + (M.whyTitle || "오늘 장"), items: why, rank: false, wrap2: true} : null]],
         note: "종가 기준 규칙 판정 · 장중 숫자는 한국거래소 시세(10분마다) · 과거 기록에 따른 참고 자료"};
     });

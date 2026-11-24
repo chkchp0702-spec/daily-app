@@ -7,7 +7,7 @@
    say.json 을 못 받으면 아무것도 안 바꿈 → 예전 첫 화면 그대로 */
 (function(){
   var RM = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/";
-  var S = null, K = null, FU = null, FL = "", T0 = 0, OPEN = {};
+  var S = null, K = null, FU = null, FL = "", T0 = 0, OPEN = {}, PT = null, BR = null, FB = null, BN = null;
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
   function gj(u, ttl){ if (!window.getJSON) return Promise.resolve(null); return getJSON(u + (u.indexOf("?") < 0 ? "?" : "&") + Math.floor(Date.now() / (ttl || 300000)), {ttl: ttl || 300000}).catch(function(){ return null; }); }
   function kst(){ return new Date(Date.now() + 9 * 3600e3); }
@@ -21,8 +21,9 @@
 
   function load(){
     if (S && Date.now() - T0 < 120000) return Promise.resolve(S);
-    return Promise.all([gj(RM + "say.json", 120000), gj("archive/x/live_kr.json", 120000), gj("archive/x/live_us_pre.json", 120000), window.__flowLine ? window.__flowLine().catch(function(){ return ""; }) : ""])
-      .then(function(r){ if (r[0] && r[0].markets){ var first = !S; S = r[0]; T0 = Date.now(); if (first) setTimeout(function(){ try { if (window.__h2apply) __h2apply(true); } catch(x) {} }, 60); } K = r[1] || K; FU = r[2] || FU; FL = r[3] || FL; return S; });
+    return Promise.all([gj(RM + "say.json", 120000), gj("archive/x/live_kr.json", 120000), gj("archive/x/live_us_pre.json", 120000), window.__flowLine ? window.__flowLine().catch(function(){ return ""; }) : "",
+      gj(RM + "port.json", 600000), gj(RM + "bear.json", 300000), gj(RM + "floor_bt.json", 3600000), gj(RM.replace(/market\/$/, "brain/") + "state.json", 600000)])
+      .then(function(r){ if (r[0] && r[0].markets){ var first = !S; S = r[0]; T0 = Date.now(); if (first) setTimeout(function(){ try { if (window.__h2apply) __h2apply(true); } catch(x) {} }, 60); } K = r[1] || K; FU = r[2] || FU; FL = r[3] || FL; PT = r[4] || PT; BR = r[5] || BR; FB = r[6] || FB; BN = r[7] || BN; return S; });
   }
   window.__sayNow = function(){ return S; };
   window.__sayLoad = load;
@@ -39,7 +40,7 @@
     var rows = S.markets.map(function(r){
       var px = isT && r.key === "kospi" && kp ? kp.last : isT && r.key === "kosdaq" && kq ? kq.last : null;
       var d = px && r.line ? (r.line / px - 1) * 100 : r.dist, live = px != null;
-      var o = {key: r.key, name: r.name, share: r.share, share_txt: r.share_txt, cond: r.cond, line_txt: r.line_txt || r.cond, cond2: r.cond2 || "", dist: d, live: live,
+      var o = {key: r.key, name: r.name, share: r.share, share_txt: r.share_txt, cond: r.cond, line_txt: r.line_txt || r.cond, line: r.line, line_name: r.line_name || "", px: px || r.close, cond2: r.cond2 || "", dist: d, live: live,
         dist_txt: d == null ? "" : dtxt(d), prev_txt: live && r.dist != null && Math.abs(r.dist - d) >= 0.3 ? "어제 " + (r.dist > 0 ? "+" : "−") + Math.abs(r.dist).toFixed(1) + "%" : "",
         fill: d == null ? 0 : Math.max(3, Math.min(100, 100 - d * 3.3)), prev_fill: r.dist == null ? null : Math.max(3, Math.min(100, 100 - r.dist * 3.3)), move: r.move};
       if (r.key === "us" && fut && fut.chg != null && r.close && r.line){ o.fut = fut.chg; o.fut_over = r.close * (1 + fut.chg / 100) > r.line; }
@@ -70,6 +71,7 @@
     if (flow) why.push({k: "누가 샀나", h: e(flow).replace(/([+][\d,.]+(?:억|조))/g, '<b class="up">$1</b>').replace(/(−[\d,.]+(?:억|조))/g, '<b class="dn">$1</b>'), t: flow, go: "flow"});
     var one = [fm ? "외국인 " + fm[1] : "", secs.length ? "강한 곳 " + secs[0].name + " " + sg(secs[0].r) : "", upr != null ? "오른 종목 " + upr + "%" : ""].filter(Boolean);
     return {word: S.word, word_key: wk, why_word: S.why, lead: lead, tail: tail, num: num, tiles: tiles, rows: rows, when: when, isT: isT, big: big,
+      kdate: K && K.date, numsel: (S.nums || []).filter(function(n){ return (n.when === "kospi_up3" && big != null && big >= 3) || (n.when === "kosdaq_up3" && isT && kq && kq.chg >= 3 && !(big >= 3)); })[0] || null,
       whyTitle: !K || !K.date ? "" : isT ? (big != null && big < 0 ? "오늘 왜 내렸나" : "오늘 왜 올랐나") : md(K.date) + " 장은 이랬어요", why: why, one: one, note: S.note};
   }
   /* 🩹 11/24 사용자 「장난하냐」 — 앱은 새것인데 say.json 이 계단(steps) 넣기 전 캐시 파일이면 「지금」 칸 하나만 그려졌음 → 줄 정보(선·거리·조건)로 계단을 직접 만듦 */
@@ -84,17 +86,74 @@
     if (r.key === "kosdaq" && sh === 50) return [{share: 50, cond: "절반은 지금부터 들고 감", now: true}, Object.assign({share: 75}, up), {share: 100, cond: "200일선 위로", dir: "up"}];
     return [{share: sh, cond: "현금으로 기다림", now: true}, Object.assign({share: 100}, up)];
   }
-  window.__sayModel = function(){ return load().then(model); };
+  window.__sayModel = function(){ return load().then(function(){ var M = model(); if (M) try { M.easy = easy(M); } catch(x) {} return M; }); };
 
   /* ── 그리기 ── */
+  /* 🧒 11/24 저녁 사용자 「자세히는 놔두고 · 직관적이고 중학생도 이해하게 오늘을 쉽게 · 두뇌가 바닥·주식/현금 비중도 줄 거니 그거에 맞춰」
+     ① 한 문장(쉬운 말) ② 100만원이 있다면(주식·금·현금 그림) ③ 시장마다 10칸 중 몇 칸 + 다시 사는 때 ④ 바닥인가요? 4단계 — 어려운 말(○○일선·계단·같은 꼴) 은 첫 화면에서 뺌(근거·자세히엔 그대로)
+     🧠 두뇌 자리: brain/state.json 의 easy 가 있으면 그 말을 먼저 씀 — {at, say, sub, mix:{stock,gold,cash}, bottom:{kospi:{lv:"gray|orange|yellow|green", t}, kosdaq:{…}, us:{…}}, todo}. 없으면 원본(say.json)·포트(port.json)·바닥 점검표(bear.json floor)로 그림 */
+  var LVN = {gray: 0, orange: 1, yellow: 2, green: 3}, LVT = ["아직 바닥 신호가 아니에요", "많이 빠져서 바닥 근처일 수 있어요", "바닥일 가능성이 높아졌어요", "바닥을 다지는 중이에요"], LVI = ["⚪", "🟠", "🟡", "🟢"];
+  function easy(M){
+    var BE = (BN && BN.easy) || {}, big = M.big, wk = M.word_key, day = M.isT ? "오늘" : (md(M.kdate) || "지난 장");
+    var mv = big == null ? "" : big >= 3 ? "크게 올랐어요" : big >= 0.5 ? "올랐어요" : big > -0.5 ? "거의 그대로예요" : big > -3 ? "내렸어요" : "크게 내렸어요";
+    var t0 = M.tiles[0], h1 = mv ? day + " 코스피가 " + mv : (t0 ? day + " 코스피 " + sg(t0.chg) : "오늘의 시장");
+    var but = (big != null && ((big >= 3 && wk !== "up") || (big <= -3 && wk === "up"))) ? "하지만 " : "";
+    var h2 = wk === "up" ? "주식을 늘려도 되는 때예요" : wk === "down" ? "오늘은 주식을 줄이는 날이에요" : "아직은 현금을 들고 기다릴 때예요";
+    var ns = M.numsel, num = ns && ns.n ? "이번 하락장에서 이렇게 크게 오른 날이 " + ns.n + "번 있었는데, 그중 " + ns.broke + "번은 그 뒤에 더 내려갔어요." : "";
+    // ② 100만원이 있다면 — 두뇌가 주면 그 값, 아니면 💼 기본 포트의 오늘 실제 비중
+    var mix = null, src = "";
+    if (BE.mix && BE.mix.stock != null){ mix = {stock: +BE.mix.stock, gold: +(BE.mix.gold || 0), cash: BE.mix.cash != null ? +BE.mix.cash : Math.max(0, 100 - BE.mix.stock - (BE.mix.gold || 0))}; src = "🧠 두뇌 판단"; }
+    else if (PT && PT.rule && PT.rule.now){ var N = PT.rule.now, g = 0, c = 0, st = 0; Object.keys(N).forEach(function(k){ var v = +N[k] || 0; if (/^금/.test(k)) g += v; else if (/현금|단기채|채권/.test(k)) c += v; else st += v; }); mix = {stock: st, gold: g, cash: c}; src = "💼 기본 포트 기준"; }
+    if (mix){ var tt = mix.stock + mix.gold + mix.cash || 100; mix.stock = Math.round(mix.stock / tt * 100); mix.gold = Math.round(mix.gold / tt * 100); mix.cash = 100 - mix.stock - mix.gold; mix.src = src; }
+    // ③ 시장마다 10칸
+    var NM = {kospi: ["코스피", "한국 큰 회사들"], kosdaq: ["코스닥", "한국 작은·기술 회사들"], us: ["미국", "미국 큰 회사들"]}, AVG = {"50일선": "최근 50일 평균값", "200일선": "최근 열 달 평균값", "20일선": "최근 한 달 평균값"};
+    var rows = M.rows.map(function(r){
+      var sh = r.share == null ? null : r.share, full = sh != null && sh >= 100, nx = (r.steps || []).filter(function(t){ return !t.now && t.dir === "up" && t.dist != null; })[0];
+      var lab = sh == null ? r.share_txt : sh <= 0 ? "주식 없음 · 전부 현금" : sh >= 100 ? "전부 주식" : sh === 50 ? "절반만 주식" : "주식 " + sh + "%";
+      var when = "", far = "";
+      if (!full && r.line){ when = n0(r.line) + " 위로 올라오면" + (r.key === "us" ? " (3일 버티면)" : "") + " " + (nx && nx.share < 100 ? "더 사요" : "다시 다 사요");
+        if (r.dist != null) far = r.dist > 0.05 ? "지금 " + n0(r.px) + " · " + r.dist.toFixed(1) + "% 더 올라야 해요" : "지금 " + n0(r.px) + " · 선을 넘었어요";
+        if (r.prev_txt && r.dist > 0.05) far += " (" + r.prev_txt.replace("어제 +", "어제는 ") + ")"; }
+      else if (full && r.line) when = n0(r.line) + " 아래로 내려가면 줄여요";
+      return {key: r.key, name: (NM[r.key] || [r.name])[0], gloss: (NM[r.key] || ["", ""])[1], share: sh, lab: lab, when: when, far: far, avg: AVG[r.line_name] || "", fut: r.fut};
+    });
+    // ④ 바닥인가요?
+    var bm = {}; ((BR && BR.markets) || []).forEach(function(m){ bm[m.key] = m; });
+    var bot = [["kospi", "코스피"], ["kosdaq", "코스닥"], ["sp500", "미국"]].map(function(x){
+      var f = bm[x[0]] && bm[x[0]].floor, be = BE.bottom && (BE.bottom[x[0]] || (x[0] === "sp500" && BE.bottom.us));
+      if (be && be.lv){ return {name: x[1], lv: LVN[be.lv] || 0, t: be.t || "", brain: true}; }
+      if (!f || !f.cells) return null;
+      var S_ = f.cells.filter(function(c){ return c.g === "sell" && c.st !== "na"; }).length, C_ = f.cells.filter(function(c){ return c.g === "conf" && c.st !== "na"; }).length;
+      var a = S_ ? f.sell_on / S_ : 0, b = C_ ? f.conf_on / C_ : 0;
+      return {name: x[1], lv: LVN[f.lv] || 0, t: (a >= 0.75 ? "팔 사람은 거의 다 팔았어요" : a >= 0.5 ? "팔 사람이 꽤 팔았어요" : "아직 덜 팔았어요") + " · " + (b >= 0.6 ? "사는 사람이 돌아왔어요" : b >= 0.3 ? "사는 사람이 조금 보여요" : "사는 사람은 아직이에요")};
+    }).filter(Boolean);
+    var pf = FB && FB.pooled && FB.pooled.first, cav = "";
+    if (pf && pf.orange && pf.yellow && bot.some(function(x){ return x.lv === 1; })) cav = "과거에 🟠 신호 뒤에는 10번 중 " + Math.round(pf.orange.broke / 10) + "번 한 번 더 내려갔어요. 🟡·🟢이 되면 그 위험이 절반쯤으로 줄었어요.";
+    return {icon: wk === "up" ? "☀️" : wk === "down" ? "🌧" : "⛅", h1: BE.say || h1 + (mv && t0 ? " (" + sg(t0.chg) + ")" : ""), h2: BE.sub || but + h2, why: M.why_word, num: num, todo: BE.todo || "", mix: mix, rows: rows, bot: bot, cav: cav, brain: !!(BE.say || BE.sub)};
+  }
+  function cells10(sh){ var h = ""; for (var i = 0; i < 10; i++){ var f = sh == null ? 0 : Math.max(0, Math.min(1, (sh - i * 10) / 10)); h += '<i' + (f >= 1 ? ' class="on"' : f > 0 ? ' class="hf"' : '') + '></i>'; } return h; }
   function heroHtml(M){
+    var E = easy(M); M.easy = E;
     var h = '<div class="say-top"><span>' + e(M.when) + '</span></div>' +
-      '<div class="say-head w-' + M.word_key + '"><div class="say-bd"><b>' + e(M.word) + '</b><span>' + e(M.why_word || "") + '</span></div>' +
-      '<p class="say-h1">' + (M.lead ? e(M.lead) + ',<br>' : '') + e(M.tail) + '</p>' + (M.num ? '<p class="say-num">' + e(M.num) + '</p>' : '') + '</div>';
+      '<div class="say-head ez w-' + M.word_key + '"><div class="ez-hd"><span class="ez-ic" aria-hidden="true">' + E.icon + '</span><div><p class="say-h1">' + e(E.h1) + '</p><p class="ez-h2">' + e(E.h2) + '</p></div></div>' +
+      '<div class="say-bd"><b>' + e(M.word) + '</b><span>' + e(E.why || "") + (E.brain ? ' · 🧠 두뇌' : '') + '</span></div>' + (E.num ? '<p class="say-num">' + e(E.num) + '</p>' : '') + (E.todo ? '<p class="say-num">👉 ' + e(E.todo) + '</p>' : '') + '</div>';
     if (M.tiles.length) h += '<div class="say-ts">' + M.tiles.map(function(t){ return '<div><small>' + e(t.n) + (M.isT ? '' : ' · 지난 장') + '</small><p><b class="' + cl(t.chg) + '">' + sg(t.chg) + '</b><em>' + e(t.v) + '</em></p></div>'; }).join("") + '</div>';
-    h += '<div class="say-sh"><div class="say-shh"><b>지금 주식 몫 · 다음 계단</b><span>규칙이 밟는 단계</span></div>' + M.rows.map(stepRow).join("") + '</div>';
+    if (E.mix){ var m = E.mix;
+      h += '<button type="button" class="say-sh ez-mix" data-saynav="port" data-j="1"><span class="say-shh"><b>💰 100만원이 있다면</b><span>' + e(m.src) + '</span></span>' +
+        '<span class="ez-bar" role="img" aria-label="주식 ' + m.stock + ' 금 ' + m.gold + ' 현금 ' + m.cash + '">' + (m.stock > 0 ? '<i class="zs" style="flex:' + m.stock + '"></i>' : '') + (m.gold > 0 ? '<i class="zg" style="flex:' + m.gold + '"></i>' : '') + (m.cash > 0 ? '<i class="zc" style="flex:' + m.cash + '"></i>' : '') + '</span>' +
+        '<span class="ez-lg"><span><i class="zs"></i>주식 <b>' + m.stock + '만원</b></span>' + (m.gold > 0 ? '<span><i class="zg"></i>금 <b>' + m.gold + '만원</b></span>' : '') + '<span><i class="zc"></i>현금 <b>' + m.cash + '만원</b></span></span>' +
+        '<span class="ez-nt">' + (m.cash >= 50 ? "절반 넘게 현금으로 쉬고 있어요 — 오르는 장일 때보다 주식을 많이 줄여 둔 상태예요" : m.stock >= 70 ? "대부분 주식에 들어가 있어요" : "주식과 현금을 나눠 들고 있어요") + '</span></button>'; }
+    h += '<div class="say-sh"><div class="say-shh"><b>시장마다 주식을 얼마나?</b><span>■ 한 칸 = 10%</span></div>' + E.rows.map(function(r){
+      return '<button type="button" class="say-r ez-r" data-saygo="rule" data-j="1"><span class="say-rn"><b>' + e(r.name) + ' <small>' + e(r.gloss) + '</small></b><strong>' + e(r.lab) + '</strong></span>' +
+        '<span class="ez-c10">' + cells10(r.share) + '</span>' +
+        (r.when ? '<span class="ez-wh"><em>🔓 다시 사는 때</em> ' + e(r.when) + (r.avg ? ' <small>(' + e(r.avg) + ')</small>' : '') + '</span>' : '') +
+        (r.far ? '<span class="ez-far">' + e(r.far) + (r.fut != null ? ' · 밤사이 선물 ' + sg(r.fut) : '') + '</span>' : '') + '</button>'; }).join("") + '</div>';
+    if (E.bot.length) h += '<button type="button" class="say-sh ez-bt" data-saygo="rule" data-j="1"><span class="say-shh"><b>🔦 바닥인가요?</b><span>4단계 중 지금</span></span>' + E.bot.map(function(b){
+      return '<span class="ez-b"><span class="ez-bn"><b>' + e(b.name) + '</b><span class="ez-st">' + [0, 1, 2, 3].map(function(i){ return '<i class="' + (i === b.lv ? "now l" + i : i < b.lv ? "past" : "") + '"></i>'; }).join("") + '</span></span>' +
+        '<span class="ez-bv">' + LVI[b.lv] + ' ' + LVT[b.lv] + '</span><span class="ez-bs">' + e(b.t) + (b.brain ? ' · 🧠' : '') + '</span></span>'; }).join("") +
+      (E.cav ? '<span class="ez-nt">' + e(E.cav) + '</span>' : '') + '</button>';
     h += '<button type="button" class="say-cta" data-saysend="1">📨 이 화면 고객에게 한 장</button>';
-    if (M.why.length) h += '<div class="say-why"><div class="say-shh"><b>' + e(M.whyTitle) + '</b></div>' + M.why.map(function(w){ return '<div class="say-w"' + (w.go ? ' data-ezgo="' + w.go + '"' : '') + '><small>' + e(w.k) + '</small><p>' + w.h + '</p></div>'; }).join("") + '</div>';
+    if (M.why.length) h += '<div class="say-why"><div class="say-shh"><b>' + e(M.whyTitle) + '</b></div>' + M.why.map(function(w){ return '<div class="say-w"' + (w.go ? ' data-ezgo="' + w.go + '"' : '') + '><small>' + e({"강한 업종": "잘 나간 업종", "약한 업종": "부진한 업종", "돈 몰린 종목": "돈이 몰린 회사"}[w.k] || w.k) + '</small><p>' + w.h + '</p></div>'; }).join("") + '</div>';
     return h;
   }
   /* 🪜 11/24 사용자 「막대그래프보다 좀 더 직관적으로 · 0·50·100% 는 너무 성의 없지 않니」 — 몫 하나만 보여 주던 막대 → 규칙이 밟는 계단 전체(지금 칸 · 다음 칸까지 남은 거리 · 어제보다 얼마나 다가왔나) + 같은 꼴 장의 이익 확률 */
@@ -147,6 +206,8 @@
       return; }
     var g = ev.target.closest("[data-saygo]");
     if (g){ ev.stopPropagation(); if (!OPEN.hero){ OPEN.hero = true; var l2 = document.getElementById("saylist"); if (l2) l2.__h = ""; draw(); } var eh = document.getElementById("ezhero"); if (eh) setTimeout(function(){ eh.scrollIntoView({block: "start", behavior: "smooth"}); }, 60); return; }
+    var nv = ev.target.closest("[data-saynav]");
+    if (nv){ ev.stopPropagation(); try { (window.go || function(){})(nv.dataset.saynav); } catch(x) {} return; }
     var s = ev.target.closest("[data-saysend]");
     if (s){ ev.stopPropagation(); if (window.__onepage && __onepage.sendSay) __onepage.sendSay(); else if (window.__onepage) (__onepage.chooser || __onepage.go)(null); }
   });
@@ -189,6 +250,17 @@
     ".sp-go{margin:2px 0 0;font-size:12.5px;line-height:1.5;color:var(--text);word-break:keep-all}.sp-go b{font-weight:900}.sp-go small{font-size:11.5px;color:var(--sub);white-space:nowrap}" +
     ".sp-up,.sp-dn{display:inline-block;font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;margin-right:6px;background:rgba(37,99,235,.12);color:var(--acc)}.sp-dn{background:rgba(57,135,229,.10);color:var(--down)}.sp-go.dnl{color:var(--sub)}" +
     ".sp-od{margin:3px 0 0;font-size:11.5px;line-height:1.45;color:var(--sub);word-break:keep-all}.sp-od b{color:var(--text)}" +
+    ".say-head.ez{padding:14px 16px}.ez-hd{display:flex;gap:12px;align-items:center;margin-bottom:10px}.ez-ic{font-size:40px;line-height:1;flex:0 0 auto}.say-head.ez .say-h1{font-size:20px;line-height:1.32}.ez-h2{margin:3px 0 0;font-size:16px;line-height:1.4;font-weight:800;color:#fde68a}.say-head.ez.w-up .ez-h2{color:#bbf7d0}.say-head.ez.w-down .ez-h2{color:#fecaca}.say-head.ez .say-bd{margin:0}.say-head.ez .say-num{font-size:13.5px;line-height:1.55}" +
+    "button.say-sh{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;padding-bottom:11px}.say-sh .say-shh{display:flex}" +
+    ".ez-bar{display:flex;height:26px;border-radius:9px;overflow:hidden;margin:8px 0 9px;gap:2px}.ez-bar i{display:block;min-width:6px}.ez-bar .zs,.ez-lg i.zs{background:var(--acc)}.ez-bar .zg,.ez-lg i.zg{background:#d9a520}.ez-bar .zc,.ez-lg i.zc{background:var(--line)}" +
+    ".ez-lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--text)}.ez-lg>span{white-space:nowrap}.ez-lg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}.ez-lg b{font-weight:900}" +
+    ".ez-nt{display:block;margin-top:7px;font-size:12.5px;line-height:1.5;color:var(--sub);word-break:keep-all}" +
+    ".ez-r .say-rn b small{font-size:11.5px;font-weight:500;color:var(--sub);margin-left:4px}.ez-r .say-rn strong{font-size:15px}" +
+    ".ez-c10{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;margin:7px 0 7px}.ez-c10 i{display:block;height:16px;border-radius:5px;background:var(--panel2);border:1px solid var(--line)}.ez-c10 i.on{background:var(--acc);border-color:var(--acc)}.ez-c10 i.hf{background:linear-gradient(90deg,var(--acc) 50%,var(--panel2) 50%)}" +
+    ".ez-wh{display:block;font-size:13.5px;line-height:1.5;color:var(--text);font-weight:700;word-break:keep-all}.ez-wh em{font-style:normal;font-size:11.5px;font-weight:800;color:var(--acc);background:rgba(37,99,235,.12);border-radius:6px;padding:1px 6px;margin-right:4px;white-space:nowrap}.ez-wh small{font-size:11.5px;font-weight:500;color:var(--sub)}.ez-far{display:block;margin-top:2px;font-size:12.5px;line-height:1.5;color:var(--sub);word-break:keep-all}" +
+    ".ez-b{display:block;padding:9px 0 8px;border-top:1px solid var(--line)}.ez-bt .say-shh+.ez-b{border-top:0;padding-top:4px}.ez-bn{display:flex;justify-content:space-between;align-items:center}.ez-bn b{font-size:15px;font-weight:700}" +
+    ".ez-st{display:flex;gap:4px}.ez-st i{display:block;width:26px;height:9px;border-radius:999px;background:var(--panel2);border:1px solid var(--line)}.ez-st i.past{background:var(--sub);border-color:var(--sub);opacity:.45}.ez-st i.now{border-color:transparent}.ez-st i.l0{background:var(--sub)}.ez-st i.l1{background:#f08c2e}.ez-st i.l2{background:#e3b400}.ez-st i.l3{background:#22a05a}" +
+    ".ez-bv{display:block;margin-top:4px;font-size:14px;font-weight:800;color:var(--text)}.ez-bs{display:block;font-size:12.5px;line-height:1.5;color:var(--sub);word-break:keep-all}" +
     ".say-skel{display:flex;flex-direction:column;gap:8px}.say-skel i{display:block;border-radius:18px;background:var(--panel);border:1px solid var(--line);height:150px}.say-skel i:nth-child(2){height:66px}.say-skel i:nth-child(3){height:330px}" +
     ":root[data-ui=light] .say-bar>i{background:#2563eb}";
   document.head.appendChild(st);
