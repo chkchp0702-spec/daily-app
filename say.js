@@ -131,6 +131,8 @@
   var st = document.createElement("style"); st.textContent =
     /* 순서만 바꿈 — 첫 화면 → 한 줄 목록 → 근거 → (열었을 때) 예전 칸 → 나머지는 원래 순서 */
     ".say-on{display:flex;flex-direction:column}.say-on>*{order:50;min-width:0}.say-on>#sayhero{order:1}.say-on>#mnbox{order:2}.say-on>#saylist{order:3}.say-on>#ezhero{order:4}.say-on>#mo19{order:5}.say-on>#ezrows{order:6}" +
+    /* 🛡 11/24 「불안정」 — 처음 1~2초 동안 내 종목·대형주·이번 주·고객 질문 칸이 펼쳐진 채 그려졌다 접히며 화면이 1,400px 출렁였음 → 접힌 모양으로 먼저 */
+    "html[data-ez=easy] #mnbox>section:not(.ez-x)>:not(h3){display:none!important}" +
     ".say-on>#ezhero,.say-on>#mo19,.say-on>#ezrows{display:none}.say-on.say-o-hero>#ezhero,.say-on.say-o-mo>#mo19,.say-on.say-o-rows>#ezrows{display:block}" +
     "#sayhero{margin:0 0 12px;display:flex;flex-direction:column;gap:8px}#sayhero *{letter-spacing:normal;word-break:keep-all}" +
     ".say-top{font-size:12px;line-height:1.3;color:var(--sub);text-align:right;margin:-4px 2px -2px}" +
