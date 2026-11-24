@@ -1,6 +1,22 @@
 {
   "items": [
     {
+      "title": "모건스탠리 윌슨 「조정 끝나기 전 마지막 한 번 더 매도」 뒤 2027 S&P 8,700",
+      "url": "https://investinglive.com/stock-market-update/morgan-stanley-s-wilson-sees-one-final-sell-off-before-us-stock-correction-ends/",
+      "press": "investingLive",
+      "at": "2026-11-24 12:45",
+      "why": "🐻 해외 판정(S&P 200일선 3일 복귀 전 덜기)과 같은 방향 — 「첫 반등에 서두르지 말 것」 근거 · 가설② 12/9 FOMC",
+      "summary": "윌슨, S&P 7,100 하락 예측 적중 뒤 「마지막 매도 한 번」 후 2027 목표 8,700(약 +15%) · 글로벌 주식 「최대 비중 확대」(stockanalysis 전재)"
+    },
+    {
+      "title": "콩고, 이달 말부터 코발트 수출 금지 — 중국 코발트주 급등",
+      "url": "https://www.bloomberg.com/news/articles/2026-11-24/shares-in-chinese-cobalt-producers-jump-after-congo-bans-exports",
+      "press": "Bloomberg",
+      "at": "2026-11-24 12:45",
+      "why": "2차전지 소재(오늘 롯데에너지머티리얼즈 +19%·전력장비 +8.5%) 원가·공급 변수 — 배터리 반등이 재료 하나 더 얻음",
+      "summary": "콩고가 가격 하락을 막으려 11월 말부터 코발트 수출 금지 · 중국 코발트 생산주 급등 · 8월 정광 수출 금지에 이은 조치"
+    },
+    {
       "title": "베선트 「재무부는 몇 달 전부터 메가스피드 블랙리스트를 원했다」",
       "url": "https://news.bgov.com/artificial-intelligence/treasury-wanted-to-blacklist-megaspeed-for-months-bessent-says",
       "press": "Bloomberg Government",
@@ -623,23 +639,7 @@
       "at": "2026-11-22 14:45",
       "why": "🐻 바닥 판단 — 헤지펀드는 줄였지만 장기 운용사·개인 물량이 남아 「항복」 미완",
       "summary": "JP모건·골드만 데이터: 헤지펀드 보유 비중은 크게 줄었지만 대규모 물량을 가진 장기 자산운용기관·개인은 아직 시장을 떠나지 않음 — 헤지펀드 축소만으로 바닥 확인 어렵다."
-    },
-    {
-      "title": "세마포 「젠슨 황, 새 반도체 회사 창업 검토 — 최대 500억 달러 조달 가능」",
-      "url": "https://longbridge.com/en/news/306237428",
-      "press": "롱브리지(세마포 인용)",
-      "at": "2026-11-22 13:45",
-      "why": "엔비디아(🐋 11/17 고래·💬 3번) — 이사회 복귀 거절 뒤 황이 경쟁 회사를 차릴 수 있다는 전망, 트럼프 「복귀해야」 재료와 반대 방향",
-      "summary": "세마포 기자 전망: 황이 새 반도체 회사를 세우면 첫날 수백억 달러(최대 500억$) 조달 가능·창업자 지배권. 이사회는 복귀 거절(IBTimes). 공식 확인 아님."
-    },
-    {
-      "title": "세마포 「엔비디아 이사회 일부 여전히 황 복귀 요구 — 마벨 CEO 매트 머피 후보 검토」",
-      "url": "https://aiweekly.co/alerts/semafor-nvidia-board-minority-still-pushing-huang-return-weighs-marvell-ceo",
-      "press": "AI Weekly(세마포 인용)",
-      "at": "2026-11-22 13:45",
-      "why": "엔비디아 경영 공백 — 후임 CEO 외부 후보(마벨 머피) 거론, 💼 나스닥100 코어 최대 종목 리더십 위험",
-      "summary": "이사회 소수파 복귀 요구 지속, 의장은 「검토 안 함」(rootdata). 외부 후보로 마벨 CEO 매트 머피 거론."
     }
   ],
-  "at": "2026-11-24 09:45"
+  "at": "2026-11-24 12:45"
 }
