@@ -3389,9 +3389,13 @@ __bk(65);
   function unifiedHtml(B){
     methHtml(B);   // BODY 채우기(설명 글)
     var main = (B.markets || []).map(function(m){ return rowHtml(m, BODY[m.key] || (window.__meetLine ? __meetLine(m) : "")); }).join("");
-    var more = (B.more || []).map(function(m){ return rowHtml(m, '<p class="ub-p"><b>다음에 바뀌는 때</b> ' + e((m.analog || {}).next || "") + '</p>' + (window.__meetLine ? __meetLine(m) : "")); }).join("");
+    /* 🌏 11/24 사용자 「하락장 계기판에 나머지 지수들도 넣어」 — 접어 두던 「다른 시장 9개」를 펼쳐 13개가 한 표에 다 보이게(일본·중국·홍콩 / 기술 지수 두 묶음 · 줄을 누르면 설명은 그대로) */
+    var TECH = {star50: 1, chinext: 1, hstech: 1, sox: 1};
+    var moreRow = function(m){ return rowHtml(m, '<p class="ub-p"><b>다음에 바뀌는 때</b> ' + e((m.analog || {}).next || "") + '</p>' + (window.__meetLine ? __meetLine(m) : "")); };
+    var asia = (B.more || []).filter(function(m){ return !TECH[m.key]; }).map(moreRow).join(""), tech = (B.more || []).filter(function(m){ return TECH[m.key]; }).map(moreRow).join("");
+    var more = (asia ? '<div class="ub-sub">일본 · 중국 · 홍콩</div>' + asia : '') + (tech ? '<div class="ub-sub">기술 지수</div>' + tech : '');
     return '<div class="ub"><div class="ub-hd"><span>시장 · 고점 대비</span><span>주식 몫</span></div>' + main +
-      (more ? '<details class="ub-more"><summary>다른 시장 ' + (B.more || []).length + '개 — 일본·중국·홍콩·기술 지수 ▾</summary>' + more + '</details>' : '') +
+      more +
       '<p class="ub-note">주식 몫 = 그 시장 주식을 지금 얼마나 들고 갈지(나머지는 현금) · 줄을 누르면 왜 그런지 · 🇺🇸 두 줄은 💼 포트 규칙과 같은 말이에요(11/24) — 실제 비중은 포트 탭</p></div>';
   }
   function bearHtml(d){
@@ -3413,7 +3417,7 @@ __bk(65);
         '<div class="bg-lad">' + (m.ladder ? m.ladder.map(function(x){ return [x[0], x[1]]; }) : [[ladder[0], "신호 0~1개"], [ladder[2], "2개"], [ladder[3], "3개"], [ladder[4], "4개"]]).map(function(x, i, A){ var now = m.ladder && m.ladder.length ? x[0] === m.cash : Math.max(0, m.n - 1) === i; return '<span class="' + (now ? "now" : "") + '"><small>' + e(x[1]) + '</small><b>' + e(m.to || '현금') + ' ' + x[0] + '%</b></span>'; }).join("") + '</div>' +
         '<p class="bg-ad">' + e(m.advice) + '</p></div>';
     }).join("");
-    return '<section class="card h2-bear" id="bear" data-cz="done"><div class="bg-h">🐻 하락장 계기판 <small>' + e(md(B.at)) + ' ' + e(String(B.at || "").slice(11, 16)) + ' · 종가 판정</small></div>' +
+    return '<section class="card h2-bear" id="bear" data-cz="done" data-xc="1"><div class="bg-h">🐻 하락장 계기판 <small>' + e(md(B.at)) + ' ' + e(String(B.at || "").slice(11, 16)) + ' · 종가 판정</small></div>' +
       unifiedHtml(B) +
       (bad.length ? '<details class="bg-d"><summary>무엇을 보면 다시 사나 · 체크리스트 펼치기</summary>' + det +
         '<p class="note bg-ru">판정: 고점보다 −10% 조정 · −20% 하락장 (종가) · 현금 권고(11/11부터): 위 🏁 시장별 방식 — 1999년부터 200여 가지를 돌려 2012년까지·2013년 뒤 둘 다 그냥 들고 있기를 이긴 것 중 수익 1등(best_bt). 판정 규칙은 결과 보기 전 등록 · 매수·매도 추천 아님 — 고객 성향·기간에 맞춰 판단.</p></details>' : '') +
@@ -3491,7 +3495,7 @@ __bk(65);
     ".s-zero .ub-v b{color:#2f6fdd}.s-half .ub-v b{color:#d9822b}.s-full .ub-v b{color:#e5484d}.s-half .ub-bar i{background:#d9822b}" +
     ".ub-nx{grid-area:x;font-size:12px;letter-spacing:-.2px;color:var(--sub);font-weight:700;word-break:keep-all}.ub-nx em{font-style:normal;color:var(--text);font-weight:900;white-space:nowrap}" +
     ".ub-x{margin-top:8px;padding-top:8px;border-top:1px solid var(--line,rgba(127,127,127,.2))}.ub-sh,.ub-p{margin:0 0 6px;font-size:12.5px;line-height:1.5;word-break:keep-all}.ub-x .bm-x{display:block}" +
-    ".ub-more{margin-top:8px}.ub-more>summary{cursor:pointer;font-size:13px;font-weight:800;padding:8px 2px;color:var(--sub)}.ub-note{margin:8px 2px 0;font-size:11.5px;line-height:1.5;color:var(--sub);word-break:keep-all}" +
+    ".ub-sub{margin:10px 2px 2px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;font-weight:800;color:var(--sub)}.ub-more{margin-top:8px}.ub-more>summary{cursor:pointer;font-size:13px;font-weight:800;padding:8px 2px;color:var(--sub)}.ub-note{margin:8px 2px 0;font-size:11.5px;line-height:1.5;color:var(--sub);word-break:keep-all}" +
     ".bg-lead{margin:0;font-size:15.5px;line-height:1.5;font-weight:700;word-break:keep-all;text-wrap:pretty}.bg-lead.warn{color:var(--text)}" +
     ".bg-d{margin-top:10px}.bg-d summary{cursor:pointer;font-size:14px;font-weight:800;color:var(--accent,#3182f6);list-style:none}.bg-d summary::-webkit-details-marker{display:none}.bg-d summary:after{content:' ▾'}.bg-d[open] summary:after{content:' ▴'}" +
     ".bg-m{background:var(--panel2);border-radius:14px;padding:12px;margin-top:10px}.bg-mh{font-size:14.5px;line-height:1.5;word-break:keep-all}.bg-n{font-size:14px;font-weight:700;margin:6px 0 4px}" +
