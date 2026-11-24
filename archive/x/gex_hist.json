@@ -47,9 +47,32 @@
 "net_gex": 3.64,
 "flip": 6872.46,
 "flip_dist": 0.55
+},
+{
+"date": "2026-11-23",
+"slot": "close",
+"ts": "2026-11-24 09:49",
+"r": 0.0415,
+"vix": 26.62,
+"sym": "SPY",
+"spot": 722.29,
+"n_exp": 29,
+"n_opt": 7807,
+"call_gex": 11.28,
+"put_gex": 18.059,
+"net_gex": -6.779,
+"flip": 739.04,
+"flip_dist": -2.27,
+"put_share": 54.0,
+"opt_vol": 5167008,
+"put_share0": 47.3,
+"exp0": "2026-11-24",
+"opt_vol0": 1226172
 }
 ],
 "note": "📐 딜러 감마 그림자(화면 없음) — net=콜−풋(10억$, 1% 움직임당) · flip_dist=(현재가/flip−1)% · gex.py",
-"errors": [],
-"updated": "2026-11-21 11:47 KST"
+"errors": [
+"^SPX: 체인 비어 있음(421)"
+],
+"updated": "2026-11-24 09:49 KST"
 }
