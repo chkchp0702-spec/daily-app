@@ -1,6 +1,22 @@
 {
  "items": [
   {
+   "title": "이란 「미군 호위에도 유조선 3척 호르무즈서 기뢰 피격」…美 재무부 제재 확대",
+   "url": "https://www.cnbc.com/2026/11/24/iran-trump-hormuz-crude-.html",
+   "press": "CNBC",
+   "at": "2026-11-24 14:05",
+   "why": "에너지 칸 — 공격 뉴스에도 유가가 내리는 「무덤덤한 장」 재확인, 브렌트 85달러 축소 선 근접",
+   "summary": "이란, 유조선 3척 기뢰 충돌·화재 주장 · 美 재무부 대이란 금융 제재 확대 · 같은 시각 브렌트 86.16·WTI 79.54(−0.79%, daily-app 14:25)"
+  },
+  {
+   "title": "델, 950억 달러 AI 수주잔고 — 11/24 실적에서 현금으로 바뀌는지가 관건",
+   "url": "https://www.tikr.com/zh/blog/dell-has-a-95-billion-ai-backlog-its-november-24-report-must-show-it-turns-into-cash",
+   "press": "TIKR",
+   "at": "2026-11-24 14:40",
+   "why": "오늘 밤 델 실적 — AI 서버 수요·메모리 원가 압박이 가설③(현금 도는 곳 vs 빚)의 시험대",
+   "summary": "AI 서버 수주잔고 약 950억$ · 메모리 값 상승이 마진 압박 · 출하·현금 전환 속도가 주가 판정 포인트"
+  },
+  {
    "title": "美 칩 규칙 강화가 말레이시아 데이터센터 전망을 흐린다",
    "url": "https://www.nst.com.my/amp/business/economy/2026/11/1580155/tighter-us-chip-rules-cloud-malaysias-data-centre-outlook-watch",
    "press": "New Straits Times",
@@ -623,22 +639,6 @@
    "at": "2026-11-22 15:45",
    "why": "🛢️ 브렌트 95 조건·에너지 칸 — 주말 셋째 호르무즈 재료, 월요일 유가 갭 판정",
    "summary": "바레인 정부가 이란의 자국 산업 시설 타격을 주장 · 오만 카사브 인근 유조선 공격 이틀 새 3건(UKMTO) 뒤 · 피해 규모·미국 대응 미확인 · 11/20 브렌트 89.87$"
-  },
-  {
-   "title": "제프리스 「AI 붐, 신흥시장에서 힘 잃나」 — 한국·대만 쏠림 위험 경고",
-   "url": "https://www.investing.com/news/stock-market-news/is-the-ai-boom-losing-its-grip-on-emerging-markets-jefferies-flags-risks-5043771",
-   "press": "인베스팅",
-   "at": "2026-11-22 15:45",
-   "why": "🐻 코스피 0%·외국인 매도 — 11/8 제프리스는 이미 한국·대만 비중 축소·인도 14%로 확대(비즈니스투데이)",
-   "summary": "AI 하드웨어 집중된 한국·대만 이익 전망 위험 지적 · 11/8 아시아 배분에서 한국·대만 축소, 인도 14%로 상향 · 외국인 올해 K주식 240조 순매도(머투)와 같은 방향"
-  },
-  {
-   "title": "BofA 하트넷 「연준 인상을 막는 가장 빠른 길 — S&P가 올해 상승분 다 반납」",
-   "url": "https://wallstreetcn.com/articles/3786446",
-   "press": "월스트리트견문(하나중국 인용)",
-   "at": "2026-11-22 14:45",
-   "why": "가설② 12/9 FOMC 분수령·🐻 계기판 — 「연준 풋」이 켜지는 숫자 기준(S&P 6,845·IG CDX 80bp)",
-   "summary": "S&P 6,845(11/20 6,910 대비 약 −1.2%) 아래 + 투자등급 CDX 80bp 위면 신용 악화가 인상 사이클 조기 종료 가능. 지난주 S&P −8.4%·7일 연속 하락·나스닥100 고점 −19.8%. 그러나 경착륙 예상 3%·현금 3.6%·4주 주식 펀드 유입 사상 최대 3,100억$ — 「가격은 항복, 포지션은 아직」."
   }
  ],
  "at": "2026-11-24 12:45"
