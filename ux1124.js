@@ -1,0 +1,57 @@
+/* 🔦 11/24 바닥 점검표 15칸 — 코스피·코스닥 (사용자: 「코스피 코스닥 바닥 신호인지를 심층분석 · 모든 방법을 동원해서」 → 「둘 다 진행」)
+   「팔 사람은 다 팔았나」(투매·청산 8칸) 와 「살 사람이 들어왔나」(확인 7칸) 를 따로 세어 한 줄 판정 + 펼치면 15칸.
+   계산은 만드는 쪽(market-strategy-report src/floor_check.py → bear.json 코스피·코스닥 칸의 floor) — 이 파일은 그리기만.
+   붙는 곳: 🐻 하락장 계기판 시장 줄 안, 📜 과거 성적표 바로 위 (새 화면 없음 · 12/1까지 새 화면 동결 지킴)
+   규칙(현금·주식 비중)은 안 바꿈 · 기록 · 과거 빈도는 앞날 보장 아님 · 매수·매도 권유 없음 · 밝은·어두운 화면 둘 다 */
+(function(){
+  "use strict";
+  function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
+  var IC = {on: "✔", half: "△", off: "✖"}, NM = {on: "켜짐", half: "반쯤", off: "꺼짐"};
+  function dots(cells){ return cells.map(function(c){ return '<i class="fc-' + c.st + '" title="' + e(c.k) + '"></i>'; }).join(""); }
+  function rows(cells){
+    return cells.map(function(c){
+      return '<li class="fc-' + c.st + '"><span class="fc-i" aria-label="' + NM[c.st] + '">' + IC[c.st] + '</span><b>' + e(c.k) + '</b><small>' + e(c.d) + (c.asof ? ' <em>' + e(c.asof) + ' 기준</em>' : '') + '</small></li>';
+    }).join("");
+  }
+  function floorHtml(m){
+    var f = m && m.floor; if (!f || !f.cells || !f.cells.length) return "";
+    var S = f.cells.filter(function(c){ return c.g === "sell"; }), C = f.cells.filter(function(c){ return c.g === "conf"; });
+    var past = (f.past && f.past.lines || []).map(function(x){ return '<li>' + e(x) + '</li>'; }).join("");
+    var d = String(f.asof || "").slice(5).replace("-", "/").replace(/^0/, "");
+    return '<div class="fc"><div class="fc-h">🔦 바닥 점검표 <small>' + e(d) + ' 종가 · 15칸</small></div>' +
+      '<div class="fc-v fc-' + e(f.lv) + '">' + e(f.head) + '</div>' +
+      '<div class="fc-g"><span>팔 사람은 다 팔았나</span><span class="fc-dots">' + dots(S) + '</span><b>' + f.sell_on + '/' + S.length + '</b></div>' +
+      '<div class="fc-g"><span>살 사람이 들어왔나</span><span class="fc-dots">' + dots(C) + '</span><b>' + f.conf_on + '/' + C.length + '</b></div>' +
+      (f.chg && f.chg.k && f.chg.k.length ? '<p class="fc-chg">🔄 ' + e(String(f.chg.d || "").slice(5).replace("-", "/")) + ' 바뀐 칸: ' + e(f.chg.k.join(" · ")) + '</p>' : '') +
+      '<details class="fc-d"><summary>15칸 펼치기</summary>' +
+        '<div class="fc-t">투매·청산 — 팔 사람은 다 팔았나</div><ul class="fc-ul">' + rows(S) + '</ul>' +
+        '<div class="fc-t">확인 — 살 사람이 들어왔나</div><ul class="fc-ul">' + rows(C) + '</ul>' +
+        '<p class="fc-n">확인 5칸↑ = 🟢 바닥 확인 쪽 · 확인 3칸↑ + 투매 4칸↑ = 🟡 가능성 높아짐 · 투매 4칸↑ = 🟠 바닥 구간일 수 있음(확인 전)</p>' +
+        (past ? '<div class="fc-t">과거 같은 자리의 그 뒤</div><ul class="fc-past">' + past + '</ul>' : '') +
+        '<p class="fc-n">' + e(f.note || "규칙은 그대로 · 기록 · 매수·매도 추천 아님") + '</p></details></div>';
+  }
+  window.__floorHtml = floorHtml;
+  var prev = window.__bearSigHead;
+  window.__bearSigHead = function(m){ var a = ""; try { a = floorHtml(m); } catch (_) {} return a + (prev ? prev(m) : ""); };
+  var css = document.createElement("style");
+  css.textContent =
+    ".fc{margin:8px 0 8px;padding:10px 10px 8px;border:1px solid var(--line,#e5e7eb);border-radius:12px;display:block;width:100%;box-sizing:border-box;text-align:left}" +
+    ".fc-h{font-size:13px;font-weight:800;margin-bottom:6px}.fc-h small{font-size:11.5px;font-weight:600;color:var(--sub,#888);margin-left:4px}" +
+    ".fc-v{font-size:15px;font-weight:900;line-height:1.4;padding:7px 9px;border-radius:9px;margin-bottom:8px;word-break:keep-all;background:rgba(127,127,127,.12);color:var(--text,#111)}" +
+    ".fc-v.fc-orange{background:rgba(245,158,11,.16)}.fc-v.fc-yellow{background:rgba(234,179,8,.20)}.fc-v.fc-green{background:rgba(34,160,90,.18)}" +
+    ".fc-g{display:grid;grid-template-columns:118px 1fr auto;column-gap:8px;align-items:center;margin:5px 0;font-size:12.5px;font-weight:700}" +
+    ".fc-g span:first-child{word-break:keep-all}.fc-g b{font-size:14px;white-space:nowrap}" +
+    ".fc-dots{display:flex;gap:4px;flex-wrap:nowrap;min-width:0}.fc-dots i{flex:1 1 0;max-width:22px;height:10px;border-radius:5px;background:rgba(127,127,127,.22);display:block}" +
+    ".fc-dots i.fc-on{background:#22a05a}.fc-dots i.fc-half{background:#f0b429}" +
+    ".fc-chg{margin:6px 0 2px;font-size:12px;line-height:1.5;color:var(--text,#111);word-break:keep-all}" +
+    ".fc-d{margin-top:4px}.fc-d summary{font-size:12px;color:var(--sub,#888);cursor:pointer;padding:6px 0;min-height:24px}" +
+    ".fc-t{font-size:12px;font-weight:800;margin:8px 0 4px;color:var(--text,#111)}" +
+    ".fc-ul{list-style:none;margin:0;padding:0}.fc-ul li{display:grid;grid-template-columns:20px 1fr;grid-template-areas:'i k' 'i d';column-gap:6px;padding:5px 0;border-top:1px solid var(--line,rgba(127,127,127,.18))}" +
+    ".fc-ul li:first-child{border-top:0}.fc-i{grid-area:i;font-size:13px;font-weight:900;line-height:1.5;color:var(--sub,#888)}" +
+    ".fc-ul li.fc-on .fc-i{color:#22a05a}.fc-ul li.fc-half .fc-i{color:#d99a0b}" +
+    ".fc-ul b{grid-area:k;font-size:13px;line-height:1.5;word-break:keep-all}.fc-ul small{grid-area:d;font-size:11.5px;line-height:1.5;color:var(--sub,#888);word-break:keep-all;display:block}" +
+    ".fc-ul small em{font-style:normal;opacity:.8;white-space:nowrap}" +
+    ".fc-past{margin:2px 0 0;padding-left:16px}.fc-past li{font-size:11.5px;line-height:1.55;color:var(--sub,#888);margin:2px 0;word-break:keep-all;display:list-item}" +
+    ".fc-n{margin:8px 0 0;font-size:11px;line-height:1.5;color:var(--sub,#888);word-break:keep-all}";
+  document.head.appendChild(css);
+})();
