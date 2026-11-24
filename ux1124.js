@@ -18,7 +18,7 @@
     var S = f.cells.filter(function(c){ return c.g === "sell"; }), C = f.cells.filter(function(c){ return c.g === "conf"; });
     var past = (f.past && f.past.lines || []).map(function(x){ return '<li>' + e(x) + '</li>'; }).join("");
     var d = String(f.asof || "").slice(5).replace("-", "/").replace(/^0/, "");
-    return '<div class="fc"><div class="fc-h">🔦 바닥 점검표 <small>' + e(d) + ' 종가 · 15칸</small></div>' +
+    return '<div class="fc"><div class="fc-h">🔦 ' + e(f.name || m.name || "") + ' 바닥 점검표 <small>' + e(d) + ' 종가 · 15칸</small></div>' +
       '<div class="fc-v fc-' + e(f.lv) + '">' + e(f.head) + '</div>' +
       '<div class="fc-g"><span>팔 사람은 다 팔았나</span><span class="fc-dots">' + dots(S) + '</span><b>' + f.sell_on + '/' + S.length + '</b></div>' +
       '<div class="fc-g"><span>살 사람이 들어왔나</span><span class="fc-dots">' + dots(C) + '</span><b>' + f.conf_on + '/' + C.length + '</b></div>' +
@@ -31,8 +31,29 @@
         '<p class="fc-n">' + e(f.note || "규칙은 그대로 · 기록 · 매수·매도 추천 아님") + '</p></details></div>';
   }
   window.__floorHtml = floorHtml;
+  /* 11/24 사용자 「왜 바닥점검표가 코스피만 있냐 — 코스닥 s&p500 나스닥100 다 만들어」
+     → 처음엔 📜 과거 성적표 머리(__bearSigHead)에만 붙여서, 첫 화면 「지금 규칙」(가장 나쁜 시장 한 곳 = 코스피)과 깊숙한 체크리스트에서만 보였음.
+     이제 시장 줄마다 불리는 __meetLine 에 붙임 → 🐻 계기판의 코스피·코스닥·S&P500·나스닥 줄을 펼치면 각각 보임.
+     같은 시장에서 두 머리가 잇달아 불리면(체크리스트 펼침) 한 번만 그림. */
+  /* 첫 화면 「지금 규칙」 펼침 — 네 시장 한 표(줄마다 판정·n/8·n/7 · 누르면 그 시장 15칸). ux1105c.js ruleHtml 이 부름. */
+  var FL = {kr: "🇰🇷", us: "🇺🇸"}, allT = 0;
+  function floorAll(BR){
+    var ms = ((BR && BR.markets) || []).filter(function(m){ return m.floor && m.floor.cells && m.floor.cells.length; });
+    if (!ms.length) return "";
+    allT = Date.now();
+    return '<div class="fa"><div class="fa-h">🔦 바닥 점검표 <small>시장 ' + ms.length + '곳 · 누르면 15칸</small></div>' + ms.map(function(m){
+      var f = m.floor, ns = f.cells.filter(function(c){ return c.g === "sell"; }).length, nc = f.cells.length - ns;
+      return '<details class="fa-r fc-' + e(f.lv) + '"><summary><span class="fa-n">' + (FL[m.nat] || "") + ' <b>' + e(f.name || m.name) + '</b></span>' +
+        '<span class="fa-v">' + e(String(f.head || "").replace(" · 확인 전", "")) + '</span>' +
+        '<span class="fa-c">팔 사람 <b>' + f.sell_on + '/' + ns + '</b> · 살 사람 <b>' + f.conf_on + '/' + nc + '</b></span></summary>' + floorHtml(m) + '</details>';
+    }).join("") + '</div>';
+  }
+  window.__floorAll = floorAll;
+  var lastM = null, lastT = 0;
+  var prevMeet = window.__meetLine;
+  window.__meetLine = function(m, cls){ var a = ""; try { a = floorHtml(m); if (a){ lastM = m; lastT = Date.now(); } } catch (_) {} return a + (prevMeet ? prevMeet(m, cls) : ""); };
   var prev = window.__bearSigHead;
-  window.__bearSigHead = function(m){ var a = ""; try { a = floorHtml(m); } catch (_) {} return a + (prev ? prev(m) : ""); };
+  window.__bearSigHead = function(m){ var a = ""; try { if (!(lastM === m && Date.now() - lastT < 40) && !(Date.now() - allT < 40)) a = floorHtml(m); lastM = null; allT = 0; } catch (_) {} return a + (prev ? prev(m) : ""); };
   var css = document.createElement("style");
   css.textContent =
     ".fc{margin:8px 0 8px;padding:10px 10px 8px;border:1px solid var(--line,#e5e7eb);border-radius:12px;display:block;width:100%;box-sizing:border-box;text-align:left}" +
@@ -52,6 +73,10 @@
     ".fc-ul b{grid-area:k;font-size:13px;line-height:1.5;word-break:keep-all}.fc-ul small{grid-area:d;font-size:11.5px;line-height:1.5;color:var(--sub,#888);word-break:keep-all;display:block}" +
     ".fc-ul small em{font-style:normal;opacity:.8;white-space:nowrap}" +
     ".fc-past{margin:2px 0 0;padding-left:16px}.fc-past li{font-size:11.5px;line-height:1.55;color:var(--sub,#888);margin:2px 0;word-break:keep-all;display:list-item}" +
+    ".fa{margin:8px 0}.fa-h{font-size:13px;font-weight:800;margin-bottom:4px}.fa-h small{font-size:11.5px;font-weight:600;color:var(--sub,#888);margin-left:4px}" +
+    ".fa-r{border:1px solid var(--line,#e5e7eb);border-radius:11px;margin:5px 0;padding:0 9px;display:block}.fa-r>summary{display:grid;grid-template-columns:1fr auto;grid-template-areas:'n c' 'v v';gap:2px 8px;align-items:center;padding:8px 0;cursor:pointer;list-style:none;min-height:44px}" +
+    ".fa-r>summary::-webkit-details-marker{display:none}.fa-r>summary::after,.fa-r>summary::before{content:none!important;display:none!important}.fa-v::after{content:' ▾';font-weight:600;color:var(--sub,#888)}.fa-r[open] .fa-v::after{content:' ▴'}.fa-n{grid-area:n;font-size:13.5px;white-space:nowrap}.fa-c{grid-area:c;font-size:11.5px;color:var(--sub,#888);white-space:nowrap;text-align:right}.fa-c b{color:var(--text,#111);font-size:12.5px}" +
+    ".fa-v{grid-area:v;font-size:12.5px;font-weight:800;word-break:keep-all}.fa-r[open]>summary{border-bottom:1px solid var(--line,rgba(127,127,127,.18))}.fa-r .fc{border:0;padding:8px 0 6px;margin:0}.fa-r .fc-h,.fa-r .fc-v{display:none}" +
     ".fc-n{margin:8px 0 0;font-size:11px;line-height:1.5;color:var(--sub,#888);word-break:keep-all}";
   document.head.appendChild(css);
 })();

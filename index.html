@@ -1663,7 +1663,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261124a";
+var APPV = "20261124b";
 function chkVer(){
   fetch("version.txt?" + Date.now(), {cache: "no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
     v = (v || "").trim();
@@ -1743,8 +1743,8 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="app.b04.js?v=e675bfcdce"></script>
 <script defer src="app.b05.js?v=ff3f81afbc"></script>
 <script defer src="app.b06.js?v=d6683be3eb"></script>
-<script defer src="app.b07.js?v=dfd81dbe52"></script>
-<script defer src="app.b08.js?v=aa113c25f4"></script>
+<script defer src="app.b07.js?v=74da228fc6"></script>
+<script defer src="app.b08.js?v=a1394f57e3"></script>
 <!--📦list
 <script defer src="views.js?v=37"></script>
 <script defer src="ixchart.js?v=8"></script>
@@ -1837,7 +1837,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="ux1118.js?v=2"></script>   <!· 🧊 11/18 냉정 분석 6차 — 🆕 새로 생긴 것 · 📌 내 바로가기 · 🗺 섹터 지도 미리보기 · 제안서 완성본 먼저·지난번 그대로 · 🧾 절세 한 장 · 💼 성적 접기 ·>
 <script defer src="ux1119.js?v=1"></script>   <!· 🌅 11/19 아침 시황 업그레이드 — 넘겨 보는 카드 5장(오늘·시황 맨 위) · 포트 진단에 오늘 리포트 처방 ·>
 <script defer src="ux1123.js?v=1"></script>   <!· 📨 11/23 A11/23-1 한 장 화면 = 오늘 실제로 나갈 그림 먼저 + 보내기 하나 · 홈 자세히 보기 안 같은 결론 상자 숨김 ·>
-<script defer src="ux1124.js?v=1"></script>   <!· 🔦 11/24 바닥 점검표 15칸 — 코스피·코스닥 (계기판 시장 줄 · bear.json floor · ux1109b 뒤에 둘 것) ·>
+<script defer src="ux1124.js?v=2"></script>   <!· 🔦 11/24 바닥 점검표 15칸 — 코스피·코스닥 (계기판 시장 줄 · bear.json floor · ux1109b 뒤에 둘 것) ·>
 <script defer src="stab.js?v=2"></script>   <!· 🛡 11/18 안정도 — 화면 그리기 보호 · 끝없는 「불러오는 중」 막기 (맨 끝에 둘 것) ·>
 📦list-->
 <!-- 📦/JS -->
