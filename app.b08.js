@@ -2063,7 +2063,7 @@ __bk(92);
     if (D.getElementById("ntc-bar")) return;
     var b = D.createElement("div");
     b.id = "ntc-bar";
-    b.style.cssText = "position:sticky;top:0;z-index:9998;background:#fff4d6;color:#6b4a00;border-bottom:1px solid #f0d58a;font-size:13px;line-height:1.4;padding:7px 12px;text-align:center;cursor:pointer";
+    b.style.cssText = "position:sticky;top:0;z-index:9998;background:#fff4d6;color:#6b4a00;border-bottom:1px solid #f0d58a;font-size:13px;line-height:1.4;padding:calc(env(safe-area-inset-top,0px) + 7px) 12px 7px;text-align:center;cursor:pointer";
     b.innerHTML = "⚠ 분석 자료 대부분 <b>11/24 저녁 기준</b> (자료 서버 문제) · 눌러서 보기";
     b.onclick = pop;
     D.body.insertBefore(b, D.body.firstChild);
