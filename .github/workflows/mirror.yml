@@ -1,8 +1,10 @@
 name: mirror
 # 🪞 11/05 D15: market-strategy-report 의 앱용 JSON → archive/m/ (raw.githubusercontent 가 막힌 곳에서도 github.io 로 받게)
 on:
-  schedule:
-    - cron: "12,42 * * * *"
+  # ⏸ 11/25 꺼 둠 — market-strategy-report 가 GitHub 에 막혀(11/24~) 30분마다 실패함.
+  #    저장소가 풀리면 아래 두 줄의 # 를 지워 다시 켤 것.
+  # schedule:
+  #   - cron: "12,42 * * * *"
   workflow_dispatch:
 permissions:
   contents: write
