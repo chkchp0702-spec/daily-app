@@ -10,5 +10,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -q yfinance pandas numpy
-      - run: python probe/cvtime_probe.py
+      - run: pip install -q yfinance pandas numpy holidays scikit-learn
+      - run: python probe/cvlag_bt.py
