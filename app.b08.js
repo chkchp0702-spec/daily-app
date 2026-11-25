@@ -1,6 +1,6 @@
 /* 📦 app.b08.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 8/8 (ux1122.js … stab.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(8,84,["ux1122.js", "ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "ux1123.js", "ux1124.js", "ux1124b.js", "say.js", "notice.js", "stab.js"],[4, 48, 433, 891, 1269, 1462, 1591, 1681, 1776, 2046, 2103]);
+__bs(8,84,["ux1122.js", "ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "ux1123.js", "ux1124.js", "ux1124b.js", "say.js", "notice.js", "stab.js"],[4, 48, 433, 891, 1269, 1462, 1591, 1681, 1776, 2046, 2104]);
 /* ======== ux1122.js ======== */
 /* 🎲 11/22 「들고 가면 · 규칙대로 하면 — 이익 확률」 (사용자: 「지금은 이걸 이렇게 들고 가는 게 이익 볼 확률이 몇 퍼센트다 — 표현은 직관적으로 ·
    왜 그런지는 밑에 자세히 탭으로 · 분할해서 현금/주식 비중을 늘려요 같은 표현도」)
@@ -2092,7 +2092,8 @@ __bk(92);
     var t = setTimeout(function(){ if (!done){ done = true; show(); } }, 5000);
     fetch(PROBE + Math.floor(Date.now() / 300000), {cache: "no-store"}).then(function(r){
       if (done) return; done = true; clearTimeout(t);
-      if (!r.ok) show();
+      /* 🩹 sw.js 가 404 일 때 예전 저장본(X-From-Cache)을 대신 줌 → 저장본은 「풀림」으로 안 셈 */
+      if (!r.ok || r.headers.get("X-From-Cache")) show();
     }).catch(function(){ if (!done){ done = true; clearTimeout(t); show(); } });
   }
 
