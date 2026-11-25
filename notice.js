@@ -46,7 +46,8 @@
     var t = setTimeout(function(){ if (!done){ done = true; show(); } }, 5000);
     fetch(PROBE + Math.floor(Date.now() / 300000), {cache: "no-store"}).then(function(r){
       if (done) return; done = true; clearTimeout(t);
-      if (!r.ok) show();
+      /* 🩹 sw.js 가 404 일 때 예전 저장본(X-From-Cache)을 대신 줌 → 저장본은 「풀림」으로 안 셈 */
+      if (!r.ok || r.headers.get("X-From-Cache")) show();
     }).catch(function(){ if (!done){ done = true; clearTimeout(t); show(); } });
   }
 
