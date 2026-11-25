@@ -106,6 +106,7 @@ EUX_CAP = 0.2
 #   적합 계수보다 낮게 0.15/1%p, 로그오즈 ±0.25 상한. 중국 ➖(KWEB−S&P 교차·걸어가기 앞/뒤 좋아지나 최근3년 0.24593→0.24663 나빠짐) · 한국 ❌
 KWX_B = {"HK": 0.15}
 KWX_CAP = 0.25
+CONF_SYMS = {"EWY", "FXI", "ASHR"}    # 🎯 자신 있는 날 근거 ETF(prob_vol.CONF_ETF·CONF_NKG) — 11/25 빠짐 막기
 EXTRA = ["^VIX", "ES=F", "NKD=F", "^SOX", "^STOXX", "KWEB", "FXI", "ASHR"] + list(ETF_X.values()) + prob_x.XSYMS
 # 2026 FOMC 결정일 (둘째 날) — 연준 공개 일정. 그 밖의 이벤트는 prob_events.json 에서
 FOMC_2026 = ["2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-09",
@@ -187,8 +188,17 @@ def load_hist(syms):
         except Exception as e:
             print("자료 없음", s, e)
     # 10/15: 여러 종목을 한 번에 받으면 가끔 한 지수(^KS11 등)가 통째로 빠짐 → 시장 지수는 하나씩 한 번 더
-    for s in {c["ix"] for c in MK.values()}:
-        if s not in out or len(out[s]) < 600:
+    # 🎯 11/25 12시: 장중 실행에서 가끔 🎯 근거 ETF(EWY·FXI·ASHR)만 빠지거나 마지막 봉이 S&P 보다 늦음(11/24 11:14 · 11/25 10:13~11:15)
+    #   → 🎯 자신 있는 날이 근거 없이 계산됨. 그 ETF 들도 짧거나·없거나·S&P 마지막 날보다 늦으면 하나씩 한 번 더 받음
+    _sp_last = out["^GSPC"].index[-1] if "^GSPC" in out and len(out["^GSPC"]) else None
+    def _bad(s):
+        if s not in out or out[s] is None or len(out[s]) < 600:
+            return True
+        if s in CONF_SYMS:
+            return len(out[s]) < 1500 or (_sp_last is not None and out[s].index[-1] < _sp_last)
+        return False
+    for s in sorted({c["ix"] for c in MK.values()} | (CONF_SYMS & set(syms))):
+        if _bad(s):
             try:
                 one = yf.download(s, start="2000-01-01", interval="1d", auto_adjust=False, progress=False)
                 if isinstance(one.columns, pd.MultiIndex):
@@ -196,7 +206,7 @@ def load_hist(syms):
                 one = one[["Open", "Close"] + (["High", "Low"] if s in CLV_SYM else [])].dropna(subset=["Close"])
                 one.index = pd.to_datetime(one.index).tz_localize(None)
                 out[s] = one[~one.index.duplicated(keep="last")]
-                print("다시 받음", s, len(out[s]))
+                print("다시 받음", s, len(out[s]), str(out[s].index[-1].date()) if len(out[s]) else "")
             except Exception as e:
                 print("다시 받기 실패", s, e)
     return out
