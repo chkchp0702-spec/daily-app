@@ -36,6 +36,14 @@
   function lockTxt(k){ if (!profSet()) return "🧭 성향 먼저"; var n = FMIN[k] || 1; return "🔒 " + PROF[n] + (n === 5 ? "만" : " 이상"); }
   // ⭐ 추천 종목의 위험등급 (분류표 기준 추정 — 국내 ETF는 운용사 표기가 우선)
   function mustGrade(m){
+    // 🏦 11/26 예금·펀드 (연금·퇴직연금 계좌)
+    if (m.t === "dep") return {g: 6, why: "원리금보장 예금", est: false};
+    if (m.t === "fund"){ var fn = String(m.name || "");
+      if (/MMF|머니마켓|단기자금|CD금리|초단기/i.test(fn)) return {g: 6, why: "MMF·단기금융 펀드", est: true};
+      if (/하이일드|회사채|크레딧/i.test(fn)) return {g: 4, why: "회사채 펀드", est: true};
+      if (/채권|국공채|국채|채권혼합|인컴/i.test(fn)) return /주식혼합|채권혼합/.test(fn) ? {g: 4, why: "채권혼합 펀드", est: true} : {g: 5, why: "채권형 펀드", est: true};
+      if (/TDF|TIF|TRF|혼합|자산배분|밸런스|EMP/i.test(fn)) return {g: 3, why: "혼합형·TDF 펀드", est: true};
+      return {g: 2, why: "주식형 펀드", est: true}; }
     var n = String(m.name || ""), mk = String(m.mkt || ""), dom = !mk || mk === "한국" || mk === "KR";
     var etf = m.etf === true || (m.etf == null && /ETF|ETN|KODEX|TIGER|ACE|SOL|RISE|KBSTAR|HANARO|PLUS|KOSEF|ARIRANG|TIMEFOLIO|파워/i.test(n));
     if (!dom) return {g: 1, why: etf ? "해외 ETF" : "해외 주식", est: false};
@@ -64,7 +72,7 @@
   }
   /* 🔎 추천 이유 — 앱이 이미 모아 둔 자료(종목리포트 d/ · ETF x/ · 뉴스 n/ · 시세 p/ · 시황 테마 · ETF 속 회사)로 규칙대로 씀 (10/29 사용자 「넌 이유를 찾아서 넣어」) */
   var RS = {}, RSP = {};
-  function rkey(m){ return (m.sym || m.code || m.name || "").toUpperCase(); }
+  function rkey(m){ return (m.t ? m.t + ":" + (m.name || "") + ":" + (m.rate || "") + ":" + (m.safe ? 1 : 0) : (m.sym || m.code || m.name || "")).toUpperCase(); }
   var OPDX = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/";
   function oj(path){ return (typeof getJSON === "function" ? getJSON(OPDX + path, {ttl: 3600e3}) : fetch(OPDX + path).then(function(r){ if (!r.ok) throw 0; return r.json(); })).catch(function(){ return null; }); }
   function ofile(sym){ return sym.replace(/[^A-Za-z0-9.-]/g, "_"); }
@@ -132,8 +140,22 @@
     if (nw) L.push("📰 " + first(nw.title, 60) + (nw.date ? " (" + String(nw.date).slice(5).replace("-", "/") + ")" : "") + (nw.publisher ? " · " + nw.publisher : ""));
     return {lines: L.slice(0, 5), short: L.length ? L[0].replace(/^📌 /, "").slice(0, 60) : "", tag: tag[0] || ""};
   }
+  // 🏦 11/26 예금·펀드는 시세·종목리포트가 없어 고정 설명 (금리·분류만)
+  function depFundReason(m){
+    if (m.t === "dep"){ var r = +m.rate;
+      return {lines: [(r ? "🏦 연 " + r.toFixed(2) + "% 확정 이자" : "🏦 확정 이자(금리는 가입 시점 기준)") + " · 만기까지 원금과 이자가 미리 정해짐",
+        "🛡 예금자보호 대상 — 연금·퇴직연금 계좌 안의 보호 대상 상품은 다른 예금과 별도로 1인당 1억원 한도 안에서 보호됨",
+        "📌 포트의 안전자산 칸 — 주식이 흔들려도 값이 변하지 않는 부분", "⏳ 만기 전에 해지하면 약정 이자보다 낮은 중도해지 이자를 받음"],
+        short: (r ? "연 " + r.toFixed(2) + "% 확정 이자 · " : "") + "원리금보장 예금", tag: "예금"}; }
+    var G = mustGrade(m);
+    return {lines: ["📦 PB가 고른 펀드 — " + G.why + " (" + G.g + "등급 " + GRADE[G.g] + " 추정)",
+      m.safe ? "📌 안전자산 칸으로 분류 — 채권형·TDF 등 위험자산 한도 계산에서 안전자산으로 셈" : "📌 위험자산 칸으로 분류",
+      "📄 운용사·과거 수익률·총보수·환매 기간은 투자설명서로 꼭 확인", "⚠️ 실적배당 상품 — 원금 손실이 날 수 있으며 예금자보호 대상 아님"],
+      short: G.why + (m.safe ? " · 안전자산 칸" : ""), tag: "펀드"};
+  }
   function reasonFor(m, ctx){
     var key = rkey(m); if (RS[key]) return Promise.resolve(RS[key]); if (RSP[key]) return RSP[key];
+    if (m.t){ RS[key] = depFundReason(m); return Promise.resolve(RS[key]); }
     RSP[key] = resolveSym(m).then(function(sym){
       if (!sym){ RS[key] = {lines: [], short: ""}; return RS[key]; }
       m.sym = sym; var sh = shard(sym);
@@ -160,17 +182,24 @@
     var o = ST.opt[k] || {}, must = (o.must || []).filter(function(m){ return m && m.name && +m.pct > 0 && mustOK(m); });
     if (!must.length) return null;
     var base = f.alloc, Rb = base.filter(function(a){ return a.kind === "위험"; }).reduce(function(s2, a){ return s2 + a.pct; }, 0), Sb = 100 - Rb;
-    var items = must.map(function(m){ return {m: m, pct: +m.pct, safe: !!(RET[k] && m.safe)}; });
+    var items = must.map(function(m){ return {m: m, pct: +m.pct, safe: !!(RET[k] && (m.safe || m.t === "dep"))}; });
     var tot = items.reduce(function(s2, x){ return s2 + x.pct; }, 0), warn = [];
     if (tot > 100){ items.forEach(function(x){ x.pct = x.pct * 100 / tot; }); warn.push("지정 비중 합이 100%를 넘어 100%로 맞춤"); }
     var fr = {}, cut = {}, sl = slotOf(base);
-    if (sl){   // 🧩 PB 선택 칸: 추천 종목이 먼저 채움 — 모자라면 넣은 % 비율대로 늘리고, 넘치면 나머지 칸을 비율대로 줄임
-      var Ms0 = items.reduce(function(s2, x){ return s2 + x.pct; }, 0), rest0 = 100 - sl.pct;
-      if (Ms0 <= sl.pct){ var up = sl.pct / Ms0; items.forEach(function(x){ x.pct *= up; }); if (Math.abs(up - 1) > 0.001) warn.push("추천 종목 합 " + pc(r1(Ms0)) + " → PB 선택 칸 " + pc(sl.pct) + "에 맞춰 넣은 비율대로 늘림"); fr["위험"] = fr["안전"] = 1; }
-      else { fr["위험"] = fr["안전"] = rest0 ? (100 - Ms0) / rest0 : 0; }
-      if (RET[k]){ var Rr = items.filter(function(x){ return !x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0) + base.filter(function(a){ return a.kind === "위험" && a !== sl; }).reduce(function(s2, a){ return s2 + a.pct * fr["위험"]; }, 0);
-        if (Rr > 70.05) warn.push("위험자산이 법정 한도 70%를 넘음(" + pc(r1(Rr)) + ") — 추천 종목 중 채권형·TDF는 「안전형」에 체크하거나 비중을 줄여 주세요"); }
-      base = base.filter(function(a){ return a !== sl; });
+    if (sl){   // 🧩 PB 선택 칸: 같은 종류(보통 위험) 추천 상품이 먼저 채움 — 모자라면 넣은 % 비율대로 늘리고, 넘치면 나머지 칸을 비율대로 줄임
+      // 🏦 11/26 예금·안전형 펀드처럼 칸과 종류가 다른 것은 칸을 채우지 않고 자기 종류(안전) 칸에서 깎음
+      var sk = sl.kind || "위험", isS = function(x){ return (x.safe ? "안전" : "위험") === sk; };
+      var inS = items.filter(isS), outS = items.filter(function(x){ return !isS(x); });
+      var Ms0 = inS.reduce(function(s2, x){ return s2 + x.pct; }, 0), Mo = outS.reduce(function(s2, x){ return s2 + x.pct; }, 0);
+      var ok = sk === "위험" ? "안전" : "위험", Ob = base.filter(function(a){ return a.kind === ok; }).reduce(function(s2, a){ return s2 + a.pct; }, 0);
+      if (Mo > Ob + 0.001){ var sc1 = Ob ? Ob / Mo : 0; outS.forEach(function(x){ x.pct *= sc1; }); warn.push((ok === "안전" ? "안전자산" : "위험자산") + " 쪽에 넣은 상품 합이 그 칸(" + pc(r1(Ob)) + ")을 넘어 " + pc(r1(Ob)) + "로 줄임"); Mo = Ob; }
+      fr[ok] = Ob ? (Ob - Mo) / Ob : 0;
+      var rest0 = 100 - sl.pct - Ob;   // 칸·반대 종류를 뺀 같은 종류의 나머지 칸
+      if (!inS.length){ fr[sk] = 1; warn.push("「PB 선택 칸」 " + pc(sl.pct) + "는 " + (sk === "위험" ? "위험자산(주식형 ETF·펀드 등)" : "안전자산") + "으로 채워야 함 — 기본 구성 칩을 켜거나 맞는 상품을 넣어 주세요"); }
+      else if (Ms0 <= sl.pct){ var up = sl.pct / Ms0; inS.forEach(function(x){ x.pct *= up; }); if (Math.abs(up - 1) > 0.001) warn.push("추천 상품 합 " + pc(r1(Ms0)) + " → PB 선택 칸 " + pc(sl.pct) + "에 맞춰 넣은 비율대로 늘림"); fr[sk] = 1; base = base.filter(function(a){ return a !== sl; }); }
+      else { fr[sk] = rest0 > 0 ? Math.max(0, rest0 - (Ms0 - sl.pct)) / rest0 : 0; base = base.filter(function(a){ return a !== sl; }); }
+      if (RET[k]){ var Rr = r1(items.filter(function(x){ return !x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0) + base.filter(function(a){ return a.kind === "위험"; }).reduce(function(s2, a){ return s2 + a.pct * fr["위험"]; }, 0));
+        if (Rr > 70.05) warn.push("위험자산이 법정 한도 70%를 넘음(" + pc(Rr) + ") — 채권형·TDF는 「안전형」에 체크하거나 비중을 줄여 주세요"); }
     } else if (RET[k]){   // 위험 70% 한도: 위험형 지정은 위험 칸에서, 안전형 지정은 안전 칸에서 먼저 깎음
       var T = Rb, Mr = items.filter(function(x){ return !x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0), Ms = items.filter(function(x){ return x.safe; }).reduce(function(s2, x){ return s2 + x.pct; }, 0);
       if (Mr > T){ var sc0 = T / Mr; items.forEach(function(x){ if (!x.safe) x.pct *= sc0; }); warn.push("위험자산 지정이 " + (T >= 70 ? "법정 한도" : "이 제안의 위험자산 몫") + "(" + T + "%)를 넘어 " + T + "%로 줄임"); Mr = T; }
@@ -181,8 +210,8 @@
       fr["위험"] = fr["안전"] = (100 - M) / 100;
     }
     var after = base.map(function(a){ var b = JSON.parse(JSON.stringify(a)); b.was = a.pct; b.pct = r1(a.pct * (fr[a.kind] != null ? fr[a.kind] : fr["위험"])); return b; });
-    var ins = items.map(function(x, i){ var m = x.m; return {k: "must", pct: r1(x.pct), was: 0, name: "⭐ " + m.name, inst: m.name + (m.mkt ? " · " + m.mkt : ""), code: m.code || null, kind: x.safe ? "안전" : "위험", etf: !!m.etf,
-      color: MCOL2[i % MCOL2.length], why: ((RS[rkey(m)] || {}).short || "PB 추천 " + (m.etf ? "ETF" : "종목")) + (x.safe ? " (안전자산으로 분류)" : ""), reason: (RS[rkey(m)] || {}).lines || [], sym: m.sym || ""}; });
+    var ins = items.map(function(x, i){ var m = x.m; return {k: "must", pct: r1(x.pct), was: 0, name: "⭐ " + m.name, inst: m.name + (m.t ? " · " + (m.t === "dep" ? "예금" + (+m.rate ? " 연 " + (+m.rate).toFixed(2) + "%" : "") : "펀드") : m.mkt ? " · " + m.mkt : ""), code: m.code || null, kind: x.safe ? "안전" : "위험", etf: !!m.etf, t: m.t || "", rate: m.rate || null,
+      color: MCOL2[i % MCOL2.length], why: ((RS[rkey(m)] || {}).short || "PB 추천 " + (m.t === "dep" ? "예금" : m.t === "fund" ? "펀드" : m.etf ? "ETF" : "종목")) + (x.safe && m.t !== "dep" ? " (안전자산으로 분류)" : ""), reason: (RS[rkey(m)] || {}).lines || [], sym: m.sym || ""}; });
     var all = ins.concat(after), diff = r1(100 - all.reduce(function(s2, a){ return s2 + a.pct; }, 0));
     if (diff){ var big = after.slice().sort(function(a, b){ return b.pct - a.pct; })[0] || ins[0]; if (big) big.pct = r1(big.pct + diff); }
     if (RET[k]){   // 반올림으로 70.1% 같은 것이 나오지 않게 — 넘친 만큼 위험 칸 → 안전 칸
@@ -588,9 +617,10 @@
     if (f.themes) f.themes.sort(function(a, b){ return b.w - a.w; });
     f.must = P.ins; f.mustPlan = P;
     // 머리말도 넣은 뒤 비중 큰 순으로 다시 씀 (기본폼 숫자가 남지 않게)
-    f.headline = "⭐ 추천 종목 " + pc(P.M) + " + " + P.after.filter(function(a){ return a.pct > 0; }).map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" + ") + " 제안임";
-    f.points = ["⭐ 추천 종목 " + P.ins.map(function(a){ return a.inst.split(" · ")[0] + " " + pc(a.pct); }).join(" · ") + " — 담는 이유는 아래 「추천 종목」 칸 · 나머지 " + pc(r1(100 - P.M)) + "는 기본 포트 비율 그대로 (아래 설명의 % 숫자는 추천 종목 넣기 전 기본 포트 기준)"].concat(RET[k] ? ["위험자산 합계 " + pc(P.risky) + " (법정 한도 70% 안)"] : []).concat(f.points || []);
-    if (f.sim && f.sim.note) f.sim.note += " · ⭐ 추천 종목은 과거 계산에서 빼고 기본 포트 비율로 계산";
+    var ML = mustLbl(f);
+    f.headline = "⭐ " + ML + " " + pc(P.M) + " + " + P.after.filter(function(a){ return a.pct > 0; }).map(function(a){ return a.name.replace(/\s*\(.*\)$/, "") + " " + pc(a.pct); }).join(" + ") + " 제안임";
+    f.points = ["⭐ " + ML + " " + P.ins.map(function(a){ return a.inst.split(" · ")[0] + (a.t === "dep" && a.rate ? "(연 " + (+a.rate).toFixed(2) + "%)" : "") + " " + pc(a.pct); }).join(" · ") + " — 담는 이유는 아래 「" + ML + "」 칸 · 나머지 " + pc(r1(100 - P.M)) + "는 " + (RET[k] && P.ins.some(function(a){ return a.kind === "안전"; }) ? "같은 종류(위험·안전) 칸에서 비율대로 줄임" : "기본 포트 비율 그대로") + " (아래 설명의 % 숫자는 넣기 전 기본 포트 기준)"].concat(RET[k] ? ["위험자산 합계 " + pc(P.risky) + " (법정 한도 70% 안)"] : []).concat(f.points || []);
+    if (f.sim && f.sim.note) f.sim.note += " · ⭐ " + ML + "은 과거 계산에서 빼고 기본 포트 비율로 계산";
     return brand(f);
   }
   var FONT = '"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR",sans-serif';
@@ -601,6 +631,8 @@
   var DISC0 = "본 자료는 미래에셋증권이 제작한 것이며, 투자권유를 위한 광고물로 활용될 수 없고, 투자자에게 배포될 수 없습니다. 본 자료에 수록된 내용은 신뢰할만한 자료 및 정보로부터 얻어진 것이나 당사는 그 정확상이나 안정성을 보장할 수 없습니다. 따라서 어떠한 경우에도 본 자료는 고객의 투자 결과에 대한 법적 책임소재에 대한 증빙자료로 사용될 수 없습니다.";
   var LOGO = "img/mirae_logo.png", LOGO_R = 1000 / 351, LOGO64 = null;
   function logo64(){ if (LOGO64) return Promise.resolve(LOGO64); return fetch(LOGO).then(function(r){ return r.blob(); }).then(function(b){ return new Promise(function(ok){ var fr = new FileReader(); fr.onload = function(){ LOGO64 = fr.result; ok(LOGO64); }; fr.readAsDataURL(b); }); }).catch(function(){ return null; }); }
+  function mustLbl(f){ var M = f.must || [], d = M.some(function(a){ return a.t === "dep"; }), fd = M.some(function(a){ return a.t === "fund"; }), o = M.some(function(a){ return !a.t; });
+    return (o ? ["추천 종목·ETF"] : []).concat(d ? ["예금"] : []).concat(fd ? ["펀드"] : []).join("·").replace(/^$/, "추천 상품") || "추천 상품"; }
   function brand(f){ if (!f) return f; f.color = PCOL[f.key] || f.color; (f.alloc || []).forEach(function(a, i){ a.color = MCH[i % MCH.length]; }); (f.themes || []).forEach(function(t, i){ t.color = MCH[(i + 2) % MCH.length]; }); (f.must || []).forEach(function(a){ var j = (f.alloc || []).indexOf(a); }); return f; }
 
   function e(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
@@ -1076,7 +1108,7 @@
   function onePageExtra(f, amt, multi){
     var S = f.sim; if (!S || !amt || multi) return "";
     var o = "";
-    if (f.must && f.must.length) o += '<div style="margin:0 26px 16px;background:#fffaee;border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:8px">⭐ 추천 종목·ETF</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    if (f.must && f.must.length) o += '<div style="margin:0 26px 16px;background:#fffaee;border-radius:16px;padding:14px 18px;color:' + INK + '"><div style="font-size:21px;color:' + SUB + ';font-weight:700;margin-bottom:8px">⭐ ' + mustLbl(f) + '</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
       f.must.map(function(a){ var r0 = (a.reason || []).filter(function(t){ return /^(🔗|📈|📊|💡)/.test(t); })[0] || (a.reason || [])[0] || "";
         return '<div style="flex:1 1 45%;background:#fff;border:1px solid ' + LINE + ';border-left:6px solid ' + a.color + ';border-radius:12px;padding:8px 12px;font-size:22px"><b>' + e(a.inst.split(" · ")[0]) + '</b> ' + pc(a.pct) + ' <span style="color:' + NAVY + ';font-weight:800">' + man(amt * a.pct / 100) + '</span>' +
           (r0 ? '<div style="font-size:17px;color:' + SUB + ';line-height:1.4;margin-top:3px">' + e(r0) + '</div>' : '') + '</div>'; }).join("") + '</div></div>';
@@ -1230,10 +1262,10 @@
           '<div style="flex:none;width:150px"><div style="font-size:15px;font-weight:800;line-height:1.3">' + e(a.inst.split(" · ")[0]) + '</div><div style="font-size:11.5px;color:' + SUB + '">' + e([a.code, a.inst.split(" · ")[1]].filter(Boolean).join(" · ")) + '</div>' +
           '<div style="font-size:22px;font-weight:900;color:' + a.color + ';margin-top:4px">' + pc(a.pct) + '</div>' + (A ? '<div style="font-size:14px;font-weight:800;color:' + NAVY + '">' + man(A * a.pct / 100) + '</div>' : '') + '</div>' +
           '<div style="flex:1;min-width:0;font-size:12.5px;line-height:1.55">' + (rs.length ? '<div style="font-size:12px;font-weight:800;color:' + SUB + ';margin-bottom:2px">왜 담나</div>' + rs.map(function(t){ return '<div style="padding:2px 0">' + e(t) + '</div>'; }).join("") : '<div style="color:' + SUB + '">' + e(a.why) + '</div>') + '</div></div>'; });
-      B.push('<!--K-->' + secT("⭐ 추천 종목·ETF " + pc(Mt) + (A ? " · " + man(A * Mt / 100) : "") + " — 왜 담나", f.color) + (cardsM[0] || ""));
+      B.push('<!--K-->' + secT("⭐ " + mustLbl(f) + " " + pc(Mt) + (A ? " · " + man(A * Mt / 100) : "") + " — 왜 담나", f.color) + (cardsM[0] || ""));
       cardsM.slice(1).forEach(function(c){ B.push(c); });
-      B.push((f.mustPlan ? '<div style="display:flex;gap:12px;align-items:flex-start;margin-top:2px"><div style="flex:1.4;min-width:0">' + tbl({cols: ["칸", "기본 포트", "추천 종목 넣은 뒤", "금액"], rows: f.mustPlan.all.map(function(a){ return [a.name, a.k === "must" ? "–" : pc(a.was), pc(a.pct), A ? man(A * a.pct / 100) : "–"]; }).concat([["합계", "100%", "100%", A ? man(A) : "–"]])}, 11.5, {right: true, pad: "4px 8px", hl: function(r){ return r[0] === "합계" || r[0].indexOf("⭐") === 0; }}) + '</div>' +
-          '<div style="flex:1;min-width:0">' + box('<div style="font-size:13px;font-weight:800;margin-bottom:6px">이렇게 맞춤</div><div style="font-size:12.5px;line-height:1.6">① 추천 종목 ' + pc(f.mustPlan.M) + '를 먼저 담음<br>② 기본 포트는 칸마다 원래 비율 그대로 ' + pc(r1(100 - f.mustPlan.M)) + '로 줄임<br>③ 합계 100%' + (RET[f.key] ? '<br>④ 위험자산 ' + pc(f.mustPlan.risky) + ' — 법정 한도 70% 안' : '') + '</div>' +
+      B.push((f.mustPlan ? '<div style="display:flex;gap:12px;align-items:flex-start;margin-top:2px"><div style="flex:1.4;min-width:0">' + tbl({cols: ["칸", "기본 포트", "넣은 뒤", "금액"], rows: f.mustPlan.all.map(function(a){ return [a.name, a.k === "must" ? "–" : pc(a.was), pc(a.pct), A ? man(A * a.pct / 100) : "–"]; }).concat([["합계", "100%", "100%", A ? man(A) : "–"]])}, 11.5, {right: true, pad: "4px 8px", hl: function(r){ return r[0] === "합계" || r[0].indexOf("⭐") === 0; }}) + '</div>' +
+          '<div style="flex:1;min-width:0">' + box('<div style="font-size:13px;font-weight:800;margin-bottom:6px">이렇게 맞춤</div><div style="font-size:12.5px;line-height:1.6">① ' + mustLbl(f) + ' ' + pc(f.mustPlan.M) + '를 먼저 담음<br>② ' + (RET[f.key] && f.must.some(function(a){ return a.kind === "안전"; }) ? '안전형(예금·채권형 등)은 안전자산 칸에서, 위험형은 위험자산 칸에서 비율대로 깎아 기본 포트 ' : '기본 포트는 칸마다 원래 비율 그대로 ') + pc(r1(100 - f.mustPlan.M)) + '로 줄임<br>③ 합계 100%' + (RET[f.key] ? '<br>④ 위험자산 ' + pc(f.mustPlan.risky) + ' — 법정 한도 70% 안' : '') + '</div>' +
           (f.mustPlan.warn.length ? '<div style="font-size:12px;color:' + UP + ';margin-top:6px">⚠️ ' + f.mustPlan.warn.map(e).join(" · ") + '</div>' : ''), "padding:12px 13px") + '</div></div>' : '') +
         '<div style="font-size:12px;color:' + SUB + ';margin-top:6px;line-height:1.5">개별 종목은 한 회사 소식에 크게 흔들리므로 비중을 너무 키우지 않는 것을 권함</div>');
     }
@@ -1446,7 +1478,7 @@
     var ks = {}; m.items.forEach(function(x){ ks[x.f.key] = x.f; });
     var has = function(o){ for (var q in ks) if (o[q]) return true; return false; };
     var only = function(o){ var n = 0; for (var q in ks){ if (!o[q]) return false; n++; } return n > 0 && !all; };
-    var stock = all || m.items.some(function(x){ return (x.f.must || []).some(function(a){ return !a.etf && !a.safe && a.kind !== "안전"; }); });
+    var stock = all || m.items.some(function(x){ return (x.f.must || []).some(function(a){ return !a.etf && !a.t && !a.safe && a.kind !== "안전"; }); });
     var usd = ks.gl_stock && (all || ks.gl_stock.mode === "usd");
     var C = [
       "본 자료는 고객의 투자 판단을 돕기 위해 작성한 참고 자료로, 특정 상품의 수익을 보장하거나 가입을 강요하지 않음. 최종 투자 판단과 그 결과에 대한 책임은 투자자 본인에게 있음",
@@ -1812,7 +1844,7 @@
           var wy2 = 2.6 + 0.34 * (WC.hs.length + 1) + 0.15;
           T(s, [{text: "받을 때 세금: " + wdTaxLine(WC), options: {bullet: true, breakLine: true, bold: true, color: hx(NAVY)}}].concat(wdChecks(WC).slice(0, WC.irp ? 4 : 3).map(function(t){ return {text: t, options: {bullet: true, breakLine: true}}; })).concat([{text: wdNote(WC), options: {color: "5B6576", fontSize: 7.5}}]), {x: 7.1, y: wy2, w: 5.7, h: 6.9 - wy2, fontSize: 8.5, paraSpaceAfter: 3});
         }
-        if ((f.must && f.must.length) || f.taxbox){ s = P.addSlide(); head(s, (f.must && f.must.length ? "⭐ 추천 종목 · " : "") + "💱 " + (f.mode === "usd" ? "환전해서 투자 (미국 상장)" : "원화로 투자 (국내 상장)"), "세금·거래 방식", f.color);
+        if ((f.must && f.must.length) || f.taxbox){ s = P.addSlide(); head(s, (f.must && f.must.length ? "⭐ " + mustLbl(f) + " · " : "") + "💱 " + (f.mode === "usd" ? "환전해서 투자 (미국 상장)" : "원화로 투자 (국내 상장)"), "세금·거래 방식", f.color);
           var yy2 = 1.4;
           if (f.must && f.must.length){ s.addTable([th(["종목·ETF", "비중", "금액", "왜 담나"])].concat(f.must.map(function(a){ return [{text: a.inst.split(" · ")[0] + "\n" + [a.code, a.inst.split(" · ")[1]].filter(Boolean).join(" · "), options: {bold: true, color: hx(a.color)}}, pc(a.pct), A ? man(A * a.pct / 100) : "–", (a.reason || []).slice(0, 4).join("\n") || a.why]; })),
             {x: 0.6, y: yy2, w: 12.1, colW: [2.6, 0.8, 1.2, 7.5], fontFace: F, fontSize: 9, border: {type: "solid", pt: 0.5, color: "E3E7EE"}, valign: "middle"}); yy2 += Math.min(4.2, 0.85 * f.must.length + 0.45) + 0.25; }
@@ -1942,6 +1974,7 @@
     fx: "💴 원화로 = 국내 상장 ETF(TIGER 미국S&P500 등)로 담아요. 환전이 없고, 팔아서 남은 돈은 배당소득으로 15.4% 세금(금융소득종합과세 대상)이에요.\n💵 환전해서 = 미국 상장 ETF(SPY·QQQ·GLD 등)를 달러로 담아요. 팔아서 남은 돈은 1년에 250만원까지 빼고 22% 양도세(분리과세)예요.\n고른 방식에 맞춰 담을 ETF와 세금 설명이 바뀌어요.",
     pick: "채권·ELS는 기본으로 기간별·조건별 추천을 담아 두지만, PB가 원하는 회차·종목으로 바꿀 수 있어요.\n🏛️ 국고채 = 미래에셋이 파는 원화 채권 전체(국채·공사채·지방채·회사채·신종) — 회사채 등은 위험등급이 고객 성향에 맞아야 담겨요.\n💵 미국채 = 미래에셋 판매 목록 + 재무부 전체 이표채(목록 밖은 창구 확인).\n💱 브라질 = 헤알 NTN-F(연 10% 이표)·LTN(할인채)·달러표시 국채.\n🎯 ELS = 지금 청약 중인 모든 회차(ELB·지수형·종목형).\n목록을 누르면 담기고, 다시 누르거나 ✕로 빼요. 비율을 적으면 그대로 한 장·PDF·PPT·모의 계산에 들어가요. ↺ 기본 추천으로 언제든 되돌려요.",
     wd: "고객이 연금으로 매달 꺼내 쓸 금액(세금 떼기 전)을 만원 단위로 적어요. 개인연금·IRP에만 있어요.\n넣으면 한 장·PDF·PPT·보여 주기에 「💸 매달 꺼내 쓰기 계획」이 붙어요: 과거에 이 비중으로 매달 꺼냈다면 돈이 남았던 비율, 몇 년 뒤 남는 돈(나쁜·보통·좋은 경우), 수익률별로 돈이 가는 기간, 세후 월 수령액, 연금수령한도·1,500만원 선 확인.\n비워 두면 예전 그대로 만들어져요. 켜진 칩을 다시 누르면 지워져요.",
+    df: "DC·IRP는 예금(원리금보장)과 펀드를, 개인연금(연금저축)은 펀드를 담을 수 있어요.\n예금 = 상품명과 금리를 적으면 안전자산 칸(회사채·CD금리)에서 비율대로 깎아 넣어요.\n펀드 = 채권형·TDF·MMF처럼 안전한 건 「안전형」에 체크하면 안전자산 칸에서, 아니면 위험자산 칸에서 깎아요. DC·IRP 위험자산 70% 한도는 그대로 지켜요.\n한 번 넣은 예금·펀드는 이 휴대폰 목록에 저장돼 다음부터 칩으로 바로 골라요(✕로 지움).\n상품명·금리는 회사 금리표·투자설명서를 보고 적어 주세요.",
     must: "고객에게 꼭 넣고 싶은 종목·ETF를 검색해서 % 를 적어요(여러 개 가능).\n넣은 % 만큼 나머지 기본 포트를 원래 비율 그대로 줄여서 합계 100%를 맞춰요. 막대에서 줄어든 칸은 옛 % 가 흐리게 보여요.\n왜 추천하는지는 종목리포트·ETF 구성·실적·애널리스트·뉴스·시황 테마로 자동으로 써 줘요.\n개인연금·DC·IRP는 국내 상장 ETF만 담을 수 있고, DC·IRP에서 채권형·TDF는 「안전형」에 체크하면 안전자산 칸에서 깎아요.",
     sim: "모든 제안서 맨 끝에 들어가는 위험고지 문구를 확인하고 심의필을 관리하는 칸이에요.\n① 아래 원문을 읽어 보고 ② 「심의 요청서 PDF」를 받아 준법감시 부서에 내요.\n③ 받은 심의필 번호와 유효기간을 넣으면 한 장·PDF·PPT 모두에 저절로 찍혀요.\n유효기간이 지나거나 문구가 바뀌면 번호가 자동으로 빠지고 여기서 알려 줘요. 번호는 꼭 회사에서 받은 것만 넣어 주세요."
   };
@@ -2005,14 +2038,40 @@
     var only = {pension: 1, dc: 1, irp: 1}[k], A = amtOf(k);
     h2 += coreUI(k);
     h2 += '<div class="pp-ol"><span data-tip="' + e(JOY.must) + '">⭐ 추천 종목·ETF 넣기 ⓘ</span> <span class="mut">(여러 개 가능 · 이유는 자동으로 찾아 넣음)</span></div>' +
-      (o.must || []).map(function(m, i){ return '<div class="pp-mu"><span class="pp-mn"><b>' + e(m.name) + '</b>' + (m.code ? ' <small>' + e(m.code) + (m.mkt ? " · " + e(m.mkt) : "") + '</small>' : ' <small>직접 입력</small>') +
+      (o.must || []).map(function(m, i){ return '<div class="pp-mu"><span class="pp-mn"><b>' + e(m.name) + '</b>' + (m.t === "dep" ? ' <small>🏦 예금' + (+m.rate ? " · 연 " + (+m.rate).toFixed(2) + "%" : "") + '</small>' : m.t === "fund" ? ' <small>📦 펀드</small>' : m.code ? ' <small>' + e(m.code) + (m.mkt ? " · " + e(m.mkt) : "") + '</small>' : ' <small>직접 입력</small>') +
         (A ? '<em class="pp-mw" id="ppmw_' + k + '_' + i + '">' + (+m.pct ? man(A * m.pct / 100) : "") + '</em>' : '') + '</span>' +
-        (RET[k] ? '<label class="pp-sf"><input type="checkbox" data-mf="' + k + '" data-mi="' + i + '"' + (m.safe ? ' checked' : '') + '>안전형</label>' : '') +
+        (RET[k] && m.t !== "dep" ? '<label class="pp-sf"><input type="checkbox" data-mf="' + k + '" data-mi="' + i + '"' + (m.safe ? ' checked' : '') + '>안전형</label>' : m.t === "dep" ? '<span class="pp-sf">안전자산</span>' : '') +
         '<input inputmode="decimal" data-mp="' + k + '" data-mi="' + i + '" value="' + e(m.pct) + '"><span>%</span><button type="button" data-mx="' + k + '" data-mi="' + i + '" aria-label="빼기">✕</button></div>'; }).join("") +
       '<div class="pp-ms"><input data-ms="' + k + '" placeholder="' + (only ? "예: KODEX 200, TIGER 미국배당다우존스" : k === "gl_stock" && o.mode === "usd" ? "예: 엔비디아, AAPL, SCHD" : "예: 삼성전자, SK하이닉스, KODEX 200") + '" autocomplete="off"><button type="button" data-ma="' + k + '">더하기</button></div><div class="pp-sg" id="ppsg_' + k + '"></div>' +
+      (only ? dfUI(k) : '') +
       '<div class="pp-pl" id="pppl_' + k + '">' + planHTML(k) + '</div>' +
-      '<p class="pp-tip" style="margin:4px 0 0">' + (only ? "연금·퇴직연금 계좌는 국내 상장 ETF만 담을 수 있음 (개별 주식·해외 상장 불가)" + (RET[k] ? " · 채권형·TDF 등은 「안전형」에 체크하면 안전자산 칸에서 깎음" : "") : "넣은 % 만큼 기본 포트를 원래 비율 그대로 줄여 합계 100%를 맞춤") + '</p>';
+      '<p class="pp-tip" style="margin:4px 0 0">' + (only ? "ETF는 국내 상장만 담을 수 있음 (개별 주식·해외 상장 불가) · 펀드도 담을 수 있음" + (RET[k] ? " · 예금은 안전자산 칸에서, 채권형·TDF 등은 「안전형」에 체크하면 안전자산 칸에서 깎음" : " · 예금은 DC·IRP에서만 가능") : "넣은 % 만큼 기본 포트를 원래 비율 그대로 줄여 합계 100%를 맞춤") + '</p>';
     return '<div class="pp-op">' + h2 + '</div>';
+  }
+  /* 🏦 11/26 사용자 「DC·IRP·개인연금 계좌에는 예금이나 펀드도 가능 — 그것들을 넣는 기능」 · 방식 = 목록에서 고르기 + 직접 입력 · 비중 = 같은 종류 칸에서
+     예금 = 항상 안전자산(DC·IRP만 · 연금저축은 예금 못 담음) · 펀드 = 「안전형」 체크로 위험/안전 구분(이름으로 먼저 짐작)
+     목록 = 기본 몇 개 + PB가 한 번 넣은 예금·펀드는 이 휴대폰에 저장돼 다음부터 칩으로 뜸(✕로 지움) · 상품명·금리는 PB가 회사 금리표·설명서 보고 씀 */
+  var FAV = [];
+  try { FAV = JSON.parse(localStorage.getItem("propfav") || "[]") || []; } catch(x) { FAV = []; }
+  var FAV0 = [{t: "dep", name: "정기예금 1년 (원리금보장)"}, {t: "dep", name: "정기예금 2년 (원리금보장)"}, {t: "dep", name: "정기예금 3년 (원리금보장)"},
+              {t: "fund", name: "TDF (은퇴 시점형)", safe: true}, {t: "fund", name: "채권형 펀드", safe: true}, {t: "fund", name: "MMF", safe: true}, {t: "fund", name: "주식형 펀드", safe: false}];
+  function favKeep(){ try { localStorage.setItem("propfav", JSON.stringify(FAV.slice(0, 30))); } catch(x) {} }
+  function favAdd(m){ if (FAV0.some(function(q){ return q.t === m.t && q.name === m.name; })) return;
+    FAV = FAV.filter(function(q){ return !(q.t === m.t && q.name === m.name); }); var q = {t: m.t, name: m.name}; if (m.rate) q.rate = +m.rate; if (m.t === "fund") q.safe = !!m.safe; FAV.unshift(q); favKeep(); }
+  var DF = {};   // 열린 입력칸: {k: "dep"|"fund"}
+  function dfUI(k){
+    var t = DF[k], canDep = k !== "pension", list = FAV.concat(FAV0).filter(function(q){ return q.t === t; });
+    var h = '<div class="pp-ol" style="margin-top:10px"><span data-tip="' + e(JOY.df) + '">🏦 예금·펀드 넣기 ⓘ</span> <span class="mut">(목록에서 고르거나 직접 입력)</span></div>' +
+      '<div class="pp-dft">' + (canDep ? '<button type="button" data-dft="' + k + '" data-dv="dep"' + (t === "dep" ? ' class="on"' : '') + '>🏦 예금</button>' : '') +
+      '<button type="button" data-dft="' + k + '" data-dv="fund"' + (t === "fund" ? ' class="on"' : '') + '>📦 펀드</button></div>';
+    if (!canDep) h += '<p class="pp-tip" style="margin:4px 0 0">개인연금(연금저축)은 예금을 담을 수 없어 펀드만 열려 있음</p>';
+    if (!t) return h;
+    h += '<div class="pp-dfc">' + list.map(function(q, i){ var mine = FAV.indexOf(q) >= 0;
+        return '<span class="pp-dfp"><button type="button" data-dfp="' + k + '" data-di="' + i + '">' + e(q.name) + (q.rate ? ' <small>' + (+q.rate).toFixed(2) + '%</small>' : '') + '</button>' + (mine ? '<button type="button" class="x" data-dfx="' + k + '" data-di="' + i + '" aria-label="목록에서 지우기">✕</button>' : '') + '</span>'; }).join("") + '</div>' +
+      '<div class="pp-dfi"><input data-dfn="' + k + '" placeholder="' + (t === "dep" ? "상품명 (예: ○○은행 정기예금 1년)" : "펀드명 (예: ○○ TDF 2045)") + '" autocomplete="off">' +
+      (t === "dep" ? '<input data-dfr="' + k + '" inputmode="decimal" placeholder="금리 %" style="width:78px;flex:none">' : '<label class="pp-sf"><input type="checkbox" data-dfs="' + k + '"' + (RET[k] ? '' : ' disabled') + '>안전형</label>') +
+      '<button type="button" data-dfa="' + k + '">더하기</button></div>';
+    return h;
   }
   // 지정 비중 → 기본 포트가 어떻게 줄어드는지 한눈에
   function planHTML(k){
@@ -2039,11 +2098,15 @@
   }
   function addMust(k, m){
     var o = opt(k); if (!m || !m.name) return;
-    if ({pension: 1, dc: 1, irp: 1}[k] && ((m.mkt && m.mkt !== "한국") || m.etf === false)) toast("연금·퇴직연금은 국내 상장 ETF만 담을 수 있어요 — 확인 후 쓰세요");
-    if ((o.must || []).some(function(x){ return x.name === m.name && (x.code || "") === (m.code || ""); })){ toast("이미 넣은 종목이에요"); return; }
+    if (m.t === "dep" && k === "pension"){ toast("개인연금(연금저축)은 예금을 담을 수 없어요 — 예금은 DC·IRP에서만 가능해요"); return; }
+    if (m.t) favAdd(m);
+    if (!m.t && {pension: 1, dc: 1, irp: 1}[k] && ((m.mkt && m.mkt !== "한국") || m.etf === false)) toast("연금·퇴직연금은 국내 상장 ETF만 담을 수 있어요 — 확인 후 쓰세요");
+    if ((o.must || []).some(function(x){ return x.name === m.name && (x.code || "") === (m.code || "") && (x.t || "") === (m.t || ""); })){ toast("이미 넣은 상품이에요"); return; }
     if (!mustOK(m)){ var G = mustGrade(m); toast("🔒 " + m.name + " — " + G.why + " " + G.g + "등급(" + GRADE[G.g] + ")" + (G.est ? " 추정" : "") + "이라 「" + profName() + "」 고객에게 담을 수 없어요"); return; }
-    var safe = RET[k] && /채권|국채|회사채|TDF|금리|단기|머니마켓|MMF|CD/i.test(m.name);
-    o.must = (o.must || []).concat([{name: m.name, code: m.code || "", mkt: m.mkt || "", etf: !!m.etf, pct: 10, safe: safe, sym: m.sym || ""}]).slice(0, 20); keep(); resetBtns();
+    var safe = m.t === "dep" ? true : m.t === "fund" && m.safe != null ? !!m.safe : RET[k] && /채권|국채|회사채|TDF|금리|단기|머니마켓|MMF|CD/i.test(m.name);
+    var nm = {name: m.name, code: m.code || "", mkt: m.mkt || "", etf: !!m.etf, pct: 10, safe: safe, sym: m.sym || ""};
+    if (m.t){ nm.t = m.t; if (+m.rate > 0) nm.rate = +m.rate; }
+    o.must = (o.must || []).concat([nm]).slice(0, 20); keep(); resetBtns();
     ensureReasons().then(function(){ preview(); });
     var y = window.scrollY; draw(); window.scrollTo(0, y);
   }
@@ -2100,6 +2163,16 @@
       (opt(k).must || []).forEach(function(m, i){ var mw = document.getElementById("ppmw_" + k + "_" + i); if (mw) mw.textContent = A && +m.pct ? man(A * m.pct / 100) : ""; }); };
     [].forEach.call(w.querySelectorAll("[data-mp]"), function(inp){ inp.oninput = function(){ var v = inp.value.replace(/[^\d.]/g, ""); if (v !== inp.value) inp.value = v; opt(inp.dataset.mp).must[+inp.dataset.mi].pct = +v || 0; keep(); resetBtns(); upPlan(inp.dataset.mp); preview(); }; });
     [].forEach.call(w.querySelectorAll("[data-mf]"), function(cb){ cb.onchange = function(){ opt(cb.dataset.mf).must[+cb.dataset.mi].safe = cb.checked; keep(); resetBtns(); upPlan(cb.dataset.mf); preview(); }; });
+    [].forEach.call(w.querySelectorAll("[data-dft]"), function(b){ b.onclick = function(){ var k = b.dataset.dft; DF[k] = DF[k] === b.dataset.dv ? null : b.dataset.dv; redraw(); }; });
+    var dfList = function(k){ return FAV.concat(FAV0).filter(function(q){ return q.t === DF[k]; }); };
+    [].forEach.call(w.querySelectorAll("[data-dfp]"), function(b){ b.onclick = function(){ var k = b.dataset.dfp, q = dfList(k)[+b.dataset.di]; if (!q) return;
+      if (q.t === "dep" && !q.rate){ var n0 = w.querySelector('[data-dfn="' + k + '"]'), r0 = w.querySelector('[data-dfr="' + k + '"]'); if (n0) n0.value = q.name; if (r0){ r0.focus(); } toast("금리(%)를 적고 「더하기」를 눌러 주세요"); return; }
+      addMust(k, {t: q.t, name: q.name, rate: q.rate, safe: q.t === "fund" ? (RET[k] ? !!q.safe : false) : true}); }; });
+    [].forEach.call(w.querySelectorAll("[data-dfx]"), function(b){ b.onclick = function(){ var q = dfList(b.dataset.dfx)[+b.dataset.di], j = FAV.indexOf(q); if (j >= 0){ FAV.splice(j, 1); favKeep(); redraw(); } }; });
+    [].forEach.call(w.querySelectorAll("[data-dfa]"), function(b){ b.onclick = function(){ var k = b.dataset.dfa, n1 = w.querySelector('[data-dfn="' + k + '"]'), nm = n1 && n1.value.trim(); if (!nm){ toast("상품명을 적어 주세요"); return; }
+      if (DF[k] === "dep"){ var r1v = w.querySelector('[data-dfr="' + k + '"]'), rv = r1v ? +String(r1v.value).replace(/[^\d.]/g, "") : 0; if (!(rv > 0 && rv < 30)){ toast("금리를 % 로 적어 주세요 (예: 3.2)"); return; } addMust(k, {t: "dep", name: nm.slice(0, 40), rate: Math.round(rv * 100) / 100}); }
+      else { var s1 = w.querySelector('[data-dfs="' + k + '"]'); addMust(k, {t: "fund", name: nm.slice(0, 40), safe: !!(s1 && s1.checked)}); } }; });
+    [].forEach.call(w.querySelectorAll("[data-dfn]"), function(inp){ inp.onkeydown = function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); var b2 = w.querySelector('[data-dfa="' + inp.dataset.dfn + '"]'); if (b2) b2.click(); } }; });
     [].forEach.call(w.querySelectorAll("[data-ms]"), function(inp){ inp.oninput = function(){ suggest(inp.dataset.ms, inp.value.trim()); };
       inp.onkeydown = function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); var b2 = w.querySelector('[data-ma="' + inp.dataset.ms + '"]'); if (b2) b2.click(); } }; });
     [].forEach.call(w.querySelectorAll("[data-ma]"), function(b){ b.onclick = function(){ var k = b.dataset.ma, inp = w.querySelector('[data-ms="' + k + '"]'), v = inp && inp.value.trim(); if (!v) return;
@@ -2347,7 +2420,7 @@
       if (WD_F[k] && +q.wd > 0) y.w = +q.wd;
       if (q.core) y.c = CORE.map(function(x){ return q.core[x[0]] ? 1 : 0; }).join("");   // spx·ndx·k200·gold
       if (q.pk && q.pk.length) y.p = q.pk.map(function(p){ return [p.id, +p.pct || 0]; });
-      if (q.must && q.must.length) y.u = q.must.map(function(m){ var z = {n: m.name, p: +m.pct || 0}; if (m.code) z.c = m.code; if (m.mkt) z.k = m.mkt; if (m.sym) z.y = m.sym; if (m.etf) z.e = 1; if (m.safe) z.f = 1; return z; });
+      if (q.must && q.must.length) y.u = q.must.map(function(m){ var z = {n: m.name, p: +m.pct || 0}; if (m.code) z.c = m.code; if (m.mkt) z.k = m.mkt; if (m.sym) z.y = m.sym; if (m.etf) z.e = 1; if (m.safe) z.f = 1; if (m.t) z.t = m.t; if (m.rate) z.r = +m.rate; return z; });
       if (Object.keys(y).length) o.o[k] = y; });
     return b64e(JSON.stringify(o));
   }
@@ -2375,7 +2448,7 @@
       if (WD_F[k] && +y.w > 0 && +y.w < 1e6) q.wd = Math.round(+y.w);
       if (typeof y.c === "string" && /^[01]{4}$/.test(y.c)) q.core = {spx: +y.c[0], ndx: +y.c[1], k200: +y.c[2], gold: +y.c[3]};
       (Array.isArray(y.u) ? y.u : []).slice(0, 20).forEach(function(z){ if (!z || !z.n) return; var mm = {name: str(z.n), pct: Math.max(0, Math.min(100, +z.p || 0))};
-        if (z.c) mm.code = str(z.c, 16); if (z.k) mm.mkt = str(z.k, 8); if (z.y) mm.sym = str(z.y, 20); if (z.e) mm.etf = true; if (z.f) mm.safe = true; q.must.push(mm); });
+        if (z.c) mm.code = str(z.c, 16); if (z.k) mm.mkt = str(z.k, 8); if (z.y) mm.sym = str(z.y, 20); if (z.e) mm.etf = true; if (z.f) mm.safe = true; if (z.t === "dep" || z.t === "fund") mm.t = z.t; if (+z.r > 0 && +z.r < 30) mm.rate = +z.r; q.must.push(mm); });
       if (PK_F[k] && Array.isArray(y.p)){ var M = candMap(form(k)); q.pk = y.p.slice(0, 10).filter(function(z){ return Array.isArray(z) && M[z[0]]; }).map(function(z){ return {id: String(z[0]), pct: Math.max(0, Math.min(100, +z[1] || 0))}; }); if (!q.pk.length) delete q.pk; }
       ST.opt[k] = q; });
     ST.cust = ""; profFix(); keep();
@@ -2447,6 +2520,9 @@
     ".pp-pt{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11.5px;margin-top:6px}.pp-pt s{color:var(--sub);font-size:10.5px}.pp-ps{font-size:12.5px;margin-top:6px}.pp-pw{font-size:12px;color:#ff7a66;margin-top:4px}" +
     ".pp-mu{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin:6px 0;padding-bottom:6px;border-bottom:1px solid var(--line)}.pp-mn{flex:1 1 100%;min-width:0;font-size:13.5px;line-height:1.35}.pp-mu>.pp-mn+*{margin-left:auto}.pp-mn small{color:var(--sub)}" +
     ".pp-mu input{width:58px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--text);font:inherit;font-size:16px;padding:6px 8px;text-align:right}.pp-mu button{border:0;background:transparent;color:var(--sub);font-size:16px;padding:4px 6px}" +
+    ".pp-dft{display:flex;gap:6px;margin:4px 0}.pp-dft button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:9px 6px;font:inherit;font-weight:700}.pp-dft button.on{background:var(--fc);color:#fff;border-color:var(--fc)}" +
+    ".pp-dfc{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.pp-dfp{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;background:var(--panel2)}.pp-dfp button{border:0;background:transparent;color:var(--text);font:inherit;font-size:13px;padding:6px 10px}.pp-dfp button small{color:var(--sub)}.pp-dfp button.x{padding:6px 8px 6px 0;color:var(--sub)}" +
+    ".pp-dfi{display:flex;gap:6px;align-items:center;margin-bottom:6px}.pp-dfi input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:12px;color:var(--text);font:inherit;font-size:16px;padding:9px 11px}.pp-dfi button{flex:none;border:0;border-radius:12px;padding:9px 14px;font:inherit;font-weight:800;background:var(--fc);color:#fff}" +
     ".pp-ms{display:flex;gap:6px}.pp-ms input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:12px;color:var(--text);font:inherit;font-size:16px;padding:9px 11px}" +
     ".pp-ms button{flex:none;border:0;border-radius:12px;padding:0 14px;font:inherit;font-weight:800;background:var(--fc);color:#fff}" +
     ".pp-ct{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0 6px}.pp-ct button{border:1px solid var(--line);background:transparent;color:var(--sub);border-radius:99px;padding:5px 10px;font:inherit;font-size:12px}.pp-ct button small{opacity:.7}.pp-ct button.on{background:var(--fc);color:#fff;border-color:transparent;font-weight:700}" +
