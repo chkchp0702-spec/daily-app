@@ -209,6 +209,33 @@ def load_hist(syms):
                 print("다시 받음", s, len(out[s]), str(out[s].index[-1].date()) if len(out[s]) else "")
             except Exception as e:
                 print("다시 받기 실패", s, e)
+    # 🎯 11/26 12시: 다시 받아도 KST 10~11시대엔 EWY·FXI·ASHR 일봉이 전날 봉을 잃음(11/26 10:15·11:14 · 11/25 10:13~11:15 · 11/24 11:14)
+    #   — 같은 실행에서 ^GSPC 일봉엔 그 봉이 있고, 12:09 다시 보면 일봉이 돌아옴(probe/etfgap2_probe.py run 45746982155:
+    #   1시간봉 마지막 15:30 종가 EWY 129.16 · 일봉 129.19). → 일봉이 S&P 마지막 날보다 늦으면 1시간봉(정규장)의 그날 마지막 값으로 그 봉만 채움
+    #   (Close 만 쓰는 🎯 등락판·수준판용 · 장이 끝난 날(마지막 봉 15시 이후)만 · 방향·🌊 계산엔 안 쓰는 ETF)
+    for s in sorted(CONF_SYMS & set(syms)):
+        if s not in out or _sp_last is None or not len(out[s]) or out[s].index[-1] >= _sp_last:
+            continue
+        try:
+            h1 = yf.Ticker(s).history(period="5d", interval="1h", auto_adjust=False, prepost=False)
+            h1 = h1.dropna(subset=["Close"])
+            if not len(h1):
+                print("🎯 1시간봉도 없음", s); continue
+            idx = h1.index.tz_convert("America/New_York") if h1.index.tz is not None else h1.index
+            add = {}
+            for dday, g in h1.groupby(idx.date):
+                ts = pd.Timestamp(dday)
+                last_t = (g.index.tz_convert("America/New_York") if g.index.tz is not None else g.index)[-1]
+                if out[s].index[-1] < ts <= _sp_last and last_t.hour >= 15:
+                    add[ts] = float(g["Close"].iloc[-1])
+            if add:
+                rows = pd.DataFrame({"Open": list(add.values()), "Close": list(add.values())}, index=list(add.keys()))
+                out[s] = pd.concat([out[s], rows]).sort_index()
+                print("🎯 1시간봉으로 빠진 봉 채움", s, {str(k.date()): round(v, 2) for k, v in add.items()})
+            else:
+                print("🎯 1시간봉에도 그날 마감 없음", s, str(out[s].index[-1].date()))
+        except Exception as e:
+            print("🎯 1시간봉 채우기 실패", s, e)
     return out
 
 
