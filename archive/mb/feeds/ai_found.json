@@ -1,6 +1,22 @@
 {
  "items": [
   {
+   "title": "Deutsche Bank and JPMorgan Raise S&P 500 Outlook for 2027",
+   "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9BMTUzSWhoNDVGZFlSNkh1MlBZX1lUeVVkQkNMU0dpSGFveE1LZFQwZmxsN013dTBtNm5FUzNKb2hBTmo1OEE3cXdHU29ndklDOTlrVnR3YVFHYjJOOFpRbA?oc=5",
+   "press": "SuaraGarut.ID(구글뉴스)",
+   "at": "2026-11-28 05:50",
+   "why": "🇺🇸 S&P 200일선(7,352) 복귀 판단의 반대 근거 — 대형 IB 2027 목표 상향(BofA 7,800에 이어)",
+   "summary": "도이체방크·JP모건이 2027 S&P500 전망을 올렸다는 보도. 판정은 정본 200일선 규칙 그대로, IB 의견은 참고."
+  },
+  {
+   "title": "荷蘭官員：反對美國立法加強半導體製造設備出口管制",
+   "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE9EZlhmdGtDME9XSmh2VGhvd29ES1l0SUF5SllBejREUTZHTy1iSE5jN05hMUdmQm84amc1NDQzNWllS1AyS29oU3ZLRDlneWtILWlGQjVya1pud1ExN1FCVW1zUGlyRGRYT3FVekVNLUE0clFSSzdr?oc=5",
+   "press": "香港文匯報",
+   "at": "2026-11-28 05:50",
+   "why": "반도체 장비 수출통제 — SOX·과창판50(표시용 경계선 근처)·🧭 반도체 칸",
+   "summary": "네덜란드 당국자가 미국의 반도체 제조장비 수출통제 강화 입법에 반대 입장. 동맹 반발이 커지면 통제 강도 약화 가능성(미확인)."
+  },
+  {
    "title": "Nvidia halts server shipments to four Southeast Asian countries, FT reports",
    "url": "https://www.investing.com/news/stock-market-news/nvidia-halts-server-shipments-to-four-southeast-asian-countries-ft-reports-5053574",
    "press": "Investing.com(FT 인용)",
@@ -623,22 +639,6 @@
    "at": "2026-11-23 05:45",
    "why": "가설①③(AI 차입·현금 도는 AI) — 현금 많은 빅테크도 AI 사용 비용을 죄기 시작 = 추론 수요 성장 가정에 균열 신호",
    "summary": "애플이 직원 AI 사용 한도를 하루 300→100달러로 낮췄고 추가 축소도 계획(아이클래리파이드). 같은 주 엔비디아 −13.8%·AI 회사채 공급 압력 경고(골드만)와 겹침."
-  },
-  {
-   "title": "골드만 트레이더들 「美 주식 진입 기회 보이지만 위험 경고」 — 포지션 아직 높아 항복 부족",
-   "url": "https://www.bloomberglinea.com/mercados/operadores-de-goldman-ven-oportunidad-de-compra-ante-la-caida-de-acciones/",
-   "press": "블룸버그 리네아",
-   "at": "2026-11-23 04:45",
-   "why": "🇺🇸 🔴 뼈대·같은 조건(A) 규칙 — 「싸 보여도 200일선 복귀 전엔 서둘러 되사지 않는다」와 같은 결론, 💬 2·9번",
-   "summary": "골드만 트레이딩 데스크: 지난주 매도로 美 주식에 매력적인 진입 기회. 다만 투자자 포지션이 여전히 높아 의미 있는 반등에 필요한 광범위한 항복은 아직 없다(블룸버그 11/22 원문 요약)."
-  },
-  {
-   "title": "대만 증시 1주 −17.5% 36년 만 최악 — 행정원장 23일 금융·테크 업계 긴급 회의",
-   "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE9uX1NCZGhRakNEWEpJWWNpUUliSUprbFFyTkFCMm0yQnllX0NPYWhVeldicGx0aS1feVl1NkU0VE1Ic1M4TUZ3ajhON1NFY0J0S1FzWllkd2NlYXd4dWF3UE5sZzdlMXdwaVdJWHQtdUh5Y0VW?oc=5",
-   "press": "BigGo 파이낸스(구글뉴스 일본)",
-   "at": "2026-11-23 04:45",
-   "why": "반도체 칸·코스피 반도체 갭 — 한·중·대만 동시 받침 조치(공매도 제한·증안펀드) 다음 단계, 💬 3·5번",
-   "summary": "가권 1주 −17.5%로 1990년 이후 최악. 卓榮泰 행정원장 11/23 금융·테크 업계 긴급 회담. 주말엔 공매도 직전가 이하 금지·증거금 150% 등 5대 조치 발표(블룸버그)."
   }
  ],
  "at": "2026-11-28 00:45"
