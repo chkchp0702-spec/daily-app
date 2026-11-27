@@ -12,6 +12,14 @@ oci network security-list update --security-list-id $SL --force --ingress-securi
 oci network subnet create -c $C --vcn-id $VCN --cidr-block 10.0.0.0/24 --display-name msr-sub --dns-label msrsub --wait-for-state AVAILABLE >/dev/null
 fi
 SUB=$(oci network subnet list -c $C --vcn-id $VCN --query 'data[0].id' --raw-output)
+echo "💰 예산 알림 확인 (1달러만 넘어도 메일)..."
+if [ -z "$(oci budgets budget list -c $C --query 'data[?"display-name"==`msr-1usd`].id | [0]' --raw-output 2>/dev/null | grep -v None)" ]; then
+  EM=$(oci iam user list -c $C --query 'data[0].email' --raw-output 2>/dev/null); [ -n "$EM" ] && [ "$EM" != "None" ] || EM=chkchp0702@gmail.com
+  BID=$(oci budgets budget create -c $C --display-name msr-1usd --amount 1 --reset-period MONTHLY --target-type COMPARTMENT --targets "[\"$C\"]" --query 'data.id' --raw-output 2>/dev/null || true)
+  if [ -n "$BID" ] && [ "$BID" != "None" ]; then
+    oci budgets alert-rule create --budget-id $BID --type ACTUAL --threshold 1 --threshold-type PERCENTAGE --recipients "$EM" --display-name msr-1usd-alert --message "Oracle 요금이 생기기 시작함 — Claude에게 알려 주세요" >/dev/null 2>&1 && echo "   ✅ 예산 알림 걸어 둠 → $EM" || echo "   ⚠ 알림 규칙은 못 만듦(서버 만들기는 계속)"
+  else echo "   ⚠ 예산은 못 만듦(서버 만들기는 계속)"; fi
+else echo "   이미 걸려 있음"; fi
 echo "② 우분투 24.04 이미지 찾는 중..."
 IMG=$(oci compute image list -c $C --operating-system "Canonical Ubuntu" --operating-system-version "24.04" --shape VM.Standard.A1.Flex --sort-by TIMECREATED --query 'data[0].id' --raw-output)
 [ -f ~/.ssh/id_rsa ] || ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/id_rsa -q
