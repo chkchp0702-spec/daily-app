@@ -1,6 +1,22 @@
 {
  "items": [
   {
+   "title": "U.S. Stock Futures Surge As Nvidia, Anthropic And Other AI Shares Rally In Premarket Trading",
+   "url": "https://www.forbes.com/sites/siladityaray/2026/11/27/stock-futures-surge-as-battered-ai-shares-rebound-ahead-of-shorterned-friday-trading/",
+   "press": "Forbes",
+   "at": "2026-11-27 20:40",
+   "why": "🇺🇸 50% 칸 — S&P 200일선 7,352 복귀 1일째가 오늘 단축장에 걸림",
+   "summary": "11/27 05:29 ET 엔비디아 프리마켓 +4.2%(155.20$)·AMD +5%·마이크론 +6.4% · 나스닥100 선물 +2.35%·S&P +1.73% · 아시아 마감 닛케이 +2.1%·코스피 +4.34%·항셍 +2.11%·상해 +3.73%."
+  },
+  {
+   "title": "Stock market today: Dow, S&P 500, Nasdaq futures gain as AI jitters steady",
+   "url": "https://finance.yahoo.com/markets/live/stock-market-today-firday-november-27-dow-sp-500-nasdaq-black-friday-holiday-091152065.html",
+   "press": "Yahoo Finance",
+   "at": "2026-11-27 20:40",
+   "why": "S&P 선물 시각 숫자(200일선 거리) 맞대기 출처",
+   "summary": "06:34 ET 기준 S&P 선물 7,321(+1.74%)·나스닥100 26,709.75(+2.34%)·다우 +1.35% · 美 10년 4.84% · 단축장 13:00 ET 마감."
+  },
+  {
    "title": "Bank of England sounds alarm over financial risks from AI boom",
    "url": "https://www.computing.co.uk/news/2026/ai/bank-of-england-sounds-alarm-over-financial-risks-from-ai-boom",
    "press": "Computing",
@@ -623,23 +639,7 @@
    "at": "2026-11-23 01:45",
    "why": "반도체 칸·💬 5번 — 수출 1조$·메모리 「완판」 속 ICT 기업 심리 올해 처음 100 아래, 주가(−50%)에 이어 심리도 꺾임",
    "summary": "12월 제조업 업황 전망 97(4개월 만에 100 하회) · ICT 부문 올해 처음 기준치 하회(TV서울·네이트) · 반도체·자동차는 상대 선방, 철강·휴대폰 한파(이투데이)"
-  },
-  {
-   "title": "델 3분기 실적 프리뷰: AI 서버 출하·이익률 버티기가 초점",
-   "url": "https://seekingalpha.com/news/4525418-dell-q3-earnings-preview-ai-server-shipments-and-margin-resilience-in-focus",
-   "press": "Seeking Alpha",
-   "at": "2026-11-23 00:45",
-   "why": "가설③(삽 장수 값 전가)·👀 DELL 11/24 실적 — FT 「AI 서버값 최대 45% 인상」이 이익률로 보이는지 첫 시험, 반도체 칸 재진입 판단 보조",
-   "summary": "11/24(화) 장 뒤 실적(나스닥 달력 EPS 예상 6.55$) · 초점은 AI 서버 출하와 메모리 원가 속 이익률(제목 기준)"
-  },
-  {
-   "title": "델, 950억 달러 AI 주문 잔고를 메모리 제약 속에서도 매출로 바꿀 수 있나",
-   "url": "https://finviz.com/news/423394/dell-must-prove-its-95-billion-ai-backlog-can-convert-despite-memory-constraints",
-   "press": "Finviz",
-   "at": "2026-11-23 00:45",
-   "why": "가설①·③ — AI 수요(잔고 950억$)는 남아 있는데 메모리 부족·원가가 병목인지, 델 실적이 AI 투자 붕괴론 vs 공급 병목론을 가른다",
-   "summary": "AI 잔고 약 950억$(제목) · 메모리 공급 제약이 매출 전환 속도를 좌우(제목 기준, 본문 미확인)"
   }
  ],
- "at": "2026-11-27 17:50"
+ "at": "2026-11-27 20:40"
 }
