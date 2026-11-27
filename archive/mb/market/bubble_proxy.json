@@ -1,0 +1,64 @@
+{
+ "at": "2026-11-27 13:02",
+ "asof_us": "2026-11-25",
+ "asof_kr": "2026-11-27",
+ "h": 4.0,
+ "h_kr": 4.0,
+ "h_free": 6.0,
+ "kospi_below200": true,
+ "kospi_on": true,
+ "since": "2026-11-25",
+ "stages": {
+  "💳 신용": 0.75,
+  "📈 금리·유가": 0.5,
+  "🧊 주식 속살·현금 도피": 0.5,
+  "🛟 완충 꺼짐": 0.25
+ },
+ "cells": {
+  "credit": 1.0,
+  "hydd": 0.5,
+  "rate": 0.5,
+  "oil": 0.5,
+  "breadth": 0.0,
+  "flow": 1.0,
+  "curve": 0.0,
+  "buffer": 0.5
+ },
+ "rule": "대리 시계 ≥ 3시(신용 단계 다 울음) + 코스피 200일선 아래 → 코스피 주식 몫 전부 현금 · 시계 1.5시 아래 또는 200일선 위 + 3시 아래면 풀림",
+ "note": "앱 버블 시계와 달리 손 칸(FCF·CDS·규제) 없이 기계 칸으로만 — 과거 검증과 같은 시계",
+ "best": {
+  "kospi": {
+   "on": true,
+   "since": "2026-10-01",
+   "ent": "clock4.5",
+   "exit": "floor14",
+   "h_free": 6.0,
+   "cred": 0.75,
+   "nb": 0,
+   "low60_seen": null,
+   "asof": "2026-11-27"
+  },
+  "kosdaq": {
+   "on": true,
+   "since": "2026-10-16",
+   "ent": "clock6",
+   "exit": "floor3",
+   "h_free": 6.0,
+   "cred": 0.75,
+   "nb": 0,
+   "low60_seen": null,
+   "asof": "2026-11-27"
+  },
+  "sp500": {
+   "on": true,
+   "since": "2026-11-25",
+   "ent": "credit200",
+   "exit": "floor14",
+   "h_free": 6.0,
+   "cred": 0.75,
+   "nb": 0,
+   "low60_seen": null,
+   "asof": "2026-11-25"
+  }
+ }
+}
