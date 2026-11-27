@@ -1,6 +1,6 @@
 {
-"at": "2026-11-28 03:30",
-"trim": "최근 36시간 · 1019/1067개 · 본문 1500자까지",
+"at": "2026-11-28 03:45",
+"trim": "최근 36시간 · 1013/1061개 · 본문 1500자까지",
 "sources": [
 {
 "id": "james_lee_advisors",
@@ -170,7 +170,7 @@
 "name": "News · Fed·macro",
 "who": "Google News",
 "ok": true,
-"n": 30,
+"n": 28,
 "url": "https://news.google.com/rss/search?q=Federal+Reserve+OR+inflation+OR+jobs+report+OR+earnings+when:1d&hl=en-US&gl=US&ceid=US:en"
 },
 {
@@ -323,7 +323,7 @@
 "name": "Barron's",
 "who": "구글뉴스 site:barrons.com",
 "ok": true,
-"n": 18,
+"n": 17,
 "url": "https://news.google.com/rss/search?q=site:barrons.com+when:1d&hl=en-US&gl=US&ceid=US:en"
 },
 {
@@ -332,7 +332,7 @@
 "name": "Seeking Alpha 시장 뉴스",
 "who": "언론사 RSS",
 "ok": true,
-"n": 3,
+"n": 4,
 "url": "https://seekingalpha.com/market_currents.xml"
 },
 {
@@ -368,7 +368,7 @@
 "name": "News · 월가 IB 전략",
 "who": "Google News",
 "ok": true,
-"n": 20,
+"n": 19,
 "url": "https://news.google.com/rss/search?q=Goldman+Sachs+OR+%22Morgan+Stanley%22+OR+JPMorgan+OR+BlackRock+strategist+outlook+when:3d&hl=en-US&gl=US&ceid=US:en"
 },
 {
@@ -449,7 +449,7 @@
 "name": "뉴스 · 한국은행·정부 경제 발표",
 "who": "구글 뉴스 검색",
 "ok": true,
-"n": 19,
+"n": 18,
 "url": "https://news.google.com/rss/search?q=%ED%95%9C%EA%B5%AD%EC%9D%80%ED%96%89+OR+%EA%B8%B0%ED%9A%8D%EC%9E%AC%EC%A0%95%EB%B6%80+OR+%EC%82%B0%EC%97%85%ED%86%B5%EC%83%81%EC%9E%90%EC%9B%90%EB%B6%80+%EC%88%98%EC%B6%9C+OR+%EA%B8%88%EC%9C%B5%EC%9C%84%EC%9B%90%ED%9A%8C+when:1d&hl=ko&gl=KR&ceid=KR:ko"
 },
 {
@@ -485,7 +485,7 @@
 "name": "이데일리 증권",
 "who": "언론사 RSS",
 "ok": true,
-"n": 19,
+"n": 18,
 "url": "http://rss.edaily.co.kr/stock_news.xml"
 },
 {
@@ -521,7 +521,7 @@
 "name": "뉴스핌",
 "who": "구글뉴스 site:newspim.com",
 "ok": true,
-"n": 6,
+"n": 5,
 "url": "https://news.google.com/rss/search?q=site:newspim.com+when:1d&hl=ko&gl=KR&ceid=KR:ko"
 },
 {
@@ -553,96 +553,127 @@
 }
 ],
 "new": [
-"n/httpskrinvestingcomnewssecfilingsarticle93CH2192036",
-"n/httpskrinvestingcomnewssecfilingsarticle93CH2192035",
-"n/httpskrinvestingcomnewssecfilingsarticle93CH2192034",
-"n/httpskrinvestingcomnewsstockmarketnewsarticle2192030",
-"n/ockfuturesriseinholidaythinnedtradetechreboundinfocus5052775",
-"n/httpwwwedailycokrnewsnewspathaspnewsid01184086645650312",
-"n/lZDalJqYXhQV2hwVTJxYjB3djZRSWp3Z3N4ZFJVbEI0Q3E3QzMzckFyegoc5",
-"n/GNwbFNwWlFFYW85aXdITlRsN0Z4SjVtM0NXU2pHQWlhVTZJekZiNjBZUQoc5",
-"n/W8ydWJKN3hmZWJFSk96dS1NWEhvWVFuLURTVmJjNHB5Y0xyUDVzQlBhdwoc5",
-"n/5TzB2UUR2blRqaEhTQlNYUzJkS2hVWjBDeTRTXzkxY2VubVdSb0dtay1Boc5",
-"n/3TDI5NS1PZ09sVC0wSDNhWWtmOEY2aVk2dkV0U3ZveHJvMm1JZzdHRjRtoc5",
-"n/8wQTlHeS1HYl9HSjhtZmJIcnlaX2xrUm5wT283WS1GSHVmeHlkOVFzQUEoc5",
-"n/rticles20261127verizonintalkstobuyfidiumin6billiondealftsays",
-"n/U3cXBJTUxfVUhUblJyMXFPeGp3dVFReWtwUVY0OF91YlZNd2RZR0hPQ2Qoc5",
-"n/k1eGpma25zSXNNT0I0MnBzRWdXSVFScGtLQTNzOTBvMW1Wd1ktMHo3X1Moc5",
-"n/261127qualcommcavaanddutchbrosearningsandaroboticsipotsrcrss",
-"n/etsstocksarticlesarmholdingsstocksclimb3180219496htmltsrcrss",
-"n/httpswwwfoolcominvesting20261127nvidiaskeymanproblemtsrcrss",
-"n/yTVprVlEyV3l4Q2FzVjJyY01nT0ZFaUFJZ3lmVWlQampaZm5CNUMycFdNoc5",
-"n/sstocksarticlesusequitymarketshigheramid175904719htmltsrcrss",
-"n/ng20261127thebest3stockstobuyindecembertoholdinto2027tsrcrss",
-"n/ETVZkQUJ2WmtCcWtPel9IdVp6QzlaOWpSenM2dDczamFqZVBMTlFkSmhRoc5",
-"n/tWEFGeERwWmxTaGxpSnZtX0JFMWpVaWo3MTNYeU9USjNmOEN4bjFUMmNRoc5",
-"n/1hlN2NBa2tYcFFkMUF3SlExRVMybmZ4Xy0tSXp5am1McGVnOHFGR21xLQoc5",
-"n/xaW9IVXE1UTcxNTVFWi1XUWxRNFRFS0c3M2kwREptZGFRWnlhbXRNdDhnoc5",
-"n/VZfUzZfdkhnZzl2d2lIVkRTMjd0T21aZ1ZSYi1hWndSamVZYUt2c09iWgoc5",
-"n/NFRmhZVkFLbThDQng4NHpQMkszdFJBUkFtMHNnVlpucjctekJuRG1Zcjgoc5",
-"n/NmYUJLS0p5UjE5OThsQkVIQWpZb0RMWGpXUDhZdHBxSkdvWXl6cXJLTkEoc5",
-"n/1tWEMzVldMcWxHSUhlalkyemtNOENKaWJBVDBkdXBLcVdRSGxxbUNjbWsoc5",
-"n/mhwUnhGMXlxMGdOaXR0NUpOSVdYcG11Z2szbHBrRkFJQ1NCWlJ0aHlZQQoc5",
-"n/zFkaGVzM3NKcGxJWEJTbmZNVm5Ra2Z4aWQ2T2NBRlFtMUFCZlZ0aEtVZwoc5",
-"n/EU1V2d3X1FqNjBWRkNFRE53aFZhaWNFOFJCWGl1ZHc5N3JldUFISVNNRgoc5",
-"n/t5aGhlWnRKaGNNNk9YT0dsRUtTT0ZHUmxLNEY0elMwTmJIN2NNY0ltOGcoc5",
-"n/k3TF9zWVExQ2pVQTd6d0NVQ2pZN3MtSDgzeWNQUFc1VE5xRFAyVFhnZkUoc5",
-"n/l1MXhJb3FBVzg2YmV3NjBWLXlsN2taZUJralFRNEFnZUpxQ0JWMVB2cXcoc5",
-"n/BaGVnWkFqYjVZSXVXY3dSaE1yTWZKRDdlNEVWdHoySktldjJxOFFfSlN6oc5",
-"n/Et4X3FEUmtHUTE2amxWZGMta2laVnNrSjAwRGJpajFoaE5PZFhOd3dmbAoc5",
-"n/J3Y0RvTzE3aFRjNG5uanlGdXFFeGNDZngzb0QyMXpUR2JPcGhDMnJZNVEoc5",
-"n/famJZSVZQdGZGei1mWEkxQWZiV09lY25OaHhoRmlVc3lBSVoxMVpkX1R3oc5",
-"n/lWcUQxX0pBZF9SaW5QWEIwenlVV2dmaFRmcUQ5NFhROTNvdXZpYzlEZkEoc5",
-"n/Tg4NmloYUR2UW1XdXktUHRKOW0xMlpWbWlUTVlTbGI3UDBxZmdyenNTQQoc5",
-"n/0261127dangerousnoreasterstormtriggerswidespreadpoweroutages",
-"n/fS3IxTkNHUkIzQXBydzRrYkNRcFVTdDA3cEpIYWQ0T2FVSTJDNGdEcnVzoc5",
-"n/jd1Z09ETlVHUWdXUmthamQ3LWdyakFSd1hMU0Z5cWVuSkF3Z0tGY0Q1Vgoc5",
-"n/FjZ2lKaUhQbGl2MHJzSy1UOVdnd1lWUjAxT2hVOHNzQzlKdmdKMDNENWcoc5",
-"n/hRbkhnN1JtOWdHeWV6NTl4OG80MFh0aGhpcVdyb1QzT3FzVVJvdFppdGcoc5",
-"n/TRDM3I0UUtKS2tHdXZHakhHTDRKOFZxVGNJbEE5WkFiam1ZVkFhNk9DQQoc5",
-"n/h6MVV5YV82eVdXRHFnVmNYZ2s0Tm5tRmhJem4yRUJHeTlGNFNqY05Gd0koc5",
-"n/3lyVWlVdHBuN1VMc0xLVnpPYTlGcnMyaHdDd0I3aTNzSWh0YjhBOW9iQQoc5",
-"n/k9RTlM5bkZuelVWdFBUbGZjbUVDZkpQNU82RlQwMmtjSmhYLWpIOU5QQQoc5",
-"n/RaMmVielNUNFZvSTZHbWNHM1lWX2tqQ3NZSGVKU2RONWdMWUxXNzd2encoc5",
-"n/pWVJlcWRoSlZySFVNMjRMb3VodWJPQ0lPTzNaRVhXc2VWeExjWXlQRnlVoc5",
-"n/dXWlJ6VjZBdFpZcURRdWZhMTdTNURUMktCVTdoVVZ5aGxlQWFMbWQ1S1Qoc5",
-"n/RwSG5kekVtb0QzMXVOeTRBbFRGU2Z1MjdvSUkxT1ZaX1hYQ3pnbHRLdkEoc5",
-"n/hfR1pvZ1BaMk01czZKdXdmYU90UnlJVmhjNXhPaC1VdVgwVkthNWVjZ3Eoc5",
-"n/xcElRZXp2NHNKRXRBVm5zbVdEQzV3YWZTNjFFbkFtVjZlRmpmMC1iTVdRoc5",
-"n/hjRVdiY1Z5Y3V0YnVxeU96R3oxZUMwbDV0NWVobHltWXkzU20taEZaSzQoc5",
-"n/vR05naVNhVFZ0ZWJNOHQyUTVuZFlfSW1RMGtIRHh1N21zbDFVOTlRMkpBoc5",
-"n/xZmVUcEp0UkZvNXJBdlh5b3B4endvcU1BamtBRnhMWjNyNTdmWmxYeURroc5",
-"n/h0WTVIRmpDdG9BVHpFcmN5enYxcU90d3BacE1oS0w0RF93YVQyYWVWNmcoc5",
-"n/Fl3bXB2U1I5YWl3RXNMSjNZZWZBSzN3UHpmWGFPdzItTzJpblRJY092Zwoc5",
-"n/FpbGdLTHBzc3o3YldMRlNPZkpkclYyRXNCUVotdl83b2FuUlRZOTNuOFIoc5",
-"n/R1cUpPUWw1aXNxMk1kX0dkNDFOUlhfWlN2X0ROZjE3N1pTOU1wTnZ6RXMoc5",
-"n/FhSXluRjJEQTR1WEI4cnd4bnVnbG1ZOWhDMmJmeENObmJ0cnJ6eGw2RVEoc5",
-"n/oM05JLTlRNFN3MWdQUW04U0E1ai13amRjZEdwd25iSkdNVU1SaDhramlRoc5",
-"n/JkUEU2SVdMQ0xIcHVQRHZsYm1BTXpfYm1VNkNPb202ZkVHeGlzOG5lVVEoc5",
-"n/0dpTGkwVFViLXREUFJwZkRQbEdHaGNibFhScGZ3RUZ1WmpONWRRVjQ0UQoc5",
-"n/HQUs3LWM2UnlYQ2FOQWpBMmtTazhNb0pOWWI0eXdVTWg0VmtQMlh1a1hRoc5",
-"n/sVXlxRjh5MGwyVndOYWczVGdhY0szU09jcDV2ZFVJanlpV0xnWlFkbTBkoc5",
-"n/BCT3l6VnliNG1ETE5PMWhsLWE5ME15ZWpncmpLcEV2MjduTEhjRGJhT1Moc5",
-"n/9SMlNFMTBWTHBqbFE1Q0tsUTVtN040ZjBzVmRlZkNmeXdpeUNGY21LWDIoc5",
-"n/1QU25wTHFWUmg1T1k5VXpRMTNNdGUyQ25ueFhmNE53RC03QmpoTm8wR00oc5",
-"n/0h3U2h3c1hJT21OcnFYT25BX0VHMkFGMTJnZ0N6WGUwV0tXMzdVSmhSUQoc5",
-"n/0RJMjhWbmFMaEw2cWZNVlNuREtxUzFVTy13eTRLWmxKbHlHbGF6eHQzdwoc5",
-"n/xRbUttdkhzVWgzM044WUtUOWgxaUJ3MFJmbjF2TzlYR3FLbHlZVXF5SmYoc5",
-"n/MOUVvdmhYQ3h3QVhpWmF6X1BCZXhHamE1Y0J0eVJQc0kyX0J4RGp4bnluoc5",
-"n/6THJfUk1acG1mS3FCTjA0S0d5eHViTldFTXo4b3JBUVprZzBoOEVpb3Fmoc5",
-"n/5TExudTNFRlBNSVhUOFZmM0V1UGlucjY5VEJBYlpWZWpIclZuR2sySGVCoc5",
-"n/kRDVXWlNkczBjZzU4QmFmRzI3ekdmSnM0b0VyZFBrSjRnT3l4OXlXRlFRoc5",
-"n/XFVXzNtR1FVdlBmalNIOU4xZDRLUXp5bFQ0MnZYdWFwR3lRWWF1LUhDTQoc5",
-"n/SQ1VVeVZuRkhNalFfQmxJcDVsS3FEOTlpbkZuc0sxR1pUUU8wOWE3eU1Foc5",
-"n/1eUFIckt0eEcxdGFaX2JNc3ZOc1B1OW82bjBqbmE0WDJWYURqRXVIQmk0oc5",
-"n/MdUhNNkI0djlxOWFjMExiT2s1bW9HdUU3b2UzSTA4VnhQOERlclFJMXRnoc5",
-"n/td2tPTmtxU3FuMExQcGFXY1RRWk5GM19lWVVtUC1OUEEzN1hZYmYyVFRmoc5"
+"n/httpskrinvestingcomnewsinsidertradingnewsarticle93CH2192039",
+"n/httpskrinvestingcomnewssecfilingsarticle93CH2192038",
+"n/httpskrinvestingcomnewssecfilingsarticle93CH2192037",
+"n/sbehindthisweeksstockmarketrally86e5319cmodmw_rss_topstories",
+"n/httpwwwedailycokrnewsnewspathaspnewsid01190646645650312",
+"n/oSUZWX0d1X0tiNDVDQ0pESVBhdmljbW9NRzVNRDJ5bFBGcE1kb05fa3d5oc5",
+"n/VSNlNuQmF0Q0hkVzRrSzc3elZRSk5lVnhrM2tySjZDVjlRR1JpcEJydm8oc5",
+"n/httpwwwedailycokrnewsnewspathaspnewsid01187366645650312",
+"n/dXTzVlT3NweTdsWnd6SnAtWVpXdUVVaE1KejBGWkpXckRkNG53eVA5NFEoc5",
+"n/outm_sourcefeed_news_allutm_mediumreferralfeed_item_typenews",
+"n/butm_sourcefeed_news_allutm_mediumreferralfeed_item_typenews",
+"n/0UTFkdkxRUmlnSnBhTlVvaFBXci1XaHBWX3MtLWN2RGJ0WlhLcnBIRUZzoc5",
+"n/tocksarticlesusequityindexesjumptreasury182226162htmltsrcrss",
+"n/lBJWVM2b0ppdVJXNFkwOVNteG0zbTZDOVdvb25aS1NvcGlFd2xBRWZkagoc5",
+"n/WlSN01McUlncVljREZvOGY5UzZaSjc3R3MzdWJUOF9oS3ZLU2c3bmV0MAoc5",
+"n/mbergcomnewsvideos20261127bloombergsurveillance11272026video",
+"n/GNpWDdXQ1FoQk5kSmkxWHpxNkZyWDJoWjVrcVNZNWh4WWlVMUkxMDZHRAoc5",
+"n/Q3REZ6SVBzWldXN0FTV0RucUJvNy1LWm1MZkp5OFZLUjlRb0Vic1FwREEoc5",
+"n/S1DRVRndDAtRjgyMG1XX2l2bVlhQndsVm83Ty1aUEFUYkJlUm1URVhGRgoc5",
+"n/FUUUtxOVBZWFBBRHYtSlRWQUphX1AxWk5hVGotN3hFSWNwOHNvNldBYXMoc5",
+"n/HI3MFh0T216VWpGbWZsa2d3VTdmcWt1Q2pjdHpacTR4UGN5Yy1ROS0zdwoc5",
+"n/zajRCOVlDM1E1YWtVWkhZM25aeWdaZWVnUnIyaHB1ZGFaLWM0UG5kbGk1oc5",
+"n/llNnZhc3VSSXVwYkJyWGxOYUd0cG5fZFM1YnZZSTZ6eGc5Tlc2T291aFAoc5",
+"n/2lnZ2F1bFI0eXNRbXVoU3RFVXZENEVtSTJVbGxKOU82REtVbVJ4ZW9TZwoc5",
+"n/FJOS3U0WG1XbGx1U2JDSkhzYlhhRnhRUTZ1QkRLYjVpZTFKYklkZERCWQoc5",
+"n/JWVo1S2hLRlZaNmMzTWh1dDFsTHpXUzlzN2lWQ01sc1VVR0hOUzlZSTJ3oc5",
+"n/nlRTEF0MEF2RVhZUEVXLWlBXzBIQllXSVVLUnE5bzdWWTVrWFB5YWwtQQoc5",
+"n/TIyMXFhdGw3ZzliWjc3RkJDVGZYT252YXRZRTd2Y3RXY2wwbWVVNEREWQoc5",
+"n/EpDeWM1cXNYU3JqR1VMWDFKRWxoUGhDR1RtTDFFQ3ctbUllYzhIVExkVwoc5",
+"n/jJ3ZWdIbkg1bk1pWlRyZkNLREE1YV9WMnZHN0JGZ0xPbDVDakVwRFZXdwoc5",
+"n/U1MR1lqZDBNZE1qVTRhaDhvNWhDLUh2aGNneHpoZmQ1TXV1VzJWVWV3QQoc5",
+"n/GV2TlFwSHVNU1hYMldJOWlCVzNBeVJkQ3N2c19ZNDdTZzVJVWd5aHUycwoc5",
+"n/cxcmU0YTlnZU1MRE1GWmlfMUpyMVpzc0lUSlA1b0xCRXltd0VEQ3pfMVEoc5",
+"n/g2elRzWklaamVVbmFiTmJ5MmtwNHhFT1hoZng0RFZwcDdsSl85TlMwQzAoc5",
+"n/zNCUVRGYTV6QUtCa3lPV1YtNEttdU95N3o3Rnk0eDFBcFVGRzlFLTNwNwoc5",
+"n/g1Q013N0RkNUZSa1psN2czeWRsQTkwWDlHcENDVnNzbkpldnVtQ3RXcFEoc5",
+"n/h4Q0d0Z0tTdFhkQWQzUU5qS1dFNmpYRGtuQkxNN0RISUxteEh5MjEtWWcoc5",
+"n/g4LVFJSlJCV2lSa0h5dE1nWGVpNGIwR3dFaGdjRXJRbW9yTDBpeF9ZMHcoc5",
+"n/0hnMGNfRG5rdjRSYl9kOE5fbjhPOVFYVkNEUjZ0YXhpb2pkY1VHZzN0UQoc5",
+"n/hLQnMyT1JjcVNiT3IxRFFOZ1h3WXczTzg0d3VlREpyYzF3ME5kb2dmMG8oc5",
+"n/wVk1LTUJNaFF5aHJWSlVJemFsX0tlcGx5elZ4V0RaczB6cVdzZ1lzOW5Loc5",
+"n/FyX3NZR2RLMHlMQkM5MElacFhsc2h2LS1qM0R3NVJhbnp4RUdoSDdYQzEoc5",
+"n/hrTkhPMy1Ed3FEdFJ0NTZSUGNVWUd5TjYwM1dDNUtMcEpSYjFFMUdJQVEoc5",
+"n/fRk92SThubXowRW84QTlyMDNKMmh2YkRyZHRTN1lKNF9EVWRaZXpNQk1uoc5",
+"n/1VQnItbzJNNUdjbm1oNXB1Z2w1VEtoRjJ5eUt3ZW04UnEtbUdfeTB2Y0Eoc5",
+"n/kYzbHRQQ1I2bG5hOUxXVkFmU2hnd0VSdktobnY2bGVGVThHZVJTTjdYWQoc5",
+"n/Vncm1NeEozempXdXROVVB1R0g5UVVlQWtrelZFQjMtRy1zeFpEbGZKSUEoc5",
+"n/J3OHlKN3EtWkMtdnBFY2RuU2xZOVRoYWZMeGFlQkJSWXdURHl1Zk5IaXcoc5",
+"n/EcEhuZHpFbW9EMzF1Tnk0QWxURlNmdTI3b0lJMU9WWl9YWEN6Z2x0S3ZBoc5",
+"n/uYkg0LUd1UFNDR3k4Zi1IRm9CUVJ6SDdpYjZLaXNGejNWVl9qeHBQSWxjoc5",
+"n/VzamZ6VGdBWVpYRXV6aG5yVUxUdnBRQ1dqc1dVa3lPR1ZOQU9RMEZrUG8oc5",
+"n/wU1RmNVRKZmJwZmZRUUhCek14YXduTUdoajVSYWd1YU9SaXdFRFlDcEl1oc5",
+"n/KOTJ2cVdRZ3Q5WmFSaHc0d0JTOF9feDVCcmM5QmM4aTdteVU1ZVBDY0ZNoc5",
+"n/zlIR0pWcFNCRnM2Mlo0N2h3Y2syc25UaWpFSlg3cGs5SDZGbmlNM2pjTwoc5",
+"n/dhSnVEOWw4emNpQnFXMlJrRGkyQXJ4RzZoRHpvNjFpM2FhelJSV002Yk0oc5",
+"n/ERzYUhpcGJFZ1IxajIxSlNPS3VicXZSbmRzdzl1R0JER1k0c2RNVXBzUQoc5",
+"n/kWG9nSjgzeFA5SC1ud292ODJiU09OcnBYaUhUUmIzUEoyYkVKSFJmMlNOoc5",
+"n/Nrc0FnOUhVc215MUdzR2tmOXRhQTBsZVFYTUtSWGl0RzdqWGV4RktUVzgoc5",
+"n/03R3ludHpXaC1CSW10UGJiYXQ5elBOc18yMjZoSUJoVUN1Q1JsYzVHaHcoc5",
+"n/hhU1Y3bDM1WGRSeGpLdU0yNHNubERnUm9CLVVmdGh3amFUVnJXNXJybkEoc5",
+"n/dZWFJKWGFGaDc2Nnc5N0JQR3dGUUtlMmQ2Q1RmX0F2VENtVnBsNHk3WEMoc5",
+"n/5FM0lvSm1ES205NTM0VFZJT3NuQmZCU1R1SXFEb3hMaDMtV1k0OTd6ZkUoc5",
+"n/2E1TV9CUEdJQ1U0T0tydUdHR0lJY1JkVGJLaWFtSEkwdjk2LWx4c1VQYwoc5",
+"n/WltcG5oQTVJd3NHRHdqTXU1a1laTTVzQXUwYzdrUVpubzVlMHpvR3dQRgoc5",
+"n/nE0dFZXeFVsWmN1V25FTHRJWFNtQUhaanZsYTBRV1V4RV9xMURIZW5yVgoc5",
+"n/k2cnZpQnF0TG1NOEdYS2NHZkJSOWtxZzNxeTV3Q1phZFZfMUpSdTdBbXcoc5",
+"n/dteTItMzl5NVQybXk5U2ZQWkRGYmhnU0dJZ2hoTEFjb3FLaktRcjZNbDcoc5",
+"n/k9BSVl0M1g1ekk0N2RYaTJaVzVFRlhwcTJRZU9wMWViWUxFd1NlMFZ0Zwoc5",
+"n/Hc2JMdFBQeDlTS01BTGhPbkxqaXdNdmhWQVM1eUQteXVmWm1TWG02VGhvoc5",
+"n/TlvcXNOeGIwaDNuTTBncnBSRXdNaUJhdFlVZ1I3dExZd3E3RGFVRU9zcwoc5",
+"n/2LTRtRHZaZmtzOWtoN0pKQUN2RWdWU0p3Y0N3YjJRWTRPSVRIekRRQ0lBoc5",
+"n/TBtNm5FUzNKb2hBTmo1OEE3cXdHU29ndklDOTlrVnR3YVFHYjJOOFpRbAoc5",
+"n/EJiTk9GSGZKZVZqTXZQeTRIRUk1SGVmX0JTdHlNajZ5X0lUMUVoNXBBUQoc5"
 ],
 "items": [
 {
+"id": "n/httpskrinvestingcomnewsinsidertradingnewsarticle93CH2192039",
+"title": "Chai Trust, Ardent Health Partners LLC 주식 1,470만 달러어치 매각",
+"at": "2026-11-28 03:45",
+"link": "https://kr.investing.com/news/insider-trading-news/article-93CH-2192039",
+"text": "Chai Trust, Ardent Health Partners LLC 주식 1,470만 달러어치 매각",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "investing_kr",
+"kind": "news",
+"name": "인베스팅닷컴 뉴스",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/httpskrinvestingcomnewssecfilingsarticle93CH2192038",
+"title": "Eightco Holdings Inc, Nasdaq 최저 매수호가 요건 미달 통지 받아",
+"at": "2026-11-28 03:45",
+"link": "https://kr.investing.com/news/sec-filings/article-93CH-2192038",
+"text": "Eightco Holdings Inc, Nasdaq 최저 매수호가 요건 미달 통지 받아",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "investing_kr",
+"kind": "news",
+"name": "인베스팅닷컴 뉴스",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/httpskrinvestingcomnewssecfilingsarticle93CH2192037",
+"title": "Cardiff Oncology Inc, Nasdaq 최저주가 요건 미달 통지 받아",
+"at": "2026-11-28 03:45",
+"link": "https://kr.investing.com/news/sec-filings/article-93CH-2192037",
+"text": "Cardiff Oncology Inc, Nasdaq 최저주가 요건 미달 통지 받아",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "investing_kr",
+"kind": "news",
+"name": "인베스팅닷컴 뉴스",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/httpskrinvestingcomnewssecfilingsarticle93CH2192036",
 "title": "Metagenomi Inc, 최저 매수호가 기준 미달로 Nasdaq 통지 받아",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://kr.investing.com/news/sec-filings/article-93CH-2192036",
 "text": "Metagenomi Inc, 최저 매수호가 기준 미달로 Nasdaq 통지 받아",
 "imgs": [],
@@ -656,7 +687,7 @@
 {
 "id": "n/httpskrinvestingcomnewssecfilingsarticle93CH2192035",
 "title": "National Healthcare Properties Inc, 의료시설 40곳 5억 3,140만 달러에 매각",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://kr.investing.com/news/sec-filings/article-93CH-2192035",
 "text": "National Healthcare Properties Inc, 의료시설 40곳 5억 3,140만 달러에 매각",
 "imgs": [],
@@ -670,7 +701,7 @@
 {
 "id": "n/httpskrinvestingcomnewssecfilingsarticle93CH2192034",
 "title": "카니발, CEO의 2022년 주식 보상 조건 변경",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://kr.investing.com/news/sec-filings/article-93CH-2192034",
 "text": "카니발, CEO의 2022년 주식 보상 조건 변경",
 "imgs": [],
@@ -684,7 +715,7 @@
 {
 "id": "n/httpskrinvestingcomnewsstockmarketnewsarticle2192030",
 "title": "인베스팅닷컴 선정 이번 주 주목할 종목",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://kr.investing.com/news/stock-market-news/article-2192030",
 "text": "인베스팅닷컴 선정 이번 주 주목할 종목",
 "imgs": [],
@@ -698,7 +729,7 @@
 {
 "id": "n/httpskrinvestingcomnewssecfilingsarticle93CH2192025",
 "title": "Jaguar Health Inc, Nasdaq 상장폐지 통보에 청문회 요청",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://kr.investing.com/news/sec-filings/article-93CH-2192025",
 "text": "Jaguar Health Inc, Nasdaq 상장폐지 통보에 청문회 요청",
 "imgs": [],
@@ -712,7 +743,7 @@
 {
 "id": "n/httpskrinvestingcomnewssecfilingsarticle93CH2192020",
 "title": "DataMeds AI Inc 공동 CEO, Nasdaq에서 자사주 5,000주 매입",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://kr.investing.com/news/sec-filings/article-93CH-2192020",
 "text": "DataMeds AI Inc 공동 CEO, Nasdaq에서 자사주 5,000주 매입",
 "imgs": [],
@@ -726,7 +757,7 @@
 {
 "id": "n/httpskrinvestingcomnewsstockmarketnewsarticle2192018",
 "title": "Anthropic 공매도 증가…보호예수 해제 앞두고 대차 주식 늘어",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://kr.investing.com/news/stock-market-news/article-2192018",
 "text": "Anthropic 공매도 증가…보호예수 해제 앞두고 대차 주식 늘어",
 "imgs": [],
@@ -738,51 +769,9 @@
 "first": "2026-11-28 02:15"
 },
 {
-"id": "n/httpskrinvestingcomnewsstockmarketnewsarticle93CH2192016",
-"title": "오라클 주가, 오늘 3.2% 오른 이유는?",
-"at": "2026-11-28 03:30",
-"link": "https://kr.investing.com/news/stock-market-news/article-93CH-2192016",
-"text": "오라클 주가, 오늘 3.2% 오른 이유는?",
-"imgs": [],
-"press": "",
-"full": 0,
-"src": "investing_kr",
-"kind": "news",
-"name": "인베스팅닷컴 뉴스",
-"first": "2026-11-28 02:15"
-},
-{
-"id": "n/httpskrinvestingcomnewsstockmarketnewsarticle93CH2192015",
-"title": "Nebius NV 주가, 오늘 상승하는 이유는?",
-"at": "2026-11-28 03:30",
-"link": "https://kr.investing.com/news/stock-market-news/article-93CH-2192015",
-"text": "Nebius NV 주가, 오늘 상승하는 이유는?",
-"imgs": [],
-"press": "",
-"full": 0,
-"src": "investing_kr",
-"kind": "news",
-"name": "인베스팅닷컴 뉴스",
-"first": "2026-11-28 02:00"
-},
-{
-"id": "n/httpskrinvestingcomnewsstockmarketnewsarticle93CH2192014",
-"title": "메타 플랫폼스 주가, 오늘 상승한 이유는?",
-"at": "2026-11-28 03:30",
-"link": "https://kr.investing.com/news/stock-market-news/article-93CH-2192014",
-"text": "메타 플랫폼스 주가, 오늘 상승한 이유는?",
-"imgs": [],
-"press": "",
-"full": 0,
-"src": "investing_kr",
-"kind": "news",
-"name": "인베스팅닷컴 뉴스",
-"first": "2026-11-28 02:00"
-},
-{
 "id": "n/ockfuturesriseinholidaythinnedtradetechreboundinfocus5052775",
 "title": "Wall Street ends higher as AI stocks rebound, Nasdaq leads gains",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://www.investing.com/news/stock-market-news/us-stock-futures-rise-in-holidaythinned-trade-tech-rebound-in-focus-5052775",
 "text": "Wall Street ends higher as AI stocks rebound, Nasdaq leads gains",
 "imgs": [],
@@ -796,7 +785,7 @@
 {
 "id": "n/ingcomnewsstockmarketnewsinvestingcomsstocksoftheweek5053762",
 "title": "Investing.com’s stocks of the week",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://www.investing.com/news/stock-market-news/investingcoms-stocks-of-the-week-5053762",
 "text": "Investing.com’s stocks of the week",
 "imgs": [],
@@ -810,7 +799,7 @@
 {
 "id": "n/newsftse100todaystocksriseasminersleadonmetalsrebound5053108",
 "title": "FTSE 100 today: Stocks climb as miners lead on metals rebound; Entain gains",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://www.investing.com/news/stock-market-news/ftse-100-today-stocks-rise-as-miners-lead-on-metals-rebound-5053108",
 "text": "FTSE 100 today: Stocks climb as miners lead on metals rebound; Entain gains",
 "imgs": [],
@@ -824,7 +813,7 @@
 {
 "id": "n/peansharesextendrallybutbruisingnovemberleavesaiscars5053023",
 "title": "European shares extend rise, but bruising November leaves AI scars",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://www.investing.com/news/stock-market-news/european-shares-extend-rally-but-bruising-november-leaves-ai-scars-5053023",
 "text": "European shares extend rise, but bruising November leaves AI scars",
 "imgs": [],
@@ -838,7 +827,7 @@
 {
 "id": "n/etnewseuropeanstocksextendrecoveryastechminersadvance5053129",
 "title": "European shares log strong weekly gains; markets await Spanish election",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://www.investing.com/news/stock-market-news/european-stocks-extend-recovery-as-tech-miners-advance-5053129",
 "text": "European shares log strong weekly gains; markets await Spanish election",
 "imgs": [],
@@ -852,7 +841,7 @@
 {
 "id": "n/higheratcloseoftradeinvestingcomunitedkingdom100up0775053741",
 "title": "U.K. stocks higher at close of trade; Investing.com United Kingdom 100 up 0.77%",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://www.investing.com/news/stock-market-news/uk-stocks-higher-at-close-of-trade-investingcom-united-kingdom-100-up-077-5053741",
 "text": "U.K. stocks higher at close of trade; Investing.com United Kingdom 100 up 0.77%",
 "imgs": [],
@@ -866,7 +855,7 @@
 {
 "id": "n/kmarketnewsspainstockshigheratcloseoftradeibex35up1725053740",
 "title": "Spain stocks higher at close of trade; IBEX 35 up 1.72%",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://www.investing.com/news/stock-market-news/spain-stocks-higher-at-close-of-trade-ibex-35-up-172-5053740",
 "text": "Spain stocks higher at close of trade; IBEX 35 up 1.72%",
 "imgs": [],
@@ -880,7 +869,7 @@
 {
 "id": "n/kmarketnewsportugalstockshigheratcloseoftradepsiup1205053739",
 "title": "Portugal stocks higher at close of trade; PSI up 1.20%",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://www.investing.com/news/stock-market-news/portugal-stocks-higher-at-close-of-trade-psi-up-120-5053739",
 "text": "Portugal stocks higher at close of trade; PSI up 1.20%",
 "imgs": [],
@@ -894,7 +883,7 @@
 {
 "id": "n/rketnewsnetherlandsstockshigheratcloseoftradeaexup1245053738",
 "title": "Netherlands stocks higher at close of trade; AEX up 1.24%",
-"at": "2026-11-28 03:30",
+"at": "2026-11-28 03:45",
 "link": "https://www.investing.com/news/stock-market-news/netherlands-stocks-higher-at-close-of-trade-aex-up-124-5053738",
 "text": "Netherlands stocks higher at close of trade; AEX up 1.24%",
 "imgs": [],
@@ -904,6 +893,160 @@
 "kind": "news",
 "name": "Investing.com 증시",
 "first": "2026-11-28 02:30"
+},
+{
+"id": "n/sbehindthisweeksstockmarketrally86e5319cmodmw_rss_topstories",
+"title": "The warnings behind this week’s stock-market rally",
+"at": "2026-11-28 03:40",
+"link": "https://www.marketwatch.com/story/the-warnings-behind-this-weeks-stock-market-rally-86e5319c?mod=mw_rss_topstories",
+"text": "The warnings behind this week’s stock-market rally\nAlso in Weekend Reads: Important tips for Medicare enrollment, how to spot online shopping scams and marital advice from The Moneyist.",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "mw_top",
+"kind": "news",
+"name": "MarketWatch",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/httpwwwedailycokrnewsnewspathaspnewsid01190646645650312",
+"title": "\"증시도 블프다\" 저가매수 나선 월가…나스닥 2.3%↑[월스트리트in]",
+"at": "2026-11-28 03:40",
+"link": "http://www.edaily.co.kr/news/newspath.asp?newsid=01190646645650312",
+"text": "\"증시도 블프다\" 저가매수 나선 월가…나스닥 2.3%↑[월스트리트in]\n블랙프라이데이인 27일(현지시간) 쇼핑객들이 할인 상품을 찾아 매장으로 몰린 사이, 월가 투자자들은 낙폭이 컸던 인공지능(AI) 관련주를 사들였다. 추수감사절 휴장 뒤 반나절만 열린 뉴욕증시는 3대 지수가 일제히 올랐다. 다우지수는 2022년 10월 이후 최고의 한 주를 보냈다.지난 25일(현지시간) 미국 뉴욕 맨해튼의 뉴욕증권거래소(NYSE)에서 메이시...",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "edaily",
+"kind": "news",
+"name": "이데일리 증권",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/oSUZWX0d1X0tiNDVDQ0pESVBhdmljbW9NRzVNRDJ5bFBGcE1kb05fa3d5oc5",
+"title": "뉴욕증시, AI주 저가 매수에 일제히 상승…S&P500 주간 5.6%↑",
+"at": "2026-11-28 03:39",
+"link": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE1WTmpwc3V4WFpsUWJsV3IxUnJhV2Y3NGRDbUtoU09zczM0MURVdGRNeURoSUZWX0d1X0tiNDVDQ0pESVBhdmljbW9NRzVNRDJ5bFBGcE1kb05fa3d5?oc=5",
+"text": "뉴욕증시, AI주 저가 매수에 일제히 상승…S&P500 주간 5.6%↑",
+"imgs": [],
+"press": "뉴스핌",
+"full": 0,
+"src": "gn_kr_global",
+"kind": "news",
+"name": "뉴스 · 해외 증시(한글)",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/VSNlNuQmF0Q0hkVzRrSzc3elZRSk5lVnhrM2tySjZDVjlRR1JpcEJydm8oc5",
+"title": "블프에 불뿜은 AI·기술주…나스닥 2.3%↑[뉴욕마감] - 머니투데이",
+"at": "2026-11-28 03:35",
+"link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9jUnVtRktfTjk4V1ZfZGdtdDl2eTY1Y0tmTjBpZDRQVUJnWG5Oc0JEbjVPc0IzaWNMemlKRFNwVjMtMGYyUm0xTVFtdzBYb2JtaktrNFN2MkhSdm1VZnhld0RxcTQwb2FCMmRjSFJXSTgxallFdFHSAXtBVV95cUxOdFpsZ2Vid1p1QVJ5X3VJOTRxVnREeEdiZG9waDlyVDZ6QlNWZTNEM1J0bXA3NUNhUTdGT1FqRG1DQlRjY0FNRno3SXgtb3VJTGVSNlNuQmF0Q0hkVzRrSzc3elZRSk5lVnhrM2tySjZDVjlRR1JpcEJydm8?oc=5",
+"text": "블프에 불뿜은 AI·기술주…나스닥 2.3%↑[뉴욕마감] - 머니투데이",
+"imgs": [],
+"press": "머니투데이",
+"full": 0,
+"src": "gn_kr_global",
+"kind": "news",
+"name": "뉴스 · 해외 증시(한글)",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/httpwwwedailycokrnewsnewspathaspnewsid01187366645650312",
+"title": "[美특징주]엔비디아, 동남아 4개국에 AI 칩 탑재 서버 출하 중단 통보…150달러 회복",
+"at": "2026-11-28 03:34",
+"link": "http://www.edaily.co.kr/news/newspath.asp?newsid=01187366645650312",
+"text": "[美특징주]엔비디아, 동남아 4개국에 AI 칩 탑재 서버 출하 중단 통보…150달러 회복\n엔비디아(NVDA)가 제조 협력사들에 자사 칩을 탑재한 서버의 말레이시아와 싱가포르, 태국, 인도네시아 출하를 중단하라고 통보했다고 파이낸셜타임스(FT)가 27일(현지 시간) 보도했다.이번 조치는 지난주 발효된 미국의 새로운 수출 규제에 따른 것으로, 새 규정은 일부 동남아시아 국가로 첨단 칩을 선적할 때 수출 허가를 받도록 의무화하고 있으며 중국 기업들...",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "edaily",
+"kind": "news",
+"name": "이데일리 증권",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/mutm_sourcefeed_news_allutm_mediumreferralfeed_item_typenews",
+"title": "SemiLEDs GAAP EPS of $0.08, revenue of $6.4M",
+"at": "2026-11-28 03:33",
+"link": "https://seekingalpha.com/news/4677092-semileds-gaap-eps-of-0_08-revenue-of-6_4m?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+"text": "SemiLEDs GAAP EPS of $0.08, revenue of $6.4M",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "sa_news",
+"kind": "news",
+"name": "Seeking Alpha 시장 뉴스",
+"first": "2026-11-28 02:45"
+},
+{
+"id": "n/dXTzVlT3NweTdsWnd6SnAtWVpXdUVVaE1KejBGWkpXckRkNG53eVA5NFEoc5",
+"title": "China's auto exports to rise 50% amid intensifying competition at home",
+"at": "2026-11-28 03:31",
+"link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOQVBCNFUtVjVTYjFhcmRmT3N4dndVSmF6NGo4eEIxb083dEFZcW5QYTEwU2hWVEliejdOamdYclVoT1NLS195VVFyRFozV3BrQnp3V2pGZFFoeEdJMEgzYU1VUkVGUklCaHNsTHhjeWxSQ0RSTmZlWXNGNnlVaUVGSjVRSnVtWHExM1dXTzVlT3NweTdsWnd6SnAtWVpXdUVVaE1KejBGWkpXckRkNG53eVA5NFE?oc=5",
+"text": "China's auto exports to rise 50% amid intensifying competition at home",
+"imgs": [],
+"press": "Nikkei Asia",
+"full": 0,
+"src": "nikkei_asia",
+"kind": "news",
+"name": "Nikkei Asia",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/outm_sourcefeed_news_allutm_mediumreferralfeed_item_typenews",
+"title": "Nasdaq rises 7% on Thanksgiving week, bolstered by Jensen Huang's return as Nvidia CEO",
+"at": "2026-11-28 03:30",
+"link": "https://seekingalpha.com/news/4677087-nasdaq-rises-7-on-thanksgiving-week-bolstered-by-jensen-huangs-return-as-nvidia-ceo?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+"text": "Nasdaq rises 7% on Thanksgiving week, bolstered by Jensen Huang's return as Nvidia CEO",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "sa_news",
+"kind": "news",
+"name": "Seeking Alpha 시장 뉴스",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/DlBamstd2FYaWlNUjd1VkpRRGpUdVEtaWJ2Z3d2SGNQTFpocjNLRTNoZwoc5",
+"title": "US Stocks Set to Bounce as Risk Appetite Returns After Holiday",
+"at": "2026-11-28 03:29",
+"link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxOWkJ0R2dQX1BpbGtNRlNncDF1aTdiMW9zNlJpQ2VXQXhvQV9aYkt5bE1HdXQ5cF9fYlNlNGFha1BDZkNOeDJrS2RkVk5UbmZaeW16N3RWZ19jUmhVYk5TLVY2ZUI3dkVVbUNhRkJMZXRMSVpuZks2SzAybFJPTGVhOXk0dFhWYTBadDlBamstd2FYaWlNUjd1VkpRRGpUdVEtaWJ2Z3d2SGNQTFpocjNLRTNoZw?oc=5",
+"text": "US Stocks Set to Bounce as Risk Appetite Returns After Holiday",
+"imgs": [],
+"press": "Bloomberg.com",
+"full": 0,
+"src": "gn_bbg",
+"kind": "news",
+"name": "News · Bloomberg 전체",
+"first": "2026-11-27 19:00"
+},
+{
+"id": "n/TX3FJQ1RWaEk3QTFSSkZYdVpMdDNvODdxTU5iYjNCVWVJOGtxNDRSZEhRoc5",
+"title": "Print Edition | Wall Street Journal",
+"at": "2026-11-28 03:28",
+"link": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9oQ01UcWpuai1fVGpvY09OSUZoV19EOEZ0Rm0xZzBSbHFCUHlRclppQ3hUNVhzTzlTX3FJQ1RWaEk3QTFSSkZYdVpMdDNvODdxTU5iYjNCVWVJOGtxNDRSZEhR?oc=5",
+"text": "Print Edition | Wall Street Journal",
+"imgs": [],
+"press": "WSJ",
+"full": 0,
+"src": "wsj",
+"kind": "news",
+"name": "Wall Street Journal",
+"first": "2026-11-27 17:30"
+},
+{
+"id": "n/butm_sourcefeed_news_allutm_mediumreferralfeed_item_typenews",
+"title": "Sify Technologies GAAP EPS of INR 0.09, revenue of INR 13.8B",
+"at": "2026-11-28 03:27",
+"link": "https://seekingalpha.com/news/4677088-sify-technologies-gaap-eps-of-inr-009-revenue-of-inr-138b?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+"text": "Sify Technologies GAAP EPS of INR 0.09, revenue of INR 13.8B",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "sa_news",
+"kind": "news",
+"name": "Seeking Alpha 시장 뉴스",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/httpwwwedailycokrnewsnewspathaspnewsid01184086645650312",
@@ -918,6 +1061,20 @@
 "kind": "news",
 "name": "이데일리 증권",
 "first": "2026-11-28 03:30"
+},
+{
+"id": "n/0UTFkdkxRUmlnSnBhTlVvaFBXci1XaHBWX3MtLWN2RGJ0WlhLcnBIRUZzoc5",
+"title": "Stocks jump to close out an erratic week that was also Wall Street’s best in more than a year",
+"at": "2026-11-28 03:25",
+"link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNbWp5SjNDbVNYZ1BPUkdhWm9rR0diTEZOa0JYTWtFOGRxRVRPWGdBdUdScFFIREtDbGstWFdIRkhhS3pTdW5GWDNTWUtTanliVlZwVHpXS243MmtnSlN3OUs5NmNqZXdreXcxU0FHeDRjX3ZjUEt5RXFhOWVtbmUwR1BkWl9OUE52WTQ4REplSl9odTJCTVpoQlk0UTFkdkxRUmlnSnBhTlVvaFBXci1XaHBWX3MtLWN2RGJ0WlhLcnBIRUZz?oc=5",
+"text": "Stocks jump to close out an erratic week that was also Wall Street’s best in more than a year",
+"imgs": [],
+"press": "WHEC.com",
+"full": 0,
+"src": "gn_us_mkt",
+"kind": "news",
+"name": "News · US markets",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/httpswwwcnbccom20261127spacexsharesmuskdonationshtml",
@@ -976,6 +1133,34 @@
 "first": "2026-11-28 03:30"
 },
 {
+"id": "n/sutm_sourcefeed_news_allutm_mediumreferralfeed_item_typenews",
+"title": "Decimus Oil Corp. reports Q3 results",
+"at": "2026-11-28 03:23",
+"link": "https://seekingalpha.com/news/4677086-decimus-oil-corp-reports-q3-results?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+"text": "Decimus Oil Corp. reports Q3 results",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "sa_news",
+"kind": "news",
+"name": "Seeking Alpha 시장 뉴스",
+"first": "2026-11-28 02:15"
+},
+{
+"id": "n/tocksarticlesusequityindexesjumptreasury182226162htmltsrcrss",
+"title": "Update: US Equity Indexes Jump With Treasury Yields as Consumer Discretionary, Technology Top Sector Charts",
+"at": "2026-11-28 03:22",
+"link": "https://finance.yahoo.com/markets/stocks/articles/us-equity-indexes-jump-treasury-182226162.html?.tsrc=rss",
+"text": "Update: US Equity Indexes Jump With Treasury Yields as Consumer Discretionary, Technology Top Sector Charts\n(Updates with index/price moves and company news from the first paragraph.) US equity indexes ros",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "yahoo",
+"kind": "news",
+"name": "Yahoo Finance",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/httpswwwcnbccom20261127norseatlanticbankruptcyfuelcostshtml",
 "title": "Budget airline Norse Atlantic files for bankruptcy in Europe after failing to secure funding",
 "at": "2026-11-28 03:20",
@@ -1018,32 +1203,18 @@
 "first": "2026-11-27 18:30"
 },
 {
-"id": "n/sutm_sourcefeed_news_allutm_mediumreferralfeed_item_typenews",
-"title": "S&P 500 posts weekly gains as Wall Street rebounds from steep losses",
-"at": "2026-11-28 03:16",
-"link": "https://seekingalpha.com/news/4677079-sp-500-post-weekly-gains-as-wall-street-rebounds-from-steep-losses?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
-"text": "S&P 500 posts weekly gains as Wall Street rebounds from steep losses",
+"id": "n/lBJWVM2b0ppdVJXNFkwOVNteG0zbTZDOVdvb25aS1NvcGlFd2xBRWZkagoc5",
+"title": "日本株ADR27日、買い優勢 三菱UFJやみずほFGが上昇",
+"at": "2026-11-28 03:17",
+"link": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBFVHRqaXRzQlR3WWh5dTkzS0ZlUXVTaElsOTRaczB5ZDRVSmFGV1ZDZmhFYzhGU1QzcXEwMnhVekpOMlBJWVM2b0ppdVJXNFkwOVNteG0zbTZDOVdvb25aS1NvcGlFd2xBRWZkag?oc=5",
+"text": "日本株ADR27日、買い優勢 三菱UFJやみずほFGが上昇",
 "imgs": [],
-"press": "",
+"press": "日本経済新聞",
 "full": 0,
-"src": "sa_news",
+"src": "gn_jp",
 "kind": "news",
-"name": "Seeking Alpha 시장 뉴스",
-"first": "2026-11-28 02:15"
-},
-{
-"id": "n/mutm_sourcefeed_news_allutm_mediumreferralfeed_item_typenews",
-"title": "ZTEST Electronics GAAP EPS of $0.01, revenue of $2.46M",
-"at": "2026-11-28 03:15",
-"link": "https://seekingalpha.com/news/4677080-ztest-electronics-gaap-eps-of-0_01-revenue-of-2_46m?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
-"text": "ZTEST Electronics GAAP EPS of $0.01, revenue of $2.46M",
-"imgs": [],
-"press": "",
-"full": 0,
-"src": "sa_news",
-"kind": "news",
-"name": "Seeking Alpha 시장 뉴스",
-"first": "2026-11-28 02:45"
+"name": "ニュース · 일본 증시",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/3TDI5NS1PZ09sVC0wSDNhWWtmOEY2aVk2dkV0U3ZveHJvMm1JZzdHRjRtoc5",
@@ -1158,18 +1329,18 @@
 "first": "2026-11-28 03:30"
 },
 {
-"id": "n/yutm_sourcefeed_news_allutm_mediumreferralfeed_item_typenews",
-"title": "U.S. equities close on top on Black Friday",
-"at": "2026-11-28 03:05",
-"link": "https://seekingalpha.com/news/4677074-us-equities-close-on-top-on-black-friday?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
-"text": "U.S. equities close on top on Black Friday",
+"id": "n/WlSN01McUlncVljREZvOGY5UzZaSjc3R3MzdWJUOF9oS3ZLU2c3bmV0MAoc5",
+"title": "US Futures Rally as Tech Rebound Gains Momentum: Markets Wrap",
+"at": "2026-11-28 03:04",
+"link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxPd2ZFa0FGcTRjb19HbGxhWGxZc05LTXQ2WUJDTTQzc2hYNGVrbE5GQWtlcERpWGdVZmptNEFUM0ltY0ZobVhoaVo1Qzl4ZTFuNlBDSXFNaG9ETXFDOGdYSGppVVh1cW10TFJ5RG9sVVNYZmUzMHk2VlROMG9yVDM3UzRtM1VSbXlaYWlSN01McUlncVljREZvOGY5UzZaSjc3R3MzdWJUOF9oS3ZLU2c3bmV0MA?oc=5",
+"text": "US Futures Rally as Tech Rebound Gains Momentum: Markets Wrap",
 "imgs": [],
-"press": "",
+"press": "Bloomberg.com",
 "full": 0,
-"src": "sa_news",
+"src": "gn_us_mkt",
 "kind": "news",
-"name": "Seeking Alpha 시장 뉴스",
-"first": "2026-11-28 03:15"
+"name": "News · US markets",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/etsstocksarticlesarmholdingsstocksclimb3180219496htmltsrcrss",
@@ -1254,20 +1425,6 @@
 "kind": "news",
 "name": "Wall Street Journal",
 "first": "2026-11-28 03:30"
-},
-{
-"id": "n/TX3FJQ1RWaEk3QTFSSkZYdVpMdDNvODdxTU5iYjNCVWVJOGtxNDRSZEhRoc5",
-"title": "Print Edition | Wall Street Journal",
-"at": "2026-11-28 02:56",
-"link": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9oQ01UcWpuai1fVGpvY09OSUZoV19EOEZ0Rm0xZzBSbHFCUHlRclppQ3hUNVhzTzlTX3FJQ1RWaEk3QTFSSkZYdVpMdDNvODdxTU5iYjNCVWVJOGtxNDRSZEhR?oc=5",
-"text": "Print Edition | Wall Street Journal",
-"imgs": [],
-"press": "WSJ",
-"full": 0,
-"src": "wsj",
-"kind": "news",
-"name": "Wall Street Journal",
-"first": "2026-11-27 17:30"
 },
 {
 "id": "n/VQ2FpNV9kNFhCMzVndFZfcTdIbmFmU3g0eHNBUkM1b1ctX1NVaVdRUHlvoc5",
@@ -1382,6 +1539,20 @@
 "first": "2026-11-28 03:30"
 },
 {
+"id": "n/mbergcomnewsvideos20261127bloombergsurveillance11272026video",
+"title": "Traders Buy the Dip as Stocks Rise on Black Friday",
+"at": "2026-11-28 02:36",
+"link": "https://www.bloomberg.com/news/videos/2026-11-27/bloomberg-surveillance-11-27-2026-video",
+"text": "Traders Buy the Dip as Stocks Rise on Black Friday\nJonathan Ferro, Lisa Abramowicz and Annmarie Hordern speak daily with leaders and decision makers from Wall Street to Washington and beyond. No other program better positions investors and executives for the trading day than \"Bloomberg Surveillance.\" (Source: Bloomberg)",
+"imgs": [],
+"press": "",
+"full": 0,
+"src": "bbg_mkt",
+"kind": "news",
+"name": "Bloomberg Markets",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/1127notamdthisisthe1companynvidiashouldworryaboutmosttsrcrss",
 "title": "Not AMD. This Is the 1 Company Nvidia Should Worry About Most.",
 "at": "2026-11-28 02:35",
@@ -1408,6 +1579,20 @@
 "kind": "news",
 "name": "Yahoo Finance",
 "first": "2026-11-28 03:15"
+},
+{
+"id": "n/GNpWDdXQ1FoQk5kSmkxWHpxNkZyWDJoWjVrcVNZNWh4WWlVMUkxMDZHRAoc5",
+"title": "野村 世界業種別投資シリーズ(世界半導体株投資)【01313098】：基準価格・投資信託情報",
+"at": "2026-11-28 02:34",
+"link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE13U2tSeDgwM2x6NWhvM3FQd3VfcU94dTd0MFRoUFVUZVZGOGNpWDdXQ1FoQk5kSmkxWHpxNkZyWDJoWjVrcVNZNWh4WWlVMUkxMDZHRA?oc=5",
+"text": "野村 世界業種別投資シリーズ(世界半導体株投資)【01313098】：基準価格・投資信託情報",
+"imgs": [],
+"press": "Yahoo!ファイナンス",
+"full": 0,
+"src": "gn_jp",
+"kind": "news",
+"name": "ニュース · 일본 증시",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/httpswwwmkcokrnewsstock12220398",
@@ -1662,46 +1847,18 @@
 "first": "2026-11-28 02:30"
 },
 {
-"id": "n/manloseconfidenceinmicrosofttheanswermightsurpriseyoutsrcrss",
-"title": "Did Billionaire Bill Ackman Lose Confidence in Microsoft? The Answer Might Surprise You",
-"at": "2026-11-28 02:20",
-"link": "https://www.fool.com/investing/2026/11/27/did-billionaire-bill-ackman-lose-confidence-in-microsoft-the-answer-might-surprise-you/?.tsrc=rss",
-"text": "Did Billionaire Bill Ackman Lose Confidence in Microsoft? The Answer Might Surprise You\nForm 13Fs don’t always tell the whole story.",
+"id": "n/Q3REZ6SVBzWldXN0FTV0RucUJvNy1LWm1MZkp5OFZLUjlRb0Vic1FwREEoc5",
+"title": "Metals Come Back Swinging As Thin Thanksgiving Trade Lifts Markets",
+"at": "2026-11-28 02:15",
+"link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQSDJtZnBVZW9ESktjUU5JVEJoSXplTFBaSzZXT1BRRFR5NTdManFuaHNtbnpXRjFjaHdTbTR6NzZSTF8za3dFZGtwRm9QWG1XWEhZUlo0N3ZEVDMwbE1wTnJjTi1GbWVWcUNURUYtNWwxX1Q3REZ6SVBzWldXN0FTV0RucUJvNy1LWm1MZkp5OFZLUjlRb0Vic1FwREE?oc=5",
+"text": "Metals Come Back Swinging As Thin Thanksgiving Trade Lifts Markets",
 "imgs": [],
-"press": "",
+"press": "Menafn",
 "full": 0,
-"src": "yahoo",
+"src": "gn_us_fed",
 "kind": "news",
-"name": "Yahoo Finance",
-"first": "2026-11-28 02:45"
-},
-{
-"id": "n/1hlN2NBa2tYcFFkMUF3SlExRVMybmZ4Xy0tSXp5am1McGVnOHFGR21xLQoc5",
-"title": "Stock Bulls Stir Again After Weeks of AI Anxiety",
-"at": "2026-11-28 02:17",
-"link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOZ3VCeHg2b05tdzhRRmprOEUxTWJBQ2VHRWNyT0MzZW1sTVk2RVZBeGoyWVc2QkNBdGstbnlRS3VrOEtMT3hEcE02UjZsYmRLdjJwcTJ6c0t0dUZtbjRmNUotSU9qZ01OODJJLUpaTjN3RzI4cS1xQUhQb1hlN2NBa2tYcFFkMUF3SlExRVMybmZ4Xy0tSXp5am1McGVnOHFGR21xLQ?oc=5",
-"text": "Stock Bulls Stir Again After Weeks of AI Anxiety",
-"imgs": [],
-"press": "Bloomberg.com",
-"full": 0,
-"src": "gn_us_tech",
-"kind": "news",
-"name": "News · 반도체·AI(영문)",
-"first": "2026-11-28 03:30"
-},
-{
-"id": "n/vcEduX3Y4M1JINDZRaDlKMEZLbkJjLXRMMGM0Skt6V2FXZXlTZFV3bE93oc5",
-"title": "Nvidia’s Rally Ripples Across Markets",
-"at": "2026-11-28 02:16",
-"link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPbmRrWGlNNEhKN1FYMEt2NmxkREM3N2toWEt1QW9NOW5ULUt5MHpuRmdjMnI2MnpzbnFIdVdTcFhXMEJDZkNFenAxSWM5aWdaYVZyLVFwTjhFODJ0dUNIWGdmdkZ2ZFhBSnE4YjJZYXFDSWRZc3NTcHJSb0FvcEduX3Y4M1JINDZRaDlKMEZLbkJjLXRMMGM0Skt6V2FXZXlTZFV3bE93?oc=5",
-"text": "Nvidia’s Rally Ripples Across Markets",
-"imgs": [],
-"press": "WSJ",
-"full": 0,
-"src": "wsj",
-"kind": "news",
-"name": "Wall Street Journal",
-"first": "2026-11-28 03:15"
+"name": "News · Fed·macro",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/httpswwwmkcokrnewsstock12220356",
@@ -1928,18 +2085,18 @@
 "first": "2026-11-28 02:15"
 },
 {
-"id": "n/NOVFRjVF9ZVkZHcmN0eERLUWJLR2x0ZnBOcGU3dWpnSWMybXNfcGU0V00oc5",
-"title": "앤스로픽, AI 관련주 반등 속 공모가 회복…주가 10%↑",
+"id": "n/S1DRVRndDAtRjgyMG1XX2l2bVlhQndsVm83Ty1aUEFUYkJlUm1URVhGRgoc5",
+"title": "[美특징주]앤스로픽, AI 관련주 반등 속 공모가 회복…주가 10%↑",
 "at": "2026-11-28 01:59",
-"link": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1aZjhfLWF6b1pJVFJtMy10Mk9tY092TW91ME1udkt0UFlBSHlxQTl4SWV6YmdyLVlqa29sUnh3SXVVMXp0RF9VYVNOVFRjVF9ZVkZHcmN0eERLUWJLR2x0ZnBOcGU3dWpnSWMybXNfcGU0V00?oc=5",
-"text": "앤스로픽, AI 관련주 반등 속 공모가 회복…주가 10%↑",
+"link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPcWh4Y1NNUFJ5SmcwZGdzM21HZVhPTXU4QnVRYURBbWlzV2FsRjUyWWtRbWFPSlJWNnE4TVoxRGsyRkQ5cWY0dEhyRmxGZXkzZW9pcE9ZQS1DRVRndDAtRjgyMG1XX2l2bVlhQndsVm83Ty1aUEFUYkJlUm1URVhGRg?oc=5",
+"text": "[美특징주]앤스로픽, AI 관련주 반등 속 공모가 회복…주가 10%↑",
 "imgs": [],
-"press": "마켓인",
+"press": "이데일리",
 "full": 0,
 "src": "gn_kr_sector",
 "kind": "news",
 "name": "뉴스 · 반도체·AI·업종",
-"first": "2026-11-28 02:30"
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/RhRmpCZDhjd3ZwWmxSLWlpTzdZa1lhQWVYWFNYelNIbjI5RmktU0FmNkkoc5",
@@ -1953,20 +2110,6 @@
 "src": "gn_kr_bbg",
 "kind": "news",
 "name": "뉴스 · 블룸버그 인용",
-"first": "2026-11-28 02:15"
-},
-{
-"id": "n/httpwwwedailycokrnewsnewspathaspnewsid01128326645650312",
-"title": "[美특징주]앤스로픽, AI 관련주 반등 속 공모가 회복…주가 10%↑",
-"at": "2026-11-28 01:59",
-"link": "http://www.edaily.co.kr/news/newspath.asp?newsid=01128326645650312",
-"text": "[美특징주]앤스로픽, AI 관련주 반등 속 공모가 회복…주가 10%↑\n인공지능(AI) 기업 앤스로픽(ANT)이 AI 관련주 전반의 투자심리 회복에 힘입어 주가가 급등하고 있다.27일(현지시간) 오전11시57분 앤스로픽 주가는 전일대비 10.49% 상승한 91.15달러에 거래되고 있다. 공모가 83달러를 회복한 데 이어 상승폭을 10% 이상으로 확대했다.배런스에 따르면 이날 AI 데이터센터 구축에 필요한 광통신 장비와 메모리...",
-"imgs": [],
-"press": "",
-"full": 0,
-"src": "edaily",
-"kind": "news",
-"name": "이데일리 증권",
 "first": "2026-11-28 02:15"
 },
 {
@@ -2096,6 +2239,20 @@
 "first": "2026-11-28 02:30"
 },
 {
+"id": "n/jd1Z09ETlVHUWdXUmthamQ3LWdyakFSd1hMU0Z5cWVuSkF3Z0tGY0Q1Vgoc5",
+"title": "eMAXIS 日経半導体株インデックス【03311247】：基準価格・投資信託情報",
+"at": "2026-11-28 01:49",
+"link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE1WcnBkNXkzRS1PdnNIWkxieGVIMWw3YjRKMXZON1NIZlpIQjd1Z09ETlVHUWdXUmthamQ3LWdyakFSd1hMU0Z5cWVuSkF3Z0tGY0Q1Vg?oc=5",
+"text": "eMAXIS 日経半導体株インデックス【03311247】：基準価格・投資信託情報",
+"imgs": [],
+"press": "Yahoo!ファイナンス",
+"full": 0,
+"src": "gn_jp",
+"kind": "news",
+"name": "ニュース · 일본 증시",
+"first": "2026-11-28 03:30"
+},
+{
 "id": "n/httpswwwmkcokrnewsstock12220295",
 "title": "뿔난 카카오엔터 연예인 주주들…“카카오 분할 막아달라”",
 "at": "2026-11-28 01:46",
@@ -2152,34 +2309,6 @@
 "first": "2026-11-28 02:15"
 },
 {
-"id": "n/VdoN3ZYSUhwbDlzakVST0FKVnUydVRnTFNMYjlUVWVHZkNtbVplR3FUZwoc5",
-"title": "주담대 5% - 마통 7%… 가계 덮친 ‘눈덩이 금리’",
-"at": "2026-11-28 01:40",
-"link": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE9mMWstWV9XRVRxd21lTUFSR1ZvRWF4ajJVTGw5Yll0WUN2ZktVcHRJVG9Ba0NnZlQ0OE9YTVdoN3ZYSUhwbDlzakVST0FKVnUydVRnTFNMYjlUVWVHZkNtbVplR3FUZ9IBZkFVX3lxTE9mMWstWV9XRVRxd21lTUFSR1ZvRWF4ajJVTGw5Yll0WUN2ZktVcHRJVG9Ba0NnZlQ0OE9YTVdoN3ZYSUhwbDlzakVST0FKVnUydVRnTFNMYjlUVWVHZkNtbVplR3FUZw?oc=5",
-"text": "주담대 5% - 마통 7%… 가계 덮친 ‘눈덩이 금리’",
-"imgs": [],
-"press": "동아일보",
-"full": 0,
-"src": "gn_kr_macro",
-"kind": "news",
-"name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 03:15"
-},
-{
-"id": "n/DlBamstd2FYaWlNUjd1VkpRRGpUdVEtaWJ2Z3d2SGNQTFpocjNLRTNoZwoc5",
-"title": "US Stocks Set to Bounce as Risk Appetite Returns After Holiday",
-"at": "2026-11-28 01:40",
-"link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxOWkJ0R2dQX1BpbGtNRlNncDF1aTdiMW9zNlJpQ2VXQXhvQV9aYkt5bE1HdXQ5cF9fYlNlNGFha1BDZkNOeDJrS2RkVk5UbmZaeW16N3RWZ19jUmhVYk5TLVY2ZUI3dkVVbUNhRkJMZXRMSVpuZks2SzAybFJPTGVhOXk0dFhWYTBadDlBamstd2FYaWlNUjd1VkpRRGpUdVEtaWJ2Z3d2SGNQTFpocjNLRTNoZw?oc=5",
-"text": "US Stocks Set to Bounce as Risk Appetite Returns After Holiday",
-"imgs": [],
-"press": "Bloomberg.com",
-"full": 0,
-"src": "gn_bbg",
-"kind": "news",
-"name": "News · Bloomberg 전체",
-"first": "2026-11-27 19:00"
-},
-{
 "id": "n/61127colombiapesostumblesasmountingriskstestcarryfueledrally",
 "title": "Colombia Peso Stumbles as Mounting Risks Test Carry-Fueled Rally",
 "at": "2026-11-28 01:37",
@@ -2222,6 +2351,20 @@
 "first": "2026-11-28 01:45"
 },
 {
+"id": "n/FUUUtxOVBZWFBBRHYtSlRWQUphX1AxWk5hVGotN3hFSWNwOHNvNldBYXMoc5",
+"title": "Shein Profit Rises Despite Lower Revenue as It Adapts to Trade Challenges",
+"at": "2026-11-28 01:30",
+"link": "https://news.google.com/rss/articles/CBMitwFBVV95cUxPRkJPeGRJc1h0T2dFNG9RdkJOS3JGcnp6Sk53aG9hazRuMEJYbU90OHBMTGlpQ01TYzh0S3lMTkpTdXdzU0tHTlFpc3NtZEdGWkhXU0E1MGdMVHl5YWt5WS1MRjNoaG5EMG1JYlQyMjR0aVBwZ0xSTUhkWmdWRXNBZFFWb0k2VmszZ2g5blFUUUtxOVBZWFBBRHYtSlRWQUphX1AxWk5hVGotN3hFSWNwOHNvNldBYXM?oc=5",
+"text": "Shein Profit Rises Despite Lower Revenue as It Adapts to Trade Challenges",
+"imgs": [],
+"press": "WSJ",
+"full": 0,
+"src": "wsj",
+"kind": "news",
+"name": "Wall Street Journal",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/NLSlgzdXZXRFcxcnBvNERHZFc4Z1ZNWnVDZnJaNzB1Q2lwdmlGdmdlSXcoc5",
 "title": "憧憬「國家隊」托市中港股彈國常會暗示彈藥充足內地指數股料受惠",
 "at": "2026-11-28 01:30",
@@ -2262,20 +2405,6 @@
 "kind": "news",
 "name": "Bloomberg Markets",
 "first": "2026-11-28 01:30"
-},
-{
-"id": "n/GJVWHlGNXpyM2J2c0RvTlkyVHBXN0luS21yZUYwaHlxRmloQnpPUlhTRQoc5",
-"title": "| Barron's",
-"at": "2026-11-28 01:23",
-"link": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE04R29oVldYNlBKVjd1c1c1bzZHRDlybV9wa1o4V0dGVFRMbjVTdUZsU2lWRlBsYmZqbGJVWHlGNXpyM2J2c0RvTlkyVHBXN0luS21yZUYwaHlxRmloQnpPUlhTRQ?oc=5",
-"text": "| Barron's",
-"imgs": [],
-"press": "Barron's",
-"full": 0,
-"src": "barrons",
-"kind": "news",
-"name": "Barron's",
-"first": "2026-11-28 00:30"
 },
 {
 "id": "n/VZfUzZfdkhnZzl2d2lIVkRTMjd0T21aZ1ZSYi1hWndSamVZYUt2c09iWgoc5",
@@ -2334,10 +2463,10 @@
 "first": "2026-11-28 01:45"
 },
 {
-"id": "n/NFRmhZVkFLbThDQng4NHpQMkszdFJBUkFtMHNnVlpucjctekJuRG1Zcjgoc5",
+"id": "n/HI3MFh0T216VWpGbWZsa2d3VTdmcWt1Q2pjdHpacTR4UGN5Yy1ROS0zdwoc5",
 "title": "금리인상과 증시 동향, 한국경제의 향방은?",
 "at": "2026-11-28 01:17",
-"link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5oUEZjZlJYTW5ER09IVHJ3eVh1THBXUXl5cUx1WTZkdGJkcXQ1UFNrOWRlLXVFb2Y4c2RvSzNFRmhZVkFLbThDQng4NHpQMkszdFJBUkFtMHNnVlpucjctekJuRG1Zcjg?oc=5",
+"link": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE1aYVljLS0wWnlhOHhJMlZCNzNNNXNzcmhuejFyQzhGN2lhaWdKMlNuV3A5OF9xalVpX1FMcHI3MFh0T216VWpGbWZsa2d3VTdmcWt1Q2pjdHpacTR4UGN5Yy1ROS0zdw?oc=5",
 "text": "금리인상과 증시 동향, 한국경제의 향방은?",
 "imgs": [],
 "press": "뉴스비전e",
@@ -2345,7 +2474,7 @@
 "src": "gn_kr_macro",
 "kind": "news",
 "name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 03:30"
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/XNUUkk1cDhyQk1IX1NwOEJNQ0RLT29PYkZCbXFydGtILWpyYnQ2RkQ4NAoc5",
@@ -2698,34 +2827,6 @@
 "first": "2026-11-27 19:00"
 },
 {
-"id": "n/qcVg1b0p2UkYzRjFJWS1wREVXbDZyVDRDdTRIbHFYV0UwTmh3RkRtWnlMoc5",
-"title": "미 국채가 약세…AI주 반등 속 위험선호 회복 |",
-"at": "2026-11-28 00:47",
-"link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE5tdy0wVmpLQUlxdGsybVc3OHFjSnowVldoUTgwWS00M3UyNTdBb1BGRWVWcTBMakF3aU10ckxRUGdyM3dNMjdHSXlqcVg1b0p2UkYzRjFJWS1wREVXbDZyVDRDdTRIbHFYV0UwTmh3RkRtWnlM?oc=5",
-"text": "미 국채가 약세…AI주 반등 속 위험선호 회복 |",
-"imgs": [],
-"press": "연합인포맥스",
-"full": 0,
-"src": "gn_kr_macro",
-"kind": "news",
-"name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 02:45"
-},
-{
-"id": "n/1tWEMzVldMcWxHSUhlalkyemtNOENKaWJBVDBkdXBLcVdRSGxxbUNjbWsoc5",
-"title": "Trump demands GDP data probe as chances of rate hike rise: What to know",
-"at": "2026-11-28 00:46",
-"link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxORTgyb0VjenJfS1Nid21HaXNOdUoycHJzSVpQUDlQemVlRkphMExkc19ZSzZubjAtNTJhVW1iT1piMGhITGVNX3F2OUstQS1qRXF4SlBac1g5aWZMYVZlME1tbVhDM1ZXTHFsR0lIZWpZMnprTThDSmliQVQwZHVwS3FXUUhscW1DY21r0gGLAUFVX3lxTE5FODJvRWN6cl9LU2J3bUdpc051SjJwcnNJWlBQOVB6ZWVGSmEwTGRzX1lLNm5uMC01MmFVbWJPWmIwaEhMZU1fcXY5Sy1BLWpFcXhKUFpzWDlpZkxhVmUwTW1tWEMzVldMcWxHSUhlalkyemtNOENKaWJBVDBkdXBLcVdRSGxxbUNjbWs?oc=5",
-"text": "Trump demands GDP data probe as chances of rate hike rise: What to know",
-"imgs": [],
-"press": "The Hill",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "n/sandherswhydontothersfeelthesamec5745889modmw_rss_topstories",
 "title": "I’ve been married for 58 years. It’s ‘our’ money, not ‘his’ and ‘hers.’ Why do so many couples keep their finances separate?",
 "at": "2026-11-28 00:45",
@@ -2880,20 +2981,6 @@
 "first": "2026-11-28 03:30"
 },
 {
-"id": "n/dSbVpHRUhHS3pFRUJhbWUxQi1acWkwNlZ6ZGwyMmV5Z0g5TXNNNjQySGMoc5",
-"title": "조작기소 특검 후보자, 李대통령 경기지사 시절 고문 변호사 활동",
-"at": "2026-11-28 00:31",
-"link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE1WSlVuUnhJNDROUzVTR21pLUpBN0RCOE5nc3IxYnRtRW5zZFB0UGQycy15ckJXeEliV3h0cUdSbVpHRUhHS3pFRUJhbWUxQi1acWkwNlZ6ZGwyMmV5Z0g5TXNNNjQySGM?oc=5",
-"text": "조작기소 특검 후보자, 李대통령 경기지사 시절 고문 변호사 활동",
-"imgs": [],
-"press": "연합뉴스TV",
-"full": 0,
-"src": "gn_kr_macro",
-"kind": "news",
-"name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 02:45"
-},
-{
 "id": "n/NQLU9rTmxlZWMwUEs2TFVOX2Jyb2JSYl9hWjd2aTQzTDViRE9Ga0E3eVooc5",
 "title": "A股晚間熱點 | 國常會首提國家隊穩市作用 A股放量大漲 作者 智通財經",
 "at": "2026-11-28 00:31",
@@ -2979,10 +3066,10 @@
 },
 {
 "id": "n/oV3V1TzA3LTlHU3dpMEF3d0dJd0YxVDIzWXM5eWhUY24xSVkxeEFkR25Roc5",
-"title": "Nvidia Stock Slips. It’s Still Finding Its Floor With Huang 2.0.",
+"title": "Nvidia Stock Gains. It’s Still Finding Its Floor With Huang 2.0.",
 "at": "2026-11-28 00:26",
 "link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE1qVUI0cGtEYUtyUERNQk1nMElsa0dsZzBGOUJoM0Z3SGFpZE1saHJ3QTVBM0N5M29ISzJhc3RhaUw4cmkwa2Q4UHBoV3V1TzA3LTlHU3dpMEF3d0dJd0YxVDIzWXM5eWhUY24xSVkxeEFkR25R?oc=5",
-"text": "Nvidia Stock Slips. It’s Still Finding Its Floor With Huang 2.0.",
+"text": "Nvidia Stock Gains. It’s Still Finding Its Floor With Huang 2.0.",
 "imgs": [],
 "press": "Barron's",
 "full": 0,
@@ -3046,20 +3133,6 @@
 "kind": "news",
 "name": "뉴스 · 국내 증시",
 "first": "2026-11-28 01:30"
-},
-{
-"id": "n/t4N0JOcmNKX2MxclJ4S0I1XzlMUkNMNG9tTlI4ZEd5aVoyS1pHdnhwTTAoc5",
-"title": "Nasdaq futures rise 2.4% before Black Friday half-day as chips rebound",
-"at": "2026-11-28 00:20",
-"link": "https://news.google.com/rss/articles/CBMikwFBVV95cUxQNW9tckpLaVdvc1BmMHQtTFEzbm1XQ2VTVjJTbHhXdVlZM1FlZ0pOMHJpeW5hZkdUdDBzTTRyRi1CWmg3ZUdMU0tSaVpBcXc4bW1tM0RodTJkTjRaU2cwRjVOZ0wzQWs1dUt4N0JOcmNKX2MxclJ4S0I1XzlMUkNMNG9tTlI4ZEd5aVoyS1pHdnhwTTA?oc=5",
-"text": "Nasdaq futures rise 2.4% before Black Friday half-day as chips rebound",
-"imgs": [],
-"press": "MLQ.ai",
-"full": 0,
-"src": "gn_us_mkt",
-"kind": "news",
-"name": "News · US markets",
-"first": "2026-11-28 00:30"
 },
 {
 "id": "n/Et4X3FEUmtHUTE2amxWZGMta2laVnNrSjAwRGJpajFoaE5PZFhOd3dmbAoc5",
@@ -3160,6 +3233,20 @@
 "first": "2026-11-28 00:30"
 },
 {
+"id": "n/zajRCOVlDM1E1YWtVWkhZM25aeWdaZWVnUnIyaHB1ZGFaLWM0UG5kbGk1oc5",
+"title": "“기술주 폭락, 바닥이 가까워졌다”…도이체방크 “내년 美 증시 25% 더 오른다”",
+"at": "2026-11-28 00:12",
+"link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFA0dm5NZ3g0VzRnQXpjeXhseHN0VmtmN2xrSnlIT0YzajRCOVlDM1E1YWtVWkhZM25aeWdaZWVnUnIyaHB1ZGFaLWM0UG5kbGk1?oc=5",
+"text": "“기술주 폭락, 바닥이 가까워졌다”…도이체방크 “내년 美 증시 25% 더 오른다”",
+"imgs": [],
+"press": "문화일보",
+"full": 0,
+"src": "gn_kr_mkt",
+"kind": "news",
+"name": "뉴스 · 국내 증시",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/httpswwwftcomcontent5b10a0e6aad6403b9f2e23b5ca78897d",
 "title": "From Jobs to Jensen: tech’s metamorphosis",
 "at": "2026-11-28 00:10",
@@ -3172,20 +3259,6 @@
 "kind": "news",
 "name": "Financial Times Companies",
 "first": "2026-11-28 00:45"
-},
-{
-"id": "n/3dibWFxVFVYNU5SQlJ4amZUSEo3c0lOUU5zS3ktM3l4M09WLUJaamloVAoc5",
-"title": "'AI 투매' 진정되나…뉴욕증시 상승 출발, 나스닥 0.7%↑",
-"at": "2026-11-28 00:09",
-"link": "https://news.google.com/rss/articles/CBMibEFVX3lxTE5rSUMtZUZPSW1WVVFuMXVGMkNTVmJLUG1HNEh1VE9xaGxZOUJoM3JScUtFOUxDTlE4SFZQbzBTX09Fc3dibWFxVFVYNU5SQlJ4amZUSEo3c0lOUU5zS3ktM3l4M09WLUJaamloVA?oc=5",
-"text": "'AI 투매' 진정되나…뉴욕증시 상승 출발, 나스닥 0.7%↑",
-"imgs": [],
-"press": "뉴시안",
-"full": 0,
-"src": "gn_kr_global",
-"kind": "news",
-"name": "뉴스 · 해외 증시(한글)",
-"first": "2026-11-28 03:15"
 },
 {
 "id": "n/b20261127top10thingstowatchinthestockmarketonblackfridayhtml",
@@ -3285,20 +3358,6 @@
 "kind": "news",
 "name": "매일경제 증권",
 "first": "2026-11-27 23:15"
-},
-{
-"id": "n/CR2piaWhFVlJHamk4SUNTVGg4VnlaS3E0UkQtU3hURjlHQ3dWdkVfbDd3oc5",
-"title": "서울 ‘부동산 선거’ 뚜렷…경기·인천과 달랐다",
-"at": "2026-11-28 00:02",
-"link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFByQ1hOTXB1YWFNWlhYZjN5WjhrR2YzQlFiNS0zcFVIcnR3cGpCR2piaWhFVlJHamk4SUNTVGg4VnlaS3E0UkQtU3hURjlHQ3dWdkVfbDd3?oc=5",
-"text": "서울 ‘부동산 선거’ 뚜렷…경기·인천과 달랐다",
-"imgs": [],
-"press": "중앙일보",
-"full": 0,
-"src": "gn_kr_macro",
-"kind": "news",
-"name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 02:45"
 },
 {
 "id": "n/ationalruleofeconomicsisbreaking9c7ad4b3modmw_rss_topstories",
@@ -3612,20 +3671,6 @@
 "first": "2026-11-28 03:30"
 },
 {
-"id": "n/zRUdKUHVFUUtGY21tWnZPRVRBd3VIQW8yYVNGRDhFWDRBdEcteWpGcmVBoc5",
-"title": "프랑스 11월 CPI 2.9%↑·전망 하회…프랑스 국채 강세 |",
-"at": "2026-11-27 23:37",
-"link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE1oTjhCWmc0cjNDQ1dvT2RRTUlZbUV5WTA1YWkzeEUtRVpUUHl4Z2FEZDFTM2NRbzNLeFJ6VU5JZWUydUZRRnU4M3IzRUdKUHVFUUtGY21tWnZPRVRBd3VIQW8yYVNGRDhFWDRBdEcteWpGcmVB?oc=5",
-"text": "프랑스 11월 CPI 2.9%↑·전망 하회…프랑스 국채 강세 |",
-"imgs": [],
-"press": "연합인포맥스",
-"full": 0,
-"src": "gn_kr_macro",
-"kind": "news",
-"name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 02:45"
-},
-{
 "id": "n/httpwwwedailycokrnewsnewspathaspnewsid03611286645649984",
 "title": "[마켓톡스]\"이번주 증시 급등세 지속 가능성 낮아…추가 하락 가능성\"",
 "at": "2026-11-27 23:35",
@@ -3696,20 +3741,6 @@
 "first": "2026-11-27 23:45"
 },
 {
-"id": "n/hYUQzcUNTNERZazJVNVJPakNkVFNlejV5aGZhMjdQenZ3amlWQzhySnd2oc5",
-"title": "달러-원, 뉴욕장서 1,330원 중반대 거래 |",
-"at": "2026-11-27 23:32",
-"link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE5yRHNSUUNWRVFJVEdBWnpsNF91V1FFMWJKWi1CeThUS2RNLXNhZHR0UmkxMTR2N0psZ0hTUzdFYnFMX0dmdEJmYWFhYUQzcUNTNERZazJVNVJPakNkVFNlejV5aGZhMjdQenZ3amlWQzhySnd2?oc=5",
-"text": "달러-원, 뉴욕장서 1,330원 중반대 거래 |",
-"imgs": [],
-"press": "연합인포맥스",
-"full": 0,
-"src": "gn_kr_macro",
-"kind": "news",
-"name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 02:45"
-},
-{
 "id": "n/Etpc0VPZ01SVjBQRklodmI5dlJ2YVRCT3E2Zk9uOWgwTTZhSmxHWVk2aQoc5",
 "title": "US dollar outlook: Fed hike priced | FOREX Friday",
 "at": "2026-11-27 23:31",
@@ -3752,39 +3783,25 @@
 "full": 1
 },
 {
-"id": "n/hwSVpWUkdJeGVsaElsZTNPVUY3N0JoUlVfcm5qbEhoQ2JYQ3lpWXBJU2goc5",
-"title": "Software giant SAP weighs major job cuts as AI transforms sector, sources say",
-"at": "2026-11-27 23:26",
-"link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOYXlTRnczX1kzVVFWNmpBWWZscmx0cGVUUGNOMFctTUV5WmJVa1NrQ3N1NmFURDhfNUVEUXJiU09lc1NPV1UyUms1ZUdpMFMwZHdnaHcxcjJHdjBuQWRpZ2dwZ3ZVUUxBTU1fMHpLYl9pSExQOTVURGpSZ3JLazhwSVpWUkdJeGVsaElsZTNPVUY3N0JoUlVfcm5qbEhoQ2JYQ3lpWXBJU2g?oc=5",
-"text": "Software giant SAP weighs major job cuts as AI transforms sector, sources say",
+"id": "n/llNnZhc3VSSXVwYkJyWGxOYUd0cG5fZFM1YnZZSTZ6eGc5Tlc2T291aFAoc5",
+"title": "Bitcoin holds near $61,400 despite inflation da...",
+"at": "2026-11-27 23:25",
+"link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOREtSWFh6c2JnMld1THJwQU5IM1RqUHR6OHgwaTdGaC1oTzNBV0U2V2ZGQ0Z0SzlsM3VvQTZwQjQzQ1QxNE1vV2hnSl9fRFMzSDJScE1Jb3NSTHUtSGMzVGhmVmhENXZXUUVhV0RhckpjeTllNnZhc3VSSXVwYkJyWGxOYUd0cG5fZFM1YnZZSTZ6eGc5Tlc2T291aFA?oc=5",
+"text": "Bitcoin holds near $61,400 despite inflation da...",
 "imgs": [],
-"press": "Reuters",
+"press": "Pluang",
 "full": 0,
-"src": "reuters",
+"src": "gn_us_fed",
 "kind": "news",
-"name": "Reuters 비즈니스·시장",
-"first": "2026-11-28 03:15"
-},
-{
-"id": "n/heholidayscomparedtoeveryoneelsef0ff3f4bmodmw_rss_topstories",
-"title": "How much more are richest Americans spending on the holidays compared to everyone else?",
-"at": "2026-11-27 23:23",
-"link": "https://www.marketwatch.com/story/see-how-much-more-money-the-richest-americans-are-spending-on-the-holidays-compared-to-everyone-else-f0ff3f4b?mod=mw_rss_topstories",
-"text": "How much more are richest Americans spending on the holidays compared to everyone else?\nMost households are getting “squeezed by rising costs of everyday goods,” according to Teneo, but upper-income households “are showing resilience.”",
-"imgs": [],
-"press": "",
-"full": 0,
-"src": "mw_top",
-"kind": "news",
-"name": "MarketWatch",
-"first": "2026-11-27 23:30"
+"name": "News · Fed·macro",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/0261127dangerousnoreasterstormtriggerswidespreadpoweroutages",
-"title": "Power Outages, Flood Risks Linger As Storm Leaves East Coast",
+"title": "Power Outages, Flood Risks Linger as Storm Leaves East Coast",
 "at": "2026-11-27 23:20",
 "link": "https://www.bloomberg.com/news/articles/2026-11-27/dangerous-nor-easter-storm-triggers-widespread-power-outages",
-"text": "Power Outages, Flood Risks Linger As Storm Leaves East Coast\nMore than 400,000 homes and businesses along the East Coast are without power after an explosive storm uprooted trees in Queens and Manhattan and inundated commuter rail lines in New Jersey on Thanksgiving Day.",
+"text": "Power Outages, Flood Risks Linger as Storm Leaves East Coast\nMore than 400,000 homes and businesses along the East Coast are without power after an explosive storm uprooted trees in Queens and Manhattan and inundated commuter rail lines in New Jersey on Thanksgiving Day.",
 "imgs": [],
 "press": "",
 "full": 0,
@@ -4118,20 +4135,6 @@
 "first": "2026-11-27 12:45"
 },
 {
-"id": "n/fS3IxTkNHUkIzQXBydzRrYkNRcFVTdDA3cEpIYWQ0T2FVSTJDNGdEcnVzoc5",
-"title": "大市點睇｜市場見底訊號浮現？國務院常務會議釋放重磅利好 恒指升467點",
-"at": "2026-11-27 22:46",
-"link": "https://news.google.com/rss/articles/CBMid0FVX3lxTE5aTzczbGdneHVzWEdRdGF2cS1zWEdlSjBONEhBcWpMRFY3OU12LUlxME5WNzNuZ0s5YUozUll1S21LRG9NYmZ2bE5EZlBfS3IxTkNHUkIzQXBydzRrYkNRcFVTdDA3cEpIYWQ0T2FVSTJDNGdEcnVz?oc=5",
-"text": "大市點睇｜市場見底訊號浮現？國務院常務會議釋放重磅利好 恒指升467點",
-"imgs": [],
-"press": "dotdotnews",
-"full": 0,
-"src": "gn_hk",
-"kind": "news",
-"name": "新聞 · 홍콩·중국 증시",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "ai/toa100billionwaveofautomatedsellinggoldmansachswarnsaba6440f",
 "title": "Stocks are poised for a Friday jump — right into a $100 billion wave of automated selling, Goldman Sachs warns",
 "at": "2026-11-27 22:45",
@@ -4158,6 +4161,34 @@
 "name": "🧠 AI가 찾은 글",
 "first": "2026-11-27 22:45",
 "full": 1
+},
+{
+"id": "n/2lnZ2F1bFI0eXNRbXVoU3RFVXZENEVtSTJVbGxKOU82REtVbVJ4ZW9TZwoc5",
+"title": "미 국채가 약세…AI주 반등 속 위험선호 회복",
+"at": "2026-11-27 22:42",
+"link": "https://news.google.com/rss/articles/CBMickFVX3lxTE1nSVRRUUdMclBxcEItRm1YUHo4bzJaRWREc1ZGdUdjZmc5emF0d0ZjLU1MMEVnMExQSWFldGo4RmJKQ2hNbFY1N2lnZ2F1bFI0eXNRbXVoU3RFVXZENEVtSTJVbGxKOU82REtVbVJ4ZW9TZw?oc=5",
+"text": "미 국채가 약세…AI주 반등 속 위험선호 회복",
+"imgs": [],
+"press": "KB Think",
+"full": 0,
+"src": "gn_kr_macro",
+"kind": "news",
+"name": "뉴스 · 금리·환율·경제",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/FJOS3U0WG1XbGx1U2JDSkhzYlhhRnhRUTZ1QkRLYjVpZTFKYklkZERCWQoc5",
+"title": "中당국, 장중 '증시부양' 메시지…주요지수 2년만에 최고상승률(종합2보)",
+"at": "2026-11-27 22:41",
+"link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTFAzNlkyVnMwTkdMaXFQWWN2WEtqWGxldnlONl9QbUVCbVJjc2dITzVmMmNWU29GRFJOS3U0WG1XbGx1U2JDSkhzYlhhRnhRUTZ1QkRLYjVpZTFKYklkZERCWdIBYEFVX3lxTFAzNlkyVnMwTkdMaXFQWWN2WEtqWGxldnlONl9QbUVCbVJjc2dITzVmMmNWU29GRFJOS3U0WG1XbGx1U2JDSkhzYlhhRnhRUTZ1QkRLYjVpZTFKYklkZERCWQ?oc=5",
+"text": "中당국, 장중 '증시부양' 메시지…주요지수 2년만에 최고상승률(종합2보)",
+"imgs": [],
+"press": "연합뉴스",
+"full": 0,
+"src": "gn_kr_mkt",
+"kind": "news",
+"name": "뉴스 · 국내 증시",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/httpwwwedailycokrnewsnewspathaspnewsid03578486645649984",
@@ -4188,18 +4219,18 @@
 "first": "2026-11-28 03:15"
 },
 {
-"id": "n/httpwwwedailycokrnewsnewspathaspnewsid03571926645649984",
-"title": "[개장전특징주]엔비디아, 마이크론, 스페이스X, 존슨앤드존슨",
-"at": "2026-11-27 22:36",
-"link": "http://www.edaily.co.kr/news/newspath.asp?newsid=03571926645649984",
-"text": "[개장전특징주]엔비디아, 마이크론, 스페이스X, 존슨앤드존슨\n27일(현지 시간) 개장 전 특징주최근 가장 극심한 변동성을 겪었던 한 주를 보내고 있는 엔비디아(NVDA) 주가가 개장 전 회복을 시도 중이다. 직전 거래일 장 초반 141.17달러까지 밀리며 52주 신저가를 경신했던 엔비디아는 오후장 낙폭을 다소 줄이며 거래를 마쳤고, 이후 추수감사절 휴장을 거치며 투자 심리가 다소 안정을 찾은 모습이다.인공지능(AI...",
+"id": "n/JWVo1S2hLRlZaNmMzTWh1dDFsTHpXUzlzN2lWQ01sc1VVR0hOUzlZSTJ3oc5",
+"title": "Airline Norse Atlantic's Norwegian operating unit declares bankruptcy",
+"at": "2026-11-27 22:37",
+"link": "https://news.google.com/rss/articles/CBMivgFBVV95cUxOZjF6SXBzRmpCeHczaU9VZnNGczNjcWtlMXNCMUFrTUxfbUViN3cxUXpPbFU0YVRTQzU0aEY5MGdLY1hnU2I1R21jd2tYNnIyLVVLeEtoSEY2WjZKNTE0QkdLWWFzcmkySGFYUWE4Vmh3OVpzLWJ3V25LX18zSUJ4TS1TcExrVFFoUUVvOS13NmF1dUZJWVo1S2hLRlZaNmMzTWh1dDFsTHpXUzlzN2lWQ01sc1VVR0hOUzlZSTJ3?oc=5",
+"text": "Airline Norse Atlantic's Norwegian operating unit declares bankruptcy",
 "imgs": [],
-"press": "",
+"press": "Reuters",
 "full": 0,
-"src": "edaily",
+"src": "reuters",
 "kind": "news",
-"name": "이데일리 증권",
-"first": "2026-11-27 22:45"
+"name": "Reuters 비즈니스·시장",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "HANAchina/72907",
@@ -4242,20 +4273,6 @@
 "src": "bbg_econ",
 "kind": "news",
 "name": "Bloomberg Economics",
-"first": "2026-11-27 22:45"
-},
-{
-"id": "n/httpwwwedailycokrnewsnewspathaspnewsid03565366645649984",
-"title": "[美특징주]버텍스, FDA 생물의약품 심사기간 연장에 개장 전 급락",
-"at": "2026-11-27 22:31",
-"link": "http://www.edaily.co.kr/news/newspath.asp?newsid=03565366645649984",
-"text": "[美특징주]버텍스, FDA 생물의약품 심사기간 연장에 개장 전 급락\n버텍스파마슈티컬스인코퍼레이티드(VRTX) 주가가 개장 전 거래에서 급락하고 있다.27일(현지시간) 오전 8시28분 현재 개장 전 거래에서 버텍스는 전 거래일 대비 7.94%(44.78달러) 내린 519.34달러를 기록하고 있다.미국 식품의약국(FDA)은 버텍스 생물의약품 허가신청(BLA·Biologics License Application)에 대한 심사기...",
-"imgs": [],
-"press": "",
-"full": 0,
-"src": "edaily",
-"kind": "news",
-"name": "이데일리 증권",
 "first": "2026-11-27 22:45"
 },
 {
@@ -4315,20 +4332,6 @@
 "first": "2026-11-27 22:30"
 },
 {
-"id": "n/jd1Z09ETlVHUWdXUmthamQ3LWdyakFSd1hMU0Z5cWVuSkF3Z0tGY0Q1Vgoc5",
-"title": "eMAXIS 日経半導体株インデックス【03311247】：基準価格・投資信託情報",
-"at": "2026-11-27 22:23",
-"link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE1WcnBkNXkzRS1PdnNIWkxieGVIMWw3YjRKMXZON1NIZlpIQjd1Z09ETlVHUWdXUmthamQ3LWdyakFSd1hMU0Z5cWVuSkF3Z0tGY0Q1Vg?oc=5",
-"text": "eMAXIS 日経半導体株インデックス【03311247】：基準価格・投資信託情報",
-"imgs": [],
-"press": "Yahoo!ファイナンス",
-"full": 0,
-"src": "gn_jp",
-"kind": "news",
-"name": "ニュース · 일본 증시",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "pillion21/224495138192",
 "title": "실패까지 계획한다는 것.",
 "at": "2026-11-27 22:22",
@@ -4369,20 +4372,6 @@
 "kind": "news",
 "name": "CNBC Top News",
 "first": "2026-11-27 22:15"
-},
-{
-"id": "n/ndpdTZFc1ZLSmxOWUtIbzZnVzg0aWw2MmxhMlFDU2t2b2I3RE1CSDNWZgoc5",
-"title": "'조작기소' 특검 후보 이임성, 李대통령 경기지사 시절 '도청 고문변호사'",
-"at": "2026-11-27 22:20",
-"link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1qX2ptcGFSTU1GN2hSN3VJWTVuZXdCblU1QUxCMDlqWDVUWHRGaXB6eVhvTHpYZndpdTZFc1ZLSmxOWUtIbzZnVzg0aWw2MmxhMlFDU2t2b2I3RE1CSDNWZg?oc=5",
-"text": "'조작기소' 특검 후보 이임성, 李대통령 경기지사 시절 '도청 고문변호사'",
-"imgs": [],
-"press": "KBC광주방송",
-"full": 0,
-"src": "gn_kr_macro",
-"kind": "news",
-"name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 02:45"
 },
 {
 "id": "n/XFpeHNhNzVMZ2RnREdUaXZCbGdCQXh1YUxKRXhuUVpUb3k3SDl4ZGt5ZQoc5",
@@ -4631,6 +4620,34 @@
 "first": "2026-11-28 03:00"
 },
 {
+"id": "n/nlRTEF0MEF2RVhZUEVXLWlBXzBIQllXSVVLUnE5bzdWWTVrWFB5YWwtQQoc5",
+"title": "NVIDIA Drivers Uninstalled Themselves? 6 Ways to Fix It",
+"at": "2026-11-27 21:51",
+"link": "https://news.google.com/rss/articles/CBMickFVX3lxTE1HeUplb0hYYTNjVzJaMTVFZUo4QUktdG9BTnlyOWRuaGQ0Vmc1M0VxTi12QWF6UkVPOGFFZXN2YXZwR2plbzROWnlRTEF0MEF2RVhZUEVXLWlBXzBIQllXSVVLUnE5bzdWWTVrWFB5YWwtQQ?oc=5",
+"text": "NVIDIA Drivers Uninstalled Themselves? 6 Ways to Fix It",
+"imgs": [],
+"press": "Windows Report",
+"full": 0,
+"src": "gn_us_tech",
+"kind": "news",
+"name": "News · 반도체·AI(영문)",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/TIyMXFhdGw3ZzliWjc3RkJDVGZYT252YXRZRTd2Y3RXY2wwbWVVNEREWQoc5",
+"title": "Oil Prices Mixed Ahead of OPEC+ Meeting as Middle East Supply Risks Persist",
+"at": "2026-11-27 21:50",
+"link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPTlk0cWFXc1dCWFZnYlZPbnBBNGtndk1USE5BM3dhd1RYNzNZdkJiYlNxWmtsLVoxa3FSR0FmNkdKaEVsaVZjYnYwaHl3QjVUbnpLcFpfUDRyenNXMjVFOVNEY083SG9rSTBLeHd4ZENhb1hBc0gtS3kyYzRQUU8xM1duaG51WHZjRFhRcXh5Y1FrdEk3WTIyMXFhdGw3ZzliWjc3RkJDVGZYT252YXRZRTd2Y3RXY2wwbWVVNEREWQ?oc=5",
+"text": "Oil Prices Mixed Ahead of OPEC+ Meeting as Middle East Supply Risks Persist",
+"imgs": [],
+"press": "WSJ",
+"full": 0,
+"src": "wsj",
+"kind": "news",
+"name": "Wall Street Journal",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/UNYS1dvT1ZIUmwtTFlUeG1GMXRmX19jZ0hJVFp3akgzQk9yYjNoOEd4QQoc5",
 "title": "Allstate Joins Growing List of Companies Hit by Tech Outages",
 "at": "2026-11-27 21:48",
@@ -4685,6 +4702,20 @@
 "kind": "news",
 "name": "머니투데이 증권",
 "first": "2026-11-27 23:45"
+},
+{
+"id": "n/EpDeWM1cXNYU3JqR1VMWDFKRWxoUGhDR1RtTDFFQ3ctbUllYzhIVExkVwoc5",
+"title": "오현규 뛰던 경기장서 ‘관중-경찰 충돌’ 아수라장…무슨 일?",
+"at": "2026-11-27 21:40",
+"link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE5SYlhjT241UHpNU3FWRGowa19hN3JQTDJNdzRyS0xIVVpKbEpDeWM1cXNYU3JqR1VMWDFKRWxoUGhDR1RtTDFFQ3ctbUllYzhIVExkVw?oc=5",
+"text": "오현규 뛰던 경기장서 ‘관중-경찰 충돌’ 아수라장…무슨 일?",
+"imgs": [],
+"press": "JTBC",
+"full": 0,
+"src": "gn_kr_macro",
+"kind": "news",
+"name": "뉴스 · 금리·환율·경제",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/cles20261127ecbstworatehikestodatearentenoughdolenctellsdelo",
@@ -4759,10 +4790,10 @@
 },
 {
 "id": "n/DF2aFhoWm0wWi1lTFZSZ19rN18yT2o5ZGVpWC1xSUhoc1dGNldnQlplWQoc5",
-"title": "The Week Ahead: eurozone CPI, US jobs report, Salesforce earnings",
+"title": "The Week Ahead: Eurozone CPI, US jobs report, Salesforce earnings",
 "at": "2026-11-27 21:31",
 "link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxPU3QxeUZsQnMtbjFiMklncVNxbC1iRXU1MVlVcTZOOVUzTVJRU3FXcTBfYnc5a1lRMHNROGlvV1doM1BNX2RIUTlBcm5zSXFTbDlTVXhYUnV3WE5OZTZ2bHNWRUw1RnNkRHBBYnR4Um9SZGNmWmJRY3FnSnBjWWl2OFFDM3BJR0VDUDF2aFhoWm0wWi1lTFZSZ19rN18yT2o5ZGVpWC1xSUhoc1dGNldnQlplWQ?oc=5",
-"text": "The Week Ahead: eurozone CPI, US jobs report, Salesforce earnings",
+"text": "The Week Ahead: Eurozone CPI, US jobs report, Salesforce earnings",
 "imgs": [],
 "press": "CMC Markets",
 "full": 0,
@@ -4835,6 +4866,20 @@
 "first": "2026-11-27 21:30"
 },
 {
+"id": "n/jJ3ZWdIbkg1bk1pWlRyZkNLREE1YV9WMnZHN0JGZ0xPbDVDakVwRFZXdwoc5",
+"title": "달러-원, 뉴욕장서 1,330원 중반대 거래",
+"at": "2026-11-27 21:24",
+"link": "https://news.google.com/rss/articles/CBMickFVX3lxTE5NWVVwcEt5d3RBcFFvc3F1aFRrTjM0VVZocExTSng4N2hXcDBqMFQ0YkdnQTd6eTQ2TXVCOHVEUFJaaVNUUGUyRjJ3ZWdIbkg1bk1pWlRyZkNLREE1YV9WMnZHN0JGZ0xPbDVDakVwRFZXdw?oc=5",
+"text": "달러-원, 뉴욕장서 1,330원 중반대 거래",
+"imgs": [],
+"press": "KB Think",
+"full": 0,
+"src": "gn_kr_macro",
+"kind": "news",
+"name": "뉴스 · 금리·환율·경제",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "HANAchina/72901",
 "title": ">>구글, 10세대 TPU 칩에 512GB 커스텀 HBM5 메모리 탑재 계획 ",
 "at": "2026-11-27 21:23",
@@ -4850,18 +4895,18 @@
 "first": "2026-11-27 21:30"
 },
 {
-"id": "n/HNEVUxaVDdlYVF6SGUweHVkUHhiXzJQV1I0R1FJVXRBem51UVpid1BQRQoc5",
-"title": "The White House Push to Reinstate Jensen Huang",
-"at": "2026-11-27 21:22",
-"link": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNWERhWWVrWXBua0FNN0d6WnltMEpUN1hrRy05Skdrd2xUX2J2UUNwVHZ4aEtGd2drYlpfY0VPNXAxLXoxbDVoMjJqN3NyYnZFSkUtVWc1WkNrRXdEb3dCMVAwNHNEVUxaVDdlYVF6SGUweHVkUHhiXzJQV1I0R1FJVXRBem51UVpid1BQRQ?oc=5",
-"text": "The White House Push to Reinstate Jensen Huang",
+"id": "n/U1MR1lqZDBNZE1qVTRhaDhvNWhDLUh2aGNneHpoZmQ1TXV1VzJWVWV3QQoc5",
+"title": "한은, 다음 금리인상 행보 느려질 것…연 3.25%로 장기간 동결 전망도 나와 [경제 ISSUE +]",
+"at": "2026-11-27 21:23",
+"link": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE1odmZSS0NJcnpnczAySFdnSlBfN2RRRlJoaWpnUlRDSGpzQjhFbGNxMVZzRnNEOEVvX2g3QU1MR1lqZDBNZE1qVTRhaDhvNWhDLUh2aGNneHpoZmQ1TXV1VzJWVWV3QQ?oc=5",
+"text": "한은, 다음 금리인상 행보 느려질 것…연 3.25%로 장기간 동결 전망도 나와 [경제 ISSUE +]",
 "imgs": [],
-"press": "WSJ",
+"press": "자투리경제",
 "full": 0,
-"src": "wsj",
+"src": "gn_kr_bok",
 "kind": "news",
-"name": "Wall Street Journal",
-"first": "2026-11-28 03:15"
+"name": "뉴스 · 한국은행·정부 경제 발표",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/FjZ2lKaUhQbGl2MHJzSy1UOVdnd1lWUjAxT2hVOHNzQzlKdmdKMDNENWcoc5",
@@ -4878,6 +4923,34 @@
 "first": "2026-11-28 03:30"
 },
 {
+"id": "n/GV2TlFwSHVNU1hYMldJOWlCVzNBeVJkQ3N2c19ZNDdTZzVJVWd5aHUycwoc5",
+"title": "Korean Company ATLAS — how to read Korean companies",
+"at": "2026-11-27 21:14",
+"link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5WUEZEN01wZUJ4QzZGUnJRQWRLS1VLTURTX1BBQnA2LWd3SVQxM2luTHY0SjhWQzh1Y3FKcXUycUF1RURmcGV2TlFwSHVNU1hYMldJOWlCVzNBeVJkQ3N2c19ZNDdTZzVJVWd5aHUycw?oc=5",
+"text": "Korean Company ATLAS — how to read Korean companies",
+"imgs": [],
+"press": "Seoul Economic Daily",
+"full": 0,
+"src": "sedaily",
+"kind": "news",
+"name": "서울경제 증권",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/cxcmU0YTlnZU1MRE1GWmlfMUpyMVpzc0lUSlA1b0xCRXltd0VEQ3pfMVEoc5",
+"title": "경기 동부 초미세먼지주의보…중부·북부 주의보 유지",
+"at": "2026-11-27 21:13",
+"link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE8tNkc3MFNUMngwbjZ2NUR1YlpvR2oyWjdmclhtRFhycHN6T252cGw1bzJmaF92VVNZdUFqZi1NMTkxVnZkN1dHTDZUVHg0ZFU5VXBkMzdEM3liZmfSAWBBVV95cUxPT2VaT3Rud3Z6VlZlOUFFRUVjVmIycUM3bTZFS3RWallCekI3T0p6T3FEUmRLQncxcmU0YTlnZU1MRE1GWmlfMUpyMVpzc0lUSlA1b0xCRXltd0VEQ3pfMVE?oc=5",
+"text": "경기 동부 초미세먼지주의보…중부·북부 주의보 유지",
+"imgs": [],
+"press": "연합뉴스",
+"full": 0,
+"src": "gn_kr_macro",
+"kind": "news",
+"name": "뉴스 · 금리·환율·경제",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/ideos20261127blackfridayshoppersturntoaibotstofinddealsvideo",
 "title": "Black Friday Shoppers Turn to AI Bots to Find Deals",
 "at": "2026-11-27 21:12",
@@ -4890,6 +4963,20 @@
 "kind": "news",
 "name": "Bloomberg Technology",
 "first": "2026-11-27 21:15"
+},
+{
+"id": "n/g2elRzWklaamVVbmFiTmJ5MmtwNHhFT1hoZng0RFZwcDdsSl85TlMwQzAoc5",
+"title": "특검후보 이임성, 李대통령 경기지사 시절 도청 고문변호사",
+"at": "2026-11-27 21:11",
+"link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBBMnVwSVVyZ1BCM3RxM21DemRSLWhyMW9JN3NXaUJJT1hLaHNicDRpbVg2elRzWklaamVVbmFiTmJ5MmtwNHhFT1hoZng0RFZwcDdsSl85TlMwQzA?oc=5",
+"text": "특검후보 이임성, 李대통령 경기지사 시절 도청 고문변호사",
+"imgs": [],
+"press": "연합뉴스",
+"full": 0,
+"src": "gn_kr_macro",
+"kind": "news",
+"name": "뉴스 · 금리·환율·경제",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "HANAchina/72900",
@@ -5042,6 +5129,20 @@
 "first": "2026-11-27 21:15"
 },
 {
+"id": "n/zNCUVRGYTV6QUtCa3lPV1YtNEttdU95N3o3Rnk0eDFBcFVGRzlFLTNwNwoc5",
+"title": "Trump Turns the Tide to Score Early Wins in Defamation Lawsuits",
+"at": "2026-11-27 21:00",
+"link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQY2h6RXZCdWlYdXRUZG9nWkc2MVFQVzd2V0diTmh3Zks1RGhPYjExN2xGcFhYaWJwQ2MzZVNiYUdXN1piYUNKTldtajc2NXZtaHZITlg0T0NXMDhqS3BWYkxpbkl0SGtCZVppY0UyWnFNUmpzdGo3Qk8wUkZpT29hRTZWOW1xYzNCUVRGYTV6QUtCa3lPV1YtNEttdU95N3o3Rnk0eDFBcFVGRzlFLTNwNw?oc=5",
+"text": "Trump Turns the Tide to Score Early Wins in Defamation Lawsuits",
+"imgs": [],
+"press": "Bloomberg.com",
+"full": 0,
+"src": "gn_bbg",
+"kind": "news",
+"name": "News · Bloomberg 전체",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/httpswwwftcomcontent55d25c66440546988fc99516010bd7fb",
 "title": "London is playing a game of penthouse one-upmanship",
 "at": "2026-11-27 21:00",
@@ -5178,10 +5279,10 @@
 "first": "2026-11-27 21:00"
 },
 {
-"id": "n/c0dERzVmpKaF9sLU1SbEp4d0VLVEpGdjh5aDNlTmVOQlVHOUhyYUVjaXcoc5",
+"id": "n/g1Q013N0RkNUZSa1psN2czeWRsQTkwWDlHcENDVnNzbkpldnVtQ3RXcFEoc5",
 "title": "금리 인상에 서민 부담 가중...은행만 배불렀다 [앵커리포트]",
 "at": "2026-11-27 20:46",
-"link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1sNDlvcFozWWQ0bzNJUnpFdE5LaTAzanktdWtCT1V3ckI5RnZVTUlhUFk1cmxBWTJGZWdzYVAxYXdzano2UEFaR2VuTGc0dERzVmpKaF9sLU1SbEp4d0VLVEpGdjh5aDNlTmVOQlVHOUhyYUVjaXc?oc=5",
+"link": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE8zaUJhZ3ZaUjRycnhHZGNwWnVPc0gyLW9zSWFid2tiSlp5b3ZDOVY4WFAyaEg1Q013N0RkNUZSa1psN2czeWRsQTkwWDlHcENDVnNzbkpldnVtQ3RXcFE?oc=5",
 "text": "금리 인상에 서민 부담 가중...은행만 배불렀다 [앵커리포트]",
 "imgs": [],
 "press": "YTN",
@@ -5189,7 +5290,7 @@
 "src": "gn_kr_macro",
 "kind": "news",
 "name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 02:45"
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/0261127nvidiablackwellchipsturnupatchinasitetiedtoalicehuang",
@@ -5204,6 +5305,20 @@
 "kind": "news",
 "name": "Bloomberg Technology",
 "first": "2026-11-28 00:00"
+},
+{
+"id": "n/h4Q0d0Z0tTdFhkQWQzUU5qS1dFNmpYRGtuQkxNN0RISUxteEh5MjEtWWcoc5",
+"title": "경기 북부 이어 중·동부까지…26개 지역 초미세먼지주의보 발령",
+"at": "2026-11-27 20:44",
+"link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9mOXJwSjNYSUJpTG50WG1ENkhnX1UxWDFQeDd0TVdOODlOWGR0SlFBRmh4Q0d0Z0tTdFhkQWQzUU5qS1dFNmpYRGtuQkxNN0RISUxteEh5MjEtWWc?oc=5",
+"text": "경기 북부 이어 중·동부까지…26개 지역 초미세먼지주의보 발령",
+"imgs": [],
+"press": "경기일보",
+"full": 0,
+"src": "gn_kr_macro",
+"kind": "news",
+"name": "뉴스 · 금리·환율·경제",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "ai/surgeasbatteredaisharesreboundaheadofshorternedfridaytrading",
@@ -5266,6 +5381,20 @@
 "kind": "tg",
 "name": "김현석 (자본주의 바이어스)",
 "first": "2026-11-27 20:45"
+},
+{
+"id": "n/g4LVFJSlJCV2lSa0h5dE1nWGVpNGIwR3dFaGdjRXJRbW9yTDBpeF9ZMHcoc5",
+"title": "中 차량호출 1위 디디, 해외서 승승장구…매출 57% 급증｜Global Money Club",
+"at": "2026-11-27 20:34",
+"link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9xeC0wUE4xbTduMFNHVmpzYTl3Vm95ZU54NzNRQUFic184MVl2U25VeHg4LVFJSlJCV2lSa0h5dE1nWGVpNGIwR3dFaGdjRXJRbW9yTDBpeF9ZMHc?oc=5",
+"text": "中 차량호출 1위 디디, 해외서 승승장구…매출 57% 급증｜Global Money Club",
+"imgs": [],
+"press": "중앙일보",
+"full": 0,
+"src": "gn_kr_bbg",
+"kind": "news",
+"name": "뉴스 · 블룸버그 인용",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/vOWVQdU02Rmp2N1F5RUlYSkpjVXdPLVNtZVk3X2FIekFZMm1LTXhCbndxoc5",
@@ -5464,6 +5593,20 @@
 "first": "2026-11-27 12:45"
 },
 {
+"id": "n/0hnMGNfRG5rdjRSYl9kOE5fbjhPOVFYVkNEUjZ0YXhpb2pkY1VHZzN0UQoc5",
+"title": "코스피·코스닥 급반등, 삼성전자 16만 원대의 진짜 의미는?",
+"at": "2026-11-27 20:11",
+"link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1YZ0Jmam5XZ0VEQ0tibU1jSTV2cTEwd1gzQS1GVXUzUW9ldVljT2VxU0hnMGNfRG5rdjRSYl9kOE5fbjhPOVFYVkNEUjZ0YXhpb2pkY1VHZzN0UQ?oc=5",
+"text": "코스피·코스닥 급반등, 삼성전자 16만 원대의 진짜 의미는?",
+"imgs": [],
+"press": "네이버페이 머니스토리",
+"full": 0,
+"src": "gn_kr_mkt",
+"kind": "news",
+"name": "뉴스 · 국내 증시",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/httpswwwbloombergcomnewsvideos20261127thepulse11272026video",
 "title": "SAP Weighs 10,000 Job Cuts as AI Reshapes Tech Industry",
 "at": "2026-11-27 20:11",
@@ -5507,6 +5650,20 @@
 "kind": "news",
 "name": "News · Fed·macro",
 "first": "2026-11-27 20:15"
+},
+{
+"id": "n/hLQnMyT1JjcVNiT3IxRFFOZ1h3WXczTzg0d3VlREpyYzF3ME5kb2dmMG8oc5",
+"title": "Crypto on notice as hawkish Fed risks December ‘meltdown’",
+"at": "2026-11-27 20:07",
+"link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9kMEJWS1lXWHl5X3kyUjhuTlFKZUlxYVloUEg2elRXVThwUnBMSWxNMzhLQnMyT1JjcVNiT3IxRFFOZ1h3WXczTzg0d3VlREpyYzF3ME5kb2dmMG8?oc=5",
+"text": "Crypto on notice as hawkish Fed risks December ‘meltdown’",
+"imgs": [],
+"press": "Cryptonews.net",
+"full": 0,
+"src": "gn_us_ib",
+"kind": "news",
+"name": "News · 월가 IB 전략",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/ByUmNGeS0xeS1IcDhtcGJzcG95WmhVODhuS1NZZXFHeDNYTlFPaVN6YXcoc5",
@@ -5759,18 +5916,32 @@
 "first": "2026-11-27 19:15"
 },
 {
-"id": "n/yaG9VVGIzNXp3eHlBUk5jM1NkdWVVMXNtOWVoNjdMUy1nRkdMWVUtQ1dwoc5",
-"title": "Nvidia Chief’s Return Lifts Many Boats",
+"id": "n/5QSTFVdC15UnhuM3hHT1FWVzlFSXBjX1NNblFCZmhPYVZHNUxMSktWdTQoc5",
+"title": "증안펀드 기대에 증시 급등…코스닥 ’사이드카’",
 "at": "2026-11-27 19:30",
-"link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxNeFd1SWlvYjZ0MVJTTHNmN2xNV0t3c0swT19CRF92UnJhLUp0dFNJbzE5aXpVQzlJNDBZSTRRb2RjLXVQcmhUUVdjR1VUdGpPTnVhcm0zT1RhZnF5TmlyaG9VVGIzNXp3eHlBUk5jM1NkdWVVMXNtOWVoNjdMUy1nRkdMWVUtQ1dw?oc=5",
-"text": "Nvidia Chief’s Return Lifts Many Boats",
+"link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9qd1Q4aXRUSFM4dDRBMnV1dHU3Ry1uOUxSXzRxOS1TZldXbnV1TkNyQTlhbUVpUE5tN3dBTk5QSTFVdC15UnhuM3hHT1FWVzlFSXBjX1NNblFCZmhPYVZHNUxMSktWdTQ?oc=5",
+"text": "증안펀드 기대에 증시 급등…코스닥 ’사이드카’",
 "imgs": [],
-"press": "WSJ",
+"press": "연합뉴스TV",
 "full": 0,
-"src": "wsj",
+"src": "gn_kr_mkt",
 "kind": "news",
-"name": "Wall Street Journal",
-"first": "2026-11-28 03:15"
+"name": "뉴스 · 국내 증시",
+"first": "2026-11-27 19:30"
+},
+{
+"id": "n/wVk1LTUJNaFF5aHJWSlVJemFsX0tlcGx5elZ4V0RaczB6cVdzZ1lzOW5Loc5",
+"title": "Italy’s Star Banker Scores a Big Away Win After Home Loss",
+"at": "2026-11-27 19:30",
+"link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPOUJNTmxQSlRlb25BbXpNU1V0R1RiYUktS0FVWTcyMVVod1RDZHdhYXl4MFBTUXVDN2toSzZkLTBXVVlINlIxOGtsNWhUY3dJYzM4Yk0wUHZmLVJTOVVsQ3JRLVNEZVlIODlrQ0huZldEMmpRSC1NZENvY2xDbHFjSFpUOWxLLWN3bmR0SU41TWwza0E0c2lsT18wVk1LTUJNaFF5aHJWSlVJemFsX0tlcGx5elZ4V0RaczB6cVdzZ1lzOW5L?oc=5",
+"text": "Italy’s Star Banker Scores a Big Away Win After Home Loss",
+"imgs": [],
+"press": "Bloomberg.com",
+"full": 0,
+"src": "gn_bbg",
+"kind": "news",
+"name": "News · Bloomberg 전체",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/JRYXZHV25Rc1BWNlZiSUpRYXpIVEJuTTB0Ui1TWW5rRU1VVVZoQjBYYlQoc5",
@@ -5805,6 +5976,20 @@
 "first": "2026-11-27 19:30"
 },
 {
+"id": "n/FyX3NZR2RLMHlMQkM5MElacFhsc2h2LS1qM0R3NVJhbnp4RUdoSDdYQzEoc5",
+"title": "경기 북부 8개 시·군 초미세먼지주의보 발령",
+"at": "2026-11-27 19:28",
+"link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE5lMjJIN29uSXlMM1Fkc0VPaTJnN0JxeU44WDVZbjJDb1JYd3J4MUFEN2NxendLRHB1VVJ2bDNVTGVGRFVyejVpWHYwM3QtNmVkVHhmY3FiZlA5YjTSAWBBVV95cUxNS2x3RS1fS24xN2lxdnVPZ0hpRkh5MS1XN3VtUHozTDJ1cFNzY09fU2lNNjItSmFyX3NZR2RLMHlMQkM5MElacFhsc2h2LS1qM0R3NVJhbnp4RUdoSDdYQzE?oc=5",
+"text": "경기 북부 8개 시·군 초미세먼지주의보 발령",
+"imgs": [],
+"press": "연합뉴스",
+"full": 0,
+"src": "gn_kr_macro",
+"kind": "news",
+"name": "뉴스 · 금리·환율·경제",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/NGcTdvOXhIcnZQRThUTGNwS2pFWXJNNGowbVEwbmlfbDVXYkE2YlMxdncoc5",
 "title": "Apple Pulls MiniMax’s Chatbot From App Store Over Child Safety Concerns",
 "at": "2026-11-27 19:27",
@@ -5817,20 +6002,6 @@
 "kind": "news",
 "name": "Caixin Global",
 "first": "2026-11-27 17:15"
-},
-{
-"id": "n/TRDM3I0UUtKS2tHdXZHakhHTDRKOFZxVGNJbEE5WkFiam1ZVkFhNk9DQQoc5",
-"title": "Why markets sometimes ignore economic data",
-"at": "2026-11-27 19:26",
-"link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxQRkVSTUdnVk1SV00zbUNFR3VpMXU4T0hHZXNQTHpoZ1BKUWZxUjc5WFlfclJMcnJPNHMwLWdVR2EwZDZEanZCaGtacURUc1MzWF9hc0tFVmR0R3VReTRDM3I0UUtKS2tHdXZHakhHTDRKOFZxVGNJbEE5WkFiam1ZVkFhNk9DQQ?oc=5",
-"text": "Why markets sometimes ignore economic data",
-"imgs": [],
-"press": "investingLive",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
 },
 {
 "id": "n/httpswwwmkcokrnewsstock12219974",
@@ -5963,20 +6134,6 @@
 "first": "2026-11-28 03:30"
 },
 {
-"id": "n/5QSTFVdC15UnhuM3hHT1FWVzlFSXBjX1NNblFCZmhPYVZHNUxMSktWdTQoc5",
-"title": "증안펀드 기대에 증시 급등…코스닥 ’사이드카’",
-"at": "2026-11-27 19:17",
-"link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9qd1Q4aXRUSFM4dDRBMnV1dHU3Ry1uOUxSXzRxOS1TZldXbnV1TkNyQTlhbUVpUE5tN3dBTk5QSTFVdC15UnhuM3hHT1FWVzlFSXBjX1NNblFCZmhPYVZHNUxMSktWdTQ?oc=5",
-"text": "증안펀드 기대에 증시 급등…코스닥 ’사이드카’",
-"imgs": [],
-"press": "연합뉴스TV",
-"full": 0,
-"src": "gn_kr_mkt",
-"kind": "news",
-"name": "뉴스 · 국내 증시",
-"first": "2026-11-27 19:30"
-},
-{
 "id": "n/pQRnJvUDZHUkdZSW1VbGMyTzZHUGNqcmpScUpScmd3S3ZzZkplZElQTkEoc5",
 "title": "What to do when holiday gift giving gets awkward",
 "at": "2026-11-27 19:17",
@@ -6078,6 +6235,20 @@
 "kind": "news",
 "name": "ニュース · 일본 증시",
 "first": "2026-11-27 19:15"
+},
+{
+"id": "n/hrTkhPMy1Ed3FEdFJ0NTZSUGNVWUd5TjYwM1dDNUtMcEpSYjFFMUdJQVEoc5",
+"title": "Citi: S&P 500 Rose After 13 of 14 VIX Spikes to 40 as Market Fear Surges in November 2026",
+"at": "2026-11-27 19:06",
+"link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1IaDMyR1A5QmR2d0x2VXMxeUNNQTFJZkttUk5yeDE0bXdIYmtmUHNDQ1p2VHkzOGE4WklDZFZObFNtY1ZndUxiMnM3YVhrTkhPMy1Ed3FEdFJ0NTZSUGNVWUd5TjYwM1dDNUtMcEpSYjFFMUdJQVE?oc=5",
+"text": "Citi: S&P 500 Rose After 13 of 14 VIX Spikes to 40 as Market Fear Surges in November 2026",
+"imgs": [],
+"press": "KuCoin",
+"full": 0,
+"src": "gn_us_fed",
+"kind": "news",
+"name": "News · Fed·macro",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "kimu_nim/50821",
@@ -6288,6 +6459,20 @@
 "first": "2026-11-27 19:15"
 },
 {
+"id": "n/fRk92SThubXowRW84QTlyMDNKMmh2YkRyZHRTN1lKNF9EVWRaZXpNQk1uoc5",
+"title": "New York Court Upholds Rent Freeze for 1 Million Households",
+"at": "2026-11-27 18:52",
+"link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxONHY4NjhBdHQtd1V3T0oxb0dBc0J1UmF2SmlDczg1T2tkS1hyR0dvbnRjVzVlRE9TQ3pFZVlyaVpLRTBPdlQ1X1NKbUFYQktFeV9wWXdyTHRKVi1ZQW9SYW1udU80TVpfY2p5aVF1eURZNjJuTENfRk92SThubXowRW84QTlyMDNKMmh2YkRyZHRTN1lKNF9EVWRaZXpNQk1u?oc=5",
+"text": "New York Court Upholds Rent Freeze for 1 Million Households",
+"imgs": [],
+"press": "Seoul Economic Daily",
+"full": 0,
+"src": "sedaily",
+"kind": "news",
+"name": "서울경제 증권",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/swwwftcomcontent5fe8a8586ed240f0a0f3e8742b7656aasyn25a6b1a61",
 "title": "Ladbrokes owner to settle Australia money laundering case",
 "at": "2026-11-27 18:51",
@@ -6328,20 +6513,6 @@
 "kind": "news",
 "name": "Wall Street Journal",
 "first": "2026-11-28 01:00"
-},
-{
-"id": "n/k9RTlM5bkZuelVWdFBUbGZjbUVDZkpQNU82RlQwMmtjSmhYLWpIOU5QQQoc5",
-"title": "Shafaq News..Gold prices climb as US holiday eases selloff",
-"at": "2026-11-27 18:48",
-"link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxQYUFUNGVmZmlCT01Mby1CV2J6MmNtTDBwQ2pjVGVJLWJqWTNFaFV4WjVac25qOTJMaEhpd0VtRDBIMEJoOTZrRzhwZ18yMnNiQkJpU2xsZXJEaUFQbk9RTlM5bkZuelVWdFBUbGZjbUVDZkpQNU82RlQwMmtjSmhYLWpIOU5QQQ?oc=5",
-"text": "Shafaq News..Gold prices climb as US holiday eases selloff",
-"imgs": [],
-"press": "شفق نيوز",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
 },
 {
 "id": "n/Gx4WE1vOWRVQWxzcUVzaEVUMTRkTGl5b3VidFlqa3lUUk9vQVZNWVVScQoc5",
@@ -6638,6 +6809,20 @@
 "first": "2026-11-28 02:45"
 },
 {
+"id": "n/1VQnItbzJNNUdjbm1oNXB1Z2w1VEtoRjJ5eUt3ZW04UnEtbUdfeTB2Y0Eoc5",
+"title": "US pressed Venezuela, Iraq to leave OPEC: Report",
+"at": "2026-11-27 18:21",
+"link": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBSUy1tVzJPZHVXV2w1eHAtUzNTSktCR1NYWXNYZHJLaTEzTmxVTjJIalY4RWZ1Y0o2NTU5Ung0MlQ3NVhGcFloV1VIWS1VQnItbzJNNUdjbm1oNXB1Z2w1VEtoRjJ5eUt3ZW04UnEtbUdfeTB2Y0E?oc=5",
+"text": "US pressed Venezuela, Iraq to leave OPEC: Report",
+"imgs": [],
+"press": "Latest news from Azerbaijan",
+"full": 0,
+"src": "gn_us_fed",
+"kind": "news",
+"name": "News · Fed·macro",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/hFeHpBbjg0a09CV1VIV0Y5SVFvNDl4WHIxaDZRbjFQU3BZRnpSTjFmMXcoc5",
 "title": "[i-point] 릴리바이레드 '러브빔 치크밤', 2026 올리브영 어워즈 1위",
 "at": "2026-11-27 18:20",
@@ -6709,6 +6894,20 @@
 "kind": "news",
 "name": "뉴스 · 국내 증시",
 "first": "2026-11-27 21:30"
+},
+{
+"id": "n/kYzbHRQQ1I2bG5hOUxXVkFmU2hnd0VSdktobnY2bGVGVThHZVJTTjdYWQoc5",
+"title": "실적 발표 앞둔 ‘SK하이닉스’ 주가 급락…증권가 목표가는 더 올랐다",
+"at": "2026-11-27 18:16",
+"link": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE50XzZoVmFuX2JBQndZTFVuTGFkVFRXeW1TWktMSFJPWUk5c1c3ZFZqRkUtVTdxTEdsdkYzbHRQQ1I2bG5hOUxXVkFmU2hnd0VSdktobnY2bGVGVThHZVJTTjdYWQ?oc=5",
+"text": "실적 발표 앞둔 ‘SK하이닉스’ 주가 급락…증권가 목표가는 더 올랐다",
+"imgs": [],
+"press": "쿠키뉴스",
+"full": 0,
+"src": "gn_kr_sector",
+"kind": "news",
+"name": "뉴스 · 반도체·AI·업종",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/ZIdXZ4dWUtN2pOZXBDaEpMbFB4cTQtQWltNE5ZcENuWk1XS0d1LWRkUlEoc5",
@@ -6934,20 +7133,6 @@
 "first": "2026-11-27 18:15"
 },
 {
-"id": "n/dXWlJ6VjZBdFpZcURRdWZhMTdTNURUMktCVTdoVVZ5aGxlQWFMbWQ1S1Qoc5",
-"title": "Take Five: A December to remember",
-"at": "2026-11-27 18:05",
-"link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9tYndvNDZiVTh5OEhJODNqYkxRS0daMUNsOGFIV0FtbEFFZUNueGItdHFFcG1veHA5MWhRQlY3dUo5Y2ptZmdXWlJ6VjZBdFpZcURRdWZhMTdTNURUMktCVTdoVVZ5aGxlQWFMbWQ1S1Q?oc=5",
-"text": "Take Five: A December to remember",
-"imgs": [],
-"press": "WTVB",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "n/BuMEV2RnVINjNFZVg0UFhBSTNIdFBsTG5zU18ybURuSVdWVkh6a25iaE0oc5",
 "title": "Ransomware Attacks Target Koh Young and Pamtek",
 "at": "2026-11-27 18:03",
@@ -7156,10 +7341,38 @@
 "first": "2026-11-27 18:00"
 },
 {
-"id": "n/RwSG5kekVtb0QzMXVOeTRBbFRGU2Z1MjdvSUkxT1ZaX1hYQ3pnbHRLdkEoc5",
+"id": "n/Vncm1NeEozempXdXROVVB1R0g5UVVlQWtrelZFQjMtRy1zeFpEbGZKSUEoc5",
+"title": "Lumibird Shares Surge After Thales Targets Majority Stake in $483 Million Laser Deal",
+"at": "2026-11-27 17:52",
+"link": "https://news.google.com/rss/articles/CBMixgFBVV95cUxOZTk0cXhqeUx4LWZ3WGphclBHcU44WjlzaDdXNTFheVFIVTNUd2RTbXdHMEp6T3ZsVG9MS2JCenF4YVNwb1JLcERtZW9MYVFSUy1Gbk1nZWVuSzVrcVM0dVVobU9CT01hbEZJc2VSQ096WjgydDFIMkQ3c1R5NUxiOHoyVVVGaGtRbjQzbVpMUnAtMmtjck9zTS1QLTVncm1NeEozempXdXROVVB1R0g5UVVlQWtrelZFQjMtRy1zeFpEbGZKSUE?oc=5",
+"text": "Lumibird Shares Surge After Thales Targets Majority Stake in $483 Million Laser Deal",
+"imgs": [],
+"press": "WSJ",
+"full": 0,
+"src": "wsj",
+"kind": "news",
+"name": "Wall Street Journal",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/J3OHlKN3EtWkMtdnBFY2RuU2xZOVRoYWZMeGFlQkJSWXdURHl1Zk5IaXcoc5",
+"title": "《港股》國常會月內兩次提及資本市場改革 恒指升467點科指飆6.5% 內銀逆市跌",
+"at": "2026-11-27 17:52",
+"link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxQa3kyVEx0bU1XVEYycXlaZ2tFZnhRV1ZDdG5sR0pJdWlveHg1X3VSYTZiY3dNbFZoZEZlOUNvQlBnN29KazJJeUZvMUdsTm1OWU1PY1V0VjA4OGhaYVZHaW9SUExNSERaVXBPTk9xUFk1ZEw2dS1jeEJ3OHlKN3EtWkMtdnBFY2RuU2xZOVRoYWZMeGFlQkJSWXdURHl1Zk5IaXc?oc=5",
+"text": "《港股》國常會月內兩次提及資本市場改革 恒指升467點科指飆6.5% 內銀逆市跌",
+"imgs": [],
+"press": "AAstocks",
+"full": 0,
+"src": "gn_hk",
+"kind": "news",
+"name": "新聞 · 홍콩·중국 증시",
+"first": "2026-11-28 03:45"
+},
+{
+"id": "n/EcEhuZHpFbW9EMzF1Tnk0QWxURlNmdTI3b0lJMU9WWl9YWEN6Z2x0S3ZBoc5",
 "title": "한은, 내년 성장률 4.1%로 대폭 상향…반도체 호황에 전망 ‘급반전’",
 "at": "2026-11-27 17:51",
-"link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE4wVjBhckpYc2ZSYXQzV0RZVzA0cUxRNGRNWmoyeUU2c2czNWZhVmJiLWFUakFjeXhnaE9UcExicXNGVHo5YzMwclRMSXRTSzNoTjEyZE1hRC1JNjJRZDdaRHJyNGJlQ09kZm04TlZjWTB4eWxhQ1hnSmNZZ9IBf0FVX3lxTFBpclY4U0ZDS1Q2N2MtZzNYYXFRY1AyWUpiRGpxek5DcE1YQXhIbVFxbGNDY0MtejdyZnZfYllLeUJVbzRnNjRaUDIyODJOU25LeUE1U0RwSG5kekVtb0QzMXVOeTRBbFRGU2Z1MjdvSUkxT1ZaX1hYQ3pnbHRLdkE?oc=5",
+"link": "https://news.google.com/rss/articles/CBMif0FVX3lxTFBpclY4U0ZDS1Q2N2MtZzNYYXFRY1AyWUpiRGpxek5DcE1YQXhIbVFxbGNDY0MtejdyZnZfYllLeUJVbzRnNjRaUDIyODJOU25LeUE1U0RwSG5kekVtb0QzMXVOeTRBbFRGU2Z1MjdvSUkxT1ZaX1hYQ3pnbHRLdkHSAX9BVV95cUxQaXJWOFNGQ0tUNjdjLWczWGFxUWNQMllKYkRqcXpOQ3BNWEF4SG1RcWxjQ2NDLXo3cmZ2X2JZS3lCVW80ZzY0WlAyMjgyTlNuS3lBNVNEcEhuZHpFbW9EMzF1Tnk0QWxURlNmdTI3b0lJMU9WWl9YWEN6Z2x0S3ZB?oc=5",
 "text": "한은, 내년 성장률 4.1%로 대폭 상향…반도체 호황에 전망 ‘급반전’",
 "imgs": [],
 "press": "데일리스포츠한국",
@@ -7167,7 +7380,7 @@
 "src": "gn_kr_bok",
 "kind": "news",
 "name": "뉴스 · 한국은행·정부 경제 발표",
-"first": "2026-11-28 03:30"
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/MdWxMN0xGRUI2QWpjcWFIS3cyWjdyQ25YWWZZZGxuemlzU1ctMmFIMU5Eoc5",
@@ -7465,34 +7678,6 @@
 "first": "2026-11-28 00:30"
 },
 {
-"id": "n/RWN3dBNHFRM0tMYjlMVU9XV0Y5VXk1aExqb1lqTk5oZjhxQkpnOF9lNDQoc5",
-"title": "엔비디아, SSD로 GPU 메모리 용량 한계 넘는다…키옥시아와 1페타바이트급 AI 메모리 확장 기술 실증",
-"at": "2026-11-27 17:36",
-"link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9JTnoyX2Q0cFpnZlU5blF0QktKRTNqR1I4bEkzUU9oSXlLM0VNNkxIWTE4ZFVQX0Z3a3M5c1RWN3dBNHFRM0tMYjlMVU9XV0Y5VXk1aExqb1lqTk5oZjhxQkpnOF9lNDQ?oc=5",
-"text": "엔비디아, SSD로 GPU 메모리 용량 한계 넘는다…키옥시아와 1페타바이트급 AI 메모리 확장 기술 실증",
-"imgs": [],
-"press": "인공지능신문",
-"full": 0,
-"src": "gn_kr_global",
-"kind": "news",
-"name": "뉴스 · 해외 증시(한글)",
-"first": "2026-11-27 17:45"
-},
-{
-"id": "n/1piX1ZhNU9oR0lRdUlyNlFhQkVodlpkNmxUcFpudUtJc3N1RFZ3ajBYegoc5",
-"title": "ロンドン株、続伸で始まる 独・仏株も高い",
-"at": "2026-11-27 17:34",
-"link": "https://news.google.com/rss/articles/CBMibEFVX3lxTE1WelpvTWlocGhISlVGdVVoZVpEeTBmaEJwbGtIQ2xkMzFkZHpmeWZDWnEyWllxSko5WHBPYUQ2T2RrS1piX1ZhNU9oR0lRdUlyNlFhQkVodlpkNmxUcFpudUtJc3N1RFZ3ajBYeg?oc=5",
-"text": "ロンドン株、続伸で始まる 独・仏株も高い",
-"imgs": [],
-"press": "日本経済新聞",
-"full": 0,
-"src": "gn_jp",
-"kind": "news",
-"name": "ニュース · 일본 증시",
-"first": "2026-11-28 01:15"
-},
-{
 "id": "n/Gt4b3dGem5VV2N4eVd4a1dMdDdSQ2gwZk5CS3h4eng3dG5CeElmZ3Yybwoc5",
 "title": "港股高收467點 科指急升逾6%",
 "at": "2026-11-27 17:34",
@@ -7563,6 +7748,20 @@
 "first": "2026-11-27 19:45"
 },
 {
+"id": "n/uYkg0LUd1UFNDR3k4Zi1IRm9CUVJ6SDdpYjZLaXNGejNWVl9qeHBQSWxjoc5",
+"title": "기준금리 3.75%까지 점 찍은 '매파 한은'…4%대 성장 자신감",
+"at": "2026-11-27 17:31",
+"link": "https://news.google.com/rss/articles/CBMia0FVX3lxTE1DQWY0azRfdll6b05OcUhJZTJxQmVQVjBhVXBTOVFJOS1RTzdmYUl0R1lQUWR0VHFjeklIZmVxOWVuYkg0LUd1UFNDR3k4Zi1IRm9CUVJ6SDdpYjZLaXNGejNWVl9qeHBQSWxj?oc=5",
+"text": "기준금리 3.75%까지 점 찍은 '매파 한은'…4%대 성장 자신감",
+"imgs": [],
+"press": "한국부동산뉴스",
+"full": 0,
+"src": "gn_kr_macro",
+"kind": "news",
+"name": "뉴스 · 금리·환율·경제",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/httpswwwhankyungcomarticle2026112753531",
 "title": "석유 왕좌 탈취한 반도체…50년 만에 뒤집힌 '돈줄 공식'",
 "at": "2026-11-27 17:31",
@@ -7577,10 +7776,10 @@
 "first": "2026-11-27 18:00"
 },
 {
-"id": "n/hfR1pvZ1BaMk01czZKdXdmYU90UnlJVmhjNXhPaC1VdVgwVkthNWVjZ3Eoc5",
+"id": "n/VzamZ6VGdBWVpYRXV6aG5yVUxUdnBRQ1dqc1dVa3lPR1ZOQU9RMEZrUG8oc5",
 "title": "《瑞銀窩輪》港股期結日大市升2.1% 內險股造好 兩手準備平安認購（18489）、平安認沽（18760）",
 "at": "2026-11-27 17:31",
-"link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxPT1N4ZVU1RHRGU3VEdF9XYmFLMWc3OXBwSURnVTRQQk5ER1BQZzZkXzAtNmVfVHUyWEhvUmNvZWpFQ3gxSTJrTFRoZFBybmNkRHFNYUFxZ0FEUzhfR1pvZ1BaMk01czZKdXdmYU90UnlJVmhjNXhPaC1VdVgwVkthNWVjZ3E?oc=5",
+"link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxPcGFpb29objk4Nlc5RTd1NkRhLWU4cjZyNkVKTDhmNUJpNjVOMm9mcGdTOG1Ub21wTXRmclZyOTNkY2JtVjBhSnY5TGE2M1RBSXFoa3Y1VmNGdVVzamZ6VGdBWVpYRXV6aG5yVUxUdnBRQ1dqc1dVa3lPR1ZOQU9RMEZrUG8?oc=5",
 "text": "《瑞銀窩輪》港股期結日大市升2.1% 內險股造好 兩手準備平安認購（18489）、平安認沽（18760）",
 "imgs": [],
 "press": "AAstocks",
@@ -7588,7 +7787,7 @@
 "src": "gn_hk",
 "kind": "news",
 "name": "新聞 · 홍콩·중국 증시",
-"first": "2026-11-28 03:30"
+"first": "2026-11-28 03:45"
 },
 {
 "id": "kimu_nim/50808",
@@ -7623,20 +7822,6 @@
 "kind": "tg",
 "name": "김현석 (자본주의 바이어스)",
 "first": "2026-11-27 17:30"
-},
-{
-"id": "n/vYUxETVhaUlhNRFhqNDd1eUMwVmhZck1rZktQNk1KUzZtX052Q0pZeEVRoc5",
-"title": "공사비 부담에 금리까지 ‘겹악재’···정비사업 금융비용 부담 커지나",
-"at": "2026-11-27 17:30",
-"link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE8yYnZMOUdYTXJ6RjFlRk9OckpJb3ZNUm9rbThiVkhaVllpcFl2dlUzTEd0MnVQY0lEOTZzd3U3MzhNbnZJMXVMdktuTG9hTERNWFpSWE1EWGo0N3V5QzBWaFlyTWtmS1A2TUpTNm1fTnZDSll4RVHSAXZBVV95cUxPMmJ2TDlHWE1yekYxZUZPTnJKSW92TVJva204YlZIWlZZaXBZdnZVM0xHdDJ1UGNJRDk2c3d1NzM4TW52STF1THZLbkxvYUxETVhaUlhNRFhqNDd1eUMwVmhZck1rZktQNk1KUzZtX052Q0pZeEVR?oc=5",
-"text": "공사비 부담에 금리까지 ‘겹악재’···정비사업 금융비용 부담 커지나",
-"imgs": [],
-"press": "시사저널e",
-"full": 0,
-"src": "gn_kr_macro",
-"kind": "news",
-"name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 02:45"
 },
 {
 "id": "n/xN1RsMUFmUm9kNGZtOVRBMVRzcFhZVlZLOFR4S290d2gyWXVXZ1FsWDNEoc5",
@@ -8129,20 +8314,6 @@
 "first": "2026-11-27 17:15"
 },
 {
-"id": "n/W13U3FrelRwNEo3X0ZjRFlGSG5lbVJ4NVF2YjA0WTdhT09WNVJBNFFmdwoc5",
-"title": "[A 주간 서머리] 경제·산업계 \"한은, 기준금리 3.25%로 인상...삼성전자, 임원인사·조직개편 단행\"",
-"at": "2026-11-27 17:00",
-"link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE5HeDJWUFQ3M3dqVU9YR3FRZWlZMl9pNEg5VDBfMWpQRUxWeGZQelo3MVBGcUtfZEVwWmQzRDgtVVIxa2pkd3J1RXFqaWI4dTNfLUN0OTNmZksyalVaM3VDMXd5T0ZEb1BTa0HSAW5BVV95cUxPdzZmSGFLWUFYeGUyNzB6NG12bmlKbTJqQWZyRzNHTFpMR1AxVkJRWmRrZU1ZX2NBTThhczFSR3BBRnRLMW13U3FrelRwNEo3X0ZjRFlGSG5lbVJ4NVF2YjA0WTdhT09WNVJBNFFmdw?oc=5",
-"text": "[A 주간 서머리] 경제·산업계 \"한은, 기준금리 3.25%로 인상...삼성전자, 임원인사·조직개편 단행\"",
-"imgs": [],
-"press": "아시아에이",
-"full": 0,
-"src": "gn_kr_bok",
-"kind": "news",
-"name": "뉴스 · 한국은행·정부 경제 발표",
-"first": "2026-11-28 03:15"
-},
-{
 "id": "kimu_nim/50802",
 "title": "[by kimuda]",
 "at": "2026-11-27 16:59",
@@ -8260,20 +8431,6 @@
 "first": "2026-11-27 17:00"
 },
 {
-"id": "n/xcElRZXp2NHNKRXRBVm5zbVdEQzV3YWZTNjFFbkFtVjZlRmpmMC1iTVdRoc5",
-"title": "Renewables key for 'economic, national security': Maldives climate chief",
-"at": "2026-11-27 16:54",
-"link": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxPSm1oVF8wUWRVY19iZFVpUndaUlhXNnpYOTZZWENzclRMR2dtaDRVZnYySkE4RmJLbW1wOFliRlZjMnFpSHpqNHBtZG8wRmJlWHktbGZRcGZNV3pQajhBdjdCNmZocmpRV0NQbmFtSTBia3NIeXQzQmNZV0dseEU0RURuanh6ZWVERVlLSVExcElRZXp2NHNKRXRBVm5zbVdEQzV3YWZTNjFFbkFtVjZlRmpmMC1iTVdR?oc=5",
-"text": "Renewables key for 'economic, national security': Maldives climate chief",
-"imgs": [],
-"press": "Nikkei Asia",
-"full": 0,
-"src": "nikkei_asia",
-"kind": "news",
-"name": "Nikkei Asia",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "kimu_nim/50801",
 "title": "[by kimuda]",
 "at": "2026-11-27 16:51",
@@ -8320,20 +8477,6 @@
 "kind": "news",
 "name": "Bloomberg Economics",
 "first": "2026-11-27 17:00"
-},
-{
-"id": "n/hjRVdiY1Z5Y3V0YnVxeU96R3oxZUMwbDV0NWVobHltWXkzU20taEZaSzQoc5",
-"title": "\"비축유 다시 채워야…공급과잉에도 유가 떠받칠 것\"",
-"at": "2026-11-27 16:47",
-"link": "https://news.google.com/rss/articles/CBMic0FVX3lxTE9VZXBReFB3cld0VkRSXzB2RkJkeXdzbXo4QWNJQWRNNzF0NEZzRlc4VGdQaVZkUXBIVHgwTGFDZ2lVcXJrc0tvRHhjRVdiY1Z5Y3V0YnVxeU96R3oxZUMwbDV0NWVobHltWXkzU20taEZaSzQ?oc=5",
-"text": "\"비축유 다시 채워야…공급과잉에도 유가 떠받칠 것\"",
-"imgs": [],
-"press": "마켓인",
-"full": 0,
-"src": "gn_kr_bbg",
-"kind": "news",
-"name": "뉴스 · 블룸버그 인용",
-"first": "2026-11-28 03:30"
 },
 {
 "id": "n/0261127frenchinflationslowsmuchmorethanexpectedasenergyeases",
@@ -8519,20 +8662,6 @@
 "first": "2026-11-27 16:45"
 },
 {
-"id": "n/mdCeDJzc2dXUkw1QUtRd2xmSGtOOE1tWmllbXRyZXIwR0lHRTJoLXU4dwoc5",
-"title": "코스피, 4%대 올라 4,900 탈환...코스닥, 8.1% 급등",
-"at": "2026-11-27 16:34",
-"link": "https://news.google.com/rss/articles/CBMib0FVX3lxTFBiN05fMENwQzk0bXpZdnlFNUlIeDgzRV9nbl9xQm1xTlh1Z1pHOGt2VkFjWF81cjd5SXN0dm1SOUprd3p4dmdCeDJzc2dXUkw1QUtRd2xmSGtOOE1tWmllbXRyZXIwR0lHRTJoLXU4dw?oc=5",
-"text": "코스피, 4%대 올라 4,900 탈환...코스닥, 8.1% 급등",
-"imgs": [],
-"press": "YTN",
-"full": 0,
-"src": "gn_kr_mkt",
-"kind": "news",
-"name": "뉴스 · 국내 증시",
-"first": "2026-11-28 03:15"
-},
-{
 "id": "n/lGSkNzVFNFSUlvRTRXQWxpbC1mQ2llcXRWWEIwZlpnVjBDZy1LcXU0MGcoc5",
 "title": "Wall Street ends higher as battered AI stocks gain in volatile week",
 "at": "2026-11-27 16:34",
@@ -8545,20 +8674,6 @@
 "kind": "news",
 "name": "Reuters 비즈니스·시장",
 "first": "2026-11-27 19:15"
-},
-{
-"id": "n/vR05naVNhVFZ0ZWJNOHQyUTVuZFlfSW1RMGtIRHh1N21zbDFVOTlRMkpBoc5",
-"title": "“지금이 기회”···시중금리 하락에 금융사 잇단 자본확충",
-"at": "2026-11-27 16:32",
-"link": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBaOVBpak1qRnNLSnRxd2RlMXV3RzczUjQ5V2dRdzJoRzJuZi0tYU9jS19Ya3hVRWtpaUZuQXRGZXV2SXAwTE1GdmhYZW9HTmdpU2FUVnRlYk04dDJRNW5kWV9JbVEwa0hEeHU3bXNsMVU5OVEySkHSAXZBVV95cUxQWjlQaWpNakZzS0p0cXdkZTF1d0c3M1I0OVdnUXcyaEcybmYtLWFPY0tfWGt4VUVraWlGbkF0RmV1dklwMExNRnZoWGVvR05naVNhVFZ0ZWJNOHQyUTVuZFlfSW1RMGtIRHh1N21zbDFVOTlRMkpB?oc=5",
-"text": "“지금이 기회”···시중금리 하락에 금융사 잇단 자본확충",
-"imgs": [],
-"press": "시사저널e",
-"full": 0,
-"src": "gn_kr_macro",
-"kind": "news",
-"name": "뉴스 · 금리·환율·경제",
-"first": "2026-11-28 03:30"
 },
 {
 "id": "n/httpswwwynacokrviewAKR20261127133300008",
@@ -8737,6 +8852,20 @@
 "first": "2026-11-27 17:30"
 },
 {
+"id": "n/wU1RmNVRKZmJwZmZRUUhCek14YXduTUdoajVSYWd1YU9SaXdFRFlDcEl1oc5",
+"title": "[증시-마감] 돌아온 외국인…코스피 兆단위 순매수에 4.3% 급등 |",
+"at": "2026-11-27 16:20",
+"link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE5uUEhWSWxjTHhZZk9LUWFmTnhKbXpWVnd5MWF0VTJxTDdCU3M1RlhoWEFqeGYtYUVMY1hpa1k2SUY5YkcwcUtOS2xwU1RmNVRKZmJwZmZRUUhCek14YXduTUdoajVSYWd1YU9SaXdFRFlDcEl1?oc=5",
+"text": "[증시-마감] 돌아온 외국인…코스피 兆단위 순매수에 4.3% 급등 |",
+"imgs": [],
+"press": "연합인포맥스",
+"full": 0,
+"src": "gn_kr_mkt",
+"kind": "news",
+"name": "뉴스 · 국내 증시",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/261127stabilizingforcesmakeeuropeanaistormsheltertakingstock",
 "title": "Stabilizing Forces Make Europe an AI-Storm Shelter: Taking Stock",
 "at": "2026-11-27 16:20",
@@ -8808,18 +8937,18 @@
 "first": "2026-11-27 22:45"
 },
 {
-"id": "n/14c2xxUms0TW9HcEhfOFZtY0V5VTNud19LZ1F2d2xsbnVpaW1sUFRQdXcoc5",
-"title": "[증시-마감] 돌아온 외국인…코스피 兆단위 순매수에 4.3% 급등",
-"at": "2026-11-27 16:14",
-"link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE80bHZ0YkFhTjV2MDJrRlJ4eHoxQTRoaWF4bDBmaDFDcDc5OFJLZmZHV2FYV1VOZlZPZWJZZTQ1WHktNG9BUy14c2xxUms0TW9HcEhfOFZtY0V5VTNud19LZ1F2d2xsbnVpaW1sUFRQdXc?oc=5",
-"text": "[증시-마감] 돌아온 외국인…코스피 兆단위 순매수에 4.3% 급등",
+"id": "n/KOTJ2cVdRZ3Q5WmFSaHc0d0JTOF9feDVCcmM5QmM4aTdteVU1ZVBDY0ZNoc5",
+"title": "[삼성 임원 인사] 파운드리 기술개발실장에 강희성 'PA팀도 수장 재배치'",
+"at": "2026-11-27 16:16",
+"link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxQS3JmNDFHVVdkWjhXZWI1TmRlNktISERYSS11djZrNFYzbzZ4WEFTRUR2cHMwZ3FSeVlSQW5YLWVUdHFDeUlQc2Q3bTN1X3F4Q2cyUElqTVVzT002UnE1R29KOTJ2cVdRZ3Q5WmFSaHc0d0JTOF9feDVCcmM5QmM4aTdteVU1ZVBDY0ZN?oc=5",
+"text": "[삼성 임원 인사] 파운드리 기술개발실장에 강희성 'PA팀도 수장 재배치'",
 "imgs": [],
-"press": "연합인포맥스",
+"press": "더벨",
 "full": 0,
-"src": "gn_kr_mkt",
+"src": "thebell",
 "kind": "news",
-"name": "뉴스 · 국내 증시",
-"first": "2026-11-28 03:15"
+"name": "더벨(자본시장)",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/httpswwwhankyungcomarticle2026112751366",
@@ -8878,18 +9007,18 @@
 "first": "2026-11-27 17:00"
 },
 {
-"id": "n/C0tSTNuUzk2d3JER3prWGRjSjJocXJzRUVHSW95Y0E4NDNsUTBJUzVEZQoc5",
-"title": "코스피 4.3% 상승 4,900선 회복…코스닥 8%대 급등 700선 탈환(종합)",
-"at": "2026-11-27 16:08",
-"link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9HUndHT3pvSWlvcVUtYXoxalVncFVFUzFoX0VIRVFjVG90RERfT2NURmhSS1JpWC0tSTNuUzk2d3JER3prWGRjSjJocXJzRUVHSW95Y0E4NDNsUTBJUzVEZdIBYEFVX3lxTE9HUndHT3pvSWlvcVUtYXoxalVncFVFUzFoX0VIRVFjVG90RERfT2NURmhSS1JpWC0tSTNuUzk2d3JER3prWGRjSjJocXJzRUVHSW95Y0E4NDNsUTBJUzVEZQ?oc=5",
-"text": "코스피 4.3% 상승 4,900선 회복…코스닥 8%대 급등 700선 탈환(종합)",
+"id": "n/zlIR0pWcFNCRnM2Mlo0N2h3Y2syc25UaWpFSlg3cGs5SDZGbmlNM2pjTwoc5",
+"title": "[속보]특검, '내란 선동' 황교안 전 총리에 1심 징역 10년 구형 - 머니투데이",
+"at": "2026-11-27 16:11",
+"link": "https://news.google.com/rss/articles/CBMia0FVX3lxTE9OSTl0Tkt1TnhIWVEzY29FMEhnbFR4VlNqa1hILXdpaGNoeUJKVXhIenNDX01aTzZJcDhLeV9ZOWhBalV0MWY5TVZZaDVUdm1pU1ZBNHJ0XzJhWXBVdlg4bG1vWW05T2wtTWZn0gFwQVVfeXFMT3ZMaEhwOTYzSG96dE5VT05MMXFnekl2ai1vd0pIYW1TbTdYbXhrOE9CU1QzeGN4WTJHSVpsQVFrOVdIOG9TVzlIR0pWcFNCRnM2Mlo0N2h3Y2syc25UaWpFSlg3cGs5SDZGbmlNM2pjTw?oc=5",
+"text": "[속보]특검, '내란 선동' 황교안 전 총리에 1심 징역 10년 구형 - 머니투데이",
 "imgs": [],
-"press": "연합뉴스",
+"press": "머니투데이",
 "full": 0,
-"src": "gn_kr_mkt",
+"src": "mt_stock",
 "kind": "news",
-"name": "뉴스 · 국내 증시",
-"first": "2026-11-28 03:15"
+"name": "머니투데이 증권",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/kVxa1ZkTDFRamlNekZkQmFJM1dCUmxTMEI4am9ZRjJiOHJfeXNSSXJ5VQoc5",
@@ -9005,32 +9134,18 @@
 "first": "2026-11-27 16:15"
 },
 {
-"id": "n/xZmVUcEp0UkZvNXJBdlh5b3B4endvcU1BamtBRnhMWjNyNTdmWmxYeURroc5",
-"title": "주요 공시(11:00~16:00)",
-"at": "2026-11-27 16:01",
-"link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxQeE9qTFoxZEllbS1OTDFVUnlyUHhlMGFEUzk1Njh0NjA0WlJvWU1JOEpWX09zMU8zMjUxOFlKam81T3RfRWd1bjZRX1Q0X0FCaXN4TVR3UjdfN0dWMFE1SWYxZmVUcEp0UkZvNXJBdlh5b3B4endvcU1BamtBRnhMWjNyNTdmWmxYeURr?oc=5",
-"text": "주요 공시(11:00~16:00)",
-"imgs": [],
-"press": "더벨",
-"full": 0,
-"src": "thebell",
-"kind": "news",
-"name": "더벨(자본시장)",
-"first": "2026-11-28 03:30"
-},
-{
-"id": "n/WXzRKOTNPUEdYU054QW9JOEZFbm4xVU1hZ0Z3em44bTE4eU1lRHZBMGdVoc5",
-"title": "3거래일 만에 4900선 회복한 코스피, 코스닥도 8% 급등···외국인 매수세·증안펀드 확대 기대감",
+"id": "n/dhSnVEOWw4emNpQnFXMlJrRGkyQXJ4RzZoRHpvNjFpM2FhelJSV002Yk0oc5",
+"title": "Nvidia’s 31% surge, US tariffs on China: 5 figures on investors’ radar this week",
 "at": "2026-11-27 16:00",
-"link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9PTDFDdUpfSnpsTmZnUkczczBWcDB2OGIyTGtqM0NQUjVvZ0tGSVZBY01jaWM0ZG0zc1BIbmlITU1tOGhqRHRIMWV6ZHZhMUJMYVc3OWZtVTRVUdIBX0FVX3lxTFBVUThGQUpkZG1KMWtrU3dORGxtNTQ2bkl0LTl5QWhnc044T3NQQm10eDdmbUJWXzRKOTNPUEdYU054QW9JOEZFbm4xVU1hZ0Z3em44bTE4eU1lRHZBMGdV?oc=5",
-"text": "3거래일 만에 4900선 회복한 코스피, 코스닥도 8% 급등···외국인 매수세·증안펀드 확대 기대감",
+"link": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxNMFVqNlhUNkNUT3NvLXNmWTgyYjg0V3o5Q1BsUV9hOHQ0M2xZVHBIcTBRX1hDbEV0QmZZUF9CeVlPeGliaHl4WTJzSVdjeE10Wkkxb1lVTFcxTXIxN1FvejR1S2UwWS1QY3ByOGZIVHQ3b0FtX2R0NWM3dXRLTnJMN0ZuUVYwZHEzanZHYkRSMEZMV1FNQlhRdnA0cWFUTEs2MXM2Nm9GUVdCN1JsU2VIM0JHVjlxc0xFUXlyd1pmSTJUQXNlS1JDdVRrWEFhdzZiR0Zob1dhSnVEOWw4emNpQnFXMlJrRGkyQXJ4RzZoRHpvNjFpM2FhelJSV002Yk0?oc=5",
+"text": "Nvidia’s 31% surge, US tariffs on China: 5 figures on investors’ radar this week",
 "imgs": [],
-"press": "경향신문",
+"press": "South China Morning Post",
 "full": 0,
-"src": "gn_kr_mkt",
+"src": "gn_us_tech",
 "kind": "news",
-"name": "뉴스 · 국내 증시",
-"first": "2026-11-28 03:15"
+"name": "News · 반도체·AI(영문)",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/chfirmscanleverageqianhaiandhongkongsadvantagesachievegrowth",
@@ -9061,6 +9176,20 @@
 "first": "2026-11-27 16:00"
 },
 {
+"id": "n/ERzYUhpcGJFZ1IxajIxSlNPS3VicXZSbmRzdzl1R0JER1k0c2RNVXBzUQoc5",
+"title": "윤태영 오스코텍 대표, 기술수출 공로 장관표창 수상",
+"at": "2026-11-27 16:00",
+"link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE1tSC1IeG9Ea29Wc1NIdGdQN0U4LTBCRkFjUkw1VWZnSHNEaElydlFJUG56aUJpVEgwSjNiM1RldF9pVERxVERzYUhpcGJFZ1IxajIxSlNPS3VicXZSbmRzdzl1R0JER1k0c2RNVXBzUQ?oc=5",
+"text": "윤태영 오스코텍 대표, 기술수출 공로 장관표창 수상",
+"imgs": [],
+"press": "비즈워치",
+"full": 0,
+"src": "gn_kr_bok",
+"kind": "news",
+"name": "뉴스 · 한국은행·정부 경제 발표",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/httpswwwhankyungcomarticle202611274923i",
 "title": "\"발표 직전 살걸\"…기업들 '자사주 소각' 한 방에 '개미 환호'",
 "at": "2026-11-27 15:59",
@@ -9073,20 +9202,6 @@
 "kind": "news",
 "name": "한국경제 증권",
 "first": "2026-11-27 17:00"
-},
-{
-"id": "n/HBlV3p2dmh1b3ZaMmVXaDl2czEwOThlbENIOUVFR19qMFlVZXlNVU1YUQoc5",
-"title": "Indonesia Arrests Three Over Trades in Stock Scrutinized by MSCI",
-"at": "2026-11-27 15:59",
-"link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxQUl9XaERjZ1Z6MmVhQUhoYWdyUjNfN2RsdGRGbFVXX0dpOUxnM1lwb3pLQmFlSExtLVE4SVFQSnlTclV6Nm5rNEpLWS1tdGp1eHM5cVBUbGw2dm5MM1hrS3FoTTZjMFU0RDlnTi05dHFtWDFkbldHRXFKVUVUWi1MSW9ZN2pJV3JtaWhHeHBlV3p2dmh1b3ZaMmVXaDl2czEwOThlbENIOUVFR19qMFlVZXlNVU1YUQ?oc=5",
-"text": "Indonesia Arrests Three Over Trades in Stock Scrutinized by MSCI",
-"imgs": [],
-"press": "Bloomberg.com",
-"full": 0,
-"src": "gn_bbg",
-"kind": "news",
-"name": "News · Bloomberg 전체",
-"first": "2026-11-27 20:45"
 },
 {
 "id": "n/atecouncilsaysitconsideringmoremeasuresbolsterflaggingstocks",
@@ -9464,20 +9579,6 @@
 "first": "2026-11-27 15:30"
 },
 {
-"id": "n/h0WTVIRmpDdG9BVHpFcmN5enYxcU90d3BacE1oS0w0RF93YVQyYWVWNmcoc5",
-"title": "NQ: Nasdaq Futures Jump 1% as Wall Street Returns from Thanksgiving",
-"at": "2026-11-27 15:25",
-"link": "https://news.google.com/rss/articles/CBMixgFBVV95cUxPbjBjcFczUEdNdkpXUFJHYldpUUpSMlpNM2IwTG9oRS1WNDg5SDZsa3VqT3NLT0tLdkdhdjIyOFRMNzBMMFJQTTYwbVAtWGNWQy1BS1ZtRW5Rdm5fSDJLaUdlTWNRSEd1VE1UOUE3WkRlWk5kRGFjM0ZHMWdaOVNZNmgwcGVUbnltM2ZUbVlOX3g5SmVrSG1UZmR1UTh0WTVIRmpDdG9BVHpFcmN5enYxcU90d3BacE1oS0w0RF93YVQyYWVWNmc?oc=5",
-"text": "NQ: Nasdaq Futures Jump 1% as Wall Street Returns from Thanksgiving",
-"imgs": [],
-"press": "TradingView",
-"full": 0,
-"src": "gn_us_mkt",
-"kind": "news",
-"name": "News · US markets",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "n/2RHZiNFZoNUlXUW5MMk1ncnpDXzVsMnhpTGx4OWpOVnpCNjlWRlJCa1Bpoc5",
 "title": "China stocks surge most in two years as Beijing vows stronger market support",
 "at": "2026-11-27 15:24",
@@ -9490,20 +9591,6 @@
 "kind": "news",
 "name": "Reuters 비즈니스·시장",
 "first": "2026-11-27 18:00"
-},
-{
-"id": "n/Fl3bXB2U1I5YWl3RXNMSjNZZWZBSzN3UHpmWGFPdzItTzJpblRJY092Zwoc5",
-"title": "Supreme Court Assigns Oh Se-hoon Poll-Payment Appeal to Justice Kwon",
-"at": "2026-11-27 15:17",
-"link": "https://news.google.com/rss/articles/CBMingFBVV95cUxPTXNEZzhPVjhUeWlLNVcxcTBVLVl5VFJ4bEtWOGxYTUVLdjhlOHBETWRSaGRNNzZyZEI2eUE2c0UwbU1haXN5VUpBX0kwcXVOTDZnRGsyOWEtbGxuZ0pYWmkwdEt6azJYM200QWdyM2hnQVJfTFl3bXB2U1I5YWl3RXNMSjNZZWZBSzN3UHpmWGFPdzItTzJpblRJY092Zw?oc=5",
-"text": "Supreme Court Assigns Oh Se-hoon Poll-Payment Appeal to Justice Kwon",
-"imgs": [],
-"press": "Seoul Economic Daily",
-"full": 0,
-"src": "sedaily",
-"kind": "news",
-"name": "서울경제 증권",
-"first": "2026-11-28 03:30"
 },
 {
 "id": "n/FDRHJBWlZ0WWlpTnFvMklqZlhKbzJrSlNvX044MnhGN2ZtSFpJSlRSencoc5",
@@ -9647,10 +9734,10 @@
 "first": "2026-11-27 15:30"
 },
 {
-"id": "n/FpbGdLTHBzc3o3YldMRlNPZkpkclYyRXNCUVotdl83b2FuUlRZOTNuOFIoc5",
+"id": "n/kWG9nSjgzeFA5SC1ud292ODJiU09OcnBYaUhUUmIzUEoyYkVKSFJmMlNOoc5",
 "title": "Japan zoo breeds endangered penguin by artificial insemination in world 1st",
 "at": "2026-11-27 15:00",
-"link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOb0dVV3ZTLW5CRkdqMkVTbXVlSzlDM1F1ME56alp0aXRXV3JNMnliSW45eXBKUmNVX2J4aG9kU2lsLThubDNjM1kyQUNuOXJyaWg2alhxRTFSUGtOTlZBLVZvTG9JMlVfcmlDTFR2TlRGMWtQREpZUHJyeHBpNkxVMThYVmlNek1OaWFpbGdLTHBzc3o3YldMRlNPZkpkclYyRXNCUVotdl83b2FuUlRZOTNuOFI?oc=5",
+"link": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxOR3NDbUNTZTdzYVp5QXNsc0FDVHFlN1ZxUWhPNjlyWkpNeTVKOTJqZ1FGVjFyZTIwdUVhYXB6YTRDNkhtRHM2SzUtRmpRaV96MHI2TFRmX2VlLWJ6WkhnN3U3SEJuYW9mUlFtaUo0MlYwZ0FHcUtlS1NKdDFqdGtWUGlfdlhPdzdwbEhLTE9kWG9nSjgzeFA5SC1ud292ODJiU09OcnBYaUhUUmIzUEoyYkVKSFJmMlNO?oc=5",
 "text": "Japan zoo breeds endangered penguin by artificial insemination in world 1st",
 "imgs": [],
 "press": "Nikkei Asia",
@@ -9658,7 +9745,7 @@
 "src": "nikkei_asia",
 "kind": "news",
 "name": "Nikkei Asia",
-"first": "2026-11-28 03:30"
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/httpswwwhankyungcomarticle202611274718i",
@@ -9951,6 +10038,20 @@
 "first": "2026-11-27 19:30"
 },
 {
+"id": "n/Nrc0FnOUhVc215MUdzR2tmOXRhQTBsZVFYTUtSWGl0RzdqWGV4RktUVzgoc5",
+"title": "한화리츠, 시청역 앞 한화손보 사옥 815억에 매입 추진 - 머니투데이",
+"at": "2026-11-27 14:38",
+"link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5RSWFQOE1tam5vVGlOaGZnOW1rVTFRclJKSnJ1cHBQRXpOYzVZU0FIRjlkWmJFbl83UEhxeUdENlNya1lKWXZlRmxHby1CWWVrMWt6UC0zMnY1QVNhZjdSbFdBVzZKSWNGc1Zza0RjaHZyN2twc3fSAXtBVV95cUxNX0ZfWC00VC1VTUswUWNHTzVzLUdubHBGUGRkbERfdUxiZXdHUFZvbWhIelA5dFduWGM2ejVZSDhuaEEwNTRhZWhWbm11MWQ0OXNrc0FnOUhVc215MUdzR2tmOXRhQTBsZVFYTUtSWGl0RzdqWGV4RktUVzg?oc=5",
+"text": "한화리츠, 시청역 앞 한화손보 사옥 815억에 매입 추진 - 머니투데이",
+"imgs": [],
+"press": "머니투데이",
+"full": 0,
+"src": "mt_stock",
+"kind": "news",
+"name": "머니투데이 증권",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/fU0VWYmp1aVRwTjQ5bDU4YWYyYlRmNmp2LXl6LXpVSEhON1hFbW5ST2k0oc5",
 "title": "도쿄전력 주가가 오늘 상승한 이유는?",
 "at": "2026-11-27 14:37",
@@ -10067,6 +10168,20 @@
 "first": "2026-11-27 14:30"
 },
 {
+"id": "n/03R3ludHpXaC1CSW10UGJiYXQ5elBOc18yMjZoSUJoVUN1Q1JsYzVHaHcoc5",
+"title": "\"수출 1조달러? 그게 무슨 소용!\"…나라만 부자, 국민은 가난",
+"at": "2026-11-27 14:15",
+"link": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE1ObFpGNk9teml1bkU3eW5QNVI1OHlEQnM3WjI3Q0txSC03R3ludHpXaC1CSW10UGJiYXQ5elBOc18yMjZoSUJoVUN1Q1JsYzVHaHc?oc=5",
+"text": "\"수출 1조달러? 그게 무슨 소용!\"…나라만 부자, 국민은 가난",
+"imgs": [],
+"press": "JTBC",
+"full": 0,
+"src": "gn_kr_bok",
+"kind": "news",
+"name": "뉴스 · 한국은행·정부 경제 발표",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/xyeHBYVENpaDRLNlFMNGtVLWJjM2EzUGI5bzRfeVhJZ2NxQ3pRaURvaTAoc5",
 "title": "SC제일은행, 임피 직원 특별퇴직…최대 39개월치 급여 지급",
 "at": "2026-11-27 14:13",
@@ -10081,6 +10196,20 @@
 "first": "2026-11-27 19:15"
 },
 {
+"id": "n/zeGJtTkxBZEVQNTMxTk1UcmFIN3FMYWpjNFlSVkRGck1LVjdDTkFtc1hToc5",
+"title": "[글로벌 특징주] 콴타스, 장거리 기종 20대 발주 대부분 보잉에 준다",
+"at": "2026-11-27 14:11",
+"link": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE1ZbVRUR1BLRk40OW91LW1kaDNDVFNBNW5abEFzVVVJM1pZdVpLdkE4LTQzeGJtTkxBZEVQNTMxTk1UcmFIN3FMYWpjNFlSVkRGck1LVjdDTkFtc1hT?oc=5",
+"text": "[글로벌 특징주] 콴타스, 장거리 기종 20대 발주 대부분 보잉에 준다",
+"imgs": [],
+"press": "뉴스핌",
+"full": 0,
+"src": "gn_kr_bbg",
+"kind": "news",
+"name": "뉴스 · 블룸버그 인용",
+"first": "2026-11-27 20:15"
+},
+{
 "id": "n/HVYY2U1Q3VPZTJKQkdWRjRyVU1ibDB1YTNqZTNZQk5vVlJsSXNyZkp3UQoc5",
 "title": "Indonesia fund Danantara's debut report spurs doubts over sweeping mandate",
 "at": "2026-11-27 14:11",
@@ -10093,20 +10222,6 @@
 "kind": "news",
 "name": "Nikkei Asia",
 "first": "2026-11-27 19:00"
-},
-{
-"id": "n/zeGJtTkxBZEVQNTMxTk1UcmFIN3FMYWpjNFlSVkRGck1LVjdDTkFtc1hToc5",
-"title": "[글로벌 특징주] 콴타스, 장거리 기종 20대 발주 대부분 보잉에 준다",
-"at": "2026-11-27 14:11",
-"link": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE1ZbVRUR1BLRk40OW91LW1kaDNDVFNBNW5abEFzVVVJM1pZdVpLdkE4LTQzeGJtTkxBZEVQNTMxTk1UcmFIN3FMYWpjNFlSVkRGck1LVjdDTkFtc1hT?oc=5",
-"text": "[글로벌 특징주] 콴타스, 장거리 기종 20대 발주 대부분 보잉에 준다",
-"imgs": [],
-"press": "뉴스핌",
-"full": 0,
-"src": "newspim",
-"kind": "news",
-"name": "뉴스핌",
-"first": "2026-11-27 20:15"
 },
 {
 "id": "HANAchina/72883",
@@ -10278,18 +10393,18 @@
 "first": "2026-11-27 14:30"
 },
 {
-"id": "n/0JQM3ZfUFhOZVFMVmcybURmMjlDNnEzOXJYei13bjFPNExobXd5MVBFQwoc5",
-"title": "[영상] 수출 1조 달러·경제 성장률 3.9%, 내 지갑은 왜 얇아졌나?",
-"at": "2026-11-27 14:00",
-"link": "https://news.google.com/rss/articles/CBMiSEFVX3lxTE5aVnp6Q2VfMnRDMkFNTG81TXdmOWJtQ0JQM3ZfUFhOZVFMVmcybURmMjlDNnEzOXJYei13bjFPNExobXd5MVBFQw?oc=5",
-"text": "[영상] 수출 1조 달러·경제 성장률 3.9%, 내 지갑은 왜 얇아졌나?",
+"id": "n/hhU1Y3bDM1WGRSeGpLdU0yNHNubERnUm9CLVVmdGh3amFUVnJXNXJybkEoc5",
+"title": "반도체 경기가 꺾이면, 나랏돈은 어떻게 될까? - 영상 | 멀티미디어",
+"at": "2026-11-27 13:59",
+"link": "https://news.google.com/rss/articles/CBMiigFBVV95cUxON1JqRWRmc29sQ2JHamxXME84cVo2SzNlNGgtcEVlMXBydTdPajBMQ0YzOTlOV3ZqTTZsVTgyUjdoZnhmbEtEODBHdWZVMVpOaWZ6WWhjYWhfelVZQzZsakhhU1Y3bDM1WGRSeGpLdU0yNHNubERnUm9CLVVmdGh3amFUVnJXNXJybkE?oc=5",
+"text": "반도체 경기가 꺾이면, 나랏돈은 어떻게 될까? - 영상 | 멀티미디어",
 "imgs": [],
-"press": "브레이크뉴스",
+"press": "대한민국 정책브리핑",
 "full": 0,
-"src": "gn_kr_bok",
+"src": "gn_kr_macro",
 "kind": "news",
-"name": "뉴스 · 한국은행·정부 경제 발표",
-"first": "2026-11-28 01:45"
+"name": "뉴스 · 금리·환율·경제",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/dXQ1hrZ0l3alZRYkRzNUtlc3lZNWpaaFQxQmRoZ3dvT3Rvb21ST3kyOUcoc5",
@@ -10304,20 +10419,6 @@
 "kind": "news",
 "name": "新聞 · 홍콩·중국 증시",
 "first": "2026-11-27 20:15"
-},
-{
-"id": "n/FhSXluRjJEQTR1WEI4cnd4bnVnbG1ZOWhDMmJmeENObmJ0cnJ6eGw2RVEoc5",
-"title": "Global Gold Retreats From $3,580 Level as US Economy Beats Forecasts; Vietnam's SJC Gold Still Rises VND400,000",
-"at": "2026-11-27 13:55",
-"link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9OckZyQmNaYzNsQzRTYUUwcFpJQjRRaDZTdTBLclVCZTNhNmlnZU56ZWcxcklveXh2MWl5Nkp0RVhSQy1sc2R0Mmh2V2FhSXluRjJEQTR1WEI4cnd4bnVnbG1ZOWhDMmJmeENObmJ0cnJ6eGw2RVE?oc=5",
-"text": "Global Gold Retreats From $3,580 Level as US Economy Beats Forecasts; Vietnam's SJC Gold Still Rises VND400,000",
-"imgs": [],
-"press": "BigGo Finance",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
 },
 {
 "id": "n/rZzFwcW5QaWpQdnRvV0RsWVFtQ2l4cEhMOXcyNDdlS3hkZnJwQUR3eWNzoc5",
@@ -10539,20 +10640,6 @@
 "first": "2026-11-27 14:00"
 },
 {
-"id": "n/FhtVEExX3pWYVVqczdPdjN4MTZuYklWbDREclhfV0lDNUxralo1Q1RqTQoc5",
-"title": "\"수출 1조달러? 그게 무슨 소용!\"…나라만 부자, 국민은 가난",
-"at": "2026-11-27 13:31",
-"link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE9zeGlYTnF0ZFBjV1ZOcEI1b1k2dGUwdV9GNlBGOXdxSXlENFhtVEExX3pWYVVqczdPdjN4MTZuYklWbDREclhfV0lDNUxralo1Q1RqTQ?oc=5",
-"text": "\"수출 1조달러? 그게 무슨 소용!\"…나라만 부자, 국민은 가난",
-"imgs": [],
-"press": "JTBC",
-"full": 0,
-"src": "gn_kr_bok",
-"kind": "news",
-"name": "뉴스 · 한국은행·정부 경제 발표",
-"first": "2026-11-28 01:45"
-},
-{
 "id": "HANAchina/72880",
 "title": "•중국•홍콩 오전 반도체 상승폭 확대 •HBM, 후공정, 반도체 장비, 파운드리 관련주 5-7%대 급등세 •화웨이 어센트 칩 관련주 급등 •홍콩 AI 칩, LLM",
 "at": "2026-11-27 13:30",
@@ -10697,6 +10784,20 @@
 "first": "2026-11-27 13:15"
 },
 {
+"id": "n/dZWFJKWGFGaDc2Nnc5N0JQR3dGUUtlMmQ2Q1RmX0F2VENtVnBsNHk3WEMoc5",
+"title": "High flying Nifty stocks vs beaten down gold: Which category should investors bet on now?",
+"at": "2026-11-27 13:02",
+"link": "https://news.google.com/rss/articles/CBMi8wFBVV95cUxQWWxpdDc5MWp5eDFHMVpWTUNDTVV1S1Uyb2E0bm1JN3otdGdaRlNJR2VXWl9RNXVYRVIxXzlrOVNmempqLTZFTjQ4emJxbUw1MDZhSzUwZm91TC1Ib2Z2bDExU3pYaXBZQmo0RFl6MUZvMENkdFFfN1lUMDFBRzBlOGZROW01Y0IzMWFmWmhzdUVOb2dLVnUycjdFRmpJUVd5ZFJDaUpwY1lJTDRSWkN2Z0U2TjloNy1rN3ZfbjlvYzlfZ1RTZE5kTFFDZzd1cU4wdlZWUDhFb0NBcXNoMGdELW9MWWNDZTFEdE84ckdXTXAwTDDSAfgBQVVfeXFMUGpEbWRmeFFhZFpuZ29FcjNqdE4wNDVHLUE1aE5kcC0xMzFyX3JURko0NURSaHdMRElqc1dnNjlReVE0clRkQjVLTG5ZLTFfS3Vvbmpjc1ZUWGMtYm96U19hZ0NIdF9kMjdDb1RULTdwdTlfR282djNOeGxoaXFoOTcyQkJmSlUtNFVwbWJHeHV2dXFuZjVYOXhROEdtVGRXM2t2Y0ZOU01DQWVoWmZVLTlGLXBYYmlzREhhaENSV25DWWpURGFLd0hobnNuSndZWFJKWGFGaDc2Nnc5N0JQR3dGUUtlMmQ2Q1RmX0F2VENtVnBsNHk3WEM?oc=5",
+"text": "High flying Nifty stocks vs beaten down gold: Which category should investors bet on now?",
+"imgs": [],
+"press": "The Economic Times",
+"full": 0,
+"src": "gn_us_ib",
+"kind": "news",
+"name": "News · 월가 IB 전략",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/icles20261127philippinetradedeficithitsrecordasimportssoar50",
 "title": "Philippine Trade Deficit Hits Record as Imports Soar 50%",
 "at": "2026-11-27 13:01",
@@ -10744,6 +10845,20 @@
 "first": "2026-11-27 13:00"
 },
 {
+"id": "n/5FM0lvSm1ES205NTM0VFZJT3NuQmZCU1R1SXFEb3hMaDMtV1k0OTd6ZkUoc5",
+"title": "In Focus: Hokkaido's Hakodate attracts tourists as local population shrinks",
+"at": "2026-11-27 12:56",
+"link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxQTkhWSDZBQTY5SjhMNUs4V0ZFTnFUSnk3U1NhMEZBQzRSWWc3a2JKQjd1MTByeHE2cF9YZGtyaXlDRncyTnlNSVZ4ZFoxM1dCcGphelN2bHZkQTN1TFlhSGU1THAyRnFPMm11WnRkV0hfekdwdFIyc0UyRWVQaG5FM0lvSm1ES205NTM0VFZJT3NuQmZCU1R1SXFEb3hMaDMtV1k0OTd6ZkU?oc=5",
+"text": "In Focus: Hokkaido's Hakodate attracts tourists as local population shrinks",
+"imgs": [],
+"press": "Nikkei Asia",
+"full": 0,
+"src": "nikkei_asia",
+"kind": "news",
+"name": "Nikkei Asia",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/NZV1A1b0lmVVNDSlFJSUhDNzRTdkFkMkgxWlVYdkVlUVBkSXJKOFRTM2coc5",
 "title": "엔비디아 스캔들이 드러낸 아시아 AI 투자 붐의 숨은 위험",
 "at": "2026-11-27 12:54",
@@ -10756,20 +10871,6 @@
 "kind": "news",
 "name": "뉴스 · 해외 증시(한글)",
 "first": "2026-11-27 13:30"
-},
-{
-"id": "n/M2THVTTWVtTHJmT1lLTUxnMmo2MEZnTm41cGRjVER1Zmd3TjVyQTZiNFEoc5",
-"title": "\"내가 살 집은 어디에\" 집값 한풀 꺾였대도 끝나지 않은 주거 불안 - 머니투데이",
-"at": "2026-11-27 12:51",
-"link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9pVlZRTXBsTkJZaXFfMkM0eG1ONklFVVYtQTV2ZTU2eWpQMkhVMHBhbkFrZzFnM0Vqd2hUMmJjN2RpTlc5ZFVCbGxwZGJxWjNTYnVEQXJyaWdGUW5RRmZsX3ZYS0JEdEozalHSAW9BVV95cUxQTzBJZW9TaG8wNkp4djVDcTFFdm5DbWNsYkZZQzk2UjZYaDQzZGVXNi05eW1KTXdOSXRhaDk5TzRoTUZDMUM2THVTTWVtTHJmT1lLTUxnMmo2MEZnTm41cGRjVER1Zmd3TjVyQTZiNFE?oc=5",
-"text": "\"내가 살 집은 어디에\" 집값 한풀 꺾였대도 끝나지 않은 주거 불안 - 머니투데이",
-"imgs": [],
-"press": "머니투데이",
-"full": 0,
-"src": "mt_stock",
-"kind": "news",
-"name": "머니투데이 증권",
-"first": "2026-11-27 12:45"
 },
 {
 "id": "YeouidoStory2/120399",
@@ -10814,20 +10915,6 @@
 "src": "mt_stock",
 "kind": "news",
 "name": "머니투데이 증권",
-"first": "2026-11-28 02:45"
-},
-{
-"id": "n/AyUE9saU04dU0xbU1QOUtTNnFqSlBtbFgwdzhIdUNYa0pHU1Y2UzFXb0goc5",
-"title": "Banks see upside for Chinese stocks in 2027",
-"at": "2026-11-27 12:36",
-"link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5JTERVSThCVndmaUdGZm5JWk9zbG1QY0Y1cUVyaGo4akhWV2hhQXAyUE9saU04dU0xbU1QOUtTNnFqSlBtbFgwdzhIdUNYa0pHU1Y2UzFXb0g?oc=5",
-"text": "Banks see upside for Chinese stocks in 2027",
-"imgs": [],
-"press": "chinadailyhk",
-"full": 0,
-"src": "gn_us_ib",
-"kind": "news",
-"name": "News · 월가 IB 전략",
 "first": "2026-11-28 02:45"
 },
 {
@@ -11029,20 +11116,6 @@
 "first": "2026-11-27 16:00"
 },
 {
-"id": "n/JkUEU2SVdMQ0xIcHVQRHZsYm1BTXpfYm1VNkNPb202ZkVHeGlzOG5lVVEoc5",
-"title": "Dow Whipsaws Through 1,100-Point Plunge to Close Higher as Hot Inflation and New Tariffs Rattle Wall Street",
-"at": "2026-11-27 11:57",
-"link": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBvdTF2VUJCS3dBTkpaRkxmdnFRQ3VzbjVQeTZmaHJPLUZNU0hZVzlINEVyRngycmY4UGZhNWlodHQ4a2xGOXRjMjRydnJkUEU2SVdMQ0xIcHVQRHZsYm1BTXpfYm1VNkNPb202ZkVHeGlzOG5lVVE?oc=5",
-"text": "Dow Whipsaws Through 1,100-Point Plunge to Close Higher as Hot Inflation and New Tariffs Rattle Wall Street",
-"imgs": [],
-"press": "BigGo Finance",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "n/FFU0Y5ZGJvQVA1NUZkd2tWaUVHYldsSXVrTG9ZNjJtLVdkTmp4SzVFYmcoc5",
 "title": "Dollar-Yen to Battle in 158-161 Range as U.S. Jobs Report and BOJ Governor Ueda's Remarks Take Center Stage; Euro Wary of Spanish General Election",
 "at": "2026-11-27 11:56",
@@ -11057,32 +11130,32 @@
 "first": "2026-11-27 12:45"
 },
 {
-"id": "n/0dpTGkwVFViLXREUFJwZkRQbEdHaGNibFhScGZ3RUZ1WmpONWRRVjQ0UQoc5",
-"title": "Korean Company ATLAS — how to read Korean companies",
-"at": "2026-11-27 11:55",
-"link": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE9CZk5KR2MxUTBaZXRfa19wRE5ka3ZDaGlZY3p4NzduU3ZEOXhDTzlQSy0zOVN2Z0llS19Bd0dpTGkwVFViLXREUFJwZkRQbEdHaGNibFhScGZ3RUZ1WmpONWRRVjQ0UQ?oc=5",
-"text": "Korean Company ATLAS — how to read Korean companies",
+"id": "n/2E1TV9CUEdJQ1U0T0tydUdHR0lJY1JkVGJLaWFtSEkwdjk2LWx4c1VQYwoc5",
+"title": "Bitcoin drops toward $58K amid rising U.S. infl...",
+"at": "2026-11-27 11:54",
+"link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQblAxd0FXN2ZxNW45ODQ5TlJIR3hnV05BeW0xNm9ubTBuQU43MUVWTDNnQUlfTmVEQTlTd3gtaEVXbDEtdWViaW56RVBKc21tclpFT0szOXJRT2E1TV9CUEdJQ1U0T0tydUdHR0lJY1JkVGJLaWFtSEkwdjk2LWx4c1VQYw?oc=5",
+"text": "Bitcoin drops toward $58K amid rising U.S. infl...",
 "imgs": [],
-"press": "Seoul Economic Daily",
+"press": "Pluang",
 "full": 0,
-"src": "sedaily",
+"src": "gn_us_fed",
 "kind": "news",
-"name": "서울경제 증권",
-"first": "2026-11-28 03:30"
+"name": "News · Fed·macro",
+"first": "2026-11-28 03:45"
 },
 {
-"id": "n/HQUs3LWM2UnlYQ2FOQWpBMmtTazhNb0pOWWI0eXdVTWg0VmtQMlh1a1hRoc5",
-"title": "Jeju Bank: who controls it, who owns it and how big it is · Company · Korean Company ATLAS",
-"at": "2026-11-27 11:55",
-"link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE1YQ3JHdEhmM19UcGFRelktbHA0a0tpb2swXzdsQThIRzMzNUxHQUs3LWM2UnlYQ2FOQWpBMmtTazhNb0pOWWI0eXdVTWg0VmtQMlh1a1hR?oc=5",
-"text": "Jeju Bank: who controls it, who owns it and how big it is · Company · Korean Company ATLAS",
+"id": "n/WltcG5oQTVJd3NHRHdqTXU1a1laTTVzQXUwYzdrUVpubzVlMHpvR3dQRgoc5",
+"title": "Bitcoin trades near $58,400 as inflation data k...",
+"at": "2026-11-27 11:54",
+"link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQN0Z3bXdPeEhKajI4YjhRbHcyQXhVV1o3c1RnSGVlZTNfTE1JM0JEaG9MTWs2R0tXTHUxYkR0QlZDcTJOdG5ncld6OVgyMEduaW44cHdiQzgxQTl3QTdVYVNCWHRXeUhhdVd1bkJ3dVcxclluS2NWbW40QVJ0UkFvUW1CR2ZpRWltcG5oQTVJd3NHRHdqTXU1a1laTTVzQXUwYzdrUVpubzVlMHpvR3dQRg?oc=5",
+"text": "Bitcoin trades near $58,400 as inflation data k...",
 "imgs": [],
-"press": "Seoul Economic Daily",
+"press": "Pluang",
 "full": 0,
-"src": "sedaily",
+"src": "gn_us_fed",
 "kind": "news",
-"name": "서울경제 증권",
-"first": "2026-11-28 03:30"
+"name": "News · Fed·macro",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/20261127treasuriesretreatasgainsinequitiessapdemandforhavens",
@@ -11170,20 +11243,6 @@
 "kind": "news",
 "name": "뉴스 · 반도체·AI·업종",
 "first": "2026-11-27 13:00"
-},
-{
-"id": "n/sVXlxRjh5MGwyVndOYWczVGdhY0szU09jcDV2ZFVJanlpV0xnWlFkbTBkoc5",
-"title": "[장중수급포착] 쎄트렉아이, 외국인/기관 동시 순매수… 주가 +12.45%",
-"at": "2026-11-27 11:32",
-"link": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE90T2dnNHZCdEhmUlc1ZW82cFN4dVRoakZXU1dIOVJaTEh4WXdUWUNJTTNsVXlxRjh5MGwyVndOYWczVGdhY0szU09jcDV2ZFVJanlpV0xnWlFkbTBk?oc=5",
-"text": "[장중수급포착] 쎄트렉아이, 외국인/기관 동시 순매수… 주가 +12.45%",
-"imgs": [],
-"press": "뉴스핌",
-"full": 0,
-"src": "gn_kr_sector",
-"kind": "news",
-"name": "뉴스 · 반도체·AI·업종",
-"first": "2026-11-28 03:30"
 },
 {
 "id": "n/3dzUxR0lweTZqd3hPVkRqcnRXTUJWaGZveVpQR0hhUUdQdWVFVDRUWFZJoc5",
@@ -11308,18 +11367,18 @@
 "first": "2026-11-27 12:45"
 },
 {
-"id": "n/VNpSzFJVjBMa0RIZGJkV05BeWlhQWRzcWxNU2dqVmVsY3FXR2lqZDNvUQoc5",
-"title": "China’s Industrial Profits Jump at Fastest Pace in Five Months",
+"id": "n/nE0dFZXeFVsWmN1V25FTHRJWFNtQUhaanZsYTBRV1V4RV9xMURIZW5yVgoc5",
+"title": "Inflation Holds Flat in November as Gas Prices Fall",
 "at": "2026-11-27 11:18",
-"link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxORW1LQW1Dd1dnUGFCSWhIMy1yX09VZklaMGlqa0VDMk5Fc3Y3dW1aY21Xa0xRV2gzc3ZqTjJDY0FxWU5GSXpidkQxbGFpV3Exdk1SOFl3N2VBSlowMGlKdVFUU2d3eS11bnZBTm1FbXJpVGl4U1d0RlRSLXNEY1dFQnNzQWFocWd2NVNpSzFJVjBMa0RIZGJkV05BeWlhQWRzcWxNU2dqVmVsY3FXR2lqZDNvUQ?oc=5",
-"text": "China’s Industrial Profits Jump at Fastest Pace in Five Months",
+"link": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOTW1BdktIUDZfUU9UYWNYUldRT2QzSDhfbm5sUXNzQ2FhZFVqUU1wSkxvN2V5Q3ZYaGhEVkxsaUVIbHFYMkFaczJTS0ltQ3lDYzlOd0FFamxwekNCV3BHNlQ0anE0dFZXeFVsWmN1V25FTHRJWFNtQUhaanZsYTBRV1V4RV9xMURIZW5yVg?oc=5",
+"text": "Inflation Holds Flat in November as Gas Prices Fall",
 "imgs": [],
-"press": "Bloomberg.com",
+"press": "Wisevoter",
 "full": 0,
-"src": "gn_bbg",
+"src": "gn_us_fed",
 "kind": "news",
-"name": "News · Bloomberg 전체",
-"first": "2026-11-28 03:15"
+"name": "News · Fed·macro",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/VlNkVyNFJ5WG8yTk1yb0xKV2ZsaE0yRUltbW5SaTRLUGY3OWFaMVgzUncoc5",
@@ -11536,20 +11595,6 @@
 "first": "2026-11-27 20:15"
 },
 {
-"id": "n/BCT3l6VnliNG1ETE5PMWhsLWE5ME15ZWpncmpLcEV2MjduTEhjRGJhT1Moc5",
-"title": "What could the US-Iran ceasefire mean for inflation, jobs?",
-"at": "2026-11-27 10:50",
-"link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxNTG9mUzk2Yk5FS1FlNU93NnNJRWo3dnZicGdjbU5IQ0ZhN21jSnRUWm8tVWJDV1JSaW9FZzd5eHFKQ2tlRHZ1X1h3WnY0bWdKVEh4ZS1jZFZSc1B6S0V0ZERjNnFqMHZHOUNPaWljWkR2Z0xuVHhpb1FxMGhHZ3Z5eEV2VGNwR2_SAYwBQVVfeXFMTUJiQ2MzNG9xendob0NOVTdmeEhrcnFCNVFodWpfc04zQ0VkS1h4aXZ4Z1VmV0c2MjFpN3hZdUtVbVFQN3NtWEU4T1VlemZHODlpYW5qeTlLMElpTUJUZG9ZU1BCT3l6VnliNG1ETE5PMWhsLWE5ME15ZWpncmpLcEV2MjduTEhjRGJhT1M?oc=5",
-"text": "What could the US-Iran ceasefire mean for inflation, jobs?",
-"imgs": [],
-"press": "ABC News - Breaking News, Latest News and Videos",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "globalmktinsight/7987",
 "title": "마켓 뷰 (11월 27일)",
 "at": "2026-11-27 10:46",
@@ -11580,20 +11625,6 @@
 "kind": "tg",
 "name": "하나 중국/신흥국 전략",
 "first": "2026-11-27 12:45"
-},
-{
-"id": "n/lyVXlNU2hkUlhsRlViMDBFalAzaXByVFdPcEdpTUV1SlB1YWhydl9JbEEoc5",
-"title": "삼성자산운용, 정기 임원인사 실시… 부사장 1명·상무 2명 승진 - 머니투데이",
-"at": "2026-11-27 10:42",
-"link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBTWnpoa2R6TDQ3UDEwTWJzSXZBWVVUUEg2bXhGMHl2MjFJZGdGLUI3OXlqYXZOeXNvNTlfejFRZWRSelBnZkxLSmlOVHdqMW9hSEhoMHFXYm1KQTc0RktBY1B2bWVMTFdP0gFuQVVfeXFMUEJOYkRHR3NKeENTQ3lKMUJtLU9udHVOX1AyZVd2b2M4VnNTZEtoTFNfWVdDT3lsRl9WcFZTTjlESkYwWUlyVXlNU2hkUlhsRlViMDBFalAzaXByVFdPcEdpTUV1SlB1YWhydl9JbEE?oc=5",
-"text": "삼성자산운용, 정기 임원인사 실시… 부사장 1명·상무 2명 승진 - 머니투데이",
-"imgs": [],
-"press": "머니투데이",
-"full": 0,
-"src": "mt_stock",
-"kind": "news",
-"name": "머니투데이 증권",
-"first": "2026-11-27 13:00"
 },
 {
 "id": "n/FRXZuTXJjZ1M4R0JpVEpkZXVPbWxqRGhRckd0UHNQejlMSktLeUE2SVVKoc5",
@@ -11807,6 +11838,20 @@
 "first": "2026-11-27 12:45"
 },
 {
+"id": "n/k2cnZpQnF0TG1NOEdYS2NHZkJSOWtxZzNxeTV3Q1phZFZfMUpSdTdBbXcoc5",
+"title": "Presidential Office Weighs Making AI Refuse to Solve Exam Questions",
+"at": "2026-11-27 10:15",
+"link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNbkdibnVpVzhmMlVIWE8taG92alh6bnhuYndOQ2Z1TWRBOG1KRXBGYUJCQzRjMmJTNHhvZlJIT1MzYXhPNUdUTGhiUVJwdjZHX1hnaEVlMW00OTFRWXRRbWVRUGE2VjRXa2lwYmFsMkxhZ3hCUFpIY0k2cnZpQnF0TG1NOEdYS2NHZkJSOWtxZzNxeTV3Q1phZFZfMUpSdTdBbXc?oc=5",
+"text": "Presidential Office Weighs Making AI Refuse to Solve Exam Questions",
+"imgs": [],
+"press": "Seoul Economic Daily",
+"full": 0,
+"src": "sedaily",
+"kind": "news",
+"name": "서울경제 증권",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/ZSbTRsbzBrTktWSDNyRVZ4M2V3a3E2YmdCLWNIT25kZnFXQVJwTGZJZzcoc5",
 "title": "Presidential Office Clashes With Economists Over Future Response Fund",
 "at": "2026-11-27 10:12",
@@ -11819,6 +11864,20 @@
 "kind": "news",
 "name": "서울경제 증권",
 "first": "2026-11-27 23:00"
+},
+{
+"id": "n/dteTItMzl5NVQybXk5U2ZQWkRGYmhnU0dJZ2hoTEFjb3FLaktRcjZNbDcoc5",
+"title": "Fed holds interest rates steady as inflation hits 3-year high",
+"at": "2026-11-27 10:10",
+"link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxObE9meWdub2FOS2dVY0pKYUxReEZrZGJhMnIyNG9JTEJpZlhISXFXMlZGZk1kSjRPWlRPejV6aTdXSHZnWWFkeHBvZVEydk9Sa1dLallzVGtIenB2OV9yR2daTDNrb2psQW5uZ2JSYnlOMUxmYzExZ1NBT1V3OGVlaERaZ1pPaVYwTDUyNVJCR1lJUkpoRFhhMzJha09TOVXSAaQBQVVfeXFMUGc0WHV5TzVaUnlTZjZ2Y1h3RHdSSnc0LWZoTzF3Uzk4WFkyQVByY1kxNkNoeDREX3Z6TDRSOUsyMmFvbHBGUWNlWUlXZGxJZFN6RFB5NWREWWtlRXUyMXJyUUlMTXo0cmh4NlpfT1pMUklyOGJLb1F5SDdteTItMzl5NVQybXk5U2ZQWkRGYmhnU0dJZ2hoTEFjb3FLaktRcjZNbDc?oc=5",
+"text": "Fed holds interest rates steady as inflation hits 3-year high",
+"imgs": [],
+"press": "ABC News - Breaking News, Latest News and Videos",
+"full": 0,
+"src": "gn_us_fed",
+"kind": "news",
+"name": "News · Fed·macro",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "HANAchina/72866",
@@ -11895,20 +11954,6 @@
 "kind": "tg",
 "name": "하나 중국/신흥국 전략",
 "first": "2026-11-27 12:45"
-},
-{
-"id": "n/9SMlNFMTBWTHBqbFE1Q0tsUTVtN040ZjBzVmRlZkNmeXdpeUNGY21LWDIoc5",
-"title": "Bitcoin Recovery at Risk as Strong GDP Fuels Fed Rate Hike Bets",
-"at": "2026-11-27 10:06",
-"link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5BaDZJVFBJNEZ0WThncVpKbnkyQjlqTTlUYTA3MFI5WHExUkJZY09SMlNFMTBWTHBqbFE1Q0tsUTVtN040ZjBzVmRlZkNmeXdpeUNGY21LWDI?oc=5",
-"text": "Bitcoin Recovery at Risk as Strong GDP Fuels Fed Rate Hike Bets",
-"imgs": [],
-"press": "Cryptonews.net",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
 },
 {
 "id": "n/WdXNVV29ZaEhNR3BRV1RULWpEUjlLQnJ5Vmc2blVlRmFKUkpKOEFtdFZRoc5",
@@ -12082,20 +12127,6 @@
 "first": "2026-11-27 12:45"
 },
 {
-"id": "n/0RJMjhWbmFMaEw2cWZNVlNuREtxUzFVTy13eTRLWmxKbHlHbGF6eHQzdwoc5",
-"title": "미스토홀딩스, 하파크리스틴 中유통 추진…렌즈 시장 공략",
-"at": "2026-11-27 09:38",
-"link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE4ydXA4V0g5TWh6NHhUQmdTanVwU2lKbDgxY1JQVlRLTlM0NURFOVJROWJTRkd5R1NRbVk4VkJ2WHlwOHVwVTNrOGdmSFVwbmZXS0RJMjhWbmFMaEw2cWZNVlNuREtxUzFVTy13eTRLWmxKbHlHbGF6eHQzdw?oc=5",
-"text": "미스토홀딩스, 하파크리스틴 中유통 추진…렌즈 시장 공략",
-"imgs": [],
-"press": "thebell Free",
-"full": 0,
-"src": "thebell",
-"kind": "news",
-"name": "더벨(자본시장)",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "YeouidoStory2/120393",
 "title": "https://www.market-ink.co.kr/news/articleView.html?idxno=16047",
 "at": "2026-11-27 09:37",
@@ -12241,32 +12272,18 @@
 "first": "2026-11-27 12:45"
 },
 {
-"id": "n/DBCQkxaeHFobk8xMlkyMXN2Y2N5VFNHeGZ2VzBuZ2dJTUVkRDFfa0cxRQoc5",
-"title": "한은 기준금리, 현행보다 0.25% 상향 3.25%로...높은 성장세 지속",
-"at": "2026-11-27 09:20",
-"link": "https://news.google.com/rss/articles/CBMibEFVX3lxTFBQdzEwTTg3Q1ZOTWU3UzZBcC14c1NqUUxzcG5NanI5VlBEMXZFdGVxUkJuWkhXV1FpVDd5WHhFcGZvUDBCQkxaeHFobk8xMlkyMXN2Y2N5VFNHeGZ2VzBuZ2dJTUVkRDFfa0cxRQ?oc=5",
-"text": "한은 기준금리, 현행보다 0.25% 상향 3.25%로...높은 성장세 지속",
-"imgs": [],
-"press": "데일리경제",
-"full": 0,
-"src": "gn_kr_bok",
-"kind": "news",
-"name": "뉴스 · 한국은행·정부 경제 발표",
-"first": "2026-11-28 01:45"
-},
-{
-"id": "n/TZXSnNaUHlzWjdVQ2lvM3ZHY0M0Tk1OY3VtVVFmOHd3ZVJKZ3hTMVotZwoc5",
-"title": "[thebell interview | 한투파 출범 40년] 황만순 대표 \"글로벌 선도기업 키우는 아시아 대표 VC로\"",
-"at": "2026-11-27 09:08",
-"link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE5PeC13MC1xVzdadFZuWHhka1VFTG1QTkhzMWx2VUNlOEdhcmp6RmkzSWhZSTIzVVBPTW5oa1huNDJ2V19ZczVJcUN1d25vclVaNTZXSnNaUHlzWjdVQ2lvM3ZHY0M0Tk1OY3VtVVFmOHd3ZVJKZ3hTMVotZw?oc=5",
-"text": "[thebell interview | 한투파 출범 40년] 황만순 대표 \"글로벌 선도기업 키우는 아시아 대표 VC로\"",
+"id": "n/k9BSVl0M1g1ekk0N2RYaTJaVzVFRlhwcTJRZU9wMWViWUxFd1NlMFZ0Zwoc5",
+"title": "[신생 CVC 톺아보기] SK하이닉스벤처스, 10년 투자 이력에 '새 간판' 달았다",
+"at": "2026-11-27 09:05",
+"link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE1uenlsTGN0NmdxYktLaEhpNDU2TG9Lajk5Qm1oMzFfcTBCaXlzR3BrWnJXQ3BZcWpJQXViQTlaSk5NcU02VlkzaDN1UmgwMXFvQk9BSVl0M1g1ekk0N2RYaTJaVzVFRlhwcTJRZU9wMWViWUxFd1NlMFZ0Zw?oc=5",
+"text": "[신생 CVC 톺아보기] SK하이닉스벤처스, 10년 투자 이력에 '새 간판' 달았다",
 "imgs": [],
 "press": "thebell Free",
 "full": 0,
 "src": "thebell",
 "kind": "news",
 "name": "더벨(자본시장)",
-"first": "2026-11-28 03:15"
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/V0dnJqSkxIaFY4VHhOemN1R21Ba3dqaGh5Nmw0WWdiMzNiNTFQaDFid1Ioc5",
@@ -12557,20 +12574,6 @@
 "kind": "tg",
 "name": "여의도스토리",
 "first": "2026-11-27 12:45"
-},
-{
-"id": "n/MOUVvdmhYQ3h3QVhpWmF6X1BCZXhHamE1Y0J0eVJQc0kyX0J4RGp4bnluoc5",
-"title": "Bitcoin rebound hinges on soft landing more than U.S. inflation cooling",
-"at": "2026-11-27 08:45",
-"link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxOZkVONmZaN2R4XzR3SGVtREFJdlBNVFJXYkg1TFZLZ1E3Um1yLWlMVGtGUnlGUlhUeTZDMVE2bmpKZnR1VV80MTg4UGIzaEZvUWpjQWt6ZGhPSVZVNFZERFBnSXlZT0J2VVdzV3BrRG9qRUtPZmd6WVJvLUU5MFBhTnJMV1o2RmxOa2ZPbHRCODhRLUFHd19ZZDBMOUVvdmhYQ3h3QVhpWmF6X1BCZXhHamE1Y0J0eVJQc0kyX0J4RGp4bnlu?oc=5",
-"text": "Bitcoin rebound hinges on soft landing more than U.S. inflation cooling",
-"imgs": [],
-"press": "디지털투데이",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
 },
 {
 "id": "n/RWTNUNnZFaVpMN0NaRzlncE5OX0h0a0tHTDNxRkFQNmNEVGZHcGpfWDlvoc5",
@@ -12988,20 +12991,6 @@
 "first": "2026-11-28 00:45"
 },
 {
-"id": "n/5TExudTNFRlBNSVhUOFZmM0V1UGlucjY5VEJBYlpWZWpIclZuR2sySGVCoc5",
-"title": "Gold Traders are Watching 5 Historic Signals",
-"at": "2026-11-27 08:12",
-"link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPTmNFSi1EQTFPYkFFVEZvLWdKNG1GbDNSc3pPSGppWnJVLV9GakE2RFpIRnVLUmNQcy1OVGpDS0RBX1psOUtGMFR0Rkw5WFg5cG9BNDZaVVRBQmNwdEE5TExudTNFRlBNSVhUOFZmM0V1UGlucjY5VEJBYlpWZWpIclZuR2sySGVC?oc=5",
-"text": "Gold Traders are Watching 5 Historic Signals",
-"imgs": [],
-"press": "CryptoRank",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "n/dsaWVDcm5xc2dmRGhzSEp4UjIwT2N3Y252em5ucHFpSi1BTFdfd2FQcUwoc5",
 "title": "신용시장으로 번지는 AI 금융불안…오라클·소뱅 CDS 급등",
 "at": "2026-11-27 08:10",
@@ -13014,20 +13003,6 @@
 "kind": "news",
 "name": "연합인포맥스",
 "first": "2026-11-27 19:30"
-},
-{
-"id": "n/omnewsarticles20261126latestoilmarketnewsandanalysisfornov27",
-"title": "Latest Oil Market News and Analysis for Nov. 27",
-"at": "2026-11-27 08:05",
-"link": "https://www.bloomberg.com/news/articles/2026-11-26/latest-oil-market-news-and-analysis-for-nov-27",
-"text": "Latest Oil Market News and Analysis for Nov. 27\nOil headed for its first weekly gain this month, as escalating attacks on energy infrastructure and tankers in the Middle East raised concerns about disruptions to supply.",
-"imgs": [],
-"press": "",
-"full": 0,
-"src": "bbg_mkt",
-"kind": "news",
-"name": "Bloomberg Markets",
-"first": "2026-11-27 22:30"
 },
 {
 "id": "YeouidoStory2/120378",
@@ -13218,6 +13193,20 @@
 "first": "2026-11-27 12:45"
 },
 {
+"id": "n/Hc2JMdFBQeDlTS01BTGhPbkxqaXdNdmhWQVM1eUQteXVmWm1TWG02VGhvoc5",
+"title": "[thebell interview | 한투파 출범 40년] 황만순 대표 \"글로벌 선도기업 키우는 아시아 대표 VC로\"",
+"at": "2026-11-27 07:49",
+"link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNc3NDMzBFYURMOHlQeHFQOEtkeFBNZlZabnVYT3FRZmdHYmxqc0k4c1l0LUpZdVVUYksxbEZzMFU0R2ExVkJwMzNYdjc3LUZnNHJJSEZNMXZmTHVLaGxZTERHc2JMdFBQeDlTS01BTGhPbkxqaXdNdmhWQVM1eUQteXVmWm1TWG02VGhv?oc=5",
+"text": "[thebell interview | 한투파 출범 40년] 황만순 대표 \"글로벌 선도기업 키우는 아시아 대표 VC로\"",
+"imgs": [],
+"press": "더벨",
+"full": 0,
+"src": "thebell",
+"kind": "news",
+"name": "더벨(자본시장)",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/13SFNwQ3cxbmhPTVZVemFEVXY5dG5wSzg5T2dWdTVWVXZrYTJqdTRQOWgoc5",
 "title": "박현주 이어 김용범…李정부, 자본시장 '빅샷'에 키 맡긴 까닭",
 "at": "2026-11-27 07:48",
@@ -13275,20 +13264,6 @@
 "kind": "news",
 "name": "News · 반도체·AI(영문)",
 "first": "2026-11-28 02:30"
-},
-{
-"id": "n/kRDVXWlNkczBjZzU4QmFmRzI3ekdmSnM0b0VyZFBrSjRnT3l4OXlXRlFRoc5",
-"title": "獨 SAP, AI 구조조정으로 최소 1만 명 감원 고려 - 블룸버그",
-"at": "2026-11-27 07:34",
-"link": "https://news.google.com/rss/articles/CBMid0FVX3lxTE9yU1Y3aU5oMUVVcWktX19OSVhBc3JTSjl0QVEwU2pZRlE4MDNicUg4bnB6MGgyQjRWWEtrd2lHU2x5VUFTZjFoWWUyOUJkRDVXWlNkczBjZzU4QmFmRzI3ekdmSnM0b0VyZFBrSjRnT3l4OXlXRlFR?oc=5",
-"text": "獨 SAP, AI 구조조정으로 최소 1만 명 감원 고려 - 블룸버그",
-"imgs": [],
-"press": "TradingView",
-"full": 0,
-"src": "gn_kr_bbg",
-"kind": "news",
-"name": "뉴스 · 블룸버그 인용",
-"first": "2026-11-28 03:30"
 },
 {
 "id": "kwusa/61817",
@@ -13484,32 +13459,18 @@
 "first": "2026-11-27 12:45"
 },
 {
-"id": "n/XFVXzNtR1FVdlBmalNIOU4xZDRLUXp5bFQ0MnZYdWFwR3lRWWF1LUhDTQoc5",
-"title": "Japan's JERA aims to build Anthropic, Meta data centers near power plants",
+"id": "n/TlvcXNOeGIwaDNuTTBncnBSRXdNaUJhdFlVZ1I3dExZd3E3RGFVRU9zcwoc5",
+"title": "Japan's JERA aims to build data centers for Anthropic, other AI players near power plants",
 "at": "2026-11-27 06:51",
-"link": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxPN0FKWlltSXhpMTdpTnRja2JXb3VyWlBnVG9ITFA3YnRiN0lYMzYwNE1vMmF0WEZzLTJyM09jMnVoZks4alExa09oUTA5ZnZLYzl4UllpZjBiWHFuazQ4WkFhUGw1SC1nRGNRQUpoZ25sUFMzQ25EckVCSWZCdWJMVmhfR0s0dlBxSUZwYjdyVUUzN1ppbzBDLWw2eEszQUE0NWNKZ0hicF9oVzlmaXFVXzNtR1FVdlBmalNIOU4xZDRLUXp5bFQ0MnZYdWFwR3lRWWF1LUhDTQ?oc=5",
-"text": "Japan's JERA aims to build Anthropic, Meta data centers near power plants",
+"link": "https://news.google.com/rss/articles/CBMi7AFBVV95cUxPNjltUWRpMDVMNGNsbGdQdFhVNVFlUEQ1ZnV0REEzSFdNLWxDR1Z1c2hyNDFROFZvVXlYbmxFLTZTSlFWUGdhNk1RMzlaLThVSTdMOFZqNEdKLWM0ZllYcWRySU9mdWthWFBBcHVHVGxBZmVOcFBCZXJLTmlkaExmUjBvaFhqSnRnUFJKQ0hHSXh0RnR2cURoUXctUEh4LTJzUVRaNzdIanZCLXVOSmdNdmhHQk9UY2F1NGd4UUZYQmd5TTlvcXNOeGIwaDNuTTBncnBSRXdNaUJhdFlVZ1I3dExZd3E3RGFVRU9zcw?oc=5",
+"text": "Japan's JERA aims to build data centers for Anthropic, other AI players near power plants",
 "imgs": [],
 "press": "Nikkei Asia",
 "full": 0,
 "src": "nikkei_asia",
 "kind": "news",
 "name": "Nikkei Asia",
-"first": "2026-11-28 03:30"
-},
-{
-"id": "n/SQ1VVeVZuRkhNalFfQmxJcDVsS3FEOTlpbkZuc0sxR1pUUU8wOWE3eU1Foc5",
-"title": "Forex Today: US Dollar finds footing as Japan CPI can rock the Yen | FXStreet",
-"at": "2026-11-27 06:44",
-"link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9FTWlVaV9TOVU1QjZkb1lNNU15TVQ2QTNPaXh4bk9hRkpSQ1VVeVZuRkhNalFfQmxJcDVsS3FEOTlpbkZuc0sxR1pUUU8wOWE3eU1F?oc=5",
-"text": "Forex Today: US Dollar finds footing as Japan CPI can rock the Yen | FXStreet",
-"imgs": [],
-"press": "شبكة تواصل الإخبارية",
-"full": 0,
-"src": "gn_us_fed",
-"kind": "news",
-"name": "News · Fed·macro",
-"first": "2026-11-28 03:30"
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/httpswwwmkcokrnewsstock12219779",
@@ -13568,6 +13529,20 @@
 "first": "2026-11-27 12:45"
 },
 {
+"id": "n/2LTRtRHZaZmtzOWtoN0pKQUN2RWdWU0p3Y0N3YjJRWTRPSVRIekRRQ0lBoc5",
+"title": "US GDP revised strongly upward, Fed’s inflation gauge hits three-year high",
+"at": "2026-11-27 06:05",
+"link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPM1NVWnpVLWltZzFIcXhuX2dyaWNsLW9WX0NBR3dNSTJfMHpjNXJ0amJBS2VLcmxGUWN6MXhZaUYtWHNpNHQ5TEZEazR4TVpJT0hMMmJkMmRPRGQtZHJ0SUo4TXB6TENqZGk5eE5EdWFRUG85WDNBRDRIcEw2LTRtRHZaZmtzOWtoN0pKQUN2RWdWU0p3Y0N3YjJRWTRPSVRIekRRQ0lB?oc=5",
+"text": "US GDP revised strongly upward, Fed’s inflation gauge hits three-year high",
+"imgs": [],
+"press": "Borneo Bulletin",
+"full": 0,
+"src": "gn_us_fed",
+"kind": "news",
+"name": "News · Fed·macro",
+"first": "2026-11-28 03:45"
+},
+{
 "id": "n/FwZ3NiZnEtSEFqVkRiZjIxMFZMLVA4NUVKNmpVbTBXUGpUVWJsWndmUkUoc5",
 "title": "NVIDIA Profile Inspector Creator Releases G-SYNC Tweaks, Tackling OLED VRR Flicker & Annoying 60 FPS Stutter",
 "at": "2026-11-27 06:04",
@@ -13594,20 +13569,6 @@
 "kind": "news",
 "name": "조선비즈 증권",
 "first": "2026-11-27 20:30"
-},
-{
-"id": "n/jhJUHl1WmM1RmhJY2lYdVlvcWtHcW1GekFXbjJLVmMzM3JLc1c2VXVYcwoc5",
-"title": "3310 CHIALIN 20261126 Earnings Call",
-"at": "2026-11-27 06:02",
-"link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOTVBHRkloMnMxaF9RQ1lGTklwVWJ6SVBKcFRmQ1drTDIxdThIeU5RcEdJdzJWMTVIZkZEQldSOURTTVB2MVFaUmhnNEdwTkQ3aXpDRHJIVjhJUHl1WmM1RmhJY2lYdVlvcWtHcW1GekFXbjJLVmMzM3JLc1c2VXVYcw?oc=5",
-"text": "3310 CHIALIN 20261126 Earnings Call",
-"imgs": [],
-"press": "finance.biggo.com",
-"full": 0,
-"src": "gn_us_tech",
-"kind": "news",
-"name": "News · 반도체·AI(영문)",
-"first": "2026-11-28 03:00"
 },
 {
 "id": "n/swwwftcomcontentff2a3ebfd9be45f695e000cc67e7c49esyn25a6b1a61",
@@ -13678,20 +13639,6 @@
 "kind": "news",
 "name": "Nikkei Asia",
 "first": "2026-11-27 12:45"
-},
-{
-"id": "n/DBTTXdWZUlPd25YMV92ckJiYmRXYmhSWjFsQ3huQWJ0ZmFnMHVwQm9wQQoc5",
-"title": "いでよ日本の産業導く「価格の主役」 半導体材料などの強みで再浮揚",
-"at": "2026-11-27 05:00",
-"link": "https://news.google.com/rss/articles/CBMibEFVX3lxTE1WZmwzVl9fTkhPeTR1RmtkUmhqd1NkNjNMTGtlMW1YdlFNMTJIQXJQMWZmUHN1c1J2THZqd0Q1T05FMDBTTXdWZUlPd25YMV92ckJiYmRXYmhSWjFsQ3huQWJ0ZmFnMHVwQm9wQQ?oc=5",
-"text": "いでよ日本の産業導く「価格の主役」 半導体材料などの強みで再浮揚",
-"imgs": [],
-"press": "日本経済新聞",
-"full": 0,
-"src": "gn_jp",
-"kind": "news",
-"name": "ニュース · 일본 증시",
-"first": "2026-11-27 21:30"
 },
 {
 "id": "globalmktinsight/7985",
@@ -13767,20 +13714,6 @@
 "first": "2026-11-27 19:00"
 },
 {
-"id": "n/Sa3JHa0FZZ0I5LUFsZHpjUTRxNzdQeXJsS0daaXhpbjJadjVzQ01QNlhyoc5",
-"title": "Nissan poised to import cars from China to Japan for first time",
-"at": "2026-11-27 03:38",
-"link": "https://news.google.com/rss/articles/CBMirAFBVV95cUxPdnhNVG5qVlQ4ckdYMERZdEhuckhJelJvTV9BYV9MOUdvcXJKanVMTEtfWXpsZ2NqQUNyWk5CYkNBVWFCenpEcnFPSXQ2UGc2VnN2ZlBkTnZuMklJeDZJNW9DZFhHdExadUJaMjN0TjBlU1cxMHdpdlA4b05nY1BhVkZSa3JHa0FZZ0I5LUFsZHpjUTRxNzdQeXJsS0daaXhpbjJadjVzQ01QNlhy?oc=5",
-"text": "Nissan poised to import cars from China to Japan for first time",
-"imgs": [],
-"press": "Nikkei Asia",
-"full": 0,
-"src": "nikkei_asia",
-"kind": "news",
-"name": "Nikkei Asia",
-"first": "2026-11-27 12:45"
-},
-{
 "id": "n/wwwcnbccom20261126semiconductorchipsarethenewoilhereswhyhtml",
 "title": "Semiconductor chips are the new oil. Here's why",
 "at": "2026-11-27 02:52",
@@ -13809,18 +13742,18 @@
 "first": "2026-11-27 12:45"
 },
 {
-"id": "n/0YlJ1cXZ5eEVGNkpwN2lxd1dWdi1yZ0V5Rkd1cGZSX05iejM0TVlrMnNnoc5",
-"title": "Crypto on notice as hawkish Fed risks December ‘meltdown’",
-"at": "2026-11-27 02:39",
-"link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNRk1hRXBYQlVtVTNtUVNtc1N0SkVPOTBhWTNtcmlQeDZSN0ZoUEYyLWRFckVIdVJlbmdnYktTNGFxWmtVaUdPYTdaam1hd2pkdldMTXcwRlRldjN6ZUdfZTlEZ2FMNEJfWnVjRGJMc1M4OWNwRnI5cU9JbFhMb0VJUk9kbVFLN1BCdXhhZlBvSDd0YlJ1cXZ5eEVGNkpwN2lxd1dWdi1yZ0V5Rkd1cGZSX05iejM0TVlrMnNn?oc=5",
-"text": "Crypto on notice as hawkish Fed risks December ‘meltdown’",
+"id": "n/TBtNm5FUzNKb2hBTmo1OEE3cXdHU29ndklDOTlrVnR3YVFHYjJOOFpRbAoc5",
+"title": "Deutsche Bank and JPMorgan Raise S&P 500 Outlook for 2027",
+"at": "2026-11-27 02:17",
+"link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9BMTUzSWhoNDVGZFlSNkh1MlBZX1lUeVVkQkNMU0dpSGFveE1LZFQwZmxsN013dTBtNm5FUzNKb2hBTmo1OEE3cXdHU29ndklDOTlrVnR3YVFHYjJOOFpRbA?oc=5",
+"text": "Deutsche Bank and JPMorgan Raise S&P 500 Outlook for 2027",
 "imgs": [],
-"press": "TradingView",
+"press": "SuaraGarut.ID",
 "full": 0,
 "src": "gn_us_ib",
 "kind": "news",
 "name": "News · 월가 IB 전략",
-"first": "2026-11-28 02:45"
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/swwwftcomcontent450920b982b84a66960b5740aa7f94aesyn25a6b1a61",
@@ -14217,20 +14150,6 @@
 "kind": "news",
 "name": "Bloomberg Economics",
 "first": "2026-11-27 23:30"
-},
-{
-"id": "n/lpRZ2hYUWR4OEN0SG9CVFQ2MzBYLVpidURaeUZnSTNzbEtHQzdDTEN3Ywoc5",
-"title": "Hedge funds are retreating from stocks, but not everyone is following them",
-"at": "2026-11-26 17:29",
-"link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNZVlQc3ROckhEd1Z4WXFFeGswRFNybVd6cDc3NTllTVBFNE5LaVp1YXByV096LVAzMzEzVnF6Ulg5dkg5MnJFdXM5andJVFZuMGJ2SHpoRHg0QlpRZ2hYUWR4OEN0SG9CVFQ2MzBYLVpidURaeUZnSTNzbEtHQzdDTEN3Yw?oc=5",
-"text": "Hedge funds are retreating from stocks, but not everyone is following them",
-"imgs": [],
-"press": "AOL.com",
-"full": 0,
-"src": "gn_us_ib",
-"kind": "news",
-"name": "News · 월가 IB 전략",
-"first": "2026-11-28 02:45"
 },
 {
 "id": "n/JpUjhoMXE2RWhiTEhTX01pNTViaktpOFVhT2hELXNLU2lhWjZfMjFreHcoc5",
@@ -15022,20 +14941,6 @@
 "first": "2026-11-27 12:45"
 },
 {
-"id": "n/MdUhNNkI0djlxOWFjMExiT2s1bW9HdUU3b2UzSTA4VnhQOERlclFJMXRnoc5",
-"title": "Bank of America Sees S&P 500 Hitting 7,800 by End of 2027",
-"at": "2026-11-25 23:45",
-"link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxNNEZ6MXNMNUlVTTNLLV9qVktES0NMOUFNRkN6T0VVWEtpRTNET3phSl9RaTFzRzhTbElMTGVrckhPX3RZaTVucnNZdGlOajhaYURvZ3NyR3ctdmJFTTdybUhJWURNVEx1SE02QjR2OXE5YWMwTGJPazVtb0d1RTdvZTNJMDhWeFA4RGVyUUkxdGfSAZABQVVfeXFMTTRGejFzTDVJVU0zSy1falZLREtDTDlBTUZDek9FVVhLaUUzRE96YUpfUWkxc0c4U2xJTExla3JIT190WWk1bnJzWXRpTmo4WmFEb2dzckd3LXZiRU03cm1ISVlETVRMdUhNNkI0djlxOWFjMExiT2s1bW9HdUU3b2UzSTA4VnhQOERlclFJMXRn?oc=5",
-"text": "Bank of America Sees S&P 500 Hitting 7,800 by End of 2027",
-"imgs": [],
-"press": "Coinpedia",
-"full": 0,
-"src": "gn_us_ib",
-"kind": "news",
-"name": "News · 월가 IB 전략",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "n/jludzlTbE93b0xLOGExUkNKNEVEUmc4ZWQxQUpVZWt4LXJ1X1RFNEt1dwoc5",
 "title": "Goldman Sachs flags 3 signals pointing to a market bottom",
 "at": "2026-11-25 23:17",
@@ -15312,20 +15217,6 @@
 "first": "2026-11-27 12:45"
 },
 {
-"id": "n/td2tPTmtxU3FuMExQcGFXY1RRWk5GM19lWVVtUC1OUEEzN1hZYmYyVFRmoc5",
-"title": "Goldman sees TOPIX up 20% to 4,500 and names five themes for Japanese stocks in 2027",
-"at": "2026-11-25 11:29",
-"link": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxOT0FSMUhXOXB5QzA2WXFOWm9MVGkxVmkzUndEazg5b2tpaTBOR05malItVHpwWmYwWUJQRTB5cmFxUUViWFBYNS1GX0dodnRma3U1aUNTWjAtZ0p2WTRuZEk4QU44X1dqb1hoRzg1Z1l3WVhEWlpvTUt0VmZhcmFpWkNpazUwQi1OUXVncjRtd2tPTmtxU3FuMExQcGFXY1RRWk5GM19lWVVtUC1OUEEzN1hZYmYyVFRm?oc=5",
-"text": "Goldman sees TOPIX up 20% to 4,500 and names five themes for Japanese stocks in 2027",
-"imgs": [],
-"press": "investingLive",
-"full": 0,
-"src": "gn_us_ib",
-"kind": "news",
-"name": "News · 월가 IB 전략",
-"first": "2026-11-28 03:30"
-},
-{
 "id": "james_lee_advisors/224491183519",
 "title": "11월 25일의 기업분석 Letter - SK하이닉스 (000660)",
 "at": "2026-11-25 11:06",
@@ -15538,6 +15429,20 @@
 "kind": "blog",
 "name": "포카라의 실전투자",
 "first": "2026-11-27 12:45"
+},
+{
+"id": "n/EJiTk9GSGZKZVZqTXZQeTRIRUk1SGVmX0JTdHlNajZ5X0lUMUVoNXBBUQoc5",
+"title": "Goldman Sachs Identifies Three Signals for Stock Market Recovery",
+"at": "2026-11-25 07:33",
+"link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE1aU2JwdUZPMjV0a2lrSm5CLVlicWpLZDBfTFd0MXJIMG4xbG02R0JuOUR6SEJKS0lpRkt6dWVkYzJ4dnE0VEJiTk9GSGZKZVZqTXZQeTRIRUk1SGVmX0JTdHlNajZ5X0lUMUVoNXBBUQ?oc=5",
+"text": "Goldman Sachs Identifies Three Signals for Stock Market Recovery",
+"imgs": [],
+"press": "SuaraGarut.ID",
+"full": 0,
+"src": "gn_us_ib",
+"kind": "news",
+"name": "News · 월가 IB 전략",
+"first": "2026-11-28 03:45"
 },
 {
 "id": "n/pWV08xbG5hT1FSNGxQazRpLXplSlpoTWNVSkZYRU52QjZ1SVJUaE9McXcoc5",
