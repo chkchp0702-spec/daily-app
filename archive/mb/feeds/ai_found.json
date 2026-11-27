@@ -1,6 +1,22 @@
 {
  "items": [
   {
+   "title": "Nvidia halts server shipments to four Southeast Asian countries, FT reports",
+   "url": "https://www.investing.com/news/stock-market-news/nvidia-halts-server-shipments-to-four-southeast-asian-countries-ft-reports-5053574",
+   "press": "Investing.com(FT 인용)",
+   "at": "2026-11-27 23:30",
+   "why": "SOX 50일선 11,208(+27.7%)·🇺🇸 50% — 블랙웰 상하이 보도와 함께 12/3 수출통제 청문회 앞 규제 위험",
+   "summary": "FT 보도: 엔비디아가 동남아 4개국으로의 서버 출하를 멈춤(인베스팅 11/27 제목)."
+  },
+  {
+   "title": "JPMorgan Sees S&P 500 Reaching 8,200 by End-2027",
+   "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE1zR0NXUy1pS3BVeFppUEx0TnppVlBUdVlKQVlraTMxNm5JczlMek1KUms4MXl2M2VuZ0VMWnRHZ19uTXhNdVdlSlJwdTVTejNacTRkcjJidDcyN0JXd01ZYlJJaW9zSWFlRi1mS014ZW5jTkNh?oc=5",
+   "press": "Google News",
+   "at": "2026-11-28 00:00",
+   "why": "🇺🇸 50% 칸 — BofA 7,800 에 이어 JP모건 8,200: 대형 IB 2027 목표가 모두 지금(7,244)보다 위 = 참고만, 판정은 200일선",
+   "summary": "JP모건이 2027년 말 S&P500 목표 8,200 제시(제목)."
+  },
+  {
    "title": "BofA sets 2027 S&P 500 target at 7,800 after pullback",
    "url": "https://seekingalpha.com/news/4677028-bofa-sets-2027-s-and-p-500-target-at-7800-after-pullback",
    "press": "Seeking Alpha",
@@ -623,23 +639,7 @@
    "at": "2026-11-23 04:45",
    "why": "반도체 칸·코스피 반도체 갭 — 한·중·대만 동시 받침 조치(공매도 제한·증안펀드) 다음 단계, 💬 3·5번",
    "summary": "가권 1주 −17.5%로 1990년 이후 최악. 卓榮泰 행정원장 11/23 금융·테크 업계 긴급 회담. 주말엔 공매도 직전가 이하 금지·증거금 150% 등 5대 조치 발표(블룸버그)."
-  },
-  {
-   "title": "베선트, 엔비디아 이사회에 「수출통제 실패 10일 안에 설명하라」",
-   "url": "https://cryptobriefing.com/bessent-nvidia-board-export-controls-deadline/",
-   "press": "Crypto Briefing",
-   "at": "2026-11-23 03:45",
-   "why": "엔비디아·반도체 칸 — 재무장관이 준 답변 시한이 이번 주 근처(정확한 날짜 미확인), 11/23 「中 판매 답 받겠다」 재언급과 이어짐",
-   "summary": "베선트가 엔비디아 이사회에 中 수출통제 문제(메가스피드 경로) 해명 시한 10일을 줬다는 보도. 11/13 상무부(러트닉) 늑장 비판에 이은 압박."
-  },
-  {
-   "title": "美 정보당국, 젠슨 황 연계 中 스파이 의혹 조사 경과",
-   "url": "https://tech-insider.org/china-spy-claim-jensen-huang-alice-huang-megaspeed-2026/",
-   "press": "Tech Insider",
-   "at": "2026-11-23 03:45",
-   "why": "엔비디아(💬 3번) — 11/23 블룸버그 「정보수장 조사 공개 확인」 배경 정리, 규제 위험이 연방 정보기관까지",
-   "summary": "메가스피드 칩 수출 경로·황 측근 스파이 의혹 정리. 11/23 블룸버그는 美 정보수장이 「전 엔비디아 CEO 연계 의혹」 조사를 공개 확인했다고 보도(제목 기준)."
   }
  ],
- "at": "2026-11-27 22:45"
+ "at": "2026-11-28 00:45"
 }
