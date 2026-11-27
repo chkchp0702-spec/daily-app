@@ -7643,6 +7643,128 @@
 "src": "ins",
 "score": 67.3,
 "note": "기회형 내부자 3명 · 230천 달러 (10일 안 공시)"
+},
+"IQV|2026-11-24": {
+"code": "IQV",
+"name": "IQVIA Holdings, Inc. Common Stock",
+"mkt": "US",
+"d": "2026-11-24",
+"src": "cup_eye",
+"score": 63.5,
+"lv": 251.61,
+"max20": 2.8,
+"id60": -0.033
+},
+"STE|2026-11-24": {
+"code": "STE",
+"name": "STERIS plc (Ireland) Ordinary Shares",
+"mkt": "US",
+"d": "2026-11-24",
+"src": "cup_eye",
+"score": 62.0,
+"lv": 234.57,
+"max20": 7.2,
+"id60": 0.133
+},
+"MANH|2026-11-24": {
+"code": "MANH",
+"name": "Manhattan Associates, Inc. - Common St",
+"mkt": "US",
+"d": "2026-11-24",
+"src": "cup_eye",
+"score": 46.2,
+"lv": 227.26,
+"max20": 3.1,
+"id60": 0.05
+},
+"6457.T|2026-11-25": {
+"code": "6457.T",
+"name": "GLORY LTD",
+"mkt": "JP",
+"d": "2026-11-25",
+"src": "cup",
+"score": 65.7,
+"lv": 5252.25
+},
+"SKY|2026-11-25": {
+"code": "SKY",
+"name": "Champion Homes, Inc. Common Stock",
+"mkt": "US",
+"d": "2026-11-25",
+"src": "cup_eye",
+"score": 46.2,
+"lv": 97.4,
+"max20": 11.3,
+"id60": -0.033
+},
+"9983.T|2026-11-25": {
+"code": "9983.T",
+"name": "TSE9983",
+"mkt": "JP",
+"d": "2026-11-25",
+"src": "cup_eye",
+"score": 72.1,
+"lv": 86065.98
+},
+"AHR|2026-11-24": {
+"code": "AHR",
+"name": "American Healthcare REIT, Inc. Common ",
+"mkt": "US",
+"d": "2026-11-24",
+"src": "cup_eye",
+"score": 68.1,
+"lv": 59.6,
+"max20": 3.3,
+"id60": -0.033
+},
+"CHE|2026-11-24": {
+"code": "CHE",
+"name": "Chemed Corp",
+"mkt": "US",
+"d": "2026-11-24",
+"src": "cup_eye",
+"score": 41.4,
+"lv": 562.8,
+"max20": 4.8,
+"id60": 0.133
+},
+"WTW|2026-11-24": {
+"code": "WTW",
+"name": "Willis Towers Watson Public Limited Co",
+"mkt": "US",
+"d": "2026-11-24",
+"src": "cup_eye",
+"score": 75.9,
+"lv": 345.25,
+"max20": 3.0,
+"id60": -0.1
+},
+"6727.T|2026-11-25": {
+"code": "6727.T",
+"name": "TSE6727",
+"mkt": "JP",
+"d": "2026-11-25",
+"src": "cup",
+"score": 68.8,
+"lv": 912.91
+},
+"4528.T|2026-11-25": {
+"code": "4528.T",
+"name": "TSE4528",
+"mkt": "JP",
+"d": "2026-11-25",
+"src": "cup",
+"score": 49.8,
+"lv": 2568.07
+},
+"605577.SS|2026-11-14": {
+"code": "605577.SS",
+"name": "龙版传媒",
+"mkt": "CN",
+"d": "2026-11-14",
+"src": "accum",
+"score": 51.0,
+"lv": 21.27
 }
 },
 "sent": [
@@ -7662,5 +7784,27 @@
 "2026-11-05|팔기|LGND",
 "2026-11-06|팔기|PAGP"
 ],
-"whale": []
+"whale": [
+"BKNG",
+"BMRN",
+"BMY",
+"CBRE",
+"CDW",
+"COF",
+"CPNG",
+"GPCR",
+"HUM",
+"MA",
+"MCHP",
+"META",
+"NRIX",
+"NVDA",
+"ONON",
+"ORCL",
+"RIG",
+"SGI",
+"STOK",
+"SW",
+"TXN"
+]
 }
