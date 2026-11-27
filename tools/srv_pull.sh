@@ -43,6 +43,11 @@ elif [ "$MODE" = "brain" ]; then
              brain/daily_ideas.md brain/return_insights.md brain/upgrades.md brain/kick_lab.md \
              inbox_status.json inbox_status_morning.json inbox_status_bt.json inbox_status_misc.json jobs_history.txt \
              joblog/inbox.txt joblog/morning-pre.txt joblog/morning-build.txt joblog/review.txt joblog/bear-fast.txt; do get "$rel" >/dev/null || true; done
+  # 🧪 11/27 서버 실험 칸(lab) — 상태·로그·설명서 + 이번에 나온 결과 파일
+  if get inbox_status_lab.json >/dev/null; then
+    get market/lab/_api.md >/dev/null || true; get market/lab/_last_log.txt >/dev/null || true
+    for rel in $(python3 -c "import json,sys;[print(x) for x in json.load(open(sys.argv[1])).get('outputs',[]) if x.startswith('market/lab/') and x.endswith(('.json','.md','.txt'))]" "$OUT/inbox_status_lab.json" 2>/dev/null); do get "$rel" >/dev/null || true; done
+  fi
   if get feeds/my_feed.json; then python3 tools/feed_trim.py "$OUT/feeds/my_feed.json" "$OUT/feeds/my_feed_recent.json" && rm -f "$OUT/feeds/my_feed.json"; fi
   echo "{\"at\": \"$(TZ=Asia/Seoul date '+%F %H:%M') KST\", \"from\": \"$SRV\", \"ok\": $ok, \"miss\": $miss}" > "$OUT/_pulled.json"
   echo "srv_pull brain: $ok 개 받음 · 못 받음 $miss"
