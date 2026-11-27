@@ -1,6 +1,22 @@
 {
  "items": [
   {
+   "title": "BofA sets 2027 S&P 500 target at 7,800 after pullback",
+   "url": "https://seekingalpha.com/news/4677028-bofa-sets-2027-s-and-p-500-target-at-7800-after-pullback",
+   "press": "Seeking Alpha",
+   "at": "2026-11-27 23:45",
+   "why": "🇺🇸 50% 칸·💼 현금 57.5% — 대형 IB 2027 목표가 지금 선물(7,300대)보다 위 = 「하락장 확정」 쪽 근거 아님",
+   "summary": "BofA 가 조정 뒤 2027년 S&P500 목표를 7,800 으로 제시(11/27 시킹알파 제목)."
+  },
+  {
+   "title": "US stocks set for higher open as battered AI shares claw back losses",
+   "url": "https://www.investing.com/news/stock-market-news/wall-st-futures-surge-as-investors-return-from-holiday-5053052",
+   "press": "Investing.com(로이터)",
+   "at": "2026-11-27 23:45",
+   "why": "S&P 200일선 7,352 — 단축장 개장 앞 AI주 반등 출발, 종가가 선 위인지가 복귀 1일째 판정",
+   "summary": "추수감사절 휴장 뒤 美 증시가 AI주 반등에 상승 출발 예상(11/27)."
+  },
+  {
    "title": "Stocks are poised for a Friday jump — right into a $100 billion wave of automated selling, Goldman Sachs warns",
    "url": "https://www.marketwatch.com/story/stocks-are-poised-for-a-friday-jump-right-into-a-100-billion-wave-of-automated-selling-goldman-sachs-warns-aba6440f",
    "press": "MarketWatch",
@@ -623,22 +639,6 @@
    "at": "2026-11-23 03:45",
    "why": "엔비디아(💬 3번) — 11/23 블룸버그 「정보수장 조사 공개 확인」 배경 정리, 규제 위험이 연방 정보기관까지",
    "summary": "메가스피드 칩 수출 경로·황 측근 스파이 의혹 정리. 11/23 블룸버그는 美 정보수장이 「전 엔비디아 CEO 연계 의혹」 조사를 공개 확인했다고 보도(제목 기준)."
-  },
-  {
-   "title": "12/9 하루에 연준 결정·브로드컴 실적·마이크론 자사주 제한 해제가 겹친다",
-   "url": "https://cryptobriefing.com/fed-broadcom-micron-december-9/",
-   "press": "Crypto Briefing",
-   "at": "2026-11-23 02:45",
-   "why": "가설② 12/9 FOMC 분수령·반도체 칸 — 같은 날 브로드컴 실적(구글 주문 축소 우려 −12%)과 마이크론 칩스법 자사주 매입 제한 해제가 겹쳐 반도체 변동성이 한 날에 몰림",
-   "summary": "12/9 FOMC(인상 폭 0.25 vs 0.5%p)와 브로드컴 실적 발표가 같은 날. 마이크론은 칩스법 보조금에 묶였던 자사주 매입 제한이 12/9 풀려 대규모 매입 여지(야후 파이낸스 X·24/7 Wall St. 8/21)."
-  },
-  {
-   "title": "미 법무부, 엔비디아 스캔들 중심 메가스피드 수출 조사 확인",
-   "url": "https://www.khaleejtimes.com/americas/us-probing-megaspeed-chip-exports-nvidia-scandal",
-   "press": "Khaleej Times",
-   "at": "2026-11-23 02:45",
-   "why": "엔비디아(🐋 11/17·💬 3) — 캘리포니아 형사 범위 확대에 이어 연방 법무부도 칩 수출 경로 조사, 규제 위험이 주 정부·연방 양쪽으로",
-   "summary": "미국이 엔비디아 칩 대중 수출 의혹 업체 메가스피드 조사를 확인(날짜·세부 미확인). 별도로 약 75억$ 규모 대중 밀반출 보도(디지털트렌드)·세마포 「여러 법무부 조사가 엔비디아에 닿을 수 있다」."
   }
  ],
  "at": "2026-11-27 22:45"
