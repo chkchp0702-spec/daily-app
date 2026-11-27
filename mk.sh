@@ -44,7 +44,7 @@ echo "$IP" > ~/msr_ip.txt
 echo "✅ 서버 만들어짐: $IP"
 echo "④ 서버 안에 휴대폰용 설치 화면 여는 중 (5~10분 · 다른 앱으로 넘어가지 마세요)..."
 SSHO="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=8 -o BatchMode=yes -o LogLevel=ERROR"
-for i in $(seq 1 40); do ssh $SSHO ubuntu@$IP true 2>/dev/null && break; sleep 10; done
+for i in $(seq 1 40); do ssh -n $SSHO ubuntu@$IP true </dev/null 2>/dev/null && break; sleep 10; done
 ssh $SSHO ubuntu@$IP "sudo bash -s $IP" <<'BOOT' | tee ~/msr_phone.txt
 set -e
 IP="$1"; HOST="$(echo "$IP" | tr . -).sslip.io"
