@@ -24,10 +24,10 @@ for T in $(seq 1 ${TRIES:-15}); do
   for SH in '{"ocpus":2,"memoryInGBs":12}' '{"ocpus":1,"memoryInGBs":6}'; do
     for AD in $ADS; do
       ID=$(oci compute instance launch -c $C --availability-domain "$AD" --shape VM.Standard.A1.Flex --shape-config "$SH" --display-name msr --image-id $IMG --subnet-id $SUB --assign-public-ip true --ssh-authorized-keys-file ~/.ssh/id_rsa.pub --boot-volume-size-in-gbs 50 --wait-for-state RUNNING --query 'data.id' --raw-output 2>/tmp/err.txt) && break 3
-      ID=""; echo "  [$T번째] $(echo $SH | tr -d '{}\"') 자리 없음: $(grep -o '"message": "[^"]*"' /tmp/err.txt | head -1 | cut -c13-)"
+      ID=""; sleep 8; echo "  [$T번째] $(echo $SH | tr -d '{}\"') 자리 없음: $(grep -o '"message": "[^"]*"' /tmp/err.txt | head -1 | cut -c13-)"
     done
   done
-  [ $T -lt ${TRIES:-15} ] && sleep 60
+  [ $T -lt ${TRIES:-15} ] && sleep 90
 done
 fi
 [ -n "$ID" ] || { echo "❌ 서버를 못 만듦 — 위 실패 메시지를 캡처해 주세요"; exit 1; }
