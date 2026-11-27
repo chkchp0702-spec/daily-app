@@ -37,7 +37,12 @@ elif [ "$MODE" = "brain" ]; then
   done
   # v2(11/27): 아침 리포트·백테스트용 — 최근 8일 data · 양식 · 성적표 · 서버 상태
   for i in $(seq 0 7); do get "data/$(TZ=Asia/Seoul date -d "-$i day" +%F).json" >/dev/null || true; done
-  for rel in data/_template.json README.md market/scores.json market/lab/_last_log.txt inbox_status.json jobs_history.txt; do get "$rel" >/dev/null || true; done
+  T0=$(TZ=Asia/Seoul date +%F); M0=$(TZ=Asia/Seoul date -d "-1 month" +%Y-%m)
+  for rel in data/_template.json README.md requirements.txt market/scores.json market/kick_candidates.json market/port_log.json market/history.csv \
+             docs/artifact.html docs/ARTIFACT_URL.txt "reviews/weekly_$T0.md" "reviews/weekly_$T0.json" "reviews/$M0.md" \
+             brain/daily_ideas.md brain/return_insights.md brain/upgrades.md brain/kick_lab.md \
+             inbox_status.json inbox_status_morning.json inbox_status_bt.json inbox_status_misc.json jobs_history.txt \
+             joblog/inbox.txt joblog/morning-pre.txt joblog/morning-build.txt joblog/review.txt joblog/bear-fast.txt; do get "$rel" >/dev/null || true; done
   if get feeds/my_feed.json; then python3 tools/feed_trim.py "$OUT/feeds/my_feed.json" "$OUT/feeds/my_feed_recent.json" && rm -f "$OUT/feeds/my_feed.json"; fi
   echo "{\"at\": \"$(TZ=Asia/Seoul date '+%F %H:%M') KST\", \"from\": \"$SRV\", \"ok\": $ok, \"miss\": $miss}" > "$OUT/_pulled.json"
   echo "srv_pull brain: $ok 개 받음 · 못 받음 $miss"
