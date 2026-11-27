@@ -1,6 +1,22 @@
 {
  "items": [
   {
+   "title": "Bank of England sounds alarm over financial risks from AI boom",
+   "url": "https://www.computing.co.uk/news/2026/ai/bank-of-england-sounds-alarm-over-financial-risks-from-ai-boom",
+   "press": "Computing",
+   "at": "2026-11-27 18:45",
+   "why": "가설 1(AI 차입·크레딧 스트레스) — 중앙은행 경고 계속",
+   "summary": "영란은행이 AI 붐의 빚(차입) 의존이 금융 안정 위험을 키운다고 경고(검색 결과 제목 기준, 게재일 미확인)."
+  },
+  {
+   "title": "World shares log modest losses as investors assess impact on AI sector from the Nvidia scandal",
+   "url": "https://www.ajc.com/news/2026/11/world-shares-log-modest-losses-as-investors-assess-impact-on-ai-sector-from-the-nvidia-scandal/",
+   "press": "AP/AJC",
+   "at": "2026-11-27 18:45",
+   "why": "엔비디아 회계 의혹이 AI 섹터 전반 신뢰에 미치는 영향 — 🫧 버블 경보판 신뢰 칸",
+   "summary": "엔비디아 스캔들이 AI 섹터에 주는 영향을 가늠하며 세계 증시 소폭 하락(11월 기사, 정확한 날짜 미확인)."
+  },
+  {
    "title": "씨티 \"증안펀드 20∼40조 확대 가능…이르면 12월 1∼2조 투입\"",
    "url": "https://www.yna.co.kr/view/AKR20261127130600008",
    "press": "연합뉴스",
@@ -623,22 +639,6 @@
    "at": "2026-11-23 00:45",
    "why": "가설①·③ — AI 수요(잔고 950억$)는 남아 있는데 메모리 부족·원가가 병목인지, 델 실적이 AI 투자 붕괴론 vs 공급 병목론을 가른다",
    "summary": "AI 잔고 약 950억$(제목) · 메모리 공급 제약이 매출 전환 속도를 좌우(제목 기준, 본문 미확인)"
-  },
-  {
-   "title": "사우디·바레인 새 공격 발표 — 바레인 산업시설 이란 발사체 피격, 이란은 「미국과 협상 여지」",
-   "url": "https://www.cnbc.com/2026/11/22/saudi-houthi-bahrain-iran-attacks-araghchi-talks.html",
-   "press": "CNBC",
-   "at": "2026-11-22 23:45",
-   "why": "🛢️ 장부 brent_95·에너지 칸 — 공격이 걸프 연안 시설로 번졌지만 이란이 협상 문을 열어 둠, 월요일 브렌트(89.87$) 갭 방향 판단",
-   "summary": "사우디는 후티 드론 격추, 바레인은 이란 발사체에 산업시설 피격(방공망 일부 요격). 아락치 외무장관 「미국과 합의 여지 유지」. 유가 숫자는 월요일 개장 전 미확인."
-  },
-  {
-   "title": "씨티 「메모리 가격 내년 정점」 — 마이크론 목표가 18% 하향(8월 노트, 이번 주말 현물 약세 전망의 배경)",
-   "url": "https://www.tipranks.com/news/memory-prices-will-peak-next-year-warns-citi-as-it-cuts-micron-mu-price-target-by-18",
-   "press": "TipRanks",
-   "at": "2026-11-22 23:45",
-   "why": "반도체 칸·가설③(메모리 상류) — 씨티가 8월부터 「2027년 2분기 정점」을 말해 왔고 11/22 「상반기 현물 약세·고정가 견조」로 이어짐, 💬 5번",
-   "summary": "씨티: D램·낸드 가격 2027년 2분기 정점 전망, 마이크론 목표가 하향(8월). 11/22 텔레그램 전재 새 노트: DDR5 64GB RDIMM 현물 9~10월 약 3,300$ → 2027년 상반기 약 2,000$, 하반기 반등."
   }
  ],
  "at": "2026-11-27 17:50"
