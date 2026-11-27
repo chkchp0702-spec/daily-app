@@ -6,7 +6,7 @@
 #   서버에서 못 받은 파일은 archive/m 의 예전 사본으로 채움(mirror) — 사본이 지워지지 않게
 #   GitHub 저장소가 다시 열리면 workflow 에서 이 줄을 원래 git clone 으로 되돌리면 됨
 set -u
-MODE="${1:?mirror|collect}"; OUT="${2:?대상 폴더}"
+MODE="${1:?mirror|collect|brain}"; OUT="${2:?대상 폴더}"
 SRV="${MSR_SRV:-https://168-110-49-71.sslip.io}"
 mkdir -p "$OUT"
 ok=0; miss=0
@@ -25,6 +25,20 @@ if [ "$MODE" = "mirror" ]; then
   echo "srv_pull mirror: $(find "$OUT" -name '*.json' | wc -l) 개 준비"
   # 서버가 통째로 안 되면 실패로 알림(사본은 그대로 둠)
   curl -sf --max-time 20 -o /dev/null "$SRV/market/bear.json" || { echo "⚠ 서버 응답 없음 — 사본 유지"; exit 3; }
+elif [ "$MODE" = "brain" ]; then
+  # 🧠 두뇌(예약 작업)가 읽을 것 — 두뇌는 서버에 못 닿아서 여기(archive/mb)로 매시간 받아 둠
+  T=$(TZ=Asia/Seoul date +%F); Y=$(TZ=Asia/Seoul date -d "-1 day" +%F)
+  for rel in RULES.md brain/README.md brain/state.json brain/insights.md brain/ideas.md brain/bubble_manual.json "brain/log/$T.md" "brain/log/$Y.md" \
+             feeds/ai_found.json feeds/hot.json feeds/used.json ledger/ledger.json \
+             market/latest.json market/focus.json market/port.json market/kick.json market/kick_cands.json market/edge.json market/bear.json \
+             market/say.json market/floor_check.json market/analog_pick.json market/analog.json market/us_regime.json market/qa.json \
+             market/sentiment.json market/bubble.json market/bubble_proxy.json market/bets_score.json market/peers.json market/conc.json market/home.json market/sectors.json; do
+    get "$rel" || true
+  done
+  if get feeds/my_feed.json; then python3 tools/feed_trim.py "$OUT/feeds/my_feed.json" "$OUT/feeds/my_feed_recent.json" && rm -f "$OUT/feeds/my_feed.json"; fi
+  echo "{\"at\": \"$(TZ=Asia/Seoul date '+%F %H:%M') KST\", \"from\": \"$SRV\", \"ok\": $ok, \"miss\": $miss}" > "$OUT/_pulled.json"
+  echo "srv_pull brain: $ok 개 받음 · 못 받음 $miss"
+  curl -sf --max-time 20 -o /dev/null "$SRV/market/bear.json" || { echo "⚠ 서버 응답 없음"; exit 3; }
 elif [ "$MODE" = "collect" ]; then
   for i in $(seq 0 11); do
     d=$(TZ=Asia/Seoul date -d "-$i day" +%F); u=${d//-/_}

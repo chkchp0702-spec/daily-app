@@ -51,12 +51,13 @@ jobs:
         run: |
           # 🚚 11/27 저장소가 GitHub 에 막혀 오라클 서버에서 받음 (풀리면 원래 git clone 두 줄로 되돌리기)
           bash tools/srv_pull.sh mirror /tmp/msr && python3 tools/mirror.py /tmp/msr archive/m
+          bash tools/srv_pull.sh brain archive/mb || echo "두뇌 재료 받기 실패"   # 🧠 11/27 두뇌(예약 작업)가 읽을 서버 자료
           python3 tools/say_check.py /tmp/msr archive/x/say_check.json || echo "말 맞춤 검사 실패"
       - name: 저장
         run: |
           git config user.name "bot"
           git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/m archive/x/say_check.json archive/x/live_*.json archive/x/focus_live.json archive/x/cup_live.json archive/x/pbbrief.json archive/x/proposal.json archive/x/wl_live.json "$(cat /tmp/cp.txt)"
+          bash scripts/push.sh "live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/m archive/mb archive/x/say_check.json archive/x/live_*.json archive/x/focus_live.json archive/x/cup_live.json archive/x/pbbrief.json archive/x/proposal.json archive/x/wl_live.json "$(cat /tmp/cp.txt)"
       - name: 지킴이 살아 있나 (없으면 켬)
         if: always()
         env:
