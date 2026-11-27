@@ -284,7 +284,7 @@ def advice(d):
     plan = []
     try:   # 🔁 11/12 닮은 장 규칙 — 국내 주식 몫을 맨 앞에 (사용자 「어플 전체에 스며들게」)
         import json as _j, urllib.request as _u
-        B = _j.loads(_u.urlopen("https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/bear.json", timeout=15).read().decode("utf-8"))
+        B = _j.loads(_u.urlopen("https://168-110-49-71.sslip.io/market/bear.json", timeout=15).read().decode("utf-8"))
         M = {m["key"]: m for m in B.get("markets", [])}
         ka, qa_ = (M.get("kospi") or {}).get("analog"), (M.get("kosdaq") or {}).get("analog")
         if ka:

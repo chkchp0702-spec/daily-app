@@ -13,7 +13,7 @@ import urllib.request
 
 KST = dt.timezone(dt.timedelta(hours=9))
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "archive", "x", "focus_live.json")
-FOCUS = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/focus.json"
+FOCUS = "https://168-110-49-71.sslip.io/market/focus.json"
 APP = "https://chkchp0702-spec.github.io/daily-app/"
 UA = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)", "Referer": "https://m.stock.naver.com/"}
 

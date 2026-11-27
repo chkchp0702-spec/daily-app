@@ -22,7 +22,7 @@ KST = dt.timezone(dt.timedelta(hours=9))
 NOW = dt.datetime.now(KST)
 X = os.path.join("archive", "x")
 OUT = os.path.join(X, "proposal.json")
-RAW = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/"
+RAW = "https://168-110-49-71.sslip.io/market/"
 
 
 def jl(p, d=None):

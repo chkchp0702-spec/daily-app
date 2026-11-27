@@ -11,7 +11,7 @@ ARC = "archive"
 OUT = os.path.join(ARC, "x", "bear_watch.json")
 KST = datetime.timezone(datetime.timedelta(hours=9))
 BEAR_LOCAL = "_src/market-strategy-report/market/bear.json"
-BEAR_RAW = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/bear.json"
+BEAR_RAW = "https://168-110-49-71.sslip.io/market/bear.json"
 KR = re.compile(r"^\d{6}(\.K[SQ])?$")
 
 

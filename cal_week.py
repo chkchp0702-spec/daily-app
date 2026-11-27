@@ -14,7 +14,7 @@ KST = dt.timezone(dt.timedelta(hours=9))
 NOW = dt.datetime.now(KST)
 OUT = os.path.join("archive", "x", "cal_week.json")
 UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36", "Accept": "application/json, text/plain, */*"}
-MSR = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/"
+MSR = "https://168-110-49-71.sslip.io/"
 
 KO = [  # 영어 지표 이름 → 쉬운 한글 (앞에서부터 먼저 맞는 것)
     (r"Core CPI", "근원 소비자물가(CPI)"), (r"CPI", "소비자물가(CPI)"), (r"Core PPI", "근원 생산자물가(PPI)"), (r"PPI", "생산자물가(PPI)"),

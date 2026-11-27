@@ -34,7 +34,7 @@ KST = dt.timezone(dt.timedelta(hours=9))
 NOW = dt.datetime.now(KST)
 FAKE = os.environ.get("FAKE") == "1"
 OPD = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/opdata/"
-MSR = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/"
+MSR = "https://168-110-49-71.sslip.io/"
 OUT = os.path.join("archive", "x", "prob_sec.json")
 WOUT = os.path.join("archive", "x", "whale_pick.json")
 WLOG = os.path.join("archive", "x", "whale_pick_log.json")

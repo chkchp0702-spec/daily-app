@@ -35,9 +35,11 @@ jobs:
       - name: 자료 레포 받기
         run: |
           mkdir -p _src
-          for r in stock-screener whale40 Cup Gap market-strategy-report sector-watch; do
+          for r in stock-screener whale40 Cup Gap sector-watch; do
             GIT_LFS_SKIP_SMUDGE=1 git clone -q --depth 1 https://github.com/chkchp0702-spec/$r _src/$r || echo "fail $r"
           done
+          # 🚚 11/27 market-strategy-report 는 GitHub 에 막혀 오라클 서버에서 최근 리포트·장부만 받음 (풀리면 위 목록에 다시 넣기)
+          bash tools/srv_pull.sh collect _src/market-strategy-report || echo "fail market-strategy-report(서버)"
       - run: python collect.py
       - name: 🔭 하락장 관찰 목록 (11/11 · 코스피 🐻 동안 신호 탭 한국 종목 → archive/x/bear_watch.json)
         run: python bear_watch.py || echo "bear_watch 실패"

@@ -32,7 +32,7 @@ NOW = dt.datetime.now(KST)
 FAKE = os.environ.get("FAKE") == "1"
 OUT = os.path.join("archive", "x", "prob.json")
 HIST = os.path.join("archive", "x", "prob_hist.json")
-MSR = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/"
+MSR = "https://168-110-49-71.sslip.io/"
 EV_FILE = os.path.join("archive", "x", "prob_events.json")   # 두뇌가 채울 수 있는 이벤트 목록 [{"d":"2026-10-14","t":"미 9월 CPI","mk":["US","KR"]}]
 
 MK = {

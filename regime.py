@@ -411,7 +411,7 @@ def live_only(prev):
         hist = {d: v for d, v in (prev.get("fr_hist") or [])}
         if len(hist) < 3:
             try:
-                L = json.loads(http("https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/ledger/ledger.json", 40, ua=NH))
+                L = json.loads(http("https://168-110-49-71.sslip.io/ledger/ledger.json", 40, ua=NH))
                 for x in (L.get("series") or {}).get("foreign_kospi", []):
                     hist.setdefault(x["date"], float(x["value"]))
             except Exception as e:

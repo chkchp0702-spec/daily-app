@@ -17,7 +17,7 @@ from pathlib import Path
 KST = dt.timezone(dt.timedelta(hours=9))
 NOW = dt.datetime.now(KST)
 APP = "https://chkchp0702-spec.github.io/daily-app/"
-MSR = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/"
+MSR = "https://168-110-49-71.sslip.io/"
 SS = "https://raw.githubusercontent.com/chkchp0702-spec/stock-screener/main/"
 DA = "https://raw.githubusercontent.com/chkchp0702-spec/daily-app/main/"
 OUT = Path(os.environ.get("HEALTH_OUT", "archive/x/health.json"))
