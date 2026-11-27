@@ -1,5 +1,5 @@
 {
- "fetched_kst": "2026-11-28 05:30",
+ "fetched_kst": "2026-11-28 06:15",
  "items": {
   "sp500": {
    "value": 7297.49,
@@ -39,10 +39,10 @@
    "prev": 26.8,
    "change": -2.99,
    "change_pct": -11.16,
-   "asof_utc": "2026-11-27T13:15:00.000-0500",
-   "asof_kst": "1:15 PM EST",
-   "market_state": "REG_MKT",
-   "src": "CNBC .VIX",
+   "asof_utc": "2026-11-27T08:00:00+00:00",
+   "asof_kst": "11/27 17:00",
+   "market_state": null,
+   "src": "Yahoo Finance ^VIX",
    "name": "VIX"
   },
   "us10y": {
@@ -50,10 +50,10 @@
    "prev": 4.848,
    "change": 0.088,
    "change_pct": 1.82,
-   "asof_utc": "2026-11-27T14:30:00.000-0500",
-   "asof_kst": "2:30 PM EST",
-   "market_state": "REG_MKT",
-   "src": "CNBC US10Y",
+   "asof_utc": "2026-11-27T15:30:00+00:00",
+   "asof_kst": "11/28 00:30",
+   "market_state": null,
+   "src": "Yahoo Finance ^TNX",
    "name": "미 10년 금리"
   },
   "us30y": {
@@ -79,23 +79,23 @@
    "name": "미 2년 금리(선물)"
   },
   "usdkrw": {
-   "value": 1333.1,
+   "value": 1333.6,
    "prev": 1342.9,
-   "change": -9.9,
-   "change_pct": -0.73,
-   "asof_utc": "2026-11-27T15:30:00.000-0500",
-   "asof_kst": "3:30 PM EST",
+   "change": -9.3,
+   "change_pct": -0.69,
+   "asof_utc": "2026-11-27T16:15:00.000-0500",
+   "asof_kst": "4:15 PM EST",
    "market_state": "REG_MKT",
    "src": "CNBC KRW=",
    "name": "달러/원"
   },
   "dxy": {
-   "value": 104.03,
+   "value": 104.05,
    "prev": 103.67,
-   "change": 0.37,
-   "change_pct": 0.35,
-   "asof_utc": "2026-11-27T15:30:24.000-0500",
-   "asof_kst": "3:30 PM EST",
+   "change": 0.38,
+   "change_pct": 0.37,
+   "asof_utc": "2026-11-27T16:15:20.000-0500",
+   "asof_kst": "4:15 PM EST",
    "market_state": "REG_MKT",
    "src": "CNBC .DXY",
    "name": "달러지수"
@@ -193,10 +193,10 @@
    "prev": 149.3,
    "change": 1.19,
    "change_pct": 0.8,
-   "asof_utc": "2026-11-27T14:30:00+00:00",
-   "asof_kst": "11/27 23:30",
-   "market_state": null,
-   "src": "Yahoo Finance NVDA",
+   "asof_utc": "2026-11-27T13:15:00.000-0500",
+   "asof_kst": "1:15 PM EST",
+   "market_state": "POST_MKT",
+   "src": "CNBC NVDA",
    "name": "엔비디아"
   },
   "kbe": {
@@ -253,8 +253,6 @@
   "yahoo ^GSPC": "HTTP Error 429: Too Many Requests",
   "yahoo ^IXIC": "HTTP Error 429: Too Many Requests",
   "yahoo ^DJI": "HTTP Error 429: Too Many Requests",
-  "yahoo ^VIX": "HTTP Error 429: Too Many Requests",
-  "yahoo ^TNX": "HTTP Error 429: Too Many Requests",
   "yahoo ^TYX": "HTTP Error 429: Too Many Requests",
   "yahoo 2YY=F": "HTTP Error 429: Too Many Requests",
   "yahoo KRW=X": "HTTP Error 429: Too Many Requests",
@@ -269,6 +267,7 @@
   "yahoo 000660.KS": "HTTP Error 429: Too Many Requests",
   "cnbc 000660-KR": "{'symbol': '000660-KR', 'code': 3}",
   "yahoo MU": "HTTP Error 429: Too Many Requests",
+  "yahoo NVDA": "HTTP Error 429: Too Many Requests",
   "yahoo KBE": "HTTP Error 429: Too Many Requests",
   "yahoo TLT": "HTTP Error 429: Too Many Requests"
  }
