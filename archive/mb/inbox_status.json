@@ -1,1 +1,1 @@
-{"id": "20261127-2245", "at": "2026-11-27 22:44 KST", "push": "ok", "qa": "통과", "applied": ["brain/state.json", "brain/ideas.md", "brain/log/2026-11-27.md", "feeds/hot.json", "feeds/ai_found.json", "market/qa.json"], "skipped": [], "jobs": [], "verify": "", "fcbase": ""}
+{"id": "20261127-2345", "at": "2026-11-27 23:42 KST", "push": "ok", "qa": "통과", "applied": ["brain/state.json", "brain/log/2026-11-27.md", "feeds/hot.json", "feeds/ai_found.json", "market/qa.json"], "skipped": [], "jobs": [], "verify": "", "fcbase": ""}
