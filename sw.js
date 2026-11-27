@@ -61,7 +61,7 @@ self.addEventListener("fetch", function(e){
   // 11/02: 새 버전으로 다시 열 때(주소에 ?v=)는 느려도 새 화면을 기다림 — 4초 만에 옛 화면을 내줘서 고친 것이 폰에 안 들어가던 것
   if (r.mode === "navigate") { e.respondWith(netFirst(r, "ch-page", /[?&]v=/.test(u.search) ? 20000 : 4000)); return; }
   // 10/19: 자료(JSON)는 브라우저 HTTP 캐시(GitHub Pages 10분)를 건너뛰고 늘 서버에 확인 — 장중 10분마다 바뀌는 파일이 옛것으로 보이던 문제
-  if (u.hostname === "raw.githubusercontent.com" || (same && /\.json$/.test(u.pathname))) { e.respondWith(netFirst(new Request(r, {cache: "no-cache"}), DC, 3500, e.clientId)); return; }
+  if (u.hostname === "raw.githubusercontent.com" || /\.sslip\.io$/.test(u.hostname) || (same && /\.json$/.test(u.pathname))) { e.respondWith(netFirst(new Request(r, {cache: "no-cache"}), DC, 3500, e.clientId)); return; }
   if (/cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com/.test(u.hostname)) { e.respondWith(cacheFirst(r, "ch-lib")); return; }   // 주소에 버전이 박힌 외부 도구 — 앱 버전과 무관
   if (same && /\/app\.b\d+\.js$/.test(u.pathname) && u.search) { e.respondWith(bundleFirst(r)); return; }
   if (same && /\.(js|css|png|webmanifest)$/.test(u.pathname) && u.search) { e.respondWith(cacheFirst(r, SC)); return; }

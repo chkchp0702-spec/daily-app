@@ -43,6 +43,25 @@
   }
 })();
 
+/* 🚚 11/27 플랜 B — 막힌 저장소(market-strategy-report) 자료를 오라클 서버에서 먼저 읽음
+   서버(도쿄) = 같은 계산 공장이 그대로 돌며 같은 경로로 파일을 내보냄: raw…/main/<경로>  →  https://SRV/<경로>
+   서버가 안 되면 원래 주소(→ 위 D15 사본)로 그대로 넘어감. GitHub 저장소가 풀려도 이 줄은 해가 없음. */
+(function(){
+  var F = window.fetch; if (!F || F.__srv) return;
+  var SRV = "https://168-110-49-71.sslip.io/";
+  var RX = /^https:\/\/raw\.githubusercontent\.com\/chkchp0702-spec\/market-strategy-report\/(?:refs\/heads\/)?main\/([^#]+)$/;
+  var DOWN = 0;
+  var sf = function(input, init){
+    var u = typeof input === "string" ? input : (input && input.url) || "", m = RX.exec(u);
+    if (!m || DOWN > 1) return F.apply(this, arguments);
+    var self = this, args = arguments, su = SRV + m[1];
+    return F.call(window, su, init).then(function(r){ if (r.ok) return r; return F.apply(self, args); },
+      function(){ DOWN++; return F.apply(self, args); });
+  };
+  sf.__srv = 1; window.fetch = sf;
+  window.__MSR_SRV = SRV;
+})();
+
 /* 🛡 11/18 16시 안정도 2차 (사용자 「안정화 시키랬지…」 — 오늘 첫 화면 큰 칸이 회색 뼈대로 멈춤)
    원인: 첫 화면 큰 칸은 자료 7개가 「다 와야」 그려지는데, 그중 오늘 한 장(pbcard.js)·여러 화면이 fetch 를 시간 제한 없이 직접 부름
    → 5G 가 잠깐 끊기면 응답이 영영 안 와서 뼈대가 그대로. 1차(getJSON 25초)는 getJSON 을 거치는 것만 막았음.
