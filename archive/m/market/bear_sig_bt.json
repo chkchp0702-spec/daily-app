@@ -1,5 +1,5 @@
 {
- "at": "2026-11-24 06:38",
+ "at": "2026-11-28 05:32",
  "rules": {
   "판정": "낙폭(252일 최고 종가 대비) > −10% 🟢 정상 · −10~−20% 🟡 조정 · −20% 이하 🐻 하락장 (🐻 은 낙폭 −10% 위 + 200일선 위까지 유지)",
   "바닥 신호": "① 60일 저점 10거래일 안 깨짐 ② 20일선 위 2일 연속 ③ VIX 20 아래 ④ 🇰🇷 외국인 3일 연속 순매수 / 🇺🇸 50일선 위",
@@ -483,34 +483,34 @@
     {
      "in": "2026-07-08",
      "out": "진행 중",
-     "bottom": "2026-11-23",
-     "bottom_dd": -48.0,
-     "len": 93,
+     "bottom": "2026-11-25",
+     "bottom_dd": -48.5,
+     "len": 97,
      "sig": [
       {
        "fake": 1,
-       "fake_more": -30.4,
+       "fake_more": -31.1,
        "on": null,
        "after": null,
        "up": null
       },
       {
        "fake": 4,
-       "fake_more": -32.3,
+       "fake_more": -33.0,
        "on": null,
        "after": null,
        "up": null
       },
       {
        "fake": 3,
-       "fake_more": -16.6,
+       "fake_more": -17.4,
        "on": null,
        "after": null,
        "up": null
       },
       {
        "fake": 2,
-       "fake_more": -32.2,
+       "fake_more": -32.8,
        "on": null,
        "after": null,
        "up": null
@@ -594,8 +594,8 @@
    "rule": "K100",
    "now": {
     "in": "2026-07-08",
-    "len": 93,
-    "bottom": "2026-11-23",
+    "len": 97,
+    "bottom": "2026-11-25",
     "fake": [
      1,
      4,
@@ -606,7 +606,7 @@
    "key": "kospi",
    "name": "코스피",
    "from": "2000-01-07",
-   "to": "2026-11-23"
+   "to": "2026-11-27"
   },
   {
    "episodes": [
@@ -1224,34 +1224,34 @@
     {
      "in": "2026-06-08",
      "out": "진행 중",
-     "bottom": "2026-11-09",
-     "bottom_dd": -47.9,
-     "len": 115,
+     "bottom": "2026-11-23",
+     "bottom_dd": -48.2,
+     "len": 119,
      "sig": [
       {
        "fake": 2,
-       "fake_more": -34.0,
-       "on": "2026-11-23",
-       "after": 10,
-       "up": 0.5
-      },
-      {
-       "fake": 3,
-       "fake_more": -23.7,
+       "fake_more": -34.4,
        "on": null,
        "after": null,
        "up": null
       },
       {
-       "fake": 4,
-       "fake_more": -35.9,
-       "on": "2026-11-09",
-       "after": 0,
-       "up": 0.0
+       "fake": 3,
+       "fake_more": -24.1,
+       "on": null,
+       "after": null,
+       "up": null
+      },
+      {
+       "fake": 5,
+       "fake_more": -36.3,
+       "on": null,
+       "after": null,
+       "up": null
       },
       {
        "fake": 3,
-       "fake_more": -25.8,
+       "fake_more": -26.2,
        "on": null,
        "after": null,
        "up": null
@@ -1335,19 +1335,19 @@
    "rule": "C6",
    "now": {
     "in": "2026-06-08",
-    "len": 115,
-    "bottom": "2026-11-09",
+    "len": 119,
+    "bottom": "2026-11-23",
     "fake": [
      2,
      3,
-     4,
+     5,
      3
     ]
    },
    "key": "kosdaq",
    "name": "코스닥",
    "from": "2001-10-26",
-   "to": "2026-11-23"
+   "to": "2026-11-27"
   },
   {
    "episodes": [
@@ -1615,7 +1615,7 @@
    "key": "sp500",
    "name": "S&P500",
    "from": "2000-01-03",
-   "to": "2026-11-23"
+   "to": "2026-11-25"
   },
   {
    "episodes": [
@@ -1977,7 +1977,7 @@
    "key": "nasdaq",
    "name": "나스닥",
    "from": "2000-01-03",
-   "to": "2026-11-23"
+   "to": "2026-11-25"
   }
  ]
 }
