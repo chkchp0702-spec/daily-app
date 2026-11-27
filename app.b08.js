@@ -1,6 +1,6 @@
 /* 📦 app.b08.js — tools/bundle.py 가 index.html 의 📦list 목록 순서대로 합친 조각 8/8 (ux1122.js … stab.js). 직접 고치지 말 것(원본 .js 를 고치고 다시 합침). */
 if(typeof __bs!=="function"){window.__bs=window.__bk=window.__be=function(){};}
-__bs(8,84,["ux1122.js", "ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "ux1123.js", "ux1124.js", "ux1124b.js", "say.js", "notice.js", "stab.js"],[4, 48, 433, 891, 1269, 1462, 1591, 1681, 1776, 2046, 2104]);
+__bs(8,84,["ux1122.js", "ux1116.js", "tax.js", "ux1118.js", "ux1119.js", "ux1123.js", "ux1124.js", "ux1124b.js", "say.js", "notice.js", "stab.js"],[4, 48, 433, 891, 1269, 1462, 1591, 1681, 1776, 2046, 2114]);
 /* ======== ux1122.js ======== */
 /* 🎲 11/22 「들고 가면 · 규칙대로 하면 — 이익 확률」 (사용자: 「지금은 이걸 이렇게 들고 가는 게 이익 볼 확률이 몇 퍼센트다 — 표현은 직관적으로 ·
    왜 그런지는 밑에 자세히 탭으로 · 분할해서 현금/주식 비중을 늘려요 같은 표현도」)
@@ -2045,14 +2045,14 @@ __bk(91);
 __bk(92);
 /* ======== notice.js ======== */
 /* 📢 11/25 안내 공지 — 사용자 「어플 처음에 안내 공지를 띄우자」
-   계산 저장소(market-strategy-report)가 11/24 저녁부터 GitHub 에 막혀, 시황·두뇌·계기판·포트 등 분석 자료가 11/24 저녁 기준으로 멈춤.
+   계산 저장소(market-strategy-report)가 11/24 저녁부터 GitHub 에 막힘 → 11/27 부터 오라클 서버로 옮겨 정상 계산. 서버 자료가 36시간 넘게 묵을 때만 공지.
    하는 일: 앱을 열 때(탭/창 하나에 한 번) 가운데 안내 창 + 닫은 뒤에도 맨 위에 얇은 띠 한 줄.
    저절로 사라짐: 막힌 저장소의 자료(raw)를 다시 읽을 수 있으면 = 풀린 것 → 창·띠 모두 안 띄움.
    끄기: index.html 에서 notice.js 줄을 빼면 끝 (정상화되면 뺄 것) */
 (function(){
   var D = document;
   var MSG_T = "📢 안내";
-  var MSG_B = "현재 자료 서버(GitHub) 문제로 <b>시황·두뇌·계기판·포트 등 분석 자료 대부분이 11월 24일 저녁 기준으로 멈춰</b> 있음.<br><br>" +
+  var MSG_B = "현재 자료 서버(GitHub) 문제로 <b>시황·두뇌·계기판·포트 등 분석 자료가 한동안 새로 나오지 않고</b> 있음.<br><br>" +
               "이용에 착오 없으시길 바람.<br><br>" +
               "<b>이 공지가 사라지면 해결된 것</b>으로 보시면 됨.";
   var PROBE = "https://raw.githubusercontent.com/chkchp0702-spec/market-strategy-report/main/market/kick.json?";
@@ -2064,7 +2064,7 @@ __bk(92);
     var b = D.createElement("div");
     b.id = "ntc-bar";
     b.style.cssText = "position:sticky;top:0;z-index:9998;background:#fff4d6;color:#6b4a00;border-bottom:1px solid #f0d58a;font-size:13px;line-height:1.4;padding:calc(env(safe-area-inset-top,0px) + 7px) 12px 7px;text-align:center;cursor:pointer";
-    b.innerHTML = "⚠ 분석 자료 대부분 <b>11/24 저녁 기준</b> (자료 서버 문제) · 눌러서 보기";
+    b.innerHTML = "⚠ 분석 자료가 <b>잠시 멈춤</b> (자료 서버 문제) · 눌러서 보기";
     b.onclick = pop;
     D.body.insertBefore(b, D.body.firstChild);
   }
@@ -2086,14 +2086,24 @@ __bk(92);
 
   function show(){ bar(); if (ss("ntc1125") !== "1") pop(); }
 
+  /* 🩹 11/27 정상화 — 자료는 이제 오라클 서버에서 새로 나옴(시황·두뇌·계기판·포트).
+     서버 계기판(market/bear.json)의 계산 시각이 36시간 안이면 「정상」으로 보고 공지를 안 띄움.
+     서버도 못 읽거나 36시간 넘게 묵었을 때만 띄움. */
+  var SRVP = "https://168-110-49-71.sslip.io/market/bear.json?";
+  function fresh(at){
+    var m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/.exec(at || ""); if (!m) return false;
+    var t = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - 9, +m[5]);   /* KST → UTC */
+    return (Date.now() - t) < 36 * 3600 * 1000;
+  }
   function go(){
     var done = false;
-    /* 막힌 저장소를 다시 읽을 수 있으면 공지 안 띄움. 5초 안에 답이 없으면 막힌 것으로 보고 띄움 */
-    var t = setTimeout(function(){ if (!done){ done = true; show(); } }, 5000);
-    fetch(PROBE + Math.floor(Date.now() / 300000), {cache: "no-store"}).then(function(r){
+    var t = setTimeout(function(){ if (!done){ done = true; show(); } }, 8000);
+    fetch(SRVP + Math.floor(Date.now() / 300000), {cache: "no-store"}).then(function(r){
+      if (!r.ok || r.headers.get("X-From-Cache")) throw 0;
+      return r.json();
+    }).then(function(j){
       if (done) return; done = true; clearTimeout(t);
-      /* 🩹 sw.js 가 404 일 때 예전 저장본(X-From-Cache)을 대신 줌 → 저장본은 「풀림」으로 안 셈 */
-      if (!r.ok || r.headers.get("X-From-Cache")) show();
+      if (!fresh(j && j.at)) show();
     }).catch(function(){ if (!done){ done = true; clearTimeout(t); show(); } });
   }
 
