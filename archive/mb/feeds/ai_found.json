@@ -1,6 +1,22 @@
 {
  "items": [
   {
+   "title": "Stocks are poised for a Friday jump — right into a $100 billion wave of automated selling, Goldman Sachs warns",
+   "url": "https://www.marketwatch.com/story/stocks-are-poised-for-a-friday-jump-right-into-a-100-billion-wave-of-automated-selling-goldman-sachs-warns-aba6440f",
+   "press": "MarketWatch",
+   "at": "2026-11-27 22:45",
+   "why": "🇺🇸 50% 칸 — 단축장 S&P가 200일선 7,352 위로 마감해도 CTA 매도가 복귀 3일을 흔들 수 있음",
+   "summary": "골드만 트레이더: 추세추종 펀드(CTA)의 올해 마지막 큰 매도가 남았고 규모는 약 1,000억$ — 금요일 반등이 그 매도와 부딪힐 수 있다(11/27)."
+  },
+  {
+   "title": "Blackwell Chips Found at Alice Huang-Linked China Site",
+   "url": "https://www.bloomberg.com/news/videos/2026-11-27/blackwell-chips-found-at-alice-huang-linked-china-site-video",
+   "press": "Bloomberg",
+   "at": "2026-11-27 22:45",
+   "why": "SOX(표시용 0%)·엔비디아 — 12/3 상원 수출통제 청문회 앞 규제 강화 위험",
+   "summary": "블룸버그 조사: 중국 업체들이 앨리스 황 연계 상하이 데이터센터에 엔비디아 GB300 블랙웰 랙을 설치 — 미국 수출 제한 대상 장비(11/27)."
+  },
+  {
    "title": "U.S. Stock Futures Surge As Nvidia, Anthropic And Other AI Shares Rally In Premarket Trading",
    "url": "https://www.forbes.com/sites/siladityaray/2026/11/27/stock-futures-surge-as-battered-ai-shares-rebound-ahead-of-shorterned-friday-trading/",
    "press": "Forbes",
@@ -623,23 +639,7 @@
    "at": "2026-11-23 02:45",
    "why": "엔비디아(🐋 11/17·💬 3) — 캘리포니아 형사 범위 확대에 이어 연방 법무부도 칩 수출 경로 조사, 규제 위험이 주 정부·연방 양쪽으로",
    "summary": "미국이 엔비디아 칩 대중 수출 의혹 업체 메가스피드 조사를 확인(날짜·세부 미확인). 별도로 약 75억$ 규모 대중 밀반출 보도(디지털트렌드)·세마포 「여러 법무부 조사가 엔비디아에 닿을 수 있다」."
-  },
-  {
-   "title": "대만, 신용 담보유지비율 130%→120% 인하 추진 — 증시 안정 조치",
-   "url": "https://www.bloomberg.com/news/articles/2026-11-22/taiwan-mulls-lowering-margin-requirement-to-support-stock-market",
-   "press": "Bloomberg",
-   "at": "2026-11-23 01:45",
-   "why": "반도체 칸·🐻 — 한(자사주 한도·증안펀드)·중(증거금 100→80%)에 이어 대만도 반대매매 고리 끊기, 월요일 아시아 반도체 갭 크기 변수",
-   "summary": "대만 거래소 신용 담보유지비율 130%→120% 검토(블룸버그 11/22) · 주간 낙폭 사상 최대(가권 −7,641p, COINOTAG) · 직전가 아래 공매도 금지 11/23부터"
-  },
-  {
-   "title": "12월 제조업 경기전망 97로 넉 달 만에 기준선 아래 — ICT 업황 올해 첫 「부정적」",
-   "url": "https://www.hankookilbo.com/news/article/A2026112214310001951",
-   "press": "한국일보",
-   "at": "2026-11-23 01:45",
-   "why": "반도체 칸·💬 5번 — 수출 1조$·메모리 「완판」 속 ICT 기업 심리 올해 처음 100 아래, 주가(−50%)에 이어 심리도 꺾임",
-   "summary": "12월 제조업 업황 전망 97(4개월 만에 100 하회) · ICT 부문 올해 처음 기준치 하회(TV서울·네이트) · 반도체·자동차는 상대 선방, 철강·휴대폰 한파(이투데이)"
   }
  ],
- "at": "2026-11-27 20:40"
+ "at": "2026-11-27 22:45"
 }
