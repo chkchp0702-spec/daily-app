@@ -17,10 +17,17 @@ IMG=$(oci compute image list -c $C --operating-system "Canonical Ubuntu" --opera
 [ -f ~/.ssh/id_rsa ] || ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/id_rsa -q
 ID=$(oci compute instance list -c $C --display-name msr --lifecycle-state RUNNING --query 'data[0].id' --raw-output 2>/dev/null || true)
 if [ -z "$ID" ] || [ "$ID" = "None" ]; then
-echo "③ 서버 만드는 중 (2~5분)..."
+echo "③ 서버 만드는 중 — 자리가 날 때까지 1분마다 다시 시도 (최대 ${TRIES:-15}번 · 이 화면 그대로 두세요)..."
 ID=""
-for AD in $(oci iam availability-domain list -c $C --query 'data[].name' --raw-output | tr -d '[]",'); do
-  ID=$(oci compute instance launch -c $C --availability-domain "$AD" --shape VM.Standard.A1.Flex --shape-config '{"ocpus":2,"memoryInGBs":12}' --display-name msr --image-id $IMG --subnet-id $SUB --assign-public-ip true --ssh-authorized-keys-file ~/.ssh/id_rsa.pub --boot-volume-size-in-gbs 50 --wait-for-state RUNNING --query 'data.id' --raw-output 2>/tmp/err.txt) && break || { echo "  $AD 실패:"; grep -o '"message": "[^"]*"' /tmp/err.txt | head -1; ID=""; }
+ADS=$(oci iam availability-domain list -c $C --query 'data[].name' --raw-output | tr -d '[]",')
+for T in $(seq 1 ${TRIES:-15}); do
+  for SH in '{"ocpus":2,"memoryInGBs":12}' '{"ocpus":1,"memoryInGBs":6}'; do
+    for AD in $ADS; do
+      ID=$(oci compute instance launch -c $C --availability-domain "$AD" --shape VM.Standard.A1.Flex --shape-config "$SH" --display-name msr --image-id $IMG --subnet-id $SUB --assign-public-ip true --ssh-authorized-keys-file ~/.ssh/id_rsa.pub --boot-volume-size-in-gbs 50 --wait-for-state RUNNING --query 'data.id' --raw-output 2>/tmp/err.txt) && break 3
+      ID=""; echo "  [$T번째] $(echo $SH | tr -d '{}\"') 자리 없음: $(grep -o '"message": "[^"]*"' /tmp/err.txt | head -1 | cut -c13-)"
+    done
+  done
+  [ $T -lt ${TRIES:-15} ] && sleep 60
 done
 fi
 [ -n "$ID" ] || { echo "❌ 서버를 못 만듦 — 위 실패 메시지를 캡처해 주세요"; exit 1; }
