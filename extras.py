@@ -751,6 +751,22 @@ def premarket():
     if not syms:
         return
     out = []
+    # 🩹 11/27 전날 정규장 종가는 일봉으로 따로 받음(오늘 날짜 봉은 빼고 그 전 마지막 종가)
+    daily_close = {}
+    try:
+        dd = yf.download(syms, period="10d", interval="1d", group_by="ticker", progress=False, threads=True, auto_adjust=False)
+        from zoneinfo import ZoneInfo
+        today_et = dt.datetime.now(ZoneInfo("America/New_York")).date()
+        for s in syms:
+            try:
+                c = (dd[s] if isinstance(dd.columns, pd.MultiIndex) else dd)["Close"].dropna()
+                c = c[[d.date() < today_et for d in c.index]]
+                if len(c):
+                    daily_close[s] = float(c.iloc[-1])
+            except Exception:
+                continue
+    except Exception as e:
+        print("프리마켓 일봉 실패", e)
     for i in range(0, len(syms), 100):
         part = syms[i:i + 100]
         try:
@@ -763,11 +779,17 @@ def premarket():
                 sub = (df[s] if isinstance(df.columns, pd.MultiIndex) else df)["Close"].dropna()
                 idx = sub.index.tz_convert("America/New_York")
                 today = idx[-1].date()
-                reg_prev = sub[(idx.date < today) & (idx.time >= dt.time(9, 30)) & (idx.time < dt.time(16, 0))]
                 pre = sub[(idx.date == today) & (idx.time < dt.time(9, 30))]
-                if not len(reg_prev) or not len(pre):
+                if not len(pre):
                     continue
-                pc, pp = float(reg_prev.iloc[-1]), float(pre.iloc[-1])
+                pp = float(pre.iloc[-1])
+                # 🩹 11/27 전날 종가 = 일봉 종가(정규장 공식 종가) — 5분봉 마지막 값은 휴장·단축장·빈 봉에서 엉뚱한 값(엔비디아 155.47 vs 실제 149.30)이 나옴
+                pc = (daily_close or {}).get(s)
+                if pc is None:
+                    reg_prev = sub[(idx.date < today) & (idx.time >= dt.time(9, 30)) & (idx.time < dt.time(16, 0))]
+                    if not len(reg_prev):
+                        continue
+                    pc = float(reg_prev.iloc[-1])
                 g = (pp / pc - 1) * 100
                 if abs(g) >= 2:
                     out.append({"s": s, "n": watch[s]["name"], "why": sorted(watch[s]["why"]), "prev": r2(pc), "pre": r2(pp), "gap": r2(g)})
