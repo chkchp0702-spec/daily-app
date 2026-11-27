@@ -11,4 +11,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q yfinance pandas numpy holidays scikit-learn
-      - run: python probe/harvol_bt.py
+      - run: python probe/harvol2_bt.py
