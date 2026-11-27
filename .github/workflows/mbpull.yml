@@ -3,7 +3,8 @@ name: mbpull
 on:
   schedule:
     - cron: "13,43 9-12 * * 1-5"   # 평일 KST 18:13 ~ 21:43
-    - cron: "13,43 * * * 0,6"      # 토·일 하루 종일 (KST 기준 토 09시~월 08시 근처)
+    - cron: "13,43 * * * 0,6"      # 토·일 하루 종일 (KST 토 09시~월 09시)
+    - cron: "13,43 22-23 * * *"    # 매일 KST 07:13~08:43 (live 아침 공백)
   workflow_dispatch:
 permissions:
   contents: write
