@@ -35,6 +35,9 @@ elif [ "$MODE" = "brain" ]; then
              market/sentiment.json market/bubble.json market/bubble_proxy.json market/bets_score.json market/peers.json market/conc.json market/home.json market/sectors.json; do
     get "$rel" || true
   done
+  # v2(11/27): 아침 리포트·백테스트용 — 최근 8일 data · 양식 · 성적표 · 서버 상태
+  for i in $(seq 0 7); do get "data/$(TZ=Asia/Seoul date -d "-$i day" +%F).json" >/dev/null || true; done
+  for rel in data/_template.json README.md market/scores.json market/lab/_last_log.txt inbox_status.json jobs_history.txt; do get "$rel" >/dev/null || true; done
   if get feeds/my_feed.json; then python3 tools/feed_trim.py "$OUT/feeds/my_feed.json" "$OUT/feeds/my_feed_recent.json" && rm -f "$OUT/feeds/my_feed.json"; fi
   echo "{\"at\": \"$(TZ=Asia/Seoul date '+%F %H:%M') KST\", \"from\": \"$SRV\", \"ok\": $ok, \"miss\": $miss}" > "$OUT/_pulled.json"
   echo "srv_pull brain: $ok 개 받음 · 못 받음 $miss"
