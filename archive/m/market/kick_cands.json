@@ -7765,6 +7765,103 @@
 "src": "accum",
 "score": 51.0,
 "lv": 21.27
+},
+"UMH|2026-11-25|ins": {
+"code": "UMH",
+"name": "UMH",
+"mkt": "US",
+"d": "2026-11-25",
+"src": "ins",
+"score": 76.1,
+"note": "기회형 내부자 5명 · 114천 달러 (10일 안 공시)"
+},
+"BHRB|2026-11-25|ins": {
+"code": "BHRB",
+"name": "BHRB",
+"mkt": "US",
+"d": "2026-11-25",
+"src": "ins",
+"score": 66.4,
+"note": "기회형 내부자 3명 · 142천 달러 (10일 안 공시)"
+},
+"GLXY|2026-11-25|ins": {
+"code": "GLXY",
+"name": "GLXY",
+"mkt": "US",
+"d": "2026-11-25",
+"src": "ins",
+"score": 80,
+"note": "기회형 내부자 3명 · 6,394천 달러 (10일 안 공시)"
+},
+"TROX|2026-11-25|ins": {
+"code": "TROX",
+"name": "TROX",
+"mkt": "US",
+"d": "2026-11-25",
+"src": "ins",
+"score": 66.1,
+"note": "기회형 내부자 3명 · 107천 달러 (10일 안 공시)"
+},
+"TGEN|2026-11-25|ins": {
+"code": "TGEN",
+"name": "TGEN",
+"mkt": "US",
+"d": "2026-11-25",
+"src": "ins",
+"score": 80,
+"note": "기회형 내부자 6명 · 101천 달러 (10일 안 공시)"
+},
+"PRE|2026-11-25|ins": {
+"code": "PRE",
+"name": "PRE",
+"mkt": "US",
+"d": "2026-11-25",
+"src": "ins",
+"score": 77.6,
+"note": "기회형 내부자 3명 · 1,264천 달러 (10일 안 공시)"
+},
+"PED|2026-11-24|ins": {
+"code": "PED",
+"name": "PED",
+"mkt": "US",
+"d": "2026-11-24",
+"src": "ins",
+"score": 69.4,
+"note": "기회형 내부자 3명 · 443천 달러 (10일 안 공시)"
+},
+"CTSO|2026-11-24|ins": {
+"code": "CTSO",
+"name": "CTSO",
+"mkt": "US",
+"d": "2026-11-24",
+"src": "ins",
+"score": 79.3,
+"note": "기회형 내부자 5명 · 435천 달러 (10일 안 공시)"
+},
+"XGPU|2026-11-24|ins": {
+"code": "XGPU",
+"name": "XGPU",
+"mkt": "US",
+"d": "2026-11-24",
+"src": "ins",
+"score": 70.1,
+"note": "기회형 내부자 3명 · 515천 달러 (10일 안 공시)"
+},
+"CPNG|2026-11-28|whale": {
+"code": "CPNG",
+"name": "CPNG",
+"mkt": "US",
+"d": "2026-11-28",
+"src": "whale",
+"score": 40
+},
+"ORCL|2026-11-28|whale": {
+"code": "ORCL",
+"name": "ORCL",
+"mkt": "US",
+"d": "2026-11-28",
+"src": "whale",
+"score": 40
 }
 },
 "sent": [
@@ -7785,26 +7882,27 @@
 "2026-11-06|팔기|PAGP"
 ],
 "whale": [
+"AMZN",
+"APP",
+"AVTX",
 "BKNG",
-"BMRN",
 "BMY",
-"CBRE",
-"CDW",
 "COF",
 "CPNG",
-"GPCR",
+"GHRS",
 "HUM",
 "MA",
-"MCHP",
 "META",
+"MSFT",
+"NEM",
 "NRIX",
-"NVDA",
 "ONON",
 "ORCL",
-"RIG",
+"ORKA",
 "SGI",
 "STOK",
-"SW",
-"TXN"
+"TSM",
+"TXN",
+"ZBRA"
 ]
 }

@@ -1,4 +1,4 @@
-20261128T081604Z.log
+20261128T082804Z.log
 ▶ 검산 data/2026-11-28.json
 ⚔️ 1:1 대결 새로움 OK — JP모건 (美 주식전략) vs 골드만삭스 (프리보로츠키 · 트레이딩)
 
@@ -17,9 +17,34 @@ series us10y 2026-11-27          4.94               4.94 (2026-11-27)           
 어긋남 0건 — 통과
 집중: 주택건설 / 바이오 · 나라 1위 중국 · 성적 27/62
 ▶ 리포트 만들기
-[Market_Strategy_Report_2026_11_28_HOL] pages=8 p1:+60px p2:+225px p3:+49px p4:+54px p5:+112px p6:+92px p7:+38px p8:+45px
-  !! page 7: content bottom 7773 vs footer 7811 (여유 38px < 40)
-[Market_Strategy_Summary_2026_11_28_HOL] pages=1 p1:+24px
-  !! page 1: content bottom 1035 vs footer 1059 (여유 24px < 40)
-빌드 실패: 넘침. data 파일의 글을 줄이거나 템플릿을 조정하세요.
-✗ build_report 실패 코드 2 (2 = 쪽 넘침 — 글을 줄여 다시)
+[Market_Strategy_Report_2026_11_28_HOL] pages=8 p1:+60px p2:+225px p3:+49px p4:+54px p5:+112px p6:+92px p7:+75px p8:+45px
+[Market_Strategy_Summary_2026_11_28_HOL] pages=1 p1:+148px
+장부 갱신: ledger/ledger.json (2026-11-28)
+완료 → /srv/msr/runs/morning-build.dywjYs/repo/reports/2026-11-28_HOL
+완료 → /srv/msr/runs/morning-build.dywjYs/repo/docs/index.html (2026-11-28 HOL)
+/srv/msr/runs/morning-build.dywjYs/repo/src/port.py:407: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+  rw = rules_on(e, d0, (d1 - pd.Timedelta(days=1)).strftime("%Y-%m-%d"), vol_on(d1))[0]
+/srv/msr/runs/morning-build.dywjYs/repo/src/port.py:458: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+  rw = rules_on(e, d0, (d1 - pd.Timedelta(days=1)).strftime("%Y-%m-%d"), vol_on(d1))[0]
+포트 -4.63% vs S&P -4.67% · 40거래일 · 빠진 시세 []
+HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: CFLT"}}}
+$CFLT: possibly delisted; no timezone found
+$CWAN: possibly delisted; no price data found  (1d 2026-05-25 -> 2026-11-28)
+
+2 Failed downloads:
+['CFLT']: possibly delisted; no timezone found
+['CWAN']: possibly delisted; no price data found  (1d 2026-05-25 -> 2026-11-28)
+기본 -4.63% · 킥 -7.57% · 슬리브 -12.66% · 거래 12 · 들고 있는 것 1
+🗓 빈 종가 채움 0칸 · []
+/srv/msr/runs/morning-build.dywjYs/repo/src/conc_port.py:122: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+  x = d + pd.Timedelta(days=1)
+/srv/msr/runs/morning-build.dywjYs/repo/src/conc_port.py:124: DeprecationWarning: The 'generic' unit for NumPy timedelta is deprecated, and will raise an error in the future. This includes implicit conversion of bare integers (e.g. `+ 1`). Please use a specific unit instead.
+  x += pd.Timedelta(days=1)
+🎯 집중 🔴 아님(S&P 200일선 -0.8%) · -4.34% vs S&P -4.67% · 기본 -4.63 · 킥 -7.57
+홈 · 성적표 7줄 · 신호 색인 337종목 · 단타 오늘 0건
+push.sh: 올림 (1번째)
+보냄 ☕ 11/28 오늘 한 줄 · 휴장판 | ⚡ 코스닥 +8.1%·창업판 +11.6%·코스피 외국인 +1.16조 — 아시아는 「정부가 사는 날」, 그런데 미 10년 금리는 …
+🎯 새로 뜬 곳 ITB·XBI — 연속 0일, 관찰만
+🎯 어제 예고 ✓ ✓ 보류 — 앱에서 결과 보기
+아침 알림 보냄
+✅ 리포트 올림: reports/2026-11-28_HOL
