@@ -265,7 +265,10 @@
       var guard = setTimeout(function(){ var x = document.getElementById("ezhero"); if (x && !x.classList.contains("ez-done") && x.querySelector(".ez-skel")){ x.innerHTML = retry; HB = 0; if (window.chErr) chErr("stuck", "첫 화면 큰 칸 12초", "ux1105c.js"); } }, 12000);
       brief().then(function(b){ clearTimeout(guard); var x = document.getElementById("ezhero"), y = document.getElementById("ezrows"); if (!x) return; var ok = b && (b.one || b.talk);
         try {
-          x.innerHTML = ok ? heroHtml(b) : !b ? retry : '<div class="ez-load">아직 오늘 자료가 안 올라왔어요 · 아래 「오늘 자세히 보기」를 눌러 주세요</div>';   /* b 없음 = 못 받음 → 다시 불러오기 */
+          var nh = ok ? heroHtml(b) : !b ? retry : '<div class="ez-load">아직 오늘 자료가 안 올라왔어요 · 아래 「오늘 자세히 보기」를 눌러 주세요</div>';   /* b 없음 = 못 받음 → 다시 불러오기 */
+          /* 🩹 11/28 사용자 「바닥인지 보려고 하면 자꾸 어플이 튕겨서 닫고 위로 올라와」 — 1분마다 통째로 갈아 끼워 펼친 칸(언제 다시 사나·바닥 점검표)이 닫히고 화면이 위로 튐
+             → 같은 내용이면 안 건드림 · 바뀌었으면 펼친 칸과 보던 자리를 그대로 살려서 바꿈(window.__keepOpen) */
+          if (x.__h !== nh){ if (window.__keepOpen) __keepOpen(x, function(){ x.innerHTML = nh; }); else x.innerHTML = nh; x.__h = nh; }
           if (!b) HB = 0;
           if (y) y.innerHTML = ok ? rowsHtml(b) : '';   /* 참고용 문구는 화면 맨 아래 공통 고지가 맡음 */
         } catch(er){ x.innerHTML = retry; HB = 0; if (window.chErr) chErr("render", (er && er.message) || er, "ux1105c.js", " · 첫 화면 큰 칸"); }
@@ -449,6 +452,20 @@
     if (cur() === "home") setTimeout(tour, 1800);
   }
   function soon(){ if (!q) q = setTimeout(tick, 200); }
+  /* 🩹 11/28 펼친 칸 지키기 — fn() 으로 안을 갈아 끼워도 ① 열려 있던 <details> 를 다시 열고 ② 손가락이 보던 자리(가장 안쪽 열린 칸의 제목)를 화면 같은 높이에 둠.
+     칸은 「같은 종류(class) 중 몇 번째」로 찾음 — 숫자가 바뀌어도 순서는 같음. 다른 화면에서도 쓸 수 있게 window 에 둠. */
+  window.__keepOpen = function(box, fn){
+    var key = function(d){ var c = (d.className || "").split(" ")[0] || "_"; var all = box.querySelectorAll("details" + (d.className ? "." + c : "")); return c + "#" + [].indexOf.call(all, d); };
+    var op = [].filter.call(box.querySelectorAll("details"), function(d){ return d.open; }).map(key), anc = null, top = 0;
+    var vis = [].filter.call(box.querySelectorAll("details[open] > summary"), function(sm){ var r = sm.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; });
+    if (!vis.length && op.length){ vis = [].filter.call(box.querySelectorAll("details[open] > summary"), function(sm){ return sm.getBoundingClientRect().top < 0; }); vis = vis.slice(-1); }
+    if (vis.length){ anc = key(vis[vis.length - 1].parentNode); top = vis[vis.length - 1].getBoundingClientRect().top; }
+    fn();
+    if (!op.length) return;
+    var seen = {};
+    [].forEach.call(box.querySelectorAll("details"), function(d){ var k = key(d); if (op.indexOf(k) >= 0) d.open = true; seen[k] = d; });
+    if (anc && seen[anc]){ var sm = seen[anc].querySelector("summary"); if (sm){ var d = sm.getBoundingClientRect().top - top; if (Math.abs(d) > 1) scrollBy(0, d); } }
+  };
   function start(){ apply(); try { new MutationObserver(soon).observe(document.body, {childList: true, subtree: true}); } catch(x) {} setInterval(tick, 3000); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 

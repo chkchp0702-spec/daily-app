@@ -141,7 +141,8 @@
         if (!j || !j.ix) return; var was = IXR && IXR.at; IXR = j; try { localStorage.setItem("ch-ixr", JSON.stringify(j)); } catch (_) {}
         if (was === j.at || !lastBR) return;
         var el = document.querySelector(".fa"); if (!el) return;       // 이미 그려진 표가 있으면 새 값으로 다시 그림
-        var t = document.createElement("div"); t.innerHTML = floorAll(lastBR); if (t.firstChild) el.parentNode.replaceChild(t.firstChild, el);
+        var nh = floorAll(lastBR), box = el.parentNode, swap = function(){ var t = document.createElement("div"); t.innerHTML = nh; if (t.firstChild && el.isConnected) box.replaceChild(t.firstChild, el); };
+        if (window.__keepOpen) __keepOpen(box, swap); else if (!el.querySelector("details[open]")) swap();   // 🩹 11/28 펼친 줄은 그대로 · 보던 자리 그대로
       }).catch(function(){});
     } catch (_) {}
   }
