@@ -1,39 +1,27 @@
 {
-"at": "2026-11-24 15:09",
-"signals": [
-{
-"src": "pead",
-"code": "KYMR",
-"name": "Kymera Therapeutics, Inc.",
-"mkt": "US",
-"d": "2026-11-23",
-"vr": 8.6,
-"gap": 19.7,
-"px": 150.37,
-"score": 30.0
-}
-],
+"at": "2026-11-28 07:20",
+"signals": [],
 "state": {
 "index_KR": {
 "sym": "^KS11",
 "above200": false,
-"d": "2026-11-24"
+"d": "2026-11-26"
 },
-"scanned_KR": 2614,
+"scanned_KR": 2613,
 "us_source": "US.json 전 종목 5923 + ETF 4975 (2026-11-22)",
 "index_US": {
 "sym": "^GSPC",
 "above200": false,
-"d": "2026-11-23"
+"d": "2026-11-27"
 },
-"scanned_US": 9163,
+"scanned_US": 9174,
 "dip": {
 "sym": "QQQ",
-"d": "2026-11-23",
-"close": 651.03,
-"ma200": 682.29,
-"ma5": 644.2,
-"rsi2": 65.2,
+"d": "2026-11-27",
+"close": 650.99,
+"ma200": 682.74,
+"ma5": 636.5,
+"rsi2": 73.3,
 "th": 5.0,
 "signal": false
 },
@@ -43,168 +31,80 @@
 "GLD": {
 "on": false,
 "since": "2026-03-23",
-"close": 333.02,
+"close": 334.4,
 "hi": 429.42,
-"lo": 320.95,
-"d": "2026-11-23"
+"lo": 313.96,
+"d": "2026-11-27"
 },
 "USO": {
 "on": false,
 "since": "2026-11-18",
-"close": 133.36,
+"close": 137.77,
 "hi": 171.82,
-"lo": 135.01,
-"d": "2026-11-23"
+"lo": 132.28,
+"d": "2026-11-27"
 },
 "TLT": {
 "on": false,
 "since": null,
-"close": 81.69,
-"hi": 84.41,
+"close": 81.27,
+"hi": 83.47,
 "lo": 76.11,
-"d": "2026-11-23"
+"d": "2026-11-27"
 },
 "UUP": {
 "on": true,
 "since": "2026-03-12",
-"close": 29.78,
-"hi": 29.67,
-"lo": 28.14,
-"d": "2026-11-23"
+"close": 29.72,
+"hi": 29.84,
+"lo": 28.34,
+"d": "2026-11-27"
 },
 "SPY": {
 "on": false,
 "since": "2026-11-05",
-"close": 722.29,
+"close": 728.32,
 "hi": 781.62,
 "lo": 686.75,
-"d": "2026-11-23"
+"d": "2026-11-27"
 },
 "QQQ": {
 "on": false,
 "since": "2026-10-30",
-"close": 651.03,
+"close": 650.99,
 "hi": 762.86,
 "lo": 606.23,
-"d": "2026-11-23"
+"d": "2026-11-27"
 },
 "EFA": {
 "on": false,
 "since": "2026-11-06",
-"close": 98.76,
+"close": 100.52,
 "hi": 108.89,
 "lo": 95.99,
-"d": "2026-11-23"
+"d": "2026-11-27"
 },
 "EEM": {
 "on": false,
 "since": "2026-07-29",
-"close": 57.83,
+"close": 58.1,
 "hi": 69.23,
 "lo": 53.65,
-"d": "2026-11-23"
+"d": "2026-11-27"
 },
 "DBC": {
 "on": false,
 "since": "2026-11-16",
-"close": 29.11,
+"close": 29.55,
 "hi": 34.14,
-"lo": 29.15,
-"d": "2026-11-23"
+"lo": 28.82,
+"d": "2026-11-27"
 }
 }
 }
 },
 "errors": [],
 "log": [
-{
-"src": "pead",
-"code": "RRC",
-"name": "Range Resources Corporation Common Stock",
-"mkt": "US",
-"d": "2026-10-26",
-"vr": 10.2,
-"gap": 11.6,
-"px": 53.56,
-"score": 30.0
-},
-{
-"src": "pead",
-"code": "SGRY",
-"name": "Surgery Partners, Inc.",
-"mkt": "US",
-"d": "2026-10-26",
-"vr": 25.5,
-"gap": 46.2,
-"px": 23.25,
-"score": 30.0
-},
-{
-"src": "pead",
-"code": "KNSA",
-"name": "Kiniksa Pharmaceuticals International, plc - Class A Ordinary Shares",
-"mkt": "US",
-"d": "2026-10-27",
-"vr": 4.0,
-"gap": 16.5,
-"px": 89.2,
-"score": 20.2
-},
-{
-"src": "pead",
-"code": "MFIC",
-"name": "MidCap Financial Investment Corporation - Closed End Fund",
-"mkt": "US",
-"d": "2026-10-27",
-"vr": 14.4,
-"gap": 22.0,
-"px": 10.26,
-"score": 30.0
-},
-{
-"src": "pead",
-"code": "BLCO",
-"name": "Bausch + Lomb Corporation Common Shares",
-"mkt": "US",
-"d": "2026-10-28",
-"vr": 8.9,
-"gap": 5.2,
-"px": 20.4,
-"score": 30.0
-},
-{
-"src": "pead",
-"code": "ICLR",
-"name": "ICON plc",
-"mkt": "US",
-"d": "2026-10-28",
-"vr": 4.5,
-"gap": 8.9,
-"px": 214.16,
-"score": 22.7
-},
-{
-"src": "pead",
-"code": "KIDS",
-"name": "OrthoPediatrics Corp.",
-"mkt": "US",
-"d": "2026-10-28",
-"vr": 7.9,
-"gap": 4.7,
-"px": 30.8,
-"score": 30.0
-},
-{
-"src": "pead",
-"code": "WING",
-"name": "Wingstop Inc.",
-"mkt": "US",
-"d": "2026-10-28",
-"vr": 3.1,
-"gap": 7.7,
-"px": 138.57,
-"score": 15.3
-},
 {
 "src": "pead",
 "code": "ADT",
