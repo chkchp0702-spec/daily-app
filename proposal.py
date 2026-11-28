@@ -74,7 +74,10 @@ def md(d):
 
 # ───────── 공통 재료 ─────────
 def morning():
-    ms = sorted(glob.glob(os.path.join("archive", "market", "20*_AM", "data.json")))
+    # 📅 11/28 아침판(AM)만 보던 것 → 휴장판(HOL)·주간판(WK)도 (사용자 「모든 것의 정상화」 — 11/24 AM 뒤 판이 없어 제안서·채권 보고서가 「11/24 아침 시황」에 멈춰 있었음)
+    #    같은 양식(data.json 키 동일 확인) · 폴더 이름(날짜_판) 순서상 가장 새 날짜 것
+    ms = sorted(glob.glob(os.path.join("archive", "market", "20*_AM", "data.json")) + glob.glob(os.path.join("archive", "market", "20*_HOL", "data.json")) + glob.glob(os.path.join("archive", "market", "20*_WK", "data.json")),
+                key=lambda f: os.path.basename(os.path.dirname(f))[:10])
     return (jl(ms[-1], {}) if ms else {}) or {}
 
 
@@ -807,7 +810,7 @@ def main():
     out = {
         "at": NOW.strftime("%Y-%m-%d %H:%M"),
         "macro": macro,
-        "basis": f"{md(D.get('date'))} 아침 시황 · 상품 {str(PR.get('updated') or '')[5:16].replace('-', '/')} · 시세 {PB.get('label') or ''}",
+        "basis": f"{md(D.get('date'))} {D.get('edition_label') or '아침판'} 시황 · 상품 {str(PR.get('updated') or '')[5:16].replace('-', '/')} · 시세 {PB.get('label') or ''}",
         "market": market_block(),
         "forms": forms,
         "notice": ["본 자료는 투자 권유를 위한 참고 자료이며, 투자 결과에 대한 책임은 투자자 본인에게 있음",
