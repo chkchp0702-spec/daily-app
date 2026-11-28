@@ -1,4 +1,4 @@
-20261128T075904Z.log
+20261128T081103Z.log
 ▶ 검산 data/2026-11-28.json
 ⚔️ 1:1 대결 새로움 OK — JP모건 (美 주식전략) vs 골드만삭스 (프리보로츠키 · 트레이딩)
 
@@ -17,12 +17,11 @@ series us10y 2026-11-27          4.94               4.94 (2026-11-27)           
 어긋남 0건 — 통과
 집중: 주택건설 / 바이오 · 나라 1위 중국 · 성적 27/62
 ▶ 리포트 만들기
-[Market_Strategy_Report_2026_11_28_HOL] pages=8 p1:+46px p2:+192px p3:-109px p4:+54px p5:-29px p6:+92px p7:+21px p8:+0px
-  !! page 3: content bottom 3430 vs footer 3321 (여유 -109px < 40)
-  !! page 5: content bottom 5595 vs footer 5566 (여유 -29px < 40)
-  !! page 7: content bottom 7790 vs footer 7811 (여유 21px < 40)
-  !! page 8: content bottom 8934 vs footer 8934 (여유 0px < 40)
-[Market_Strategy_Summary_2026_11_28_HOL] pages=1 p1:-47px
-  !! page 1: content bottom 1093 vs footer 1046 (여유 -47px < 40)
+[Market_Strategy_Report_2026_11_28_HOL] pages=8 p1:+60px p2:+225px p3:+27px p4:+54px p5:+30px p6:+92px p7:+38px p8:+45px
+  !! page 3: content bottom 3294 vs footer 3321 (여유 27px < 40)
+  !! page 5: content bottom 5536 vs footer 5566 (여유 30px < 40)
+  !! page 7: content bottom 7773 vs footer 7811 (여유 38px < 40)
+[Market_Strategy_Summary_2026_11_28_HOL] pages=1 p1:-4px
+  !! page 1: content bottom 1063 vs footer 1059 (여유 -4px < 40)
 빌드 실패: 넘침. data 파일의 글을 줄이거나 템플릿을 조정하세요.
 ✗ build_report 실패 코드 2 (2 = 쪽 넘침 — 글을 줄여 다시)
