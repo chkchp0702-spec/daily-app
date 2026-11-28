@@ -1663,7 +1663,7 @@ function openOP(code){
 }
 
 /* ---------- 새 버전이 올라오면 한 번 새로고침 (홈 화면 앱은 옛 파일을 오래 들고 있어서) ---------- */
-var APPV = "20261128c";
+var APPV = "20261128d";
 /* 🛡 11/24 사용자 「어플이 너무 불안정해」 — 원인 1순위: 새 버전이 올라올 때마다(하루 여러 번) 읽고 있던 화면이 30분마다·앱으로 돌아올 때 갑자기 새로고침됐음(같은 버전에 최대 3번).
    → 저절로 새로고침은 「처음 열 때」와 「3분 넘게 다른 앱에 있다 돌아올 때」만, 한 버전에 한 번만. 보고 있는 중엔 맨 아래 작은 띠(「새 버전 · 누르면 바로」)만. */
 var HIDE_AT = 0;
@@ -1753,7 +1753,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="app.b04.js?v=c976e04c84"></script>
 <script defer src="app.b05.js?v=ff3f81afbc"></script>
 <script defer src="app.b06.js?v=2d9bb42d1c"></script>
-<script defer src="app.b07.js?v=62f9a2d2f6"></script>
+<script defer src="app.b07.js?v=4d6a1885c6"></script>
 <script defer src="app.b08.js?v=6b84d86e8f"></script>
 <!--📦list
 <script defer src="views.js?v=37"></script>
@@ -1839,7 +1839,7 @@ Promise.all([bootManifest(), DOMREADY]).then(function(a){
 <script defer src="ux1112b.js?v=9"></script>   <!· 🧊 11/12 한 화면 · 할 일 5칸 · 🔬 연구실 · 첫 화면 기능 지도 (되돌리기: 브랜치 backup-before-job5-1112) ·>
 <script defer src="ux1112c.js?v=1"></script>   <!· ⬆ 11/12 언제나 접기 · ← 언제나 뒤로 (사용자) ·>
 <script defer src="ux1112d.js?v=2"></script>   <!· 🎯 11/12 신호 확률판 (경고·바닥 신호별 확률 · 계절 시계 아래) ·>
-<script defer src="ux1112e.js?v=2"></script>   <!· 🔁 11/12 닮은 장 백테스트 (지금과 닮았던 때만 · 그 뒤 2년) ·>
+<script defer src="ux1112e.js?v=3"></script>   <!· 🔁 11/12 닮은 장 백테스트 (지금과 닮았던 때만 · 그 뒤 2년) ·>
 <script defer src="ux1113.js?v=1"></script>   <!· 📏 11/13 A11/13-1 선이 내려오는 날 (가격 그대로면 50일선·장기선이 닿는 날짜 · bear.json meet) ·>
 <script defer src="ux1122.js?v=2"></script>   <!· 🎲 11/22 들고 가면·규칙대로 하면 이익 확률 (계기판 시장 줄 · bear.json hold · ux1113 바로 뒤에 둘 것) ·>
 <script defer src="ux1116.js?v=1"></script>   <!· 🧊 11/16 냉정 분석 5차 — 🩻 포트 진단 한 장 · 💬 고객 질문 답 그림 한 장 · 🎯 신호 한눈에(큰손·컵·갭·확률 합침) ·>

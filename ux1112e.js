@@ -51,7 +51,7 @@
     var sens = (m.sens || []).map(function(s){ return "닮은 때 " + s.n + "번으로 보면 1등 「" + (SHORT[s.top[0][0]] || s.top[0][0]) + "」 · 지금 다 사기 " + sg(s.lump[0]) + " (현금보다 " + s.lump[1] + "/" + s.n + ")"; }).join(" / ");
     return '<details class="an-r"><summary><span class="an-n">' + (FL[m.nat] || "") + ' <b>' + e(m.name) + '</b><small>2년 새 ' + sg(now.run) + ' 오른 뒤 고점보다 ' + mn((function(){ var F = window.__sayNow && __sayNow() && __sayNow().facts, f = F && F[m.key]; return f && f.dd != null ? f.dd : now.dd; })()) + '% · ' + now.since + '일째</small></span>' +
       '<span class="an-v ' + v[0] + '"><b>' + e(v[1]) + '</b></span></summary>' +
-      '<div class="an-x"><p class="an-why">' + e(v[2]) + '</p><p class="an-cap">아래는 지금과 숫자가 닮았던 12번의 참고 기록이에요 — 판단은 위 규칙으로 해요</p>' + chart(m) +
+      '<div class="an-x"><p class="an-why">' + e(v[2]) + '</p><p class="an-cap">아래는 지금과 숫자가 닮았던 ' + n + '번의 참고 기록이에요 — 판단은 위 규칙으로 해요' + (m.app ? ' · 이 지수는 앱이 같은 방식으로 따로 계산(' + e(String(m.first || "").slice(0, 4)) + '년~ 자료 · ' + e(String(m.asof || "").slice(5).replace("-", "/")) + ' 종가)' : '') + '</p>' + chart(m) +
       '<p class="an-cap">가는 선 = 닮았던 때 하나하나(그날 샀다면) · 굵은 선 = 가운데 길</p>' +
       '<ul class="an-f"><li><small>그 뒤 가장 깊이 더 빠진 폭(가운데값)</small><b>' + mn(f.more_med) + '%</b></li><li><small>10% 넘게 더 빠진 때</small><b>' + f.more10 + '/' + n + '번</b></li><li><small>바닥까지 걸린 기간</small><b>약 ' + Math.max(1, Math.round(f.to_low_med / 21)) + '개월</b></li><li><small>1년 뒤 플러스 · 2년 뒤 플러스</small><b>' + f.y1_up + '/' + n + ' · ' + f.y2_up + '/' + n + '번</b></li></ul>' +
       '<p class="an-b"><b>가장 나았던 방식 — ' + e(SHORT[best.k] || best.name) + '</b> · 2년 뒤 가운데값 ' + sg(best.y2_med) + ' · 가장 나빴던 때 ' + sg(best.y2_worst) + ' · 현금보다 나았던 때 ' + best.beat_cash + '/' + best.n + '번</p>' +
@@ -92,6 +92,16 @@
     ".an-note{margin:10px 0 0;font-size:11.5px;line-height:1.5;color:var(--sub);word-break:keep-all}";
   document.head.appendChild(css);
   fetch(RAW + "?t=" + Math.floor(Date.now() / 18e5)).then(function(r){ return r.ok ? r.json() : null; }).then(function(S){
-    if (!S) return; window.__analogData = S; if (window.__h2apply) try { __h2apply(); } catch(x) {}
+    if (!S) return; window.__analogData = S; addCN(); if (window.__h2apply) try { __h2apply(); } catch(x) {}
   }).catch(function(){});
+  /* 🔁 11/28 사용자 「닮은장 참고기록에 과창판이랑 창업판은 왜 없는겨?」 — 서버는 9개 지수만 계산 → 앱이 같은 방식으로 따로 계산한 archive/x/analog_cn.json(analog_cn.py · 하루 1번)을 뒤에 붙임
+     판정(주식 몫·다음 조건)은 서버 analog_pick 그대로(pick) · 숫자는 참고 기록 · 같은 key 가 서버에 생기면 서버 것을 씀 */
+  var CN = null;
+  function addCN(){
+    var S = window.__analogData; if (!S || !S.markets || !CN || !CN.markets) return;
+    var have = {}; S.markets.forEach(function(m){ have[m.key] = 1; });
+    CN.markets.forEach(function(m){ if (!have[m.key] && m.episodes && m.episodes.length && m.rules && m.rules.length) S.markets.push(m); });
+  }
+  try { var cu = "archive/x/analog_cn.json", cp = window.getJSON ? getJSON(cu, {ttl: 1800000}) : fetch(cu).then(function(r){ return r.ok ? r.json() : null; });
+    Promise.resolve(cp).then(function(j){ if (j && j.markets){ CN = j; var n0 = window.__analogData && __analogData.markets ? __analogData.markets.length : 0; addCN(); if (window.__analogData && __analogData.markets.length !== n0 && window.__h2apply) try { __h2apply(); } catch(x) {} } }).catch(function(){}); } catch(x) {}
 })();

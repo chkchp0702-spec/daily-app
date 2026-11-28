@@ -36,6 +36,8 @@ jobs:
           pip install -q yfinance pandas
           python live_world.py || echo "일본·중국·홍콩·미국 실패"
           python ix_real.py || echo "📏 실제 지수 실패"   # 11/28 중국·홍콩 실제 지수(텐센트) — 서버 계기판 값이 지수와 다를 때 앱이 이 값으로 선까지 거리를 그림
+          # 🔁 11/28 닮은 장 참고 기록 — 과창판50·창업판(서버는 9개 지수만 계산) · 하루 1번: 파일이 없거나 오늘(KST) 16시 뒤 아직 안 돌았을 때
+          if python3 -c "import json,sys,datetime as D;n=D.datetime.utcnow()+D.timedelta(hours=9);a=json.load(open('archive/x/analog_cn.json')).get('at','');sys.exit(0 if (a[:10]==n.strftime('%Y-%m-%d') and (n.hour<16 or a[11:13]>='16')) or (a[:10]<n.strftime('%Y-%m-%d') and n.hour<16 and a[:10]>=(n-D.timedelta(days=4)).strftime('%Y-%m-%d')) else 1)" 2>/dev/null && [ -z "$FORCE" ]; then echo "🔁 닮은 장(중국 기술) 오늘 이미 함"; else python analog_cn.py || echo "🔁 닮은 장(중국 기술) 실패"; fi
           # 🌏 10/28: 세계 지수·미국 선물·유가·금·환율(live_us_pre) — uspre.yml 예약이 실제론 5시간에 한 번꼴만 돌아 여기서 10분마다 같이
           python live_us_pre.py || echo "🌙 세계·선물 실패"
           python focus_live.py || echo "🎯 집중 장중 실패"
@@ -58,7 +60,7 @@ jobs:
         run: |
           git config user.name "bot"
           git config user.email "bot@users.noreply.github.com"
-          bash scripts/push.sh "live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/m archive/mb archive/x/say_check.json archive/x/live_*.json archive/x/focus_live.json archive/x/cup_live.json archive/x/pbbrief.json archive/x/proposal.json archive/x/wl_live.json "$(cat /tmp/cp.txt)"
+          bash scripts/push.sh "live $(TZ=Asia/Seoul date '+%F %H:%M')" archive/m archive/mb archive/x/say_check.json archive/x/live_*.json archive/x/focus_live.json archive/x/cup_live.json archive/x/pbbrief.json archive/x/proposal.json archive/x/wl_live.json archive/x/analog_cn.json "$(cat /tmp/cp.txt)"
       - name: 지킴이 살아 있나 (없으면 켬)
         if: always()
         env:
