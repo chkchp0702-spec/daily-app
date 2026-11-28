@@ -1,1 +1,1 @@
-{"id": "20261128-2345", "at": "2026-11-28 23:38 KST", "push": "ok", "qa": "통과", "applied": ["brain/state.json", "brain/log/2026-11-28.md", "market/qa.json"], "skipped": [], "jobs": [], "verify": "", "fcbase": ""}
+{"id": "20261129-0135", "at": "2026-11-29 01:46 KST", "push": "ok", "qa": "없음", "applied": ["brain/state.json", "brain/log/2026-11-29.md"], "skipped": [], "jobs": [], "verify": "", "fcbase": ""}
