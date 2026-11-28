@@ -75,8 +75,15 @@
   function diffParts(m, C){
     var f = m.floor, out = [], N = C.n || 1;
     f.cells.forEach(function(c){   // 남들은 꺼졌는데 여기만 켜진 확인 칸
+      if (m._real && (c.k === "저점 다지기" || c.k === "20일선·50일선 회복" || c.k === "200일선 회복")) return;   // 실제 지수로 아래에서 따로 말함
       if (c.g === "conf" && c.st !== "off" && c.st !== "na" && GOOD[c.k] && (C.on[c.k] || 0) / N <= 0.4 && out.length < 2) out.push({t: GOOD[c.k](c), up: 1});
     });
+    var R = m._real;
+    if (R && R.low60 && R.low60.d){
+      var la = String(R.low60.d).split("-"), ld = (+la[1]) + "/" + (+la[2]), n = R.low60.days;
+      out.push(n >= 10 ? {t: "저점(" + ld + ") 뒤 " + n + "거래일째 지킴", up: 1} : {t: ld + " 새 저점 뒤 " + n + "거래일째"});
+      if (R.m20 > 0 && R.close > R.m20) out.push({t: "20일선 위로 올라옴", up: 1});
+    }
     var lk = 0;
     f.cells.forEach(function(c){   // 남들은 켜졌는데 여기만 꺼진 투매 칸
       if (c.g === "sell" && c.st === "off" && LACK[c.k] && C.has[c.k] > 2 && (C.on[c.k] || 0) / C.has[c.k] >= 0.7 && lk < 1){ out.push({t: LACK[c.k]}); lk++; }
@@ -87,12 +94,13 @@
     if (b != null && (m.nat === "kr" || (b === C.debtMin && C.debtMinN === 1))) out.push({t: "빚 " + sg(b, 0) + (b === C.debtMin && C.debtMinN === 1 ? " · 가장 많이 털림" : "")});
     var g = gateOf(m);
     if (g) out.push({t: g.over ? "200일선 위" : (g.up ? g.up + " · " : "") + (g.g < 1 ? g.k + " 코앞(" + sg(g.g, 2) + ")" : g.k + "까지 " + sg(g.g)), gate: 1});
+    if (R && m._srv > 0 && Math.abs(m._srv / m.close - 1) > 0.02) out.push({t: "실제 지수 " + cm(m.close) + " 기준 (계기판 값은 " + cm(m._srv) + ")", warn: 1});
     return out;
   }
   function diffHtml(m, C){
     var a = []; try { a = diffParts(m, C); } catch (_) {}
     var late = '';
-    return '<span class="fa-x">' + (a.length ? '<span class="fa-xi">💡</span>' + a.map(function(x){ return '<span class="' + (x.up ? "fa-up" : x.gate ? "fa-gt" : "") + '">' + e(x.t) + '</span>'; }).join('<i> · </i>') : '') + late +
+    return '<span class="fa-x">' + (a.length ? '<span class="fa-xi">💡</span>' + a.map(function(x){ return '<span class="' + (x.up ? "fa-up" : x.gate ? "fa-gt" : x.warn ? "fa-wn" : "") + '">' + e(x.t) + '</span>'; }).join('<i> · </i>') : '') + late +
       '<span class="fa-p" data-pol="' + e(m.key || "") + '">' + polHtml(m.key, 0) + '</span></span>';
   }
   function lateTxt(all){   // 켜짐·꺼짐 칸이 종가보다 하루 늦은 시장이 있으면 한 번만 알림
@@ -113,6 +121,31 @@
       return L.length ? '<div class="fa-top">' + L.map(function(x){ return '<p><span>' + x[0] + '</span>' + x[1] + '</p>'; }).join("") + '<p class="fa-topn">같은 🟠 라도 속은 다름 — 줄마다 💡 가 그 시장만의 다른 점' + lateTxt(all) + '</p></div>' : '';
     } catch (_) { return ""; }
   }
+  /* 📏 11/28 사용자 「다른 곳 시세라도 가져와」 — 중국·홍콩은 실제 지수(archive/x/live_ix.json · ix_real.py · 텐센트)로 선까지 거리·저점 지킨 날을 그림.
+     서버 계기판 값이 지수와 2% 넘게 다르면 그 사실도 한 줄. 판정(🟠)·칸 수·주식 몫은 서버 것 그대로 — 여기서 새로 판정하지 않음. 5일 넘게 묵으면 안 씀. */
+  var IXR = null, lastBR = null;
+  try { IXR = JSON.parse(localStorage.getItem("ch-ixr") || "null"); } catch (_) {}
+  function ixOk(){ if (!IXR || !IXR.ix || !IXR.at) return false; var t = Date.parse(String(IXR.at).replace(" ", "T") + ":00+09:00"); return !(t > 0) || Date.now() - t < 5 * 864e5; }
+  function withReal(m){
+    var r = ixOk() ? IXR.ix[m.key] : null;
+    if (!r || !(r.close > 0) || (m.asof && String(r.asof) < String(m.asof))) return m;
+    var o = {}, k; for (k in m) o[k] = m[k];
+    o._srv = m.close; o._real = r; o.close = r.close; o.asof = r.asof; if (r.m50 > 0) o.m50 = r.m50; if (r.m200 > 0) o.m200 = r.m200; if (r.m20 > 0) o.m20 = r.m20;
+    return o;
+  }
+  function cm(x){ return Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  function ixGet(){
+    try {
+      var u = "archive/x/live_ix.json", p = window.getJSON ? getJSON(u, {ttl: 600000}) : fetch(u).then(function(r){ return r.json(); });
+      Promise.resolve(p).then(function(j){
+        if (!j || !j.ix) return; var was = IXR && IXR.at; IXR = j; try { localStorage.setItem("ch-ixr", JSON.stringify(j)); } catch (_) {}
+        if (was === j.at || !lastBR) return;
+        var el = document.querySelector(".fa"); if (!el) return;       // 이미 그려진 표가 있으면 새 값으로 다시 그림
+        var t = document.createElement("div"); t.innerHTML = floorAll(lastBR); if (t.firstChild) el.parentNode.replaceChild(t.firstChild, el);
+      }).catch(function(){});
+    } catch (_) {}
+  }
+  setTimeout(ixGet, 900);
   /* 🏛 정부 움직임 — 말(1) ▸ 제도(2) ▸ 돈(3) */
   var POL = null, STG = ["", "말", "제도", "돈"];
   try { POL = JSON.parse(localStorage.getItem("ch-pol") || "null"); } catch (_) {}
@@ -139,6 +172,7 @@
     var ms = ((BR && BR.markets) || []).filter(ok), mo = ((BR && BR.more) || []).filter(ok);
     if (!ms.length && !mo.length) return "";
     allT = Date.now();
+    lastBR = BR; ms = ms.map(withReal); mo = mo.map(withReal);
     var all = ms.concat(mo), CX = ctx(all);
     setTimeout(paintPol, 0);
     var grp = [[null, ms], ["일본 · 중국 · 홍콩", mo.filter(function(m){ return !TECH[m.key]; })], ["기술 지수", mo.filter(function(m){ return TECH[m.key]; })]];
@@ -180,7 +214,7 @@
     ".fa-r>summary::-webkit-details-marker{display:none}.fa-r>summary::after,.fa-r>summary::before{content:none!important;display:none!important}.fa-v::after{content:' ▾';font-weight:600;color:var(--sub,#888)}.fa-r[open] .fa-v::after{content:' ▴'}.fa-n{grid-area:n;font-size:13.5px;white-space:nowrap}.fa-c{grid-area:c;font-size:11.5px;color:var(--sub,#888);white-space:nowrap;text-align:right}.fa-c b{color:var(--text,#111);font-size:12.5px}" +
     ".fa-v{grid-area:v;font-size:12.5px;font-weight:800;word-break:keep-all}.fa-r[open]>summary{border-bottom:1px solid var(--line,rgba(127,127,127,.18))}.fa-r .fc{border:0;padding:8px 0 6px;margin:0}.fa-r .fc-h,.fa-r .fc-v{display:none}" +
     ".fa-x{grid-area:x;display:block;font-size:12px;line-height:1.55;font-weight:600;color:var(--text,#111);word-break:keep-all;margin-top:2px}.fa-x i{font-style:normal;color:var(--sub,#888);font-weight:400}.fa-xi{margin-right:3px}" +
-    ".fa-up{color:#16803f}.fa-gt{font-weight:800}.fa-late{display:block;font-style:normal;font-weight:500;font-size:11px;color:#b45309}.fa-p{display:block}.fa-p:empty{display:none}" +
+    ".fa-up{color:#16803f}.fa-gt{font-weight:800}.fa-wn{color:#b45309;font-weight:600}.fa-late{display:block;font-style:normal;font-weight:500;font-size:11px;color:#b45309}.fa-p{display:block}.fa-p:empty{display:none}" +
     ".fa-pc{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:600;color:var(--sub,#888);margin-top:3px}.fa-pc i{font-style:normal;padding:1px 6px;border-radius:8px;border:1px solid rgba(127,127,127,.35);color:var(--sub,#888);font-weight:600}.fa-pc i.on{background:#1d4ed8;border-color:#1d4ed8;color:#fff;font-weight:800}.fa-pc u{text-decoration:none;opacity:.6}" +
     ".fa-top{margin:4px 0 8px;padding:8px 10px;border-radius:11px;background:rgba(29,78,216,.07)}.fa-top p{margin:3px 0;font-size:12.5px;line-height:1.5;word-break:keep-all;color:var(--text,#111)}.fa-top p span{display:block;font-size:11.5px;font-weight:700;color:var(--sub,#888)}.fa-top p.fa-topn{font-size:11px;color:var(--sub,#888);margin-top:6px}" +
     ".fc-pol:empty{display:none}.fc-pd{margin:2px 0 0;font-size:11.5px;line-height:1.6;color:var(--text,#111);word-break:keep-all}.fc-pd em{font-style:normal;color:var(--sub,#888);white-space:nowrap}.fc-t small{font-weight:600;color:var(--sub,#888)}" +
