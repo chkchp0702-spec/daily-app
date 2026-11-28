@@ -83,6 +83,17 @@
 3. **결과 받기**: 성공하면 `gh api -X POST repos/chkchp0702-spec/daily-app/actions/workflows/collect.yml/dispatches -f ref=main` 과 live.yml 을 켜고 5~8분 뒤 `git -C /home/claude/daily-app sparse-checkout add "/archive/market/<날짜>_<판>/" && git pull` → `archive/market/<날짜>_<판>/` 의 PDF 두 개와 kakao.txt 를 받는다. PDF 를 Read 로 열어 깨진 곳이 없는지 눈으로 확인한다(1쪽 킥 줄, 2쪽 🎯 오늘의 집중, 3쪽 오늘의 한 장, 4쪽 새 ⚔️ 대결). 깨졌으면 고쳐 다시 만든다.
 4. **별도 검산자**: Agent 도구로 리포트를 만들지 않은 에이전트 하나에게 "data/YYYY-MM-DD.json 의 숫자 카드 8개, 킥·주도 테마·집중 이유의 숫자, 어제 채점 3개(ledger.forecasts.items 를 글자 그대로 채점했는지), 오늘 예고 3개(기저율이 서버 fcbase 출력과 같은지 · 0.65 넘는 공짜 문제가 아닌지 · if_wrong 이 실제 결정인지), 피드 인용 숫자, ⚔️ 대결 두 사람의 발언이 실제인지(출처 URL), 💼 비중·🧭 섹터 칸 변경 근거를 $M 의 market/latest·sectors·focus·port·conc.json·feeds/my_feed_recent.json·ledger 와 웹 출처로 대조하고 틀리거나 근거 없는 것만 목록으로" 시킨다(보내기 2 전에). 지적이 맞으면 고친다.
 
+## 5-B. 밀린 장부 따라잡기 (11/28 사용자 「ㅇㅇ」 — 매 회차)
+- morning-build 성공 뒤 live.yml 로 새로 받은 `$M/ledger/ledger.json`(build --commit 반영본)의 updated 와 conditions·series 마지막 날짜를 본다. 리포트가 빠진 날(서버 이전·휴장 등)이 있으면 그 날들 숫자로 따라잡는다:
+  · conditions 의 count·state·now — 정본 숫자만(latest·history.csv·bear.json hist·archive/x/flow_kr.json mkt.KOSPI[].f) · 못 찾은 날은 「자료 없음」이라고 적고 세지 않음
+  · series.foreign_kospi·us10y 에 빠진 날 추가(출처 다르면 range) · 예고(forecasts)·scorecard·_applied 는 서버가 쓰니 손대지 않음
+- 고친 장부 **전체 복사본**을 `inbox/msr/_morning/ledger/ledger.json` + manifest(새 id, jobs 없음)로 보내고, live.yml 로 inbox_status_morning.json 의 applied 에 ledger 가 들어갔는지 확인한다.
+- 🧠 brain/state.json 은 매시간 두뇌가 고치므로 보내지 않는다(덮어쓰기 위험) — 논지 채점은 리포트 안에만.
+
+## 5-C. 📑 채권 전망 보고서 다시 만들기 (11/28 사용자 「ㅇㅇ」 — 매 회차, 리포트를 올린 뒤)
+- `gh api -X POST repos/chkchp0702-spec/daily-app/actions/workflows/bond_outlook.yml/dispatches -f ref=main -f inputs[force]=1` → 끝난 뒤 `git pull` 하고 `archive/x/bond_outlook/index.json` 의 날짜가 오늘 판인지 확인해 마지막 답변에 한 줄로 적는다(이 워크플로를 켜는 것만 허용 · 파일 쓰기는 여전히 inbox/msr/_morning 만).
+- 권한이 막히면 억지로 우회하지 말고 「채권 전망 다시 만들기 — 권한 막힘」이라고 한 줄 남긴다.
+
 ## 6. 올린 뒤
 - **대시보드 아티팩트 갱신**: live.yml 로 새로 받은 `$M/docs/ARTIFACT_URL.txt` 의 주소를 Artifact 도구 read 로 한 번 읽은 뒤 같은 주소로 `$M/docs/artifact.html` 을 publish(새 아티팩트를 만들지 않는다 · 오늘 날짜가 들어간 새 파일인지 먼저 확인 — 아니면 건너뛰고 적는다).
 - 이 세션에 claude.ai Project 도구가 있으면 `claude/시황리포트_장부.md` 의 상태 요약을 오늘 장부 기준으로 고쳐 쓴다. 없으면 건너뛴다.
