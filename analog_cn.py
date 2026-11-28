@@ -19,27 +19,32 @@ POOL = [("kospi", "^KS11", "코스피", "kr"), ("kosdaq", "^KQ11", "코스닥", 
         ("ndx", "^NDX", "나스닥100", "us"), ("sox", "^SOX", "미국 반도체", "us"),
         ("star50", "000688.SS", "과창판50", "cn"), ("chinext", "399006.SZ", "창업판", "cn")]
 TARGET = ["star50", "chinext"]
-TENCENT = {"star50": "sh000688", "chinext": "sz399006"}
+TENCENT = {"star50": "sh000688", "chinext": "sz399006"}   # 야후엔 두 지수가 없음(11/28 확인) → 텐센트 실제 지수
 W = [1.5, 1.5, 1, 1, 1.5, 1]
 NAMES = {"lump": "지금 다 삼", "cash": "계속 현금", "dca6": "6개월 나눠 사기", "dca12": "12개월 나눠 사기", "dip": "더 빠질 때마다 3분의 1씩(−10·−20·−30%)",
          "half200": "절반 지금 + 절반은 200일선 회복 때", "half5020": "절반 지금 + 4분의 1은 50일선 회복 때 + 4분의 1은 200일선 회복 때",
          "third": "3분의 1씩(지금 · 50일선 위 · 200일선 위)", "ma10": "10개월선 위면 주식 · 아래면 현금", "a200": "200일선 위면 주식 · 아래면 현금", "a50": "50일선 위면 주식 · 아래면 현금"}
 
 
-def tencent(code, n=2600):
-    u = "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=%s,day,,,%d,qfq" % (code, n)
-    req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://gu.qq.com/"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        j = json.loads(r.read().decode("utf-8"))
-    d = (j.get("data") or {}).get(code) or {}
-    out = []
-    for x in d.get("day") or d.get("qfqday") or []:
+def tencent(code, first="2009-01-01"):
+    """텐센트 일봉 — 한 번에 많이 달라면 501 이 와서, 2년씩 잘라 받음"""
+    out, y0, y1 = {}, int(first[:4]), datetime.date.today().year
+    for y in range(y0, y1 + 1, 2):
+        u = "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=%s,day,%d-01-01,%d-12-31,640,qfq" % (code, y, y + 1)
+        req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://gu.qq.com/"})
         try:
-            c = float(x[2])
-            if c > 0: out.append((str(x[0])[:10], c))
+            with urllib.request.urlopen(req, timeout=30) as r:
+                j = json.loads(r.read().decode("utf-8"))
         except Exception:
-            pass
-    return out
+            continue
+        d = (j.get("data") or {}).get(code) or {}
+        for x in d.get("day") or d.get("qfqday") or []:
+            try:
+                c = float(x[2])
+                if c > 0: out[str(x[0])[:10]] = c
+            except Exception:
+                pass
+    return sorted(out.items())
 
 
 def yahoo(sym):
@@ -123,7 +128,8 @@ def main():
     S, bad = {}, []
     for key, sym, nm, nat in POOL:
         try:
-            r = yahoo(sym)
+            try: r = yahoo(sym)
+            except Exception: r = []
             if key in TENCENT:
                 try: r = merge(r, tencent(TENCENT[key]))
                 except Exception as ex: bad.append("%s 텐센트: %s" % (nm, str(ex)[:60]))
