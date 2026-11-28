@@ -3396,7 +3396,7 @@ __bk(65);
     var more = (asia ? '<div class="ub-sub">일본 · 중국 · 홍콩</div>' + asia : '') + (tech ? '<div class="ub-sub">기술 지수</div>' + tech : '');
     return '<div class="ub"><div class="ub-hd"><span>시장 · 고점 대비</span><span>주식 몫</span></div>' + main +
       more +
-      '<p class="ub-note">주식 몫 = 그 시장 주식을 지금 얼마나 들고 갈지(나머지는 현금) · 줄을 누르면 왜 그런지 · 🇺🇸 두 줄은 💼 포트 규칙과 같은 말이에요(11/24) — 실제 비중은 포트 탭</p></div>';
+      '<p class="ub-note">주식 몫 = 그 시장 주식을 지금 얼마나 들고 갈지(나머지는 현금) · 줄을 누르면 왜 그런지 · 🇺🇸 두 줄은 💼 포트 규칙과 같은 말이에요 — 실제 비중은 포트 탭</p></div>';
   }
   function bearHtml(d){
     var B = d.bear; if (!B || !B.markets || !B.markets.length) return "";

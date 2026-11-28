@@ -176,3 +176,57 @@
     chErr(net ? "net" : "promise", msg, r && r.stack ? srcOf(r.stack, (/([^\/\s(]+\.js)/.exec(r.stack) || [])[1]) : "");
   });
 })();
+
+/* 📅 11/28 날짜 지난 칸 바로잡기 (사용자 「왜 24일로 나오는 것들이 이리 많아? 싹 다 검사하고 고칠 수 있는 거 고쳐」)
+   🔦 바닥 점검표의 「외국인 매도 멈춤」 칸은 서버가 아침 리포트 장부(11/24 이후 멈춤)에서 외국인 숫자를 가져와 「11/24 기준」으로 남아 있었음.
+   → 앱이 매일 직접 받는 archive/x/flow_kr.json(KRX 투자자별 · 코스피·코스닥 최근 20거래일)이 더 새것이면 그 숫자로 칸을 다시 씀.
+   규칙은 서버와 같음: 연속 순매수 3일 이상 = 켜짐 · 1~2일 = 절반 · 0일 = 꺼짐 · 20일 누적 = 20거래일 합. 칸 상태가 바뀌면 칸 수(n/7)도 다시 셈.
+   floor_check.json · bear.json(계기판 안 점검표) 둘 다 · 서버 값이 더 새것이면 손대지 않음. */
+(function(){
+  var F = window.fetch; if (!F || F.__fresh) return;
+  var RX = /\/market\/(floor_check|bear)\.json(\?|$)/, MK = {kospi: "KOSPI", kosdaq: "KOSDAQ"}, FLP = null, FLT = 0;
+  function flow(){
+    if (!FLP || Date.now() - FLT > 600000){ FLT = Date.now();
+      FLP = F.call(window, "archive/x/flow_kr.json?" + Math.floor(Date.now() / 600000)).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }); }
+    return FLP;
+  }
+  function md(s){ s = String(s || ""); var m = /(\d{4})-(\d\d)-(\d\d)/.exec(s); if (m) return [+m[2], +m[3]]; m = /(\d{1,2})\/(\d{1,2})/.exec(s); return m ? [+m[1], +m[2]] : null; }
+  function newer(a, b){ return !b || a[0] > b[0] || (a[0] === b[0] && a[1] > b[1]) || (a[0] < 3 && b[0] > 10); }   // 해 넘김(1·2월 vs 11·12월)
+  function fix(o, FL){
+    var col = MK[o.key], L = col && FL && FL.mkt && FL.mkt[col]; if (!L || !L.length || !o.cells) return 0;
+    var last = md(L[0].d), n = 0;
+    o.cells.forEach(function(c){
+      if (!c || c.k !== "외국인 매도 멈춤" || !last || !newer(last, md(c.asof))) return;
+      var s = 0; for (var i = 0; i < L.length && (+L[i].f || 0) > 0; i++) s++;
+      var sum = 0; L.slice(0, 20).forEach(function(x){ sum += +x.f || 0; });
+      var st = s >= 3 ? "on" : s >= 1 ? "half" : "off", t = (sum / 1e12).toFixed(1);
+      c.d = (s ? s + "일 연속 순매수" : "마지막 날 순매도(연속 순매수 0일)") + " · " + L.slice(0, 20).length + "일 누적 " + (sum > 0 ? "+" : "") + t + "조" + (s >= 3 ? " · 조건 충족" : " · 3일 연속 순매수 필요");
+      c.asof = last[0] + "/" + last[1]; c.src = "앱 KRX 투자자별"; if (c.st !== st){ c.st = st; n++; }
+    });
+    if (n){   // 칸 상태가 바뀌었으면 칸 수 다시 셈
+      var cnt = {on: 0, half: 0, off: 0}, sell = 0, conf = 0, ns = 0, nc = 0;
+      o.cells.forEach(function(c){ if (cnt[c.st] != null) cnt[c.st]++; if (c.g === "sell"){ ns++; if (c.st === "on") sell++; } if (c.g === "conf"){ nc++; if (c.st === "on") conf++; } });
+      o.on = cnt.on; o.half = cnt.half; o.off = cnt.off; o.sell_on = sell; o.conf_on = conf;
+      if (typeof o.line === "string") o.line = o.line.replace(/(팔 사람은 다 팔았나 )\d+\/\d+/, "$1" + sell + "/" + ns).replace(/(살 사람이 들어왔나 )\d+\/\d+/, "$1" + conf + "/" + nc);
+    }
+    return 1;
+  }
+  function walk(o, FL, d){
+    if (!o || typeof o !== "object" || d > 6) return 0; var k = 0;
+    if (o.cells && MK[o.key]) k += fix(o, FL);
+    for (var p in o) if (Object.prototype.hasOwnProperty.call(o, p) && o[p] && typeof o[p] === "object") k += walk(o[p], FL, d + 1);
+    return k;
+  }
+  var ff = function(input, init){
+    var u = typeof input === "string" ? input : (input && input.url) || "";
+    if (!RX.test(u) || /_log|_bt/.test(u)) return F.apply(this, arguments);
+    return Promise.all([F.apply(this, arguments), flow()]).then(function(a){
+      var r = a[0], FL = a[1]; if (!r || !r.ok || !FL) return r;
+      return r.clone().json().then(function(j){
+        try { if (!walk(j, FL, 0)) return r; } catch(e){ return r; }
+        return new Response(JSON.stringify(j), {status: 200, headers: {"Content-Type": "application/json"}});
+      }).catch(function(){ return r; });
+    });
+  };
+  ff.__fresh = 1; ff.__mir = F.__mir; ff.__to = F.__to; window.fetch = ff;
+})();
